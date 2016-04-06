@@ -1,0 +1,133 @@
+page.title=Mendefinisikan Bayangan dan Memangkas Tampilan
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#Elevation">Menetapkan Elevasi pada Tampilan Anda</a></li>
+  <li><a href="#Shadows">Menyesuaikan Bayangan dan Garis Luar Tampilan</a></li>
+  <li><a href="#Clip">Memangkas Tampilan</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Desain bahan memperkenalkan elevasi untuk elemen-elemen UI. Elevasi membantu pengguna memahami
+arti penting relatif masing-masing elemen dan memfokuskan perhatian pada tugas yang ada.</p>
+
+<p>Elevasi tampilan, yang dinyatakan dengan properti Z, menentukan tampilan visual
+bayangannya: tampilan dengan nilai Z lebih tinggi menghasilkan bayangan lebih besar dan lebih halus. Tampilan dengan nilai Z lebih tinggi menutupi
+tampilan dengan nilai Z lebih rendah; akan tetapi, nilai Z tampilan tidak memengaruhi ukuran tampilan.</p>
+
+<p>Bayangan digambar oleh induk tampilan yang dinaikkan, sehingga terkena pemangkasan standar tampilan,
+yang dipangkas oleh induk secara default.</p>
+
+<p>Elevasi juga berguna untuk membuat animasi tempat memunculkan widget untuk sementara di atas
+bidang tampilan saat melakukan beberapa tindakan.</p>
+
+<p>Untuk informasi selengkapnya tentang elevasi dalam desain bahan, lihat
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">Objek
+di ruang 3D</a>.</p>
+
+
+<h2 id="Elevation">Menetapkan Elevasi pada Tampilan Anda</h2>
+
+<p>Nilai Z untuk tampilan memiliki dua komponen:
+
+<ul>
+<li>Elevasi: Komponen statis.</li>
+<li>Transformasi: Komponen dinamis yang digunakan untuk animasi.</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>Gambar 1</strong> - Bayangan untuk berbagai elevasi tampilan.</p>
+
+<p>Untuk mengatur elevasi tampilan dalam definisi layout, gunakan atribut <code>android:elevation</code>.
+ Untuk mengatur elevasi tampilan dalam kode aktivitas, gunakan
+metode {@link android.view.View#setElevation View.setElevation()}.</p>
+
+<p>Untuk mengatur transformasi tampilan, gunakan metode {@link android.view.View#setTranslationZ
+View.setTranslationZ()}.</p>
+
+<p>Metode {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} dan {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} yang baru memudahkan
+Anda menganimasikan elevasi tampilan. Untuk informasi selengkapnya, lihat referensi API untuk
+{@link android.view.ViewPropertyAnimator} dan panduan pengembang <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Animasi Properti</a>.
+</p>
+
+<p>Anda juga bisa menggunakan {@link android.animation.StateListAnimator}
+untuk menetapkan animasi ini secara deklaratif. Ini khususnya berguna bila
+perubahan status memicu animasi, seperti saat seorang pengguna menekan tombol. Untuk informasi selengkapnya, lihat
+<a href="{@docRoot}training/material/animations.html#ViewState">Menganimasikan Perubahan Status Tampilan</a>.</p>
+
+<p>Nilai Z diukur dengan satuan dp (density-independent pixel).</p>
+
+
+<h2 id="Shadows">Menyesuaikan Bayangan dan Garis Luar Tampilan</h2>
+
+<p>Batas-batas drawable latar belakang tampilan menentukan bentuk default bayangannya.
+<strong>Garis luar</strong> menyatakan bentuk luar objek grafis dan mendefinisikan
+bidang riak untuk umpan balik sentuh.</p>
+
+<p>Perhatikan tampilan ini, yang didefinisikan dengan drawable latar belakang:</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>Drawable latar belakang didefinisikan sebagai persegi panjang dengan sudut membulat:</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>Tampilan ini menghasilkan bayangan dengan sudut membulat, karena drawable latar belakang mendefinisikan
+garis luar tampilan. Memberikan garis luar custom akan mengesampingkan bentuk default bayangan tampilan.</p>
+
+<p>Untuk mendefinisikan garis luar custom suatu tampilan dalam kode Anda:<p>
+
+<ol>
+<li>Perluas kelas {@link android.view.ViewOutlineProvider}.</li>
+<li>Kesampingkan metode {@link android.view.ViewOutlineProvider#getOutline getOutline()}.</li>
+<li>Tetapkan penyedia garis luar baru untuk tampilan Anda dengan metode {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()}.</li>
+</ol>
+
+<p>Anda bisa membuat garis luar lonjong dan persegi panjang yang bersudut membulat dengan menggunakan metode dalam
+kelas {@link android.graphics.Outline}. Penyedia garis luar default untuk tampilan memperoleh garis luar
+dari latar belakang tampilan. Untuk mencegah tampilan menghasilkan bayangan, atur penyedia garis luarnya
+ke <code>null</code>.</p>
+
+
+<h2 id="Clip">Memangkas Tampilan</h2>
+
+<p>Memangkas tampilan memudahkan Anda mengubah bentuk tampilan. Anda bisa memangkas tampilan agar
+konsistensi dengan elemen desain lainnya atau mengubah bentuk tampilan untuk merespons input pengguna.
+Anda bisa memangkas tampilan hingga area garis luarnya dengan menggunakan metode {@link android.view.View#setClipToOutline
+View.setClipToOutline()} atau atribut <code>android:clipToOutline</code>. Hanya
+garis-garis luar persegi panjang, lingkaran, dan persegi panjang bersudut bulat yang mendukung pemangkasan, seperti yang ditentukan oleh
+metode {@link android.graphics.Outline#canClip Outline.canClip()}.</p>
+
+<p>Untuk memangkas tampilan ke bentuk drawable, atur drawable sebagai latar belakang tampilan
+(seperti yang ditampilkan di atas) dan panggil metode {@link android.view.View#setClipToOutline View.setClipToOutline()}.
+</p>
+
+<p>Memangkas tampilan adalah operasi yang mahal; jadi, jangan animasikan bentuk yang Anda gunakan
+untuk memangkas tampilan. Untuk memperoleh efek ini, gunakan animasi <a href="{@docRoot}training/material/animations.html#Reveal">Reveal Effect</a>.</p>

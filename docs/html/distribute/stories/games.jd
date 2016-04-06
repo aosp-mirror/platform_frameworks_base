@@ -1,28 +1,35 @@
-page.title=Developer Stories: Google Play Game Services
-meta.tags="google play, story, stories, games, global"
+page.title=Developer Stories: Games
+meta.tags="google play, games, global, developer story"
+page.timestamp=1381449601
 page.image=/images/distribute/glu-ew-gpgames.jpg
 page.metaDescription=How game studios are using Google Play game services to deliver new gaming experiences for their users.
 
 @jd:body
 
 <p>
-  <a href="https://developers.google.com/games/">Google Play game services</a>
-  lets you add great social features to your games quickly, without having to
-  build them yourself. You can add multiplayer, game invites, quests, and a
-  variety of other features &mdash; all from within your app. Google provides
-  cross-platform game and player infrastructure for you, as well as insights
-  and analytics to help you understand the activities of users in your games.
+  Learn how top game studios are taking advantage of Google Play game services
+  &mdash; the features they've added and the results they are seeing.
 </p>
 
-<p>
-  The case study presentations below highlight how top game studios are taking
-  advantage of Google Play game services &mdash; the features they've added and
-  the results they are seeing. Each deck (PDF) is focused on a single game and
-  how it uses a specific Google Play gemes feature.
-</p>
+<section class="dac-section dac-small" id="games-videos"><div class="wrap">
+  <h2 class="norule">Videos</h2>
 
-<div class="resource-widget resource-flow-layout col-13"
-    data-query="collection:distribute/stories/games"
-    data-sortOrder="-timestamp"
-    data-cardSizes="18x12"
-    data-maxResults="32"></div>
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:youtube+tag:developerstory+tag:games"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="6"></div>
+</div></section>
+
+<section class="dac-section dac-small" id="games-articles"><div class="wrap">
+  <h2 class="norule">Articles</h2>
+
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:distribute+tag:developerstory+tag:games"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="6"></div>
+</div></section>
+

@@ -51,6 +51,13 @@ both your wearable and handheld apps.
 <p>To update your SDK with these components, see
 <a href="{@docRoot}sdk/installing/adding-packages.html#GetTools"> Get the latest SDK tools</a>.</p>
 
+<p class="note"><strong>Note:</strong> If you plan to make your Wear apps available for China,
+  you must use the special release version 7.8.87 of the Google Play services client library to handle
+  communication between handset and wearable.
+
+ For information on how to configure Wear apps for China, see
+ <a href="{@docRoot}training/wearables/apps/creating-app-china.html"> Creating Android Wear Apps for
+ China</a>.</p>
 
 <h2 id="SetupEmulator">Set Up an Android Wear Emulator or Device</h2>
 <p>We recommend that you develop on real hardware so you can better

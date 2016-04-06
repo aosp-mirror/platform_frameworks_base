@@ -1,0 +1,171 @@
+page.title=시작하기
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#ApplyTheme">머티리얼 테마 적용</a></li>
+  <li><a href="#Layouts">레이아웃 디자인</a></li>
+  <li><a href="#Depth">뷰에서 엘리베이션 지정</a></li>
+  <li><a href="#ListsCards">목록 및 카드 생성</a></li>
+  <li><a href="#Animations">애니메이션 사용자지정</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>머티리얼 디자인으로 앱을 생성하려면:</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    <a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a>을 검토합니다.</li>
+  <li style="margin-bottom:10px">
+    앱에 머티리얼 <strong>테마</strong>를 적용합니다.</li>
+  <li style="margin-bottom:10px">
+    머티리얼 디자인 지침에 따라 <strong>레이아웃</strong>을 생성합니다.</li>
+  <li style="margin-bottom:10px">
+    그림자를 드리우기 위한 뷰의 <strong>엘리베이션</strong>을 지정합니다.</li>
+  <li style="margin-bottom:10px">
+    목록 및 카드에는 시스템 <strong>위젯</strong>을 사용합니다.</li>
+  <li style="margin-bottom:10px">
+    앱에서 <strong>애니메이션</strong>을 사용자지정합니다.</li>
+</ol>
+
+<h3>이전 버전과의 호환성 유지</h3>
+
+<p>Android 5.0 이전 버전과의 호환성을 유지하면서 다양한 머티리얼 디자인 기능을 앱에 추가할 수 있습니다.
+ 자세한 내용은
+<a href="{@docRoot}training/material/compatibility.html">호환성 유지</a>를 참조하세요.</p>
+
+<h3>머티리얼 디자인으로 앱 업데이트</h3>
+
+<p>머티리얼 디자인을 통합하기 위해 기존 앱을 업데이트하려면 머티리얼 디자인 지침에 따라 레이아웃을 업데이트하세요.
+ 또한 깊이, 터치 피드백, 애니메이션도 통합하세요.
+</p>
+
+<h3>머티리얼 디자인으로 새 앱 생성</h3>
+
+<p>머티리얼 디자인 기능으로 새 앱을 생성하는 경우, <a href="http://www.google.com/design/spec">머티리얼 디자인 지침</a>은 효율적인 디자인 프레임워크를 제공합니다.
+ 앱 디자인 및 개발 시 이 지침을 따르고 Android 프레임워크의 새로운 기능을 사용하세요.
+</p>
+
+
+<h2 id="ApplyTheme">머티리얼 테마 적용</h2>
+
+<p>머티리얼 테마를 앱에 적용하려면
+<code>android:Theme.Material</code>에서 상속하는 스타일을 지정합니다.</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>머티리얼 테마는 터치 피드백 및 액티비티 전환을 위한 색상표 및 기본 애니메이션을 설정할 수 있는 업데이트된 시스템 위젯을 제공합니다.
+ 자세한 내용은
+<a href="{@docRoot}training/material/theme.html">머티리얼 테마 사용</a>을 참조하세요.</p>
+
+
+<h2 id="Layouts">레이아웃 디자인</h2>
+
+<p>머티리얼 테마를 적용하고 사용자지정하는 것과 더불어, 레이아웃이 <a href="http://www.google.com/design/spec">머티리얼 디자인 지침</a>을 따라야 합니다.
+ 레이아웃 디자인 시 다음 사항에 특히 주의하세요.
+</p>
+
+<ul>
+<li>기준선 그리드</li>
+<li>키라인</li>
+<li>간격</li>
+<li>터치 대상 크기</li>
+<li>레이아웃 구조</li>
+</ul>
+
+
+<h2 id="Depth">뷰에서 엘리베이션 지정</h2>
+
+<p>뷰는 그림자를 드리울 수 있으며 뷰의 엘리베이션 값은 그림자 크기 및 그리는 순서를 결정합니다.
+ 뷰의 엘리베이션을 설정하려면 레이아웃에서
+<code>android:elevation</code> 특성을 사용하세요.</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>새 <code>translationZ</code> 속성을 사용하여 뷰 엘리베이션의 일시적 변경을 반영하는 애니메이션을 생성할 수 있습니다.
+ 엘리베이션 변경은
+<a href="{@docRoot}training/material/animations.html#ViewState">터치
+제스처에 반응</a>할 때 유용하게 쓰일 수 있습니다.</p>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/shadows-clipping.html">그림자 정의 및 뷰 클리핑</a>을 참조하세요.
+</p>
+
+
+<h2 id="ListsCards">목록 및 카드 생성</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView}는 {@link
+android.widget.ListView}의 플러그 기능이 개선된 버전으로, 다양한 레이아웃 유형을 지원하고 향상된 성능을 제공합니다.
+{@link android.support.v7.widget.CardView}를 사용하면 모든 앱에서 일관된 모습으로 카드 안의 정보를 표시할 수 있습니다.
+ 다음 코드 예는 {@link android.support.v7.widget.CardView}를 레이아웃에
+포함시키는 방법을 보여줍니다.</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>자세한 내용은 <a href="{@docRoot}training/material/lists-cards.html">목록 및 카드 생성</a>을 참조하세요.
+</p>
+
+
+<h2 id="Animations">애니메이션 사용자지정</h2>
+
+<p>Android 5.0(API 레벨 21)에는 앱에서 사용자지정 애니메이션 생성을 위한 새 API가 포함되어 있습니다. 예를 들어, 액티비티 전환을 활성화하고 액티비티 내부에서 나가기 전환을 정의할 수 있습니다.
+
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>이 액티비티에서 다른 액티비티를 시작하면 나가기 전환이 활성화됩니다.</p>
+
+<p>새 애니메이션 API에 대한 자세한 내용은 <a href="{@docRoot}training/material/animations.html">사용자지정 애니메이션 정의</a>를 참조하세요.</p>

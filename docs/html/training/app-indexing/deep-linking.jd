@@ -66,10 +66,10 @@ in your manifest for deep linking. The URIs {@code “example://gizmos”} and
               android:host="www.example.com"
               android:pathPrefix="/gizmos" /&gt;
         &lt;!-- note that the leading "/" is required for pathPrefix--&gt;
-        &lt;!-- Accepts URIs that begin with "example://gizmos”
+        &lt;!-- Accepts URIs that begin with "example://gizmos” --&gt;
         &lt;data android:scheme="example"
               android:host="gizmos" /&gt;
-        --&gt;
+        
     &lt;/intent-filter&gt;
 &lt;/activity&gt;
 </pre>

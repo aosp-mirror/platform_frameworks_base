@@ -58,11 +58,10 @@ window.onhashchange = function () {
     <img src="{@docRoot}images/kk-devices.png" alt="Android 4.4 on phone and tablet" width="380">
   </div>
 
-  <div class="landing-docs" style="float:right;clear:both;margin:22px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >Key Developer Features</h3>
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2 id="features" >Key Developer Features</h3>
     <ul style="list-style-type:none;">
-      <!--<li><a href="#44-ui">UI refresh</a></li>-->
       <li><a href="#44-hce">Host Card Emulation</a></li>
       <li><a href="#44-printing">Printing framework</a></li>
       <li><a href="#44-storage-access">Storage access framework</a></li>

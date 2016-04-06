@@ -1,7 +1,6 @@
-page.title=材料设计
-page.tags=Material, design
-page.type=设计
-page.image=design/material/images/MaterialLight.png
+page.title=Android 材料设计
+page.tags=Material,design,设计
+page.image=images/cards/design-material-for-android_2x.jpg
 
 @jd:body
 
@@ -53,13 +52,13 @@ Android 现在已支持材料设计应用。
   <li>用于自定义阴影和动画的全新 API</li>
 </ul>
 
-<p>有关在 Android 上实现材料设计的详细信息，请参阅<a href="{@docRoot}training/material/index.html">创建材料设计应用</a>。
+<p>有关在 Android 上实现材料设计的详细信息，请参阅<a href="{@docRoot}training/material/index.html">使用材料设计创建应用</a>。
 </p>
 
 
 <h3>材料主题</h3>
 
-<p>材料主题提供了新的应用样式和系统小工具，让您能够为触摸反馈以及活动转换设置配色工具以及默认动画。
+<p>材料主题提供了新的应用样式和系统小工具，让您能够为触摸反馈以及 Activity 转换设置配色工具以及默认动画。
 </p>
 
 <!-- two columns -->
@@ -136,7 +135,7 @@ Android 现在已支持材料设计应用。
 
 <h3>动画</h3>
 
-<p>动画 API 让您可为 UI 控件中的触摸反馈、视图状态更改以及活动转换创建自定义动画。
+<p>动画 API 让您可为 UI 控件中的触摸反馈、视图状态更改以及 Activity 转换创建自定义动画。
 </p>
 
 <p>这些 API 的作用是：</p>
@@ -149,7 +148,7 @@ Android 现在已支持材料设计应用。
 使用<strong>循环显示</strong>动画隐藏和显示视图。
 </li>
 <li style="margin-bottom:15px">
-使用自定义<strong>活动转换</strong>动画切换活动。
+使用自定义 <strong>Activity 转换</strong>动画切换 Activity。
 </li>
 <li style="margin-bottom:15px">
 使用<strong>曲线运动</strong>创建更自然的动画。

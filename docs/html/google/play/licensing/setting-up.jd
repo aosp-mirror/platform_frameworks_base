@@ -6,7 +6,7 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
   <h2>In this document</h2>
   <ol>
   <li><a href="#account">Setting Up a Publisher Account</a></li>
@@ -161,7 +161,7 @@ the add-on, you need to create an AVD configuration that uses that system image.
 However, it does provide: </p>
 
 <ul>
-<li>An Google Play background service that implements the
+<li>A Google Play background service that implements the
 <code>ILicensingService</code> remote interface, so that your application can
 send license checks over the network to the licensing server. </li>
 <li>A set of underlying account services that let you add an a Google account on
@@ -179,21 +179,24 @@ Play services.</p>
 these steps: </p>
 
 <ol>
-  <li>Launch the Android SDK Manager (available under the Eclipse <strong>Window</strong>
-menu or by executing {@code &lt;sdk>/tools/android sdk}).</li>
+  <li>Launch the Android SDK Manager, available under the Android Studio Tools menu
+(<strong>Tools > Android > SDK Manager</strong>) or by executing
+{@code &lt;sdk>/tools/android sdk}.</li>
   <li>Select and download <strong>Google APIs</strong> for the Android version you'd like to target
 (must be Android 2.2 or higher).</li>
-  <li>When the download is complete, open the AVD Manager (available under the Eclipse
-<strong>Window</strong>
-menu or by executing {@code &lt;sdk>/tools/android avd}).</li>
-  <li>Click
-<strong>New</strong> and set the configuration details for the new AVD. </li>
-  <li>In the dialog that appears, assign a descriptive name to the AVD and then
-use the Target menu to choose the <strong>Google APIs</strong> as
-the system image to run on the new AVD. Set the other configuration details as
-needed and then click <strong>Create AVD</strong> to finish. The SDK tools
-create the new AVD configuration, which then appears in the list of available
-Android Virtual Devices.</li>
+  <li>When the download is complete, open the AVD Manager, available under the Android Studio
+Tools menu (<strong>Tools > Android > AVD Manager</strong>) or by executing
+{@code &lt;sdk>/tools/android avd}.</li>
+  <li>In the <em>Android Virtual Device Manager</em> window, select
+<strong>+ Create Virtual Device</strong> to set the configuration details for the new AVD. </li>
+  <li>In the <em>Virtual Device Configuration</em> window, select device hardware, then
+select <strong>Next</strong>.</li>
+<li>Select a <strong>Google API</strong> as the system image to run on the new AVD, then
+select <strong>Next</strong>.</li>
+<li>Assign a descriptive name to the AVD and then set the other configuration details as
+needed.</li>
+<li>Select <strong>Finish</strong> to create the new AVD configuration, which will appear in the
+list of available Android Virtual Devices.</li>
 </ol>
 
 <p>If you are not familiar with AVDs or how to use them, see <a
@@ -205,29 +208,13 @@ href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 above &mdash; either on an actual device or on an emulator &mdash; make sure to
 update your application project or build scripts as needed, so that your compiled
 <code>.apk</code> files that use licensing are deployed into that environment.
-In particular, if you are developing in Eclipse, make sure that you set up a
+In particular, if you are developing in Android Studio, make sure that you set up a
 Run/Debug Configuration that targets the appropriate device or AVD. </p>
 
 <p>You do not need to make any changes to your application's
 build configuration, provided that the project is already configured to compile
-against a standard Android 1.5 (API level 3) or higher library. For example:
-
-<ul>
-<li>If you have an existing application that is compiled against
-the Android 1.5 library, you do not need to make any changes to your
-build configuration to support licensing. The build target meets the minimum
-requirements for licensing, so you would continue building
-against the same version of the Android platform.</li>
-
-<li>Similarly, if you are building against Android 1.5 (API level 3) but
-are using an emulator running the Google APIs Add-On API 8 as the application's
-runtime environment, there is no need to change your application's build
-configuration. </li>
-</ul>
-
-<p>In general, adding licensing to an application should have no impact
-whatsoever on the application's build configuration.</p>
-
+against a standard Android 1.5 (API level 3) or higher library. Adding licensing to an application
+should have no impact whatsoever on the application's build configuration.</p>
 
 <h3 id="download-lvl">Downloading the LVL</h3>
 
@@ -323,28 +310,22 @@ across all of your projects and maintain it centrally. </p>
 <p>The LVL is provided as a configured library project &mdash; once you have
 downloaded it, you can start using it right away. </p>
 
-<p>If you are working in Eclipse with ADT, you need to add the LVL to your
-workspace as a new development project, in the same way as you would a new
-application project. </p>
+<p>If you are working in Android Studio, you need to add the LVL to your
+project as a new module.</p>
 
 <ol>
-<li>Use the New Project Wizard to create a new
-project from existing sources. Select the LVL's <code>library</code> directory
-(the directory containing the library's AndroidManifest.xml file) as the project
-root.</li>
-<li>When you are creating the library project, you can select any application
-name, package, and set other fields as needed. </li>
-<li>For the library's build target, select Android 1.5 (API level 3) or higher.</li>
+<li>Use the New Module Wizard to import a library module by selecting
+<strong>File > New > Import Module</strong>.</li>
+<li>In the <em>New Module</em> window, in <em>Source directory</em>, enter the LVL's
+<code>library</code> directory (the directory containing the library's AndroidManifest.xml file)
+as the project root ({@code &lt;sdk>/extras/google/play_licensing/library/AndroidManifest.xml}),
+then select <strong>Next</strong>.</li>
+<li>Select <strong>Finish</strong> to import the library module.</li>
 </ol>
 
-<p> When created, the project is
-predefined as a library project in its <code>project.properties</code> file, so
-no further configuration is needed. </p>
-
-<p>For more information about how to create an application project or work with
-library projects in Eclipse, see <a
-href="{@docRoot}tools/projects/projects-eclipse.html">Managing Projects from
-Eclipse with ADT</a>.</p>
+<p>For more information about how to work with library modules in Android Studio, see
+<a href="{@docRoot}sdk/installing/create-project.html#SettingUpLibraryModule">Managing Projects from
+Android Studio</a>.</p>
 
 
 <h4>Copying the LVL sources to your application</h4>
@@ -369,23 +350,9 @@ build tools to include the LVL library project sources in your application at
 compile time. The process for adding a reference to a library project depends
 on your development environment, as described below.</p>
 
-<p> If you are developing in Eclipse with ADT, you should already have added the
-library project to your workspace, as described in the previous section. If you
+<p> If you are developing in Android Studio, you should already have added the
+library module to your project, as described in the previous section. If you
 haven't done that already, do it now before continuing. </p>
-
-<p>Next, open the application's project properties window, as shown below.
-Select the "Android" properties group and click <strong>Add</strong>, then
-choose the LVL library project (com_android_vending_licensing) and click
-<strong>OK</strong>. For more information, see
-<a href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">
-Managing Projects from Eclipse with ADT</a></p>.
-
-
-<img src="{@docRoot}images/licensing_add_library.png" alt=""/>
-<p class="img-caption"><strong>Figure 3.</strong> If you are
-working in Eclipse with ADT, you can add the LVL library project to your
-application from the application's project properties.</p>
-
 
 <p>If you are developing using the SDK command-line tools, navigate to the
 directory containing your application project and open the

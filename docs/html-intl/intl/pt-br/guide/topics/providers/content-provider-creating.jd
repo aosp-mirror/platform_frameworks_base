@@ -1,0 +1,1214 @@
+page.title=Criação de um Provedor de Conteúdo
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>Neste documento</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">Projeto de armazenamento de dados</a>
+    </li>
+    <li>
+        <a href="#ContentURI">Projeto de URIs de conteúdo</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">Implementação da classe ContentProvider</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">Métodos obrigatórios</a>
+            </li>
+            <li>
+                <a href="#Query">Implementação do método query()</a>
+            </li>
+            <li>
+                <a href="#Insert">Implementação do método insert()</a>
+            </li>
+            <li>
+                <a href="#Delete">Implementação do método delete()</a>
+            </li>
+            <li>
+                <a href="#Update">Implementação do método update()</a>
+            </li>
+            <li>
+                <a href="#OnCreate">Implementação do método onCreate()</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">Implementação de tipos MIME do Provedor de Conteúdo</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">Tipos MIME para tabelas</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">Tipos MIME para arquivos</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">Implementação de uma classe de contrato</a>
+    </li>
+    <li>
+        <a href="#Permissions">Implementação de permissões do Provedor de Conteúdo</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">O elemento &lt;provider&gt;</a>
+    </li>
+    <li>
+        <a href="#Intents">Intenções e acesso a dados</a>
+    </li>
+</ol>
+<h2>Classes principais</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>Exemplos relacionados</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">
+                Aplicativo de exemplo do Bloco de Notas
+            </a>
+        </li>
+    </ol>
+<h2>Veja também</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            Preceitos do provedor de conteúdo</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Provedor de agenda</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    O provedor de conteúdo gerencia o acesso a um repositório central de dados. Implementa-se
+    um provedor como uma ou mais classes em um aplicativo do Android, em conjunto com elementos
+    no arquivo de manifesto. Uma das classes implementa uma subclasse
+    {@link android.content.ContentProvider}, que é a interface entre o provedor
+    e outros aplicativos. Embora provedores de conteúdo se destinem a disponibilizar dados a outros
+    aplicativos, naturalmente é possível ter atividades no aplicativo que permitam ao usuário
+    consultar e modificar os dados gerenciados pelo provedor.
+</p>
+<p>
+    O restante deste tópico é uma lista básica de etapas para a criação de um provedor de conteúdo e uma lista
+    de APIs para usar.
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">Antes de começar a criar</h2>
+<p>
+    Antes de começar a criar um provedor, faça o seguinte:
+</p>
+<ol>
+    <li>
+        <strong>Avalie se você precisa de um provedor de conteúdo</strong>. É necessário criar um provedor
+        de conteúdo para fornecer um ou mais dos recursos a seguir:
+        <ul>
+            <li>Oferecer dados ou arquivos complexos a outros aplicativos.</li>
+            <li>Permitir que usuários copiem dados complexos do seu aplicativo para outros aplicativos.</li>
+            <li>Fornecer sugestões de pesquisa personalizada usando a estrutura de pesquisa.</li>
+        </ul>
+    <p>
+        <em>Não</em> é necessário um provedor para usar um banco de dados SQLite se o uso for inteiramente dentro
+        do próprio aplicativo.
+    </p>
+    </li>
+    <li>
+        Se você ainda não tiver feito isso, leia o tópico
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Preceitos do provedor de conteúdo</a> para saber mais sobre provedores.
+    </li>
+</ol>
+<p>
+    A seguir, siga estas etapas para criar seu provedor:
+</p>
+<ol>
+    <li>
+        Projete o armazenamento bruto dos dados. Os provedores de conteúdo oferecem dados de duas maneiras:
+        <dl>
+            <dt>
+                Dados de arquivo
+            </dt>
+            <dd>
+                Dados que normalmente transitam em arquivos, como
+                fotos, áudio ou vídeos. Armazene os arquivos no espaço privado
+                do seu aplicativo. Em resposta a uma solicitação de um arquivo por outro aplicativo,
+                o provedor pode oferecer um identificador para o arquivo.
+            </dd>
+            <dt>
+                Dados "estruturados"
+            </dt>
+            <dd>
+                Dados que normalmente transitam em um banco de dados, uma matriz ou estrutura similar.
+                Armazene os dados de forma compatível com tabelas de linhas e colunas. Cada linha
+                representa uma entidade, como uma pessoa ou um item em um inventário. Cada coluna representa
+                alguns dados da entidade, como o nome da pessoa ou o preço do item. Um modo comum de
+                armazenar esse tipo de dados é em um banco de dados SQLite, mas é possível usar qualquer tipo
+                de armazenamento persistente. Para saber mais sobre os tipos de armazenamento disponíveis
+                no sistema Android, consulte a seção <a href="#DataStorage">
+Projeto de armazenamento de dados</a>.
+            </dd>
+        </dl>
+    </li>
+    <li>
+        Defina uma implementação sólida da classe {@link android.content.ContentProvider}
+        e seus métodos obrigatórios. Essa classe é a interface entre seus dados e o restante
+        do sistema Android. Para obter mais informações sobre essa classe, consulte a seção
+        <a href="#ContentProvider">Implementação da classe ContentProvider</a>.
+    </li>
+    <li>
+        Defina a string de autoridade do provedor, suas URIs de conteúdo e seus nomes de coluna. Se você deseja que
+        o aplicativo do provedor trate de intenções, defina também ações de intenção, dados extras
+        e sinalizadores. Também defina as permissões necessárias para aplicativos que queiram
+        acessar seus dados. Deve-se considerar definir todos esses valores como constantes
+        em uma classe de contrato separada; posteriormente, será possível expor essa classe a outros desenvolvedores. Para
+        obter mais informações sobre URIs de conteúdo, consulte
+        a seção <a href="#ContentURI">Projeto de URIs de conteúdo</a>.
+        Para obter mais informações sobre intenções, consulte
+        a seção <a href="#Intents">Intenções e acesso a dados</a>.
+    </li>
+    <li>
+        Adicione outras partes opcionais, como dados de exemplo ou uma implementação
+        de {@link android.content.AbstractThreadedSyncAdapter} que possa sincronizar dados entre
+        o provedor e os dados com base em nuvem.
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">Projeto de armazenamento de dados</h2>
+<p>
+    Os provedores de conteúdo são a interface para dados salvos em um formato estruturado. Antes de criar
+    a interface, é preciso decidir como armazenar os dados. É possível armazená-los da forma que
+    quiser e, em seguida, projetar a interface para ler e gravar os dados conforme o necessário.
+</p>
+<p>
+    Essas são algumas das tecnologias de armazenamento de dados disponíveis no Android:
+</p>
+<ul>
+    <li>
+        O sistema Android contém uma API de banco de dados SQLite que os provedores do Android usam
+    para armazenar dados orientados a tabela. 
+        A classe {@link android.database.sqlite.SQLiteOpenHelper} ajuda a criar bancos de dados
+        e a classe {@link android.database.sqlite.SQLiteDatabase} é a classe de base para acessar
+        banco de dados.
+        <p>
+            Lembre-se de que não é necessário usar nenhum banco de dados para implementar o repositório. Um provedor
+            aparece externamente como um conjunto de tabelas, semelhante a um banco de dados relacional, mas isso não
+            é um requisito para a implementação interna do provedor.
+        </p>
+    </li>
+    <li>
+        Para armazenar dados de arquivos, o Android tem diversas APIs orientadas a arquivo.
+        Para saber mais sobre armazenamento de arquivos, leia o tópico
+        <a href="{@docRoot}guide/topics/data/data-storage.html">Armazenamento de dados</a>. Se você estiver
+        projetando um provedor que oferece dados relacionados a mídia como música ou vídeos, é possível
+        ter um provedor que combine dados de tabela e de arquivos.
+    </li>
+    <li>
+        Para trabalhar com dados com base em rede, use classes em {@link java.net}
+        e em {@link android.net}. É possível, também, sincronizar dados com base em rede com uma armazenagem
+        local de dados, como um banco de dados e, em seguida, fornecer os dados na forma de tabelas ou arquivos.
+        O exemplo de aplicativo <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Exemplo de adaptador de sincronização</a>  demonstra o tipo de sincronização.
+    </li>
+</ul>
+<h3 id="DataDesign">
+    Considerações para projetar dados
+</h3>
+<p>
+    A seguir há algumas dicas para projetar a estrutura de dados do seu provedor:
+</p>
+<ul>
+    <li>
+        Os dados de tabela sempre devem ter uma coluna de "chave principal" que o provedor mantém
+        como um valor numérico exclusivo para cada linha. É possível usar esse valor para vincular a linha a linhas
+        relacionadas em outras tabelas (usando-o como uma "chave externa"). Embora seja possível usar qualquer nome
+        para essa coluna, é melhor usar {@link android.provider.BaseColumns#_ID BaseColumns._ID}
+        porque a vinculação dos resultados de uma consulta de provedor com uma
+        {@link android.widget.ListView} requer que uma das colunas tenha o nome
+        <code>_ID</code>.
+    </li>
+    <li>
+        Se você deseja fornecer imagens bitmap ou outras partes muito grandes de dados orientados a arquivo, armazene
+        os dados em um arquivo e, em seguida, forneça-o indiretamente em vez de armazená-lo diretamente em uma
+        tabela. Ao fazer isso, será necessário informar aos usuários do provedor que eles precisam usar
+        um método de arquivo {@link android.content.ContentResolver} para acessar os dados.
+    </li>
+    <li>
+        Use objeto grande binário (BLOB) como tipo de dados para armazenar dados que variam em tamanho ou que tenham
+        estrutura variável. Por exemplo: é possível usar uma coluna de BLOB para armazenar
+        um <a href="http://code.google.com/p/protobuf">buffer de protocolo</a> ou
+        uma <a href="http://www.json.org">estrutura JSON</a>.
+        <p>
+            Pode-se usar um BLOB para implementar uma tabela <em>independente de esquema</em>. Nesse
+            tipo de tabela, define-se uma coluna de chave principal, uma coluna de tipo MIME e uma
+            ou mais colunas genéricas como BLOB. O significado dos dados nas colunas BLOB é indicado
+            pelo valor na coluna de tipo MIME. Isso permite o armazenamento de diferentes tipos de linha
+            na mesma tabela. A tabela de "dados" {@link android.provider.ContactsContract.Data}
+            do Provedor de contatos é um exemplo de uma tabela
+            independente de esquema.
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">Projeto de URIs de conteúdo</h2>
+<p>
+    <strong>URI de conteúdo</strong> é uma URI que identifica dados em um provedor. URIs de conteúdo
+    contêm o nome simbólico de todo o provedor (sua <strong>autoridade</strong>) e um
+    nome que aponta para uma tabela ou arquivo (um <strong>caminho</strong>). Parte do ID opcional aponta para
+    uma linha individual em uma tabela. Cada método de acesso aos dados
+    {@link android.content.ContentProvider} de tem uma URI de conteúdo como um argumento. Isso permite
+    determinar a tabela, a linha ou o arquivo a acessar.
+</p>
+<p>
+    Os conceitos básicos de URIs de conteúdo são escritos no tópico
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Preceitos do provedor de conteúdo</a>.
+</p>
+<h3>Projeto de uma autoridade</h3>
+<p>
+    Os provedores normalmente têm uma única autoridade, que serve como seu nome interno do Android. Para
+    evitar conflitos com outros provedores, deve-se usar a propriedade de domínio da internet (ao contrário)
+    como a base da autoridade do provedor. Em virtude de esta recomendação ser verdadeira para nomes
+    de pacote do Android, é possível definir a autoridade do provedor como uma extensão do nome
+    do pacote que contém o provedor. Por exemplo: se o nome do pacote do Android for
+    <code>com.example.&lt;appname&gt;</code>, deve-se atribuir ao provedor
+    a autoridade <code>com.example.&lt;appname&gt;.provider</code>.
+</p>
+<h3>Projeto de uma estrutura de caminho</h3>
+<p>
+    Desenvolvedores normalmente criam URIs de conteúdo a partir da autoridade anexando caminhos que apontam para
+    tabelas individuais. Por exemplo: se você tiver duas tabelas (<em>tabela1</em> e
+    <em>tabela2</em>), combine a autoridade do exemplo anterior para produzir
+    as URIs de conteúdo
+    <code>com.example.&lt;appname&gt;.provider/table1</code> e
+    <code>com.example.&lt;appname&gt;.provider/table2</code>. Caminhos não
+    se limitam a um único segmento e não precisa ter uma tabela para cada nível do caminho.
+</p>
+<h3>Identificação de IDs de URIs de conteúdo</h3>
+<p>
+    Por convenção, provedores fornecem acesso a uma linha exclusiva em uma tabela aceitando uma URI de conteúdo
+    com um valor de ID para a linha no fim da URI. Também por convenção, provedores combinam
+    o valor do ID com a coluna <code>_ID</code> da tabela e realizam o acesso solicitado
+    na linha correspondente.
+</p>
+<p>
+    Essa convenção facilita a padronização comum do projeto para aplicativos que acessam um provedor. O aplicativo
+    realiza uma consulta no provedor e exibe o {@link android.database.Cursor}
+    resultante em uma {@link android.widget.ListView} usando um {@link android.widget.CursorAdapter}.
+    A definição de {@link android.widget.CursorAdapter} requer que uma das colunas
+    no {@link android.database.Cursor} seja <code>_ID</code>
+</p>
+<p>
+    Em seguida, o usuário seleciona uma das linhas exibidas na IU para visualizar ou modificar
+    os dados. O aplicativo tem a linha correspondente do {@link android.database.Cursor} apoiando
+    a {@link android.widget.ListView}, obtém o valor <code>_ID</code> para essa linha, anexa-o
+    à URI de conteúdo e envia a solicitação de acesso ao provedor. O provedor, então, pode realizar
+    a consulta ou modificação na exata linha que o usuário selecionou.
+</p>
+<h3>Padrões de URI de conteúdo</h3>
+<p>
+    Para ajudar a escolher que ação tomar para uma URI de conteúdo recebida, a API do provedor contém
+    a classe de conveniência {@link android.content.UriMatcher}, que mapeia "padrões" de URI de conteúdo
+    como valores de número inteiro. É possível usar os valores de número inteiro em uma declaração <code>switch</code> que
+    escolha a ação desejada para a URI de conteúdo ou URIs que atendam ao padrão determinado.
+</p>
+<p>
+    Um padrão de URI de conteúdo corresponde a URIs de conteúdo que usam caracteres especiais:
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>:</strong> Corresponde a uma string de qualquer caractere válido de qualquer comprimento.
+        </li>
+        <li>
+            <strong><code>#</code>:</strong> Corresponde a uma string de caracteres numéricos de qualquer comprimento.
+        </li>
+    </ul>
+<p>
+    Como um exemplo de projeto e codificação da identificação de URIs de conteúdo, considere um provedor
+    com a autoridade <code>com.example.app.provider</code> que reconheça as URIs de conteúdo
+    que apontam para tabelas:
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>: Uma tabela chamada <code>table1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>: Uma tabela chamada
+        <code>dataset1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>: Uma tabela chamada
+        <code>dataset1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>: Uma tabela chamada <code>table3</code>.
+    </li>
+</ul>
+<p>
+    O provedor também reconhece essas URIs de conteúdo se elas tiverem um ID de linha anexado, como
+    <code>content://com.example.app.provider/table3/1</code> para a linha identificada por
+    <code>1</code> em <code>table3</code>.
+</p>
+<p>
+    Os seguintes padrões de URI de conteúdo seriam possíveis:
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        Corresponde a qualquer URI de conteúdo no provedor.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>:
+    </dt>
+    <dd>
+        Corresponde a uma URI de conteúdo das tabelas <code>dataset1</code>
+        e <code>dataset2</code>, mas não a URIs de conteúdo de <code>table1</code>
+        nem <code>table3</code>.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>: Corresponde a uma URI de conteúdo
+        para linhas exclusivas em <code>table3</code>, como
+        <code>content://com.example.app.provider/table3/6</code> da linha identificada por
+        <code>6</code>.
+    </dt>
+</dl>
+<p>
+    O fragmento de código a seguir mostra como funcionam os métodos em {@link android.content.UriMatcher}.
+    Esse código identifica URIs para toda uma tabela, diferentemente das URIs
+    para uma linha exclusiva, usando o padrão de URI de conteúdo
+    <code>content://&lt;authority&gt;/&lt;path&gt;</code> para tabelas e
+    <code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code> para linhas exclusivas.
+</p>
+<p>
+    O método {@link android.content.UriMatcher#addURI(String, String, int) addURI()} mapeia
+    uma autoridade e um caminho como um valor de número inteiro. O método {@link android.content.UriMatcher#match(Uri)
+    match()} retorna o valor de número inteiro para a URI. Uma declaração <code>switch</code>
+    escolhe entre consultar a tabela inteira e consultar um único registro:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    Outra classe, {@link android.content.ContentUris}, fornece métodos convenientes para trabalhar
+    com a parte <code>id</code> das URIs de conteúdo. As classes {@link android.net.Uri}
+    e {@link android.net.Uri.Builder} contêm métodos convenientes para analisar objetos
+    {@link android.net.Uri} existentes e criar novos.
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">Implementação da classe ContentProvider</h2>
+<p>
+    A instância {@link android.content.ContentProvider} gerencia o acesso
+    a um conjunto de dados estruturado lidando com solicitações de outros aplicativos. Todas as formas
+    de acesso ocasionalmente chamam {@link android.content.ContentResolver} que, em seguida, chama um método
+    concreto de {@link android.content.ContentProvider} para obter acesso.
+</p>
+<h3 id="RequiredAccess">Métodos obrigatórios</h3>
+<p>
+    A classe abstrata {@link android.content.ContentProvider} define seis métodos abstratos
+    que devem ser implementados como parte das subclasses concretas. Todos esses métodos, exceto
+    {@link android.content.ContentProvider#onCreate() onCreate()}, são chamados por um aplicativo cliente
+    que está tentando acessar seu provedor de conteúdo:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+        query()}
+    </dt>
+    <dd>
+        Recupere dados do provedor. Use os argumentos para selecionar a tabela
+        para consultar as linhas e colunas a retornar e a ordem de classificação do resultado.
+        Retorne os dados como um objeto {@link android.database.Cursor}.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        Insira uma nova linha no provedor. Use os argumentos para selecionar
+        a tabela de destino e obter os valores de coluna a usar. Retorne uma URI de conteúdo para
+        a linha recentemente inserida.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+        update()}
+    </dt>
+    <dd>
+        Atualize as linhas existentes no provedor. Use os argumentos para selecionar a tabela e linhas
+        para atualizar e obter os valores de coluna atualizados. Retorne o número de linhas atualizadas.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        Exclua linhas do provedor. Use os argumentos para selecionar a tabela e as linhas
+        a excluir. Retorne o número de linhas excluídas.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Retorne o tipo MIME correspondente a uma URI de conteúdo. Esse método é descrito com mais
+        detalhes na seção <a href="#MIMETypes">Implementação de tipos MIME do Provedor de Conteúdo</a>.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        Inicializar o provedor. O sistema Android chama esse método imediatamente
+        após criar o provedor. Observe que o provedor não é criado até que
+        um objeto {@link android.content.ContentResolver} tente acessá-lo.
+    </dd>
+</dl>
+<p>
+    Observe que esses métodos têm a mesma assinatura dos métodos 
+        {@link android.content.ContentResolver} de mesmo nome.
+</p>
+<p>
+    A implementação desses métodos deve levar em conta o seguinte:
+</p>
+<ul>
+    <li>
+        Todos esses métodos, exceto {@link android.content.ContentProvider#onCreate() onCreate()},
+        podem ser chamados por diversos encadeamentos simultaneamente, então devem ter encadeamento seguro. Para saber
+        mais sobre encadeamentos múltiplos, consulte o tópico
+        <a href="{@docRoot}guide/components/processes-and-threads.html">
+        Processos e encadeamentos</a>.
+    </li>
+    <li>
+        Evite realizar longas operações em {@link android.content.ContentProvider#onCreate()
+        onCreate()}. Adie tarefas de inicialização até que sejam realmente necessárias.
+        A seção <a href="#OnCreate">Implementação do método onCreate()</a>
+        aborda o assunto mais detalhadamente.
+    </li>
+    <li>
+        Embora seja preciso implementar esses métodos, o código não precisa fazer nada além
+        de retornar o tipo de dados esperado. Por exemplo: você pode querer evitar que outros aplicativos
+        insiram dados em algumas tabelas. Para tanto, pode-se ignorar a chamada de
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} e retornar
+        0.
+    </li>
+</ul>
+<h3 id="Query">Implementação do método query()</h3>
+<p>
+    
+    O método {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} precisa retornar um objeto {@link android.database.Cursor}  ou, se
+    falhar, gerar uma {@link java.lang.Exception}. Se você estiver usando um banco de dados SQLite
+    como armazenamento de dados, pode simplesmente retornar o {@link android.database.Cursor} retornado
+    por um dos métodos <code>query()</code> da classe {@link android.database.sqlite.SQLiteDatabase}.
+    Se a consulta não corresponder a nenhuma linha, deve-se retornar uma instância {@link android.database.Cursor}
+cujo método {@link android.database.Cursor#getCount()} retorne 0.
+    Deve-se retornar <code>null</code> somente se ocorrer um erro interno durante o processo de consulta.
+</p>
+<p>
+    Se você não estiver usando um banco de dados SQLite como modo de armazenamento de dados, use uma das subclasses concretas
+    de {@link android.database.Cursor}. Por exemplo, a classe {@link android.database.MatrixCursor}
+    implementa um cursor em que cada linha é uma matriz de {@link java.lang.Object}. Com essa classe,
+    use {@link android.database.MatrixCursor#addRow(Object[]) addRow()} para adicionar uma nova linha.
+</p>
+<p>
+    Lembre-se de que o sistema Android deve ser capaz de se comunicar com {@link java.lang.Exception}
+    entre limites de processo. O Android pode fazer isso para as exceções a seguir, que podem ser úteis
+    para tratar de erros de consulta:
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException} (é possível escolher lançar isso se o provedor
+        receber uma URI de conteúdo inválida)
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}
+    </li>
+</ul>
+<h3 id="Insert">Implementação do método insert()</h3>
+<p>
+    O método {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} adiciona
+    uma nova linha à tabela apropriada usando os valores no argumento
+    {@link android.content.ContentValues}. Se um nome de coluna não estiver no argumento {@link android.content.ContentValues},
+    talvez seja necessário fornecer um valor padrão para ele tanto no código do provedor quanto no esquema
+    do banco de dados.
+</p>
+<p>
+    Esse método deve retornar a URI de conteúdo da nova linha. Para construir isso, anexe o valor <code>_ID</code>
+    da nova linha (ou outra chave principal) à URI de conteúdo da tabela usando
+    {@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()}.
+</p>
+<h3 id="Delete">Implementação do método delete()</h3>
+<p>
+    O método {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    não precisa excluir linhas fisicamente do armazenamento de dados. Se você estiver usando um adaptador de sincronização
+    com o provedor, considere marcar uma linha excluída
+    com um sinalizador "excluir" em vez de removê-la totalmente. O adaptador de sincronização pode
+    verificar se há linhas excluídas e removê-las do servidor antes de excluí-las do provedor.
+</p>
+<h3 id="Update">Implementação do método update()</h3>
+<p>
+    O método {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+    update()} usa o mesmo argumento {@link android.content.ContentValues} usado por
+    {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}, e os
+    mesmos argumentos <code>selection</code> e <code>selectionArgs</code> usados por
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} e
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()}. Isso deve permitir a reutilização do código entre esses métodos.
+</p>
+<h3 id="OnCreate">Implementação do método onCreate()</h3>
+<p>
+    O sistema Android chama {@link android.content.ContentProvider#onCreate()
+    onCreate()} quando inicia o provedor. Nesse método, devem-se realizar apenas tarefas de inicialização
+    de execução rápida e adiar a criação do banco de dados e o carregamento dos dados até que o provedor
+    receba efetivamente uma solicitação de acesso aos dados. Se houver tarefas longas
+    em {@link android.content.ContentProvider#onCreate() onCreate()}, a inicialização do provedor
+    ficará lenta. Consequentemente, isso diminuirá a rapidez da resposta do provedor
+    a outros aplicativos.
+</p>
+<p>
+    Por exemplo: se você estiver usando um banco de dados SQLite, é possível criar
+    um novo objeto {@link android.database.sqlite.SQLiteOpenHelper}
+    em {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}
+    e, em seguida, criar as tabelas SQL na primeira vez em que o banco de dados for aberto. Para facilitar isso,
+    a primeira vez que chamar {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+    getWritableDatabase()}, ele automaticamente chamará
+    o método {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}
+</p>
+<p>
+    Os dois fragmentos a seguir demonstram a interação
+    entre {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}
+    e {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}. O primeiro fragmento é a implementação de
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}.
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    O próximo fragmento é a implementação de
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}, inclusive uma classe auxiliar:
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">Implementação de tipos MIME de ContentProvider</h2>
+<p>
+    A classe {@link android.content.ContentProvider} tem dois métodos para retornar tipos MIME:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Um dos métodos obrigatórios que devem ser implementados em qualquer provedor.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        Um método que deve ser implementado se o provedor fornecer arquivos.
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">Tipos MIME para tabelas</h3>
+<p>
+    O método {@link android.content.ContentProvider#getType(Uri) getType()} retorna
+    uma {@link java.lang.String} em formato MIME que descreve o tipo de dados retornado pelo argumento
+    da URI de conteúdo. O argumento {@link android.net.Uri} pode ser um padrão em vez de uma URI específica;
+    nesse caso, deve-se retornar o tipo de dados associado a URIs de conteúdo que correspondam
+    ao padrão.
+</p>
+<p>
+    Para tipos de dados comuns como texto, HTML ou JPEG,
+    {@link android.content.ContentProvider#getType(Uri) getType()} deve retornar o tipo MIME
+    padrão daqueles dados. Há uma lista completa desse tipos de padrão
+    no site de 
+    <a href="http://www.iana.org/assignments/media-types/index.htm">Tipos de mídia MIME IANA</a>.
+</p>
+<p>
+    Para obter URIs de conteúdo que apontam para uma linha ou linhas de dados de tabela,
+    {@link android.content.ContentProvider#getType(Uri) getType()} deve retornar
+    um tipo MIME no formato MIME específico do fornecedor do Android:
+</p>
+<ul>
+    <li>
+        Parte do tipo: <code>vnd</code>
+    </li>
+    <li>
+        Parte do subtipo:
+        <ul>
+            <li>
+    Se um padrão de URI se destinar a uma única linha: <code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    Se um padrão de URI se destinar a mais de uma linha: <code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        Parte específica do provedor: <code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            Fornecem-se <code>&lt;name&gt;</code> e o <code>&lt;type&gt;</code>.
+            O valor <code>&lt;name&gt;</code> deve ser globalmente exclusivo
+            e o <code>&lt;type&gt;</code> deve ser exclusivo para o padrão de URI
+            correspondente. Uma boa escolha para <code>&lt;name&gt;</code> é o nome da empresa
+            ou alguma parte do nome do pacote do Android do seu aplicativo. Uma boa escolha para
+            <code>&lt;type&gt;</code> é uma string que identifique a tabela associada
+            à URI.
+        </p>
+
+    </li>
+</ul>
+<p>
+    Por exemplo: se a autoridade de um provedor
+    for <code>com.example.app.provider</code> e ele expuser uma tabela chamada
+    <code>table1</code>, o tipo MIME de diversas linhas em <code>table1</code> será:
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    Para uma única linha de <code>table1</code>, o tipo MIME será:
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">Tipos MIME para arquivos</h3>
+<p>
+    Se o provedor oferecer arquivos, implemente
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}.
+    O método retorna uma matriz {@link java.lang.String} de tipos MIME para os arquivos que o provedor
+    pode retornar de uma dada URI de conteúdo. É preciso filtrar os tipos MIME oferecidos pelo argumento do filtro
+    de tipo MIME para retornar somente os tipos MIME que o cliente quer tratar.
+</p>
+<p>
+    Por exemplo: considere um provedor que ofereça imagens de foto como arquivos em formatos <code>.jpg</code>,
+    <code>.gif</code> e <code>.png</code>.
+    Se um aplicativo chama {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} com a string de filtro <code>image/*</code> (algo que
+    seja uma "imagem"),
+    o método {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} deve retornar a matriz:
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    Se o aplicativo estiver interessado apenas em arquivos <code>.jpg</code>, ele pode chamar
+    {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} com a string de filtro <code>*\/jpeg</code>
+    e {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} deve retornar:
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    Se o provedor não oferecer nenhum tipo MIME solicitado na string de filtro,
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    deve retornar <code>null</code>.
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">Implementação de uma classe de contrato</h2>
+<p>
+    Uma classe de contrato é uma classe <code>public final</code> que contém definições de constantes para
+    os nomes de coluna das URIs, dos tipos MIME e de outros metadados que pertencem ao provedor. A classe
+    estabelece um contrato entre o provedor e outros aplicativos, garantindo que o provedor
+    possa ser corretamente acessado mesmo se houver mudanças nos valores atuais de URIs, nomes de coluna
+    etc.
+</p>
+<p>
+    As classes de contrato também ajudam os desenvolvedores porque normalmente suas constantes têm nomes mnemônicos e,
+    por isso, os desenvolvedores têm menos chance de usar valores incorretos para nomes de coluna ou URIs. Já que é
+    uma classe, ela pode conter documentação Javadoc. Ambientes de desenvolvimento integrados, como
+    o Eclipse, podem preencher automaticamente os nomes de constantes da classe de contrato e exibir Javadoc para
+    as constantes.
+</p>
+<p>
+    Os desenvolvedores não podem acessar o arquivo de classe da classe de contrato do aplicativo, mas podem
+    compilá-lo estaticamente no aplicativo a partir de um arquivo <code>.jar</code> que você fornece.
+</p>
+<p>
+    A classe {@link android.provider.ContactsContract} e classes aninhadas são exemplos
+    de classes de contrato.
+</p>
+<h2 id="Permissions">Implementação de permissões do Provedor de Conteúdo</h2>
+<p>
+    Permissões e acesso, para todos os aspectos do sistema Android, são descritos detalhadamente no
+    tópico <a href="{@docRoot}guide/topics/security/security.html">Permissões e segurança</a>.
+    O tópico <a href="{@docRoot}guide/topics/data/data-storage.html">Armazenamento de dados</a> também
+    descreve segurança e permissões em vigor para diversos tipos de armazenamento.
+    Em resumo, os pontos importantes são:
+</p>
+<ul>
+    <li>
+        Por padrão, arquivos de dados armazenados no armazenamento interno do dispositivo são privados em relação
+        ao aplicativo e ao provedor.
+    </li>
+    <li>
+        Os bancos de dados {@link android.database.sqlite.SQLiteDatabase} criados são privados em relação
+        ao aplicativo e ao provedor.
+    </li>
+    <li>
+        Por padrão, arquivos de dados salvos em armazenamentos externos são <em>públicos</em>
+        e <em>legíveis para todos</em>. Não é possível usar um provedor de conteúdo para restringir o acesso a arquivos
+        em um armazenamento externo porque outros aplicativos podem usar chamadas de outra API para lê-los e gravar neles.
+    </li>
+    <li>
+        O método que chama a abertura ou criação de arquivos ou bancos de dados SQLite no armazenamento
+        interno do seu dispositivo podem fornecer acesso de leitura e gravação a todos os outros aplicativos. Se você
+        usar um arquivo ou banco de dados interno como o repositório do provedor e conceder-lhe
+        acesso "legível para todos" ou "gravável por todos", as permissões definidas para o provedor
+        no manifesto não protegerão os dados. O acesso padrão de arquivos e bancos de dados
+        no armazenamento interno é "privado" e, para o repositório do provedor, não é recomendável alterar isso.
+    </li>
+</ul>
+<p>
+    Se você deseja usar permissões do provedor de conteúdo para controlar o acesso aos dados, deve
+    armazená-los em arquivos internos, bancos de dados SQLite ou em "nuvem" (por exemplo,
+    em um servidor remoto) e mantê-los privados em relação ao aplicativo.
+</p>
+<h3>Implementação de permissões</h3>
+<p>
+    Todos os aplicativos podem ler ou gravar no provedor, mesmo que os dados em questão
+    sejam privados porque, por padrão, o provedor não tem permissões definidas. Para mudar isso,
+    defina permissões do provedor no arquivo de manifesto por meio de atributos ou elementos
+    filho do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. É possível definir permissões que se apliquem a todo o provedor,
+    a determinadas tabelas, a registros específicos ou a todos os três.
+</p>
+<p>
+    As permissões são definidas para o provedor com um ou mais
+    elementos <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> no arquivo de manifesto. Para tornar
+    a permissão exclusiva para o provedor, use escopo de estilo Java para
+    o atributo <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code>. Por exemplo: nomeie a permissão de leitura
+    <code>com.example.app.provider.permission.READ_PROVIDER</code>.
+
+</p>
+<p>
+    A lista a seguir descreve o escopo de permissões do provedor, começando
+    com as permissões que se aplicam a todo o provedor e seguindo para as mais específicas.
+    Permissões mais específicas têm precedência sobre as de escopo maior:
+</p>
+<dl>
+    <dt>
+        Única permissão de leitura e gravação no nível do provedor
+    </dt>
+    <dd>
+        Uma permissão que controla os acessos de leitura e gravação a todo o provedor, especificada
+        com o atributo <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code>
+        do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>.
+    </dd>
+    <dt>
+        Permissões de leitura e gravação separadas no nível do provedor
+    </dt>
+    <dd>
+        Uma permissão de leitura e uma permissão de gravação para todo o provedor. São especificadas
+        com os atributos <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code>
+        e <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code>
+        do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Elas têm precedência sobre a permissão exigida
+        por <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code>.
+    </dd>
+    <dt>
+        Permissão no nível do caminho
+    </dt>
+    <dd>
+        Permissão de leitura, gravação ou leitura/gravação para uma URI de conteúdo no provedor. Especifica-se
+        cada URI que se deseja controlar
+        com um elemento filho <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> 
+        do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Para cada URI de conteúdo, pode-se especificar
+        uma permissão de leitura/gravação, uma permissão de leitura, uma permissão de gravação ou as três. As permissões
+        de leitura e gravação têm precedência sobre a permissão de leitura/gravação. Além disso,
+        permissões no nível do caminho têm precedência sobre permissões no nível do provedor.
+    </dd>
+    <dt>
+        Permissão temporária
+    </dt>
+    <dd>
+        Nível de permissão que concede acesso temporário a um aplicativo mesmo que ele
+        não tenha as permissões normalmente exigidas. O recurso de acesso
+        temporário reduz o número de permissões que um aplicativo deve solicitar
+        no manifesto. Ao ativar permissões temporárias, os únicos aplicativos que precisam de
+        permissões "permanentes" para seu provedor são os que têm acesso contínuo
+        a todos os dados.
+        <p>
+            Considere as permissões necessárias para implementar um provedor e um aplicativo de e-mail
+        ao permitir um aplicativo visualizador de imagens externas para exibir anexos de fotos
+        do provedor. Para conceder o acesso necessário ao visualizador de imagens sem as permissões exigidas,
+        configure permissões temporárias das URIs de conteúdo de fotos. Projete o aplicativo de e-mail
+        para que, quando o usuário quiser exibir uma foto, o aplicativo envie uma intenção
+        com a URI de conteúdo da foto e sinalizadores de permissão para o visualizador de imagens. O visualizador de imagens poderá,
+        então, consultar o provedor de e-mail para recuperar a foto mesmo que ele
+        não tenha a permissão normal de leitura para o provedor.
+        </p>
+        <p>
+            Para ativar permissões temporárias, defina
+        o atributo <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code>
+        do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> ou adicione um ou mais
+        elementos filhos <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code>
+        ao elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>. Se forem usadas permissões temporárias, será necessário chamar
+                    {@link android.content.Context#revokeUriPermission(Uri, int)
+            Context.revokeUriPermission()} sempre que remover suporte a URI de conteúdo do
+            provedor, e a URI de conteúdo será associada a uma permissão temporária.
+        </p>
+        <p>
+            O valor do atributo determina o nível de acessibilidade do provedor.
+            Se o atributo estiver definido como <code>true</code>, o sistema concederá permissão
+            temporária a todo o provedor, sobrepondo todas as outras permissões exigidas
+            pelas permissões no nível do provedor ou no nível do caminho.
+        </p>
+        <p>
+            Se esse sinalizador estiver definido como <code>false</code>, será necessário adicionar
+            elementos filhos <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code>
+            ao elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>. Cada elemento filho especifica a URI ou URIs
+            de conteúdo para as quais o acesso temporário é concedido.
+        </p>
+        <p>
+            Para delegar o acesso temporário a um aplicativo, a intenção deve conter
+            os sinalizadores {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION},
+            {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} ou ambos. Eles
+            são definidos com o método {@link android.content.Intent#setFlags(int) setFlags()}.
+        </p>
+        <p>
+            Se o atributo <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> não estiver presente, presume-se que ele seja
+            <code>false</code>.
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">O elemento &lt;provider&gt;</h2>
+<p>
+    Como os componentes {@link android.app.Activity} e {@link android.app.Service},
+            a subclasse de {@link android.content.ContentProvider}
+            deve ser definida no arquivo de manifesto do aplicativo
+            pelo elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. O sistema Android obtém as seguintes informações
+            do elemento:
+<dl>
+    <dt>
+        Autoridade
+            (<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+        android:authorities}</a>)
+    </dt>
+    <dd>
+        Nomes simbólicos que identificam todo o provedor dentro do sistema. Esse
+        atributo é descrito com mais detalhes na seção
+        <a href="#ContentURI">Projeto de URIs de conteúdo</a>.
+    </dd>
+    <dt>
+        Nome da classe do provedor
+        (<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>)
+    </dt>
+    <dd>
+        A classe que implementa {@link android.content.ContentProvider}. Esta classe é
+        abordada com mais detalhes na seção
+        <a href="#ContentProvider">Implementação da classe ContentProvider</a>.
+    </dd>
+    <dt>
+        Permissões
+    </dt>
+    <dd>
+        Atributos que especificam as permissões que outros aplicativos precisam ter para acessar
+        os dados do provedor:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>: Sinalizador de permissão temporária.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>: Permissão única de leitura/gravação por todo o provedor.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>: Permissão de leitura por todo o provedor.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>: Permissão de gravação por todo o provedor.
+            </li>
+        </ul>
+        <p>
+            As permissões e os atributos correspondentes são abordados com mais
+            detalhes na seção
+            <a href="#Permissions">Implementação de permissões do Provedor de conteúdo</a>.
+        </p>
+    </dd>
+    <dt>
+        Atributos de início e controle
+    </dt>
+    <dd>
+        Esses atributos determinam como e quando o sistema Android inicia o provedor,
+        as características do processo do provedor e outras configurações de tempo de execução:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>: sinalizador que permite ao sistema iniciar o provedor.
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>: sinalizador que permite a outros aplicativos usarem esse provedor.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>: a ordem em que esse provedor deve ser iniciado,
+                relativa a outros provedores no mesmo processo.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>: sinalizador que permite ao sistema iniciar o provedor
+                no mesmo processo que o cliente chama.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>: o nome do processo em que o provedor deve
+                ser executado.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>: sinalizador que indica que os dados do provedor devem ser
+                sincronizados com os dados em um servidor.
+            </li>
+        </ul>
+        <p>
+            os atributos estão totalmente documentados no tópico do guia de desenvolvimento
+            do elemento
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+    <dt>
+        Atributos informacionais
+    </dt>
+    <dd>
+        Um ícone e um rótulo opcionais para o provedor:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>: um recurso desenhável contendo um ícone para o provedor.
+                O ícone aparece próximo ao rótulo do provedor na lista de aplicativos
+                em <em>Configurações</em> &gt; <em>Aplicativos</em> &gt; <em>Todos</em>.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>: um rótulo informacional que descreve o provedor,
+                seus dados ou ambos. O rótulo aparece na lista de aplicativos
+                em <em>Configurações</em> &gt; <em>Aplicativos</em> &gt; <em>Todos</em>.
+            </li>
+        </ul>
+        <p>
+            Os atributos estão totalmente documentados no tópico do guia de desenvolvimento
+            do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">Intenções e acesso a dados</h2>
+<p>
+    Os aplicativos podem acessar um provedor de conteúdo indiretamente com uma {@link android.content.Intent}.
+    O aplicativo não chama nenhum método de {@link android.content.ContentResolver}
+    nem de {@link android.content.ContentProvider}. Em vez disso, ele envia uma intenção que inicia uma atividade,
+    que, em geral, é parte do aplicativo do próprio provedor. A atividade de destino é responsável
+    pela recuperação e exibição dos dados na IU. Conforme a ação na intenção,
+    a atividade de destino também pode levar o usuário a realizar modificações nos dados do provedor.
+    Uma intenção também pode conter dados "extras" que a atividade de destino exibe
+    na IU; o usuário terá, então, a opção de alterar esses dados antes de usá-los para modificar
+    os dados no provedor.
+</p>
+<p>
+
+</p>
+<p>
+    Pode ser necessário usar acesso de intenções para ajudar a garantir a integridade deles. O provedor pode depender
+    de ter dados inseridos, atualizados e excluídos de acordo com a lógica de negócio rigorosamente definida. Se
+    for o caso, a permissão para que outros aplicativos modifiquem os dados diretamente pode levar
+    à invalidação dos dados. Se você deseja que os desenvolvedores usem o acesso via intenções, certifique-se de documentá-lo minuciosamente.
+    Explique por que o acesso via intenções pela IU do aplicativo é melhor do que tentar
+    modificar os dados com códigos.
+</p>
+<p>
+    O tratamento das intenções recebidas com a intenção de modificar os dados do provedor não é diferente
+    de tratar de outras intenções. Para saber mais sobre o uso de intenções, leia o tópico
+    <a href="{@docRoot}guide/components/intents-filters.html">Intenções e filtros de intenções</a>.
+</p>

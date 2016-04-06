@@ -29,7 +29,13 @@ same look-and-feel as for app purchases.</li>
   </ol>
    <h2>Related Samples</h2>
   <ol>
-    <li><a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">Sample Application (V3)</a></li>
+    <li><a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">Sample
+      Application (V3)</a></li>
+  </ol>
+   <h2>Related Videos</h2>
+  <ol>
+    <li><a href="https://www.youtube.com/watch?v=UvCl5Xx7Z5o">Implementing
+      Freemium</a></li>
   </ol>
 </div>
 </div>
@@ -40,12 +46,13 @@ Billing features into your application.</p>
 
 <p class="note"><b>Note</b>: Ensure that you comply with applicable laws in the countries where you
 distribute apps. For example, in EU countries, laws based on the
-<a href="http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ:L:2005:149:0022:0039:EN:PDF">Unfair
-Commercial Practices Directive</a> prohibit direct exhortations to children to buy advertised
+<a href="http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ:L:2005:149:0022:0039:EN:PDF">
+Unfair Commercial Practices Directive</a> prohibit direct exhortations to children to buy advertised
 products or to persuade their parents or other adults to buy advertised products for them.
 See the
-<a href="http://ec.europa.eu/consumers/enforcement/docs/common_position_on_online_games_en.pdf">position
-of the EU consumer protection authorities</a> for more information on this and other topics.
+<a href="http://ec.europa.eu/consumers/enforcement/docs/common_position_on_online_games_en.pdf">
+position of the EU consumer protection authorities</a> for more information on this and other
+topics.
 </p>
 
 <h2 id="api">In-app Billing API</h2>
@@ -65,7 +72,9 @@ must be able to access the Google Play server over the network.</p>
 <p>In-app billing Version 3 is the latest version, and maintains very broad
 compatibility across the range of Android devices. In-app Billing Version 3 is
 supported on devices running Android 2.2 or higher that have the latest version
-of the Google Play store installed (<a href="{@docRoot}about/dashboards/index.html">a vast majority</a> of active devices).</p>
+of the Google Play store installed (<a
+href="{@docRoot}about/dashboards/index.html">a vast majority</a> of active
+devices).</p>
 
 <h4>Version 3 features</h4>
 <ul>
@@ -107,7 +116,9 @@ the Google Play Developer Console.</p>
 <p>You can specify these types of products for your In-app Billing application
 — <em>managed in-app products</em> and <em>subscriptions</em>. Google Play
 handles and tracks ownership for in-app products and subscriptions on your
-application on a per user account basis. <a href="{@docRoot}google/play/billing/api.html#producttypes">Learn more about the product types supported by In-app Billing Version 3</a>.</p>
+application on a per user account basis.
+<a href="{@docRoot}google/play/billing/api.html#producttypes">Learn more about
+the product types supported by In-app Billing Version 3</a>.</p>
 
 <h2 id="console">Google Play Developer Console</h2>
 <p>The Developer Console is where you can publish your
@@ -146,7 +157,9 @@ Google Play.</p>
 provides a sample application that demonstrates how to sell in-app products and subscriptions
 from inside an app.</p>
 
-<p>The <a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">TrivialDrive sample for the Version 3 API</a> sample shows how to use the In-app Billing Version 3 API
+<p>The <a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">
+TrivialDrive sample for the Version 3 API</a> sample shows how to use the In-app
+Billing Version 3 API
 to implement in-app product and subscription purchases for a driving game. The
 application demonstrates how to send In-app Billing requests, and handle
 synchronous responses from Google Play. The application also shows how to record
@@ -160,7 +173,7 @@ code in your application before you publish it. For more information, see
 and Design</a>.</p>
 
 <h2 id="migration">Migration Considerations</h2>
-<p>The In-app Billing Version 2 API is deprecated and will be discontinued in January 2015.
+<p>The In-app Billing Version 2 API was discontinued in January 2015.
 If you have an existing In-app Billing implementation that uses API Version 2 or
 earlier, you must migrate to <a href="{@docRoot}google/play/billing/api.html">In-app Billing Version
 3</a>.</p>
@@ -173,11 +186,5 @@ work with Version 3 as before.</li>
 treated as managed products if you make a purchase request for these items using
 the Version 3 API. You do not need to create a new product entry in Developer
 Console for these items, and you can use the same product IDs to purchase these
-items. They will still continue to be treated as unmanaged items if you make a
-purchase request for them using the Version 2 or earlier API.
+items.
 </ul>
-
-
-
-
-

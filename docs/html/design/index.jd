@@ -1,10 +1,11 @@
 fullpage=true
 page.title=Design
-page.viewport_width=970
 section.landing=true
 meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
+page.metaDescription=Create beautiful experiences in your apps.
 header.hide=1
 footer.hide=1
+nonavpage=true
 @jd:body
 
 <section class="dac-expand dac-hero dac-light">
@@ -46,7 +47,7 @@ footer.hide=1
     <i class="dac-sprite dac-arrow-down-gray"></i>
   </a>
 </div>
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+<section class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:design/landing/latest"

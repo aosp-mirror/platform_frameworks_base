@@ -78,7 +78,7 @@ trainingnavtop=true
         ...
             &lt;activity
                 android:name=".FileSelectActivity"
-                android:label="&#64;"File Selector" &gt;
+                android:label="&#64;File Selector" &gt;
                 &lt;intent-filter&gt;
                     &lt;action
                         android:name="android.intent.action.PICK"/&gt;

@@ -20,7 +20,7 @@ trainingnavtop=true
 
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+        <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>
     </li>
     <li>
         <a href="{@docRoot}design/index.html">
@@ -53,7 +53,7 @@ creating an immersive experience without sacrificing easy access to the bars.</p
 
 <h2 id="dim">Dim the Status and Navigation Bars</h2>
 
-<p>You can dim the status and notification bars on Android 4.0 and higher using the
+<p>You can dim the status and notification bars using the
 {@link android.view.View#SYSTEM_UI_FLAG_LOW_PROFILE} flag, as follows:</p>
 
 <pre>

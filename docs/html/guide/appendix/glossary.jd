@@ -41,8 +41,8 @@ excludeFromSuggestions=true
     <dt id="adb">adb</dt>
     <dd>Android Debug Bridge, a command-line debugging application included with the
         SDK. It provides tools to browse the device, copy tools on the device, and
-        forward ports for debugging. If you are developing in Eclipse using the
-		ADT Plugin, adb is integrated into your development environment. See 
+        forward ports for debugging. If you are developing in Android Studio, 
+        adb is integrated into your development environment. See 
 		<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
 		for more information. </dd>
 
@@ -90,8 +90,8 @@ excludeFromSuggestions=true
     <dt id="ddms">DDMS</dt>
     <dd>Dalvik Debug Monitor Service, a GUI debugging application included
     with the SDK. It provides screen capture, log dump, and process
-    examination capabilities. If you are developing in Eclipse using the ADT
-    Plugin, DDMS is integrated into your development environment. See <a
+    examination capabilities. If you are developing in Android Studio, 
+    DDMS is integrated into your development environment. See <a
     href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a> to learn more about the program.</dd>
 
     <dt id="dialog">Dialog</dt> <dd> A floating window that acts as a lightweight

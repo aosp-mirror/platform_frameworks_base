@@ -1,0 +1,61 @@
+page.title=デベロッパーのためのマテリアル デザイン
+page.type=デザイン
+page.image=images/cards/material_2x.png
+page.metaDescription=アプリにマテリアル デザインを適用する方法を学習する
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>必要な知識と前提条件</h2>
+  <ul>
+    <li>Android 5.0（API レベル 21）</li>
+  </ul>
+</div>
+</div>
+
+<p>マテリアル デザインは、複数のプラットフォームや端末の視覚、モーション、インタラクション デザインの包括的な指針です。
+Android アプリでマテリアル デザインを使うには、
+<a href="http://www.google.com/design/spec/material-design/introduction.html">マテリアル デザインの仕様</a>で説明されているガイドラインに従い、Android 5.0（API レベル 21）の新しいコンポーネントや機能を使用します。
+
+
+</p>
+
+<p>ここでは、次の要素を用いてマテリアル デザイン アプリを作成する方法について説明します。</p>
+
+<ul>
+<li>マテリアル テーマ</li>
+<li>カードやリストのウィジェット</li>
+<li>カスタム シャドウとビューのクリッピング</li>
+<li>ベクター型ドローアブル</li>
+<li>カスタム アニメーション</li>
+</ul>
+
+<p>さらに、アプリでマテリアル デザインの機能を使うときに Android 5.0（API レベル 21）より前のバージョンとの互換性を維持する方法についても説明します。
+</p>
+
+<h2>レッスン</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">スタートガイド</a></dt>
+  <dd>マテリアル デザインの機能でアプリを更新する方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">マテリアル テーマの使用</a></dt>
+  <dd>マテリアル デザインのスタイルをアプリに適用する方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">リストとカードの作成</a></dt>
+  <dd>システム ウィジェットを使って、一貫した外観や使用感のリストやカードを作成する方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">シャドウとクリッピング ビューの定義</a></dt>
+  <dd>ビューのエレベーションを設定してカスタム シャドウを作成する方法やビューをクリップする方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">ドローアブルの使用</a></dt>
+  <dd>ベクター型ドローアブルを作成する方法やドローアブル リソースに色を付ける方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">カスタム アニメーションの定義</a></dt>
+  <dd>ビューのカスタム アニメーションや共有要素とアクティビティ遷移を作成する方法について学習します。</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">互換性の維持</a></dt>
+  <dd>Android 5.0 より前のバージョンのプラットフォームとの互換性を維持する方法について学習します。</dd>
+</dl>

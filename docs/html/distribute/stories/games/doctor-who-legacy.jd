@@ -1,0 +1,97 @@
+page.title=Achievements drive engagement in Doctor Who: Legacy
+page.metaDescription=The Tiny Rebel Games integrated achievements and cloud services from Google Play games services into the award-winning Doctor Who: Legacy game, under license from BBC Worldwide.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/doctor-who-legacy.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/doctor-who-legacy-icon.png"
+  height="113" />
+</div>
+
+<p>
+  The Tiny Rebel Games team has a combined experience of over 35 years in
+  creating blockbuster console, PC, and mobile games in the areas of production,
+  design, marketing, social media, PR, and distribution.
+</p>
+
+<p>
+  They are the publisher and co-developer (along with Seed Studio in Taiwan) of
+  the award-winning
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.tinyrebel.doctorwholegacy">
+  Doctor Who: Legacy</a> game, under license from BBC Worldwide.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Tiny Rebel Games integrated achievements and cloud services from Google
+  Play games services into Doctor Who: Legacy. Achievements were supported with
+  beautifully designed and customized badges to encourage players to unlock. To
+  delight users with quick wins, achievements can be unlocked from within the
+  first play session. In addition, percentage progress updates keep players
+  motivated.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:237px">
+  <img
+   src="{@docRoot}images/distribute/stories/doctor-who-legacy-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/doctor-who-legacy-screenshot.png 1x
+  {@docRoot}images/distribute/stories/doctor-who-legacy-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+</div>
+
+<p>
+  After integrating achievements, Tiny Rebel Games saw a dramatic increase in
+  daily revenues as a result of an increase in daily installs and the average
+  revenue per install
+</p>
+
+<p>
+  Some key metrics include:
+  <ul>
+    <li>Average <b>daily revenue increased 108 percent</b> from the 30 days
+    before to the 30 days after integrating Google Play games services.</li>
+    <li>30-day <b>average revenue per install increased 53 percent</b> after
+    implementation.</li>
+    <li>Among achievement earners, <b>integration increased daily average
+    revenue per user by ~33 percent</b>.</li>
+  </ul>
+</p>
+
+<p>
+  "Google Play has been a tremendous partner of ours in our launch and support
+  of Doctor Who: Legacy, which to date remains our most successful platform in
+  terms of downloads and revenue. Integration of cloud services and achievements
+  dramatically improved our daily revenues and we continue to look to add
+  additional services like the newly announced Google Quests," says Susan
+  Cummings, CEO and Executive Producer at Tiny Rebel Games.
+</p>
+
+<p>
+  See examples of how Tiny Rebel Games integrated Google Play games services
+  achievements into the
+  <a href="{@docRoot}shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf">
+  UI of Doctor Who: Legacy</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to add
+  <a href="https://developers.google.com/games/services/common/concepts/achievements">achievements</a> to your games and discover more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase player
+  engagement and revenues.
+</p>

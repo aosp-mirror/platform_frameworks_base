@@ -1,0 +1,156 @@
+page.title=创建面向中国市场的 Android Wear 应用
+parent.title=培训
+parent.link=creating.html
+page.tags= "可穿戴式", "应用", "中国"
+page.article=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#ChinaSDK">在面向中国市场的 Android Wear 上支持您的应用</a></li>
+  <li><a href="#other-services">使用其他 Google Play Services API</a></li>
+</ol>
+<h2>依赖项和先决条件</h2>
+<ol>
+<li> 在手持式设备和可穿戴式设备上安装 Android 4.3（API 级别 18）或更高版本。</li>
+</ol>
+<h2>下载</h2>
+<ol>
+<div class="download-box">
+<a href="https://dl.google.com/androidwear/developers/china/google-play-services-7-8-87.zip" class="button">独立客户端库</a>
+<p class="filename">google-play-services-7-8-87.zip</p>
+</div>
+</ol>
+</div>
+</div>
+
+
+<p>
+在中国销售的手持式设备没有预装 Google Play 服务。为此，在面向中国市场的设备上运行的可穿戴式设备应用必须通过 Android Wear 协同应用与配对的手持式设备进行通信。
+
+为了让您能够开发出可与面向中国市场的 Android Wear 和面向全球其他市场的 Android Wear 配合使用的 APK，我们提供了专用版本的 Google Play services 客户端库。
+
+</p>
+
+<p>
+此客户端库与 Android 4.3（API 级别 18）及更高版本兼容，您只需将其拖放到您的应用中。
+您无需编写任何新代码，只需更改几个项目配置设置，然后重新编译应用。
+
+</p>
+
+
+<p>本页面的其余部分将介绍如何执行此过程。</p>
+
+
+
+<h2 id = "ChinaSDK">在面向中国市场的 Android Wear 上支持您的应用</h2>
+
+<p>
+<p>为了在所有手持式设备上支持您的可穿戴式设备应用，您必须下载 Google Play
+services 7.8.87 客户端库，并将其作为 Maven 存储库添加到您的项目中，配置开发项目以使用该库，然后重新编译您的应用。
+
+</p>
+
+<h3>添加 Google Play services 7.8.87 库</h3>
+
+<p>Google Play services 7.8.87 客户端库作为 Maven 存储库分发。要将此存储库添加到项目，请：
+</p>
+
+<ol>
+<li><a href="https://dl.google.com/androidwear/developers/china/google-play-services-7-8-87.zip">下载</a>客户端库。
+文件名为 {@code google-play-services-7-8-87.zip}。
+</li>
+<li>通过从下载的 zip 文件提取 {@code google-play-services-7-8-87/} 目录来创建本地 Maven 存储库，并将其放入项目的根目录中。
+
+</li>
+<li>在顶级项目 {@code build.gradle} 文件中，指定新创建的本地 Maven {@code google-play-services-7-8-87} 存储库的位置。
+
+</li>
+<p>
+以下示例向您展示如何操作：
+</p>
+<pre>
+allprojects {
+  repositories {
+
+        maven {
+                url "${rootProject.projectDir}/google-play-services-7-8-87"
+              }
+       // ... other repositories may go here ...
+
+    }</pre>
+</ol>
+<h3>配置应用以使用库</h3>
+<p>在 <em>mobile</em> 模块的 {@code build.gradle} 文件中，将 Google Play services 依赖项替换为指向客户端库（来自新添加的存储库）的引用。
+以下示例向您展示如何操作：
+
+</p>
+
+
+<pre>
+dependencies{
+    ...
+    wearApp project(':wear')
+    compile 'com.google.android.gms:play-services-wearable:7.8.87'
+    ...
+    }
+</pre>
+<p><em>wear</em> 模块的 {@code build.gradle} 文件也必须使用此版本的客户端库，例如：
+
+</p>
+<pre>
+dependencies {
+    compile 'com.google.android.support:wearable:1.3.0'
+    compile 'com.google.android.gms:play-services-wearable:7.8.87'
+}
+</pre>
+
+<p class="note"><strong>注</strong>：如果您在可穿戴式设备应用中使用任何其他 Google Play services API，则必须有选择地将这些 Google Play services API 添加到应用中，并显式指定 7.8.87 版本。
+
+例如，若要将 Google 位置 API 包含到可穿戴式设备应用中，则在您的 {@code build.gradle} 文件中添加以下行：
+
+</p>
+<pre>
+compile 'com.google.android.gms:play-services-location:7.8.87'
+</pre>
+</p>
+<h3>构建项目</h3>
+
+
+<p>现在，您可以<a href="{@docRoot}training/wearables/apps/packaging.html">构建</a>应用的新版本，并将其全局部署到 Android 手持式设备。
+</p>
+</ol>
+
+
+<h2 id= "other-services">使用其他 Google Play services API</h2>
+
+<p>
+如果您的应用使用 Google Play services API 而不是 Wearable API，那么您的应用需要检查这些 API 在运行时是否可用以及是否能够做出恰当的响应。
+检查 Google Play services API 可用性的方式有两种：
+
+</p>
+
+<ol>
+<li>使用独立的 <a href="https://developers.google.com/android/reference/com/google/android/gms/
+common/api/GoogleApiClient.html">{@code GoogleApiClient}</a> 实例来连接到其他 API。此界面包含回调以提醒您的应用连接成功还是失败。若要了解如何处理连接故障，请参阅<a href="https://developers.google.com/android/guides/api-client">访问 Google API</a>。
+
+
+</li>
+
+<li>使用
+<a href="https://developers.google.com/android/
+reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code GoogleApiClient.Builder}
+</a>
+的 <a href="https://developers.google.com/android/reference/com/google/android/gms/common/
+api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api&lt;O&gt;, O,
+com.google.android.gms.common.api.Scope...)"> {@code addApiIfAvailable()}</a> 方法以连接到必需的 API。在触发 <a href="https://developers.google.com/android/reference/
+com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks#onConnected(android.os.Bundle)">
+{@code onConnected()}</a> 回调后，使用 <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/
+GoogleApiClient.html#hasConnectedApi(com.google.android.gms.common.api.Api&lt;?&gt;)">
+ {@code hasConnectedApi()}</a> 方法检查所请求的每个 API 是否均已正确连接。
+
+
+</ol>

@@ -1,22 +1,22 @@
 page.title=Notifications
-page.tags="notifications","design","L"
+page.tags="notifications","design"
 @jd:body
 
-  <a class="notice-developers" href="{@docRoot}training/notify-user/index.html">
+  <a class="notice-developers right" href="{@docRoot}training/notify-user/index.html">
   <div>
     <h3>Developer Docs</h3>
     <p>Notifying the User</p>
   </div>
 </a>
 
-<a class="notice-designers" href="notifications_k.html">
+<a class="notice-designers right" href="notifications_k.html">
   <div>
     <h3>Notifications in Android 4.4 and Lower</h3>
   </div>
 </a>
 
 <!-- video box -->
-<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<a class="notice-developers-video right" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
 <div>
     <h3>Video</h3>
     <p>DevBytes: Notifications in the Android L Developer Preview</p>

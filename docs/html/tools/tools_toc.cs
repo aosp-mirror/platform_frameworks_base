@@ -5,30 +5,9 @@
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
-          <span class="en">Installing the SDK</span></a></li>
-
-      <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
-          <span class="en">Adding SDK Packages</span></a></li>
+          <span class="en">Install Android Studio</span></a></li>
     </ul>
   </li>
-
-
-<!-- Android Studio menu-->
-
- <li class="nav-section">
-    <div class="nav-section-header">
-      <a href="<?cs var:toroot?>tools/studio/index.html">Android Studio</a>
-    </div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/studio/studio-config.html">
-          Configuration</a></li>
-      <li><a href="<?cs var:toroot ?>tools/studio/studio-features.html">
-          Features</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
-          Tips and Tricks</a></li>
-    </ul>
-
- </li><!-- End of Android Studio menu -->
 
 
 <!-- Workflow menu-->
@@ -38,117 +17,157 @@
         <a href="<?cs var:toroot ?>tools/workflow/index.html"><span class="en">Workflow</span></a>
     </div>
     <ul>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/devices/index.html"><span class="en">Setting Up Virtual Devices</span></a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/devices/managing-avds.html"><span class="en">With AVD Manager</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/devices/managing-avds-cmdline.html"><span class="en">From the Command Line</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/devices/emulator.html"><span class="en">Using the Emulator</span></a></li>
-        </ul>
+      <li><a href="<?cs var:toroot ?>tools/projects/index.html">
+          <span class="en">Projects</span></a>
       </li>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/device.html"><span class="en">Using Hardware Devices</span></a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/extras/oem-usb.html"><span
-            class="en">USB Drivers</span></a></li>
-        </ul>
+      <li><a href="<?cs var:toroot ?>tools/building/index.html">
+          <span class="en">Build and Run</span></a>
       </li>
+      <li><a href="<?cs var:toroot ?>tools/devices/index.html">
+        <span class="en">Virtual Devices</span></a></li>
+
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Managing Projects</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/device.html">
+          <span class="en">Hardware Devices</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html"><span class="en">From Android Studio</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/projects/templates.html"><span class="en">Using Code Templates</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/extras/oem-usb.html">
+            <span class="en">USB Drivers</span></a></li>
         </ul>
       </li>
 
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>tools/building/index.html">
-          <span class="en">Building and Running</span></a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/building/building-studio.html">
-            <span class="en">From Android Studio</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
-            <span class="en">From the Command Line</span></a></li>
-        </ul>
+      <li><a href="<?cs var:toroot?>tools/testing/index.html">
+        <span class="en">Testing</span></a>
       </li>
 
+      <li><a href="<?cs var:toroot ?>tools/debugging/index.html">
+          <span class="en">Debugging</span></a></li>
 
-  <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot?>tools/testing/index.html">
-            <span class="en">Testing</span>
-          </a></div>
-        <ul>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_android.html">
-            <span class="en">Fundamentals</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">
-            <span class="en">From Eclipse</span></a>
-          </li>
-          <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
-            <span class="en">From Other IDEs</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/activity_testing.html">
-            <span class="en">Activity Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/service_testing.html">
-            <span class="en">Service Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/contentprovider_testing.html">
-            <span class="en">Content Provider Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_accessibility.html">
-            <span class="en">Accessibility Testing</span></a>
-          </li>
-           <li>
-            <a href="<?cs var:toroot?>tools/testing/testing_ui.html">
-            <span class="en">UI Testing</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>tools/testing/what_to_test.html">
-            <span class="en">What To Test</span></a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>tools/testing/activity_test.html">
-            <span class="en">Activity Testing Tutorial</span></a>
-          </li>
-        </ul>
-  </li><!-- end of testing -->
-
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/debugging/index.html"><span class="en">Debugging</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-studio.html"><span class="en">From Android Studio</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects-cmdline.html"><span class="en">From Other IDEs</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/ddms.html"><span class="en">Using DDMS</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-log.html"><span class="en">Reading and Writing Logs</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/improving-w-lint.html"><span class="en">Improving Your Code with lint</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html"><span class="en">Optimizing your UI</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html"><span class="en">Profiling with Traceview and dmtracedump</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/annotations.html"><span class="en">Improving Code Inspection with Annotations</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/systrace.html"><span class="en">Analyzing UI Performance</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></li>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
-    </ul>
-  </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html" zh-cn-lang="发布概述"><span class="en">Publishing</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html"
+          zh-cn-lang="发布概述"><span class="en">Publishing</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>tools/publishing/preparing.html" zh-cn-lang="准备发布"><span class="en">Preparing for Release</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/versioning.html"><span class="en">Versioning Your Apps</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/app-signing.html"><span class="en">Signing Your Apps</span></a></li>
         </ul>
       </li>
+
     </ul>
-  </li>
+  </li> <!-- end of Workflow -->
+
+
+<!-- Android Studio menu-->
+
+ <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot?>tools/studio/index.html"><span class="en">Android Studio</span></a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/studio/studio-features.html">
+          Features</a></li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/studio/studio-config.html">
+          Configuration</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
+          </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>sdk/installing/create-project.html">
+          Project Tools</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/help/project-mgmt.html">
+              <span class="en">Project Structure Management</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/projects/templates.html">
+              <span class="en">Using Code Templates</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/building/building-studio.html">
+              <span class="en">Building and Running</span></a></li>
+          </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/studio/code-tools.html">
+          Code Tools</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/debugging/improving-w-lint.html">
+              <span class="en">Improving Your Code with lint</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/debugging/annotations.html">
+              <span class="en">Improving Code Inspection with Annotations</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/help/app-link-indexing.html">
+              <span class="en">Deep Link and App Indexing API Support</span></a></li>
+          </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/studio/ui-tools.html">
+          UI Tools</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
+              <span class="en">Layout Editor</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/help/theme-editor.html">
+              <span class="en">Theme Editor</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/help/translations-editor.html">
+              <span class="en">Translations Editor</span></a>
+            <li><a href="<?cs var:toroot ?>tools/help/vector-asset-studio.html">
+              <span class="en">Vector Asset Studio</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/help/image-asset-studio.html">
+              <span class="en">Image Asset Studio</span></a></li>
+          </ul>
+      </li>
+
+      <li><a href="<?cs var:toroot ?>tools/devices/managing-avds.html">
+        <span class="en">AVD Manager</span></a></li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/debugging/debugging-studio.html">
+            <span class="en">Debugging Tools</span></a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/debugging/ddms.html">
+              <span class="en">DDMS</span></a></li>
+          </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/help/android-monitor.html">Android Monitor</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/help/am-logcat.html"><span
+            class="en">logcat Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-memory.html"><span
+            class="en">Memory Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-cpu.html"><span
+            class="en">CPU Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-gpu.html"><span
+            class="en">GPU Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-network.html"><span
+            class="en">Network Monitor</span></a>
+          </li>
+        </ul>
+      </li>
+
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
+          Tips and Tricks</a></li>
+
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
+        <span class="en">
+          Migrating from Eclipse ADT</span></a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/studio/eclipse-transition-guide.html">
+            <span class="en">Transition Guide</span></a></li>
+          </ul>
+      </li>
+    </ul>
+
+ </li><!-- End of Android Studio menu -->
 
 
   <li class="nav-section">
@@ -156,27 +175,60 @@
 class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/help/android.html">android</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/devices/managing-avds-cmdline.html"><span class="en">
+              Managing AVDs</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/projects/projects-cmdline.html"><span class="en">
+              Managing Projects</span></a></li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
-      <li><a href="<?cs var:toroot ?>tools/help/monitor.html">Device Monitor</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/desktop-head-unit.html">Desktop Head Unit</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/monitor.html">Device Monitor</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/dmtracedump.html">dmtracedump</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/draw9patch.html">Draw 9-Patch</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Emulator</a></li>
+
       <li><a href="<?cs var:toroot ?>tools/help/etc1tool.html">etc1tool</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">Hierarchy Viewer</a></li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">
+            <span class="en">Hierarchy Viewer</span></a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html">
+              <span class="en">Optimizing your UI</span></a></li>
+          </ul>
+      </li>
+
       <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/jobb.html">jobb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/debugging/debugging-log.html">
+              <span class="en">Reading and Writing Logs</span></a></li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
-       <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
-       <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
-       <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
+
+       <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/devices/emulator.html">
+            <span class="en">Virtual Device Emulator</span></a></div>
+         <ul>
+           <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Command Reference</a></li>
+         </ul>
+       </li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
+
     </ul>
   </li>
 
@@ -190,6 +242,8 @@ class="en">Tools Help</span></a></div>
       <a href="<?cs var:toroot ?>sdk/installing/studio-build.html">Build System</a>
     </div>
     <ul>
+      <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
+        <span class="en">Running Gradle Builds</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/building/configuring-gradle.html">
         <span class="en">Configuring Gradle Builds</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/building/plugin-for-gradle.html">
@@ -205,7 +259,7 @@ class="en">Tools Help</span></a></div>
 <!-- Performance Tools menu-->
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>tools/performance/index.html">Peformance Tools</a>
+      <a href="<?cs var:toroot ?>tools/performance/index.html">Performance Tools</a>
     </div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/performance/debug-gpu-overdraw/index.html">
@@ -241,14 +295,38 @@ class="en">Tools Help</span></a></div>
           <li><a href="<?cs var:toroot ?>tools/performance/allocation-tracker/index.html"><span
             class="en">Allocation Tracker</span></a>
           </li>
+          <li><a href="<?cs var:toroot ?>tools/debugging/debugging-memory.html">
+            <span class="en">Investigating Your RAM Usage</span></a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>tools/performance/traceview/index.html">
-        Traceview</a>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html">
+            <span class="en">Traceview</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/performance/traceview/index.html">
+            Walkthrough</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/traceview.html">
+            Command Reference</a></li>
+        </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>tools/performance/systrace/index.html">
-        Systrace</a>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/debugging/systrace.html">
+          <span class="en">Systrace</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/performance/systrace/index.html">
+            Walkthrough</a></li>
+           <li><a href="<?cs var:toroot ?>tools/help/systrace.html">
+            Command Reference</a></li>
+        </ul>
       </li>
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>tools/performance/batterystats-battery-historian/index.html">
@@ -266,15 +344,24 @@ class="en">Tools Help</span></a></div>
   <!-- Testing Tools menu-->
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html"><span class="en">Testing Tools</span></a></div>
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>tools/testing/testing-tools.html">
+      <span class="en">Testing Tools</span></a></div>
     <ul>
+      <li><a href="<?cs var:toroot ?>tools/testing/testing_android.html">Testing Concepts</a></li>
       <li class="nav-section">
-         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span
+         <div class="nav-section-header">
+         <a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span
 class="en">Testing Support Library</span></a></div>
          <ul>
-            <li><a href="<?cs var:toroot ?>reference/android/support/test/package-summary.html">API Reference</a></li>
+            <li><a href="<?cs var:toroot ?>reference/android/support/test/package-summary.html">
+            API Reference</a></li>
          </ul>
       </li>
+      <li><a href="<?cs var:toroot ?>training/testing/start/index.html">
+      Testing with Android Studio</a></li>
+      <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
+      Testing from the Command-Line</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot
@@ -350,38 +437,6 @@ class="en">Data Binding Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
     </ul>
   </li> -->
-
-
-<!-- Eclipse ADT menu-->
-
-  <li class="nav-section">
-    <div class="nav-section-header">
-    <a href="<?cs var:toroot ?>tools/help/adt.html">
-      <span class="en">Eclipse with ADT</span></a>
-    </div>
-    <ul>
-        <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
-          <span class="en">Migrating to Android Studio</span></a></div>
-         <ul>
-            <li><a href="<?cs var:toroot ?>tools/studio/eclipse-transition-guide.html">
-            Transition Guide</span></a> </li>
-         </ul>
-        </li>
-
-    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
-        <span class="en">Installing the Eclipse Plugin</span></a></li>
-    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
-    <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
-    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
-    <li><a href="<?cs var:toroot ?>tools/publishing/app-signing-eclipse.html">Signing Your Apps</a></li>
-    </ul>
-  </li><!-- end of Eclipse  -->
-
-
-</ul><!-- nav -->
 
 <script type="text/javascript">
 <!--

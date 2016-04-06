@@ -131,6 +131,11 @@ page.tags="databinding", "layouts"
           </li>
         </ol>
       </li>
+
+      <li>
+        <a href="#studio_support">Android Studio Support for Data Binding</a>
+      </li>
+
     </ol>
   </div><!-- qv -->
 </div><!-- qv-wrapper -->
@@ -141,48 +146,12 @@ page.tags="databinding", "layouts"
   application logic and layouts.
 </p>
 
-<p>The Data Binding Library offers both flexibility and broad comnpatibility
+<p>The Data Binding Library offers both flexibility and broad compatibility
 &mdash; it's a support library, so you can use it with all Android platform
 versions back to <strong>Android 2.1</strong> (API level 7+).</p>
 
-<p>To use data binding, Android Plugin for Gradle <strong>1.3.0-beta4</strong>
+<p>To use data binding, Android Plugin for Gradle <strong>1.5.0-alpha1</strong>
 or higher is required.</p>
-
-<h4>Beta release</h4>
-
-<div class="caution">
-  <p>Please note that the Data Binding library is a <strong>beta release</strong>.
-  While Data Binding is in beta, developers should be aware of the following
-  caveats:</p>
-  <ul>
-    <li>
-    This is a beta release of the feature intended to generate developer
-    feedback. It might contain bugs, and it might not work for your use case,
-    so use it at your own risk. That said, we do want your feedback! Please
-    let us know what is or isn’t working for you using the <a
-    href="https://code.google.com/p/android-developer-preview/">issue
-    tracker</a>.
-    </li>
-    <li>
-    The Data Binding library beta release is subject to significant changes,
-    including those which are not source code compatible with your app. That is,
-    significant rework may be required to take updates to the library in the future.
-    </li>
-    <li>
-    Developers should feel free to publish apps built with the Data Binding
-    library beta release, with the caveats that the standard Android SDK and
-    Google Play terms of service apply, and it’s always a great idea to test your
-    app thoroughly when adopting new libraries or tools.
-    </li>
-    <li>
-    We’re just getting started with Android Studio support at this time.
-    Further Android Studio support will come in the future.
-    </li>
-    <li>
-    By using the Data Binding library beta release, you acknowledge these
-    caveats.</li>
-  </ul>
-</div>
 
 <h2 id="build_environment">
   Build Environment
@@ -191,53 +160,28 @@ or higher is required.</p>
 <p>To get started with Data Binding, download the library from the Support
 repository in the Android SDK manager. </p>
 
-<p>The Data Binding plugin requires Android Plugin for Gradle <strong>1.3.0-beta4
-or higher</strong>, so update your build dependencies (in the top-level
-<code>build.gradle</code> file) as needed.</p>
-
-<p>Also, make sure you are using a compatible version of Android Studio.
-<strong>Android Studio 1.3</strong> adds the code-completion and layout-preview
-support for data binding.</p>
-
 <p>
-  <strong>Setting Up Work Environment:</strong>
+To configure your app to use data binding, add the <code>dataBinding</code> element to your
+<code>build.gradle</code> file in the app module.
 </p>
 
-<p>
-  To set up your application to use data binding, add data binding to the class
-  path of your top-level <code>build.gradle</code> file, right below "android".
-</p>
+ <p>Use the following code snippet to configure data binding: </p>
 
 <pre>
-   dependencies {
-       classpath <strong>"com.android.tools.build:gradle:1.3.0-beta4"</strong>
-       classpath <strong>"com.android.databinding:dataBinder:1.0-rc1"</strong>
-   }
-</pre>
-<p>
-  Then make sure jcenter is in the repositories list for your projects in the top-level
-  <code>build.gradle</code> file.
-</p>
-
-<pre>
-allprojects {
-   repositories {
-       jcenter()
-   }
+android {
+    ....
+    dataBinding {
+        enabled = true
+    }
 }
 </pre>
-<p>
-  In each module you want to use data binding, apply the plugin right after
-  android plugin
-</p>
 
-<pre>
-apply plugin: &apos;com.android.application&apos;
-apply plugin: &apos;com.android.databinding&apos;
-</pre>
-<p>
-  The data binding plugin is going to add necessary <strong>provided</strong>
-  and <strong>compile configuration</strong> dependencies to your project.
+<p>If you have an app module that depends on a library which uses data binding, your app module
+ must configure data binding in its <code>build.gradle</code> file as well.</p>
+
+<p>Also, make sure you are using a compatible version of Android Studio.
+<strong>Android Studio 1.3</strong> and later provides support for data binding as described in
+<a href="#studio_support">Android Studio Support for Data Binding</a>.
 </p>
 
 <h2 id="data_binding_layout_files">
@@ -428,6 +372,36 @@ ListItemBinding binding = DataBindingUtil.<em>inflate</em>(layoutInflater, R.lay
    &lt;/LinearLayout&gt;
 &lt;/layout&gt;
 </pre>
+
+<p>
+  Some specialized click event handlers exist and they need an attribute other than
+  <code>android:onClick</code> to avoid a conflict. The following attributes have been created
+  to avoid such conflicts:
+</p>
+
+<table>
+  <tr>
+    <th>Class</th>
+    <th>Listener Setter</th>
+    <th>Attribute</th>
+  </tr>
+  <tr>
+    <td>{@link android.widget.SearchView}</td>
+    <td>{@link android.widget.SearchView#setOnSearchClickListener}</td>
+    <td><code>android:onSearchClick</code></td>
+  </tr>
+  <tr>
+    <td>{@link android.widget.ZoomControls}</td>
+    <td>{@link android.widget.ZoomControls#setOnZoomInClickListener}</td>
+    <td><code>android:onZoomIn</code></td>
+  </tr>
+  <tr>
+    <td>{@link android.widget.ZoomControls}</td>
+    <td>{@link android.widget.ZoomControls#setOnZoomOutClickListener}</td>
+    <td><code>android:onZoomOut</code></td>
+  </tr>
+</table>
+
 <h2 id="layout_details">
   Layout Details
 </h2>
@@ -558,6 +532,14 @@ ListItemBinding binding = DataBindingUtil.<em>inflate</em>(layoutInflater, R.lay
   the setter is called &mdash; <code>null</code> for reference types,
   <code>0</code> for <code>int</code>, <code>false</code> for
   <code>boolean</code>, etc.
+</p>
+
+<p>
+  A special variable named <code>context</code> is generated for use in binding
+  expressions as needed. The value for <code>context</code> is the
+  <code>Context</code> from the root View's {@link android.view.View#getContext}.
+  The <code>context</code> variable will be overridden by an explicit variable
+  declaration with that name.
 </p>
 
 <h3 id="custom_binding_class_names">
@@ -1669,3 +1651,28 @@ public static ColorDrawable convertColorToDrawable(int color) {
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 </pre>
+
+<h3 id="studio_support">Android Studio Support for Data Binding</h3>
+
+<p>
+Android Studio supports syntax highlighting of data binding expressions, and flags any expression
+language syntax errors in the editor.
+</p>
+<p>
+The Preview pane displays default values for data binding expressions if provided. In the following
+example excerpt of an element from a layout XML file, the Preview pane displays the
+{@code PLACEHOLDER} default text value in the <code>TextView</code>.
+</p>
+
+<pre>
+&lt;TextView android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:text="&commat;{user.firstName, default=PLACEHOLDER}"/&gt;
+</pre>
+
+<p>
+If you need to display a default value during the design phase of your project, you
+can also use tools attributes instead of default expression values, as described in
+<a class="external-link" href="http://tools.android.com/tips/layout-designtime-attributes">
+Designtime Layout Attributes</a>.
+</p>

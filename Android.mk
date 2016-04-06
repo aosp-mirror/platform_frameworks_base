@@ -948,6 +948,42 @@ $(static_doc_index_redirect): \
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
 
+# ====  static html in the sdk, reference only ===============================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := offline-refonly
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-offlinemode \
+		-title "Android SDK" \
+		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
+		-sdkvalues $(OUT_DOCS) \
+		-hdf android.whichdoc offline \
+		-referenceonly
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-refonly
+
+include $(BUILD_DROIDDOC)
+
+static_doc_index_redirect := $(out_dir)/index.html
+$(static_doc_index_redirect): \
+	$(LOCAL_PATH)/docs/docs-preview-index.html | $(ACP)
+	$(hide) mkdir -p $(dir $@)
+	$(hide) $(ACP) $< $@
+
+$(full_target): $(static_doc_index_redirect)
+$(full_target): $(framework_built)
+
 # ==== docs for the web (on the androiddevdocs app engine server) =======================
 include $(CLEAR_VARS)
 
@@ -1032,40 +1068,41 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-devsite \
 		-toroot / \
 		-hdf android.whichdoc online \
+		-useUpdatedTemplates \
 		-hdf devsite true
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
 
 include $(BUILD_DROIDDOC)
 
-# ==== docs for the ndk =======================
+# ==== site updates for docs (on the androiddevdocs app engine server) =======================
 include $(CLEAR_VARS)
+
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=docs/html-ndk
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
 LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-# specify a second html input dir and an output path relative to OUT_DIR)
-LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl/intl /
+LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl /
 
-LOCAL_MODULE := online-ndk
+LOCAL_MODULE := online-sdk-dev
 
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
 		-hdf android.whichdoc online \
 		$(sample_groups) \
+		-useUpdatedTemplates \
 		-hdf android.hasSamples true \
 		-samplesdir $(samples_dir)
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
 
 include $(BUILD_DROIDDOC)
-
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)

@@ -1,0 +1,157 @@
+page.title=Creating Android Wear Apps for China
+parent.title=Training
+parent.link=creating.html
+page.tags= "wearable", "apps", "china"
+page.article=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ChinaSDK">Support Your App on Android Wear for China</a></li>
+  <li><a href="#other-services">Use Other Google Play Services APIs</a></li>
+</ol>
+<h2>Dependencies and prerequisites</h2>
+<ol>
+<li> Android 4.3 (API Level 18) or higher on the handset and wearable device</li>
+</ol>
+<h2>Downloads</h2>
+<ol>
+<div class="download-box">
+<a href="https://dl.google.com/androidwear/developers/china/google-play-services-7-8-87.zip"
+  class="button">Standalone Client Library</a>
+<p class="filename">google-play-services-7-8-87.zip</p>
+</div>
+</ol>
+</div>
+</div>
+
+
+<p>
+Handsets sold in China do not have Google Play services preinstalled. For this reason, wearable
+apps running on devices in China must communicate with paired handsets through the Android Wear
+companion app.  To enable you to develop a single APK that works with both Android Wear for China and
+ Android Wear in the rest of the world, we provide a special variant of the Google Play services
+client library.</p>
+
+<p>
+This client library is compatible with Android 4.3 (API level 18) and higher, and you can simply
+drop it into your app. You do not need to write any new code. Instead, you change several project
+configuration settings, and re-compile your app.
+</p>
+
+
+<p>The rest of this page explains how to perform this process.</p>
+
+
+
+<h2 id = "ChinaSDK">Support Your App on Android Wear for China</h2>
+
+<p>
+<p>In order to support your wearable app on all handsets, you must download and add the Google Play
+Services 7.8.87 client library as a Maven repository in your project, configure your
+development project to use it, and re-compile your app.
+</p>
+
+<h3>Add the Google Play Services 7.8.87 library</h3>
+
+<p>The Google Play services 7.8.87 client library is distributed as a Maven repository. To add this
+repository to your project:</p>
+
+<ol>
+<li><a href="https://dl.google.com/androidwear/developers/china/google-play-services-7-8-87.zip">
+Download</a> the client library.
+The filename is {@code google-play-services-7-8-87.zip}.</li>
+<li>Create a local Maven repository by extracting the {@code google-play-services-7-8-87/} directory
+from the downloaded zip file, and placing it into the root directory of your project.
+</li>
+<li>In your top-level project {@code build.gradle} file, specify the location of the newly created
+local Maven {@code google-play-services-7-8-87} repository.
+</li>
+<p>
+The following example shows how to do so:
+</p>
+<pre>
+allprojects {
+  repositories {
+
+        maven {
+                url "${rootProject.projectDir}/google-play-services-7-8-87"
+              }
+       // ... other repositories may go here ...
+
+    }</pre>
+</ol>
+<h3>Configure your app to use the library</h3>
+<p>In the {@code build.gradle} file of your <em>mobile</em> module replace the Google Play
+ services dependency with a reference to the client library from the newly added repository. The
+ following example shows how to do so:
+</p>
+
+
+<pre>
+dependencies{
+    ...
+    wearApp project(':wear')
+    compile 'com.google.android.gms:play-services-wearable:7.8.87'
+    ...
+    }
+</pre>
+<p>The {@code build.gradle} file of your <em>wear</em> module must also use this version of the
+client library, for example:
+</p>
+<pre>
+dependencies {
+    compile 'com.google.android.support:wearable:1.3.0'
+    compile 'com.google.android.gms:play-services-wearable:7.8.87'
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> If you are using any other Google Play services APIs in your
+wearable app, you must selectively add those Google Play service APIs into your app and explicitly
+ specify the 7.8.87 version. For example to include the Google location API in your wearable app,
+ add the following line in your {@code build.gradle} file:
+</p>
+<pre>
+compile 'com.google.android.gms:play-services-location:7.8.87'
+</pre>
+</p>
+<h3>Build the project</h3>
+
+
+<p>You can now <a href="{@docRoot}training/wearables/apps/packaging.html">build
+</a>a new version of your app and deploy it to Android handsets globally.</p>
+</ol>
+
+
+<h2 id= "other-services">Use Other Google Play services APIs</h2>
+
+<p>
+If your app uses Google Play services APIs other than the Wearable API, then your app needs to check
+whether these APIs are available to use during runtime and respond appropriately. There are two ways
+to check the availability of Google Play service APIs:
+</p>
+
+<ol>
+<li>Use a separate <a href="https://developers.google.com/android/reference/com/google/android/gms/
+common/api/GoogleApiClient.html">{@code GoogleApiClient}</a> instance for connecting to other APIs.
+This interface contains callbacks to alert your app to the success or failure of the connection.
+To learn how to handle connection failures,
+see <a href="https://developers.google.com/android/guides/api-client">Accessing Google APIs</a>.</li>
+
+<li>Use the <a href="https://developers.google.com/android/reference/com/google/android/gms/common/
+api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<O>, O,
+com.google.android.gms.common.api.Scope...)"> {@code addApiIfAvailable()}</a> method of
+<a href="https://developers.google.com/android/
+reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code GoogleApiClient.Builder}
+</a>
+to connect to the required APIs. After the <a href = "https://developers.google.com/android/reference/
+com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks#onConnected(android.os.Bundle)">
+{@code onConnected()}</a> callback fires, check if each of the requested API is connected correctly
+using the <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/
+GoogleApiClient.html#hasConnectedApi(com.google.android.gms.common.api.Api<?>)">
+ {@code hasConnectedApi()}</a> method.
+
+</ol>

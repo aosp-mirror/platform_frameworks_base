@@ -1,0 +1,5 @@
+The source file for app_restrictions_diagram.png is a
+Google Doc owned by Matt Werner, mattwerner@google.com.
+You can access the diagram in this doc:
+
+https://docs.google.com/document/d/1qffQfciilSYHHJxpWCs-VEsANnbIt69Zz1qmQuGe0Wc/edit

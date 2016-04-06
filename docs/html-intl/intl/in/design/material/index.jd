@@ -1,0 +1,186 @@
+page.title=Material Design for Android
+page.tags=Material,design
+page.type=design
+page.image=images/cards/design-material-for-android_2x.jpg
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>Dokumen Pengembang</h3>
+    <p>Membuat Aplikasi dengan Desain Bahan</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>Video</h3>
+    <p>Pengantar Desain Bahan</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>Video</h3>
+    <p>Kertas dan Tinta: Bahan Penting</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>Video</h3>
+    <p>Desain Bahan di Aplikasi Google I/O</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">Desain bahan adalah panduan komprehensif untuk desain visual, gerak, dan
+interaksi lintas platform dan perangkat. Android kini menyertakan dukungan untuk
+aplikasi desain bahan. Untuk menggunakan desain bahan di aplikasi Android, ikuti panduan yang didefinisikan
+dalam <a href="http://www.google.com/design/spec">spesifikasi desain bahan</a> dan gunakan
+komponen dan fungsionalitas baru yang tersedia di Android 5.0 (API level 21) ke atas.</p>
+
+<p>Android menyediakan elemen berikut untuk membangun aplikasi desain bahan:</p>
+
+<ul>
+  <li>Tema baru</li>
+  <li>Widget baru untuk tampilan yang kompleks</li>
+  <li>API baru untuk animasi dan bayangan custom</li>
+</ul>
+
+<p>Untuk informasi selengkapnya tentang mengimplementasikan desain bahan pada Android, lihat
+<a href="{@docRoot}training/material/index.html">Membuat Aplikasi dengan Desain Bahan</a>.</p>
+
+
+<h3>Tema Bahan</h3>
+
+<p>Tema bahan menyediakan gaya baru untuk aplikasi Anda, widget sistem yang memungkinkan Anda mengatur
+palet warnanya, dan animasi default untuk umpan balik sentuh dan transisi aktivitas.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Tema bahan gelap</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Tema bahan terang</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/theme.html">Menggunakan Tema
+Bahan</a>.</p>
+
+
+<h3>Daftar dan Kartu</h3>
+
+<p>Android menyediakan dua widget baru untuk menampilkan kartu dan daftar dengan gaya desain bahan
+dan animasi:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>Widget <code>RecyclerView</code> baru adalah versi <code>ListView</code>
+ yang lebih mudah dimasukkan dan mendukung beragam tipe layout serta memberikan peningkatan kinerja.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>Widget <code>CardView</code> baru memungkinkan Anda menampilkan potongan informasi penting dalam
+  kartu yang memiliki tampilan dan cara kerja yang konsisten.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/lists-cards.html">Membuat Daftar
+dan Kartu</a>.</p>
+
+
+<h3>Bayangan Tampilan</h3>
+
+<p>Selain properti X dan Y, tampilan di Android kini memiliki
+properti Z. Properti baru ini mewakili ketinggian tampilan, yang menentukan:</p>
+
+<ul>
+<li>Ukuran bayangan: tampilan dengan nilai Z lebih tinggi menghasilkan bayangan lebih besar.</li>
+<li>Urutan penggambaran: tampilan dengan nilai Z lebih tinggi muncul di atas tampilan lainnya.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>Untuk memutar ulang film, klik layar perangkat</em>
+  </div>
+</div>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/shadows-clipping.html">Mendefinisikan
+Bayangan dan Memangkas Tampilan</a>.</p>
+
+
+<h3>Animasi</h3>
+
+<p>API animasi baru memungkinkan Anda membuat animasi custom untuk umpan balik sentuh dalam kontrol UI,
+perubahan status tampilan, dan transisi aktivitas.</p>
+
+<p>API ini memungkinkan Anda:</p>
+
+<ul>
+<li style="margin-bottom:15px">
+Merespons kejadian sentuh dalam tampilan Anda dengan animasi <strong>umpan balik sentuh</strong>.
+</li>
+<li style="margin-bottom:15px">
+Menyembunyikan dan memperlihatkan tampilan dengan animasi <strong>membuka melingkar</strong>.
+</li>
+<li style="margin-bottom:15px">
+Peralihan antar aktivitas dengan animasi <strong>transisi aktivitas</strong> custom.
+</li>
+<li style="margin-bottom:15px">
+Membuat animasi yang lebih alami dengan <strong>gerak melengkung</strong>.
+</li>
+<li style="margin-bottom:15px">
+Menganimasikan perubahan dalam satu atau beberapa properti tampilan dengan animasi <strong>perubahan status tampilan</strong>.
+</li>
+<li style="margin-bottom:15px">
+Menampilkan animasi di <strong>drawable daftar status</strong> di antara perubahan status tampilan.
+</li>
+</ul>
+
+<p>Animasi umpan balik sentuh dimasukkan ke dalam beberapa tampilan standar, misalnya tombol. API baru
+ini memungkinkan Anda menyesuaikan animasi ini dan menambahkannya ke tampilan custom Anda.</p>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/animations.html">Mendefinisikan Animasi
+Custom</a>.</p>
+
+
+<h3>Drawable</h3>
+
+<p>Kemampuan baru untuk drawable ini membantu Anda mengimplementasikan aplikasi desain bahan:</p>
+
+<ul>
+<li><strong>Drawable vektor</strong> bisa diubah skalanya tanpa kehilangan definisi dan cocok
+untuk ikon satu-warna dalam-aplikasi.</li>
+<li><strong>Pewarnaan drawable</strong> memungkinkan Anda mendefinisikan bitmap sebagai alpha-mask dan mewarnainya
+saat runtime.</li>
+<li><strong>Ekstraksi warna</strong> memungkinkan Anda mengekstrak warna mencolok secara otomatis dari
+gambar bitmap.</li>
+</ul>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/drawables.html">Bekerja dengan
+Drawable</a>.</p>

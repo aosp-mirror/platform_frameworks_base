@@ -7,6 +7,7 @@ page.metaDescription=Bring your apps, games, and content to the biggest screen i
 fullpage=true
 no_footer_links=true
 page.type=about
+nonavpage=true
 
 @jd:body
 
@@ -259,24 +260,6 @@ page.type=about
       </div> <!-- end .landing-section -->
 
     </div> <!-- end .landing-rest-of-page -->
-
-    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement">
-      <div class="layout-content-col col-16" style="padding-top:4px">
-        <style>#___plusone_0 {float:right !important;}</style>
-        <div class="g-plusone" data-size="medium"></div>
-      </div>
-    </div>
-    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
-      <div id="copyright">
-        Except as noted, this content is
-        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
-        Creative Commons Attribution 2.5</a>. For details and
-        restrictions, see the <a href="/license.html">Content
-        License</a>.
-      </div>
-    </div>
-
-  </div> <!-- end .landing-hero-container -->
 
   <script>
   $("a.landing-down-arrow").on("click", function(e) {

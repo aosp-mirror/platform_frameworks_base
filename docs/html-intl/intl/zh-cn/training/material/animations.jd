@@ -1,0 +1,550 @@
+page.title=定义定制动画
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#Touch">定制触摸反馈</a></li>
+  <li><a href="#Reveal">使用揭露效果</a></li>
+  <li><a href="#Transitions">定制操作行为转换</a></li>
+  <li><a href="#ViewState">为视图状态改变添加动画</a></li>
+  <li><a href="#AnimVector">为矢量图片添加动画</a></li>
+</ol>
+<h2>您也应该阅读</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料设计规范</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 材料设计</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>材料设计中的动画将为用户提供操作反馈并在用户与您的应用进行互动时提供视觉连续性。
+材料主题将为按钮与操作行为转换提供一些默认动画，而 Android 5.0（API 级别 21）及更高版本可让您定制这些动画，同时也可创建新动画：
+
+</p>
+
+<ul>
+<li>触摸反馈</li>
+<li>循环揭露</li>
+<li>操作行为转换</li>
+<li>曲线运动</li>
+<li>视图状态改变</li>
+</ul>
+
+
+<h2 id="Touch">定制触摸反馈</h2>
+
+<p>材料设计中的触摸反馈可在用户与 UI 元素互动时，在接触点上提供即时视觉确认。
+适用于按钮的默认触摸动画使用全新 {@link android.graphics.drawable.RippleDrawable} 类别，以波纹效果实现不同状态间的转换。
+
+</p>
+
+<p>在大多数情况下，您应以下列方式指定视图背景，在您的视图 XML 中应用此功能：
+</p>
+
+<ul>
+<li><code>?android:attr/selectableItemBackground</code> 指定有界的波纹。</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> 指定越过视图边界的波纹。
+它将由一个非空背景的视图的最近父项所绘制和设定边界。
+</li>
+</ul>
+
+<p class="note"><strong>注意：</strong><code>selectableItemBackgroundBorderless</code> 是 API 级别 21 中推出的新属性。
+</p>
+
+
+<p>此外，您可利用 <code>ripple</code> 元素将 {@link android.graphics.drawable.RippleDrawable}
+定义为一个 XML 资源。</p>
+
+<p>您可以为 {@link android.graphics.drawable.RippleDrawable} 对象指定一种颜色。如果要改变默认触摸反馈颜色，请使用主题的 <code>android:colorControlHighlight</code>
+属性。
+</p>
+
+<p>如果要了解更多信息，请参阅 {@link
+android.graphics.drawable.RippleDrawable} 类别的 API 参考文档。</p>
+
+
+<h2 id="Reveal">使用揭露效果</h2>
+
+<p>当您显示或隐藏一组 UI
+元素时，揭露动画可为用户提供视觉连续性。{@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} 方法让您能够为裁剪区域添加动画以揭露或隐藏视图。
+</p>
+
+<p>如果要使用此效果揭露之前不可见的视图：</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+
+// create the animator for this view (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+
+// make the view visible and start the animation
+myView.setVisibility(View.VISIBLE);
+anim.start();
+</pre>
+
+<p>如果要使用此效果隐藏之前可见的视图：</p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">定制操作行为转换</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>图 1</strong> - 拥有共享元素的转换。
+</p>
+    <em>如果要重新播放影片，请点击设备屏幕</em>
+  </div>
+</div>
+
+<p>材料设计应用中的操作行为转换透过通用元素之间的移动和转换提供不同状态之间的视觉连接。
+您可为进入、退出转换以及操作行为之间的共享元素转换指定定制动画。
+</p>
+
+<ul>
+<li><strong>进入</strong>转换将决定操作行为中视图如何进入场景。例如，在<em>分解</em>进入转换中，视图将从屏幕外进入场景并飞往屏幕中心。
+
+</li>
+
+<li><strong>退出</strong>转换将决定操作行为中应用行为的显示视图如何退出场景。例如，在<em>分解</em>退出转换中，视图将从屏幕中心退出场景。
+
+</li>
+
+<li><strong>共享元素</strong>转换将决定两个操作行为转换之间共享的视图如何在这些操作行为中转换。
+例如，如果两个操作行为拥有相同的图像，但其位置与大小不同，<em>changeImageTransform</em> 共享元素转换将在这些操作行为之间平滑地转换与缩放图像。
+
+</li>
+</ul>
+
+<p>Android 5.0（API 级别 21）支持这些进入与退出转换：</p>
+
+<ul>
+<li><em>分解</em> - 从场景中心移入或移出视图。</li>
+<li><em>滑动</em> - 从场景边缘移入或移出视图。</li>
+<li><em>淡入淡出</em> - 通过调整透明度在场景中增添或移除视图。</li>
+</ul>
+
+<p>任何扩展 {@link android.transition.Visibility} 类别的转换均将获得进入或退出转换支持。
+如果要了解更多信息，请参阅
+{@link android.transition.Transition} 类别的 API 参考文档。</p>
+
+<p>Android 5.0（API 级别 21）也支持这些共享元素转换：</p>
+
+<ul>
+<li><em>changeBounds</em> - 为目标视图的布局边界的变化添加动画。</li>
+<li><em>changeClipBounds</em> - 为目标视图的裁剪边界的变化添加动画。</li>
+<li><em>changeTransform</em> - 为目标视图的缩放与旋转变化添加动画。</li>
+<li><em>changeImageTransform</em> - 为目标图像的大小与缩放变化添加动画。</li>
+</ul>
+
+<p>当您在您的应用中启用操作行为转换，默认的交叉淡入淡出转换将在进入与退出操作行为之间激活。
+</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
+<p class="img-caption">
+  <strong>图 2</strong> - 拥有一个共享元素的场景转换。
+</p>
+
+<h3>指定定制转换</h3>
+
+<p>首先，在定义您从材料主题继承的风格时，使用 <code>android:windowContentTransitions</code>
+属性启用窗口内容转换。您也可在您的风格定义中指定进入、退出以及共享元素转换：
+</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>此示例中的 <code>change_image_transform</code> 转换定义如下：</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p><code>changeImageTransform</code> 元素与
+{@link android.transition.ChangeImageTransform} 类别相对应。如果要了解更多信息，请参阅 {@link android.transition.Transition} 的 API
+参考。</p>
+
+<p>如果要在您的代码中启用窗口内容转换，请调用
+{@link android.view.Window#requestFeature Window.requestFeature()} 方法：</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>如果要在您的代码中指定转换，请以 {@link
+android.transition.Transition} 对象调用这些方法：</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>{@link android.view.Window#setExitTransition setExitTransition()} 和 {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} 方法定义正在调用的操作行为的退出转换。
+{@link android.view.Window#setEnterTransition
+setEnterTransition()} 与 {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} 方法定义被调用的操作行为的进入转换。</p>
+
+<p>如果要取得转换的完整效果，您必须在正在调用以及被调用的操作行为上启用窗口内容转换。
+否则，正在调用的操作行为将开始退出转换，但是您将会看到窗口转换（例如缩放或淡入淡出）。
+</p>
+
+<p>如果要尽快开始进入转换，请针对被调用的操作行为使用
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+方法。这可以让您实现更生动的进入转换。</p>
+
+<h3>使用转换启动一个操作行为</h3>
+
+<p>如果您启用转换并且为一个操作行为设置退出转换，那么在您启动另一个操作行为时，转换将以下列方式激活：
+</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>如果您已为第二个操作行为设置进入转换，则转换也将会在操作行为启动时激活。
+如果要在您启动另一个操作行为时禁用转换，请提供
+<code>null</code> 选项包。</p>
+
+<h3>以共享元素启动一个操作行为</h3>
+
+<p>如果要在两个拥有共享元素的操作行为之间安排屏幕转换动画：</p>
+
+<ol>
+<li>请在您的主题中启用窗口内容转换。</li>
+<li>在您的风格中指定一个共享元素转换。</li>
+<li>将您的转换定义为 XML 资源。</li>
+<li>利用
+<code>android:transitionName</code> 属性对两个布局中的共享元素指定一个通用名称。</li>
+<li>使用 {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()} 方法。</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>对于在您的代码中生成的共享动态视图，请使用
+{@link android.view.View#setTransitionName View.setTransitionName()} 方法在两个操作行为中指定一个通用元素名称。
+</p>
+
+<p>如果要在完成第二项操作行为时反转场景转换动画，请调用
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+方法而非 {@link android.app.Activity#finish Activity.finish()}。</p>
+
+<h3>以多个共享元素启动一个操作行为</h3>
+
+<p>如果要在两个拥有多个共享元素的操作行为之间安排场景转换动画，请以 <code>android:transitionName</code>
+属性（或在两个操作行为中使用 {@link android.view.View#setTransitionName View.setTransitionName()} 方法）定义共享元素，并以下列方式创建一个 {@link android.app.ActivityOptions} 对象：
+
+</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">使用曲线运动</h2>
+
+<p>材料设计中的动画利用曲线实现时间内插与空间移动模式。
+利用 Android 5.0（API 级别 21）及更高版本，您可为动画定义定制时间曲线以及曲线运动模式。
+</p>
+
+<p>{@link android.view.animation.PathInterpolator} 类别是一个基于贝塞尔曲线或 {@link android.graphics.Path} 对象的全新插入器。
+此插入器在一个 1x1 的正方形内指定一个运动曲线，定位点位于 (0,0) 以及 (1,1)，而控制点则使用构造函数参数指定。
+
+您也可以将路径插入器定义为一个 XML 资源：</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>系统将为材料设计规范中的三种基本曲线提供 XML 资源：
+</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>您可以将一个 {@link android.view.animation.PathInterpolator} 对象传递给 {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()} 方法。</p>
+
+<p>{@link android.animation.ObjectAnimator} 类别拥有新的构造函数，可让您一次使用两个或更多属性在路径上为坐标添加动画。
+例如，下列动画使用 {@link android.graphics.Path} 对象为视图的 X 和 Y 属性添加动画：
+</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">为视图状态改变添加动画</h2>
+
+<p>{@link android.animation.StateListAnimator} 类别让您能够定义视图状态改变时运行的动画。
+下列示例显示如何将 {@link
+android.animation.StateListAnimator} 定义为一个 XML 资源：</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>如果要将定制视图状态动画附加至一个视图，请依照此示例使用 XML 资源文件中的
+<code>selector</code> 元素定义一个动画，并使用 <code>android:stateListAnimator</code> 属性将此动画分配给您的视图。
+如果要将一个状态列表动画分配给您的代码内的一个视图，请使用 {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} 方法，并以
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()} 方法将动画分配给您的视图。
+</p>
+
+<p>当您的主题扩展材料主题时，在默认情况下按钮将拥有一个 Z 动画。如果要避免您的按钮出现这类行为，请将 <code>android:stateListAnimator</code> 属性设置为
+<code>@null</code>。
+</p>
+
+<p>{@link android.graphics.drawable.AnimatedStateListDrawable} 类别让您能够创建图片，显示相关视图之间的状态变化。
+Android 5.0 中的某些系统小组件在默认情况下使用这些动画。
+下列示例显示如何将 {@link android.graphics.drawable.AnimatedStateListDrawable} 定义为一个 XML 资源：
+</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">为矢量图片添加动画</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">矢量图片</a>可在不丢失定义的情况下缩放。
+{@link android.graphics.drawable.AnimatedVectorDrawable}
+类别可让您为矢量图片的属性添加动画。</p>
+
+<p>您通常可以在 3 个 XML 文件中定义添加动画的矢量图片：</p>
+
+<ul>
+<li>在
+<code>res/drawable/</code> 中拥有 <code>&lt;vector&gt;</code> 元素的矢量图片</li>
+<li>在
+<code>res/drawable/</code> 中拥有 <code>&lt;animated-vector&gt;</code> 元素且已添加动画的矢量图片</li>
+<li>在
+<code>res/anim/</code> 中拥有 <code>&lt;objectAnimator&gt;</code> 元素的一个或多个对象动画</li>
+</ul>
+
+<p>添加动画的矢量图片可为 <code>&lt;group&gt;</code> 以及
+<code>&lt;path&gt;</code> 元素的属性添加动画。<code>&lt;group&gt;</code> 元素定义路径集或子组，而 <code>&lt;path&gt;</code> 元素则定义将绘制的路径。
+</p>
+
+<p>当您定义一个您想要添加动画的矢量图片时，请使用 <code>android:name</code>
+属性给这些群组和路径指定一个唯一名称，以便让您能够从您的动画定义中引用这些群组或路径。
+例如：</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>已添加动画的矢量图片定义按名称引用矢量图片内的群组和路径：
+</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>动画定义代表着 {@link android.animation.ObjectAnimator} 或 {@link
+android.animation.AnimatorSet} 对象。此示例中的第一个动画将目标群组旋转 360 度：
+</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>此示例中的第二个动画对矢量图片的路径进行变形。
+两个路径均需可兼容变形操作：两个路径均需拥有相同数量的指令，而且每个指令均需拥有相同数量的参数。
+</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>如果要了解更多信息，请参阅 {@link
+android.graphics.drawable.AnimatedVectorDrawable} 的 API 参考文档。</p>

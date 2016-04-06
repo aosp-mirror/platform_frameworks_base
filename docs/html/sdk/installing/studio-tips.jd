@@ -1,4 +1,8 @@
 page.title=Android Studio Tips and Tricks
+page.image=images/tools/studio-previewall.png
+page.metaDescription=Tips to help you get started with Android Studio's most common tasks and productivity enhancements.
+page.tags=studio,tips
+meta.tags="studio", "tools"
 @jd:body
 
 <div id="qv-wrapper">
@@ -204,7 +208,7 @@ you can set a scope to identify all code related to a specific action bar.   </p
 <p>With language injection, the Android Studio IDE allows you to work with islands of different
 languages embedded in the source code. This extends the syntax, error highlighting and coding
 assistance to the embedded language. This can be especially useful for checking regular expression
-values inline, and validating XML and SQL statements.</p>
+values inline and validating XML.</p>
 
 
 <h3>Code folding</h3>

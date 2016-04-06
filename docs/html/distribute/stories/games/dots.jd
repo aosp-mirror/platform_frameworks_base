@@ -1,0 +1,84 @@
+page.title=Dots increased installs by over 6% using Store Listing Experiments
+page.metaDescription=Game developer Playdots decided to use Store Listing Experiments to see if different game screenshots could impact installs for their game Two Dots. They found that game screenshots showing gameplay mechanics drove more installs from the store listing page than their existing non-gameplay screenshots.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/dots.png
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/dots-icon.png" height="113" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.nerdyoctopus.gamedots&hl=en">
+  Dots</a>, the successful puzzle strategy game from games developer Playdots
+  Inc., was produced by <a class="external-link"
+  href="https://betaworks.com/">Betaworks</a> in 2013.
+  It achieved over 20 million downloads in its first year, with over five
+  billion games having played on Android and iOS since launch. For the follow
+  up,
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.weplaydots.twodotsandroid&hl=en">
+  Two Dots</a>, Playdots decided to use
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> to see if
+  different game screenshots could impact installs. They found that game
+  screenshots showing gameplay mechanics drove more installs from the store
+  listing page than their existing non-gameplay screenshots.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Dots used a localized store listing experiment in the Google Play Developer
+  Console to test Two Dots screenshots in the US. They targeted 50 percent of
+  users with non-gameplay screenshots (the “control”) and the other 50 percent
+  with gameplay screenshots, to see how graphically demonstrating gameplay would
+  impact installs.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The results revealed that screenshots showing gameplay mechanics drove 6
+  percent more installs than the control group using non-gameplay screenshots.
+</p>
+
+  <img
+   src="{@docRoot}images/distribute/stories/dots-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/dots-screenshot.png 1x
+  {@docRoot}images/distribute/stories/dots-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+
+<p>
+  In a follow up experiment they tested whether including text emphasizing
+  gameplay performed better than screenshots without text. The results showed
+  that screenshots with text highlighting gameplay had an 8 percent increase in
+  installs compared to those without.
+</p>
+
+<p>
+  Dots commented that “sometimes you have to step back and think about what your
+  objective is: illustrate gameplay. So that’s what we did — and the simplest
+  changes impacted our conversion by a huge percentage.”
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Learn how to run
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> and read our best practices for
+  <a href="https://developer.android.com/distribute/users/experiments.html">
+  running successful experiments</a>.
+</p>

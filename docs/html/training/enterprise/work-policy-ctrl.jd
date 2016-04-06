@@ -1,5 +1,6 @@
-page.title=Building a Work Policy Controller
-page.metaDescription=Learn how to develop a Work Policy Controller to create and administer a managed profile on an employee's device.
+page.title=Building a Device Policy Controller
+page.metaDescription=Learn how to develop a device policy controller to create and administer a managed profile on an employee's device.
+page.tags="work policy controller,WPC,device policy controller,DPC"
 @jd:body
 
 <div id="tb-wrapper">
@@ -54,8 +55,9 @@ page.metaDescription=Learn how to develop a Work Policy Controller to create and
 </p>
 
 <p>
-  To handle these tasks, an enterprise develops and deploys a Work Policy
-  Controller app. This app is installed on each employee's device. The
+  To handle these tasks, an enterprise develops and deploys
+  a <em>device policy controller</em> app (previously known as a
+  <em>work policy controller</em>). This app is installed on each employee's device. The
   controller app installed on each employee's device and creates a work user
   profile, which accesses enterprise apps and data separately from the user's
   personal account. The controller app also acts as the
@@ -66,7 +68,7 @@ page.metaDescription=Learn how to develop a Work Policy Controller to create and
 </p>
 
 <p>
-  This lesson describes how to develop a Work Policy Controller app for devices
+  This lesson describes how to develop a device policy controller app for devices
   in an Android for Work deployment. The lesson describes how to create a work
   user profile, how to set device policies, and how to apply
   restrictions to other apps running on the managed profile.
@@ -85,13 +87,13 @@ page.metaDescription=Learn how to develop a Work Policy Controller to create and
   policies to control the behavior of employees' devices and apps. The
   enterprise administrator sets these policies with software provided by their
   Enterprise Mobility Management (EMM) provider. The EMM software communicates
-  with a Work Policy Controller on each device. The Work Policy Controller, in
+  with a device policy controller on each device. The device policy controller, in
   turn, manages the settings and behavior of the work user profile on each
   individual’s device.
 </p>
 
 <p class="note">
-  <strong>Note:</strong> A Work Policy Controller is built on the existing
+  <strong>Note:</strong> A device policy controller is built on the existing
   model used for device administration applications, as described in <a href=
   "{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>.
   In particular, your app needs to create a subclass of {@link
@@ -177,7 +179,7 @@ if (provisioningIntent.resolveActivity(provisioningActivity.getPackageManager())
   <li>Removes non-required applications from the managed profile.
   </li>
 
-  <li>Copies the Work Policy Controller application into the managed profile and
+  <li>Copies the device policy controller app into the managed profile and
     sets it as the profile owner.
   </li>
 </ul>
@@ -209,9 +211,8 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 <h3 id="after_creating_profile">After Creating the Managed Profile</h3>
 
-<p>When the profile has been provisioned, the system calls the Work Policy
-Controller app's {@link
-android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete
+<p>When the profile has been provisioned, the system calls the device policy
+controller app's {@link android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete
 DeviceAdminReceiver.onProfileProvisioningComplete()} method. Override this
 callback method to finish enabling the managed profile.</p>
 
@@ -257,7 +258,7 @@ manager.setProfileEnabled(componentName);</pre>
 <h2 id="set_up_policies">Set Up Device Policies</h2>
 
 <p>
-  The Work Policy Controller app is responsible for applying the enterprise's
+  The device policy controller app is responsible for applying the enterprise's
   device policies. For example, a particular enterprise might require that all
   devices become locked after a certain number of failed attempts to enter the
   device password. The controller app queries the EMM to find out what
@@ -273,13 +274,12 @@ Administration</a> guide.</p>
 
 <h2 id="apply_restrictions">Apply App Restrictions</h2>
 
-<p>Enterprise environments may require that approved apps implement apps
-implement security or feature restrictions. App developers must implement these
-restrictions and declare them for use by enterprise administrators, as described
-in <a href="{@docRoot}training/enterprise/app-restrictions.html">Implementing
-App Restrictions</a>. The Work Policy Controller receives restriction changes
-from the enterprise administrator, and forwards those restriction changes to the
-apps.</p>
+<p>Enterprise environments may require that approved apps implement security
+or feature restrictions. App developers must implement these restrictions
+and declare them for use by enterprise administrators, as described in
+<a href="{@docRoot}training/enterprise/app-restrictions.html">Implementing
+App Restrictions</a>. The device policy controller receives restriction changes
+from the enterprise administrator, and forwards those restriction changes to the apps.</p>
 
 <p>For example, a particular news app might have a restriction setting that
 controls whether the app is allowed to download videos over a cellular
@@ -287,9 +287,9 @@ network. When the EMM wants to disable cellular downloads, it sends a
 notification to the controller app. The controller app, in turn,
 notifies the news app that the restriction setting has changed.</p>
 
-<p class="note"><strong>Note:</strong> This document covers how the Work Policy
-Controller app changes the restriction settings for the other apps on the
-managed profile. Details on how the Work Policy Controller app communicates with
+<p class="note"><strong>Note:</strong> This document covers how the device policy
+controller app changes the restriction settings for the other apps on the
+managed profile. Details on how the device policy controller app communicates with
 the EMM are out of scope for this document.</p>
 
 <p>To change an app's restrictions, call the {@link
@@ -308,7 +308,7 @@ restriction that can be configured, with the key
 a cellular network; it must use a Wi-Fi network instead.</p>
 
 <p>
-  If your Work Policy Controller app needs to turn off cellular downloads, it
+  If your device policy controller app needs to turn off cellular downloads, it
   would first fetch the device policy service object, as described above. It
   then assembles a restrictions bundle and passes this bundle to {@link
   android.app.admin.DevicePolicyManager#setApplicationRestrictions

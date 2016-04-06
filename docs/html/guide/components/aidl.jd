@@ -190,11 +190,11 @@ project's {@code gen/} directory. The generated file name matches the {@code .ai
 with a {@code .java} extension (for example, {@code IRemoteService.aidl} results in {@code
 IRemoteService.java}).</p>
 
-<p>If you use Eclipse, the incremental build generates the binder class almost immediately. If you
-do not use Eclipse, then the Ant tool generates the binder class next time you build your
-application&mdash;you should build your project with <code>ant debug</code> (or <code>ant
-release</code>) as soon as you're finished writing the {@code .aidl} file, so that your code can
-link against the generated class.</p>
+<p>If you use Android Studio, the incremental build generates the binder class almost immediately.
+If you do not use Android Studio, then the Gradle tool generates the binder class next time you
+build your application&mdash;you should build your project with <code>gradle assembleDebug</code>
+(or <code>gradle assembleRelease</code>) as soon as you're finished writing the {@code .aidl} file,
+so that your code can link against the generated class.</p>
 
 
 <h3 id="Implement">2. Implement the interface</h3>
@@ -217,7 +217,7 @@ inherited from the {@code .aidl} file.</p>
 
 <p>Here is an example implementation of an interface called {@code IRemoteService} (defined by the
 {@code IRemoteService.aidl} example, above) using an anonymous instance:</p>
-  
+
 <pre>
 private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
     public int getPid(){
@@ -324,7 +324,7 @@ href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
 
 
 
-  
+
 
 <h2 id="PassingObjects">Passing Objects over IPC</h2>
 

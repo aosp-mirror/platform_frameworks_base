@@ -1,0 +1,337 @@
+page.title=存取資源
+parent.title=應用程式資源
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>快速檢視</h2>
+  <ul>
+    <li>使用 {@code R.java} 中的整數可以參照程式碼中的資源，例如
+{@code R.drawable.myimage}</li>
+    <li>使用特殊 XML 語法可以參照資源中的資源，例如 {@code
+&#64;drawable/myimage}</li>
+    <li>您也可以使用
+{@link android.content.res.Resources} 中的方法存取應用程式資源</li>
+  </ul>
+
+  <h2>重要類別</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">存取程式碼中的資源</a></li>
+    <li><a href="#ResourcesFromXml">存取 XML 中的資源</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">參照樣式屬性</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">存取平台資源</a></li>
+  </ol>
+
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="providing-resources.html">提供資源</a></li>
+    <li><a href="available-resources.html">資源類型</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>提供應用程式中的資源 (於<a href="providing-resources.html">提供資源</a>中討論) 後，您可以參照其資源 ID 加以應用。所有資源 ID 會在專案的 {@code R} 類別中定義。此類別是由 {@code aapt} 工具自動產生的。
+
+</p>
+
+<p>編譯應用程式後，{@code aapt} 會產生 {@code R} 類別。此類別內含 {@code
+res/} 目錄中所有資源的資源 ID。
+每一種資源類型都有 {@code R} 子類別 (例如，所有可繪項目資源的
+{@code R.drawable})，而這種類型的每一種資源都有靜態整數 (例如，{@code R.drawable.icon})。
+此整數就是資源 ID，您可以用於擷取資源。
+</p>
+
+<p>儘管資源 ID 都指定於 {@code R} 類別，您不需要為了取得資源 ID 而加以查看。資源 ID 的組成如下：
+</p>
+<ul>
+  <li>資源類型<em></em>：每一種資源會以「類型」分類，例如 {@code
+string}、{@code drawable} 以及 {@code layout}。如需有關不同類型的詳細資訊，請參閱<a href="available-resources.html">資源類型</a>。
+  </li>
+  <li>資源名稱<em></em>可能是：檔案名稱，不含副檔名；或 XML {@code android:name} 屬性中的值，如果資源是簡單值 (例如字串)。
+
+</li>
+</ul>
+
+<p>您有兩種方式可存取資源：</p>
+<ul>
+  <li><strong>在程式碼中：</strong>使用 {@code R} 類別中子類別的靜態整數，例如：
+
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} 是資源類型，而 {@code hello} 是資源名稱。若您以此格式提供資源 ID 時，很多 Android API 都可以存取您的資源。
+請參閱<a href="#ResourcesFromCode">在程式碼中存取資源</a>。
+</p>
+  </li>
+  <li><strong>在 XML 中：</strong>使用特殊 XML 語法，也可以對應到您在 {@code R} 類別中定義的資源 ID，例如：
+
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} 是資源類型，而 {@code hello} 是資源名稱。您可以在 XML 資源中的任何位置使用此語法，只要符合您在資源中所提供的預期值即可。
+請參閱<a href="#ResourcesFromXml">存取 XML 中的資源</a>。</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">在程式碼中存取資源 </h2>
+
+<p>您可以將資源 ID 作為方法參數傳遞，在程式碼中使用資源。例如，您可以利用 {@link android.widget.ImageView#setImageResource(int) setImageResource()} 將 {@link android.widget.ImageView} 設定為使用 {@code res/drawable/myimage.png} 資源：
+
+</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>您也可以使用 {@link
+android.content.res.Resources} (以 {@link android.content.Context#getResources()} 可取得執行個體) 中的方法擷取個別的資源。
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>存取原始檔案</h2>
+
+<p>雖然不常見，但您有時需要存取原始檔案和目錄。如果有此需求，則不能將檔案儲存在 {@code res/}，因為要從 
+{@code res/} 讀取資源的唯一方式是透過資源 ID。不過，您可以將資源儲存在 
+{@code assets/} 目錄。
+</p>
+<p>儲存在 {@code assets/} 目錄中的檔案「不會」<em></em>指定資源 ID，因此您無法透過 {@code R} 類別或從 XML 資源參照這些檔案。
+您可以改為查詢 {@code assets/} 目錄中的檔案，就像一般檔案系統一樣，並使用 
+{@link android.content.res.AssetManager} 讀取原始資料。
+</p>
+<p>不過，如果您只是要讀取原始資料 (例如影片或音訊檔案)，可以將檔案儲存在 {@code res/raw/} 目錄，然後使用 {@link
+android.content.res.Resources#openRawResource(int) openRawResource()} 讀取位元組串流。
+</p>
+
+</div>
+</div>
+
+
+<h3>語法</h3>
+
+<p>在程式碼中參照資源的語法如下：</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;}<em></em> 資源所在的封裝名稱 (從您自己的封裝中參照資源時，不需要此名稱)。
+</li>
+  <li>{@code &lt;resource_type&gt;}<em></em> 是資源類型的 {@code R} 子類別。</li>
+  <li>{@code &lt;resource_name&gt;}<em></em> 可以是不含副檔名的資源檔案名稱，或是 XML 元素中的 {@code android:name} 屬性值 (簡單值)。
+
+</li>
+</ul>
+<p>請參閱<a href="available-resources.html">資源類型</a>，以取得關於每個資源類型及其參照方式的詳細資訊。
+</p>
+
+
+<h3>使用案例</h3>
+
+<p>很多方法都接受資源 ID 參數，您可以使用
+{@link android.content.res.Resources} 中的方法擷取資源。您可以透過以下方式取得 {@link
+android.content.res.Resources} 的執行個體：{@link android.content.Context#getResources
+Context.getResources()}。</p>
+
+
+<p>以下是在程式碼中存取資源的範例：</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>注意：</strong>您不應手動修改 {@code
+R.java} 檔案 &mdash; 此檔案是在編譯專案時由 {@code aapt} 工具所產生。
+下次編譯時會覆寫所有變更內容。</p>
+
+
+
+<h2 id="ResourcesFromXml">存取 XML 中的資源</h2>
+
+<p>您可以使用現有資源的參照，為某些 XML 屬性和元素定義值。
+您在建立版面配置檔案時，會經常以此方式提供字串和影像讓小工具使用。
+</p>
+
+<p>例如，如果您要將 {@link android.widget.Button} 加入版面配置，應該使用按鈕文字的<a href="string-resource.html">字串資源</a>：
+</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>語法</h3>
+
+<p>在 XML 資源中參照資源的語法如下：</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} 資源所在的封裝名稱 (從同一個封裝中參照資源時，不需要此名稱)
+</li>
+  <li>{@code &lt;resource_type&gt;} 是資源類型的
+{@code R} 子類別。</li>
+  <li>{@code &lt;resource_name&gt;} 可以是不含副檔名的資源檔案名稱，或是 XML 元素中的 {@code android:name} 屬性值 (簡單值)。
+
+</li>
+</ul>
+
+<p>請參閱<a href="available-resources.html">資源類型</a>，以取得關於每個資源類型及其參照方式的詳細資訊。
+</p>
+
+
+<h3>使用案例</h3>
+
+<p>有時候您必須在 XML 中使用資源，而不能使用值 (例如，將可繪項目影像套用至小工具)。不過，您也可以在 XML 中接受簡單值的任何位置使用資源。
+例如，如果您有下列資源檔案，其中內含<a href="more-resources.html#Color">色彩資源</a>和<a href="string-resource.html">字串資源</a>：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>您可以在下列版面配置檔案中使用這些資源，以設定文字色彩和文字字串：
+</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>在此情況下，您不用在資源參照中指定封裝名稱，因為資源是來自您自己的封裝。
+如要參照系統資源，則需要使用封裝名稱。
+範例：</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>注意：</strong>您一律都要使用字串資源，便於應用程式當地語系化。
+如需關於建立替代資源 (例如當地語系化的字串) 的詳細資訊，請參閱<a href="providing-resources.html#AlternativeResources">提供替代資源</a>。
+
+
+如需將應用程式當地語系化的詳細指南，請參閱<a href="localization.html">當地語系化</a>。
+</p>
+
+<p>您甚至可以在 XML 中使用資源以建立別名。例如：您可以用其他可繪項目資源的別名，建立可繪項目資源：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>聽起來多此一舉，但是，當您使用替代資源時，就非常實用。深入瞭解<a href="providing-resources.html#AliasResources">建立別名資源</a>。
+</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">參照樣式屬性</h3>
+
+<p>樣式屬性資源可以讓您在目前套用的設計風格中參照屬性的值。
+參照樣式屬性可以讓您透過目前設計風格提供的標準變化自訂 UI 元素外觀，而不需要使用硬式編碼值。
+
+參照樣式屬性基本上就是「使用目前設計風格中此屬性所定義的樣式」。
+</p>
+
+<p>如要參照樣式屬性，名稱語法幾乎和一般資源格式相同，只要把小老鼠符號 ({@code @}) 換成問號 ({@code ?}) 即可，而且您可以選擇是否要使用資源類型。
+
+範例：</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>例如，您可以參照屬性，讓文字色彩符合系統設計風格的「主要」文字色彩，方式如下：
+</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>這裡的 {@code android:textColor} 屬性指出目前設計風格中樣式屬性的名稱。
+Android 現在會將套用至 {@code android:textColorSecondary} 樣式屬性的值，當成此小工具中 {@code android:textColor} 的值。
+因為系統資源工具知道在此環境中會有一個屬性資源，您不需要明確陳述其類型 (
+<code>?android:attr/textColorSecondary</code>)&mdash; 可以不需要寫上出 {@code attr} 類型。
+
+</p>
+
+
+
+
+<h2 id="PlatformResources">存取平台資源</h2>
+
+<p>Android 內含多種標準資源，例如樣式、設計風格以及版面配置。如要存取這些資源，則必須在參照資源時使用
+<code>android</code> 封裝名稱。
+例如，Android 在 {@link android.widget.ListAdapter} 中提供版面配置資源，您可以用於列出項目：
+</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>在此範例中，{@link android.R.layout#simple_list_item_1} 是一個版面配置資源，由平台為 {@link android.widget.ListView} 中的項目所定義。
+您可以加以使用，而不用自行建立清單項目的版面配置。
+如需詳細資訊，請參閱<a href="{@docRoot}guide/topics/ui/layout/listview.html">清單檢視</a>開發人員指南。
+</p>
+

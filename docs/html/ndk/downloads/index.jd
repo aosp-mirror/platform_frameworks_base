@@ -1,104 +1,95 @@
 ndk=true
 page.template=sdk
-
-
-ndk.mac64_download=android-ndk-r10e-darwin-x86_64.bin
-ndk.mac64_bytes=388937326
-ndk.mac64_checksum=2cb8893a5701603519d38a7e04c50e81
-
-ndk.linux64_download=android-ndk-r10e-linux-x86_64.bin
-ndk.linux64_bytes=401522849
-ndk.linux64_checksum=19af543b068bdb7f27787c2bc69aba7f
-
-ndk.linux32_download=android-ndk-r10e-linux-x86.bin
-ndk.linux32_bytes=394281908
-ndk.linux32_checksum=c3edd3273029da1cbd2f62c48249e978
-
-ndk.win64_download=android-ndk-r10e-windows-x86_64.exe
-ndk.win64_bytes=419616132
-ndk.win64_checksum=8412bb4991a95e08fda50b5a44d95df7
-
-ndk.win32_download=android-ndk-r10e-windows-x86.exe
-ndk.win32_bytes=396563176
-ndk.win32_checksum=1a82445baaf62aec3a46386ab1e5772c
-
-
-
 page.title=NDK Downloads
+
 @jd:body
 
 
-<div id="tos" style="display:none;width:760px;height:0;margin:0 auto">
-
-<div id="download" class="ndk" style="
-z-index: 99;
-width: 720px;
-position: absolute;
-margin: -70px 0;
-padding: 14px;
-background: white;
-border: 1px solid #999;
-box-shadow: -10px 10px 50px #888;
--moz-box-shadow: -10px 10px 50px #888;
--webkit-box-shadow: -10px 10px 50px #888;">
-<p>Before installing the Android NDK, you must agree to the following terms and conditions.</p>
+<!-- start studio download modal -->
+<div data-modal="ndk_tos" class="dac-modal" id="ndk_tos">
+  <div class="dac-modal-container">
+    <div class="dac-modal-window">
+      <header class="dac-modal-header">
+        <div class="dac-modal-header-actions">
+          <button class="dac-modal-header-close" data-modal-toggle></button>
+        </div>
+        <section class="dac-swap-section dac-active dac-down">
+          <h2 class="norule dac-modal-header-title" id="tos-header">Download the Android NDK</h2>
+        </section>
+      </header>
+      <section class="dac-swap-section dac-active dac-left">
+          <section class="dac-modal-content">
+            <fieldset class="dac-form-fieldset">
+              <div class="cols">
+                <div class="col-2of2 tos-leftCol">
+                  <p class="sdk-terms-intro">Before installing the Android
+                  NDK,
+                  you must agree to the following terms
+                  and conditions.</p>
+                </div>
 <div class="sdk-terms" style="width:auto" onfocus="this.blur()">
 <h2 class="norule">Terms and Conditions</h2>
 This is the Android Software Development Kit License Agreement
 
 <h3>1. Introduction</h3>
-1.1 The Android Software Development Kit (referred to in this License Agreement as the "SDK" and
+1.1 The Android Software Development Kit (referred to in the License Agreement as the "SDK" and
 specifically including the Android system files, packaged APIs, and Google APIs add-ons) is
-licensed to you subject to the terms of this License Agreement. This License Agreement forms a
+licensed to you subject to the terms of the License Agreement. The License Agreement forms a
 legally binding contract between you and Google in relation to your use of the SDK.
 
-1.2 “Android” means the Android software stack for devices, as made available under the Android
+1.2 "Android" means the Android software stack for devices, as made available under the Android
 Open Source Project, which is located at the following URL: http://source.android.com/, as updated
 from time to time.
 
-1.3 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600
+1.3 A "compatible implementation" means any Android device that (i) complies with the Android
+Compatibility Definition document, which can be found at the Android compatibility website
+(http://source.android.com/compatibility) and which may be updated from time to time; and (ii)
+successfully passes the Android Compatibility Test Suite (CTS).
+
+1.4 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600
 Amphitheatre Parkway, Mountain View, CA 94043, United States.
 
 
 <h3>2. Accepting this License Agreement</h3>
-2.1 In order to use the SDK, you must first agree to this License Agreement. You may not use the
-SDK if you do not accept this License Agreement.
+2.1 In order to use the SDK, you must first agree to the License Agreement. You may not use the SDK
+if you do not accept the License Agreement.
 
-2.2 By clicking to accept, you hereby agree to the terms of this License Agreement.
+2.2 By clicking to accept, you hereby agree to the terms of the License Agreement.
 
 2.3 You may not use the SDK and may not accept the License Agreement if you are a person barred
-from receiving the SDK under the laws of the United States or other countries including the country
-in which you are resident or from which you use the SDK.
+from receiving the SDK under the laws of the United States or other countries, including the
+country in which you are resident or from which you use the SDK.
 
-2.4 If you are agreeing to be bound by this License Agreement on behalf of your employer or other
+2.4 If you are agreeing to be bound by the License Agreement on behalf of your employer or other
 entity, you represent and warrant that you have full legal authority to bind your employer or such
-entity to this License Agreement. If you do not have the requisite authority, you may not accept
-the License Agreement or use the SDK on behalf of your employer or other entity.
+entity to the License Agreement. If you do not have the requisite authority, you may not accept the
+License Agreement or use the SDK on behalf of your employer or other entity.
 
 
 <h3>3. SDK License from Google</h3>
-3.1 Subject to the terms of this License Agreement, Google grants you a limited, worldwide,
-royalty-free, non-assignable and non-exclusive license to use the SDK solely to develop
-applications to run on the Android platform.
+3.1 Subject to the terms of the License Agreement, Google grants you a limited, worldwide,
+royalty-free, non-assignable, non-exclusive, and non-sublicensable license to use the SDK solely to
+develop applications for compatible implementations of Android.
 
-3.2 You agree that Google or third parties own all legal right, title and interest in and to the
+3.2 You may not use this SDK to develop applications for other platforms (including non-compatible
+implementations of Android) or to develop another SDK. You are of course free to develop
+applications for other platforms, including non-compatible implementations of Android, provided
+that this SDK is not used for that purpose.
+
+3.3 You agree that Google or third parties own all legal right, title and interest in and to the
 SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property
 Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law,
 and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-3.3 You may not use the SDK for any purpose not expressly permitted by this License Agreement.
+3.4 You may not use the SDK for any purpose not expressly permitted by the License Agreement.
 Except to the extent required by applicable third party licenses, you may not: (a) copy (except for
 backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create
 derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile
 handset or any other hardware device except a personal computer, combine any part of the SDK with
 other software, or distribute any software or device incorporating a part of the SDK.
 
-3.4 You agree that you will not take any actions that may cause or result in the fragmentation of
-Android, including but not limited to distributing, participating in the creation of, or promoting
-in any way a software development kit derived from the SDK.
-
 3.5 Use, reproduction and distribution of components of the SDK licensed under an open source
-software license are governed solely by the terms of that open source software license and not this
+software license are governed solely by the terms of that open source software license and not the
 License Agreement.
 
 3.6 You agree that the form and nature of the SDK that Google provides may change without prior
@@ -107,7 +98,7 @@ on previous versions of the SDK. You agree that Google may stop (permanently or 
 providing the SDK (or any features within the SDK) to you or to users generally at Google's sole
 discretion, without prior notice to you.
 
-3.7 Nothing in this License Agreement gives you a right to use any of Google's trade names,
+3.7 Nothing in the License Agreement gives you a right to use any of Google's trade names,
 trademarks, service marks, logos, domain names, or other distinctive brand features.
 
 3.8 You agree that you will not remove, obscure, or alter any proprietary rights notices (including
@@ -116,11 +107,11 @@ copyright and trademark notices) that may be affixed to or contained within the 
 
 <h3>4. Use of the SDK by You</h3>
 4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under
-this License Agreement in or to any software applications that you develop using the SDK, including
+the License Agreement in or to any software applications that you develop using the SDK, including
 any intellectual property rights that subsist in those applications.
 
-4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a)
-this License Agreement and (b) any applicable law, regulation or generally accepted practices or
+4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) the
+License Agreement and (b) any applicable law, regulation or generally accepted practices or
 guidelines in the relevant jurisdictions (including any laws regarding the export of data or
 software to and from the United States or other relevant countries).
 
@@ -145,7 +136,7 @@ through Android and/or applications for Android, and for the consequences of you
 (including any loss or damage which Google may suffer) by doing so.
 
 4.6 You agree that you are solely responsible for (and that Google has no responsibility to you or
-to any third party for) any breach of your obligations under this License Agreement, any applicable
+to any third party for) any breach of your obligations under the License Agreement, any applicable
 third party contract or Terms of Service, or any applicable law or regulation, and for the
 consequences (including any loss or damage which Google or any third party may suffer) of any such
 breach.
@@ -185,7 +176,7 @@ distribute or create derivative works based on these data, content, or resources
 or in part) unless you have been specifically given permission to do so by the relevant owners.
 
 7.3 You acknowledge that your use of such third party applications, data, content, or resources may
-be subject to separate terms between you and the relevant third party. In that case, this License
+be subject to separate terms between you and the relevant third party. In that case, the License
 Agreement does not affect your legal relationship with these third parties.
 
 
@@ -205,14 +196,14 @@ purposes for which, the user has given you permission to do so.
 
 
 <h3>9. Terminating this License Agreement</h3>
-9.1 This License Agreement will continue to apply until terminated by either you or Google as set
+9.1 The License Agreement will continue to apply until terminated by either you or Google as set
 out below.
 
-9.2 If you want to terminate this License Agreement, you may do so by ceasing your use of the SDK
+9.2 If you want to terminate the License Agreement, you may do so by ceasing your use of the SDK
 and any relevant developer credentials.
 
-9.3 Google may at any time, terminate this License Agreement with you if:
-(A) you have breached any provision of this License Agreement; or
+9.3 Google may at any time, terminate the License Agreement with you if:
+(A) you have breached any provision of the License Agreement; or
 (B) Google is required to do so by law; or
 (C) the partner with whom Google offered certain parts of SDK (such as APIs) to you has terminated
 its relationship with Google or ceased to offer certain parts of the SDK to you; or
@@ -220,9 +211,9 @@ its relationship with Google or ceased to offer certain parts of the SDK to you;
 in which you are resident or from which you use the service, or the provision of the SDK or certain
 SDK services to you by Google is, in Google's sole discretion, no longer commercially viable.
 
-9.4 When this License Agreement comes to an end, all of the legal rights, obligations and
+9.4 When the License Agreement comes to an end, all of the legal rights, obligations and
 liabilities that you and Google have benefited from, been subject to (or which have accrued over
-time whilst this License Agreement has been in force) or which are expressed to continue
+time whilst the License Agreement has been in force) or which are expressed to continue
 indefinitely, shall be unaffected by this cessation, and the provisions of paragraph 14.7 shall
 continue to apply to such rights, obligations and liabilities indefinitely.
 
@@ -256,7 +247,7 @@ liabilities, damages, costs and expenses (including reasonable attorneys fees) a
 accruing from (a) your use of the SDK, (b) any application you develop on the SDK that infringes
 any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of
 any person or defames any person or violates their rights of publicity or privacy, and (c) any
-non-compliance by you with this License Agreement.
+non-compliance by you with the License Agreement.
 
 
 <h3>13. Changes to the License Agreement</h3>
@@ -266,45 +257,44 @@ the website where the SDK is made available.
 
 
 <h3>14. General Legal Terms</h3>
-14.1 This License Agreement constitutes the whole legal agreement between you and Google and
-governs your use of the SDK (excluding any services which Google may provide to you under a
-separate written agreement), and completely replaces any prior agreements between you and Google in
-relation to the SDK.
+14.1 The License Agreement constitutes the whole legal agreement between you and Google and governs
+your use of the SDK (excluding any services which Google may provide to you under a separate
+written agreement), and completely replaces any prior agreements between you and Google in relation
+to the SDK.
 
 14.2 You agree that if Google does not exercise or enforce any legal right or remedy which is
-contained in this License Agreement (or which Google has the benefit of under any applicable law),
+contained in the License Agreement (or which Google has the benefit of under any applicable law),
 this will not be taken to be a formal waiver of Google's rights and that those rights or remedies
 will still be available to Google.
 
 14.3 If any court of law, having the jurisdiction to decide on this matter, rules that any
-provision of this License Agreement is invalid, then that provision will be removed from this
-License Agreement without affecting the rest of this License Agreement. The remaining provisions of
-this License Agreement will continue to be valid and enforceable.
+provision of the License Agreement is invalid, then that provision will be removed from the License
+Agreement without affecting the rest of the License Agreement. The remaining provisions of the
+License Agreement will continue to be valid and enforceable.
 
 14.4 You acknowledge and agree that each member of the group of companies of which Google is the
-parent shall be third party beneficiaries to this License Agreement and that such other companies
-shall be entitled to directly enforce, and rely upon, any provision of this License Agreement that
+parent shall be third party beneficiaries to the License Agreement and that such other companies
+shall be entitled to directly enforce, and rely upon, any provision of the License Agreement that
 confers a benefit on (or rights in favor of) them. Other than this, no other person or company
-shall be third party beneficiaries to this License Agreement.
+shall be third party beneficiaries to the License Agreement.
 
 14.5 EXPORT RESTRICTIONS. THE SDK IS SUBJECT TO UNITED STATES EXPORT LAWS AND REGULATIONS. YOU MUST
 COMPLY WITH ALL DOMESTIC AND INTERNATIONAL EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK. THESE
 LAWS INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE.
 
-14.6 The rights granted in this License Agreement may not be assigned or transferred by either you
+14.6 The rights granted in the License Agreement may not be assigned or transferred by either you
 or Google without the prior written approval of the other party. Neither you nor Google shall be
-permitted to delegate their responsibilities or obligations under this License Agreement without
-the prior written approval of the other party.
+permitted to delegate their responsibilities or obligations under the License Agreement without the
+prior written approval of the other party.
 
-14.7 This License Agreement, and your relationship with Google under this License Agreement, shall
-be governed by the laws of the State of California without regard to its conflict of laws
-provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located
-within the county of Santa Clara, California to resolve any legal matter arising from this License
-Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for
-injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
+14.7 The License Agreement, and your relationship with Google under the License Agreement, shall be
+governed by the laws of the State of California without regard to its conflict of laws provisions.
+You and Google agree to submit to the exclusive jurisdiction of the courts located within the
+county of Santa Clara, California to resolve any legal matter arising from the License Agreement.
+Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies
+(or an equivalent type of urgent legal relief) in any jurisdiction.
 
-
-<em>November 13, 2012</em>
+<em>November 20, 2015</em>
 </div>
 
 
@@ -314,221 +304,63 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
-<p><a href="" class="button disabled ndk" id="downloadForRealz" onclick="return onDownloadNdkForRealz(this);"></a></p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
 </div>
 
-
-
-</div>
-</div>
-
- <div id="qv-wrapper">
-
+                </div>
+              </div>
+            </fieldset>
+          </section>
+        </form>
+      </section>
+    </div>
   </div>
+</div>
+<!-- end ndk_tos modal -->
 
-  <p>Select, from the table below, the NDK package for your development platform. For information
+
+  <p>Select, from the table above, the NDK package for your development platform. For information
   about the changes in the newest version of the NDK, see <a href="#rel">Release Notes</a>. For
   information about earlier revisions, see <a href="{@docRoot}ndk/downloads/revision_history.html">
   NDK Revision History.</a></p>
-
-
-<h2 id="Downloads">Downloading</h2>
 
 
 <script>
 $('#Downloads').after($('#download-table'));
 </script>
 
-  <h2 id="extract">Extraction</h2>
-  <p>The NDK package is a self-extracting binary. To unpack it, follow the procedure for your
-  development platform:</p>
-       <ul>
-       <li>On Linux and Mac OS X (Darwin):
-          <ul>
-          <ol>
-          <li>Download the appropriate package from this page.</li>
-          <li>Open a terminal window.</li>
-          <li>Go to the directory to which you downloaded the package.</li>
-          <li>Run <code>chmod a+x</code> on the downloaded package.</li>
-          <li>Execute the package. For example:
-          <pre class="no-pretty-print">
-ndk$ chmod a+x android-ndk-r10c-darwin-x86_64.bin
-ndk$ ./android-ndk-r10c-darwin-x86_64.bin
-          </pre></li>
-          <p>The folder containing the NDK extracts itself.</p>
-          <p>You can also use a program like 7z to extract the package.</p>
-          </ol>
-          </ul>
-       </li>
-    <li>On Windows:</li>
-       <ul>
-       <ol>
-       <li>Download the appropriate package from this page.</li>
-       <li>Navigate to the folder to which you downloaded the package.</li>
-       <li>Double-click the downloaded file. The folder containing the NDK extracts itself.</li>
-       </ol>
-       </ul>
-     </ul>When uncompressed, the NDK files are contained in a directory called
-    <code>android-ndk-&lt;version&gt;</code>. You can rename the NDK directory if necessary and you
-    can move it to any location on your computer. This documentation refers to the NDK directory as
-    <code>&lt;ndk&gt;</code>.
-
-
-  <p>You are now ready to start working with the NDK.</p>
-
 <h2 id="rel">Release Notes</h2>
 
- <p>Android NDK, Revision 10e</a> <em>(May 2015)</em></p>
-    <dl>
-      <dt>Important changes:</dt>
-      <dd>
-      <ul>
-        <li>Integrated the workaround for Cortex-A53 Erratum 843419 into the
-        {@code aarch64-linux-android-4.9} linker. For more information on this workaround, see
-        <a href="https://sourceware.org/ml/binutils/2015-03/msg00446.html">Workaround for cortex-a53
-        erratum 843419.</a></li>
+<p>
+  Android NDK, Revision 11c <em>(March 2016)</em>
+</p>
 
-         <li>Added Clang 3.6; {@code NDK_TOOLCHAIN_VERSION=clang} now picks that version
-         of Clang by default.</li>
+<dl>
+  <dt>
+    NDK
+  </dt>
 
-         <li>Removed Clang 3.4.</li>
-
-         <li>Removed GCC 4.6.</li>
-
-         <li>Implemented multithreading support in {@code ld.gold} for all architectures. It can
-         now link with or without support for multithreading; the default is to do it without.
-            <ul>
-            <li>To compile with multithreading, use the {@code --threads} option.</li>
-            <li>To compile without multithreading, use the {@code --no-threads} option.</li>
-            </ul>
-            </li>
-
-         <li>Upgraded GDB/gdbserver to 7.7 for all architectures.</li>
-
-         <li>Removed the NDK package for 32-bit Darwin.</li>
-      </ul>
-      </dd>
-   <dl>
-
-
-     <dt>Important bug fixes:</dt>
-     <dd>
-     <ul>
-        <li>Fixed a crash that occurred when there were OpenMP loops outside of the main thread.</li>
-
-        <li>Fixed a GCC 4.9 internal compiler error (<i>ICE</i>) that occured when the user declared
-        {@code #pragma GCC optimize ("O0")}, but had a different level of optimization specified
-        on the command line. The {@code pragma} takes precedence.</li>
-
-        <li>Fixed an error that used to produce a crash with the following error message:
-<pre>
-in add_stores, at var-tracking.c:6000
-</pre>
-        </li>
-
-        <li>Implemented a workaround for a Clang 3.5 issue in which LLVM auto-vectorization
-        generates {@code llvm.cttz.v2i64()}, an instruction with no counterpart in the ARM
-        instruction set.</li>
-     </ul>
-     </dd>
-
-     <dt>Other bug fixes:</dt>
-     <dd>
-     <ul>
-        <li>Made the following header and library fixes:</li>
-           <ul>
-           <li>Fixed {@code PROPERTY_*} in {@code media/NdkMediaDrm.h}.</li>
-           <li>Fixed {@code sys/ucontext.h} for {@code mips64}.</li>
-           <li>Dropped the Clang version check for {@code __builtin_isnan} and
-           {@code __builtin_isinf}.</li>
-           <li>Added {@code android-21/arch-mips/usr/include/asm/reg.h}
-           and {@code android-21/arch-mips64/usr/include/asm/reg.h}.</li>
-           </ul>
-           </li>
-
-        <li>Fixed a spurious array-bounds warning that GCC 4.9 produced for x86, and reenabled the
-        array bounds warning that GCC 4.9 had produced for ARM. The warning for ARM had
-        previously been unconditionally disabled.</li>
-
-        <li>Fixed Clang 3.5 for {@code mips} and {@code mips64} to create a writable
-            {@code .gcc_except_table} section, thus matching GCC behavior. This change allows you
-            to avoid the following linker warning:
-
-<pre>
-.../ld: warning: creating a DT_TEXTREL in a shared object
-</pre>
-            </li>
-
-        <li>Backported a fix for {@code compiler-rt} issues that were causing crashes when Clang
-        compiled for {@code mips64}. For more information, see LLVM Issue
-        <a href="http://llvm.org/bugs/show_bug.cgi?id=20098">20098</a>.</li>
-
-        <li>Fixed Clang 3.5 crashes that occurred on non-ASCII comments. (Issue
-        <a href="https://code.google.com/p/android/issues/detail?id=81440">81440</a>)</li>
-
-        <li>Fixed {@code stlport collate::compare} to return {@code -1} and {@code 1}. Previously,
-        it had returned arbitrary signed numbers.</li>
-
-        <li>Fixed {@code ndk-gdb} for 64-bit ABIs. (Issue
-        <a href="https://code.google.com/p/android/issues/detail?id=118300">118300</a>)</li>
-
-        <li>Fixed the crash that the HelloComputeNDK sample for RenderScript was producing on
-        Android 4.4 (Android API level 19). For more information, see
-        <a href="http://stackoverflow.com/questions/28057049/targeting-pre-lollipop-devices-using-renderscript-from-ndk-c">this page</a>.</li>
-
-        <li>Fixed {@code libc++ __wrap_iter} for GCC. For more information, see LLVM Issue
-        <a href="http://llvm.org/bugs/show_bug.cgi?id=22355">22355</a>.</li>
-
-        <li>Fixed {@code .asm} support for ABI {@code x86_64}.</li>
-
-        <li>Implemented a workaround for the GCC 4.8 {@code stlport} issue. (Issue
-        <a href="https://android-review.googlesource.com/#/c/127773">127773</a>)</li>
-
-        <li>Removed the trailing directory separator {@code \\} from the project path in Windows.
-        (Issue <a href="https://code.google.com/p/android/issues/detail?id=160584">160584</a>)
-        </li>
-
-        <li>Fixed a {@code no rule to make target} error that occurred when compiling a single
-        {@code .c} file by executing the {@code ndk-build.cmd} command from {@code gradle}. (Issue
-        <a href="https://code.google.com/p/android/issues/detail?id=66937">66937</a>)</li>
-
-        <li>Added the {@code libatomic.a} and {@code libgomp.a} libraries that had been missing from
-        the following host toolchains:
+  <dd>
+    <ul>
+      <li>Changes
         <ul>
-           <li>{@code aarch64-linux-android-4.9}</li>
-           <li>{@code mips64el-linux-android-4.9}</li>
-           <li>{@code mipsel-linux-android-4.9}</li>
-           <li>{@code x86_64-4.9}</li>
+          <li>Applied additional fixes to the {@code ndk-gdb.py} script.
+          </li>
+          <li>Added an optional package name argument to the {@code ndk-gdb}
+            command {@code --attach} option.
+            (<a href="https://github.com/android-ndk/ndk/issues/13">Issue 13</a>)
+          </li>
+          <li>Fixed invalid toolchain paths for 32-bit Windows platform.
+            (<a href="https://github.com/android-ndk/ndk/issues/45">Issue 45</a>)
+          </li>
+          <li>Fixed the relative path for the {@code ndk-which} command.
+            (<a href="https://github.com/android-ndk/ndk/issues/29">Issue 29</a>)
+          </li>
+          <li>Fixed use of cygpath for the libgcc compiler.
+            (Android <a href="http://b.android.com/195486">Issue 195486</a>)
+          </li>
         </ul>
-     </ul>
-     </dd>
-
-     <dt>Other changes:</dt>
-     <dd>
-       <ul>
-       <li>Added {@code ld.gold} for {@code aarch64}. The default linker remains {@code ld.bfd}.
-       To explicitly enable {@code ld.gold}, add {@code -fuse-ld=gold} to the
-       {@code LOCAL_LDFLAGS} or {@code APP_LDFLAGS} variable.</li>
-
-       <li>Built the MIPS and MIPS64 toolchains with {@code binutils-2.25}, which provides improved
-       R6 support.</li>
-
-       <li>Made {@code -fstandalone-debug} (full debug info) a default option for Clang.</li>
-
-       <li>Replaced {@code -fstack-protector} with {@code -fstack-protector-strong} for
-       the ARM, AArch64, X86, and X86_64 toolchains for GCC 4.9, Clang 3.5, and
-       Clang 3.6.</li>
-
-       <li>Added the {@code --package} command-line switch to {@code ndk-gdb} to allow the build
-       system to override the package name. (Issue
-       <a href="https://code.google.com/p/android/issues/detail?id=56189">56189</a>)</li>
-
-       <li> Deprecated {@code -mno-ldc1-stc1} for MIPS.  This option may not work with the new
-       {@code -fpxx} and {@code -mno-odd-spreg} options, or with the FPXX ABI.</li>
-
-       <li>Added MIPS MSA and R6 detection to {@code cpu-features}.</li>
-
-     </ul>
-     </dd>
-
-   </dl>
+      </li>
+    </ul>
+  </dd>
+</dl>

@@ -1,0 +1,281 @@
+page.title=런타임 변경 처리하기
+page.tags=액티비티, 수명 주기
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>이 문서의 내용</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">구성 변경 중에 객체 보존하기</a></li>
+    <li><a href="#HandlingTheChange">구성 변경 직접 처리하기</a>
+  </ol>
+
+  <h2>참고 항목</h2>
+  <ol>
+    <li><a href="providing-resources.html">리소스 제공</a></li>
+    <li><a href="accessing-resources.html">리소스 액세스</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">더 빠른
+ 화면 방향 변경</a></li>
+  </ol>
+</div>
+</div>
+
+<p>몇몇 기기 구성은 런타임 중에 변경될 수 있습니다
+(예: 화면 방향, 키보드 가용성 및 언어 등). 그러한 변경이 일어나는 경우, 
+Android는 실행 중인 
+{@link android.app.Activity}를 다시 시작합니다({@link android.app.Activity#onDestroy()} 호출, 뒤이어 {@link
+android.app.Activity#onCreate(Bundle) onCreate()} 호출). 이런 동작은 여러분이 제공한 
+대체 리소스로 애플리케이션을 자동으로 다시 로딩함으로써 새로운 기기 구성에 애플리케이션이 적응하는 것을 돕도록
+설계되었습니다(예: 다양한 화면 방향과 크기에 대한 다양한 레이아웃).</p>
+
+<p>다시 시작을 적절히 처리하려면 액티비티가 정상적인 
+<a href="{@docRoot}guide/components/activities.html#Lifecycle">액티비티
+수명 주기</a>를 통해 이전 상태를 복원하는 것이 중요합니다. 여기에서 Android는 
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()}를 호출한 다음에 액티비티를 소멸시켜 
+애플리케이션 상태에 대한 데이터를 저장할 수 있습니다. 그러면 
+{@link android.app.Activity#onCreate(Bundle) onCreate()} 또는 {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()} 중에 상태를 복원할 수 있습니다.</p>
+
+<p>애플리케이션이 애플리케이션 상태를 그대로 유지한 채 스스로 다시 시작할 수 있는지 시험해 보려면, 
+구성 변경을 일으켜보아야 합니다(예를 들어 화면 방향 변경 등). 이는 애플리케이션에서 여러 가지 작업을 수행하는 
+동안 해봅니다. 애플리케이션이 언제든 사용자 데이터나 상태를 손실하지 않고 
+다시 시작할 수 있어야 합니다. 그래야 구성 변경과 같은 이벤트를 처리할 수 있기 때문입니다. 그렇지 않으면 
+사용자가 걸려오는 전화를 받은 다음 한참 후에 애플리케이션으로 돌아오면 애플리케이션 프로세스가 이미 
+소멸되어 있을 수 있습니다. 액티비티 상태를 복원하는 방법을 배우려면, <a href="{@docRoot}guide/components/activities.html#Lifecycle">액티비티 수명 주기</a>에 관해 읽어보십시오.</p>
+
+<p>하지만, 애플리케이션을 다시 시작하고 상당량의 데이터를 복원하면 비용도 많이 들고 
+불량한 사용자 환경이 만들어지는 상황에 직면할 수도 있습니다. 그러한 상황이라면, 
+두 가지 다른 옵션이 있습니다.</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">구성 변경 중에 객체 보존하기</a>
+  <p>구성이 변경되는 중에 액티비티가 다시 시작될 수 있게 허용하되, 액티비티의 새 인스턴스에 상태 
+저장 객체를 넣습니다.</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">구성 변경 직접 처리하기</a>
+  <p>특정 구성 변경 중에 시스템이 액티비티를 다시 시작하도록 하지 못하게 방지하되, 
+구성이 실제로 변경되면 콜백을 수신하도록 하여 필요에 따라 액티비티를 수동으로 업데이트할 수 
+있도록 합니다.</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">구성 변경 중에 객체 보존하기</h2>
+
+<p>액티비티를 다시 시작하려면 많은 수의 데이터 세트를 복구해야 하는 경우, 네트워크 연결을 
+다시 설정하거나 다른 집약적 작업을 수행한 다음 완전히 다시 시작하십시오. 
+구성 변경 때문에 사용자 환경이 느려질 수 있습니다. 또한, 액티비티 상태를 완전히 복원하려면 
+{@link android.os.Bundle}을 사용할 수도 있습니다. 이것은 시스템이 개발자 대신 {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} 콜백으로 저장해두는 것입니다. 이것은 대형 객체(예: 비트맵)를 담도록 
+디자인된 것이 아니며 이 안의 데이터는 반드시 직렬화했다가 다시 역직렬화해야 합니다. 이렇게 하면 
+메모리를 아주 많이 소모할 수 있으며 구성 변경이 느려질 수 있습니다. 이와 같은 상황에서는 
+액티비티를 다시 초기화해야 한다는 부담을 해결하기 위해 액티비티가 구성 변경으로 인해 다시 시작되었을 때 {@link
+android.app.Fragment}를 보존하면 됩니다. 이 프래그먼트에는 
+보존하고자 하는 상태 저장 객체에 대한 참조를 담을 수 있습니다.</p>
+
+<p>Android 시스템이 구성 변경으로 인하여 액티비티를 종료시킬 때, 액티비티에서 보존하기로 표시해둔 
+프래그먼트는 소멸되지 않습니다. 그러한 프래그먼트를 액티비티에 추가하면 
+상태 저장 객체를 보존할 수 있습니다.</p>
+
+<p>런타임 구성 변경 중에 상태 저장 객체를 프래그먼트에 보존해두는 방법은 다음과 같습니다.</p>
+
+<ol>
+  <li>{@link android.app.Fragment} 클래스를 확장하고 상태 저장 
+객체에 참조를 선언합니다.</li>
+  <li>프래그먼트가 생성되면 {@link android.app.Fragment#setRetainInstance(boolean)}를 호출합니다.
+      </li>
+  <li>해당 프래그먼트를 액티비티에 추가합니다.</li>
+  <li>{@link android.app.FragmentManager}를 사용하여 액티비티가 다시 시작될 때 프래그먼트를 
+검색합니다.</li>
+</ol>
+
+<p>예를 들어 프래그먼트를 다음과 같이 정의합니다.</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>주의:</strong> 어느 객체든 저장할 수 있지만, 
+{@link android.app.Activity}에 묶여 있는 객체는 절대로 전달하면 안 됩니다. 예를 들어 {@link
+android.graphics.drawable.Drawable}, {@link android.widget.Adapter}, {@link android.view.View}
+ 또는 {@link android.content.Context}와 연관된 기타 모든 객체가 이에 해당됩니다. 이런 것을 전달하면, 
+원래 액티비티 인스턴스의 모든 보기와 리소스를 몽땅 누출시킵니다. (리소스 누출이란 
+애플리케이션이 리소스에 대한 보유권을 유지하고 있어 가비지 수집의 대상이 될 수 없고, 따라서 엄청난 양의 메모리가 
+손실된다는 뜻입니다.)</p>
+
+<p>그런 다음 {@link android.app.FragmentManager}를 사용하여 프래그먼트를 액티비티에 추가합니다. 
+프래그먼트에서 데이터 객체를 가져오려면 런타임 구성 변경 중에 액티비티가 다시 시작될 때 
+가져오면 됩니다. 예를 들어, 액티비티를 다음과 같이 정의합니다.</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>이 예시에서 {@link android.app.Activity#onCreate(Bundle) onCreate()}는 프래그먼트를 추가하거나 
+이에 대한 참조를 복원합니다. {@link android.app.Activity#onCreate(Bundle) onCreate()} 또한 
+프래그먼트 인스턴스 안에 상태 저장 객체를 저장합니다. 
+{@link android.app.Activity#onDestroy() onDestroy()}는 보존된 
+프래그먼트 인스턴스 내부의 상태 저장 객체를 업데이트합니다.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">구성 변경 직접 처리하기</h2>
+
+<p>애플리케이션이 특정 구성 변경 중에 리소스를 업데이트하지 않아도 되고 
+그와 <em>동시에</em> 성능 한계가 있어 액티비티 다시 시작을 피해야 하는 경우, 
+액티비티가 구성 변경을 알아서 처리한다고 선언하면 됩니다. 
+이렇게 하면 시스템이 액티비티를 다시 시작하지 않도록 방지할 수 있습니다.</p>
+
+<p class="note"><strong>참고:</strong> 구성 변경을 직접 처리하면 대체 리소스를 사용하는 것이 
+훨씬 더 까다로워질 수 있습니다. 시스템이 개발자 대신 자동으로 이를 적용해주지 않기 
+때문입니다. 이 기법은 구성 변경으로 인한 재시작을 반드시 피해야만 하는 경우 최후의 수단으로서만 
+고려해야 하며 대부분의 애플리케이션에는 권장하지 않습니다.</p>
+
+<p>액티비티가 구성 변경을 직접 처리한다고 선언하려면, 매니페스트 파일의 적절한 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 요소를 편집하여 
+처리하고자 하는 구성을 나타내는 값이 있는 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 속성을 포함하도록 
+합니다. 가능한 값은 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 속성에 대한 관련 문서에 목록으로 나열되어 있습니다(가장 보편적으로 사용되는 값은 화면 방향이 변경될 때 다시 시작을 방지하는 {@code "orientation"}과 
+키보드 가용성이 변경될 때 다시 시작을 방지하는 {@code "keyboardHidden"}
+입니다).  이 속성에는 여러 개의 구성 값을 선언할 수 있습니다. 각각을 
+파이프 {@code |} 문자로 구분하면 됩니다.</p>
+
+<p>예를 들어 다음 매니페스트 코드는 화면 방향 변경과 키보드 가용성 변경을 둘 다 
+처리하는 액티비티를 선언하는 것입니다.</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>이제 이러한 구성 중 하나가 변경되어도 {@code MyActivity}는 다시 시작하지 않습니다. 
+그 대신, {@code MyActivity}가 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}로의 호출을 받습니다. 이 메서드는 
+{@link android.content.res.Configuration} 객체로 전달되며, 이는 새 기기 구성을 
+나타냅니다. {@link android.content.res.Configuration}의 필드를 읽어보면 
+새 구성을 판별할 수 있고 적절한 변경을 할 수 있습니다. 그러려면 인터페이스에 사용된 리소스를 
+업데이트하면 됩니다. 이 메서드가 
+호출되면, 액티비티의 {@link android.content.res.Resources} 객체가 
+업데이트되어 새 구성에 기반한 리소스를 반환하며, 따라서 시스템이 액티비티를 다시 시작하지 않아도 
+UI의 요소를 손쉽게 재설정할 수 있게 됩니다.</p>
+
+<p class="caution"><strong>주의:</strong> Android 3.2(API 레벨 13)부터 기기가 
+세로 방향 및 가로 방향 사이를 전환할 때 <strong>"화면 크기"도 
+같이 변경됩니다</strong>. 따라서, 
+API 레벨 13 이상(<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 및 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+ 속성에서 선언한 내용에 따름)을 대상으로 개발하는 경우 방향 변경으로 인한 런타임 다시 시작을 방지하고자 하면, {@code
+"orientation"} 값 외에 {@code "screenSize"} 값도 포함시켜야 합니다. 다시 말해, {@code
+android:configChanges="orientation|screenSize"}를 선언해야 합니다. 하지만, 애플리케이션이 API 레벨 12 이하를 
+대상으로 하는 경우라면 애플리케이션이 언제든 이 구성 변경을 알아서 처리합니다(이 구성 변경은 
+액티비티를 다시 시작하지 않습니다. 이는 Android 3.2 이상 기기에서 실행되는 경우에도 마찬가지입니다).</p>
+
+<p>예를 들어, 다음 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 구현은 
+현재 기기의 방향을 확인합니다.</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>{@link android.content.res.Configuration} 객체는 변경된 것만이 아니라 현재 
+구성 전체를 나타냅니다. 대부분의 경우에는 구성이 정확히 어떻게 
+변경되었는지에는 관심이 없고 처리 중인 구성에 대체 리소스를 제공하는 모든 리소스를 그저 
+재할당하기만 하면 됩니다. 예를 들어 이제 {@link
+android.content.res.Resources} 객체가 업데이트되었으니 {@link android.widget.ImageView#setImageResource(int)
+setImageResource()}가 있는 모든 
+{@link android.widget.ImageView}와 
+새 구성에 대한 적절한 리소스를 재설정할 수 있습니다(<a href="providing-resources.html#AlternateResources">리소스 제공</a>에 설명된 바와 같음).</p>
+
+<p>{@link
+android.content.res.Configuration} 필드에서 가져온 값이 
+{@link android.content.res.Configuration} 클래스에서 가져온 특정 상수와 일치하는 정수라는 점을 눈여겨 보십시오. 각 필드에 
+어느 상수를 써야 하는지에 대한 관련 문서는 {@link
+android.content.res.Configuration} 참조에 있는 적절한 필드를 참조하십시오.</p>
+
+<p class="note"><strong>명심할 점:</strong> 액티비티가 직접 구성 변경을 처리한다고 선언하는 경우, 
+대체를 제공하는 모든 요소에 대해 본인이 직접 책임을 지게 됩니다. 액티비티가 직접 
+방향 변경을 처리하고 가로 및 세로 방향 사이에서 바뀌어야 하는 이미지가 있는 경우, 
+각 리소스를 각 요소에 재할당해야 하며 이를 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 중에 수행해야 합니다.</p>
+
+<p>이러한 구성 변경을 기반으로 애플리케이션을 업데이트하지 않아도 되는 경우, 
+대신 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}를 구현하지 <em>않으면</em> 됩니다. 이런 
+경우, 구성 변경 전에 쓰였던 리소스가 모두 그대로 사용되고 액티비티의 다시 시작만 
+피한 것이 됩니다. 그러나, 애플리케이션은 
+언제든 종료되고 이전 상태를 그대로 유지한 채 다시 시작될 수 있어야 합니다 정상적인 액티비티 
+수명 주기 중에 상태 유지에서의 탈출 방안으로 이 기법을 고려해서는 안 됩니다. 이는 애플리케이션이 
+다시 시작되지 않도록 방지할 수 없는, 다른 구성 변경도 여럿 있어서일뿐만 아니라, 사용자가 
+애플리케이션을 떠났을 경우 해당 사용자가 다시 돌아오기 전에 소멸되는 것과 같은 이벤트를 처리해야 하기 때문이라는 
+이유도 있습니다.</p>
+
+<p>액티비티 내에서 처리할 수 있는 구성 변경이 무엇인지에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 관련 문서와 {@link android.content.res.Configuration}
+클래스를 참조하십시오.</p>

@@ -1,0 +1,658 @@
+page.title=Serviços vinculados
+parent.title=Serviços
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Neste documento</h2>
+<ol>
+  <li><a href="#Basics">Conceitos básicos</a></li>
+  <li><a href="#Creating">Criação de um serviço vinculado</a>
+    <ol>
+      <li><a href="#Binder">Extensão da classe Binder</a></li>
+      <li><a href="#Messenger">Uso de um mensageiro</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">Vinculação a um serviço</a></li>
+  <li><a href="#Lifecycle">Gerenciamento do ciclo de vida de um serviço vinculado</a></li>
+</ol>
+
+<h2>Classes principais</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>Exemplos</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Veja também</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">Serviços</a></li>
+</ol>
+</div>
+
+
+<p>Um serviço vinculado é o servidor em uma interface servidor-cliente. Um serviço vinculado permite que componentes
+(como atividades) sejam vinculados ao serviço, enviem solicitações, recebam respostas e até estabeleçam
+comunicação entre processos (IPC). Um serviço vinculado, geralmente, vive somente enquanto serve
+outro componente do aplicativo e não é executado em segundo plano indefinidamente.</p>
+
+<p>Este documento mostra como criar um serviço vinculado, inclusive como criar vínculos
+com o serviço a partir de outros componentes do aplicativo. No entanto, você também deve consultar a documentação <a href="{@docRoot}guide/components/services.html">Serviços</a> para obter
+informações adicionais sobre serviços de forma geral, por exemplo: como enviar notificações de um serviço,
+como definir o serviço a ser executado em primeiro plano etc.</p>
+
+
+<h2 id="Basics">Conceitos básicos</h2>
+
+<p>Um serviço vinculado é uma implementação da classe {@link android.app.Service} que permite
+que outros aplicativos sejam vinculados e interajam com ele. Para fornecer a vinculação
+a um serviço, você deve implementar o método de retorno de chamada {@link android.app.Service#onBind onBind()}. Este método
+retorna um objeto {@link android.os.IBinder} que define a interface de programação
+que os clientes podem usar para interagir com o serviço.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Vinculação com um serviço iniciado</h3>
+
+<p>Como discutido na documentação <a href="{@docRoot}guide/components/services.html">Serviços</a>,
+é possível criar um serviço que já foi iniciado e vinculado. Ou seja, o serviço pode
+ser iniciado chamando {@link android.content.Context#startService startService()}, que permite que ele
+permaneça em execução indefinidamente e também permite que um cliente vincule-o chamando {@link
+android.content.Context#bindService bindService()}.
+  <p>Se você permitir que o serviço seja iniciado e vinculado, então, quando ele
+for iniciado, o sistema <em>não</em> o destruirá quando todos os clientes desfizerem a vínculo. Em vez disso, você deve
+interromper o serviço explicitamente chamando {@link android.app.Service#stopSelf stopSelf()} ou {@link
+android.content.Context#stopService stopService()}.</p>
+
+<p>Apesar de normalmente se implementar {@link android.app.Service#onBind onBind()}
+<em>ou</em> {@link android.app.Service#onStartCommand onStartCommand()}, às vezes
+é necessário implementar ambos. Por exemplo, um reprodutor de música pode achar útil permitir que o seu serviço
+permaneça em execução indefinidamente, além de fornecer vinculação. Desta forma, uma atividade pode iniciar o serviço
+para reproduzir algumas músicas e a música continuará em reprodução mesmo quando o usuário sair do aplicativo. Em seguida, quando o usuário
+voltar ao aplicativo, a atividade poderá vincular-se ao serviço para retomar o controle da reprodução.</p>
+
+<p>Certifique-se de ler a seção sobre <a href="#Lifecycle">Gerenciamento do ciclo de vida de um serviço
+vinculado</a> para obter mais informações sobre o ciclo de vida do serviço ao adicionar vinculação
+a um serviço iniciado.</p>
+</div>
+</div>
+
+<p>Um cliente pode vincular-se ao serviço chamando {@link android.content.Context#bindService
+bindService()}. Quando isto ocorre, é preciso fornecer uma implementação de {@link
+android.content.ServiceConnection}, que monitora a conexão com o serviço. O método {@link
+android.content.Context#bindService bindService()} retorna imediatamente sem um valor,
+mas quando o sistema Android cria a conexão entre
+o cliente e o serviço, ele chama {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} em {@link
+android.content.ServiceConnection} para fornecer o {@link android.os.IBinder}
+que o cliente pode usar para comunicar-se com o serviço.</p>
+
+<p>Vários clientes podem conectar-se ao serviço de uma vez. No entanto, o sistema chama o método
+{@link android.app.Service#onBind onBind()} do serviço para recuperar o {@link android.os.IBinder}
+somente quando o primeiro cliente é vinculado. Em seguida, o sistema entrega o mesmo {@link android.os.IBinder}
+para quaisquer clientes adicionais que vincularem-se, sem chamar {@link android.app.Service#onBind onBind()} novamente.</p>
+
+<p>Quando o último cliente desvincular-se do serviço, o sistema destruirá o serviço
+(a não ser que ele também seja iniciado por {@link android.content.Context#startService startService()}).</p>
+
+<p>Ao implementar o serviço vinculado, o mais importante é definir a interface
+que o método de retorno de chamada {@link android.app.Service#onBind onBind()} retornará. Há poucas maneiras diferentes
+de definir a interface {@link android.os.IBinder} do serviço e a
+seção a seguir discute cada técnica.</p>
+
+
+
+<h2 id="Creating">Criação de um serviço vinculado</h2>
+
+<p>Ao criar um serviço que fornece vinculação, você deve fornecer um {@link android.os.IBinder}
+que ofereça a interface de programação que os clientes podem usar para interagir com o serviço. Há três maneiras
+possíveis de definir a interface:</p>
+
+<dl>
+  <dt><a href="#Binder">Extensão da classe Binder</a></dt>
+  <dd>Se o serviço for privado para o próprio aplicativo e for executado no mesmo processo que o cliente
+(o que é comum), deve-se criar a interface estendendo-se a classe {@link android.os.Binder}
+e retornando uma instância dela a partir de
+{@link android.app.Service#onBind onBind()}. O cliente receberá {@link android.os.Binder}
+e poderá usá-lo para acessar os métodos públicos disponíveis na implementação de {@link android.os.Binder}
+ou até em {@link android.app.Service} diretamente.
+  <p>Esta é a técnica preferencial quando o serviço é meramente um trabalhador de segundo plano
+para o aplicativo. O único motivo pelo qual não se criaria a interface desta maneira
+é porque o serviço está sendo usado por outros aplicativos ou em processos separados.</dd>
+
+  <dt><a href="#Messenger">Uso de um mensageiro</a></dt>
+  <dd>Caso precise que a interface funcione em diferentes processos, é possível
+criar uma interface para o serviço com {@link android.os.Messenger}. Desta maneira, o serviço
+define um {@link android.os.Handler} que responde a diferentes tipos de objetos {@link
+android.os.Message}. Este {@link android.os.Handler}
+é a base para {@link android.os.Messenger}, que pode então compartilhar um {@link android.os.IBinder}
+com o cliente, permitindo que ele envie comandos ao serviço usando objetos {@link
+android.os.Message}. Além disso, o cliente pode definir o próprio {@link android.os.Messenger}
+para que o serviço possa enviar as mensagens de volta.
+  <p>Esta é a maneira mais simples de estabelecer comunicação entre processos (IPC), pois o {@link
+android.os.Messenger} coloca todas as solicitações em fila em um único encadeamento para que você não precise
+projetar o serviço de modo que seja seguro para encadeamentos.</p>
+  </dd>
+
+  <dt>Uso de AIDL</dt>
+  <dd>O AIDL (Android Interface Definition Language, linguagem de definição de interface do Android) realiza todo o trabalho de decomposição de objetos
+em primitivos para que o sistema operacional possa entendê-los e dispô-los em processos
+para realizar a IPC. A técnica anterior, usando o {@link android.os.Messenger}, tem base em AIDL
+como a estrutura fundamental. Como mencionado acima, o {@link android.os.Messenger} cria uma fila
+de todas as solicitações de cliente em um único encadeamento para que o serviço receba uma solicitação por vez. Se, no entanto,
+você quiser que o serviço lide com várias solicitações simultaneamente, é possível usar a AIDL
+diretamente. Neste caso, o serviço deverá ser capaz de realizar vários encadeamentos e ser programado de forma segura para encadeamentos.
+  <p>Para usar a AIDL diretamente, deve-se
+criar um arquivo {@code .aidl} que defina a interface de programação. As ferramentas SDK do Android
+usam este arquivo para gerar uma classe abstrata que implemente a interface e lide com a IPC,
+que pode ser estendida dentro do serviço.</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>Observação:</strong> a maioria dos aplicativos <strong>não deve</strong> usar a AIDL
+para criar um serviço vinculado, pois isto requer capacidade de se trabalhar com encadeamentos múltiplos
+e pode resultar em uma implementação mais complicada. Portanto, a AIDL não é adequada para a maioria dos aplicativos
+e este documento não discute o seu uso para o serviço. Caso tenha certeza de que
+precisa usar a AIDL diretamente, consulte a documentação
+<a href="{@docRoot}guide/components/aidl.html">AIDL</a>.</p>
+
+
+
+
+<h3 id="Binder">Extensão da classe Binder</h3>
+
+<p>Se o serviço for usado somente pelo aplicativo local e não precisar trabalhar entre processos,
+então será possível implementar a própria classe {@link android.os.Binder} que fornece ao cliente
+acesso direto aos métodos públicos no serviço.</p>
+
+<p class="note"><strong>Observação:</strong> isto funciona somente se o cliente e o serviço
+estiverem no mesmo aplicativo e processo, o que é muito comum. Por exemplo, isto funcionaria bem para um
+aplicativo de música que precise vincular uma atividade ao próprio serviço que está
+reproduzindo música em segundo plano.</p>
+
+<p>Como configurar:</p>
+<ol>
+  <li>No serviço, crie uma instância de {@link android.os.Binder} que:
+    <ul>
+      <li>contenha métodos públicos que o cliente possa chamar</li>
+      <li>retorne ao cliente a instância {@link android.app.Service}, que tenha métodos públicos
+que ele possa chamar</li>
+      <li>ou retorne uma instância de outra classe hospedada pelo serviço com métodos públicos
+que o cliente possa chamar</li>
+    </ul>
+  <li>Retorne esta instância de {@link android.os.Binder} a partir do método de retorno de chamada {@link
+android.app.Service#onBind onBind()}.</li>
+  <li>No cliente, receba o {@link android.os.Binder} a partir do método de retorno de chamada {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}
+e faça chamadas para o serviços vinculados usando os métodos fornecidos.</li>
+</ol>
+
+<p class="note"><strong>Observação:</strong> o motivo pelo qual o serviço e o cliente devem estar no mesmo aplicativo
+é para que o cliente possa lançar o objeto retornado e chamar as APIs adequadamente. O serviço e o cliente
+também devem estar no mesmo processo, pois esta técnica não possui
+nenhuma ingerência entre processos.</p>
+
+<p>Por exemplo, a seguir há um serviço que fornece aos clientes acesso aos métodos no serviço
+por meio de uma implementação de {@link android.os.Binder}:</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>O {@code LocalBinder} fornece o método {@code getService()} para que os clientes
+recuperem a instância atual de {@code LocalService}. Isto permite que os clientes chamem métodos públicos
+no serviço. Por exemplo, eles podem chamar {@code getRandomNumber()} a partir do serviço.</p>
+
+<p>Abaixo há uma atividade que vincula-se a {@code LocalService} e chama {@code getRandomNumber()}
+quando um botão é pressionado:</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>O exemplo acima mostra como o cliente vincula um serviço usando uma implementação
+de {@link android.content.ServiceConnection} e o retorno de chamada {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}. A próxima seção
+fornece mais informações sobre este processo de vinculação ao serviço.</p>
+
+<p class="note"><strong>Observação:</strong> o exemplo acima não desfaz a vinculação explicitamente a partir do serviço,
+mas todos os clientes devem fazê-lo no momento adequado (como quando a atividade pausa).</p>
+
+<p>Para obter mais códigos de exemplo, consulte a classe <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> e a classe <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a> em <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h3 id="Messenger">Uso de um mensageiro</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>Comparado ao AIDL</h4>
+  <p>Quando é necessário fazer uma IPC, usar o {@link android.os.Messenger} para a interface
+é mais simples do que implementá-la com AIDL, pois o {@link android.os.Messenger} enfileira
+todas as chamadas do serviço, enquanto que uma interface de AIDL pura envia solicitações simultâneas
+ao serviço, que deve então lidar com vários encadeamentos.</p>
+  <p>Para a maioria dos aplicativos, o serviço não precisa realizar vários encadeamentos. Portanto, usar {@link
+android.os.Messenger} permite que o serviço lide com uma chamada por vez. Caso seja importante
+que o serviço realize vários encadeamentos, deve-se usar a <a href="{@docRoot}guide/components/aidl.html">AIDL</a> para definir a interface.</p>
+</div>
+</div>
+
+<p>Caso precise que o serviço comunique-se com processos remotos, é possível usar 
+o {@link android.os.Messenger} para fornecer a interface ao serviço. Esta técnica permite
+estabelecer comunicação entre processos (IPC) sem precisar usar a AIDL.</p>
+
+<p>A seguir há um resumo sobre como usar um {@link android.os.Messenger}:</p>
+
+<ul>
+  <li>O serviço implementa um {@link android.os.Handler} que recebe um retorno de chamada
+para cada chamada de um cliente.</li>
+  <li>O {@link android.os.Handler} é usado para criar um objeto {@link android.os.Messenger}
+(que é uma referência para o {@link android.os.Handler}).</li>
+  <li>O {@link android.os.Messenger} cria um {@link android.os.IBinder} que o serviço
+retorna aos clientes a partir de {@link android.app.Service#onBind onBind()}.</li>
+  <li>Os clientes usam {@link android.os.IBinder} para instanciar o {@link android.os.Messenger}
+(que menciona o {@link android.os.Handler} do serviço), que usam para enviar objetos 
+{@link android.os.Message} para o serviço.</li>
+  <li>O serviço recebe cada {@link android.os.Message} em seu {@link
+android.os.Handler} &mdash; especificamente, no método {@link android.os.Handler#handleMessage
+handleMessage()}.</li>
+</ul>
+
+
+<p>Desta forma, não há "métodos" para o cliente chamar no serviço. Em vez disso, o cliente
+envia "mensagens" (objetos {@link android.os.Message}) que o serviço recebe
+no {@link android.os.Handler}.</p>
+
+<p>Abaixo há um exemplo simples de serviço que usa uma interface {@link android.os.Messenger}:</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>Observe que o método {@link android.os.Handler#handleMessage handleMessage()}
+no {@link android.os.Handler} é onde o serviço recebe a {@link android.os.Message}
+e decide o que fazer, com base no membro {@link android.os.Message#what}.</p>
+
+<p>Tudo que o cliente precisa fazer é criar um {@link android.os.Messenger} com base no {@link
+android.os.IBinder} retornado pelo serviço e enviar uma mensagem usando {@link
+android.os.Messenger#send send()}. Por exemplo, a seguir há uma atividade simples que vincula-se
+ao serviço e envia a mensagem {@code MSG_SAY_HELLO} a ele:</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>Observe que este exemplo não mostra como o serviço pode responder ao cliente. Caso queira que o serviço responda,
+é necessário criar um {@link android.os.Messenger} no cliente também. Em seguida,
+quando o cliente receber o retorno de chamada de {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, ele enviará uma {@link android.os.Message} para o serviço que inclui
+o {@link android.os.Messenger} no parâmetro {@link android.os.Message#replyTo}
+do método {@link android.os.Messenger#send send()}.</p>
+
+<p>É possível ver um exemplo de como fornecer mensagens de duas vias nos exemplos <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a> (serviço) e <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a> (cliente).</p>
+
+
+
+
+
+<h2 id="Binding">Vinculação a um serviço</h2>
+
+<p>Um componente de aplicativo (cliente) pode vincular-se a um serviço chamando
+{@link android.content.Context#bindService bindService()}. O sistema Android, em seguida,
+chama o método {@link android.app.Service#onBind
+onBind()} do serviço, que retorna um {@link android.os.IBinder} para interagir com o serviço.</p>
+
+<p>A vinculação é assíncrona. {@link android.content.Context#bindService
+bindService()} retorna imediatamente e <em>não</em> retorna o {@link android.os.IBinder}
+ao cliente. Para receber {@link android.os.IBinder}, o cliente deve criar uma instância de {@link
+android.content.ServiceConnection} e passá-la para {@link android.content.Context#bindService
+bindService()}. O {@link android.content.ServiceConnection} inclui um método de retorno de chamada
+que o sistema chama para entregar o {@link android.os.IBinder}.</p>
+
+<p class="note"><strong>Observação:</strong> somente atividades, serviços e provedores de conteúdo
+podem vincular-se a um serviço &mdash; você <strong>não</strong> pode fazer isto a partir de um receptor de transmissão.</p>
+
+<p>Portanto, para vincular-se a um serviço a partir do cliente, deve-se: </p>
+<ol>
+  <li>Implementar {@link android.content.ServiceConnection}.
+    <p>Sua implementação deve substituir dois métodos de retorno de chamada:</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>O sistema chama isto para entregar o {@link android.os.IBinder} retornado
+pelo método {@link android.app.Service#onBind onBind()} do serviço.</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>O sistema Android chama isto quando a conexão ao serviço é perdida inesperadamente,
+ como quando o serviço apresenta problemas ou é fechado repentinamente. Isto <em>não</em> é chamado quando
+o cliente desfaz o vínculo.</dd>
+    </dl>
+  </li>
+  <li>Chamar {@link
+android.content.Context#bindService bindService()}, passando a implementação {@link
+android.content.ServiceConnection}. </li>
+  <li>Quando o sistema chamar o método de retorno de chamada {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, é possível fazer chamadas para o serviço
+usando os métodos definidos pela interface.</li>
+  <li>Para desconectar-se de um serviço, chamar {@link
+android.content.Context#unbindService unbindService()}.
+    <p>Quando um cliente é destruído, o vínculo com o serviço acaba. No entanto, sempre desvincule-se
+ao terminar a interação com o serviço ou quando a atividade pausar para que o serviço
+possa ser encerrado enquanto não estiver em uso (os momentos adequados para vincular ou desvincular
+são abordados mais abaixo).</p>
+  </li>
+</ol>
+
+<p>Por exemplo, o fragmento a seguir conecta o cliente ao serviço criado acima 
+<a href="#Binder">estendendo a classe Binder</a> para que tudo que ele tenha que fazer seja lançar
+o {@link android.os.IBinder} retornado para a classe {@code LocalService} e solicitar a instância de {@code
+LocalService}:</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>Com este {@link android.content.ServiceConnection}, o cliente pode vincular-se a um serviço
+passando-o para {@link android.content.Context#bindService bindService()}. Por exemplo:</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>O primeiro parâmetro de {@link android.content.Context#bindService bindService()}
+é uma {@link android.content.Intent} que nomeia explicitamente o serviço que será vinculado (apesar de a intenção
+poder ser implícita).</li>
+<li>O segundo parâmetro é o objeto {@link android.content.ServiceConnection}.</li>
+<li>O terceiro parâmetro é um sinalizador que indica as opções de vinculação. Geralmente, ele deve ser {@link
+android.content.Context#BIND_AUTO_CREATE} para criar o serviço se não estiver ativo ainda.
+Outros possíveis valores são {@link android.content.Context#BIND_DEBUG_UNBIND}
+e {@link android.content.Context#BIND_NOT_FOREGROUND}, ou {@code 0} para nada.</li>
+</ul>
+
+
+<h3>Observações adicionais</h3>
+
+<p>A seguir há algumas observações importantes sobre a vinculação com um serviço:</p>
+<ul>
+  <li>Deve-se sempre capturar exceções{@link android.os.DeadObjectException}, que são lançadas
+quando a conexão apresenta erros. Esta é a única exceção lançada por métodos remotos.</li>
+  <li>Objetos são referências contadas em todos os processos. </li>
+  <li>Geralmente, alterna-se entre a vinculação e a desvinculação
+durante os momentos crescentes e decrescentes do ciclo de vida do cliente. Por exemplo:
+    <ul>
+      <li>Caso precise interagir com o serviço enquanto a atividade estiver visível,
+deve-se vincular durante {@link android.app.Activity#onStart onStart()} e desvincular durante {@link
+android.app.Activity#onStop onStop()}.</li>
+      <li>Caso queira que a atividade receba mensagens mesmo quando for interrompida
+em segundo plano, é possível vincular durante {@link android.app.Activity#onCreate onCreate()}
+e desvincular durante {@link android.app.Activity#onDestroy onDestroy()}. Cuidado, pois isto significa que a atividade
+precisa usar o serviço durante todo o tempo de execução (mesmo em segundo plano).
+Portanto, se o serviço estiver em outro processo, o peso do processo será aumentado
+e é mais provável que o sistema elimine-o.</li>
+    </ul>
+    <p class="note"><strong>Observação:</strong> geralmente, <strong>não</strong> se realiza o vínculo e o seu rompimento
+durante o {@link android.app.Activity#onResume onResume()} e o {@link
+android.app.Activity#onPause onPause()} da atividade, pois esses retornos de chamada ocorrem em todas as transições do ciclo de vida
+e deve-se usar menos processamento possível nessas transações. Além disso,
+se várias atividades no aplicativo vincularem-se ao mesmo serviço e houver uma transação entre duas
+dessas atividades, o serviço poderá ser destruído e recriado à medida que a atividade desvincula-se,
+durante a pausa, antes do próximo vínculo, durante a retomada (esta transição de atividade
+para como as atividades coordenam os ciclos de vida é descrita no documento <a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Atividades</a>
+).</p>
+</ul>
+
+<p>Para obter mais códigos de exemplo mostrando como vincular a um serviço, consulte a classe <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> no <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h2 id="Lifecycle">Gerenciamento do ciclo de vida de um serviço vinculado</h2>
+
+<p>Quando um serviço é desvinculado de todos os clientes, o sistema Android o destrói (a não ser que ele
+também tenha sido inicializado com {@link android.app.Service#onStartCommand onStartCommand()}). Portanto, não é necessário
+gerenciar o ciclo de vida do serviço se ele for puramente um serviço vinculado
+&mdash; o sistema Android o gerencia com base nos vínculos com os clientes.</p>
+
+<p>No entanto, se você escolher implementar o método de retorno de chamada {@link android.app.Service#onStartCommand
+onStartCommand()}, interrompa o serviço explicitamente, pois o serviço
+já terá sido considerado como <em>iniciado</em>. Neste caso, o serviço permanece em execução até
+ser interrompido com {@link android.app.Service#stopSelf()} ou outras chamadas de componente {@link
+android.content.Context#stopService stopService()}, independente de vínculo
+com qualquer cliente.</p>
+
+<p>Além disso, se o serviço for iniciado e aceitar vínculos, quando o sistema chamar
+o método {@link android.app.Service#onUnbind onUnbind()}, será possível retornar 
+{@code true} opcionalmente se você quiser receber uma chamada de {@link android.app.Service#onRebind
+onRebind()} na próxima vez em que um cliente vincular-se ao serviço (em vez de receber uma chamada de {@link
+android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind
+onRebind()} retorna vazio, mas o cliente ainda recebe {@link android.os.IBinder}
+no retorno de chamada {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}.
+Abaixo, a figura 1 ilustra a lógica para este tipo de ciclo de vida.</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> O ciclo de vida para um serviço que é iniciado
+e também permite vínculos.</p>
+
+
+<p>Para obter mais informações sobre o ciclo de vida de um serviço iniciado, consulte o documento <a href="{@docRoot}guide/components/services.html#Lifecycle">Serviços</a>.</p>
+
+
+
+

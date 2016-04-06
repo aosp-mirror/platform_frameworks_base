@@ -1,0 +1,813 @@
+page.title=服務
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>本文件內容</h2>
+<ol>
+<li><a href="#Basics">基本概念</a></li>
+<ol>
+  <li><a href="#Declaring">在宣示說明中宣告服務</a></li>
+</ol>
+<li><a href="#CreatingAService">建立已啟動的服務</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">延伸 IntentService 類別</a></li>
+    <li><a href="#ExtendingService">延伸服務類別</a></li>
+    <li><a href="#StartingAService">啟動服務</a></li>
+    <li><a href="#Stopping">停止服務</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">建立已繫結的服務</a></li>
+<li><a href="#Notifications">傳送通知給使用者</a></li>
+<li><a href="#Foreground">在前景中執行服務</a></li>
+<li><a href="#Lifecycle">管理服務的生命週期</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">實作生命週期回呼</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>重要類別</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>範例</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">已繫結的服務</a></li>
+</ol>
+
+</div>
+
+
+<p>{@link android.app.Service} 是可以在背景中長時間執行操作的應用程式元件，且不提供使用者介面。
+也是另一個可以啟動服務的應用程式元件，就算使用者切換至其他應用程式，也會繼續在背景中執行。
+
+此外，元件也可以繫結至服務，以便與其互動，甚至執行處理程序間通訊 (IPC)。
+例如，服務可能處理網路交易、播放音樂、執行檔案輸入/輸出或與內容供應程式互動，這些都可以從背景執行。
+
+</p>
+
+<p>服務基本上可以採取兩種形式：</p>
+
+<dl>
+  <dt>啟動</dt>
+  <dd>服務「啟動」表示應用程式元件 (例如 Activity) 透過呼叫
+{@link android.content.Context#startService startService()} 來啟動服務。一旦啟動，服務可以無限次數地在背景中執行，就算啟動服務的元件已終結也不會影響。
+通常，已啟動的服務會執行單一操作且不會將結果傳回呼叫端。例如，服務可能會透過網路下載或上傳檔案。
+
+當操作完成時，服務應該會自行終結。
+</dd>
+  <dt>繫結</dt>
+  <dd>服務「繫結」表示應用程式元件透過呼叫 {@link
+android.content.Context#bindService bindService()} 來繫結至服務。已繫結的服務提供主從式介面，讓元件可以與服務互動、傳送要求、取得結果，甚至可以使用處理程序間通訊 (IPC) 來跨程序達到目的。
+
+已繫結的服務伴隨另一個繫結至服務的應用程式元件執行。
+多重元件可以一次繫結至服務，但是當所有元件都取消繫結時，服務就會被終結。
+</dd>
+</dl>
+
+<p>雖然此文件通常分別討論服務的這兩種類別，但您的服務兩種方式都可以執行 &mdash; 可以啟動服務 (無限次數地執行) 也允許繫結。
+這僅與您是否實作兩種回呼方法而定：{@link
+android.app.Service#onStartCommand onStartCommand()} 允許元件啟動服務，而 {@link
+android.app.Service#onBind onBind()} 則允許繫結。
+</p>
+
+<p>不論您的應用程式是否啟動、繫結或兩者都有，任何應用程式元件可以使用服務 (就算來自不同的應用程式)，與任何元件可以使用 Activity 的方式相同 &mdash; 使用 {@link android.content.Intent} 啟動服務。
+
+然而，您可以宣告服務為私用、位於宣示說明檔案之中，與封鎖從其他應用程式存取。
+如需更多討論資訊，請詳見<a href="#Declaring">在宣示說明中宣告服務</a>。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>服務會在其託管程序的主執行緒中執行 &mdash; 服務<strong>不會</strong>建立自己的執行緒且<strong>不會</strong>在另外的程序中執行 (除非您另行指定)。
+
+這代表如果您的服務即將從事任何 CPU 密集的作業或封鎖操作 (如播放 MP3 或連線網路)，您應該在服務中建立新的執行緒來執行這些工作。
+
+透過使用另外的執行緒，您會降低應用程式不回應 (ANR) 錯誤的風險，且應用程式的主執行緒仍可以專務於使用者與您的 Activity 互動。
+
+</p>
+
+
+<h2 id="Basics">基本概念</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>應該使用服務或執行緒？</h3>
+  <p>服務簡單而言就是可以在背景中執行的元件，就算使用者不與您的應用程式互動也不會影響。
+所以，您應該只在需要時才建立服務。
+</p>
+  <p>如果您必須在主執行緒外執行作業，但只有在使用者與您應用程式互動時才需要，則您可能應該建立新的執行緒而非服務。
+例如，如果您想要播放一些音樂，但只在執行您的 Activity 時播放，您可能在
+{@link android.app.Activity#onCreate onCreate()} 中建立執行緒，在 {@link
+android.app.Activity#onStart onStart()} 中開始執行該執行緒，然後在 {@link android.app.Activity#onStop
+onStop()} 中停止。
+也可以考慮使用 {@link android.os.AsyncTask} 或 {@link android.os.HandlerThread}，來代替傳統的 {@link java.lang.Thread} 類別。
+如需更多有關執行緒的資訊，請參閱<a href="{@docRoot}guide/components/processes-and-threads.html#Threads">程序與執行緒</a>文件。
+</p>
+  <p>請記得如果您確實使用服務，依照預設會在您應用程式的主執行緒中執行該服務，所以，如果服務執行密集的操作或封鎖操作，則您仍應在服務中建立新的執行緒。
+
+</p>
+</div>
+</div>
+
+<p>如要建立服務，您必須建立 {@link android.app.Service} 的子類別 (或是其現有的子類別之一)。
+在您的實作中，如果可以，您必須覆寫某些回呼方法，這些方法負責處理服務生命週期的關鍵層面，並提供元件繫結至服務的機制。
+
+您應該覆寫的最重要回呼方法為：</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>當另一個元件 (如 Activity) 透過呼叫 {@link android.content.Context#startService
+startService()} 來要求啟動服務時，系統會呼叫此方法。
+一旦執行此方法，服務會被啟動且可以無限次數地在背景中執行。
+如果您實作此方法，當作業完成時，您必須負責停止服務，方式為呼叫 {@link android.app.Service#stopSelf stopSelf()} 或 {@link
+android.content.Context#stopService stopService()}。
+(如果您只想要提供繫結功能，您不需要實作此方法)。
+</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>當其他元件想要與服務 (如執行 RPC) 繫結時，系統會透過呼叫 {@link android.content.Context#bindService
+bindService()} 來呼叫此方法。
+在您實作此方法時，透過傳回 {@link android.os.IBinder}，您必須提供用戶端可用來與服務通訊的介面。
+您必須永遠實作此方法，但如果您不想允許繫結，則您應該傳回 null。
+</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>當第一次建立服務時，系統會呼叫此方法來執行一次性的設定程序 (在其呼叫 {@link android.app.Service#onStartCommand onStartCommand()} 或
+{@link android.app.Service#onBind onBind()} 之前)。
+如果已經執行服務，則不會呼叫此方法。
+</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>當不再使用服務且正在終結服務時，系統會呼叫此方法。您的服務應該實作此方法來清除任何如執行緒、註冊的接聽器，接收器等資源。
+
+這會是服務接收到的最後呼叫。</dd>
+</dl>
+
+<p>如果透過呼叫 {@link
+android.content.Context#startService startService()} (這是呼叫至 {@link
+android.app.Service#onStartCommand onStartCommand()} 的結果) 讓元件啟動服務，則服務仍會保持執行狀態，直到使用 {@link android.app.Service#stopSelf()} 讓服務自行停止或透過呼叫
+{@link android.content.Context#stopService stopService()} 由其他元件停止服務。
+</p>
+
+<p>如果元件呼叫
+{@link android.content.Context#bindService bindService()} 來建立服務 (且「沒有」呼叫 {@link
+android.app.Service#onStartCommand onStartCommand()}<em></em>)，則服務會伴隨繫結至服務的元件執行。
+一旦服務與所有用戶端解除繫結時，系統會終結服務。
+</p>
+
+<p>只有在記憶體不足且必須復原擁有使用者焦點的 Activity 其系統資源時，Android 系統才會強制停止服務。
+如果服務已繫結至擁有使用者焦點的 Activity，則該服務不太容易被終止，且如果服務被宣告為<a href="#Foreground">在前景中執行</a> (稍後會討論)，則該服務幾乎不會被終止。
+否則，如果長時間執行於前景中啟動的服務，則系統會隨時間降低該服務在背景工作清單中的位置，且該服務會很容易被終止 &mdash; 如果已啟動您的服務，則您必須設計讓系統可以完美地處理重新啟動。
+
+
+
+如果系統終止服務，則系統會在可以再度取得資源時立即重新啟動服務 (雖然這也會依據您從 {@link
+android.app.Service#onStartCommand onStartCommand()} 傳回的值而有所不同，稍後會討論)。
+如需更多有關系統何時可能終結服務的資訊，請參閱<a href="{@docRoot}guide/components/processes-and-threads.html">程序與執行緒</a>文件。
+
+</p>
+
+<p>在下列小節，您將看到您如何可以建立每種類型的服務與如何從不同應用程式元件使用。
+</p>
+
+
+
+<h3 id="Declaring">在宣示說明中宣告服務</h3>
+
+<p>就如同 Activity (與其他元件)，您必須在您應用程式的宣示說明檔案中宣告所有服務。
+</p>
+
+<p>如要宣告您的服務，可以新增 <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 元素為 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>元素的子項。
+
+例如：</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>如需更多有關在宣示說明中宣告您服務的行系資訊，請參閱 <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 元素。
+</p>
+
+<p>您還可以在 <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 元素中包含其他屬性，用來定義如啟動服務所需權限的屬性，與服務應該執行的程序。
+
+<a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a> 屬性是唯一必備的屬性 &mdash; 用來指定服務的類別名稱。
+一旦您發佈應用程式，您就不應該變更此名稱，因為如果這樣做，會由於依賴明確的意圖來啟動或繫結服務 (閱讀部落格貼文、<a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">不能變更的事項</a>)，造成程式碼中斷的風險。
+
+
+
+
+<p>如要確認您的應用程式是安全的，<strong>當啟動或繫結您的 {@link android.app.Service} 時，永遠使用明確意圖</strong>，且不要宣告服務的意圖篩選器。
+如果允許一定程度的模糊來決定啟動的服務是重要的，您可以提供您的服務意圖篩選器，並從 {@link
+android.content.Intent} 排除元件名稱，但您仍需使用 {@link
+android.content.Intent#setPackage setPackage()} 設定意圖的封裝，這會提供目標服務足夠明確、避免含糊的指示。
+
+
+</p>
+
+<p>此外，您可以確保只有您的應用程式可以使用您的服務，方法為包含 <a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a> 屬性並將其設定為 {@code "false"}。
+
+這可以有效地避免其他應用程式啟動您的服務，就算使用明確意圖時也是如此。
+</p>
+
+
+
+
+<h2 id="CreatingStartedService">建立已啟動的服務</h2>
+
+<p>已啟動的服務是由其他應用程式呼叫 {@link
+android.content.Context#startService startService()} 所啟動的，由呼叫至服務的
+{@link android.app.Service#onStartCommand onStartCommand()} 方法所導致。</p>
+
+<p>當服務啟動，其生命週期與啟動服務的元件無關，且服務可以無限次數地在背景中執行，就算啟動服務的元件已終結也不會影響。
+
+因此，當服務的工作藉由呼叫 {@link android.app.Service#stopSelf stopSelf()} 而完成時，服務應該會自行停止，或藉由呼叫 {@link android.content.Context#stopService stopService()}，其他元件也可以停止服務。
+
+</p>
+
+<p>如 Activity 等應用程式元件可以透過呼叫 {@link
+android.content.Context#startService startService()} 與傳送用來指定服務及包含服務所要使用任何資料的
+{@link android.content.Intent}，來啟動服務。服務會接收 {@link android.app.Service#onStartCommand
+onStartCommand()} 方法中的此 {@link android.content.Intent}。
+</p>
+
+<p>例如，假設 Activity 需要一些資料到線上資料庫。藉由傳送意圖至 {@link
+android.content.Context#startService startService()}，Activity 可以啟動伴隨服務並傳送要儲存的資料。
+服務會接收 {@link
+android.app.Service#onStartCommand onStartCommand()} 中的意圖，連線到網際網路，並執行資料庫交易。
+當操作完成時，服務應該會自行終結。
+</p>
+
+<p class="caution"><strong>注意：</strong>服務會在與應用程式相同的程序中執行，服務會在該程序中被宣告，且依照預設，會位於該應用程式的主執行緒之中。
+所以，在使用者與來自相同應用程式的 Activity 互動時，如果您的服務執行密集的操作或封鎖操作，則該服務將會降低 Activity 的效能。
+
+要避免影響應用程式的效能，您應該在服務之中啟動新的執行緒。
+</p>
+
+<p>傳統上，有兩種類別可以延伸為建立已啟動的服務：</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>這是所有服務的基本類別。當您延伸此類別時，建立用來執行所有服務工作的新執行緒是非常重要的，因為依照預設，服務會使用您應用程式的主執行緒，這會降低任何您應用程式所執行 Activity 的效能。
+
+
+</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>這是 {@link android.app.Service} 的子類別，會使用 worker 執行緒來處理所有的啟動要求，一次一個。
+如果您不需要您的服務同時處理多個要求，則這是最佳的選項。
+您唯一要做的就是實作 {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}，這會接收每個起始要求的意圖 ，所以您可以在背景執行。
+</dd>
+</dl>
+
+<p>下列小節說明如何可以使用這些類別之一來實作您的服務。
+</p>
+
+
+<h3 id="ExtendingIntentService">延伸 IntentService 類別</h3>
+
+<p>因為大多數的已啟動服務不需要同時處理多個要求(多重執行緒策略事實上是危險的)，如果您使用 {@link android.app.IntentService} 類別來實作您的服務可能是最佳的方法。
+
+</p>
+
+<p>{@link android.app.IntentService} 會達到下列目的：</p>
+
+<ul>
+  <li>建立預設的 worker 執行緒，該執行緒會執行所有傳送至 {@link
+android.app.Service#onStartCommand onStartCommand()} 的意圖，並與您應用程式的主執行緒有所分別。
+</li>
+  <li>建立工作佇列，該佇列會一次傳送一個意圖到您的 {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} 實作，所以您絕對不需要擔心多重執行緒的問題。
+</li>
+  <li>在所有啟動要求都已處理後，停止服務，這樣您永遠不需要呼叫
+{@link android.app.Service#stopSelf}。</li>
+  <li>提供傳回 null 的 {@link android.app.IntentService#onBind onBind()} 其預設實作。
+</li>
+  <li>提供傳送意圖至工作佇列的 {@link android.app.IntentService#onStartCommand
+onStartCommand()} 其預設實作，然後傳送至您的 {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} 實作。</li>
+</ul>
+
+<p>所有這一切都說明了您要做的就是實作 {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} 來完成用戶端提供的工作。
+(雖然，您也需要提供小型建構函式給服務)。</p>
+
+<p>下列是 {@link android.app.IntentService} 實作的範例：</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>您需要的是：{@link
+android.app.IntentService#onHandleIntent onHandleIntent()} 的建構函式與實作。</p>
+
+<p>如果您決定也要覆寫其他回呼方法，如 {@link
+android.app.IntentService#onCreate onCreate()}、{@link
+android.app.IntentService#onStartCommand onStartCommand()} 或 {@link
+android.app.IntentService#onDestroy onDestroy()}，請確認呼叫超級實作，這樣
+{@link android.app.IntentService} 才可以適當處理 worker 執行緒的生命。</p>
+
+<p>例如，{@link android.app.IntentService#onStartCommand onStartCommand()} 必須傳回預設的實作 (這就是意圖如何被傳送至 {@link
+android.app.IntentService#onHandleIntent onHandleIntent()})：
+</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>除了 {@link android.app.IntentService#onHandleIntent onHandleIntent()}，您不需要呼叫超級類別的唯一方法就是 {@link android.app.IntentService#onBind
+onBind()} (但只有在您的服務允許繫結時才需要實作)。
+</p>
+
+<p>在下一節，您會看到在延伸基本 {@link android.app.Service} 類別時，如何實作同類的服務，這需要寫更多程式碼，但是如果您需要同時處理多個啟動要求時，這可能是比較合適的處理方式。
+
+</p>
+
+
+<h3 id="ExtendingService">延伸服務類別</h3>
+
+<p>如同您在前一節看到的，使用 {@link android.app.IntentService} 可讓您已啟動服務的實作變得非常容易。
+然而，如果您要求您的服務執行多重執行緒 (取代透過工作佇列處理啟動要求)，則您可以延伸 {@link android.app.Service} 類別來處理每個意圖。
+
+</p>
+
+<p>為了對比之用，下列程式碼範例是 {@link
+android.app.Service} 類別的實作，該類別執行與上述使用 {@link
+android.app.IntentService} 範例相同的工作。也就是，對每個啟動要求，會使用 worker 執行緒來執行工作，且一次只處理一個要求。
+</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>如同您看到的，比起使用 {@link android.app.IntentService}，這需要花更多功夫。</p>
+
+<p>然而，因為您自行處理每個對 {@link android.app.Service#onStartCommand
+onStartCommand()} 的呼叫，您可以同時執行多個要求。那不是這個範例要做的，但如果那是您想要的，那麼您可以針對每個要求建立新的執行緒，並立即執行 (代替等待之前的要求結束)。
+
+</p>
+
+<p>請注意：{@link android.app.Service#onStartCommand onStartCommand()} 方法必須傳回整數。
+整數是一個數值，說明在系統終止服務的事件中，系統該如何繼續服務 (如上述的討論，雖然您可以修改，但 {@link
+android.app.IntentService} 的預設實作會替您處理)。
+從
+{@link android.app.Service#onStartCommand onStartCommand()} 傳回的值必須是下列常數之一：
+</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>如果系統在 {@link android.app.Service#onStartCommand
+onStartCommand()} 回傳後終止服務，除非有待決的意圖要傳送，否則請「不要」<em></em>建立服務。
+在非必要時與應用程式可以簡單地重新啟動任何未完成的工作時，這是避免執行服務的最安全方式。
+</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>如果系統在 {@link android.app.Service#onStartCommand
+onStartCommand()} 回傳後終止服務，請重新建立服務並呼叫 {@link
+android.app.Service#onStartCommand onStartCommand()}，但「不要」<em></em>重新傳送最後的意圖。
+相反地，除非有待決的意圖要啟動服務傳送，否則系統會使用 null 意圖呼叫 {@link android.app.Service#onStartCommand onStartCommand()}，如果有待決的意圖要啟動服務，則會傳送那些意圖。
+
+這適用於媒體播放程式 (或類似服務) 這類不執行命令，但可以無次數限制執行與等待工作的服務。
+</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>如果系統在 {@link android.app.Service#onStartCommand
+onStartCommand()} 回傳後終止服務，請重新建立服務並使用傳送至服務的最後意圖呼叫 {@link
+android.app.Service#onStartCommand onStartCommand()}。
+任何待決的意圖會反過來由後往前傳送。這適用的服務為主動執行如下載檔案等應該立即繼續的工作。
+</dd>
+</dl>
+<p>如需有關這些傳回值的詳細資訊，請參閱每個常數的連結參考文件。
+</p>
+
+
+
+<h3 id="StartingAService">啟動服務</h3>
+
+<p>您可以透過傳送
+{@link android.content.Intent} (指定要啟動的服務) 到 {@link
+android.content.Context#startService startService()}，從 Activity 或其他應用程式元件來啟動服務。Android 系統會呼叫服務的 {@link
+android.app.Service#onStartCommand onStartCommand()} 方法並傳送 {@link
+android.content.Intent} 給該方法。(絕對不要直接呼叫 {@link android.app.Service#onStartCommand
+onStartCommand()})。</p>
+
+<p>例如，使用明確意圖並搭配 {@link android.content.Context#startService
+startService()}，Activity 可以啟動前小節範例中的服務 ({@code
+HelloSevice})：</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>{@link android.content.Context#startService startService()} 方法會立即回傳且Android 系統會呼叫服務的 {@link android.app.Service#onStartCommand
+onStartCommand()} 方法。
+如果尚未開始執行服務，系統會先呼叫 {@link
+android.app.Service#onCreate onCreate()}，然後呼叫 {@link android.app.Service#onStartCommand
+onStartCommand()}。</p>
+
+<p>如果服務也不提供繫結，則與意圖一同傳送的 {@link
+android.content.Context#startService startService()} 是在應用程式元件與服務間通訊的唯一模式。
+然而，如果您想要服務將結果送回，則啟動服務的用戶端會針對廣播建立 {@link android.app.PendingIntent}(搭配 {@link android.app.PendingIntent#getBroadcast getBroadcast()}) 並將其傳送至服務，該服務在啟動服務的 {@link android.content.Intent} 之中。
+
+
+然後服務就可使用廣播來傳送結果。
+</p>
+
+<p>多個啟動服務的要求會導致多個相關呼叫至服務的
+{@link android.app.Service#onStartCommand onStartCommand()}。然而，只允許一個要求可以停止服務 (使用 {@link android.app.Service#stopSelf stopSelf()} 或 {@link
+android.content.Context#stopService stopService()})。
+</p>
+
+
+<h3 id="Stopping">停止服務</h3>
+
+<p>已啟動的服務必須管理本身的生命週期。也就是，系統不會停止或終結服務，除非系統必須復原系統記憶體，而服務會在 {@link android.app.Service#onStartCommand onStartCommand()} 回傳後繼續執行。
+
+所以，服務務必自我停止，可透過呼叫 {@link android.app.Service#stopSelf stopSelf()} 達成，或透過呼叫 {@link android.content.Context#stopService stopService()} 讓其他元件可以停止服務。
+
+</p>
+
+<p>一旦要求使用 {@link android.app.Service#stopSelf stopSelf()} 或 {@link
+android.content.Context#stopService stopService()} 停止，系統會盡快終結服務。
+</p>
+
+<p>然而，如果您的服務同時處理多個對 {@link
+android.app.Service#onStartCommand onStartCommand()} 的要求，則在您開始處理啟動要求時，您不應該停止服務，因為您仍可能會收到新的啟動要求 (在第一個要求結束時停止可能會終止第二個要求)。
+
+如要避免發生此問題，您可以使用 {@link android.app.Service#stopSelf(int)} 來確保您停止服務的要求會總是基於最新的啟動要求。
+
+也就是，當您呼叫 {@link
+android.app.Service#stopSelf(int)} 時，會傳送啟動要求的 ID (<code>startId</code> 已傳送至 {@link android.app.Service#onStartCommand onStartCommand()}) 至您相關的停止要求。
+
+然而，如果服務在您可以呼叫 {@link
+android.app.Service#stopSelf(int)} 之前，就收到新的啟動要求，則 ID 將不會相符，服務也不會停止。</p>
+
+<p class="caution"><strong>注意：</strong>在您的應用程式完成工作時，應用程式停止其服務是非常重要的，這可以避免浪費系統資源與消耗電池電力。
+如果必要，透過呼叫 {@link
+android.content.Context#stopService stopService()}，其他元件可以停止服務。
+就算您啟動服務的繫結，如果曾接收對 {@link
+android.app.Service#onStartCommand onStartCommand()} 的呼叫，您永遠仍必須自行停止服務。
+</p>
+
+<p>如需有關服務生命週期的詳細資訊，請參閱下節<a href="#Lifecycle">管理服務的生命週期</a>。</p>
+
+
+
+<h2 id="CreatingBoundService">建立已繫結的服務</h2>
+
+<p>已繫結的服務是允許應用程式元件透過呼叫 {@link
+android.content.Context#bindService bindService()} 來建立繫結的服務，這是為了建立長期的連線 (一般而言，並不允許元件透過呼叫 {@link
+android.content.Context#startService startService()} 來「啟動」<em></em> )。
+</p>
+
+<p>當您想要透過處理程序間通訊 (IPC)，與來自 Activity 的服務及您應用程式中的其他元件互動時，或是想要揭露您應用程式的特定功能給其他應用程式時，您應該建立已繫結的服務。
+
+</p>
+
+<p>如要建立已繫結的服務，您必須實作 {@link
+android.app.Service#onBind onBind()} 回呼方法並傳回
+{@link android.os.IBinder} (這用來定義與服務溝通的介面)。接著其他應用程式元件可以呼叫
+{@link android.content.Context#bindService bindService()} 來擷取介面並開始服務上的呼叫方法。
+服務只會為了服務所繫結應用程式元件才存在，
+所以當沒有繫結服務的元件時，系統會終結服務 (當服務透過
+{@link android.app.Service#onStartCommand onStartCommand()} 啟動時，您「不」<em></em>需要停止已繫結的服務)。
+</p>
+
+<p>如要建立已繫結的服務，您必須做的第一件事就是定義用來指定用戶端如何與服務通訊的介面。
+介於服務與用戶端間的介面必須是 {@link android.os.IBinder} 的實作，也是您服務必須從 {@link android.app.Service#onBind
+onBind()} 回呼方法傳回的。
+
+一旦用戶端收到 {@link android.os.IBinder}，可以透過介面開始與服務互動。
+</p>
+
+<p>服務一次可以繫結多個用戶端。當用戶端完成與服務互動時，會呼叫 {@link android.content.Context#unbindService unbindService()} 來取消繫結。
+一旦沒有用戶端與服務繫結，系統就會終結服務。
+</p>
+
+<p>有多個方法可以實作已繫結的服務，且實作比已啟動服務更加複雜，所以會在另一份有關<a href="{@docRoot}guide/components/bound-services.html">已繫結的服務</a>文件中討論已繫結的服務。
+
+</p>
+
+
+
+<h2 id="Notifications">傳送通知給使用者</h2>
+
+<p>一旦執行，服務可以使用<a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">快顯通知</a>或<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">狀態列通知</a>來通知事件的使用者。</p>
+
+<p>快顯通知是一個會出現在目前視窗表面上短暫時間然後消失的訊息，此時狀態列通知會在狀態列提供一個圖示與訊息，使用者可以選擇然後採取行動 (例如啟動 Activity)。
+
+</p>
+
+<p>通常，當已完成某些背景作業(如完成檔案下載) 且使用者現在可以採取行動時，狀態列通知是最佳的方法。
+
+當使用者從擴展的檢視選取通知時，通知可以啟動 Activity (如檢視已下載檔案)。
+</p>
+
+<p>如需更多資訊，請參閱<a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">快顯通知</a>或<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">狀態列通知</a>開發人員指南。
+</p>
+
+
+
+<h2 id="Foreground">在前景中執行服務</h2>
+
+<p>前景服務是被認為使用者已主動意識到、就算在記憶體不足時系統也不會終結的服務。
+前景服務必須提供通知給狀態列，狀態列會放置在「進行中」標題之下，這表示除非服務已被停止或從前景移除，否則無法解除通知。
+
+
+</p>
+
+<p>例如，播放來自某服務音樂的音樂播放器應該被設為在前景中執行，因為使用者明確意識到這項操作。
+
+狀態列中的通知可能會指出目前播放的歌曲，並允許使用者啟動 Activity 來與音樂播放器互動。
+</p>
+
+<p>如要要求您的服務在前景中執行，可以呼叫 {@link
+android.app.Service#startForeground startForeground()}。此方法有兩個參數：一個整數用來唯一識別通知，以及 {@link
+android.app.Notification} 供狀態列使用。
+例如：</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>注意：</strong>您給 {@link
+android.app.Service#startForeground startForeground()} 的整數 ID 不能為 0。</p>
+
+
+<p>如要從前景移除服務，可以呼叫 {@link
+android.app.Service#stopForeground stopForeground()}。此方法有一個布林數，表示是否同時移除狀態列通知。
+此方法「不會」<em></em>停止服務。
+然而，如果您在服務仍於前景執行時停止服務，則也會移除通知。
+</p>
+
+<p>如需更多有關通知的資訊，請參閱<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">建立狀態列通知</a>。
+</p>
+
+
+
+<h2 id="Lifecycle">管理服務的生命週期</h2>
+
+<p>服務的生命週期比 Activity 的生命週期要簡單多了。然而，密切關注如何建立與終結服務就更重要了，因為在使用者沒有意識到的狀況下可在背景中執行服務。
+
+</p>
+
+<p>服務生命週期 &mdash; 從何時建立到何時終結 &mdash; 可以遵循兩種不同的路徑：
+</p>
+
+<ul>
+<li>已啟動的服務
+  <p>當其他元件呼叫 {@link
+android.content.Context#startService startService()} 時，會建立服務。然後服務可無限次數執行，且必須自行停止，方法是呼叫 {@link
+android.app.Service#stopSelf() stopSelf()}。
+透過呼叫 {@link android.content.Context#stopService
+stopService()}，其他元件可以停止服務。
+當服務停止時，系統會終結服務。</p></li>
+
+<li>已繫結的服務
+  <p>當其他元件 (一個用戶端) 呼叫 {@link
+android.content.Context#bindService bindService()} 時，會建立服務。然後用戶端會透過
+{@link android.os.IBinder} 介面與服務通訊。用戶端也可以呼叫
+{@link android.content.Context#unbindService unbindService()} 來切斷連線。多重用戶端可以繫結至相同的服務，但是當所有用戶端都取消繫結時，系統就會終結服務。
+(服務「不」<em></em>需要自行停止)。
+</p></li>
+</ul>
+
+<p>這兩種路徑不是完全獨立的。也就是，您可以繫結至已經使用
+{@link android.content.Context#startService startService()} 啟動的服務。例如，可以啟動背景音樂服務，方法是呼叫 {@link android.content.Context#startService
+startService()} 並搭配可識別要播放音樂的 {@link android.content.Intent}。
+之後，使用者可能會想要透過播放器試試某些控制或取得關於目前歌曲的資訊，可以將 Activity 繫結至服務，方法為呼叫 {@link
+android.content.Context#bindService bindService()}。
+
+就這個的案子而言，除非所有的用戶端都取消繫結，否則 {@link
+android.content.Context#stopService stopService()} 或 {@link android.app.Service#stopSelf
+stopSelf()} 不會實際上停止服務。 </p>
+
+
+<h3 id="LifecycleCallbacks">實作生命週期回呼</h3>
+
+<p>就如同 Activity，服務有您可以實作來監控服務狀態變更與在適合時段執行作業的生命週期回呼方法。
+下列服務會示範每個生命週期方法：
+</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>不像 Activity 生命週期回呼方法，您「不」<em></em>需要呼叫這些回呼方法的超級類別實作。
+</p>
+
+<img src="{@docRoot}images/service_lifecycle.png" alt="" />
+<p class="img-caption"><strong>圖 2.</strong>服務生命週期。左圖顯示使用 {@link android.content.Context#startService
+startService()} 建立服務的生命週期，右圖顯示使用
+{@link android.content.Context#bindService bindService()} 建立服務的生命週期。
+</p>
+
+<p>透過實作這些方法，您可以監控服務生命週期中的兩個巢狀迴圈： </p>
+
+<ul>
+<li>服務的<strong>整個生命</strong>發生在 {@link
+android.app.Service#onCreate onCreate()} 被呼叫的時間與 {@link
+android.app.Service#onDestroy} 回傳的時間之間。就像 Activity，服務於
+{@link android.app.Service#onCreate onCreate()} 中開始其初始設定，並於 {@link
+android.app.Service#onDestroy onDestroy()} 中釋出所有剩餘的資訊。例如，音樂播放服務可以建立執行緒，且音樂會於 {@link
+android.app.Service#onCreate onCreate()} 中播放，然後在 {@link
+android.app.Service#onDestroy onDestroy()} 中停止執行緒。
+
+
+<p>{@link android.app.Service#onCreate onCreate()} 與 {@link android.app.Service#onDestroy
+onDestroy()} 方法可供所有服務呼叫，不論服務是否由 {@link android.content.Context#startService startService()} 或 {@link
+android.content.Context#bindService bindService()} 所建立。
+</p></li>
+
+<li>服務的<strong>使用生命</strong>從對 {@link
+android.app.Service#onStartCommand onStartCommand()} 或 {@link android.app.Service#onBind onBind()} 的呼叫開始。
+每個方法都被遞交 {@link
+android.content.Intent}，也會被分別傳送至 {@link android.content.Context#startService
+startService()} 或 {@link android.content.Context#bindService bindService()}。
+<p>如果服務已啟動，使用生命的結束時間與整個生命結束的時間相同 (就算在 {@link android.app.Service#onStartCommand
+onStartCommand()} 回傳後，服務仍在作用中)。
+如果服務已繫結，使用生命的會於 {@link
+android.app.Service#onUnbind onUnbind()} 回傳時結束。</p>
+</li>
+</ul>
+
+<p class="note"><strong>注意：</strong>雖然已啟動的服務可藉由對
+ {@link android.app.Service#stopSelf stopSelf()} 或 {@link
+android.content.Context#stopService stopService()} 的呼叫來停止，但沒有服務的相對應回呼 (沒有 {@code onStop()} 回呼)。
+所有，除非服務已繫結至用戶端，系統會在服務停止時終結服務 &mdash; {@link
+android.app.Service#onDestroy onDestroy()} 是唯一收到的回呼。
+</p>
+
+<p>圖 2 說明服務的回呼方法。雖然圖示區隔由
+{@link android.content.Context#startService startService()} 所建立的服務與由
+{@link android.content.Context#bindService bindService()} 所建立的服務，但請記住，任何服務不論是如何建立的，都可能可以允許使用者繫結。
+
+所以，一開始使用 {@link android.app.Service#onStartCommand
+onStartCommand()} 啟動的服務 (由用戶端呼叫 {@link android.content.Context#startService startService()})仍可以接收對 {@link android.app.Service#onBind onBind()} 的呼叫 (當用戶端呼叫
+{@link android.content.Context#bindService bindService()} 時)。
+</p>
+
+<p>針對建立提供已繫結的服務，如需更多詳細資訊，請參閱<a href="{@docRoot}guide/components/bound-services.html">已繫結的服務</a>文件，其中在<a href="{@docRoot}guide/components/bound-services.html#Lifecycle">管理已繫結服務的生命週期</a>包含更多有關 {@link android.app.Service#onRebind onRebind()}回呼方法的詳細資訊。
+
+
+</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->

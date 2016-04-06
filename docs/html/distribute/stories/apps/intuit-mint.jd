@@ -1,0 +1,82 @@
+page.title=Mint finds more screen real estate gives more engagement
+page.metaDescription=Intuit expands their Mint app to the tablet.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/intuit-mint.png
+page.timestamp=1456340902
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/intuit-mint-icon.png"
+  height="113" />
+</div>
+
+<p>
+  Intuit wanted to expand their
+  <a class="external-link"
+  href="http://play.google.com/store/apps/details?id=com.mint">Mint.com
+  Personal Finance</a> offering for mobile by including a version optimized for
+  Android tablets. However, they knew that taking the layout that worked for
+  phones and simply showing an enlarged version wouldn’t take full advantage of
+  the opportunities that tablets afford.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Following the Tablet Quality guidelines, the Intuit team updated Mint to
+  target 7- to 10-inch tablets, in addition to phones. “We knew we had a lot
+  more real estate, and we wanted to provide a more immersive experience for
+  our users” said Ken Sun, Intuit Group Product Manager for Mint.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:380px">
+  <img
+   src="{@docRoot}images/distribute/stories/intuit-mint-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/intuit-mint-screenshot.png 1x
+  {@docRoot}images/distribute/stories/intuit-mint-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Mint used the extra screen area on tablets to offer quick access to
+    additional tools and information
+  </p>
+</div>
+
+<p>
+  Intuit’s Mint app, which has a 4-star rating on Google Play, brings a number
+  of features to Android tablets that aren’t available for phones. These include
+  a more visual presentation of personal financial data: a change that has
+  contributed to <b>much higher user engagement</b>.
+</p>
+
+<p>
+  For example, 50 percent more Android tablet users have Mint sessions of <b>
+  five minutes or longer</b> than they do on phones.
+</p>
+
+<p>
+  Intuit also noted that customer budget operations (view, edit, drill-down,
+  and others) are <b>seven times higher on Android tablets</b> than they are on
+  phones.
+</p>
+
+<p>
+  Ken noted that “We’ve found that phone usage is indicative of a customer’s
+  regular financial check-in, while tablet usage points towards more analysis
+  and interaction with that customer’s personal financial data. This is the
+  sort of immersive engagement experience we were looking for; the tablet and
+  phone apps serve as great complements to each other."
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about creating a tablet version of your app by reviewing the
+  <a href="http://developer.android.com/distribute/essentials/quality/tablets.html">
+  Tablet App Quality</a> guidelines and growing your user base.
+</p>

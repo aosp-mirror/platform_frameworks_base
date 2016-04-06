@@ -1,0 +1,61 @@
+page.title=Material Design cho Nhà phát triển
+page.type=design
+page.image=images/cards/material_2x.png
+page.metaDescription=Tìm hiểu cách áp dụng material design cho ứng dụng của bạn.
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Phụ thuộc và Điều kiện Tiên quyết</h2>
+  <ul>
+    <li>Android 5.0 (API mức 21)</li>
+  </ul>
+</div>
+</div>
+
+<p>Material design là một hướng dẫn toàn diện về thiết kế trực quan, chuyển động
+và tương tác giữa nhiều nền tảng và thiết bị. Để sử dụng material design trong ứng dụng Androi của mình, hãy làm theo hướng dẫn
+mô tả trong 
+<a href="http://www.google.com/design/spec/material-design/introduction.html">đặc tả
+material design</a> và sử dụng những thành phần và tính năng mới sẵn có trong Android 5.0
+(API mức 21).</p>
+
+<p>Bài học này sẽ cho bạn thấy cách tạo ứng dụng material design bằng những phần tử sau:</p>
+
+<ul>
+<li>Chủ đề material</li>
+<li>Widget cho thẻ và danh sách</li>
+<li>Đổ bóng và cắt xén dạng xem tùy chỉnh</li>
+<li>Nội dung vẽ được véc-tơ</li>
+<li>Hoạt hình tùy chỉnh</li>
+</ul>
+
+<p>Bài học này cũng hướng dẫn cho bạn cách duy trì tính tương thích với các phiên bản Android trước
+5.0 (API mức 21) khi bạn sử dụng các tính năng về material design trong ứng dụng của mình.</p>
+
+<h2>Bài học</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">Bắt đầu</a></dt>
+  <dd>Tìm hiểu cách cập nhật ứng dụng của bạn với các tính năng của material design.</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">Sử dụng Chủ đề Material</a></dt>
+  <dd>Tìm hiểu cách áp dụng các kiểu phong cách material design cho ứng dụng của bạn.</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">Tạo Danh sách và Thẻ</a></dt>
+  <dd>Tìm hiểu cách tạo danh sách và thẻ với một diện mạo và cảm giác nhất quán bằng cách sử dụng widget hệ thống.</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">Định nghĩa Đổ bóng và Dạng xem Cắt hình</a></dt>
+  <dd>Tìm hiểu cách đặt độ cao cho dạng xem của bạn để tạo đổ bóng tùy chỉnh và cách cắt hình dạng xem.</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">Làm việc với Nội dung vẽ được</a></dt>
+  <dd>Tìm hiểu cách tạo nội dung vẽ được véc-tơ và cách nhuộm màu tài nguyên vẽ được.</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">Định nghĩa Hoạt hình Tùy chỉnh</a></dt>
+  <dd>Tìm hiểu cách tạo hoạt hình tùy chỉnh cho các dạng xem và chuyển tiếp hoạt động bằng các phần tử chung.</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">Duy trì Tính tương thích</a></dt>
+  <dd>Tìm hiểu cách duy trì tính tương thích với các phiên bản nền tảng trước Android 5.0.</dd>
+</dl>

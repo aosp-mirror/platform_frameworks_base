@@ -1,0 +1,76 @@
+page.title=Kongregate increases AdVenture Capitalist conversions by 5% with Store Listing Experiments
+page.metaDescription=AdVenture Capitalist, a builder game from games developers HyperHippo and Kongregate, was originally built for the web and released as a mobile version in May 2015. Kongregate decided to use Store Listing Experiments to see if different graphics could impact their installs.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/kongregate-adv-cap.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/kongregate-adv-cap-icon.png"
+  height="113" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.kongregate.mobile.adventurecapitalist.google&hl=en">
+  AdVenture Capitalist</a> a builder game from games developers HyperHippo and
+  Kongregate, was originally built for the web and released as a mobile version
+  in May 2015. Kongregate decided to use
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> to see if different graphics
+  could impact their installs. They found that graphics illustrating the game’s
+  builder mechanics and strategy drove more installs from the store listing page
+  than their existing graphics.
+
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/developer?id=Kongregate">
+  Kongregate</a> used a global store listing experiment in the Google Play
+  Developer Console to test two variant designs of feature art. Their prediction
+  was that their current control graphic would outperform the variant designs,
+  because of the game’s brand and icon reputation on the web.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The results revealed that variant graphics showing more of the game’s builder
+  mechanics and strategy drove more installs compared to the existing branded
+  icon.
+</p>
+
+  <img
+   src="{@docRoot}images/distribute/stories/kongregate-adv-cap-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/kongregate-adv-cap-screenshot.png 1x
+  {@docRoot}images/distribute/stories/kongregate-adv-cap-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+
+<p>
+  Jeff Gurian, Senior Marketing Director at Kongregate commented that: "Google
+  Play's Store Listing Experiments tool allows us to maximize ASO performance
+  across all of our channels in a live environment, for free — it is now our
+  primary tool for testing."
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Learn how to run
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> and read our best practices for
+  <a href="https://developer.android.com/distribute/users/experiments.html">
+  running successful experiments</a>.
+</p>

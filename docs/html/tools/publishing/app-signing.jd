@@ -16,7 +16,7 @@ page.title=Signing Your Applications
 </li>
 <li><a href="#studio">Signing Your App in Android Studio</a>
   <ol>
-  	<li><a href="sign-auto">Automatically Signing Your App</a></li>
+  	<li><a href="#sign-auto">Automatically Signing Your App</a></li>
   </ol>
 </li>
 <li><a href="#studio">Signing Your App with Android Studio</a></li>
@@ -60,14 +60,14 @@ without typing the password every time you make a change to your project.</p>
 you run or debug your project from the IDE.</p>
 
 <p>You can run and debug an app signed in debug mode on the emulator and on devices connected
-to your development manchine through USB, but you cannot distribute an app signed in debug
+to your development machine through USB, but you cannot distribute an app signed in debug
 mode.</p>
 
 <p>By default, the <em>debug</em> configuration uses a debug keystore, with a known
 password and a default key with a known password.
-The debug keystore is located in $HOME/.android/debug.keystore, and is created if not present.
-
-The debug build type is set to use this debug <code>SigningConfig</code> automatically. </p>
+The debug keystore is located in <code>$HOME/.android/debug.keystore</code>, and
+is created if not present.
+The debug build type is set to use this debug <code>SigningConfig</code> automatically.</p>
 
 <p>For more information about how to build and run apps in debug mode, see
 <a href="{@docRoot}tools/building/index.html">Building and Running</a>.</p>
@@ -82,7 +82,8 @@ set of private keys. You must keep your keystore in a safe and secure place.</li
 <li><em>Create a private key.</em> A <strong>private key</strong> represents the entity to
 be identified with the app, such as a person or a company.</li>
 <li><p>Add the signing configuration to the build file for the <code>app</code> module:</p>
-        <p><pre>
+
+<pre>
 ...
 android {
     ...
@@ -103,12 +104,13 @@ android {
     }
 }
 ...
-</pre></p>
+</pre>
     </li>
 <li>Invoke the <code>assembleRelease</code> build task from Android Studio.</li>
 </ol>
 
-<p>The package in <code>app/build/apk/app-release.apk</code> is now signed with your release key.</p>
+<p>The package in <code>app/build/apk/app-release.apk</code> is now signed with your release
+key.</p>
 
 <p class="note"><strong>Note:</strong> Including the passwords for your release key and keystore
 inside the build file is not a good security practice. Alternatively, you can configure the build
@@ -156,26 +158,40 @@ For more information on packaging and signing Android Wear apps, see
 
 <ol>
 <li>On the menu bar, click <strong>Build</strong> &gt; <strong>Generate Signed APK</strong>.</li>
-<li><p>On the <em>Generate Signed APK Wizard</em> window, click <strong>Create new</strong> to create
-a new keystore.</p><p>If you already have a keystore, go to step 4.</p></li>
+<li><p>On the <em>Generate Signed APK Wizard</em> window, click <strong>Create new</strong> to
+create a new keystore.</p>
+<p>If you already have a keystore, go to step 4.</p></li>
 <li><p>On the <em>New Key Store</em> window, provide the required information as shown
-in figure 1.</p><p>Your key should be valid for at least 25 years, so you can sign app updates
+in figure 1.</p>
+<p>Your key should be valid for at least 25 years, so you can sign app updates
 with the same key through the lifespan of your app.</p>
 <img src="{@docRoot}images/tools/signstudio2.png" alt=""
      width="416" height="364" style="margin-top:15px"/>
 <p class="img-caption"><strong>Figure 1</strong>. Create a new keystore in Android Studio.</p>
 </li>
-<li><p>On the <em>Generate Signed APK Wizard</em> window, select a keystore, a private key, and enter
-the passwords for both. Then click <strong>Next</strong>.</p>
+<li><p>On the <em>Generate Signed APK Wizard</em> window, select a keystore, a private key, and
+enter the passwords for both. Then click <strong>Next</strong>.</p>
 <img src="{@docRoot}images/tools/signstudio1.png" alt=""
      width="349" height="232" style="margin-top:15px"/>
 <p class="img-caption"><strong>Figure 2</strong>. Select a private key in Android Studio.</p>
 </li>
-<li><p>On the next window, select a destination for the signed APK and click
-<strong>Finish</strong>.</p>
+<li><p>
+  On the next window, select a destination for the signed APK(s), select the
+  build type, (if applicable) choose the product flavor(s), and click
+  <strong>Finish</strong>.</p>
 <img src="{@docRoot}images/tools/signstudio3.png" alt=""
      width="350" height="175" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 3</strong>. Generate a signed APK in Android Studio.</p>
+<p class="img-caption">
+  <strong>Figure 3</strong>. Generate signed APKs for the selected product
+  flavors.
+</p>
+<p class="note">
+  <strong>Note:</strong> If your project uses product flavors, you can select
+  multiple product flavors while holding down the <strong>Ctrl</strong> key on
+  Windown/Linux, or the <strong>Command</strong> key on Mac OSX. Android Studio
+  will generate a separate APK for each selected product flavor.
+</p>
+
 </li>
 </ol>
 
@@ -193,14 +209,16 @@ Settings</strong>.</li>
 more than one), and enter the required information.</p>
 <img src="{@docRoot}images/tools/signstudio10.png" alt=""
      width="623" height="372" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 4</strong>. Create a signing configuration in Android Studio.</p>
+<p class="img-caption"><strong>Figure 4</strong>. Create a signing configuration in Android
+Studio.</p>
 </li>
 <li>Click on the <strong>Build Types</strong> tab.</li>
 <li>Select the <strong>release</strong> build.</li>
 <li><p>Under <em>Signing Config</em>, select the signing configuration you just created.</p>
 <img src="{@docRoot}images/tools/signstudio11.png" alt=""
      width="623" height="372" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 5</strong>. Select a signing configuration in Android Studio.</p>
+<p class="img-caption"><strong>Figure 5</strong>. Select a signing configuration in Android
+Studio.</p>
 </li>
 <li>Click <strong>OK</strong>.</li>
 </ol>
@@ -299,9 +317,10 @@ an app in release mode from the command line:</p>
 <ol>
 <li>
   <p>Generate a private key using
-  <code><a href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html">keytool</a></code>.
+  <code><a href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html"
+    >keytool</a></code>.
   For example:</p>
-<pre>
+<pre class="no-pretty-print">
 $ keytool -genkey -v -keystore my-release-key.keystore
 -alias alias_name -keyalg RSA -keysize 2048 -validity 10000
 </pre>
@@ -317,7 +336,7 @@ $ keytool -genkey -v -keystore my-release-key.keystore
   <p>Sign your app with your private key using
   <code><a href="http://docs.oracle.com/javase/6/docs/technotes/tools/windows/jarsigner.html">jarsigner</a></code>:
   </p>
-<pre>
+<pre class="no-pretty-print">
 $ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1
 -keystore my-release-key.keystore my_application.apk alias_name
 </pre>
@@ -326,14 +345,14 @@ $ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1
 </li>
 <li style="margin-top:18px">
   <p>Verify that your APK is signed. For example:</p>
-<pre>
+<pre class="no-pretty-print">
 $ jarsigner -verify -verbose -certs my_application.apk
 </pre>
 </li>
 <li style="margin-top:18px">
   <p>Align the final APK package using
   <code><a href="{@docRoot}tools/help/zipalign.html">zipalign</a></code>.</p>
-<pre>
+<pre class="no-pretty-print">
 $ zipalign -v 4 your_project_name-unaligned.apk your_project_name.apk
 </pre>
   <p><code>zipalign</code> ensures that all uncompressed data starts with a particular byte

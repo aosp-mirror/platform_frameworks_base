@@ -11,22 +11,24 @@ nonavpage=true
   help you gain traction in the marketplace.</span>
 </p>
 
-  <h2>Overview</h2>
+  <section class="dac-section dac-small" id="latest-games"><div class="wrap">
+  <h2 class="norule">Overview</h2>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gplanding"
     data-sortOrder="-timestamp"
     data-cardSizes="6x6"
     data-maxResults="3">
-  </div>
+    </div></div></section>
 
-  <h2 id="opportunities">Opportunities &amp; Programs</h2>
+  <section class="dac-section dac-small" id="latest-games"><div class="wrap">
+  <h2 id="opportunities" class="norule">Opportunities &amp; Programs</h2>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gpfelanding"
     data-cardSizes="6x6"
     data-maxResults="10">
-  </div>
+  </div></div></section>
 
 <!--  <h2>Related resources</h2>
 

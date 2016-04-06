@@ -29,6 +29,7 @@
         <span class="en">Drive Engagement with Ads</span></a>
     </div>
   </li>
+
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/game-services.html">
@@ -53,7 +54,12 @@
         <span class="en">Integrate GCM</span></a>
     </div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/beta.html">
+        <span class="en">Get Feedback with Beta Tests</span></a>
+    </div>
+  </li>
 </ul>
 
 <script type="text/javascript">

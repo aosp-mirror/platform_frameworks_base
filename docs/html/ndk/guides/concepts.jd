@@ -18,12 +18,9 @@ page.title=Concepts
 
 <h2 id="bb">Before Beginning</h2>
 
-<p>This guide assumes that you are:</p>
-<ul>
-<li>Already familiar with concepts inherent in native programming and in
-<a href="{@docRoot}">Android development</a>.</li>
-<li>Working in <a href="{@docRoot}sdk/index.html">Eclipse, and using the Android
-Development Tools (ADT)</a>, except where otherwise noted.</li>
+<p>This guide assumes that you are already familiar with concepts inherent in native programming and 
+in <a href="{@docRoot}developer/index.html">Android development</a>.</p>
+
 </ul>
 <h2 id="intro">Introduction</h2>
 
@@ -151,15 +148,13 @@ native code.
 <p class="note"><strong>Note:</strong> While it is possible to completely avoid Java, you are likely
 to find the Android Java framework useful for tasks including controlling the display and UI.</p>
 </li>
-
-<li>Create an Android app Project in Eclipse as you would for any other Android project.</li>
+<li>Create an Android app Project as you would for any other Android project.</li>
 <li>If you are writing a native-only app, declare the {@link android.app.NativeActivity} class in
-{@code AndroidManifest.xml}. You can do so from the Eclipse/ADT Android Manifest Editor, or by
-hand-editing the file. For more information, see the <a href="#naa">Native Activities and
+{@code AndroidManifest.xml}. For more information, see the <a href="#naa">Native Activities and
 Applications</a>.
 </li>
 <li>Create an {@code Android.mk} file describing the native library, including name, flags, linked
-libraries, and source files to be compiled in the ‘JNI’ directory.</li>
+libraries, and source files to be compiled in the "JNI" directory.</li>
 <li>Optionally, you can create an {@code Application.mk} file configuring the target ABIs,
 toolchain, release/debug mode, and STL. For any of these that you do not specify, the following
 default values are used, respectively:
@@ -184,7 +179,6 @@ STL: system
 needed for your app to run.
 </ol>
 
-<p>Note that Eclipse can perform steps 7. through 9. in a single operation.</p>
 
 <h2 id="naa">Native Activities and Applications</h2>
 
@@ -300,7 +294,7 @@ $ cd &lt;path&gt;/&lt;to&gt;/&lt;project&gt;
 $ &lt;ndk&gt;/ndk-build
 </pre>
 
-<li>Build and install your Android project as usual, using Ant or Eclipse. If your native code is in
+<li>Build and install your Android project as usual. If your native code is in
 the {@code jni/} directory, the build script automatically packages the {@code .so} file(s) built
 from it into the APK.</li>
 </ol>

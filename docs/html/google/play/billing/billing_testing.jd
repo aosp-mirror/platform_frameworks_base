@@ -26,16 +26,27 @@ implementation:</p>
 
 <ul>
 <li>Test purchases, which let license-test users purchase your published in-app
-    items, but without any actual charges to their accounts.</li>
+    items, without any actual charges to their accounts.</li>
 <li>Static billing responses from Google Play, for testing in early development</p>
 </ul>
 
-<p>To test In-app Billing in an application you must install the application on an Android-powered
-device. You cannot use the Android emulator to test In-app Billing.  The device you use for testing
-must run a standard version of the Android 1.6 or later platform (API level 4 or higher), and have
-the most current version of the Google Play application installed. If a device is not running the
-most current Google Play application, your application won't be able to send In-app Billing
-requests to Google Play. For general information about how to set up a device for use in
+<p>To test in-app billing, you need to publish your app to an <a
+href="https://support.google.com/googleplay/android-developer/answer/3131213">alpha
+or beta channel in Google Play.</a></p>
+
+<p>After you publish an app to an alpha or beta channel, it can take a few hours
+for the app to be available for testers. The version code of an APK on a test device
+must match the version currently uploaded to the alpha or beta channel on Google Play.</p>
+
+<p class="caution"><strong>Important</strong>: To test in-app products or make in-app
+purchases in your alpha or beta channel app, each tester
+needs to <a href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a>. On your test’s opt-in URL, your
+testers will get an explanation of what it means to be a tester and a link to opt-in.</p>
+
+<p>You can test on any Android-powered hardware device running Android 1.6 or higher.
+The most current version of the Google Play application must be installed on the device.
+For general information about how to set up a device for use in
 developing Android applications, see <a href="{@docRoot}tools/device.html">Using Hardware
 Devices</a>.</p>
 
@@ -43,17 +54,22 @@ Devices</a>.</p>
 
 <p>When your In-app Billing implementation is ready, you can test purchasing of your in-app SKUs in two ways:</p>
 
-<ul> <li><strong>Test purchases</strong>, which let your selected license-test
+<ul>
+<li><strong>Test purchases</strong>, which let your selected license-test
 users purchase your in-app products without any resulting charges to the user.
-Test purchases can be used in alpha/beta releases or in published apps. </li>
+Test purchases can be used in alpha/beta releases only. </li>
 <li><strong>Real purchases</strong>, which let regular users make real purchases
-of your in-app products with actual charges to the user’s payment instruments.
-You can use Google Play’s alpha and beta release groups to manage
-the users who can make live purchases using your implementation.  </li>
+of your in-app products with actual charges to the user’s payment instruments.</li>
 </ul>
 
-<p>The sections below provide more detail about how to use these approaches for
+<p>In either case, you need to publish your app to Google Play's
+<a href="https://support.google.com/googleplay/android-developer/answer/3131213">alpha
+  and beta release channels</a> to manage the users who can make purchases.</p>
+
+  <p>The sections below provide more detail about how to use these approaches for
 testing and validation. </p>
+
+
 
 <h3 id="test-purchases">Test Purchases (In-app Billing Sandbox)</h3>
 
@@ -66,14 +82,17 @@ accounts.</p>
 <p>Once authorized for testing access, those users can make purchases without
 being charged.
 Test purchases are real orders and Google Play processes them in the same way as
-other orders. When purchases are complete, Google Play prevents the orders from
+other orders. However, the <code>orderId</code> field for test purchases is
+blank.
+When purchases are complete, Google Play prevents the orders from
 going to financial processing, ensuring that there are no actual charges to user
-accounts, and automatically canceling the completed orders after 14 days. </p>
+accounts, and automatically canceling the completed orders after 14 days.</p>
 
 <p class="note">
   <strong>Note:</strong> Test subscription purchases recur daily, regardless of
   the product's subscription period.
 </p>
+
 
 <h4 id="setup">Setting up test purchases</h4>
 
@@ -83,7 +102,7 @@ available payment method (even though there’s no charge to the payment
 method).</p>
 
 <p>First, upload and publish in-app products that you want testers to be able to
-purchase. You can upload and publish in-app products in the Developer Console. 
+purchase. You can upload and publish in-app products in the Developer Console.
 Note that you can upload and publish your in-app items before you publish the
 APK itself.</p>
 
@@ -97,12 +116,24 @@ href="#billing-testing-test">Setting Up for Test Purchases</a>.</p>
 within 15 minutes those users can begin making test purchases of your in-app
 products.</p>
 
-<p class="note"><strong>Note</strong>: To make test purchases, the license test
-account must be on the user’s Android device. If the device has more than one
+<p class="caution"><strong>Important</strong>: After you publish your app
+to an alpha or beta channel, your testers need to <a
+href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a> using the provided opt-in URL before they
+can make test purchases. </p>
+
+<p class="note"><strong>Note</strong>: License test accounts
+must be on the user’s Android device. If the device has more than one
 account, the purchase will be made with the account that downloaded the app. If
 none of the accounts has downloaded the app, the purchase is made with the first
 account. Users can confirm the account that is making a purchase by expanding the
 purchase dialog.</p>
+
+<p class="note">
+  <strong>Note:</strong> For test subscription purchases, leave the {@code orderId}
+  field blank. You can use the {@code purchaseToken} field to identify test purchases.
+</p>
+
 
 <h4 id="tp-account">Test purchases and developer account</h4>
 <p>Authorized license test accounts are associated with your developer account
@@ -133,6 +164,22 @@ center, look up the transaction, and then cancel it. You can find transactions
 by looking up their order numbers.</li>
 </ul>
 
+<p>
+  You can cancel test subscriptions purchases from the app page in the Play Store,
+  or use the 
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/cancel">
+  {@code cancel}</a> method.
+</p>
+
+<p class="caution">
+  <strong>Important:</strong> The
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/refund">
+  {@code refund}</a> and
+  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/revoke">
+  {@code revoke}</a> methods do not support test purchases.
+</p>
+
+
 <h3 id="transations">Testing with real transactions</h3>
 <p>As you prepare to launch an app that uses In-app Billing, you can make use of
 Google Play alpha/beta release options to do validation and load testing on your
@@ -145,13 +192,19 @@ payment methods in Google Play to make purchases. Note that if you include test
 license accounts in your alpha and beta distribution groups, those users will
 only be able to make test purchases. </p>
 
+<p class="caution"><strong>Important</strong>: After you publish your app
+to an alpha or beta channel, your testers need to <a
+href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
+to your app’s alpha or beta test</a> using the provided opt-in URL before they
+can make test purchases. </p>
+
 
 <h2 id="billing-testing-static">Testing with Static Responses</h2>
 
 <p>We recommend that you first test your In-app Billing implementation using static responses from
 Google Play. This enables you to verify that your application is handling the primary Google
-Play responses correctly and that your application is able to verify signatures correctly. You can do this
-even if the app hasn't been published yet.</p>
+Play responses correctly and that your application is able to verify signatures correctly. You can
+do this even if the app hasn't been published yet.</p>
 
 <p>To test your implementation with static responses, you make an In-app Billing request using a
 special item that has a reserved product ID. Each reserved product ID returns a specific static
@@ -199,9 +252,11 @@ href="#draft_apps">Draft Apps are No Longer Supported</a>.
     billing service. Refunds must be initiated by you (the merchant). After you process a refund
     request through your Google payments merchant account, a refund message is sent to your application by
     Google Play. This occurs only when Google Play gets notification from Google payments that
-    a refund has been made. For more information about refunds, see <a href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
-IN_APP_NOTIFY messages</a> and <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
-Pricing</a>.</p>
+    a refund has been made. For more information about refunds, see <a
+    href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
+    IN_APP_NOTIFY messages</a> and <a
+    href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485"
+    >In-app Billing Pricing</a>.</p>
   </li>
   <li><strong>android.test.item_unavailable</strong>
     <p>When you make an In-app Billing request with this product ID, Google Play responds as

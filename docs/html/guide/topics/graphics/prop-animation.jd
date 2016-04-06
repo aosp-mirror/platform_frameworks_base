@@ -920,10 +920,7 @@ in multiple activities and more easily edit the animation sequence.</p>
 <p>To distinguish animation files that use the new property animation APIs from those that use the
 legacy <a href="{@docRoot}guide/topics/graphics/view-animation.html">view animation</a> framework,
 starting with Android 3.1, you should save the XML files for property animations in the {@code
-res/animator/} directory (instead of {@code res/anim/}). Using the {@code animator} directory name
-is optional, but necessary if you want to use the layout editor tools in the Eclipse ADT plugin (ADT
-11.0.0+), because ADT only searches the {@code res/animator/} directory for property animation
-resources.</p>
+res/animator/} directory.</p>
 
 <p>The following property animation classes have XML declaration support with the
   following XML tags:</p>

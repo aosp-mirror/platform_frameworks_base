@@ -71,10 +71,10 @@ android.view.View} objects.</p>
 <h2 id="LinearLayout">Create a Linear Layout</h2>
 
 <ol>
-<li>In Android Studio, from the <code>res/layout</code> directory, open the <code>activity_my.xml</code>
+<li>In Android Studio, from the <code>res/layout</code> directory, open the {@code content_my.xml}
 file.
 <p>The BlankActivity template you chose when you created this project includes the
-<code>activity_my.xml</code> file with a {@link android.widget.RelativeLayout} root view and a
+<code>content_my.xml</code> file with a {@link android.widget.RelativeLayout} root view and a
 {@link android.widget.TextView} child view.</p>
 </li>
 <li>In the <strong>Preview</strong> pane, click the Hide icon <img src="{@docRoot}images/tools/as-hide-side.png"
@@ -90,16 +90,17 @@ file.
 <li>Remove the {@code android:padding} attributes and the {@code tools:context} attribute.
 </ol>
 
-</p>The result looks like this:</p>
+<p>The result looks like this:</p>
 
-<p class="code-caption">res/layout/activity_my.xml</p>
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
-&lt;/LinearLayout>
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_my"&gt;
 </pre>
 
 <p>{@link android.widget.LinearLayout} is a view group (a subclass of {@link
@@ -131,7 +132,7 @@ href="{@docRoot}guide/topics/ui/declaring-layout.html">Layout</a> guide.</p>
 the {@link android.widget.EditText} object's properties.</p>
 
 <ol>
-<li>In the <code>activity_my.xml</code> file, within the
+<li>In the <code>content_my.xml</code> file, within the
 {@link android.widget.LinearLayout &lt;LinearLayout>} element, define an
 {@link android.widget.EditText &lt;EditText>} element with the <code>id</code> attribute
 set to <code>@+id/edit_message</code>.</li>
@@ -142,7 +143,6 @@ set to <code>@+id/edit_message</code>.</li>
 
 <p>The {@link android.widget.EditText &lt;EditText>} element should read as follows:</p>
 
-<p class="code-caption">res/layout/activity_my.xml</p>
 <pre>
 &lt;EditText android:id="@+id/edit_message"
     android:layout_width="wrap_content"
@@ -232,12 +232,10 @@ the same name does not cause collisions.</p>
 <li>Add a line for a string named <code>"button_send"</code> with the value, "Send".
 <p>You'll create the button that uses this string in the next section.</p>
 </li>
-<li>Remove the line for the <code>"hello world"</code> string.</li>
 </ol>
 
 <p>The result for <code>strings.xml</code> looks like this:</p>
 
-<p class="code-caption">res/values/strings.xml</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
@@ -245,7 +243,6 @@ the same name does not cause collisions.</p>
     &lt;string name="edit_message">Enter a message&lt;/string>
     &lt;string name="button_send">Send&lt;/string>
     &lt;string name="action_settings">Settings&lt;/string>
-    &lt;string name="title_activity_main">MainActivity&lt;/string>
 &lt;/resources>
 </pre>
 
@@ -264,7 +261,7 @@ class.</p>
 <h2 id="Button">Add a Button</h2>
 
 <ol>
-<li>In Android Studio, from the <code>res/layout</code> directory, edit the <code>activity_my.xml</code>
+<li>In Android Studio, from the <code>res/layout</code> directory, edit the <code>content_my.xml</code>
 file.</li>
 <li>Within the
 {@link android.widget.LinearLayout &lt;LinearLayout>} element, define a
@@ -280,21 +277,23 @@ resource you defined in the previous section.</li>
 
 <p>Your {@link android.widget.LinearLayout &lt;LinearLayout>} should look like this:</p>
 
-<p class="code-caption">res/layout/activity_my.xml</p>
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" &gt;
-      &lt;EditText android:id="@+id/edit_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/edit_message" /&gt;
-      &lt;Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_send" /&gt;
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_my"&gt;
+        &lt;EditText android:id="@+id/edit_message"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:hint="@string/edit_message" /&gt;
+        &lt;Button
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/button_send" /&gt;
 &lt;/LinearLayout&gt;
 </pre>
 
@@ -303,8 +302,8 @@ resource you defined in the previous section.</li>
 attribute, because it won't be referenced from the activity code.</p>
 
 <p>The layout is currently designed so that both the {@link android.widget.EditText} and {@link
-android.widget.Button} widgets are only as big as necessary to fit their content, as shown in
-figure 2.</p>
+android.widget.Button} widgets are only as big as necessary to fit their content, as Figure 2 shows.
+</p>
 
 <img src="{@docRoot}images/training/firstapp/edittext_wrap.png" />
 <p class="img-caption"><strong>Figure 2.</strong> The {@link android.widget.EditText} and {@link
@@ -339,13 +338,12 @@ given the space they require.</p>
 the following:</p>
 
 <ol>
-<li>In the <code>activity_my.xml</code> file, assign the
+<li>In the <code>content_my.xml</code> file, assign the
 {@link android.widget.EditText &lt;EditText>} element's <code>layout_weight</code> attribute a value
 of <code>1</code>.</li>
 <li>Also, assign {@link android.widget.EditText &lt;EditText>} element's <code>layout_width</code>
 attribute a value of <code>0dp</code>.
 
-<p class="code-caption">res/layout/activity_my.xml</p>
 <pre>
 &lt;EditText
     android:layout_weight="1"
@@ -371,16 +369,18 @@ android.widget.LinearLayout}.</p>
 </li>
 </ol>
 
-<p>Here’s how your complete <code>activity_my.xml</code>layout file should now look:</p>
+<p>Here’s how your complete <code>content_my.xml</code>layout file should now look:</p>
 
-<p class="code-caption">res/layout/activity_my.xml</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
+   xmlns:app="http://schemas.android.com/apk/res-auto"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:orientation="horizontal"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   app:layout_behavior="@string/appbar_scrolling_view_behavior"
+   tools:showIn="@layout/activity_my"&gt;
     &lt;EditText android:id="@+id/edit_message"
         android:layout_weight="1"
         android:layout_width="0dp"
@@ -405,9 +405,9 @@ results:</p>
     style="vertical-align:baseline;margin:0; max-height:1em" />.</li>
   <li>Or from a command line, change directories to the root of your Android project and
 execute:
-<pre>
-ant debug
-adb install bin/MyFirstApp-debug.apk
+<pre class="no-pretty-print">
+$ ant debug
+adb install -r app/build/outputs/apk/app-debug.apk
 </pre></li>
 </ul>
 

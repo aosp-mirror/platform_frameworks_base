@@ -1,0 +1,266 @@
+page.title=建立清單和卡片
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#RecyclerView">建立清單</a></li>
+  <li><a href="#CardView">建立卡片</a></li>
+  <li><a href="#Dependencies">新增相依性</a></li>
+</ol>
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料設計規格</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 上的材料設計</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>如要在應用程式中使用材料設計樣式建立複雜的清單和卡片，可以使用 {@link android.support.v7.widget.RecyclerView} 和 {@link android.support.v7.widget.CardView} 小工具。
+
+</p>
+
+
+<h2 id="RecyclerView">建立清單</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} 小工具是比較進階和彈性的 {@link android.widget.ListView} 版本。
+這個小工具是一個用來顯示大型資料集的容器，只要維護少數幾個視圖，就可極有效率地捲動資料集。
+當您的資料集元素在執行階段會根據使用者操作動作或網路事件而變更，請使用 {@link android.support.v7.widget.RecyclerView} 小工具。
+
+</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} 類別會提供下列項目，簡化大型資料集的顯示和處理方式：
+</p>
+
+<ul>
+  <li>版面配置管理員，用來將項目定位</li>
+  <li>常見項目操作 (例如移除或新增項目) 的預設動畫</li>
+</ul>
+
+<p>您也可針對 {@link
+android.support.v7.widget.RecyclerView} 小工具定義自訂的版面配置管理員。</p>
+
+<img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
+<p class="img-caption">
+<strong>圖 1.</strong><code>RecyclerView</code> 小工具。
+</p>
+
+<p>如果要使用 {@link android.support.v7.widget.RecyclerView} 小工具，您必須指定配接器和版面配置管理員。
+如要建立配接器，請延伸 {@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter} 類別。實作的詳細情形根據您的資料集和檢視類型而定。
+如需詳細資訊，請參閱下面的<a href="#RVExamples">範例</a>。
+</p>
+
+<div style="float:right">
+<img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
+<p class="img-caption" style="margin-left:8px">
+<strong>圖 2</strong> - 含有 <code>RecyclerView</code> 的清單。
+</p>
+</div>
+
+<p><strong>版面配置管理員</strong>會將 {@link
+android.support.v7.widget.RecyclerView} 內的項目視圖定位，並判斷何時要重複使用使用者不會再看到的項目視圖。
+如要重複使用 (或回收<em></em>) 某個視圖，版面配置管理員會要求配接器以資料集中不同的元素，取代視圖的內容。
+使用此方式回收視圖可避免建立不必要的視圖或執行耗費資源的 {@link android.app.Activity#findViewById findViewById()} 查詢，以增進效能。
+
+</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} 提供下列內建的版面配置管理員：</p>
+
+<ul>
+<li>{@link android.support.v7.widget.LinearLayoutManager} 在垂直或水平捲動清單中顯示項目。
+</li>
+<li>{@link android.support.v7.widget.GridLayoutManager} 會在網格中顯示項目。</li>
+<li>{@link android.support.v7.widget.StaggeredGridLayoutManager} 會在交錯網格中顯示項目。</li>
+</ul>
+
+<p>如要建立自訂版面配置管理員，請延伸 {@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager} 類別。</p>
+
+<h3>動畫</h3>
+
+<p>在 {@link
+android.support.v7.widget.RecyclerView} 中，預設已啟用新增和移除項目的動畫。如果要自訂這些動畫，請延伸 {@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} 類別並使用 {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()} 方法。
+
+
+</p>
+
+<h3 id="RVExamples">範例</h3>
+
+<p>下列程式碼範例示範如何在版面配置中加入 {@link android.support.v7.widget.RecyclerView}：
+</p>
+
+<pre>
+&lt;!-- A RecyclerView with some commonly used attributes -->
+&lt;android.support.v7.widget.RecyclerView
+    android:id="@+id/my_recycler_view"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</pre>
+
+<p>一旦您在版面配置中加入 {@link android.support.v7.widget.RecyclerView} 小工具之後，先取得該物件的控制代碼、將控制代碼連線到版面配置管理員，再連接配接器以便顯示資料：
+
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+    ...
+}
+</pre>
+
+<p>配接器可存取資料集中的項目、建立項目的視圖，並在原來的項目無法再顯示時，使用新的資料項目取代某些視圖的內容。
+
+下列程式碼範例簡單實作一個由使用 {@link android.widget.TextView} 小工具顯示的字串陣列所組成的資料集：
+</p>
+
+<pre>
+public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
+    private String[] mDataset;
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+        }
+    }
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(String[] myDataset) {
+        mDataset = myDataset;
+    }
+
+    // Create new views (invoked by the layout manager)
+    &#64;Override
+    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext())
+                               .inflate(R.layout.my_text_view, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ...
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    &#64;Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.mTextView.setText(mDataset[position]);
+
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<div style="float:right;margin-top:15px;margin-left:30px">
+<img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
+<p class="img-caption" style="margin-left:12px">
+<strong>圖 3.</strong>卡片範例。
+</p>
+</div>
+
+<h2 id="CardView">建立卡片</h2>
+
+<p>{@link android.support.v7.widget.CardView} 會延伸{@link android.widget.FrameLayout} 類別，讓您跨平台以一致的外觀顯示卡片內部的資訊。{@link
+android.support.v7.widget.CardView} 小工具可以有陰影和圓形邊角。
+</p>
+
+<p>如要建立有陰影的卡片，請使用 <code>card_view:cardElevation</code> 屬性。在 Android 5.0 (API 級別 21) 以及以上版本，{@link android.support.v7.widget.CardView} 使用實際高度和動態陰影，但在較舊的版本上只能有計畫地實作陰影。如需詳細資訊，請參閱<a href="{@docRoot}training/material/compatibility.html">維持相容性</a>。
+
+
+
+</p>
+
+<p>使用下列屬性可自訂 {@link android.support.v7.widget.CardView} 小工具的外觀：
+</p>
+
+<ul>
+  <li>如果要在版面配置中設定圓角的半徑，請使用 <code>card_view:cardCornerRadius</code> 屬性。
+ </li>
+  <li>如果要在程式碼中設定圓角的半徑，請使用 <code>CardView.setRadius</code> 方法。</li>
+  <li>如果要設定卡片的背景顏色，請使用 <code>card_view:cardBackgroundColor</code> 屬性。
+ </li>
+</ul>
+
+<p>下列程式碼範例示範如何在版面配置中加入 {@link android.support.v7.widget.CardView}小工具：
+ </p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    ... >
+    &lt;!-- A CardView that contains a TextView -->
+    &lt;android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        card_view:cardCornerRadius="4dp">
+
+        &lt;TextView
+            android:id="@+id/info_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    &lt;/android.support.v7.widget.CardView>
+&lt;/LinearLayout>
+</pre>
+
+<p>如需詳細資訊，請參閱 {@link android.support.v7.widget.CardView} 的 API 參考資料。</p>
+
+
+<h2 id="Dependencies">新增相依性</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} 和 {@link android.support.v7.widget.CardView} 小工具都屬於 <a href="{@docRoot}tools/support-library/features.html#v7">v7 支援程式庫</a>。
+
+如要在專案中使用這些小工具，請在應用程式的模組中加入下列 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 相依性</a>：
+
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>

@@ -21,8 +21,10 @@ meta.tags="monetization, inappbilling, subscriptions"
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">Implementing Subscriptions (V3)</a></li>
-    <li><a href="https://developers.google.com/android-publisher/">Google Play Developer API</a></li>
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">Implementing
+    Subscriptions (V3)</a></li>
+    <li><a href="https://developers.google.com/android-publisher/">Google Play
+    Developer API</a></li>
   </ol>
 </div>
 </div>
@@ -109,11 +111,12 @@ content.</li>
 <p>In general the same basic policies and terms apply to subscriptions as to
 standard in-app products, however there are some differences. For complete
 information about the current policies and terms, please read the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en
-&answer=140504">policies document</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a>.</p>
 
 <p>To learn about the minimum system requirements for
-subscriptions, see the <a href="{@docRoot}google/play/billing/versions.html#Subs">Version Notes</a>.</p>
+subscriptions, see the <a href="{@docRoot}google/play/billing/versions.html#Subs">
+Version Notes</a>.</p>
 
 <h2 id="administering">Configuring Subscription Items</h2>
 
@@ -167,9 +170,14 @@ automated recurring billing at your choice of intervals:</p>
   <li>Monthly &mdash; Google Play bills the customer’s Google payments account at
   the time of purchase and monthly subsequent to the purchase date (exact billing
   intervals can vary slightly over time).</li>
+  <li>3 Months &mdash; Google Play bills the customer’s Google payments account at
+  the time of purchase and every three months after that (exact billing
+  intervals can vary slightly over time).</li>
+  <li>6 Months &mdash; Google Play bills the customer’s Google payments account at
+  the time of purchase and every six months after that (exact billing
+  intervals can vary slightly over time).</li>
   <li>Annually &mdash; Google Play bills the customer's Google payments account at
   the time of purchase and again on the same date in subsequent years.</li>
-
   <li>Seasonal &mdash; Google Play bills the customer's Google payments account at
   the beginning of each "season" (you specify the season beginning and end
   dates). This
@@ -194,15 +202,8 @@ which can then use it to validate or cancel the subscription remotely using the
 href="{@docRoot}google/play/developer-api.html">Google Play Developer API</a>.</p>
 
 <p>If a recurring payment fails (for example, because the customer’s credit
-card has become invalid), the subscription does not renew. How your app is
-notified depends on the In-app Billing API version that you are using:</p>
-<ul>
-<li>With In-app Billing Version 3, the failed or expired subscription is no longer
-returned when you call {@code getPurchases}.</li>
-<li>With In-app Billing Version 2, Google Play notifies your app at the end of
-the active cycle that the purchase state of the subscription is now "Expired".
-</li>
-</ul>
+card has become invalid), the subscription does not renew. The {@code
+getPurchases()} method does not return failed or expired subscriptions.</p>
 
 <p class="note"><strong>Recommendation</strong>: Include business logic in your
 app to notify your backend servers of subscription purchases, tokens, and any
@@ -312,7 +313,8 @@ date to 15 August 2015 14:00:00 UTC.</p>
 try your subscription content before buying it. The trial period runs for the
 period of time that you set and then automatically converts to a full
 subscription managed according to the subscription's billing interval and
-price. Free trials are supported for monthly and annual subscriptions only, and are not supported for seasonal subscriptions.</p>
+price. Google Play supports free trials for all subscription types, including
+seasonal subscriptions.</p>
 
 <p>To take advantage of a free trial, a user must "purchase" the full
 subscription through the standard In-app Billing flow, providing a valid form of
@@ -330,10 +332,10 @@ against the credit card that the user provided during the initial purchase, at
 the amount set
 for the full subscription, and continuing at the subscription interval. If
 necessary, the user can cancel the subscription at any time during the trial
-period. In this case, Google Play <em>marks the subscription as expired immediately</em>,
-rather than waiting until the end of the trial period. The user has not
-paid for the trial period and so is not entitled to continued access after
-cancellation.</p>
+period. In this case, the subscription remains active until the end of the
+trial period, but Google Play sets the subscription <em>not</em> to renew
+automatically; at the end of the trial period the subscription expires, and
+Google Play does not charge the user.</p>
 
 <p>You can set up a trial period for a subscription in the Developer Console,
 without needing to modify or update your APK. Just locate and edit the
@@ -369,6 +371,24 @@ products available for purchase inside the app. </p>
 product from the product list offered in your app to prevent users from seeing
 or purchasing it.</p>
 
+<h3 id="prorate">Prorated Seasonal Subscription Prices</h3>
+
+<p>You can set up prorated prices for users who buy seasonal subscriptions
+after the season's start date. You specify the date on which the discounted
+price takes effect. The discounted price takes effect at 0:00 UTC on
+the specified date. You can set multiple prorated prices, dropping the
+subscription price lower and lower as the season goes on. If a user purchases
+a prorated seasonal subscription and remains subscribed until the start of the
+next season, Google Play charges them the full subscription price when the next
+season starts.</p>
+
+<p>For example, the professional checkers season runs from March 1 to August 31.
+The <em>Checkers Dilettante</em> app offers a seasonal subscription for €10. The
+app also offers two prorated prices: €7.50 for users who sign up on or after
+June 1, and €5 for users who sign up on or after
+August 15. Regardless of when the user signs up, the seasonal subscription ends
+on August 31.</p>
+
 <h2 id="cancellation">Subscription Cancellation</h2>
 
 <p>Users can view the status of all of their subscriptions and cancel them if
@@ -398,7 +418,8 @@ and revoke</a> API to revoke each subscriber's subscription (one by one) and
 refund their subscription payments.
 Removing content that any subscriber is entitled to access
 will result in penalties. Please see the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">policies document</a> for more information. </p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a> for more information. </p>
 
 <h3 id="uninstall">App uninstallation</h3>
 
@@ -443,8 +464,8 @@ Billing to handle the transaction and may not provide links to a purchase flow
 outside of the app and Google Play (such as to a web site).</p>
 
 <p>For complete details about terms and policies, see the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">policies
-document</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a>.</p>
 
 <h3 id="orderId">Subscription order numbers</h3>
 
@@ -453,10 +474,11 @@ payments provides a base Merchant Order Number for all recurrences of the
 subscription and denotes
 each recurring transaction by appending an integer as follows: </p>
 
-<p><span style="color:#777"><code style="color:#777">12999556515565155651.5565135565155651</code> (base order number)</span><br />
-<code>12999556515565155651.5565135565155651..0</code> (first recurrence orderID)<br />
-<code>12999556515565155651.5565135565155651..1</code> (second recurrence orderID)<br />
-<code>12999556515565155651.5565135565155651..2</code> (third recurrence orderID)<br />
+<p><span style="color:#777"><code style="color:#777">GPA.1234-5678-9012-34567</code>
+(base order number)</span><br />
+<code>GPA.1234-5678-9012-34567..0</code> (first recurrence orderID)<br />
+<code>GPA.1234-5678-9012-34567..1</code> (second recurrence orderID)<br />
+<code>GPA.1234-5678-9012-34567..2</code> (third recurrence orderID)<br />
 ...<br /></p>
 
 <p>Google Play provides the order number as the value of the

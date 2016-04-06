@@ -1,0 +1,128 @@
+page.title=Optimizing User-Initiated Network Use
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#pre-fetch-data">Pre-fetch Network Data</a>
+  <li><a href="#check-or-listen">Check for Connectivity or Listen for Changes</a></li>
+  <li><a href="#reduce-connections">Reduce the Number of Connections</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+  Quick handling of user requests helps ensure a good user experience, especially when it comes to
+  user actions that require network access. You should prioritize low latency over power
+  conservation to provide the fastest response when optimizing network use that is a direct result
+  of user actions. Attaining an optimal network traffic profile for your app, while making sure
+  that your users get fast responses, can be a bit challenging.
+</p>
+
+<p>
+  This lesson teaches you how to optimize network use for user-initiated
+  actions and reduce battery consumption.
+</p>
+
+
+<h2 id="pre-fetch-data">Pre-fetch Network Data</h2>
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/Rk1u7VVmadE?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>
+  Pre-fetching data is an effective way to reduce the number of independent data transfer sessions
+  that your app runs. With pre-fetching, when the user performs an action in your app, the app
+  anticipates which data will most likely be needed for the next series of user actions and fetches
+  that data in bulk. Battery power consumption is reduced for two reasons:
+  <ul>
+    <li>
+      Because your app pre-fetches data only when the the mobile radio is already awake from
+      the user's action, and so does not incur the overhead of waking up the mobile radio.
+    </li>
+    <li>
+      The app pre-fetches data for anticipated user actions, each of which might otherwise
+      require separate requests that each incur waking up the mobile radio.
+    </li>
+  </ul>
+
+</p>
+
+<p class="note">
+  <strong>Tip:</strong> To explore whether your app might benefit from pre-fetching, review your
+  app's network traffic and look for situations where a specific series of user actions almost
+  always results in multiple network requests over the course of the task. For instance, an app
+  that incrementally downloads article content as a user views it might be able to pre-fetch one or
+  more articles in categories the user is known to view.
+</p>
+
+<p>
+  Watch the video on effective pre-fetching which describes what pre-fetching is, where to
+  use it, and how much data to pre-fetch. For more details, see <a href=
+  "{@docRoot}training/efficient-downloads/efficient-network-access.html#PrefetchData">Optimizing
+  Downloads for Efficient Network Access</a>.
+</p>
+
+
+<h2 id="check-or-listen">Check for Connectivity or Listen for Changes</h2>
+
+<p>
+  Searching for a cell signal is one of the most power-draining operations on a mobile
+  device. Your app should always check for connectivity before sending a user-initiated network
+  request. If you use a scheduling service, <a href=
+  "{@docRoot}training/performance/battery/network/action-app-traffic.html#choosing-scheduler">Schedulers</a>
+  do this automatically for you.
+</p>
+
+<ul>
+  <li>If only certain buttons in your activity depend on a network connection, use <a href=
+  "{@docRoot}reference/android/net/ConnectivityManager.html">Connectivity Manager</a> to check for
+  a network connection before sending the network request, as instructed in <a href=
+  "{@docRoot}training/monitoring-device-state/connectivity-monitoring.html#MonitorChanges">Monitor
+  for Changes in Connectivity</a>. If there's no network, the app can save battery by not forcing
+  the mobile radio to search.
+  </li>
+
+  <li>If your entire activity's user interface is non-functional without network access, then use
+  <a href="{@docRoot}training/monitoring-device-state/manifest-receivers.html">Manipulate Broadcast
+  Receivers on Demand</a>. This technique listens for connectivity changes when your activity is in
+  the foreground, and prevents network requests from proceeding when no connectivity exists. That
+  is, if your app detects that connectivity has been lost, it disables all of its receivers, except
+  for the connectivity-change receiver. An example would be a news app that presents an activity
+  with a full-screen view of news snippets and does no pre-fetching. Any snippet a user taps would
+  require a network connection.
+  </li>
+</ul>
+
+
+<p>
+  A best practice for user-initiated traffic is to first check for a connection using <a href=
+  "{@docRoot}reference/android/net/ConnectivityManager.html">Connectivity Manager</a>, and if there
+  is no connection, <a href="#heading=h.a114i7ic2bxc">schedule</a> the network request for when the
+  connection is made. Schedulers will use techniques such as exponential backoff to save battery,
+  where each time the attempt to connect fails, the scheduler doubles the delay before the next
+  retry.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> To check for connectivity for app-initiated traffic, see <a href=
+  "action-app-traffic.html#check-connect">Optimizing App-Initiated Network Use</a>.
+</p>
+
+
+<h2 id="reduce-connections">Reduce the Number of Connections</h2>
+
+<p>
+  In general, it's more efficient to reuse existing network connections than to initiate new ones.
+  Reusing connections also allows the network to more intelligently react to congestion and related
+  network data issues. For more information on reducing the number of connections used by your app,
+  see <a href="{@docRoot}training/efficient-downloads/efficient-network-access.html#ReduceConnections">
+  Optimizing Downloads for Efficient Network Access</a>.
+</p>

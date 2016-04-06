@@ -1,0 +1,55 @@
+page.title=Testing App Component Integrations
+page.tags=testing,integration
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+        <h2>
+          You should also read
+        </h2>
+        <ul>
+          <li>
+            <a href="{@docRoot}tools/testing-support-library/index.html">Testing Support Library</a>
+          </li>
+        </ul>
+</div>
+</div>
+
+<p>
+If your app uses components that users do not directly interact with, such as
+a <a href="{@docRoot}guide/components/services.html">Service</a> or
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Provider</a>, you
+should validate that these components behave in a correct way with your app.</p>
+<p>When developing such components, you should get into the habit of writing
+<em>integration tests</em> in order to validate the component's behavior when your app runs on a
+device or an emulator.</p>
+
+<p class="note"><strong>Note:</strong> Android does not provide a separate test case class for
+{@link android.content.BroadcastReceiver}. To verify that a
+{@link android.content.BroadcastReceiver} responds correctly, you can test the component that sends
+it an {@link android.content.Intent} object. Alternatively, you can create an instance of your
+{@link android.content.BroadcastReceiver} by calling
+<a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html#getContext()">
+{@code InstrumentationRegistry.getTargetContext()}</a>, then call the
+{@link android.content.BroadcastReceiver} method that you want to test (usually, this is
+the
+{@link android.content.BroadcastReceiver#onReceive(android.content.Context, android.content.Intent)
+onReceive()} method).</p>
+
+<p>This class teaches you to build automated integration tests using the testing APIs and tools
+that the Android platform provides.</p>
+<h2>Lessons</h2>
+<dl>
+  <dt><strong><a href="service-testing.html">
+Testing Your Service</a></strong></dt>
+    <dd>Learn how to build integration tests to verify that a service works correctly with your
+    app.</dd>
+  <dt><strong><a href="content-provider-testing.html">
+Testing Your Content Provider</a></strong></dt>
+    <dd>Learn how to build integration tests to verify that a content provider works correctly with
+    your app.</dd>
+</dl>

@@ -180,7 +180,8 @@ m.openDevice(info, new MidiManager.OnDeviceOpenedListener() {
             Log.e(TAG, "could not open device " + info);
         } else {
             ...
-        }, new Handler(Looper.getMainLooper())
+        }
+    }, new Handler(Looper.getMainLooper())
     );
 </pre>
 

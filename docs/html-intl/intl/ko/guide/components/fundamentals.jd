@@ -1,0 +1,480 @@
+page.title=애플리케이션 기본 항목
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+<li><a href="#Components">앱 구성 요소</a>
+  <ol>
+    <li><a href="#ActivatingComponents">구성 요소 활성화</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">매니페스트 파일</a>
+  <ol>
+    <li><a href="#DeclaringComponents">구성 요소 선언</a></li>
+    <li><a href="#DeclaringRequirements">앱 요구 사항 선언</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">앱 리소스</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android 앱은 Java 프로그래밍 언어로 작성됩니다. Android SDK 도구는 
+코드를 컴파일링하여 모든 데이터 및 리소스 파일과 함께 하나의 APK로 만듭니다. 이것은 즉, <i>Android 패키지</i>
+를 뜻하며, 이는 일종의 {@code .apk} 접미사가 있는 아카이브 파일입니다. 한 개의 APK 파일에는 
+Android 앱의 모든 콘텐츠가 들어 있으며 이 파일이 바로 Android로 구동하는 기기가 앱을 설치할 때 사용하는 파일입니다.</p>
+
+<p>Android 앱은 일단 기기에 설치되고 나면 각자 나름의 보안 샌드박스 안에 살게 됩니다. </p>
+
+<ul>
+ <li>Android 운영 체제는 멀티 사용자 Linux 시스템으로, 여기서 각 앱은 각기 다른 사용자와 
+같습니다.</li>
+
+<li>기본적으로 시스템이 각 앱에 고유한 Linux ID를 할당합니다(이 ID는 시스템만 
+사용할 수 있으며 앱은 이것을 알지 못합니다). 시스템은 앱 안의 모든 파일에 대해 권한을 설정하여 
+해당 앱에 할당된 사용자 ID만 이에 액세스할 수 있도록 합니다. </li>
+
+<li>각 프로세스에는 나름의 가상 머신(VM)이 있고, 그렇기 때문에 한 앱의 코드가 다른 여러 앱과는 격리된 상태로 
+실행됩니다.</li>
+
+<li>기본적으로 모든 앱이 나름의 Linux 프로세스에서 실행됩니다. Android는 앱의 구성 요소 중 
+어느 것이라도 실행해야 하는 경우 프로세스를 시작하고, 이것이 더 이상 필요 없어지거나 시스템이 다른 앱을 위해 
+메모리를 회복해야 하는 경우 해당 프로세스를 종료합니다.</li>
+</ul>
+
+<p>Android 시스템은 이런 방식으로 <em>최소 특권의 원리</em>를 구현하는 것입니다. 다시 말해, 
+각 앱은 기본적으로 자신의 작업을 수행하기 위해 필요한 구성 요소에만 액세스 권한을 가지고 
+그 이상은 허용되지 않습니다. 이렇게 하면 대단히 안전한 환경이 만들어져 앱이 시스템에서 
+자신이 권한을 부여 받지 못한 부분에는 액세스할 수 없게 됩니다.</p>
+
+<p>그러나, 앱이 다른 여러 앱과 데이터를 공유하는 것과 앱이 시스템 서비스에 액세스하는 데에는 
+여러 가지 방법이 있습니다.</p>
+
+<ul>
+  <li>두 개의 앱이 같은 Linux 사용자 ID를 공유하도록 설정할 수도 있습니다. 이 경우 
+두 앱은 서로의 파일에 액세스할 수 있게 됩니다.  시스템 리소스를 절약하려면, 같은 사용자 ID를 가진 앱이 
+같은 Linux 프로세스에서 실행되도록 설정하고 같은 VM을 공유하도록 할 수도 있습니다(이들 앱은 같은 인증서로 
+서명해야 합니다).</li>
+  <li>앱은 사용자의 연락처, SMS 메시지, 마운트 가능한 저장소(SD 카드), 
+카메라, Bluetooth를 비롯하여 이외에도 여러 가지 기기 데이터에 액세스할 권한을 요청할 수 있습니다. 모든 
+앱 권한은 설치 시점에 사용자가 허용해야 합니다.</li>
+</ul>
+
+<p>이렇게 해서 Android 앱이 시스템 내에 어떤 식으로 존재하는지 기본 정보를 알아보았습니다. 이 문서의 
+나머지 부분에서 소개될 내용은 다음과 같습니다.</p>
+<ul>
+  <li>앱을 정의하는 핵심 프레임워크 구성 요소.</li>
+  <li>구성 요소를 선언하고 앱에 맞는 필수 기기 특징을 선언할 수 있는 매니페스트 
+파일.</li>
+  <li>앱 코드로부터 별도로 분리되어 있으며 앱이 다양한 기기 구성에 맞게 자신의 행동을 
+안정적으로 최적화할 수 있도록 해주는 리소스.</li>
+</ul>
+
+
+
+<h2 id="Components">앱 구성 요소</h2>
+
+<p>앱 구성 요소는 Android 앱을 이루는 가장 기본적인 구성 단위입니다. 각 
+구성 요소는 시스템이 앱으로 들어올 수 있는 각기 다른 통과 지점을 나타냅니다. 구성 요소 중에는 
+실제 사용자가 쓸 수 있는 진입 지점이 아닌 것도 있고, 일부는 서로에게 의존하지만, 
+각각의 구성 요소는 따로 떨어진 엔티티로서 존재하며 각기 특정한 역할을 수행합니다. 즉 하나하나가 
+앱의 전반적인 행동을 정의하는 데 유용한 고유한 구성 단위인 것입니다.</p>
+
+<p>앱 구성 요소에는 네 가지 서로 다른 유형이 있습니다. 각 유형이 뚜렷한 목적을 가지고 있으며 
+각자 나름의 수명 주기가 있어 구성 요소의 생성 및 소멸 방식을 정의합니다.</p>
+
+<p>다음은 네 가지 유형의 앱 구성 요소를 나타낸 것입니다.</p>
+
+<dl>
+
+<dt><b>액티비티</b></dt>
+
+<dd>통상 <i>액티비티</i> 라고 하면, 사용자 인터페이스가 있는 화면 하나를 나타냅니다. 예를 들어 
+이메일 앱이라면 새 이메일 목록을 표시하는 액티비티가 하나 있고, 
+이메일을 작성하는 액티비티가 또 하나, 그리고 이메일을 읽는 데 쓰는 액티비티가 또 하나 있을 수 있습니다. 여러 
+액티비티가 함께 작동하여 해당 이메일 앱에서 짜임새 있는 사용자 환경을 형성하는 것은 사실이지만, 각자 서로와는 
+독립적인 형태입니다. 따라서, 다른 앱이 이와 같은 액티비티 중 어느 것이라도 하나만 
+시작할 수 있습니다(이메일 앱이 그렇게 하도록 허용하는 경우). 예를 들어, 카메라 앱이라면 이메일 앱 안의 
+액티비티를 시작하여 새 메일을 작성하도록 해서 사용자가 사진을 공유하도록 할 수 있습니다.
+
+<p>액티비티는 {@link android.app.Activity}의 하위 클래스로 구현되며 이에 대한 더 자세한 내용은 
+<a href="{@docRoot}guide/components/activities.html">액티비티</a>
+개발자 가이드에서 확인하실 수 있습니다.</p>
+</dd>
+
+
+<dt><b>서비스</b></dt>
+
+<dd>통상 <i>서비스</i> 라고 하면 배경에서 실행되는 구성 요소로, 오랫동안 실행되는 
+작업을 수행하거나 원격 프로세스를 위한 작업을 수행하는 것입니다. 서비스는 
+사용자 인터페이스를 제공하지 않습니다. 예를 들어 서비스는 사용자가 다른 앱에 있는 동안에 배경에서 음악을 재생할 수도 있고, 
+아니면 사용자와 액티비티 사이의 상호 작용을 차단하지 않고 네트워크를 가로질러 
+데이터를 가져올 수도 있습니다. 또 다른 구성 요소(예: 액티비티)가 서비스를 시작한 다음 
+실행되도록 두거나 자신에게 바인딩하여 상호 작용하도록 할 수도 있습니다.
+
+<p>서비스는 {@link android.app.Service}의 하위 클래스로 구현되며 이에 대한 더 자세한 내용은 
+<a href="{@docRoot}guide/components/services.html">서비스</a>
+개발자 가이드에서 확인하실 수 있습니다.</p>
+</dd>
+
+
+<dt><b>콘텐츠 제공자</b></dt>
+
+<dd>통상 <i>콘텐츠 제공자</i> 는 공유된 앱 데이터 집합을 관리합니다. 데이터는 파일 시스템이나 SQLite 데이터베이스, 
+또는 웹이나 기타 영구적인 저장소 위치 중 앱이 액세스할 수 있는 곳이라면 어디에든 저장할 수 
+있습니다. 다른 여러 앱은 콘텐츠 제공자를 통해 해당 데이터를 쿼리하거나, 심지어는 수정할 수도 
+있습니다(콘텐츠 제공자가 그렇게 하도록 허용하는 경우). 예를 들어, Android 시스템은 사용자의 연락처 정보를 
+관리하는 콘텐츠 제공자를 제공합니다. 따라서, 적절한 권한을 가진 앱이라면 
+어떤 것이든 해당 콘텐츠 제공자의 일부를 쿼리하여(예를 들어 {@link
+android.provider.ContactsContract.Data} 등) 특정한 사람에 대한 정보를 읽고 쓸 수 있습니다.
+
+<p>콘텐츠 제공자는 앱에서 비공개이며 공유되지 않는 데이터를 읽고 쓰는 데에도 
+유용합니다. 예를 들어 <a href="{@docRoot}resources/samples/NotePad/index.html">메모장</a> 샘플 앱은 메모한 내용을 저장하는 데 
+콘텐츠 제공자를 사용합니다.</p>
+
+<p>콘텐츠 제공자는 {@link android.content.ContentProvider}의
+하위 클래스로 구현되며, 다른 앱이 트랜잭션을 수행할 수 있도록 활성화하는 표준 API 집합을 
+구현해야 합니다. 자세한 내용은 <a href="{@docRoot}guide/topics/providers/content-providers.html">콘텐츠 제공자</a> 개발자
+가이드를 참조하십시오.</p>
+</dd>
+
+
+<dt><b>브로드캐스트 수신기</b></dt>
+
+<dd>통상 <i>브로드캐스트 수신기</i> 는 시스템 전체에 대한 브로드캐스트 공지에 응답하는 구성 요소를 
+말합니다.  대다수의 브로드캐스트는 시스템에서 시작합니다. 예를 들어, 화면이 꺼졌다거나 
+배터리 잔량이 부족하다거나, 사진을 캡처했다는 것을 알리는 브로드캐스트가 있습니다.
+앱도 브로드캐스트를 시작합니다. 예를 들어, 기기에 몇 가지 데이터를 다운로드하여 다른 앱도 사용할 수 있다는 
+사실을 다른 여러 앱에게 알리는 것입니다. 브로드캐스트 수신기는 사용자 인터페이스를 표시하지 않지만, 
+<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">상태 표시줄 알림을 생성</a>하여 
+사용자에게 브로드캐스트 이벤트가 발생했다고 알릴 수 있습니다. 다만 브로드캐스트 수신기는 
+그저 다른 구성 요소로의 "게이트웨이"인 경우가 더 보편적이고, 극소량의 작업만 수행하도록 만들어진 경우가 많습니다. 예컨대 
+서비스를 시작하여 이벤트를 근거로 한 어떤 작업을 수행하도록 할 수 있습니다.
+
+<p>브로드캐스트 수신기는 {@link android.content.BroadcastReceiver}의 
+하위 클래스로 구현되며 각 브로드캐스트는 {@link android.content.Intent} 객체로 전달됩니다. 자세한 정보는 
+{@link android.content.BroadcastReceiver} 클래스를 참조하십시오.</p>
+</dd>
+
+</dl>
+
+
+
+<p>Android 시스템 디자인의 독특한 점으로 어떤 앱이든 다른 앱의 구성 요소를 시작할 수 있다는 점을 
+들 수 있습니다. 예를 들어 사용자가 기기 카메라로 사진을 캡처하기를 바라는 경우, 
+그런 작업을 수행하는 또 다른 앱이 있을 가능성이 높습니다. 그러면 사진을 캡처하는 액티비티를 직접 개발하는 대신 
+여러분의 앱이 그 앱을 사용하도록 하면 됩니다. 카메라 앱에 
+통합하기는커녕 카메라 앱의 코드에 연결시킬 필요조차도 없습니다.
+그 대신, 그저 사진을 캡처하는 카메라 앱 안의 해당 액티비티를 시작하기만 하면 
+됩니다. 작업이 완료되면 사진이 앱으로 반환되기까지 하여 바로 사용할 수 있습니다. 사용자에게는, 
+마치 카메라가 여러분의 앱의 일부분인 것처럼 보입니다.</p>
+
+<p>시스템이 구성 요소를 시작하는 경우, 그 앱에 대한 프로세스를 시작하는 것이며(이미 
+실행 중이지 않은 경우), 해당 구성 요소에 필요한 클래스를 인스턴트화하는 것입니다. 예를 들어 여러분의 앱이 
+카메라 앱 내에서 사진을 캡처하는 액티비티를 시작한다고 하면, 해당 액티비티는 
+여러분 앱의 프로세스가 아니라 카메라 앱에 속한 프로세스에서 실행됩니다. 
+따라서 대부분의 다른 시스템에서와는 달리 Android 앱에는 단일한 진입 
+지점이 없습니다(예를 들어 {@code main()} 기능이 없습니다).</p>
+
+<p>시스템이 각 앱을 별도의 프로세스에서 실행하며 다른 앱에 대한 액세스를 제한하는 
+파일 권한을 가지고 실행하기 때문에 여러분의 앱은 또 다른 앱에서 곧바로 구성 요소를 
+활성화할 수는 없습니다. 하지만 Android 시스템은 할 수 있습니다. 그래서 또 다른 앱에 있는 
+구성 요소를 활성화하려면 시스템에 메시지를 전달하여 특정 구성 요소를 시작하고자 하는 <em>인텐트</em>를 
+밝혀야 합니다. 그러면 시스템이 대신 해당 구성 요소를 활성화해줍니다.</p>
+
+
+<h3 id="ActivatingComponents">구성 요소 활성화</h3>
+
+<p>네 가지 구성 요소 중 세 가지&mdash;액티비티, 서비스 및 
+브로드캐스트 수신기&mdash;는 일명 <em>인텐트</em>라고 하는 비동기식 메시지가 활성화합니다.
+인텐트는 각각의 구성 요소를 런타임에 서로 바인딩하며(다른 구성 요소로부터 작업을 요청하는 
+일종의 메신저로 생각하면 됩니다), 이는 구성 요소가 여러분의 앱에 속하든 아니든 
+무관합니다.</p>
+
+<p>인텐트는 {@link android.content.Intent} 객체로 생성되며, 이것이 
+특정 구성 요소를 활성화할지 아니면 구성 요소의 특정 <em>유형</em>을 활성화할지를 나타내는 메시지를 정의합니다. 인텐트는 
+각각 명시적이거나 암시적일 수 있습니다.</p>
+
+<p>액티비티와 서비스의 경우, 인텐트는 수행할 작업을 정의하며(예를 들어 무언가를 '보기" 또는 
+"보내기"), 작업을 수행할 데이터의 URI를 나타낼 수 있습니다(시작되는 구성 요소가 알아야 할 것은 
+이외에도 많이 있습니다). 예를 들어, 인텐트는 액티비티에 이미지를 표시하거나 웹 페이지를 열라는 요청을 
+전달할 수 있습니다. 어떤 경우에는 액티비티를 시작하여 
+결과를 받아오도록 할 수 있습니다. 이런 경우 이 액티비티는 
+{@link android.content.Intent}로 결과를 반환하기도 합니다(예를 들어, 사용자가 
+개인적인 연락처를 선택하도록 한 다음 그것을 반환하도록 하는 인텐트를 발행할 수 있습니다&mdash;반환 인텐트에 
+선택한 연락처를 가리키는 URI가 포함됩니다).</p>
+
+<p>브로드캐스트 수신기의 경우, 인텐트는 단순히 브로드캐스트될 알림을 
+정의할 뿐입니다(예를 들어, 기기 배터리 잔량이 낮다는 것을 나타내는 브로드캐스트에는 
+"배터리 부족"을 나타내는 알려진 작업 문자열만 포함됩니다).</p>
+
+<p>남은 하나의 구성 요소 유형, 즉 콘텐츠 제공자는 인텐트가 활성화하지 않습니다. 그보다는 
+{@link android.content.ContentResolver}로부터의 요청으로 지정되면 활성화됩니다. 콘텐츠 
+확인자는 콘텐츠 제공자와의 모든 직접적인 트랜잭션을 처리하여 
+제공자와의 트랜잭션을 수행하는 구성 요소가 그런 일을 하지 않아도 되게 하고, 그 대신 {@link
+android.content.ContentResolver} 객체에서 메서드를 호출합니다. 이렇게 되면 콘텐츠 제공자와 
+정보를 요청하는 구성 요소 사이에 추상화 계층이 하나 남습니다(보안 목적).</p>
+
+<p>각 유형의 구성 요소를 활성화하는 데에는 각기 별도의 메서드가 있습니다.</p>
+<ul>
+  <li>액티비티를 시작하려면(아니면 무언가 새로운 할 일을 주려면) 
+{@link android.content.Intent}를 {@link android.content.Context#startActivity
+startActivity()} 또는 {@link android.app.Activity#startActivityForResult startActivityForResult()}에 
+전달하면 됩니다(액티비티가 결과를 반환하기를 원하는 경우).</li>
+  <li>서비스를 시작하려면(또는 진행 중인 서비스에 새로운 지침을 주려면) 
+{@link android.content.Intent}를 {@link android.content.Context#startService
+startService()}에 전달하면 됩니다. 아니면 {@link android.content.Intent}를 
+{@link android.content.Context#bindService bindService()}에 전달하여 서비스에 바인딩할 수도 있습니다.</li>
+  <li>브로드캐스트를 시작하려면 {@link android.content.Intent}를 
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()} 또는 {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}와 같은 메서드에 전달하면 됩니다.</li>
+  <li>콘텐츠 제공자에 쿼리를 수행하려면 {@link android.content.ContentResolver}에서 {@link
+android.content.ContentProvider#query query()}를 호출하면 됩니다.</li>
+</ul>
+
+<p>인텐트 사용에 관한 자세한 정보는 <a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 
+인텐트 필터</a>문서를 참조하십시오. 특정 구성 요소를 활성화하는 데 관한 자세한 정보 또한 다음 문서에 
+제공되어 있습니다. <a href="{@docRoot}guide/components/activities.html">액티비티</a>, <a href="{@docRoot}guide/components/services.html">서비스</a>, {@link
+android.content.BroadcastReceiver} 및 <a href="{@docRoot}guide/topics/providers/content-providers.html">콘텐츠 제공자</a>.</p>
+
+
+<h2 id="Manifest">매니페스트 파일</h2>
+
+<p>Android 시스템이 앱 구성 요소를 시작하려면 시스템은 우선 해당 구성 요소가 
+존재하는지 알아야 합니다. 그러기 위해 앱의 {@code AndroidManifest.xml} 파일을 읽습니다(즉 "매니페스트"
+파일). 앱은 이 파일 안에 모든 구성 요소를 선언해야 하며, 이 파일은 앱 프로젝트 디렉터리의 루트에 
+있어야 합니다.</p>
+
+<p>매니페스트는 앱의 구성 요소를 선언하는 것 이외에도 수많은 역할을 합니다.
+예를 들면 다음과 같습니다.</p>
+<ul>
+  <li>앱이 요구하는 모든 사용자 권한 식별(예: 인터넷 액세스 또는 사용자의 연락처로의 
+읽기 액세스)</li>
+  <li>앱이 어느 API를 사용하는지를 근거로 하여 앱에서 요구하는 최소 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 레벨</a>
+선언</li>
+  <li>앱에서 사용하거나 필요로 하는 하드웨어 및 소프트웨어 기능 선언(예: 카메라, 
+블루투스 서비스 또는 멀티터치 화면 등)</li>
+  <li>앱이 링크되어야 하는 API 라이브러리(Android 프레임워크 
+API 제외)(예: <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps
+라이브러리</a>)</li>
+  <li>그 외 기타 등등</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">구성 요소 선언</h3>
+
+<p>매니페스트의 주요 작업은 시스템에 앱의 구성 요소에 대해 알리는 것입니다. 예를 들어 
+매니페스트 파일은 액티비티를 다음과 같이 선언할 수 있습니다. </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p><code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+요소에서 {@code android:icon} 속성은 앱을 식별하는 아이콘에 대한 리소스를 
+가리킵니다.</p>
+
+<p><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 요소에서는, 
+{@code android:name} 속성이 {@link
+android.app.Activity} 하위 클래스의 완전히 정규화된 클래스 이름을 나타내며 {@code android:label} 속성은 액티비티의 
+사용자에게 표시되는 레이블로 사용할 문자열을 나타냅니다.</p>
+
+<p>모든 앱 구성 요소를 이렇게 선언해야 합니다.</p>
+<ul>
+  <li>액티비티는 
+<code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 요소</li>
+  <li>서비스는 
+<code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 요소</li>
+  <li>브로드캐스트 수신기는 
+<code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> 요소</li>
+  <li>콘텐츠 제공자는 
+<code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 요소</li>
+</ul>
+
+<p>액티비티, 서비스를 비롯하여 소스에는 포함시키지만 매니페스트에서는 선언하지 않는 
+콘텐츠 제공자는 시스템에 표시되지 않으며, 따라서 실행될 수 없습니다.  그러나 
+브로드캐스트
+ 수신기는 매니페스트에서 선언해도 되고 코드를 사용해(
+{@link android.content.BroadcastReceiver} 객체로) 동적으로 생성한 다음 시스템에 등록해도 됩니다. 이때 
+{@link android.content.Context#registerReceiver registerReceiver()}를 호출하는 방법을 씁니다.</p>
+
+<p>앱에 맞는 매니페스트 파일을 구성하는 방법에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml 파일</a>을
+ 참조하십시오. </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">구성 요소 기능 선언</h3>
+
+<p>위에서 논한 바와 같이, <a href="#ActivatingComponents">활성화 상태의 구성 요소</a>에서는 
+{@link android.content.Intent}를 사용하여 액티비티, 서비스 및 브로드캐스트 수신기를 시작할 수 있습니다. 그렇게 하려면 
+대상 구성 요소를 인텐트 내에서 명시적으로 명명하면 됩니다(구성 요소 클래스 이름을 사용). 그러나, 
+인텐트의 진정한 힘은 <em>암시적 인텐트</em>의 개념에서 발휘됩니다. 암시적 인텐트는 
+그저 수행할 작업의 유형을 설명할 뿐이며(또한, 선택 사항으로, 해당 작업을 수행하고자 하는 
+데이터 위치도) 시스템에 기기에서 작업을 수행할 수 있는 구성 요소를 찾아 
+시작하도록 해줍니다. 인텐트가 설명한 작업을 수행할 수 있는 구성 요소가 여러 개인 경우, 
+어느 것을 사용할지 사용자가 선택합니다.</p>
+
+<p>시스템이 인텐트에 응답할 수 있는 구성 요소를 식별하는 방법은 수신한 인텐트를 
+ <i>인텐트 필터</i> 와 비교하는 것입니다. 이 인텐트 필터는 기기의 다른 여러 앱의 매니페스트 
+파일이 제공합니다.</p>
+
+<p>앱의 매니페스트에서 액티비티를 선언하는 경우, 선택 사항으로 
+해당 액티비티의 기능을 선언하는 인텐트 필터를 포함시켜서 다른 앱으로부터의 인텐트에 
+응답할 수 있도록 할 수 있습니다. 구성 요소에 대한 인텐트 필터를 선언하려면 
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 요소를 해당 구성 요소의 선언 요소 하위로 추가하면 됩니다.</p>
+
+<p>예를 들어, 새 이메일을 작성하는 데 쓰는 액티비티가 있는 이메일 앱을 구축했다고 가정합시다. 이때 "전송" 인텐트에 
+응답하는 인텐트 필터를 선언하려면(새 이메일을 전송하기 위해) 다음과 같이 하면 됩니다.</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>그런 다음, 다른 앱이 {@link
+android.content.Intent#ACTION_SEND} 작업을 가진 인텐트를 생성하여 그것을 {@link android.app.Activity#startActivity
+startActivity()}로 전달하면 시스템이 여러분의 액티비티를 시작하여 사용자가 이메일을 임시 보관하고 전송할 수 
+있습니다.</p>
+
+<p>인텐트 필터 생성에 관한 자세한 내용은 <a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a> 문서를 참조하십시오.
+</p>
+
+
+
+<h3 id="DeclaringRequirements">앱 요구 사항 선언</h3>
+
+<p>Android로 구동되는 기기는 수없이 많지만 모두 똑같은 특징을 갖고 같은 
+기능을 제공하는 것은 아닙니다. 앱이 필요로 하는 기능이 부족한 기기에 앱을 설치하게 되는 불상사를 방지하려면, 
+앱이 지원하는 기기 유형에 대한 프로필을 명확하게 정의하는 것이 중요합니다. 
+그러려면 매니페스트 파일에 기기와 소프트웨어 요구 사항을 
+선언하면 됩니다. 이와 같은 선언은 대부분 정보성일 뿐이며 시스템은 이를 읽지 않는 것이 일반적이지만, 
+Google Play와 같은 외부 서비스는 사용자가 본인의 기기에서 앱을 검색할 때 필터링을 제공하기 위해 
+이와 같은 선언도 읽습니다.</p>
+
+<p>예를 들어, 앱에 카메라가 필요하고 Android 2.1부터 도입된 API를 사용하는 경우(<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 레벨</a> 7) 
+이과 같은 내용을 매니페스트 파일에 요구 사항으로 선언하려면 다음과 같이 합니다.</p> 
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>이제 카메라가 <em>없고</em> Android 버전이 2.1 <em>이하</em>인 기기는 
+Google Play에서 여러분의 앱을 설치할 수 없습니다.</p>
+
+<p>그러나, 앱이 카메라를 사용하기는 하지만 꼭 
+<em>필요한</em> 것은 아니라고 선언할 수도 있습니다. 이 경우에는, 앱이 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
+ 속성을 {@code "false"}에 설정하고 런타임을 확인하여 
+해당 기기에 카메라가 있는지, 경우에 따라 모든 카메라 기능을 비활성화할 수 있는지 알아봅니다.</p>
+
+<p>여러 가지 기기와 앱의 호환성을 관리하는 방법에 대한 자세한 정보는 
+<a href="{@docRoot}guide/practices/compatibility.html">기기 호환성</a>
+ 문서를 참조하십시오.</p>
+
+
+
+<h2 id="Resources">앱 리소스</h2>
+
+<p>Android 앱을 이루는 것은 코드만이 아닙니다. 소스 코드와는 별개인 여러 리소스가 필요합니다.
+예를 들어 이미지, 오디오 파일과 앱을 시각적으로 표현하는 것과 관련된 모든 것들이 있습니다. 
+예컨대 애니메이션, 메뉴, 스타일, 색상과 액티비티 사용자 인터페이스의 레이아웃을 XML 파일로 
+정의해야 합니다. 앱 리소스를 사용하면 앱의 다양한 특성을 
+쉽게 업데이트할 수 있으며 코드를 수정하지 않아도 되고 일련의 대체 리소스를 
+제공함으로써 다양한 기기 구성에 맞게 앱을 
+최적화할 수도 있습니다(예: 여러 가지 언어 및 화면 크기).</p>
+
+<p>Android 프로젝트에 포함시키는 리소스마다 SDK 빌드 도구가 고유한 
+정수 ID를 정의하므로, 이를 사용하여 앱 코드에서의 리소스나 XML로 정의된 
+다른 리소스에서 참조할 수 있습니다. 예를 들어 앱에 {@code
+logo.png}라는 이름의 이미지 파일이 들어 있다고 하면({@code res/drawable/} 디렉터리에 저장됨) SDK 도구가 
+{@code R.drawable.logo}라는 리소스 ID를 생성합니다. 이것을 사용하여 이미지를 참조하고 사용자 인터페이스에 
+삽입할 수 있습니다.</p>
+
+<p>소스 코드와는 별개로 리소스를 제공하는 것의 가장 중요한 측면 중 하나는 
+여러 가지 기기 구성에 맞게 대체 리소스를 제공할 능력을 갖추게 
+됩니다. 예를 들어 UI 문자열을 XML로 정의하면 이러한 문자열을 다른 언어로 변환한 뒤 
+그러한 문자열을 별개의 파일에 저장할 수 있습니다. 그런 다음, 리소스 디렉터리 이름에 추가한 언어 <em>한정자</em>
+(예를 들어 프랑스어 문자열 값의 경우 {@code res/values-fr/}) 및 
+사용자의 언어 설정을 근거로 하여 Android 시스템이 적절한 언어 문자열을 UI에 
+적용하는 것입니다.</p>
+
+<p>Android는 대체 리소스에 대해 다양한 <em>한정자</em>를 지원합니다. 한정자란
+ 리소스 디렉터리의 이름에 포함시키는 짧은 문자열로, 이를 사용해 해당 리소스를 사용할 기기 구성을 
+정의합니다. 또 다른 예를 들자면, 
+기기의 화면 방향과 크기에 따라 액티비티에 여러 가지 레이아웃을 생성해야 할 때가 
+많습니다. 예를 들어 기기 화면이 세로 
+방향(키가 큼)인 경우, 버튼이 세로 방향으로 되어 있는 레이아웃을 사용하는 것이 좋지만 화면이 
+가로 방향(폭이 넓음)인 경우, 버튼이 가로 방향으로 정렬되어야 합니다. 방향에 따라 레이아웃을 변경하려면, 
+서로 다른 두 가지 레이아웃을 정의하여 적절한 한정자를 각각의 레이아웃의 디렉터리 이름에 
+적용하면 됩니다. 그러면 시스템이 현재 기기 방향에 따라 적절한 레이아웃을 
+자동으로 적용합니다.</p>
+
+<p>애플리케이션에 포함할 수 있는 여러 가지 종류의 리소스와, 각기 다른 기기 구성에 따라 
+대체 리소스를 생성하는 방법에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/resources/providing-resources.html">리소스 제공</a>을 읽어보십시오.</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">계속 읽기:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a>
+    </dt>
+    <dd>{@link android.content.Intent} API를 사용하여 
+앱 구성 요소(예: 액티비티 및 서비스 등)를 활성화하는 방법, 앱 구성 요소를 다른 여러 앱이 사용할 수 있도록 하는 방법 
+등에 관한 정보입니다.</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">액티비티</a></dt>
+    <dd>{@link android.app.Activity} 클래스의 인스턴스를 생성하는 방법에 관한 정보로, 
+애플리케이션에 사용자 인터페이스가 있는 독특한 화면을 제공합니다.</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">리소스 제공</a></dt>
+    <dd>Android 앱이 앱 코드와는 별개의 앱 리소스에 대해 구조화된 방식에 관한 정보로, 
+특정 기기 구성에 맞게 대체 리소스를 제공하는 방법도 포함되어 
+있습니다.
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">혹시 다음과 같은 내용에도 흥미가 있으신가요?</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">기기 호환성</a></dt>
+    <dd>여러 가지 유형의 기기에서 Android의 작동 방식과 앱을 각 기기에 맞춰 최적화하는 방법 
+또는 여러 가지 기기에 대해 앱의 가용성을 제한하는 방법 등에 관한 
+정보입니다.</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">시스템 권한</a></dt>
+    <dd>Android가 특정 API에 대한 앱의 액세스를 제한하기 위해 권한 시스템을 
+사용하는 방법으로, 그러한 API를 사용하려면 앱에 대해 사용자의 승인이 필요합니다.</dd>
+  </dl>
+</div>
+</div>
+

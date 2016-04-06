@@ -1,0 +1,248 @@
+page.title=Action Views and Action Providers
+page.tags="action view", "action provider"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li><a href="#action-view">Add an Action View</a></li>
+      <li><a href="#action-provider">Add an Action Provider</a></li>
+    </ol>
+
+<!--
+    <h2>Useful Resources</h2>
+    <ul>
+      <li></li>
+    </ul>
+-->
+
+  </div>
+</div>
+
+<p>
+  The <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> support library {@link android.support.v7.widget.Toolbar} provides several
+  different ways for users to interact with your app. Previous lessons
+  described how to define an <em>action</em>, which can be either a button or a
+  menu item. This lesson describes how to add two versatile components:
+</p>
+
+<ul>
+  <li>An <em>action view</em> is an action that provides rich functionality
+  within the app bar. For example, a search action view allows the user to type
+  their search text in the app bar, without having to change activities or
+  fragments.
+  </li>
+
+  <li>An <em>action provider</em> is an action with its own customized layout.
+  The action initially appears as a button or menu item, but when the user clicks the
+  action, the action provider controls the action's behavior in any way you
+  want to define. For example, the action provider might respond to a click by
+  displaying a menu.
+  </li>
+</ul>
+
+<p>
+  The Android support libraries provide several specialized action view and
+  action provider widgets. For example, the {@link
+  android.support.v7.widget.SearchView} widget implements an action view for
+  entering search queries, and the {@link
+  android.support.v7.widget.ShareActionProvider} widget implements an action
+  provider for
+  sharing information with other apps. You can also define your own action
+  views and action providers.
+</p>
+
+<h2 id="action-view">
+  Add an Action View
+</h2>
+
+<p>
+  To add an action view, create an <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element in the toolbar's menu resource, as <a href="actions.html">Add Action
+  Buttons</a> describes. Add one of the following two
+  attributes to the <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element:
+</p>
+
+<ul>
+  <li>
+    <code>actionViewClass</code>: The class of a widget that implements the
+    action.
+  </li>
+
+  <li>
+    <code>actionLayout</code>: A layout resource describing the action's
+    components.
+  </li>
+</ul>
+
+<p>
+  Set the <code>showAsAction</code> attribute to either
+  <code>"ifRoom|collapseActionView"</code> or
+  <code>"never|collapseActionView"</code>. The <code>collapseActionView</code>
+  flag indicates how to display the widget when the user is not interacting with
+  it: If the widget is on the app bar, the app should display the widget as an
+  icon. If the widget is in the overflow menu, the app should display the widget
+  as a menu item. When the user interacts with the action view, it
+  expands to fill the app bar.
+</p>
+
+<p>
+  For example, the following code adds a {@link
+  android.support.v7.widget.SearchView} widget to the app bar:
+</p>
+
+<pre>
+&lt;item android:id="&#64;+id/action_search"
+     android:title="&#64;string/action_search"
+     android:icon="&#64;drawable/ic_search"
+     <strong>app:showAsAction="ifRoom|collapseActionView"</strong>
+     <strong>app:actionViewClass="android.support.v7.widget.SearchView" /&gt;</strong>
+</pre>
+
+<p>
+  If the user is not interacting with the widget, the app displays the widget
+  as the icon specified by <code>android:icon</code>. (If there is not enough
+  room in the app bar, the app adds the action to the overflow menu.) When the
+  user taps the icon or menu item, the widget expands to fill the toolbar,
+  allowing the user to interact with it.
+</p>
+
+<img src="{@docRoot}images/training/appbar/action_view_2x.png"
+    srcset="{@docRoot}images/training/appbar/action_view.png 1x,
+        {@docRoot}images/training/appbar/action_view_2x.png 2x"
+    alt="" width="400" id="figure-action-view">
+<p class="img-caption">
+  <strong>Figure 1.</strong> When the user clicks an action view's icon, the
+  view's UI fills the toolbar.
+</p>
+
+<p>
+  If you need to configure the action, do so in your activity's {@link
+  android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} callback. You
+  can get the action view's object reference by calling the static {@link
+  android.support.v4.view.MenuItemCompat#getActionView getActionView()} method.
+  For example, the following code gets the object reference for the {@link
+  android.support.v7.widget.SearchView} widget defined in the previous code
+  example:
+</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+
+    <strong>MenuItem searchItem = menu.findItem(R.id.action_search);</strong>
+    <strong>SearchView searchView =
+            (SearchView) MenuItemCompat.getActionView(searchItem);</strong>
+
+    // Configure the search info and add any event listeners...
+
+    return super.onCreateOptionsMenu(menu);
+}
+</pre>
+<h3 id="view-expansion">Responding to action view expansion</h3>
+
+<p>
+  If the action's <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element has a <code>collapseActionView</code> flag, the app displays the action
+  view as an icon until the user interacts with the action view.
+  When the user clicks on the icon, the built-in handler for {@link
+  android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} expands
+  the action view. If your activity subclass overrides the {@link
+  android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method,
+  your override method must call {@link android.app.Activity#onOptionsItemSelected
+  super.onOptionsItemSelected()} so the superclass can expand the action view.
+</p>
+
+<p>
+  If you want to do something when the action is expanded or collapsed, you can
+  define a class that implements
+  {@link android.view.MenuItem.OnActionExpandListener}, and pass a member of
+  that class to
+  {@link android.view.MenuItem#setOnActionExpandListener
+  setOnActionExpandListener()}. For example, you might want to update the
+  activity based on whether an action view is expanded or collapsed. The
+  following snippet shows how to define and pass a listener:
+</p>
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.options, menu);
+    // ...
+
+    // Define the listener
+    OnActionExpandListener expandListener = new OnActionExpandListener() {
+        &#64;Override
+        public boolean onMenuItemActionCollapse(MenuItem item) {
+            // Do something when action item collapses
+            return true;  // Return true to collapse action view
+        }
+
+        &#64;Override
+        public boolean onMenuItemActionExpand(MenuItem item) {
+            // Do something when expanded
+            return true;  // Return true to expand action view
+        }
+    };
+
+    // Get the MenuItem for the action item
+    MenuItem actionMenuItem = menu.findItem(R.id.myActionItem);
+
+    // Assign the listener to that action item
+    MenuItemCompat.setOnActionExpandListener(actionMenuItem, expandListener);
+
+    // Any other things you have to do when creating the options menu…
+
+    return true;
+}
+</pre>
+
+<h2 id="action-provider">
+  Add an Action Provider
+</h2>
+
+<p>
+  To declare an action provider, create an <a href=
+  "{@docRoot}guide/topics/resources/menu-resource.html#item-element"><code>&lt;item&gt;</code></a>
+  element in the toolbar's menu resource, as described in <a href=
+  "actions.html">Add Action Buttons</a>. Add an
+  <code>actionProviderClass</code> attribute, and set it to the fully qualified
+  class name for the action provider class.
+</p>
+
+<p>
+  For example, the following code declares a {@link
+  android.support.v7.widget.ShareActionProvider}, which is a widget defined in
+  the support library that allows your app to share data with other apps:
+</p>
+
+<pre>
+&lt;item android:id="&#64;+id/action_share"
+    android:title="&#64;string/share"
+    app:showAsAction="ifRoom"
+    app:actionProviderClass="android.support.v7.widget.ShareActionProvider"/&gt;
+</pre>
+
+<p>
+  In this case, it is not necessary to declare an icon for the widget, since {@link
+  android.support.v7.widget.ShareActionProvider} provides its own graphics. If
+  you are using a custom action, declare an icon.
+</p>
+
+<p>
+  For information about creating a custom action provider, see the {@link
+  android.support.v4.view.ActionProvider} reference. For information about
+  configuring a {@link android.support.v7.widget.ShareActionProvider}, see the
+  reference for that class.
+</p>

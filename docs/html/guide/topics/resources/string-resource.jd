@@ -1,6 +1,7 @@
 page.title=String Resources
 parent.title=Resource Types
 parent.link=available-resources.html
+page.metaDescription=Explains how to use string resources in your UI.
 @jd:body
 
 <p>A string resource provides text strings for your application

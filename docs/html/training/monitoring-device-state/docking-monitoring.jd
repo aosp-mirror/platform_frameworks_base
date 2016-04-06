@@ -3,14 +3,14 @@ parent.title=Optimizing Battery Life
 parent.link=index.html
 
 trainingnavtop=true
-previous.title= Monitoring the Battery Level and Charging State
-previous.link=battery-monitoring.html
+next.title=Optimizing for Power-Saving
+next.link=battery-optimization.html
 next.title= Determining and Monitoring the Connectivity Status
 next.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -26,7 +26,7 @@ next.link=connectivity-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>Android devices can be docked into several different kinds of docks. These include car or home
@@ -42,8 +42,8 @@ updates while car docked if your background service is updating traffic conditio
 query if the device is docked or not, and if so, in which kind of dock.</p>
 
 
-<h2 id="CurrentDockState">Determine the Current Docking State</h2> 
- 
+<h2 id="CurrentDockState">Determine the Current Docking State</h2>
+
 <p>The dock-state details are included as an extra in a sticky broadcast of the {@link
 android.content.Intent#ACTION_DOCK_EVENT} action. Because it's sticky, you don't need to register a
 {@link android.content.BroadcastReceiver}. You can simply call {@link
@@ -59,9 +59,9 @@ Intent dockStatus = context.registerReceiver(null, ifilter);</pre>
 boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;</pre>
 
 
-<h2 id="DockType">Determine the Current Dock Type</h2> 
+<h2 id="DockType">Determine the Current Dock Type</h2>
 
-<p>If a device is docked, it can be docked in any one of four different type of dock: 
+<p>If a device is docked, it can be docked in any one of four different type of dock:
 <ul><li>Car</li>
 <li>Desk</li>
 <li>Low-End (Analog) Desk</li>
@@ -72,12 +72,12 @@ practice to check for all three where you are only interested in the type of doc
 being digital or analog specifically:</p>
 
 <pre>boolean isCar = dockState == EXTRA_DOCK_STATE_CAR;
-boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK || 
+boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK ||
                  dockState == EXTRA_DOCK_STATE_LE_DESK ||
                  dockState == EXTRA_DOCK_STATE_HE_DESK;</pre>
 
 
-<h2 id="MonitorDockState">Monitor for Changes in the Dock State or Type</h2> 
+<h2 id="MonitorDockState">Monitor for Changes in the Dock State or Type</h2>
 
 <p>Whenever the device is docked or undocked, the {@link
 android.content.Intent#ACTION_DOCK_EVENT} action is broadcast. To monitor changes in the

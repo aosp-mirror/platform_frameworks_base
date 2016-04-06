@@ -1,0 +1,204 @@
+page.title=Building and Displaying a Pop-Up Message
+page.tags="Snackbar" "popup" "pop-up"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li><a href="#coordinator">Use a CoordinatorLayout</a></li>
+      <li><a href="#display">Display a Message</a></li>
+    </ol>
+
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}tools/support-library/setup.html"
+    >Support Library Setup</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<p>
+  You can use a {@link android.support.design.widget.Snackbar} to display a brief
+  message to the user. The message automatically goes away after a short
+  period. A {@link android.support.design.widget.Snackbar} is ideal
+  for brief messages that the user doesn't necessarily need to act on. For
+  example, an email app could use a {@link
+  android.support.design.widget.Snackbar} to tell the user that the app
+  successfully sent an email.
+</p>
+
+<h2 id="coordinator">Use a CoordinatorLayout</h2>
+
+<p>
+  A {@link android.support.design.widget.Snackbar} is attached to a view. The
+  {@link android.support.design.widget.Snackbar} provides basic functionality
+  if it is attached to any object derived from the {@link android.view.View}
+  class, such as any of the common layout objects. However, if the
+  {@link android.support.design.widget.Snackbar}
+  is attached to a {@link android.support.design.widget.CoordinatorLayout}, the
+  {@link android.support.design.widget.Snackbar} gains additional features:
+</p>
+
+<ul>
+  <li>The user can dismiss the {@link android.support.design.widget.Snackbar}
+  by swiping it away.
+  </li>
+
+  <li>The layout moves some other UI elements when the {@link
+  android.support.design.widget.Snackbar} appears. For example, if the layout
+  has a {@link android.support.design.widget.FloatingActionButton}, the layout
+  moves the button up when it shows a {@link
+  android.support.design.widget.Snackbar}, instead of drawing the {@link
+  android.support.design.widget.Snackbar} on top of the button. You can see how
+  this looks in Figure 1.
+  </li>
+</ul>
+
+<p>
+  The {@link android.support.design.widget.CoordinatorLayout} class provides a superset
+  of the functionality of {@link android.widget.FrameLayout}. If your app
+  already uses a {@link android.widget.FrameLayout}, you can just replace that
+  layout with a {@link android.support.design.widget.CoordinatorLayout} to
+  enable the full {@link android.support.design.widget.Snackbar} functionality.
+  If your app uses other layout objects, the simplest thing to do is wrap your
+  existing layout elements in a {@link
+  android.support.design.widget.CoordinatorLayout}, as in this example:
+</p>
+
+<pre>&lt;android.support.design.widget.CoordinatorLayout
+    android:id="@+id/myCoordinatorLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;!-- Here are the existing layout elements, now wrapped in
+         a CoordinatorLayout --&gt;
+    &lt;LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"&gt;
+
+        &lt;!-- …Toolbar, other layouts, other elements… --&gt;
+
+    &lt;/LinearLayout>
+
+&lt;/android.support.design.widget.CoordinatorLayout&gt;</pre>
+
+<p>
+  Make sure to set an <code>android:id</code> tag for your {@link
+  android.support.design.widget.CoordinatorLayout}. You need the layout's ID
+  when you display the message.
+</p>
+
+<div class="framed-nexus5-port-span-5" id="video-coord">
+  <video class="play-on-hover" autoplay loop
+    alt="If the Snackbar is attached to a CoordinatorLayout, the layout
+        moves other elements up when it shows the Snackbar.">
+  <!-- Preferred video size 216x384 (portrait) -->
+    <source src="{@docRoot}images/training/snackbar/snackbar_button_move.mp4">
+  </video>
+</div>
+
+<p class="img-caption">
+  <strong>Figure 1.</strong> The {@link android.support.design.widget.CoordinatorLayout}
+  moves the {@link android.support.design.widget.FloatingActionButton} up
+  when the {@link android.support.design.widget.Snackbar} appears.
+</p>
+
+<h2 id="display">
+  Display a Message
+</h2>
+
+<p>
+  There are two steps to displaying a message. First, you create a {@link
+  android.support.design.widget.Snackbar} object with the message text. Then,
+  you call that object's {@link android.support.design.widget.Snackbar#show
+  show()} method to display the message to the user.
+</p>
+
+<h3 id="create-snackbar">Creating a Snackbar object</h3>
+
+<p>
+  Create a {@link android.support.design.widget.Snackbar} object by
+  calling the static {@link android.support.design.widget.Snackbar#make
+  Snackbar.make()} method. When you create the {@link
+  android.support.design.widget.Snackbar}, you specify both the message it
+  displays, and the length of time to show the message:
+</p>
+
+<pre>Snackbar mySnackbar = Snackbar.make(viewId, stringId, duration);</pre>
+
+<dl>
+  <dt>
+    <em>viewId</em>
+  </dt>
+
+  <dd>
+    The view to attach the {@link android.support.design.widget.Snackbar} to.
+    The method actually searches up the view hierarchy from the passed
+    <em>viewId</em> until it reaches either a {@link
+    android.support.design.widget.CoordinatorLayout}, or the window decor's
+    content view. Ordinarily, it's simplest to just pass the ID of the {@link
+    android.support.design.widget.CoordinatorLayout} enclosing your content.
+  </dd>
+
+  <dt>
+    <em>stringId</em>
+  </dt>
+
+  <dd>
+    The resource ID of the message you want to display. This can be formatted
+    or unformatted text.
+  </dd>
+
+  <dt>
+    <em>duration</em>
+  </dt>
+
+  <dd>
+    The length of time to show the message. This can be either {@link
+    android.support.design.widget.Snackbar#LENGTH_SHORT LENGTH_SHORT} or {@link
+    android.support.design.widget.Snackbar#LENGTH_LONG LENGTH_LONG}.
+  </dd>
+</dl>
+
+<h3 id="show-snackbar">Showing the message to the user</h3>
+
+<p>
+  Once you have created the {@link android.support.design.widget.Snackbar},
+  call its {@link android.support.design.widget.Snackbar#show show()} method to
+  display the {@link android.support.design.widget.Snackbar} to the user:
+</p>
+
+<pre>mySnackbar.show();</pre>
+
+<p>
+  The system does not show multiple {@link
+  android.support.design.widget.Snackbar} objects at the same time, so if the
+  view is currently displaying another {@link
+  android.support.design.widget.Snackbar}, the system queues your {@link
+  android.support.design.widget.Snackbar} and displays it after the current
+  {@link android.support.design.widget.Snackbar} expires or is dismissed.
+</p>
+
+<p>
+  If you just want to show a message to the user and won't need to call any of
+  the {@link android.support.design.widget.Snackbar} object's utility methods,
+  you don't need to keep the reference to the {@link
+  android.support.design.widget.Snackbar} after you call {@link
+  android.support.design.widget.Snackbar#show show()}. For this reason, it's
+  common to use method chaining to create and show a {@link
+  android.support.design.widget.Snackbar} in one statement:
+</p>
+
+<pre>Snackbar.make(findViewById(R.id.myCoordinatorLayout), R.string.email_sent,
+                        Snackbar.LENGTH_SHORT)
+        .show();</pre>

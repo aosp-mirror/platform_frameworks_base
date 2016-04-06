@@ -63,10 +63,13 @@ recommendations you should consider:</p>
 
 <ul>
 <li><strong>Continuation content</strong> recommendations for the next episode for users to resume
-watching a series.</li>
+watching a series. Or, use continuation recommendations for paused movies, TV shows, or podcasts
+so users can get back to watching paused content in just a few clicks.</li>
 <li><strong>New content</strong> recommendations, such as for a new first-run episode, if the user
-finished watching another series.
-<li><strong>Related content</strong> recommendations based on the users historic viewing behavior.
+finished watching another series. Also, if your app lets users subscribe to, follow, or track
+content, use new content recommendations for unwatched items in their list of tracked content.</li>
+<li><strong>Related content</strong> recommendations based on the users' historic viewing behavior.
+</li>
 </ul>
 
 <p>For more information on how to design recommendation cards for the best user experience, see
@@ -88,6 +91,25 @@ To learn more, see
 <a href="https://www.google.com/design/spec-tv/system-overview/recommendation-row.html#recommendation-row-card-customization"
 class="external-link">Recommendation Row</a> in the Android TV Design Spec.</p>
 
+<h3 id="grouping">Grouping Recommendations</h3>
+
+<p>
+You can optionally group recommendations based on recommendation source. For example, your app
+might provide two groups of recommendations: recommendations for content the user is subscribed to,
+and recommendations for new trending content the user might not be aware of.
+</p>
+<p>
+The system ranks and orders recommendations for each group separately when creating or updating
+the recommendation row. By providing group information for your recommendations, you can ensure
+that your recommendations don’t get ordered below unrelated recommendations.
+</p>
+<p>
+Use
+{@link android.support.v4.app.NotificationCompat.Builder#setGroup
+NotificationCompat.Builder.setGroup()} to set the group key string of a recommendation. For
+example, to mark a recommendation as belonging to a group that contains new trending content,
+you might call <code>setGroup("trending")</code>.
+</p>
 
 <h2 id="service">Create a Recommendations Service</h2>
 

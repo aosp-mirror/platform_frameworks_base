@@ -42,7 +42,7 @@ memory usage with tools. This guide shows you how to do that.</p>
 <p>The simplest place to begin investigating your app’s memory usage is the runtime log messages.
 Sometimes when a GC occurs, a message is printed to
 <a href="{@docRoot}tools/help/logcat.html">logcat</a>. The logcat output is also available in the
-Device Monitor or directly in IDEs such as Eclipse and Android Studio.</p>
+Device Monitor or directly in an IDE such as Android Studio.</p>
 
 <h3 id="DalvikLogMessages">Dalvik Log Messages</h3>
 
@@ -107,7 +107,7 @@ a memory leak.</p>
 
 <h3 id="ARTLogMessages">ART Log Messages</h3>
 
-<p>Unlike Dalvik, ART doesn't log messqages for GCs that were not explicitly requested. GCs are only
+<p>Unlike Dalvik, ART doesn't log messages for GCs that were not explicitly requested. GCs are only
 printed when they are they are deemed slow. More precisely, if the GC pause exceeds than 5ms or
 the GC duration exceeds 100ms. If the app is not in a pause perceptible process state,
 then none of its GCs are deemed slow. Explicit GCs are always logged.</p>
@@ -240,7 +240,7 @@ can view real-time updates to your app's heap in Android Studio's
 
 <h3>Memory Monitor in Android Studio</h3>
 <p>Use Android Studio to view your app's memory use: </p>
-<ul>
+<ol>
   <li>Start your app on a connected device or emulator.</li>
   <li>Open the Android run-time window, and view the free and allocated memory in the Memory
     Monitor. </li>
@@ -260,7 +260,7 @@ can view real-time updates to your app's heap in Android Studio's
    </li>
   <li>Identify which actions in your app are likely causing too much allocation and determine where
    in your app you should try to reduce allocations and release resources.
-</ul>
+</ol>
 
 <h3>Device Monitor </h3>
 <ol>
@@ -350,9 +350,9 @@ showing recent app allocations and stack traces in the Allocation Tracker.</p>
 
 
 <p class="note"><strong>Note:</strong> You will always see some allocations from {@code
-DdmVmInternal} and else where that come from the allocation tracker itself.</p>
+DdmVmInternal} and elsewhere that come from the allocation tracker itself.</p>
 
-<p>Although it's not necessary (nor possible) to remove all allocations for your performance
+<p>Although it's not necessary (nor possible) to remove all allocations from your performance
 critical code paths, the allocation tracker can help you identify important issues in your code.
 For instance, some apps might create a new {@link android.graphics.Paint} object on every draw.
 Moving that object into a global member is a simple fix that helps improve performance.</p>
@@ -628,7 +628,7 @@ can track down problems you might have identified while viewing heap updates.</p
 
 
 <p>To retrieve your heap dump from within Android Studio, use the
-<a href="{@docRoot}tools/studio/index.html#me-cpu">Memory Monitor</a> and
+<a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a> and
 <a href="{@docRoot}tools/studio/index.html#heap-dump">HPROF viewer</a>.  
 
 <p>You can also still perform these procedures in the Android monitor:</p>
@@ -655,10 +655,12 @@ HPROF tool. The major difference in an Android heap dump is due to the fact that
 number of allocations in the Zygote process. But because the Zygote allocations are shared across
 all app processes, they don’t matter very much to your own heap analysis.</p>
 
-<p>To analyze your heap dump, you can use a standard tool like jhat or the <a href=
-"http://www.eclipse.org/mat/downloads.php">Eclipse Memory Analyzer Tool</a> (MAT). However, first
+<p>To analyze your heap dump, you can use <a href=
+"{@docRoot}tools/help/am-memory.html">Memory Monitor</a> in Android Studio. 
+You can also use a standard tool like jhat. However, first
 you'll need to convert the HPROF file from Android's format to the J2SE HPROF format. You can do
-this using the <code>hprof-conv</code> tool provided in the <code>&lt;sdk&gt;/platform-tools/</code>
+this using the <code>hprof-conv</code> tool provided in the 
+<code>&lt;sdk&gt;/platform-tools/</code>
 directory. Simply run the <code>hprof-conv</code> command with two arguments: the original HPROF
 file and the location to write the converted HPROF file. For example:</p>
 
@@ -666,11 +668,9 @@ file and the location to write the converted HPROF file. For example:</p>
 hprof-conv heap-original.hprof heap-converted.hprof
 </pre>
 
-<p class="note"><strong>Note:</strong> If you're using the version of DDMS that's integrated into
-Eclipse, you do not need to perform the HPROF conversation—it performs the conversion by
-default.</p>
 
-<p>You can now load the converted file in MAT or another heap analysis tool that understands
+
+<p>You can now load the converted file into a heap analysis tool that understands
 the J2SE HPROF format.</p>
 
 <p>When analyzing your heap, you should look for memory leaks caused by:</p>
@@ -680,77 +680,6 @@ reference to the container Activity or Context.</li>
 <li>Non-static inner classes (such as a Runnable, which can hold the Activity instance).</li>
 <li>Caches that hold objects longer than necessary.</li>
 </ul>
-
-
-<h3 id="EclipseMat">Using the Eclipse Memory Analyzer Tool</h3>
-
-<p>The <a href=
-"http://www.eclipse.org/mat/downloads.php">Eclipse Memory Analyzer Tool</a> (MAT) is just one
-tool that you can use to analyze your heap dump. It's also quite powerful so most of its
-capabilities are beyond the scope of this document, but here are a few tips to get you started.
-
-<p>Once you open your converted HPROF file in MAT, you'll see a pie chart in the Overview,
-showing what your largest objects are. Below this chart, are links to couple of useful features:</p>
-
-<ul>
-  <li>The <strong>Histogram view</strong> shows a list of all classes and how many instances
-  there are of each.
-  <p>You might want to use this view to find extra instances of classes for which you know there
-  should be only a certain number. For example, a common source of leaks is additional instance of
-  your {@link android.app.Activity} class, for which you should usually have only one instance
-  at a time. To find a specific class instance, type the class name into the <em>&lt;Regex></em>
-  field at the top of the list.
-  <p>When you find a class with too many instances, right-click it and select
-  <strong>List objects</strong> &gt; <strong>with incoming references</strong>. In the list that
-  appears, you can determine where an instance is retained by right-clicking it and selecting
-  <strong>Path To GC Roots</strong> &gt; <strong>exclude weak references</strong>.</p>
-  </li>
-
-  <li>The <strong>Dominator tree</strong> shows a list of objects organized by the amount
-  of retained heap.
-  <p>What you should look for is anything that's retaining a portion of heap that's roughly
-  equivalent to the memory size you observed leaking from the <a href="#LogMessages">GC logs</a>,
-  <a href="#ViewHeap">heap updates</a>, or <a href="#TrackAllocations">allocation
-  tracker</a>.
-  <p>When you see something suspicious, right-click on the item and select
-  <strong>Path To GC Roots</strong> &gt; <strong>exclude weak references</strong>. This opens a
-  new tab that traces the references to that object which is causing the alleged leak.</p>
-
-  <p class="note"><strong>Note:</strong> Most apps will show an instance of
-  {@link android.content.res.Resources} near the top with a good chunk of heap, but this is
-  usually expected when your app uses lots of resources from your {@code res/} directory.</p>
-  </li>
-</ul>
-
-
-<img src="{@docRoot}images/tools/mat-histogram@2x.png" width="760" alt="" />
-<p class="img-caption"><strong>Figure 4.</strong> The Eclipse Memory Analyzer Tool (MAT),
-showing the Histogram view and a search for "MainActivity".</p>
-
-<p>For more information about MAT, watch the Google I/O 2011 presentation,
-<a href="http://www.youtube.com/watch?v=_CruQY55HOk">Memory management for Android apps</a>,
-which includes a walkthrough using MAT beginning at about <a href=
-"http://www.youtube.com/watch?v=_CruQY55HOk&amp;feature=player_detailpage#t=1270">21:10</a>.
-Also refer to the <a href="http://wiki.eclipse.org/index.php/MemoryAnalyzer">Eclipse Memory
-Analyzer documentation</a>.</p>
-
-<h4 id="MatCompare">Comparing heap dumps</h4>
-
-<p>You may find it useful to compare your app's heap state at two different points in time in order
-to inspect the changes in memory allocation. To compare two heap dumps using MAT:</p>
-
-<ol>
-  <li>Create two HPROF files as described above, in <a href="#HeapDump">Capturing a Heap Dump</a>.
-  <li>Open the first HPROF file in MAT (<strong>File</strong> > <strong>Open Heap Dump</strong>).
-  <li>In the Navigation History view (if not visible, select <strong>Window</strong> >
-  <strong>Navigation History</strong>), right-click on <strong>Histogram</strong> and select
-  <strong>Add to Compare Basket</strong>.
-  <li>Open the second HPROF file and repeat steps 2 and 3.
-  <li>Switch to the <em>Compare Basket</em> view and click <strong>Compare the Results</strong>
-  (the red "!" icon in the top-right corner of the view).
-</ol>
-
-
 
 
 

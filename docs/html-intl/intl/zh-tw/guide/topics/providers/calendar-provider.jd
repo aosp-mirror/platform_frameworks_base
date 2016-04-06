@@ -1,0 +1,1184 @@
+page.title=日曆供應程式
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>本文件內容</h2>
+    <ol>
+  <li><a href="#overview">基本概念</a></li>
+  <li><a href="#manifest">使用者權限</a></li>
+  <li><a href="#calendar">日曆表格</a>
+<ol>
+      <li><a href="#query">查詢日曆</a></li>
+      <li><a href="#modify-calendar">修改日曆</a></li>
+      <li><a href="#insert-calendar">插入日曆</a></li>
+    </ol>
+  </li>
+  <li><a href="#events">活動表格</a>
+<ol>
+      <li><a href="#add-event">新增活動</a></li>
+      <li><a href="#update-event">更新活動</a></li>
+      <li><a href="#delete-event">刪除活動</a></li>
+    </ol>
+  </li>
+  <li><a href="#attendees">參與者表格</a>
+<ol>
+      <li><a href="#add-attendees">新增參與者</a></li>
+    </ol>
+  </li>
+  <li><a href="#reminders">提醒表格</a>
+<ol>
+      <li><a href="#add-reminders">新增提醒</a></li>
+    </ol>
+  </li>
+  <li><a href="#instances">執行個體表格</a>
+  <ol>
+      <li><a href="#query-instances">查詢執行個體表格</a></li>
+  </ol></li>
+  <li><a href="#intents">日曆意圖</a>
+  <ol>
+      <li><a href="#intent-insert">使用意圖插入活動</a></li>
+      <li><a href="#intent-edit">使用意圖編輯活動</a></li>
+      <li><a href="#intent-view">使用意圖檢視日曆資料</a></li>
+    </ol>
+  </li>
+  
+  <li><a href="#sync-adapter">同步配接器</a></li>
+</ol>
+
+    <h2>重要類別</h2>
+    <ol>
+      <li>{@link android.provider.CalendarContract.Calendars}</li>
+      <li>{@link android.provider.CalendarContract.Events}</li>
+      <li>{@link android.provider.CalendarContract.Attendees}</li>
+      <li>{@link android.provider.CalendarContract.Reminders}</li>
+    </ol>
+</div>
+</div>
+
+<p>「日曆供應程式」是使用者日曆活動的存放庫。「日曆供應程式」API 允許您在日曆、活動、參與者、提醒等等項目中執行查詢、插入、更新以及刪除操作。
+
+</p>
+
+
+<p>「日曆供應程式」API 可以由應用程式和同步配接器使用。規則取決於發出呼叫的程式類型。
+本文件主要著重於將「日曆供應程式」API 作為應用程式使用。
+如要瞭解同步配接器不一樣的資訊，請參閱<a href="#sync-adapter">同步配接器</a>。
+
+</p>
+
+
+<p>一般而言，如要讀取或寫入日曆資料，應用程式的宣示說明必須含有適當的權限 (於<a href="#manifest">使用者權限</a>中描述)。
+
+如要更輕鬆執行常見操作，「日曆供應程式」提供一組意圖 (於<a href="#intents">日曆意圖</a>中描述)。
+
+這些意圖會將使用者帶往「日曆」應用程式，以插入、檢視以及編輯活動。
+使用者與「日曆」應用程式互動後，回到原來的應用程式。
+因此，您的應用程式不需要要求權限，也不需要提供檢視或建立活動的使用者介面。
+</p>
+
+<h2 id="overview">基本概念</h2>
+
+<p><a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>會儲存資料，讓應用程式可以存取這些資料。
+內容供應程式是由 Android 平台所提供 (包括「日曆供應程式」)，通常會根據關聯式資料庫模型，以一組表格的形式公開資料。表格中的每一列都是一筆記錄，而每一欄則是特定類型和意義的資料。
+
+透過「日曆供應程式」API，應用程式和同步配接器可以取得資料庫表格 (此資料庫表格含有使用者日曆資料) 的讀取/寫入存取權。
+
+</p>
+
+<p>每個內容供應程式都會公開一個公用 URI (包裝為 
+{@link android.net.Uri} 物件)，可唯一識別其資料集。
+控制多個資料集 (多個表格) 的內容供應程式會為每個資料集公開個別的 URI。
+供應程式所有 URI 的開頭字串為「content://」。
+這表示資料是受到內容供應程式的控制。
+「日曆供應程式」會為每個類別 (表格) 的 URI 定義常數。
+這些 URI 的格式為 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。
+例如，{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}。
+</p>
+
+<p>「圖 1」顯示「日曆供應程式」資料模型的圖形表示。它顯示主要表格以及將每個表格連接在一起的欄位。
+</p>
+
+<img src="{@docRoot}images/providers/datamodel.png" alt="Calendar Provider Data Model" />
+<p class="img-caption"><strong>圖 1.</strong>「日曆供應程式」資料模型。</p>
+
+<p>使用者可以有多個日曆，而且不同的日曆可以與不同類型的帳戶 (Google 日曆、Exchange 等等) 關聯。</p>
+
+<p>{@link android.provider.CalendarContract} 會定義日曆的資料模型和活動相關資訊。此資料儲存於一些表格，列示如下。</p>
+
+<table>
+  <tr>
+    <th>表格 (類別)</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
+    
+    <td>此表格內含日曆特定的資訊。
+此表格中的每一列包含單一日曆的詳細資訊，例如名稱、色彩、同步資訊等等。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Events}</td>
+    
+    <td>此表格內含活動特定的資訊。
+此表格中的每一列包含單一活動的資訊 &mdash; 例如，活動標題、位置、開始時間、結束時間等等。
+
+活動可以只發生一次或發生多次。參與者、提醒以及延伸屬性儲存於個別的表格。
+它們每一個都有 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}，會參照「活動」表格中的 {@link android.provider.BaseColumns#_ID}。
+
+</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances}</td>
+    
+    <td>此表格內含活動每次發生的開始和結束時間。
+此表格的每一列代表單一活動發生。
+單次活動執行個體和活動的對應為 1:1。
+對於週期性活動，則會自動產生多個列，對應到該活動的多次發生。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Attendees}</td>
+    
+    <td>此表格內含活動參與者 (邀請對象) 的資訊。
+每一列代表一個活動的單一邀請對象。
+其中會指出邀請對象類型，以及邀請對象是否出席該活動的回應。
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Reminders}</td>
+    
+    <td>此表格內含警示/通知資訊。
+每一列代表一個活動的單一警示。一個活動可以設定多個提醒。
+每個活動的最大數量提醒指定於 
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS}，此項是由擁有指定日曆的同步配接器所設定。
+
+
+提醒是以分鐘數指定活動發生前的時間，而且有一個方法用於決定通知使用者的方式。
+</td>
+  </tr>
+  
+</table>
+
+<p>「日曆供應程式」API 的設計具備彈性且功能強大。提供良好的使用者體驗，以及保護日曆及其資料的完整性，兩者一樣重要。
+
+關於這一點，使用此 API 時，請記得以下事項：
+</p>
+
+<ul>
+
+<li><strong>插入、更新以及檢視日曆活動。</strong>如要從「日曆供應程式」直接插入、修改以及讀取活動，您需要具備適當的<a href="#manifest">權限</a>。然而，如果您不是要建置功能豐富的日曆應用程式，則不需要要求這些權限。您可以改用 Android「日曆」應用程式支援的意圖，將讀取和寫入操作交給您的應用程式。使用意圖時，您的應用程式可以將使用者傳送到「日曆」應用程式，在預先填好的表單中執行想要的操作。
+完成之後，使用者會回到您的應用程式。將應用程式設計成透過「日曆」來執行常見的操作，即可為使用者提供一致且完整的使用者介面。
+
+我們建議您採用此方式。
+如需詳細資訊，請參閱<a href="#intents">日曆意圖</a>。
+</p>
+
+
+<li><strong>同步配接器。</strong>同步配接器會將使用者裝置的日曆資料與另一台伺服器或資料來源進行同步。
+在 
+{@link android.provider.CalendarContract.Calendars} 和
+{@link android.provider.CalendarContract.Events} 表格中，會保留某些欄讓同步配接器使用。供應程式和應用程式不應加以修改。
+
+事實上，除非以同步配接器進行存取，否則看不到這些保留的欄。
+如需關於同步配接器的詳細資訊，請參閱<a href="#sync-adapter">同步配接器</a>。
+</li>
+
+</ul>
+
+
+<h2 id="manifest">使用者權限</h2>
+
+<p>如要讀取日曆資料，應用程式必須在其宣示說明檔案中包含 {@link
+android.Manifest.permission#READ_CALENDAR} 權限。宣示說明檔案必須包含 {@link android.Manifest.permission#WRITE_CALENDAR} 權限，才能刪除、插入或更新日曆資料：
+
+</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;...&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.READ_CALENDAR&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_CALENDAR&quot; /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="calendar">日曆表格</h2>
+
+<p>{@link android.provider.CalendarContract.Calendars} 表格包含個別日曆的詳細資訊。
+下列「日曆」欄可以讓應用程式和<a href="#sync-adapter">同步配接器</a>寫入。
+如需關於支援欄位的完整清單，請參閱
+{@link android.provider.CalendarContract.Calendars} 參照。
+</p>
+<table>
+  <tr>
+    <th>常數</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#NAME}</td>
+    <td>日曆的名稱。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#CALENDAR_DISPLAY_NAME}</td>
+    <td>使用者看到此日曆的名稱。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
+    
+    <td>指出是否選擇要顯示日曆的布林值。值 0 表示與此日曆關聯的活動不應顯示。
+
+值 1 表示與此日曆關聯的活動應顯示。
+此值會影響 {@link
+android.provider.CalendarContract.Instances} 表格中列的產生。</td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
+    
+    <td>指出日曆是否應同步，並且讓日曆的活動儲存在裝置上的布林值。
+值 0 表示不同步此日曆，並且不要在裝置上儲存其活動。
+值 1 表示同步此日曆的活動，並且在裝置上儲存其活動。
+</td>
+  </tr>
+</table>
+
+<h3 id="query">查詢日曆</h3>
+
+<p>以下的範例顯示如何取得特定使用者擁有的日曆。
+為了簡化起見，本範例中的查詢操作顯示於使用者介面執行緒 (即「主要執行緒」) 中。
+實務上，應該以非同步執行緒來完成，而不是使用主要執行緒。
+如需更多討論，請參閱<a href="{@docRoot}guide/components/loaders.html">載入器</a>。
+如果您不只要讀取資料，還要加以修改，請參閱 {@link android.content.AsyncQueryHandler}。
+
+</p>
+
+
+<pre>
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
+    Calendars._ID,                           // 0
+    Calendars.ACCOUNT_NAME,                  // 1
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
+  
+
+<div class="sidebox-wrapper"> <div class="sidebox"> <h3>為什麼一定要包含 ACCOUNT_TYPE？
+</h3> <p>如果您要針對 {@link
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
+Calendars.ACCOUNT_NAME} 進行查詢，也必須在選項中包含 
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}。
+這是因為只有同時提供指定帳戶的 <code>ACCOUNT_NAME</code> 和
+<code>ACCOUNT_TYPE</code> 情況下，此帳戶才會視為唯一的。
+<code>ACCOUNT_TYPE</code> 是對應至帳戶驗證器的字串。帳戶使用
+{@link android.accounts.AccountManager} 註冊時，會使用此帳戶驗證器。
+沒有與裝置帳戶關聯的日曆也有一種特殊類型的帳戶，稱為 {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}。{@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 帳戶不會進行同步。
+
+</p> </div> </div> 
+
+
+<p> 在範例的下一個部分，您將建構查詢。選項會指定查詢的條件。
+在此範例中，查詢會尋找日曆中有 <code>ACCOUNT_NAME</code> "sampleuser@google.com"、<code>ACCOUNT_TYPE</code> "com.google" 以及 <code>OWNER_ACCOUNT</code> "sampleuser@google.com" 的內容。
+
+
+
+如果您要查看使用者可以檢視的所有日曆，不是只查看使用者擁有的日曆，請略過 <code>OWNER_ACCOUNT</code>。此查詢會傳回 {@link android.database.Cursor} 物件。您可以使用此物件周遊資料庫查詢傳回的結果集。
+
+
+
+如需關於在內容供應程式中使用查詢的詳細討論，請參閱<a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>。
+</p>
+
+
+<pre>// Run query
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+Uri uri = Calendars.CONTENT_URI;   
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"}; 
+// Submit the query and get a Cursor object back. 
+cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
+
+<p>下一節會使用游標逐步檢視結果集。它會使用範例一開始設定好的常數，傳回每個欄位的值。
+
+</p>
+    
+<pre>// Use the cursor to step through the returned records
+while (cur.moveToNext()) {
+    long calID = 0;
+    String displayName = null;
+    String accountName = null;
+    String ownerName = null;
+      
+    // Get the field values
+    calID = cur.getLong(PROJECTION_ID_INDEX);
+    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
+    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
+              
+    // Do something with the values...
+
+   ...
+}
+</pre>
+  
+<h3 id="modify-calendar">修改日曆</h3>
+
+<p>如要執行日曆的更新，您可以提供日曆的 {@link
+android.provider.BaseColumns#_ID}，可以是 URI 的附加 ID 
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 或以第一個選擇項目方式提供。
+
+
+選項的開頭應該是 <code>&quot;_id=?&quot;</code>，而且第一個 
+<code>selectionArg</code> 應該是日曆的 {@link
+android.provider.BaseColumns#_ID}。
+您也可以透過將 ID 編碼在 URI 中，以執行更新。此範例會使用 
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 方式變更日曆的顯示名稱：
+
+
+</p>
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long calID = 2;
+ContentValues values = new ContentValues();
+// The new display name for the calendar
+values.put(Calendars.CALENDAR_DISPLAY_NAME, &quot;Trevor's Calendar&quot;);
+Uri updateUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
+
+<h3 id="insert-calendar">插入日曆</h2>
+
+<p>日曆的設計主要是由同步配接器進行管理，因此您只能以同步配接器的方式插入新日曆。
+在大多數情況下，應用程式只能對日曆進行與外觀相關的變更，例如變更顯示名稱
+。如果應用程式需要建立本機日曆，請以同步配接器的方式插入日曆，方法是使用 {@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 的 {@link android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE}。
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 是特殊的日曆帳戶類型，它沒有與裝置帳戶關聯。
+
+
+
+
+
+此類型的日曆不會同步至伺服器。如需關於同步配接器的相關討論，請參閱<a href="#sync-adapter">同步配接器</a>。
+</p>
+
+<h2 id="events">活動表格</h2>
+
+<p>{@link android.provider.CalendarContract.Events} 表格包含個人活動的詳細資訊。
+如要新增、更新或刪除活動，應用程式必須在<a href="#manifest">宣示說明檔案</a>中包括 {@link android.Manifest.permission#WRITE_CALENDAR}權限。
+
+</p>
+
+<p>下列「活動」欄可以讓應用程式和同步配接器寫入。
+如需關於支援欄位的完整清單，請參閱 {@link
+android.provider.CalendarContract.Events} 參照。</p>
+
+<table>
+  <tr>
+    <th>常數</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#CALENDAR_ID}</td>
+    <td>活動所屬日曆的 {@link android.provider.BaseColumns#_ID}。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ORGANIZER}</td>
+    <td>活動主辦人 (擁有者) 的電子郵件。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE}</td>
+    <td>活動的標題。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</td>
+    <td>舉辦活動的地點。 </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</td>
+    <td>活動的描述。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTSTART}</td>
+    <td>活動開始的時間，以紀元元年 1 月 1 日零時起算經過的 UTC 毫秒數為單位。 </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTEND}</td>
+    <td>活動結束的時間，以紀元元年 1 月 1 日零時起算經過的 UTC 毫秒數為單位。 </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}</td>
+    <td>活動的時區。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_END_TIMEZONE}</td>
+    <td>活動結束時間的時區。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
+    
+    <td>活動的持續期間，以 <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a> 格式表示。例如，值 <code>&quot;PT1H&quot;</code> 表示活動持續一小時，而值 <code>&quot;P2W&quot;</code> 指出持續 2 週。
+
+
+ </td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
+    
+    <td>值 1 表示此活動需要整天，如同當地時區所定義。
+值 0 表示定期活動，會在一天中的任何時間開始和結束。
+</td>
+
+    
+  </tr>
+  
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
+    
+    <td>活動的週期規則。例如，<code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>。
+您可以在<a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">這裡</a>查看更多範例。
+</td>
+    
+  </tr>
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
+    <td>活動重複發生的日期。您通常會將 {@link android.provider.CalendarContract.EventsColumns#RDATE} 和 {@link android.provider.CalendarContract.EventsColumns#RRULE} 一起使用，以定義週期性活動的彙總集合。
+
+
+
+如需更多討論，請參閱 <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 規格</a>。</td>
+</tr>
+ 
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
+    
+    <td>活動要視為忙碌或有空 (可以安排其他活動) 的時間。
+ </td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
+    <td>邀請對象是否可以修改活動。 </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_INVITE_OTHERS}</td>
+    <td>邀請對象是否可以邀請其他人。 </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_SEE_GUESTS}</td>
+    <td>邀請對象是否可以看到參與者清單。</td>
+  </tr>
+</table>
+
+<h3 id="add-event">新增活動</h3>
+
+<p>您的應用程式插入新活動時，我們建議您使用 
+{@link android.content.Intent#ACTION_INSERT INSERT} 意圖 (如同<a href="#intent-insert">使用意圖插入活動</a>所述)。不過，如果需要，您也可以直接插入活動。
+本節將描述如何執行此動作。
+</p>
+
+
+<p>以下是插入新活動的規則： </p>
+<ul>
+
+  <li>您必須包括 {@link
+android.provider.CalendarContract.EventsColumns#CALENDAR_ID} 和 {@link
+android.provider.CalendarContract.EventsColumns#DTSTART}。</li>
+
+<li>您必須包括 {@link
+android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}。如要取得系統已安裝時區 ID 的清單，請使用 {@link
+java.util.TimeZone#getAvailableIDs()}。
+請注意，如果您是透過 {@link
+android.content.Intent#ACTION_INSERT INSERT} 意圖 (如同<a href="#intent-insert">使用意圖插入活動</a> &mdash; 所描述的案例) 插入活動，則不適用此規則，將會提供預設時區。
+
+</li>
+  
+  <li>對於非週期性活動，您必須包括 {@link
+android.provider.CalendarContract.EventsColumns#DTEND}。 </li>
+  
+  
+  <li>對於週期性活動，您必須包括 {@link
+android.provider.CalendarContract.EventsColumns#DURATION}，以及 {@link
+android.provider.CalendarContract.EventsColumns#RRULE} 或 {@link
+android.provider.CalendarContract.EventsColumns#RDATE}。請注意，如果您是透過 {@link
+android.content.Intent#ACTION_INSERT INSERT} 意圖 (如同<a href="#intent-insert">使用意圖插入活動</a> &mdash; 所描述的案例) 插入活動，則不適用此規則。您可以使用 {@link
+android.provider.CalendarContract.EventsColumns#RRULE} 搭配 {@link android.provider.CalendarContract.EventsColumns#DTSTART} 和 {@link android.provider.CalendarContract.EventsColumns#DTEND}，然後「日曆」應用程式就會自動將它轉換為一段持續時間。
+
+
+</li>
+  
+</ul>
+
+<p>以下是插入活動的範例。為了簡化，會在 UI 執行緒中執行此示範。
+實際運作時，插入和更新應該在非同步執行緒中完成，以便將動作移至背景執行緒。
+如需詳細資訊，請參閱 {@link android.content.AsyncQueryHandler}。
+</p>
+
+
+<pre>
+long calID = 3;
+long startMillis = 0; 
+long endMillis = 0;     
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 9, 14, 7, 30);
+startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 9, 14, 8, 45);
+endMillis = endTime.getTimeInMillis();
+...
+
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Events.DTSTART, startMillis);
+values.put(Events.DTEND, endMillis);
+values.put(Events.TITLE, &quot;Jazzercise&quot;);
+values.put(Events.DESCRIPTION, &quot;Group workout&quot;);
+values.put(Events.CALENDAR_ID, calID);
+values.put(Events.EVENT_TIMEZONE, "America/Los_Angeles");
+Uri uri = cr.insert(Events.CONTENT_URI, values);
+
+// get the event ID that is the last element in the Uri
+long eventID = Long.parseLong(uri.getLastPathSegment());
+// 
+// ... do something with event ID
+//
+//</pre>
+
+<p class="note"><strong>注意：</strong>查看本範例如何在建立活動後擷取活動 ID。
+這是取得活動 ID 的最簡單方式。您經常需要活動 ID 來執行其他日曆操作 &mdash; 例如，在活動中新增參與者或提醒。
+
+</p>
+
+
+<h3 id="update-event">更新活動</h3>
+
+<p>您的應用程式允許使用者編輯活動時，我們建議您使用 {@link android.content.Intent#ACTION_EDIT EDIT} 意圖編輯活動 (如同<a href="#intent-edit">使用意圖插入活動</a>所述)。不過，如果需要，您也可以直接編輯活動。
+
+
+如要執行活動的更新，您要提供活動的 <code>_ID</code>，可以是 URI 的附加 ID ({@link
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 或以第一個選擇項目方式提供。
+
+
+選項的開頭應該是 <code>&quot;_id=?&quot;</code>，而且第一個 
+<code>selectionArg</code> 應該是活動的 <code>_ID</code>。
+您也可以使用不含 ID 的選項進行更新。以下是更新活動的範例。
+
+它使用 
+{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()} 方式變更活動的標題：
+</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 188;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri updateUri = null;
+// The new title for the event
+values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
+
+<h3 id="delete-event">刪除活動</h3>
+
+<p>您可以透過活動 URI 的附加 ID {@link
+android.provider.BaseColumns#_ID} 或使用標準選擇方式來刪除活動。
+如果您使用附加 ID，就不能進行選擇。刪除有兩種方式：以應用程式和以同步配接器。
+應用程式刪除會將 <em>deleted</em> 欄設定為 1。
+此旗標會告訴同步配接器該列已刪除，而且此刪除應傳播到伺服器。
+
+同步配接器會從資料庫刪除活動及其相關的所有資料。
+以下是應用程式透過活動的 {@link android.provider.BaseColumns#_ID}刪除活動的範例：
+</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 201;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri deleteUri = null;
+deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().delete(deleteUri, null, null);
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+</pre>
+
+<h2 id="attendees">參與者表格</h2>
+
+<p>{@link android.provider.CalendarContract.Attendees} 表格的每一列都代表活動的單一參與者或邀請對象。
+呼叫 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 會傳回指定 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 活動的參與者清單。
+
+此 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 必須符合特定活動的 {@link
+android.provider.BaseColumns#_ID}。
+
+</p> 
+
+<p>下表列出可寫入的欄位。
+插入新的參與者時，您必須包括 <code>ATTENDEE_NAME</code> 以外的所有項目。
+
+</p>
+
+
+<table>
+  <tr>
+    <th>常數</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}</td>
+    <td>活動的 ID。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_NAME}</td>
+    <td>參與者的名稱。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_EMAIL}</td>
+    <td>參與者的電子郵件地址。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_RELATIONSHIP}</td>
+    <td><p>參與者與活動的關係。可以是以下其中一種：</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ATTENDEE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ORGANIZER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_PERFORMER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_SPEAKER}</li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_TYPE}</td>
+    <td><p>參與者的類型。可以是以下其中一種： </p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_REQUIRED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_OPTIONAL}</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS}</td>
+    <td><p>參與者的出席狀態。可以是以下其中一種：</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_ACCEPTED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_DECLINED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_INVITED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_TENTATIVE}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-attendees">新增參與者</h3>
+
+<p>以下是將單一參與者新增至活動的範例。請注意，
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 為必要的：
+</p>
+
+<pre>
+long eventID = 202;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Attendees.ATTENDEE_NAME, &quot;Trevor&quot;);
+values.put(Attendees.ATTENDEE_EMAIL, &quot;trevor@example.com&quot;);
+values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ATTENDEE);
+values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_OPTIONAL);
+values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_INVITED);
+values.put(Attendees.EVENT_ID, eventID);
+Uri uri = cr.insert(Attendees.CONTENT_URI, values);
+</pre>
+
+<h2 id="reminders">提醒表格</h2>
+
+<p>{@link android.provider.CalendarContract.Reminders} 表格的每一列都代表活動的單一提醒。
+呼叫 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 會傳回指定 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 活動的提醒清單。
+</p>
+
+
+<p>下表列出提醒可寫入的欄位。插入新的提醒時，必須包括所有項目。
+請注意，同步配接器會在 {@link
+android.provider.CalendarContract.Calendars} 表格中指出同步配接器支援的提醒類型。
+如需詳細資料，請參閱 
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS}。
+</p>
+
+
+<table>
+  <tr>
+    <th>常數</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#EVENT_ID}</td>
+    <td>活動的 ID。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#MINUTES}</td>
+    <td>活動之前的幾分鐘要觸發提醒。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#METHOD}</td>
+    <td><p>鬧鐘方法 (如伺服器上所設定)。可以是以下其中一種：</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_ALERT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_DEFAULT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_EMAIL}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_SMS}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-reminders">新增提醒</h3>
+
+<p>此範例會在活動新增提醒。此提醒會在活動 15 分鐘之前觸發。
+</p>
+<pre>
+long eventID = 221;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Reminders.MINUTES, 15);
+values.put(Reminders.EVENT_ID, eventID);
+values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
+Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
+
+<h2 id="instances">執行個體表格</h2>
+
+<p>
+{@link android.provider.CalendarContract.Instances} 表格內含活動每次發生的開始和結束時間。
+此表格的每一列代表單一活動發生。
+執行個體表格無法寫入，僅供查詢活動的發生。
+ </p>
+
+<p>下表列出您可以針對執行個體查詢的欄位。請注意，時區是由 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE} 和 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES} 所定義。
+
+</p>
+
+
+<table>
+  <tr>
+    <th>常數</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#BEGIN}</td>
+    <td>執行個體的開始時間，以 UTC 毫秒數為單位。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END}</td>
+    <td>執行個體的結束時間，以 UTC 毫秒數為單位。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
+    
+    <td>執行個體的凱撒曆結束日，與「日曆」的時區相關。
+ 
+    
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
+    
+    <td>執行個體的結束分鐘，從「日曆」時區的午夜開始計算。
+</td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
+    <td>此執行個體活動的 <code>_ID</code>。</td>
+  </tr>
+    <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
+    <td>執行個體的凱撒曆開始日，與「日曆」的時區相關。 
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
+    
+    <td>執行個體的開始分鐘，從午夜開始計算，與「日曆」的時區相關。
+ 
+</td>
+    
+  </tr>
+
+</table>
+
+<h3 id="query-instances">查詢執行個體表格</h3>
+
+<p>如要查詢「執行個體」表格，您需要在 URI 中指定查詢的範圍時間。在本範例中，{@link android.provider.CalendarContract.Instances} 是透過 {@link android.provider.CalendarContract.EventsColumns} 介面的實作，得以存取 {@link
+android.provider.CalendarContract.EventsColumns#TITLE} 欄位。
+
+
+換句話說，{@link
+android.provider.CalendarContract.EventsColumns#TITLE} 是透過資料庫視觀表所傳回，而不是透過查詢原始 {@link
+android.provider.CalendarContract.Instances} 表格。
+
+</p>
+
+<pre>
+private static final String DEBUG_TAG = "MyActivity";
+public static final String[] INSTANCE_PROJECTION = new String[] {
+    Instances.EVENT_ID,      // 0
+    Instances.BEGIN,         // 1
+    Instances.TITLE          // 2
+  };
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_BEGIN_INDEX = 1;
+private static final int PROJECTION_TITLE_INDEX = 2;
+...
+
+// Specify the date range you want to search for recurring
+// event instances
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2011, 9, 23, 8, 0);
+long startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2011, 10, 24, 8, 0);
+long endMillis = endTime.getTimeInMillis();
+  
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+
+// The ID of the recurring event whose instances you are searching
+// for in the Instances table
+String selection = Instances.EVENT_ID + " = ?";
+String[] selectionArgs = new String[] {"207"};
+
+// Construct the query with the desired date range.
+Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+ContentUris.appendId(builder, startMillis);
+ContentUris.appendId(builder, endMillis);
+
+// Submit the query
+cur =  cr.query(builder.build(), 
+    INSTANCE_PROJECTION, 
+    selection, 
+    selectionArgs, 
+    null);
+   
+while (cur.moveToNext()) {
+    String title = null;
+    long eventID = 0;
+    long beginVal = 0;    
+    
+    // Get the field values
+    eventID = cur.getLong(PROJECTION_ID_INDEX);
+    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+    title = cur.getString(PROJECTION_TITLE_INDEX);
+              
+    // Do something with the values. 
+    Log.i(DEBUG_TAG, "Event:  " + title); 
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(beginVal);  
+    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    }
+ }</pre>
+
+<h2 id="intents">日曆意圖</h2>
+<p>您的應用程式不需要<a href="#manifest">權限</a>，即可讀取和寫入日曆資料。您可以改用 Android「日曆」應用程式支援的意圖，將讀取和寫入操作交給您的應用程式。下表列出「日曆供應程式」支援的意圖：</p>
+<table>
+  <tr>
+    <th>動作</th>
+    <th>URI</th>
+
+    <th>描述</th>
+    <th>Extra</th>
+  </tr>
+  <tr>
+    <td><br>
+    {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
+    <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
+    您也可以使用 
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI} 參照 URI。如需使用此意圖的範例，請參閱<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">使用意圖檢視日曆資料</a>。
+ 
+
+    </td>
+    <td>開啟日曆到 <code>&lt;ms_since_epoch&gt;</code> 指定的時間。</td>
+    <td>無。</td>
+  </tr>
+  <tr>
+    <td><p>{@link android.content.Intent#ACTION_VIEW VIEW} </p>
+
+     </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+    您也可以使用 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 參照 URI。如需使用此意圖的範例，請參閱<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">使用意圖檢視日曆資料</a>。
+
+    
+    </td>
+    <td>檢視 <code>&lt;event_id&gt;</code> 指定的活動。</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+  您也可以使用 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 參照 URI。如需使用此意圖的範例，請參閱<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">使用意圖編輯活動</a>。
+
+    
+    
+    </td>
+    <td>編輯 <code>&lt;event_id&gt;</code> 指定的活動。</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} <br>
+    <br>
+    {@link android.content.Intent#ACTION_INSERT INSERT} </td>
+    <td><p><code>content://com.android.calendar/events</code></p>
+    
+   您也可以使用 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 參照 URI。如需使用此意圖的範例，請參閱<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">使用意圖插入活動</a>。
+
+    
+    </td>
+
+    <td>建立活動。</td>
+    <td>Extra 列於下表。</td>
+  </tr>
+</table>
+
+<p>下表列出「日曆供應程式」支援的意圖 Extra：
+</p>
+<table>
+  <tr>
+    <th>意圖 Extra</th>
+    <th>描述</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}</td>
+    <td>活動的名稱。</td>
+  </tr>
+  <tr>
+  
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
+    <td>活動開始時間，以紀元元年 1 月 1 日零時起算經過的毫秒數為單位。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME}</td>
+    
+    <td>活動結束時間，以紀元元年 1 月 1 日零時起算經過的毫秒數為單位。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
+CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
+    
+    <td>指出活動為整天的布林值。值可以是 
+<code>true</code> 或 <code>false</code>。</td> </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
+Events.EVENT_LOCATION}</td>
+    
+    <td>活動的地點。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
+Events.DESCRIPTION}</td>
+    
+    <td>活動描述。</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</td>
+    <td>邀請對象的電子郵件地址 (以逗號分隔的清單)。</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#RRULE Events.RRULE}</td>
+    <td>活動的週期規則。</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
+Events.ACCESS_LEVEL}</td>
+    
+    <td>活動為私人或公開性質。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
+Events.AVAILABILITY}</td>
+    
+    <td>活動要視為忙碌或有空 (可以安排其他活動) 的時間。</td>
+    
+</table> 
+<p>以下各節說明如何使用這些意圖。</p>
+
+
+<h3 id="intent-insert">使用意圖插入活動</h3>
+
+<p>使用 {@link android.content.Intent#ACTION_INSERT INSERT} 意圖讓您的應用程式將活動插入工作交給「日曆」本身。使用此方式，您的應用程式就不需要將 {@link
+android.Manifest.permission#WRITE_CALENDAR} 權限包括在其<a href="#manifest">宣示說明檔案</a>中。
+
+</p>
+
+  
+<p>使用者執行採用此方式的應用程式時，此應用程式會將使用者
+傳送到「日曆」以完成新增活動的操作。{@link
+android.content.Intent#ACTION_INSERT INSERT} 意圖會使用額外的欄位將「日曆」中活動的詳細資訊，預先填入表單。
+然後，使用者可以取消活動、視需要編輯表單或將活動儲存到其日曆。
+
+</p>
+  
+
+
+<p>以下的程式碼片段會在 2012 年 1 月 19 日安排活動，此活動的期間是從上午 7:30 到上午 8:30。
+請注意下列關於此程式碼片段的事項：</p>
+
+<ul>
+  <li>它指定 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}  作為 URI。
+</li>
+  
+  <li>它使用 {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME} 和 {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME} 額外欄位，將活動的時間預先填入表單。
+這些時間值必須以自紀元元年 1 月 1 日零時起算經過的 UTC 毫秒數為單位。
+</li>
+  
+  <li>它使用 {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL} 額外欄位提供逗號分隔的受邀者清單 (以電子郵件地址指定)。
+</li>
+  
+</ul>
+<pre>
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 0, 19, 8, 30);
+Intent intent = new Intent(Intent.ACTION_INSERT)
+        .setData(Events.CONTENT_URI)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+        .putExtra(Events.TITLE, &quot;Yoga&quot;)
+        .putExtra(Events.DESCRIPTION, &quot;Group class&quot;)
+        .putExtra(Events.EVENT_LOCATION, &quot;The gym&quot;)
+        .putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+        .putExtra(Intent.EXTRA_EMAIL, &quot;rowan@example.com,trevor@example.com&quot;);
+startActivity(intent);
+</pre>
+
+<h3 id="intent-edit">使用意圖編輯活動</h3>
+
+<p>您可以直接更新活動，如同<a href="#update-event">更新活動</a>所述。不過，使用 {@link
+android.content.Intent#ACTION_EDIT EDIT} 意圖可以讓不具備權限的應用程式將活動編輯操作交給「日曆」應用程式。使用者在「日曆」中完成活動的編輯操作時，使用者就會回到原來的應用程式。
+
+
+</p> <p>以下的意圖範例會為指定的活動設定名稱，然後讓使用者在「日曆」中編輯此活動。
+</p>
+
+
+<pre>long eventID = 208;
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_EDIT)
+    .setData(uri)
+    .putExtra(Events.TITLE, &quot;My New Title&quot;);
+startActivity(intent);</pre>
+
+<h3 id="intent-view">使用意圖檢視日曆資料</h3>
+<p>「日曆供應程式」提供兩種不同的方式來使用 {@link android.content.Intent#ACTION_VIEW VIEW} 意圖：</p>
+<ul>
+  <li>開啟「日曆」到特定的日期。</li>
+  <li>檢視某個活動。</li>
+
+</ul>
+<p>以下的範例顯示如何開啟「日曆」到特定的日期：</p>
+<pre>// A date-time specified in milliseconds since the epoch.
+long startMillis;
+...
+Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+builder.appendPath(&quot;time&quot;);
+ContentUris.appendId(builder, startMillis);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+    .setData(builder.build());
+startActivity(intent);</pre>
+
+<p>以下的範例顯示如何開啟某個活動以便檢視。</p>
+<pre>long eventID = 208;
+...
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+   .setData(uri);
+startActivity(intent);
+</pre>
+
+
+<h2 id="sync-adapter">同步配接器</h2>
+
+
+<p>應用程式和同步配接器存取「日曆供應程式」的方式只有些微差異：
+</p>
+
+<ul>
+  <li>同步配接器需要透過將 {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} 設定為 <code>true</code>，以指出這是同步配接器。</li>
+  
+  
+  <li>同步配接器需要在 URI 中提供 {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} 和 {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} 作為查詢參數。 </li>
+  
+  <li>同步配接器與應用程式或小工具相比，有更多欄的寫入權限。
+  例如，應用程式只能修改日曆的一些特性，例如名稱、顯示名稱、能見度設定，以及日曆是否同步。
+
+相較之下，同步配接器不只能存取這些欄，還可以存取很多其他欄，例如日曆色彩、時區、存取級別、位置等等。然而，同步配接器受限於所指定的 <code>ACCOUNT_NAME</code> 和 
+<code>ACCOUNT_TYPE</code>。
+
+</li> </ul>
+
+<p>以下是您可用於傳回 URI 的協助程式方法，以便與同步配接器搭配使用：</p>
+<pre> static Uri asSyncAdapter(Uri uri, String account, String accountType) {
+    return uri.buildUpon()
+        .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,&quot;true&quot;)
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
+ }
+</pre>
+<p>如需實作同步配接器的範例 (並非與「日曆」特別相關)，請參閱 
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>。

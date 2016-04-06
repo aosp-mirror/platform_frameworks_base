@@ -38,6 +38,8 @@ page.title=Support Library Features
         Support Library Revisions</a></li>
       <li><a href="{@docRoot}tools/support-library/setup.html">
         Support Library Setup</a></li>
+      <li><a href="{@docRoot}tools/testing-support-library/index.html">
+        Testing Support Library</a></li>
     </ol>
 
   </div>
@@ -151,7 +153,7 @@ numbers, can cause unexpected version updates and regression incompatibilities.<
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v4:21.0.0
+com.android.support:support-v4:23.2.1
 </pre>
 
 
@@ -202,8 +204,7 @@ com.android.support:multidex:1.0.0
 </p>
 
 <p class="note"><strong>Note:</strong>
-  This library depends on the v4 Support Library. If you are using Ant or Eclipse, make sure
-  you include the v4 Support Library as part of this library's classpath.
+  This library depends on the v4 Support Library.
 </p>
 
 <p>Here are a few of the key classes included in the v7 appcompat library:</p>
@@ -236,7 +237,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:appcompat-v7:21.0.0
+com.android.support:appcompat-v7:23.2.1
 </pre>
 
 
@@ -257,7 +258,7 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:cardview-v7:21.0.0
+com.android.support:cardview-v7:23.2.1
 </pre>
 
 
@@ -279,7 +280,7 @@ For detailed information about the v7 gridlayout library APIs, see the
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:gridlayout-v7:21.0.0
+com.android.support:gridlayout-v7:23.2.1
 </pre>
 
 
@@ -306,16 +307,14 @@ with a dependency on the v7 appcompat library, so you'll need to include both
 libraries in your build path when setting up your project. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
-with resources</a>. If you are developing in Eclipse/ADT, make sure to include
-the <code>android-support-v7-mediarouter.jar</code>, <code>android-support-v7-appcompat.jar</code>,
-and <code>android-support-v7-palette.jar</code> files.</p>
+with resources</a>.</p>
 
-<p>If you are using Android Studio, all you need to do is specify the Gradle build
-script dependency identifier <code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
+<p>The Gradle builder script dependency identifier is as follows:
+<code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
 where "&lt;revision&gt;" is the minimum revision at which the library is available. For example:</p>
 
 <pre>
-com.android.support:mediarouter-v7:21.0.0
+com.android.support:mediarouter-v7:23.2.1
 </pre>
 
 <p class="caution">The v7 mediarouter library APIs introduced in Support Library
@@ -341,7 +340,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:palette-v7:21.0.0
+com.android.support:palette-v7:23.2.1
 </pre>
 
 
@@ -350,8 +349,8 @@ com.android.support:palette-v7:21.0.0
 
 <p>The recyclerview library adds the {@link android.support.v7.widget.RecyclerView}
 class. This class provides support for the
-<a href="{@docRoot}training/material/lists-cards#RecyclerView">RecyclerView
-widget</a>, a view for efficiently displaying large data sets by providing a
+<a href="{@docRoot}training/material/lists-cards.html">RecyclerView</a>
+widget, a view for efficiently displaying large data sets by providing a
 limited window of data items.</p>
 
 <p>After you download the Android Support Libraries, this library is located in the
@@ -363,7 +362,7 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:recyclerview-v7:21.0.0
+com.android.support:recyclerview-v7:23.2.1
 </pre>
 
 
@@ -392,7 +391,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-v7:23.0.0
+com.android.support:preference-v7:23.2.1
 </pre>
 
 
@@ -421,7 +420,7 @@ com.android.support:preference-v7:23.0.0
 
 <p class="note">
   <strong>Note:</strong> Use of RenderScript with the support library is supported with Android
-  Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools. The
+  Studio and Gradle-based builds. The
   renderscript library is located in the <code>build-tools/$VERSION/renderscript/</code> folder.
 </p>
 
@@ -456,7 +455,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v13:18.0.0
+com.android.support:support-v13:23.2.1
 </pre>
 
 
@@ -488,7 +487,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-v14:23.0.0
+com.android.support:preference-v14:23.2.1
 </pre>
 
 
@@ -517,7 +516,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-v17:23.0.0
+com.android.support:preference-leanback-v17:23.2.1
 </pre>
 
 
@@ -559,7 +558,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:leanback-v17:21.0.0
+com.android.support:leanback-v17:23.2.1
 </pre>
 
 
@@ -580,7 +579,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-annotations:22.0.0
+com.android.support:support-annotations:23.2.1
 </pre>
 
 
@@ -605,7 +604,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:design:22.2.0
+com.android.support:design:23.2.1
 </pre>
 
 
@@ -633,7 +632,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:customtabs:23.0.0
+com.android.support:customtabs:23.2.1
 </pre>
 
 
@@ -656,7 +655,7 @@ PercentRelativeLayout</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code &lt;sdk&gt;/extras/android/support/percent} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -664,7 +663,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:percent:23.0.0
+com.android.support:percent:23.2.1
 </pre>
 
 
@@ -686,7 +685,7 @@ RecommendationExtender</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code &lt;sdk&gt;/extras/android/support/recommendation} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -694,5 +693,5 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:app.recommendation-app:23.0.0
+com.android.support:recommendation:23.2.1
 </pre>

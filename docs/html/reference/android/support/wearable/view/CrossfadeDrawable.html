@@ -95,6 +95,11 @@
 
 
 
+
+
+
+
+
 <html>
 <head>
 
@@ -469,6 +474,7 @@ type="text/css">
               
     <li><h2>Interfaces</h2>
       <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPageOptions.html">GridPageOptions</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPageOptions.BackgroundListener.html">GridPageOptions.BackgroundListener</a></li>
@@ -484,6 +490,7 @@ type="text/css">
               
     <li><h2>Classes</h2>
       <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionLabel.html">ActionLabel</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionPage.html">ActionPage</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/BoxInsetLayout.html">BoxInsetLayout</a></li>
@@ -1256,7 +1263,7 @@ Summary:
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.graphics.drawable.Drawable" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.graphics.drawable.Drawable-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -1631,10 +1638,10 @@ From class
             
             
             
-            int</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getIntrinsicHeight</span>()</nobr>
+        <span class="sympad">getHotspotBounds</span>(Rect arg0)</nobr>
         
   </td></tr>
 
@@ -1650,7 +1657,39 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getIntrinsicHeight</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getIntrinsicWidth</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getLayoutDirection</span>()</nobr>
         
   </td></tr>
 
@@ -1858,13 +1897,29 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">isStateful</span>()</nobr>
+        <span class="sympad">isFilterBitmap</span>()</nobr>
         
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">isStateful</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1880,7 +1935,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1896,7 +1951,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1912,7 +1967,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1923,6 +1978,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onBoundsChange</span>(Rect arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onLayoutDirectionChanged</span>(int arg0)</nobr>
         
   </td></tr>
 
@@ -2194,13 +2265,29 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setLevel</span>(int arg0)</nobr>
+        <span class="sympad">setLayoutDirection</span>(int arg0)</nobr>
         
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setLevel</span>(int arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2216,7 +2303,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2232,7 +2319,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2248,7 +2335,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2264,7 +2351,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2280,7 +2367,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2306,7 +2393,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -2508,7 +2595,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.graphics.drawable.Drawable.Callback" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.graphics.drawable.Drawable.Callback-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 

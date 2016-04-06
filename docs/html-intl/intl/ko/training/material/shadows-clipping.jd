@@ -1,0 +1,133 @@
+page.title=그림자 정의 및 뷰 클리핑
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#Elevation">뷰에 엘리베이션 지정</a></li>
+  <li><a href="#Shadows">뷰 그림자 및 윤곽선 사용자지정</a></li>
+  <li><a href="#Clip">뷰 클리핑</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+<p>머티어리얼 디자인은 UI 요소에 엘리베이션을 도입합니다. 엘리베이션은 사용자가 각 요소의 상대적 중요성을 이해하고 현재 직면한 작업에 집중할 수 있도록 도와줍니다.
+</p>
+
+<p>Z 속성으로 표현되는 뷰의 엘리베이션은 그림자의 시각적인 모양을 결정합니다. 예를 들어, 더 높은 Z값을 가진 뷰는 더 크고 부드러운 그림자를 드리웁니다.
+ 높은 Z값을 가진 뷰는 낮은 Z값을 가진 뷰를 가립니다. 하지만 뷰의 Z값이 뷰의 크기에 영향을 주지는 않습니다.
+</p>
+
+<p>그림자는 엘리베이트된 뷰의 상위 요소에 의해 그려지며, 따라서 기본적으로 상위 요소에 의해 클리핑되는 표준 뷰 클리핑이 적용됩니다.
+</p>
+
+<p>엘리베이션은 특정 작업 수행 시 위젯이 일시적으로 뷰 평면 위로 올라오는 애니메이션을 생성하는 경우에도 유용합니다.
+</p>
+
+<p>머티리얼 디자인의 엘리베이션에 대한 자세한 내용은
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">3D 공간의 개체</a>를 참조하세요.
+</p>
+
+
+<h2 id="Elevation">뷰에 엘리베이션 지정</h2>
+
+<p>뷰의 Z 값은 2개의 구성요소를 가집니다.
+
+<ul>
+<li>엘리베이션: 정적 구성요소.</li>
+<li>변환: 애니메이션에 사용되는 동적 구성요소.</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>그림 1</strong> - 서로 다른 뷰 엘리베이션의 그림자.</p>
+
+<p>레이아웃 정의에서 뷰의 엘리베이션을 설정하려면 <code>android:elevation</code>
+특성을 사용합니다. 액티비티의 코드에서 뷰의 엘리베이션을 설정하려면
+{@link android.view.View#setElevation View.setElevation()} 메서드를 사용합니다.</p>
+
+<p>뷰의 변환을 설정하려면 {@link android.view.View#setTranslationZ
+View.setTranslationZ()} 메서드를 사용합니다.</p>
+
+<p>새 {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} 및 {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} 메서드를 사용하면 뷰의 엘리베이션을 손쉽게 애니메이트할 수 있습니다.
+ 자세한 내용은
+{@link android.view.ViewPropertyAnimator}의 API 레퍼런스와 <a href="{@docRoot}guide/topics/graphics/prop-animation.html">속성 애니메이션</a> 개발자 가이드를 참조하세요.
+</p>
+
+<p>{@link android.animation.StateListAnimator}를 사용해서 이러한 애니메이션을 선언적 방식으로 지정할 수도 있습니다.
+ 이는 사용자가 버튼을 누를 때와 같이 상태 변경이 애니메이션을 트리거하는 경우에 특히 유용합니다.
+ 자세한 내용은
+<a href="{@docRoot}training/material/animations.html#ViewState">뷰 상태 변경 애니메이트</a>를 참조하세요.</p>
+
+<p>Z 값은 dp(밀도 독립적 픽셀)로 측정됩니다.</p>
+
+
+<h2 id="Shadows">뷰 그림자 및 윤곽선 사용자지정</h2>
+
+<p>뷰의 배경 드로어블의 경계는 해당 그림자의 기본 모양을 결정합니다.
+<strong>윤곽선</strong>은 그래픽 객체의 바깥쪽 모양을 나타내고 터치 피드백의 물결 영역을 정의합니다.
+</p>
+
+<p>배경 드로어블을 사용하여 정의된 다음 뷰를 살펴봅시다.</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>배경 드로어블은 둥근 모서리를 가진 직사각형으로 정의됩니다.</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>배경 드로어블이 뷰의 윤곽선을 정의하기 때문에 뷰는 둥근 모서리를 가진 그림자를 드리웁니다.
+ 사용자지정 윤곽선을 제공하면 뷰 그림자의 기본 모양이 재정의됩니다.</p>
+
+<p>코드에서 뷰의 사용자지정 윤곽선을 정의하려면:<p>
+
+<ol>
+<li>{@link android.view.ViewOutlineProvider} 클래스를 확장합니다.</li>
+<li>{@link android.view.ViewOutlineProvider#getOutline getOutline()} 메서드를 재정의합니다.</li>
+<li>{@link
+android.view.View#setOutlineProvider View.setOutlineProvider()} 메서드를 사용하여 새로운 윤곽선 공급자를 뷰에 할당합니다.</li>
+</ol>
+
+<p>{@link android.graphics.Outline} 클래스의 메서드를 사용하여 둥근 모서리를 가진 타원형 및 직사각형 윤곽선을 생성할 수 있습니다.
+ 뷰의 기본 윤곽선 공급자는 뷰의 배경에서 윤곽선을 가져옵니다.
+ 뷰에 그림자가 드리우는 것을 원치 않으면 뷰의 윤곽선 공급자를 <code>null</code>로 설정하세요.
+</p>
+
+
+<h2 id="Clip">뷰 클리핑</h2>
+
+<p>뷰를 클리핑하면 뷰의 모양을 손쉽게 바꿀 수 있습니다. 다른 디자인 요소와의 일관성을 위해, 또는 사용자 입력에 응답하여 뷰의 모양을 바꾸기 위해 뷰를 클리핑할 수 있습니다. {@link android.view.View#setClipToOutline
+View.setClipToOutline()} 메서드나 <code>android:clipToOutline</code> 특성을 사용하여 뷰를 해당 윤곽선 영역까지 클리핑할 수 있습니다.
+
+ 
+{@link android.graphics.Outline#canClip Outline.canClip()} 메서드에서 결정된 대로 사각형, 원형 및 둥근 사각형의 윤곽선만 클리핑을 지원합니다.
+</p>
+
+<p>드로어블 모양으로 뷰를 클리핑하려면 위와 같이 드로어블을 뷰의 배경으로
+설정하고 {@link android.view.View#setClipToOutline View.setClipToOutline()}
+메서드를 호출합니다.</p>
+
+<p>뷰 클리핑은 리소스 소모가 많은 작업이므로,뷰를 클리핑하는 데 사용하는 모양을 애니메이트하지 마세요.
+ 이 효과를 얻으려면 <a href="{@docRoot}training/material/animations.html#Reveal">표시 효과</a> 애니메이션을 사용하세요.</p>

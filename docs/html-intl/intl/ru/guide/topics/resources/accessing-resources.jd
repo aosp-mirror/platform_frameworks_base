@@ -1,0 +1,337 @@
+page.title=Доступ к ресурсам
+parent.title=Ресурсы приложения
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Краткое описание</h2>
+  <ul>
+    <li>В коде для создания ссылок на ресурсы можно использовать целочисленные переменные из {@code R.java}, такие как
+{@code R.drawable.myimage}</li>
+    <li>Для создания ссылок на ресурсы из самих ресурсов можно использовать особый синтаксис XML, например {@code
+&#64;drawable/myimage}</li>
+    <li>Также для доступа к ресурсам приложения используются методы класса
+{@link android.content.res.Resources}</li>
+  </ul>
+
+  <h2>Ключевые классы</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>Содержание документа</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">Доступ к ресурсам из кода</a></li>
+    <li><a href="#ResourcesFromXml">Доступ к ресурсам из XML</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">Ссылка на атрибуты стиля</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">Доступ к ресурсам платформы</a></li>
+  </ol>
+
+  <h2>См. также:</h2>
+  <ol>
+    <li><a href="providing-resources.html">Предоставление ресурсов</a></li>
+    <li><a href="available-resources.html">Типы ресурсов</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>После того, как вы предоставили ресурс в вашем приложении (см. раздел <a href="providing-resources.html">Предоставление ресурсов</a>), этот ресурс можно применить. Для этого необходимо создать
+ссылку на идентификатор ресурса. Для задания всех таких идентификаторов в вашем проекте используется класс {@code R}, который автоматически создается инструментом
+{@code aapt}.</p>
+
+<p>Во время компиляции приложения инструмент {@code aapt} создает класс {@code R}, в котором находятся
+идентификаторы для всех ресурсов в каталоге {@code
+res/}. Для каждого типа ресурсов предусмотрен подкласс {@code R} (например,
+класс {@code R.drawable} для элементов дизайна), а для каждого ресурса указанного типа существует статическая
+целочисленная переменная (например, {@code R.drawable.icon}). Эта переменная как раз и служит идентификатором ресурса, которую можно
+использовать для его получения.</p>
+
+<p>Несмотря на то, что в классе {@code R} находятся идентификаторы ресурсов, никогда не обращайтесь к нему
+для поиска идентификатора ресурса. Последний состоит из следующих компонентов:</p>
+<ul>
+  <li><em>Тип ресурса</em>: ресурсы объединены по типам, таким как {@code
+string}, {@code drawable} и {@code layout}. Дополнительные сведения о различных типах представлены в разделе <a href="available-resources.html">Типы ресурсов</a>.
+  </li>
+  <li><em>Имя ресурса</em>, в качестве которого выступает либо имя файла
+(без расширения), либо значение атрибута XML {@code android:name} (если
+ресурс представляет собой простое значение, например строку).</li>
+</ul>
+
+<p>Существует два способа доступа к ресурсу.</p>
+<ul>
+  <li><strong>Из кода:</strong> с помощью статической целочисленной переменной из подкласса вашего класса {@code R}
+, например:
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} — это тип ресурса, а {@code hello} — это его имя. Существует множество API-интерфейсов
+Android, которые могут получать доступ к ресурсам, идентификаторы которых указаны в этом формате. См. раздел
+<a href="#ResourcesFromCode">Доступ к ресурсам из кода</a>.</p>
+  </li>
+  <li><strong>Из XML:</strong> с помощью особого синтаксиса XML, который также соответствует
+идентификатору ресурса, заданному в классе {@code R}, например:
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} — это тип ресурса, а {@code hello} — это его имя. Этот синтаксис можно
+использовать в любом фрагменте ресурса XML, где ожидается значение, указанное вами в ресурсе. См. раздел <a href="#ResourcesFromXml">Доступ к ресурсам из XML</a></p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">Доступ к ресурсам из кода </h2>
+
+<p>Чтобы использовать ресурс в коде, можно передать идентификатор ресурса в виде параметра метода. Например, с
+помощью метода {@link android.widget.ImageView#setImageResource(int) setImageResource()} можно указать использование виджетом {@link android.widget.ImageView} ресурса {@code res/drawable/myimage.png}:
+</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>Отдельные ресурсы также можно получать с помощью методов в классе {@link
+android.content.res.Resources}, экземпляр которого можно получить с помощью
+метода {@link android.content.Context#getResources()}.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Доступ к исходным файлам</h2>
+
+<p>В редких случаях может потребоваться получить доступ к исходным файлам и каталогам. В этом случае просто сохранить
+файлы в каталоге {@code res/} будет недостаточно, поскольку обратиться к ресурсу из папки
+{@code res/} можно только по его идентификатору. Вместо этого ресурсы можно сохранить в каталоге
+{@code assets/}.</p>
+<p>Файлам, которые сохранены в каталоге {@code assets/}, <em>не</em> присваиваются идентификаторы
+ресурсов, поэтому вам не удастся сослаться на них с помощью класса {@code R} или из ресурсов XML. Вместо этого можно
+запросить файлы из каталога {@code assets/}, как в обычной файловой системе, и считать необработанные данные с помощью
+{@link android.content.res.AssetManager}.</p>
+<p>Однако, если вам требуется всего лишь возможность считать необработанные данные (например, видео- или аудиофайл),
+ сохраните требуемый файл в каталоге {@code res/raw/} и считайте поток байтов с помощью метода {@link
+android.content.res.Resources#openRawResource(int) openRawResource()}.</p>
+
+</div>
+</div>
+
+
+<h3>Синтаксис</h3>
+
+<p>Ниже представлен синтаксис ссылки на ресурс из кода.</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em>{@code &lt;package_name&gt;}</em> — это имя пакета, в котором находится ресурс (не
+требуется при создании ссылок на ресурсы из вашего собственного пакета).</li>
+  <li><em>{@code &lt;resource_type&gt;}</em> — это подкласс {@code R} для типа ресурса.</li>
+  <li><em>{@code &lt;resource_name&gt;}</em> — это либо имя файла
+ресурса (без расширения), либо значение атрибута {@code android:name} в элементе XML (для простых
+значений).</li>
+</ul>
+<p>Дополнительные сведения о каждом типе
+ресурсов и порядке создания ссылок на них см. в разделе <a href="available-resources.html">Типы ресурсов</a>.</p>
+
+
+<h3>Примеры использования</h3>
+
+<p>Существует множество методов, которые могут принимать идентификатор ресурса в виде параметра. Для получения ресурсов можно использовать методы,
+представленные в классе {@link android.content.res.Resources}. Можно получить экземпляр {@link
+android.content.res.Resources} с помощью {@link android.content.Context#getResources
+Context.getResources()}.</p>
+
+
+<p>Вот некоторые примеры доступа к ресурсам из кода:</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>Внимание!</strong> Никогда не изменяйте файл {@code
+R.java} вручную &mdash; этот файл создается инструментом {@code aapt} во время компиляции вашего
+проекта. Любые внесенные в него изменения перезаписываются после следующей компиляции.</p>
+
+
+
+<h2 id="ResourcesFromXml">Доступ к ресурсам из XML</h2>
+
+<p>Для задания значений для некоторых атрибутов и элементов XML можно использовать
+ссылку на существующий ресурс. Это зачастую требуется при создании файлов макета при
+указании строк и изображений для виджетов.</p>
+
+<p>Например, при добавлении в макет элемента {@link android.widget.Button} необходимо использовать
+<a href="string-resource.html">строковый ресурс</a> для надписи на кнопке:</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>Синтаксис</h3>
+
+<p>Ниже представлен синтаксис ссылки на ресурс из ресурса XML.</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} — это имя пакета, в котором находится ресурс (не
+требуется при создании ссылок на ресурсы из одного и того же пакета).</li>
+  <li>{@code &lt;resource_type&gt;} — это подкласс 
+{@code R} для типа ресурса.</li>
+  <li>{@code &lt;resource_name&gt;} — это либо имя файла
+ресурса (без расширения), либо значение атрибута {@code android:name} в элементе XML (для простых
+значений).</li>
+</ul>
+
+<p>Дополнительные сведения о каждом типе
+ресурсов и порядке создания ссылок на них см. в разделе <a href="available-resources.html">Типы ресурсов</a>.</p>
+
+
+<h3>Примеры использования</h3>
+
+<p>В некоторых случаях ресурс необходимо использовать в качестве значения в элементе XML (например, чтобы применить графическое изображение к 
+виджету), однако вы также можете использовать ресурс в любом фрагменте XML, где ожидается простое значение. Например,
+если имеется следующий файл ресурса, включающий <a href="more-resources.html#Color">цветовой ресурс</a> и <a href="string-resource.html">строковый ресурс</a>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>Эти ресурсы можно использовать в следующем файле макета для задания цвета текста и
+надписи:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>В этом случае в ссылке на ресурс не нужно указывать имя пакета, поскольку
+ресурсы находятся в вашем собственном пакете. Однако для создания
+ссылки на системный ресурс вам потребуется указать имя пакета. Например:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Всегда используйте строковые ресурсы,
+поскольку ваше приложение может потребоваться перевести на другие языки. 
+Сведения о создании альтернативных
+ресурсов (например, локализованных строк) представлены в разделе <a href="providing-resources.html#AlternativeResources">Предоставление альтернативных
+ресурсов</a>. В разделе <a href="localization.html">Локализация</a> приведено полное руководство по локализации
+приложения.</p>
+
+<p>Вы даже можете использовать ресурсы в XML для создания псевдонимов. Например, можно создать 
+элемент дизайна, который будет служить псевдонимом для другого элемента дизайна:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>Это может показаться излишним, однако такой подход очень полезен при использовании альтернативных ресурсов. Узнайте подробнее о
+<a href="providing-resources.html#AliasResources">создании псевдонимов ресурсов</a>.</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">Ссылка на атрибуты стиля</h3>
+
+<p>С помощью ресурса атрибута стиля можно создать ссылку на значение
+атрибута в текущей примененной теме. Таким образом можно
+настраивать внешний вид элементов пользовательского интерфейса, подстраивая их под стандартные варианты элементов оформления
+текущей темы, вместо указания жестко заданных значений. Создание ссылки на атрибут стиля
+представляет собой своеобразную инструкцию «использовать стиль, заданный этим атрибутом в текущей теме».</p>
+
+<p>Синтаксис для создания ссылки на атрибут стиля практически идентичен обычному формату
+ресурса, только в этом случае вместо символа{@code @} необходимо указать вопросительный знак ({@code ?}), а тип ресурса
+вообще необязательно указывать. Например:</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>Ниже представлен пример создания ссылки на атрибут для задания цвета текста в соответствии с
+«основным» цветом текста системной темы оформления:</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>Здесь атрибут {@code android:textColor} служит для задания имени атрибута стиля
+в текущей теме. Теперь в Android используется значение, примененное к атрибуту стиля{@code android:textColorSecondary}
+в качестве значения для {@code android:textColor} в этом виджете. Поскольку инструменту для работы с системными
+ресурсами известно, что в этом контексте ожидается ресурс атрибута,
+вам не нужно явно указывать его тип (который должен быть
+<code>?android:attr/textColorSecondary</code>) &mdash; тип {@code attr} можно исключить.</p>
+
+
+
+
+<h2 id="PlatformResources">Доступ к ресурсам платформы</h2>
+
+<p>В Android предусмотрен ряд стандартных ресурсов, например, стилей, тем и макетов. Для
+доступа к этим ресурсам укажите в ссылке на ресурс имя пакета
+<code>android</code>. Например, в Android имеется ресурс макета, который можно использовать для
+элементов списка в виджете {@link android.widget.ListAdapter}:</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>В этом примере {@link android.R.layout#simple_list_item_1} представляет собой ресурс макета, определенный
+платформой для элементов в виджете {@link android.widget.ListView}. Вы можете использовать его вместо создания
+собственных макетов для элементов списка. Дополнительные сведения представлены в руководстве для разработчиков, посвященном
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">представлению в виде списка</a>.</p>
+

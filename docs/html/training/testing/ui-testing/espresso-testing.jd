@@ -55,6 +55,8 @@ trainingnavtop=true
             <a href="https://github.com/googlesamples/android-testing"
             class="external-link">Espresso Code Samples</a>
           </li>
+          <li><a href="https://www.code-labs.io/codelabs/android-testing/index.html?index=..%2F..%2Findex#0"
+            class="external-link">Android Testing Codelab</a></li>
         </ul>
       </div>
     </div>
@@ -90,72 +92,51 @@ trainingnavtop=true
       Set Up Espresso
     </h2>
 
-    <p>
-      Before you begin using Espresso, you must:
-    </p>
+<p>Before building your UI test with Espresso, make sure to configure your test source code
+location and project dependencies, as described in
+<a href="{@docRoot}training/testing/start/index.html#config-instrumented-tests">
+Getting Started with Testing</a>.</p>
 
-    <ul>
-      <li>
-        <strong>Install the Android Testing Support Library</strong>. The Espresso API is
-        located under the {@code com.android.support.test.espresso} package. These classes allow
-        you to create tests that use the Espresso testing framework. To learn how to install the
-        library, see <a href="{@docRoot}tools/testing-support-library/index.html#setup">
-        Testing Support Library Setup</a>.
-      </li>
+<p>In the {@code build.gradle} file of your Android app module, you must set a dependency
+  reference to the Espresso library:</p>
 
-      <li>
-        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
-        the target app that you want to test is typically placed under the {@code app/src/main}
-        folder. The source code for instrumentation tests, including
-        your Espresso tests, must be placed under the <code>app/src/androidTest</code> folder. To
-        learn more about setting up your project directory, see
-        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
-      </li>
-
-      <li>
-        <strong>Specify your Android testing dependencies</strong>. In order for the
-        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> to
-        correctly build and run your Espresso tests, you must specify the following libraries in
-        the {@code build.gradle} file of your Android app module:
-
-        <pre>
+<pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
+    ...
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
 }
 </pre>
-      </li>
 
-      <li>
-        <strong>Turn off animations on your test device.</strong> Leaving system animations turned
-        on in the test device might cause unexpected results or may lead your test to fail. Turn
-        off animations from <em>Settings</em> by opening <em>Developing Options</em> and
-        turning all the following options off:
+<p>Turn off animations on your test device &mdash; leaving system animations turned on in the test
+device might cause unexpected results or may lead your test to fail. Turn off animations from
+<em>Settings</em> by opening <em>Developing Options</em> and turning all the following options off:
+</p>
         <ul>
           <li>
-            <em>Window animation scale</em>
+            <strong>Window animation scale</strong>
           </li>
 
           <li>
-            <em>Transition animation scale</em>
+            <strong>Transition animation scale</strong>
           </li>
 
           <li>
-            <em>Animator duration scale</em>
+            <strong>Animator duration scale</strong>
           </li>
         </ul>
       </li>
     </ul>
+<p>If you want to set up your project to use Espresso features other than what the core API
+  provides, see this
+  <a href="https://google.github.io/android-testing-support-library/docs/espresso/index.html"
+  class="external-link">resource</a>.</p>
 
     <h2 id="build">
       Create an Espresso Test Class
     </h2>
 
     <p>
-      To create an Espresso test, create a Java class or an
-      {@link android.test.ActivityInstrumentationTestCase2}
-      subclass that follows this programming model:
+      To create an Espresso test, create a Java class that follows this programming model:
     </p>
 
     <ol>
@@ -200,11 +181,70 @@ onView(withId(R.id.my_view))            // withId(R.id.my_view) is a ViewMatcher
         .perform(click())               // click() is a ViewAction
         .check(matches(isDisplayed())); // matches(isDisplayed()) is a ViewAssertion
 </pre>
+<h3 id="espresso-atr">Using Espresso with ActivityTestRule</h3>
+<p>
+The following section describes how to create a new Espresso test in the JUnit 4 style and use
+<a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
+{@code ActivityTestRule}</a> to reduce the amount of boilerplate code you need to write. By using
+<a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
+{@code ActivityTestRule}</a>, the testing framework launches the activity under test
+before each test method annotated with {@code &#64;Test} and before any method annotated with
+{@code &#64;Before}. The framework handles shutting down the activity after the test finishes
+and all methods annotated with {@code &#64;After} are run.</p>
+
+<pre>
+package com.example.android.testing.espresso.BasicSample;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
+...
+
+&#64;RunWith(AndroidJUnit4.class)
+&#64;LargeTest
+public class ChangeTextBehaviorTest {
+
+    private String mStringToBetyped;
+
+    &#64;Rule
+    public ActivityTestRule&lt;MainActivity&gt; mActivityRule = new ActivityTestRule&lt;&gt;(
+            MainActivity.class);
+
+    &#64;Before
+    public void initValidString() {
+        // Specify a valid string.
+        mStringToBetyped = "Espresso";
+    }
+
+    &#64;Test
+    public void changeText_sameActivity() {
+        // Type text and then press the button.
+        onView(withId(R.id.editTextUserInput))
+                .perform(typeText(mStringToBetyped), closeSoftKeyboard());
+        onView(withId(R.id.changeTextBt)).perform(click());
+
+        // Check that the text was changed.
+        onView(withId(R.id.textToBeChanged))
+                .check(matches(withText(mStringToBetyped)));
+    }
+}
+</pre>
 
     <h3 id="espresso-aitc2">
       Using Espresso with ActivityInstrumentationTestCase2
     </h3>
-
+<p>The following section describes how to migrate to Espresso if you have existing test classes
+subclassed from {@link android.test.ActivityInstrumentationTestCase2} and you don't want to rewrite
+them to use JUnit4.</p>
+<p class="note"><strong>Note:</strong> For new UI tests, we strongly recommend that you write your
+test in the JUnit 4 style and use the
+<a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
+{@code ActivityTestRule}</a> class, instead of
+{@link android.test.ActivityInstrumentationTestCase2}.</p>
     <p>
       If you are subclassing {@link android.test.ActivityInstrumentationTestCase2}
       to create your Espresso test class, you must inject an
@@ -541,40 +581,13 @@ public void testChangeText_sameActivity() {
 </pre>
 
 <h2 id="run">Run Espresso Tests on a Device or Emulator</h2>
-
-    <p>
-      To run Espresso tests, you must use the
-      <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
-      class provided in the
-      <a href="{@docRoot}tools/testing-support-library/index.html">
-      Android Testing Support Library</a> as your default test runner. The
-      <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for
-      Gradle</a> provides a default directory ({@code src/androidTest/java}) for you to store the
-      instrumented test classes and test suites that you want to run on a device. The
-      plug-in compiles the test code in that directory and then executes the test app using
-      the configured test runner class.
-    </p>
-
-    <p>
-      To run Espresso tests in your Gradle project:
-    </p>
-
-    <ol>
-      <li>Specify
-        <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
-        as the default test instrumentation runner in
-      your {@code build.gradle} file:
-
-  <pre>
-android {
-    defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-}</pre>
-      </li>
-      <li>Run your tests from the command-line by calling the the {@code connectedCheck}
-        (or {@code cC}) task:
-  <pre>
-./gradlew cC</pre>
-      </li>
-    </ol>
+<p>
+You can run Espresso tests from <a href="{@docRoot}sdk/index.html">Android Studio</a> or
+from the command-line. Make sure to specify
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+  {@code AndroidJUnitRunner}</a> as the default instrumentation runner in your project.
+</p>
+<p>
+To run your Espresso test, follow the steps for running instrumented tests
+described in <a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</a>.</p>

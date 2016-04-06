@@ -1,0 +1,411 @@
+page.title=處理程序和執行緒
+page.tags=生命週期、背景
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容</h2>
+<ol>
+<li><a href="#Processes">處理程序</a>
+  <ol>
+    <li><a href="#Lifecycle">處理程序生命週期</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">執行緒</a>
+  <ol>
+    <li><a href="#WorkerThreads">工作者執行緒</a></li>
+    <li><a href="#ThreadSafe">安全執行緒方法</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">處理程序間通訊</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>當應用程式元件啟動且該應用程式未執行任何其他元件時，Android 系統會以執行單一執行緒的方式，為該應用程式啟動新的 Linux 處理程序。
+
+預設會以相同的處理程序和執行緒 (稱為「主要」執行緒) 執行相同應用程式的所有元件。
+如果應用程式元件啟動且已有該應用程式的處理程序存在 (由於應用程式還有另一個元件存在)，那麼元件會在該處理程序中啟動，並使用相同的執行緒執行。
+
+不過，您可以安排應用程式中的不同元件以個別處理程序執行，還可以為任何處理程序建立額外的執行緒。
+
+</p>
+
+<p>本文件說明處理程序和執行緒如何在 Android 應用程式中運作。</p>
+
+
+<h2 id="Processes">處理程序</h2>
+
+<p>在預設情況下，系統會以相同的處理程序執行相同應用程式的所有元件，而且大部分應用程式都是如此。
+不過，如果您需要控制特定元件所屬的處理程序，可以在宣示說明檔案中這麼做。
+</p>
+
+<p>每種元件元素 &mdash; <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a> 和 <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a> &mdash; 的宣示說明項目都支援 {@code android:process} 屬性，這項屬性能指定元件應在哪個處理程序執行。
+您可以設定此屬性讓每個元件都以自己的處理程序執行，或只讓當中的部分元件共用同一處理程序。
+您也可以設定 
+{@code android:process}，讓不同應用程式的元件以相同的處理程序執行，只要這些應用程式分享相同的 Linux 使用者 ID 並以相同的憑證簽署。
+
+</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> 元素也支援 {@code android:process} 屬性，以設定要套用到所有元件的預設值。
+</p>
+
+<p>Android 可能會在記憶體不足且需要其他處理程序更立即為使用者提供服務時，決定關閉處理程序。
+使用已終止的處理程序執行的應用程式元件會因此而終結。
+當再次有工作需要執行時，就會為這些元件再次啟動處理程序。
+</p>
+
+<p>Android 系統會將處理程序對使用者的相對重要性加權，以決定要終止的處理程序。
+例如，相較於代管可見 Activity 的處理程序，系統較容易關閉代管已不在螢幕上顯示的 Activity 的處理程序。
+因此，是否要終止處理程序，取決於以該處理程序執行中的元件狀態。
+如要瞭解用於決定是否終止處理程序的規則，請參閱下文。
+ </p>
+
+
+<h3 id="Lifecycle">處理程序生命週期</h3>
+
+<p>Android 系統會儘可能持續維護處理程序，但最終仍必須移除舊的處理程序，以便回收記憶體供新的或更重要的處理程序使用。
+系統會根據以該處理程序執行的元件和那些元件的狀態，將每個處理程序放入「重要性階層」，藉此決定要保留以及要終止的處理程序。
+
+
+重要性最低的處理程序會最先遭到終止，接著是重要性次低的處理程序，依此類推，視需要收回系統資源。
+
+</p>
+
+<p>重要性階層共有五個層級。下方清單依照重要性的順序列出不同類型的處理程序 (第一個處理程序為「最重要」<em></em>且會「最後終止」<em></em>)：
+
+</p>
+
+<ol>
+  <li><b>前景處理程序</b>
+    <p>這種處理程序是指使用者目前執行的工作所需的處理程序。針對下列任一情況，系統或將處理程序視為位於前景中：
+</p>
+
+      <ul>
+        <li>使用者正與其代管的 {@link android.app.Activity} 互動 (已呼叫 {@link
+android.app.Activity} 的 {@link android.app.Activity#onResume onResume()} 方法)。
+</li>
+
+        <li>其代管的 {@link android.app.Service} 已繫結至正在與使用者互動的 Activity。
+</li>
+
+        <li>其代管的 {@link android.app.Service} 正「在前景」執行中 (服務已呼叫 {@link android.app.Service#startForeground startForeground()})。
+
+
+        <li>其代管的 {@link android.app.Service} 正在執行本身的其中一個生命週期回呼 ({@link android.app.Service#onCreate onCreate()}、{@link android.app.Service#onStart onStart()} 或 {@link android.app.Service#onDestroy onDestroy()})。
+
+</li>
+
+        <li>其代管的 {@link android.content.BroadcastReceiver} 正在執行本身的 {@link
+android.content.BroadcastReceiver#onReceive onReceive()} 方法。</li>
+    </ul>
+
+    <p>一般來說，在任何指定時間內只會有幾個前景處理程序存在。只有在記憶體過低而全都無法繼續執行時，才會採取這最後的手段來終止它們。
+在這種情況下，裝置通常已達到記憶體分頁處理狀態，因此必須終止一些前景處理程序，才能讓使用者介面保持回應。
+
+</p></li>
+
+  <li><b>可見處理程序</b>
+    <p>這種處理程序是指沒有任何前景元件的處理程序，但仍會影響使用者在螢幕上看見的內容。
+針對下列任一情況，系統會將處理程序視為可見：
+</p>
+
+      <ul>
+        <li>其代管的 {@link android.app.Activity} 不在前景中，但使用者仍可看見 (已呼叫它的 {@link android.app.Activity#onPause onPause()} 方法)。
+例如，如果前景 Activity 啟動的對話方塊允許在它身後看見先前的 Activity，就會發生這種情況。
+
+</li>
+
+        <li>其代管的 {@link android.app.Service} 已繫結至可見 (或前景) Activity。
+</li>
+      </ul>
+
+      <p>可見處理程序相當重要而且不會遭到終止，除非系統為了讓所有前景處理程序維持執行而必須終止這類處理程序。
+ </p>
+    </li>
+
+  <li><b>服務處理程序</b>
+    <p>這種處理程序是指正在執行已使用 {@link
+android.content.Context#startService startService()} 方法啟動的服務的處理程序；此處理程序不屬於上述兩種較重要的類別。
+雖然服務處理程序是間接繫結至使用者所見內容，但通常會執行使用者重視的工作 (例如，在背景中播放音樂，或下載網路上的資料)，因此除非記憶體不足，無法讓所有前景與可見處理程序保持執行，否則系統會讓這類處理程序繼續執行。
+
+
+ </p>
+  </li>
+
+  <li><b>背景處理程序</b>
+    <p>這種處理程序會保留使用者目前看不見的 Activity (已呼叫 Activity 的 
+{@link android.app.Activity#onStop onStop()} 方法)。這些處理程序會間接影響使用者體驗，且系統能隨時將其終止，藉此回收記憶體以供前景、可見或服務處理程序使用。
+
+
+通常會有許多背景處理程序處於執行中，因此會將它們放在 LRU (最近最少使用) 清單中，以確保在最後才將包含使用者最近最常見 Activity 的處理程序終止。
+
+如果 Activity 正確實作其生命週期方法並儲存其目前狀態，終止其處理程序不會對使用者體驗造成任何可察覺的影響，原因是當使用者瀏覽回 Activity 時，該 Activity 會還原它的所有可見狀態。
+
+
+如要進一步瞭解如何儲存及還原狀態，請參閱 <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activity</a>。
+</p>
+  </li>
+
+  <li><b>空白處理程序</b>
+    <p>這種處理程序是指未保留任何使用中應用程式元件的處理程序。讓這類處理程序保持有效的唯一目的是將其用於快取，以改善元件下次執行時所需的啟動時間。
+
+系統通常會終止這些處理程序，以平衡處理程序快取與底層核心快取之間的整體系統資源。
+</p>
+  </li>
+</ol>
+
+
+  <p>Android 會根據在處理程序中目前處於使用中的元件重要性，將處理程序盡量排在最高層級。
+例如，如果處理程序代管一項服務和一個可見 Activity，此處理程序的會排為可見處理程序，而不是服務處理程序。
+</p>
+
+  <p>此外，還可能因為它有其他相依處理程序，而導致處理程序的排名提升：為另一個處理程序提供服務的處理程序，其排名絕不能低於為其提供服務的處理程序。
+
+例如，如果處理程序 A 的內容供應程式為處理程序 B 中的用戶端提供服務，或處理程序 A 中的服務繫結至處理程序 B 中的元件，則系統至少會將處理程序 A 視為和處理程序 B 一樣重要。
+
+</p>
+
+  <p>由於執行服務的處理程序排名會比包含背景 Activity 的處理程序排名高，因此初始化長時間執行操作的 Activity 可能適合啟動該操作的<a href="{@docRoot}guide/components/services.html">服務</a>，而不只是建立工作者執行緒 &mdash; 特別是該操作可能會比 Activity 持久。例如，將圖片上傳至網站 Activity 應該啟動要執行上傳的服務，如果使用者離開 Activity，上傳處理程序也能在背景中繼續進行。如果使用服務，不論 Activity 發生什麼情況，都可保證該操作的優先順序至少會是「服務處理程序」。
+
+
+
+
+
+廣播接收器應該採用服務，而不是只在執行緒中放置時間耗用操作，也是相同的理由。
+</p>
+
+
+
+
+<h2 id="Threads">執行緒</h2>
+
+<p>當應用程式啟動時，系統會為執行該應用程式建立一個稱為「主要」的執行緒。
+這個執行緒非常重要，原因是它負責將事件分配給適當的使用者介面小工具，包括繪製事件。
+您的應用程式與 Android UI 工具組中的元件 ({@link
+android.widget} 和 {@link android.view} 中的元件) 互動時，也需要使用這個執行緒。
+因此，主要執行緒有時也稱為 UI 執行緒。
+</p>
+
+<p>系統「不會」<em></em>為每個元件執行個體建立個別的執行緒。以相同處理程序執行的所有元件都是利用 UI 執行緒來具現化，而且都是由該執行緒分配系統呼叫的每個元件。
+
+因此，回應系統回呼的方法 (例如報告使用者動作的 {@link android.view.View#onKeyDown onKeyDown()} 或生命週期回呼方法) 一律會以該處理程序的 UI 執行緒執行。
+
+</p>
+
+<p>例如，當使用者輕觸畫面上的按鈕時，您應用程式的 UI 執行緒會將輕觸事件分配給小工具，接著設定其按下狀態並對事件佇列張貼失效要求。
+
+UI 執行緒會將要求從佇列中移除，然後通知小工具應重新繪製本身。
+</p>
+
+<p>當您的應用程式密集執行作業以回應使用者互動時，除非您適當實作應用程式，否則這種單一執行緒模型會降低效能。
+具體來說，假設一切都在 UI 執行緒中進行，如果執行像是網路存取或資料庫查詢的長時間操作，將會封鎖整個 UI。當執行緒遭到封鎖時，會無法分配任何事件 (包括繪製事件)。
+
+
+從使用者的觀點來看，應用程式似乎閒置不動。
+更糟的是，如果 UI 執行緒遭到封鎖長達數秒 (目前約為 5 秒)，就會向使用者顯示的「<a href="http://developer.android.com/guide/practices/responsiveness.html">應用程式沒有回應</a>」(ANR) 對話方塊。
+
+使用者接著會決定結束您的應用程式，並可能因感到不滿而將其解除安裝。
+</p>
+
+<p>此外，Andoid UI 工具組「並非」<em></em>安全執行緒，因此請勿透過工作者執行緒操縱 UI &mdash; 使用者介面的所有操縱作業都必須從 UI 執行緒來執行。
+
+基於上述原因，Android 的單一執行緒模型只有兩項簡單規則：</p>
+
+<ol>
+<li>不要封鎖 UI 執行緒
+<li>不要從 UI 執行緒以外的位置存取 Android UI 工具組
+</ol>
+
+<h3 id="WorkerThreads">工作者執行緒</h3>
+
+<p>因為上述的單一執行緒模型，所以不封鎖 UI 執行緒對於應用程式 UI 的回應能力至關重要。
+如果您有不會立即執行的操作，請務必以不同的執行緒 (「背景」或「工作者」執行緒) 執行這類操作。
+
+</p>
+
+<p>例如，以下是從個別執行緒下載圖片並顯示在 {@link android.widget.ImageView} 的部分點擊接聽器程式碼：
+</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>首先，由於這會建立新的執行緒來處理網路操作，所以看起來似乎可以正常運作。
+不過，它違反單一執行緒模型的第二項規則：「不要從 UI 執行緒以外的位置存取 Android UI 工具組」<em></em>&mdash; 這個範例修改工作者執行緒中的 {@link
+android.widget.ImageView}，而不是 UI 執行緒。
+這樣會產生未定義且預期外的行為，不但難以追蹤且耗費時間。
+</p>
+
+<p>為修正這個問題，Android 提供數種可從其他執行緒存取 UI 執行緒的方法。
+以下是可協助修正此問題的方法清單：</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>例如，您可以使用 {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)} 方法來修正上述程式碼：</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>現在這個實作才是安全執行緒：雖然從不同的執行緒完成網路操作，但卻是從 UI 執行緒操縱 {@link android.widget.ImageView}。
+</p>
+
+<p>不過，隨著操作複雜度日益增加，這種程式碼也會變得複雜且難以維護。
+如要利用工作者執行緒處理更複雜的互動，您可能要考慮在工作者執行緒中使用 {@link android.os.Handler}，以處理從 UI 執行緒傳送的訊息。
+
+最佳解決方案也許是擴充 {@link android.os.AsyncTask} 類別，將必須與 UI 互動的工作者執行緒工作執行簡化。
+</p>
+
+
+<h4 id="AsyncTask">使用 AsyncTask</h4>
+
+<p>{@link android.os.AsyncTask} 可讓您透過使用者介面執行非同步工作。
+它會以工作者執行緒執行封鎖操作，然後將結果發行在 UI 執行緒，完全不需要您自行處理執行緒和/或處理常式。
+</p>
+
+<p>使用方法是您必須要有子類別 {@link android.os.AsyncTask}，並實作以背景執行緒集區執行的 {@link
+android.os.AsyncTask#doInBackground doInBackground()} 回呼方法。
+如要更新您的 UI，請實作 {@link
+android.os.AsyncTask#onPostExecute onPostExecute()} 來傳送 {@link
+android.os.AsyncTask#doInBackground doInBackground()} 的結果，然後以 UI 執行緒執行，如此您才能安全地更新 UI。
+接著，您可以從 UI 執行緒呼叫 {@link android.os.AsyncTask#execute execute()} 來執行該工作。
+</p>
+
+<p>例如，您可以使用 {@link android.os.AsyncTask} 這種方法實作先前的範例：
+</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+    
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>現在 UI 很安全，而且程式碼變得更簡單，這是因為它將工作分成兩部分，一部分應在工作者執行緒上完成，而另一部分應在 UI 執行緒上完成。
+</p>
+
+<p>建議您參閱 {@link android.os.AsyncTask} 參考資料，以全面瞭解如何使用此類別；以下是其如何運作的快速總覽：
+</p>
+
+<ul>
+<li>您可以使用泛型來指定參數類型、進度值以及工作的最終值
+</li>
+<li>{@link android.os.AsyncTask#doInBackground doInBackground()} 方法會在工作者執行緒中自動執行
+</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}、{@link
+android.os.AsyncTask#onPostExecute onPostExecute()} 和 {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} 全都是透過 UI 執行緒呼叫。</li>
+<li>{@link android.os.AsyncTask#doInBackground doInBackground()} 傳回的值會傳送至
+{@link android.os.AsyncTask#onPostExecute onPostExecute()}</li>
+<li>您隨時都可用 {@link
+android.os.AsyncTask#doInBackground doInBackground()} 呼叫 {@link android.os.AsyncTask#publishProgress publishProgress()}，以便透過 UI 執行緒執行 {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()}。</li>
+<li>您可以從任何執行緒隨時取消工作</li>
+</ul>
+
+<p class="caution"><strong>注意：</strong>使用工作者執行緒可能會遇到的另一個問題是，由於<a href="{@docRoot}guide/topics/resources/runtime-changes.html">執行階段設定變更</a> (例如使用者變更螢幕方向時) 使您的 Activity 意外重新啟動，而可能會終止您的工作者站執行緒。
+
+請參閱 <a href="http://code.google.com/p/shelves/">Shelves</a> 範例應用程式的原始程式碼，以瞭解如何在遇到其中一種重新啟動情況時保留您的工作，以及如何在 Activity 遭到終止時適當取消該工作。
+
+</p>
+
+
+<h3 id="ThreadSafe">安全執行緒方法</h3>
+
+<p> 在某些情況下，您實作的方法可能是從多個執行緒呼叫，因此務必要撰寫成安全執行緒。
+ </p>
+
+<p>這種情況主要發生在可從遠端呼叫的方法，例如<a href="{@docRoot}guide/components/bound-services.html">已繫結服務</a>中的方法。當在源自執行 {@link android.os.IBinder IBinder} 的相同處理程序中實作 {@link android.os.IBinder} 方法上的呼叫時，該方法是以呼叫端的執行緒執行。
+
+
+
+不過，當呼叫源自另一個處理程序時，會從系統在相同處理程序中當成 {@link android.os.IBinder
+IBinder} (未以處理程序的 UI 執行緒執行) 維護的執行緒集區，以選擇的執行緒來執行該方法。例如，雖然服務的
+{@link android.app.Service#onBind onBind()} 方法可從服務處理程序的 UI 執行緒呼叫，但以 {@link android.app.Service#onBind
+onBind()} 傳回的物件實作的方法會從集區中的執行緒呼叫。
+
+由於服務能有多個用戶端，同時也能有多個集區執行緒採用相同的
+{@link android.os.IBinder IBinder} 方法。因此 {@link android.os.IBinder
+IBinder} 方法必須實作為安全執行緒。</p>
+
+<p> 同樣地，內容供應程式能接收源自其他處理程序的資料要求。
+雖然 {@link android.content.ContentResolver} 與 {@link android.content.ContentProvider}
+類別會隱藏如何管理處理程序間通訊的詳細資料，但回應這些要求的 {@link
+android.content.ContentProvider} 方法 &mdash; {@link
+android.content.ContentProvider#query query()}、{@link android.content.ContentProvider#insert
+insert()}、{@link android.content.ContentProvider#delete delete()}、{@link
+android.content.ContentProvider#update update()} 和 {@link android.content.ContentProvider#getType
+getType()} &mdash; 是在內容供應程式的處理程序中從執行緒集區呼叫，而不是該處理程序的 UI 執行緒。
+由於可能會同時有任意數目的執行緒呼叫這些方法，因此它們也要實作為安全執行緒。
+ </p>
+
+
+<h2 id="IPC">處理程序間通訊</h2>
+
+<p>Android 提供一項使用遠端程序呼叫 (RPC) 進行處理程序間通訊 (IPC) 的機制，RPC 是指 (以另一個處理程序) 從遠端執行由 Activity 或其他應用程式元件呼叫的方法，再加上要傳回給呼叫端的任何結果。
+
+
+這需要將方法呼叫與其資料分解成作業系統能夠瞭解的程度，將它從本機處理程序與位址空間傳輸到遠端處理程序與位址空間，然後再重新組合和重新實作呼叫。
+
+接著，再以相反的方向傳輸傳回值。
+Android 提供進行這些 IPC 交易的所有程式碼，讓您可以專心定義及實作 RPC 程式設計介面。
+ </p>
+
+<p>如要執行 IPC，您的應用程式必須使用 {@link
+android.content.Context#bindService bindService()} 來繫結至服務。如需詳細資訊，請參閱<a href="{@docRoot}guide/components/services.html">服務</a>開發人員指南。</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->

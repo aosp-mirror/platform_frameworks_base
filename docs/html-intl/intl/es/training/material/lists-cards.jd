@@ -1,0 +1,266 @@
+page.title=Crear listas y tarjetas
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lección te enseña a realizar lo siguiente:</h2>
+<ol>
+  <li><a href="#RecyclerView">Crear listas</a></li>
+  <li><a href="#CardView">Crear tarjetas</a></li>
+  <li><a href="#Dependencies">Agregar dependencias</a></li>
+</ol>
+<h2>También deberías leer</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificación de Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design en Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Para crear listas completas y tarjetas con estilos de Material Design en tus aplicaciones, puedes usar los widgets
+{@link android.support.v7.widget.RecyclerView} y {@link android.support.v7.widget.CardView}.
+</p>
+
+
+<h2 id="RecyclerView">Crear listas</h2>
+
+<p>El widget {@link android.support.v7.widget.RecyclerView} es una versión más
+flexible y avanzada de {@link android.widget.ListView}. Este widget es un contenedor para mostrar grandes conjuntos de
+datos que se pueden desplazar de manera muy eficiente al mantener una cantidad limitada de vistas. Usa el widget
+{@link android.support.v7.widget.RecyclerView} cuando tengas conjuntos de datos cuyos elementos
+cambien en tiempo de ejecución sobre la base de la acción del usuario o los eventos de la red.</p>
+
+<p>La clase {@link android.support.v7.widget.RecyclerView} simplifica la pantalla y la manipulación de grandes conjuntos de
+datos al proporcionar lo siguiente:</p>
+
+<ul>
+  <li>Administradores de diseño para el posicionamiento de elementos</li>
+  <li>Animaciones predeterminadas para las operaciones comunes con elementos, como quitar o agregar elementos</li>
+</ul>
+
+<p>También tienes la flexibilidad para definir administradores de diseño personalizados y animaciones para los widgets {@link
+android.support.v7.widget.RecyclerView}.</p>
+
+<img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
+<p class="img-caption">
+<strong>Figura 1</strong>. El widget <code>RecyclerView</code>.
+</p>
+
+<p>Para usar el widget {@link android.support.v7.widget.RecyclerView}, tienes que especificar un
+adaptador y un administrador de diseño. Para crear un adaptador, extiende la clase {@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter}. Los detalles
+de la implementación dependen de las especificaciones de tu conjunto de datos y los tipos de vistas. Para más
+información, consulta los <a href="#RVExamples">ejemplos</a> que figuran a continuación.</p>
+
+<div style="float:right">
+<img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
+<p class="img-caption" style="margin-left:8px">
+<strong>Figura 2</strong>. Listas con <code>RecyclerView</code>.
+</p>
+</div>
+
+<p>Un <strong>administrador de diseño</strong> posiciona las vistas de artículos dentro de un {@link
+android.support.v7.widget.RecyclerView} y determina cuándo volver a usar las vistas de elementos que ya
+no están visibles para el usuario. Para reutilizar (o <em>reciclar</em>) una vista, un administrador de diseño puede solicitarle al
+adaptador que reemplace el contenido de la vista con un elemento diferente del conjunto de datos. De esta manera,
+cuando se reciclan las vistas se mejora el rendimiento al evitar la creación de vistas innecesarias o
+realizar búsquedas costosas de {@link android.app.Activity#findViewById findViewById()}.</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} te proporciona estos administradores de diseño incorporados:</p>
+
+<ul>
+<li>{@link android.support.v7.widget.LinearLayoutManager} muestra elementos en una lista de desplazamiento horizontal o
+vertical.</li>
+<li>{@link android.support.v7.widget.GridLayoutManager} muestra elementos en una cuadrícula.</li>
+<li>{@link android.support.v7.widget.StaggeredGridLayoutManager} muestra elementos en una cuadrícula escalonada.</li>
+</ul>
+
+<p>Para crear un administrador de diseño personalizado, extiende la clase {@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}.</p>
+
+<h3>Animaciones</h3>
+
+<p>Las animaciones para agregar o eliminar elementos están permitidas en forma predeterminada en {@link
+android.support.v7.widget.RecyclerView}. Para personalizar estas animaciones, extiende la clase
+{@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} y usa
+el método {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}.
+</p>
+
+<h3 id="RVExamples">Ejemplos</h3>
+
+<p>El siguiente ejemplo de códigos demuestra cómo agregar el widget
+{@link android.support.v7.widget.RecyclerView} a un diseño:</p>
+
+<pre>
+&lt;!-- A RecyclerView with some commonly used attributes -->
+&lt;android.support.v7.widget.RecyclerView
+    android:id="@+id/my_recycler_view"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</pre>
+
+<p>Una vez que hayas agregado un widget {@link android.support.v7.widget.RecyclerView} a tu diseño,
+obtén un identificador para el objeto, conéctalo a un administrador de diseño y adjunta un adaptador para los datos
+que se van a mostrar:</p>
+
+<pre>
+public class MyActivity extends Activity {
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+    ...
+}
+</pre>
+
+<p>El adaptador proporciona acceso a los elementos en tu conjunto de datos, crea vistas para los elementos y
+reemplaza el contenido de algunas de las vistas con estos elementos de datos nuevos cuando el elemento original ya no está
+visible. El siguiente ejemplo de código muestra una implementación simple para un conjunto de datos que consta
+de una matriz de cadenas mostradas mediante el uso de widgets {@link android.widget.TextView}:</p>
+
+<pre>
+public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
+    private String[] mDataset;
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+        }
+    }
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(String[] myDataset) {
+        mDataset = myDataset;
+    }
+
+    // Create new views (invoked by the layout manager)
+    &#64;Override
+    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext())
+                               .inflate(R.layout.my_text_view, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ...
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    &#64;Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.mTextView.setText(mDataset[position]);
+
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<div style="float:right;margin-top:15px;margin-left:30px">
+<img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
+<p class="img-caption" style="margin-left:12px">
+<strong>Figura 3</strong>. Ejemplos de tarjetas.
+</p>
+</div>
+
+<h2 id="CardView">Crear tarjetas</h2>
+
+<p>{@link android.support.v7.widget.CardView} extiende la clase {@link android.widget.FrameLayout}
+y te permite mostrar información dentro de tarjetas que tienen una apariencia uniforme en la plataforma. Los widgets {@link
+android.support.v7.widget.CardView} pueden tener sombras y esquinas redondeadas.</p>
+
+<p>Para crear una tarjeta con una sombra, usa el atributo <code>card_view:cardElevation</code>.
+{@link android.support.v7.widget.CardView} usa elevación real y sombras dinámicas en Android 5.0
+(API nivel 21) y superior, y regresa a una implementación de sombras programáticas en versiones anteriores.
+Para más información, consulta <a href="{@docRoot}training/material/compatibility.html">Mantener
+la compatibilidad</a>.</p>
+
+<p>Usa estas propiedades para personalizar la apariencia del widget
+{@link android.support.v7.widget.CardView}:</p>
+
+<ul>
+  <li>Para establecer el radio de la esquina en tus diseños, usa el atributo <code>card_view:cardCornerRadius</code>.
+</li>
+  <li>Para establecer el radio en tu código, usa el método <code>CardView.setRadius</code>.</li>
+  <li>Para establecer el color de fondo de una tarjeta, usa el atributo <code>card_view:cardBackgroundColor</code>.
+</li>
+</ul>
+
+<p>El siguiente ejemplo de código muestra cómo incluir un widget {@link android.support.v7.widget.CardView}
+en tu diseño:</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    ... >
+    &lt;!-- A CardView that contains a TextView -->
+    &lt;android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        card_view:cardCornerRadius="4dp">
+
+        &lt;TextView
+            android:id="@+id/info_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    &lt;/android.support.v7.widget.CardView>
+&lt;/LinearLayout>
+</pre>
+
+<p>Para más información, consulta la referencia de la API para {@link android.support.v7.widget.CardView}.</p>
+
+
+<h2 id="Dependencies">Agregar dependencias</h2>
+
+<p>Los widgets {@link android.support.v7.widget.RecyclerView} y {@link android.support.v7.widget.CardView}
+son parte de las <a href="{@docRoot}tools/support-library/features.html#v7">Bibliotecas de
+soporte v7</a>. Para usar estos widgets en tu proyecto, agrega estas
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Dependencias de Gradle</a> al módulo
+de tu aplicación:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>

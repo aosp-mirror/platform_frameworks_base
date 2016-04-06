@@ -12,7 +12,7 @@ trainingnavtop=true
   <ol>
     <li><a href="#manifest">Declare Your TV Input Service in the Manifest</a></li>
     <li><a href="#tvinput">Define Your TV Input Service</a></li>
-    <li><a href="#setup">Define Setup and Settings Activities</a></li>
+    <li><a href="#setup">Define Your Setup Activity</a></li>
   </ol>
   <h2>You should also read</h2>
   <ul>
@@ -82,18 +82,14 @@ meta data are described in the following example.</p>
 
 <p>Define the service meta data in separate XML file, as shown in the following example. The service
 meta data must include a setup interface that describes the TV input's initial configuration and
-channel scan. Also, the service meta data may (optionally) describe a settings activity for users to
-modify the TV input's behavior. The service meta data file is located in the XML resources directory
+channel scan. The service meta data file is located in the XML resources directory
 for your application and must match the name of the resource in the manifest. Using the example
 manifest entries above, you would create an XML file in the location
 <code>res/xml/sample_tv_input.xml</code>, with the following contents:</p>
 
 <pre>
 &lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
-  &lt;!-- Required: activity for setting up the input --&gt;
-  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity"
-  &lt;!-- Optional: activity for controlling the settings --&gt;
-  android:settingsActivity="com.example.sampletvinput.SampleTvInputSettingsActivity" /&gt;
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
 </pre>
 
 <h2 id="tvinput">Define Your TV Input Service</h2>
@@ -157,21 +153,16 @@ for more information about working with {@link android.view.Surface} to render v
 <p>The {@link android.media.tv.TvInputService.Session} handles the
 {@link android.media.tv.TvInputService.Session#onTune(android.net.Uri) onTune()}
 event when the user selects a channel, and notifies the system TV app for changes in the content and
-content meta data. These <code>notify()</code>code> methods are described in
+content meta data. These <code>notify()</code> methods are described in
 <a href="{@docRoot}training/tv/tif/ui.html#control">
-Control Content</a> and <a href="training/tv/tif/ui.html#track">Handle Track Selection</a> further
-in this training.</p>
+Control Content</a> and <a href="{@docRoot}training/tv/tif/ui.html#track">Handle Track Selection</a>
+further in this training.</p>
 
-<h2 id="setup">Define Setup and Settings Activities</h2>
+<h2 id="setup">Define Your Setup Activity</h2>
 
-<p>The system TV app works with the setup and settings activities you define for your TV input. The
+<p>The system TV app works with the setup activity you define for your TV input. The
 setup activity is required and must provide at least one channel record for the system database. The
 system TV app will invoke the setup activity when it cannot find a channel for the TV input.
 <p>The setup activity describes to the system TV app the channels made available through the TV
 input, as demonstrated in the next lesson, <a href="{@docRoot}training/tv/tif/channel.html">Creating
 and Updating Channel Data</a>.</p>
-
-<p>The settings activity is optional. You can define a settings activity to turn on parental
-controls, enable closed captions, set the display attributes, and so forth.</p>
-
-

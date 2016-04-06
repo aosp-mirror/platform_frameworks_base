@@ -1,0 +1,75 @@
+page.title=Glu improves player lifetime value with Google Play games services sign-in
+page.metaDescription=With the release of their game Deer Hunter 2014, leading developer and publisher Glu Mobile found that Google Play games services helped improve the user experience leading to increased player happiness.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/glu-dh.jpg
+timestamp=1456787470
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/glu-dh-icon.jpg" height="113"
+      srcset="{@docRoot}images/distribute/stories/glu-dh-icon.jpg 1x,
+      {@docRoot}images/distribute/stories/glu-dh-icon_2x.jpg 2x" />
+</div>
+
+<p>
+  With the release of their game <a href=
+  "https://play.google.com/store/apps/details?id=com.glu.deerhunt2" class=
+  "external-link">Deer Hunter 2014</a>, leading developer and publisher Glu
+  Mobile found that Google Play games services helped improve the user
+  experience leading to increased player happiness. These happy players then
+  tended to play longer and have a higher <em>lifetime value (LTV)</em>.
+</p>
+
+
+<h3>What they did</h3>
+
+<p>
+  Glu implemented Google Play games services sign-in as part of Deer Hunter
+  2014. Users were given the option to auto sign-in and, for those that didn’t
+  take that option, sign-in was displayed prominently on the game’s home
+  screen.
+</p>
+
+<p>
+  For users who were signed in, Glu offered leaderboards and achievements,
+  found through easily recognizable and accessible icons on the game’s home
+  screen. Achievements were customized to fit the flow of the game, with the
+  degree of progress displayed to keep players motivated. Multiple leaderboards
+  were provided to engage players through different goals; with friends-only
+  leaderboards, in addition to the public ones, to keep the experience social.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:380px">
+  <img src="{@docRoot}images/distribute/stories/glu-dh-screenshot.png"
+    width="380"
+    srcset="{@docRoot}images/distribute/stories/glu-dh-screenshot.png 1x,
+   {@docRoot}images/distribute/stories/glu-dh-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Games services features shown with easily recognizable icons after
+    user signs in
+  </p>
+</div>
+
+<p>
+  Overall, Glu found that Google Play games services helped identify
+  high-quality players, improve segmentation and user targeting.
+</p>
+
+<p>
+  The results from Deer Hunter 2014 showed that sessions per user and lifetime
+  value were positively correlated with Google Play games sign-ins: signed-in
+  users reported engagement at 62 percent higher and average LTV 211 percent
+  higher than users who didn’t sign-in.
+</p>
+
+<p>
+  This success also supported the guidelines for Google Play games services
+  integrations: make them highly visible, customized, achievable, and
+  incentivized.
+</p>

@@ -1,0 +1,96 @@
+page.title=&lt;uses-permission-sdk-23&gt;
+page.tags="uses-permission-sdk-23","permissions","uses-permission-sdk23"
+parent.title=The AndroidManifest.xml File
+parent.link=manifest-intro.html
+@jd:body
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-permission-sdk-23 android:<a href="#nm">name</a>="<i>string</i>"
+        android:<a href="#maxSdk">maxSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
+
+<dt>Contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>
+  Description:
+</dt>
+
+<dd itemprop="description">
+  Specifies that an app wants a particular permission, but <em>only</em> if
+  the app is running on a device with <a
+  href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
+  level</a> 23 or higher. If the device
+  is running API level 22 or lower, the app does not have the specified
+  permission.
+
+<p>
+  This element is useful when you update an app to include a new
+  feature that requires an additional permission. If a user updates an app on a
+  device that is running API level 22 or lower, the system prompts the user
+  at install time to grant all new permissions that are declared in that
+  update. If a new feature is minor enough, you may prefer to disable
+  the feature altogether on those devices, so the user does not have to grant
+  additional permissions to update the app. By using the
+  <code>&lt;uses-permission-sdk-23&gt;</code> element instead of <a href=
+  "uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a>,
+  you can request the permission <em>only</em> if the app is running on
+  platforms that support the <a
+  href="{@docRoot}training/permissions/requesting.html">runtime permissions</a>
+  model, in which the user
+  grants permissions to the app while it is running.
+</p>
+
+  <p>
+    For more information on permissions, see the <a href=
+    "{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a>
+    section in the introduction and the separate <a href=
+    "{@docRoot}guide/topics/security/permissions.html">System Permissions</a>
+    API guide. A list of permissions defined by the base platform is available
+    at {@link android.Manifest.permission android.Manifest.permission}.
+  </p>
+</dd>
+
+<dt>Attributes:</dt>
+
+  <dd>
+    <dl class="attr">
+
+      <dt><a name="nm"></a>{@code android:name}</dt>
+
+      <dd>
+        The name of the permission. This permission can be defined by the
+        app with the <code><a href=
+        "{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+        element, it can be a permission defined by another app, or it can be one
+        of the standard system permissions, such as
+        {@link android.Manifest.permission#CAMERA "android.permission.CAMERA"}
+        or {@link android.Manifest.permission#READ_CONTACTS
+        "android.permission.READ_CONTACTS"}.
+      </dd>
+
+      <dt><a name="maxSdk"></a>{@code android:maxSdkVersion}</dt>
+      <dd>
+        The highest API level at which this permission should be granted to your
+        app. If the app is installed on a device with a later API level, the app
+        is not granted the permission and cannot use any related functionality.
+      </dd>
+    </dl>
+  </dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 23</dd>
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code></li>
+  <li><a href=
+    "uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a></li>
+  <li><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code></li>
+</ul>
+</dd>
+
+</dl>

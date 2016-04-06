@@ -1,0 +1,71 @@
+page.title=UI の概要
+@jd:body
+
+
+<p>Android アプリのすべてのユーザー インターフェース エレメントは、{@link android.view.View} と {@link android.view.ViewGroup} オブジェクトを使ってビルドされています。
+{@link android.view.View} は、ユーザーが相互操作できる、画面上で何かを描画するオブジェクトです。
+{@link android.view.ViewGroup} は、インターフェースのレイアウトを定義するために、その他の {@link android.view.View}（と {@link android.view.ViewGroup}）オブジェクトを保持するオブジェクトです。
+
+</p>
+
+<p>Android では、共通の入力コントロール（ボタンやテキスト フィールドなど）とさまざまなレイアウトモデル（線形レイアウトや相対レイアウトなど）を提供する {@link android.view.View} と {@link android.view.ViewGroup} サブクラスの両方が提供されています。
+
+</p>
+
+
+<h2 id="Layout">ユーザー インターフェースのレイアウト</h2>
+
+<p>アプリの各コンポーネントのユーザー インターフェースは、図 1 のように、{@link
+android.view.View} と {@link android.view.ViewGroup} オブジェクトの階層を使って定義されます。各ビューグループは、子ビューをまとめる非表示のコンテナであり、子ビューは UI の一部を描画する入力コントロールまたはその他のウィジェットです。この階層ツリーは、必要に応じて単純にまたは複雑にすることができますが、パフォーマンスの点では単純な階層ツリーが最適です。
+
+
+
+</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong> UI レイアウトを定義するビュー階層の図。
+</p>
+
+<p>レイアウトを宣言するには、コードで {@link android.view.View} オブジェクトのインスタンスを作成してツリーのビルドを始めることができますが、レイアウトを定義する最も簡単で効率的な方法は XML ファイルを使用することです。XML では HTML のように、人が見える構造でレイアウトが提供されます。
+
+</p>
+
+<p>ビューの XML 要素名は、それが表す Android クラスによって決まります。<code>&lt;TextView&gt;</code> 要素は UI で {@link android.widget.TextView} ウィジェットを、<code>&lt;LinearLayout&gt;</code> 要素は {@link android.widget.LinearLayout} ビューグループを作成します。
+
+
+ </p>
+
+<p>たとえば、テキストビューとボタンを含む単純な縦レイアウトは次のようになります。</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>アプリでレイアウト リソースを読み込むとき、Android はレイアウトの各ノードを初期化して、他の動作の定義、オブジェクト状態の照会、レイアウトの変更をするのに使用できるランタイム オブジェクトにします。
+
+</p>
+
+<p>UI レイアウト作成のガイドについては、<a href="declaring-layout.html">XML レイアウト</a>をご覧ください。
+
+
+  
+<h2 id="UIComponents">ユーザー インターフェース コンポーネント</h2>
+
+<p>{@link android.view.View} と {@link android.view.ViewGroup} オブジェクトを使用してすべての UI をビルドする必要はありません。
+Android では、コンテンツの定義に必要な標準的な UI レイアウトを提供する複数のアプリ コンポーネントが提供されます。
+これらの各 UI コンポーネントには、それぞれのドキュメントで説明されている固有の API（<a href="{@docRoot}guide/topics/ui/actionbar.html">アクションバー</a>、<a href="{@docRoot}guide/topics/ui/dialogs.html">ダイアログ</a>、<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">状態通知</a>など）があります。
+</p>
+
+

@@ -1,0 +1,90 @@
+page.title=Điều khiển Nhập liệu
+parent.title=Giao diện Người dùng
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>Điều khiển nhập liệu là những thành phần tương tác trong giao diện người dùng của ứng dụng của bạn. Android cung cấp
+nhiều kiểu điều khiển bạn có thể sử dụng trong UI của mình, chẳng hạn như nút, trường văn bản, thanh tìm kiếm,
+hộp kiểm, nút thu phóng, nút bật tắt, và nhiều kiểu khác.</p>
+
+<p>Thêm một điều khiển nhập liệu vào UI của bạn cũng đơn giản như thêm một phần tử XML vào <a href="{@docRoot}guide/topics/ui/declaring-layout.html">bố trí XML</a> của bạn. Ví dụ, đây là một bố trí
+với một trường văn bản và nút:</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Mỗi điều khiển nhập liệu hỗ trợ một tập hợp sự kiện nhập liệu cụ thể để bạn có thể xử lý các sự kiện chẳng hạn như khi
+người dùng nhập văn bản hoặc chạm vào một nút.</p>
+
+
+<h2 id="CommonControls">Điều khiển Thông dụng</h2>
+<p>Sau đây là danh sách những điều khiển thông dụng mà bạn có thể sử dụng trong ứng dụng của mình. Theo dõi các liên kết để tìm
+hiểu thêm về việc sử dụng từng điều khiển.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Android cung cấp nhiều điều khiển hơn một chút so với liệt kê ở
+đây. Duyệt gói {@link android.widget} để khám phá thêm. Nếu ứng dụng của bạn yêu cầu một
+kiểu điều khiển nhập liệu cụ thể, bạn có thể xây dựng <a href="{@docRoot}guide/topics/ui/custom-components.html">các thành phần tùy chỉnh</a> của chính mình.</p>
+
+<table>
+    <tr>
+        <th scope="col">Kiểu Điều khiển</th>
+        <th scope="col">Mô tả</th>
+	<th scope="col">Lớp Liên quan</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">Nút</a></td>
+        <td>Nút nhấn có thể được nhấn, hoặc nhấp vào, bởi người dùng để thực hiện một hành động.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">Trường văn bản</a></td>
+        <td>Trường văn bản có thể chỉnh sửa. Bạn có thể sử dụng widget <code>AutoCompleteTextView</code> để tạo một widget mục nhập văn bản nhằm cung cấp các gợi ý tự động hoàn thành</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">Hộp kiểm</a></td>
+        <td>Một công tắc bật/tắt mà có thể được chuyển đổi bởi người dùng. Bạn nên sử dụng các hộp kiểm khi trình bày cho người dùng một nhóm các tùy chọn có thể chọn mà không loại trừ lẫn nhau.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">Nút chọn một</a></td>
+        <td>Tương tự như hộp kiểm, chỉ khác ở chỗ chỉ có thể chọn một tùy chọn trong nhóm.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">Nút bật tắt</a></td>
+        <td>Một nút bật/tắt có đèn chỉ báo.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">Quay tròn</a></td>
+        <td>Một danh sách thả xuống cho phép người dùng chọn một giá trị từ một tập hợp.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">Bộ chọn</a></td>
+        <td>Một hộp thoại cho người dùng chọn một giá trị đơn lẻ cho một tập hợp bằng cách sử dụng các nút lên/xuống hoặc thông qua cử chỉ trượt nhanh. Sử dụng một widget <code>DatePicker</code> để nhập giá trị cho ngày (tháng, ngày, năm) hoặc một widget <code>TimePicker</code> để nhập giá trị cho thời gian (giờ, phút, Sáng/Chiều tối) mà sẽ được định dạng tự động theo bản địa của người dùng.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>

@@ -1,7 +1,7 @@
-page.title=머티어리얼 디자인
+page.title=Android용 머티리얼 디자인
 page.tags=Material,design
 page.type=design
-page.image=design/material/images/MaterialLight.png
+page.image=images/cards/design-material-for-android_2x.jpg
 
 @jd:body
 
@@ -9,7 +9,7 @@ page.image=design/material/images/MaterialLight.png
 <a class="notice-developers right" href="{@docRoot}training/material/index.html">
   <div>
     <h3>개발자 문서</h3>
-    <p>머티어리얼 디자인으로 앱 생성</p>
+    <p>머티리얼 디자인으로 앱 생성</p>
   </div>
 </a>
 
@@ -17,7 +17,7 @@ page.image=design/material/images/MaterialLight.png
 <a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
 <div>
     <h3>비디오</h3>
-    <p>머티어리얼 디자인 소개</p>
+    <p>머티리얼 디자인 소개</p>
 </div>
 </a>
 
@@ -25,7 +25,7 @@ page.image=design/material/images/MaterialLight.png
 <a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
 <div>
     <h3>비디오</h3>
-    <p>종이와 잉크: 중요한 머티어리얼</p>
+    <p>종이와 잉크: 중요한 머티리얼</p>
 </div>
 </a>
 
@@ -33,19 +33,19 @@ page.image=design/material/images/MaterialLight.png
 <a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
 <div>
     <h3>비디오</h3>
-    <p>Google I/O 앱 내 머티어리얼 디자인</p>
+    <p>Google I/O 앱 내 머티리얼 디자인</p>
 </div>
 </a>
 
 
 
-<p itemprop="description">머티어리얼 디자인은 플랫폼 및 기기 전반의 표현 방식, 모션 및
+<p itemprop="description">머티리얼 디자인은 플랫폼 및 기기 전반의 표현 방식, 모션 및
 상호 작용 디자인에 대한 종합적인 지침입니다. Android에는 이제
-머티어리얼 디자인 앱에 대한 지원이 포함되었습니다. Android 앱에서 머티어리얼 디자인을 사용하려면 <a href="http://www.google.com/design/spec">머티어리얼 디자인 사양</a>에
+머티리얼 디자인 앱에 대한 지원이 포함되었습니다. Android 앱에서 머티리얼 디자인을 사용하려면 <a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a>에
 규정되어 있는 지침을 따르세요. 또한 Android 5.0(API 레벨 21) 이상에서 제공하는
 새 구성 요소 및 기능을 사용하세요.</p>
 
-<p>Android는 머티어리얼 디자인 앱을 구축하는 데 사용할 수 있는 다음 요소를 제공합니다.</p>
+<p>Android는 머티리얼 디자인 앱을 구축하는 데 사용할 수 있는 다음 요소를 제공합니다.</p>
 
 <ul>
   <li>새로운 테마</li>
@@ -53,13 +53,13 @@ page.image=design/material/images/MaterialLight.png
   <li>사용자 지정 그림자 및 애니메이션을 위한 새로운 API</li>
 </ul>
 
-<p>Android에서 머티어리얼 디자인을 구현하는 방법에 대한 자세한 내용은
-<a href="{@docRoot}training/material/index.html">머티어리얼 디자인으로 앱 생성</a>을 참조하세요.</p>
+<p>Android에서 머티리얼 디자인을 구현하는 방법에 대한 자세한 내용은
+<a href="{@docRoot}training/material/index.html">머티리얼 디자인으로 앱 생성</a>을 참조하세요.</p>
 
 
-<h3>머티어리얼 테마</h3>
+<h3>머티리얼 테마</h3>
 
-<p>머티어리얼 테마는 앱에 사용할 수 있는 새로운 스타일, 색상표를
+<p>머티리얼 테마는 앱에 사용할 수 있는 새로운 스타일, 색상표를
 설정할 수 있는 시스템 위젯, 그리고 터치 피드백 및 액티비티 전환을 위한 기본 애니메이션을 제공합니다.</p>
 
 <!-- two columns -->
@@ -67,25 +67,25 @@ page.image=design/material/images/MaterialLight.png
 <div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
   <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
   <div style="width:140px;margin:0 auto">
-  <p style="margin-top:8px">어두운 머티어리얼 테마</p>
+  <p style="margin-top:8px">어두운 머티리얼 테마</p>
   </div>
 </div>
 <div style="float:left;width:250px;margin-right:0px;">
   <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
   <div style="width:140px;margin:0 auto">
-  <p style="margin-top:8px">밝은 머티어리얼 테마</p>
+  <p style="margin-top:8px">밝은 머티리얼 테마</p>
   </div>
 </div>
 <br style="clear:left"/>
 </div>
 
-<p>자세한 내용은 <a href="{@docRoot}training/material/theme.html">머티어리얼
+<p>자세한 내용은 <a href="{@docRoot}training/material/theme.html">머티리얼
 테마 사용</a>을 참조하세요.</p>
 
 
 <h3>목록 및 카드</h3>
 
-<p>Android는 머티어리얼 디자인 스타일
+<p>Android는 머티리얼 디자인 스타일
 및 애니메이션으로 카드 및 목록을 표시하는 데 사용할 수 있는 두 개의 새로운 위젯을 제공합니다.</p>
 
 <!-- two columns -->
@@ -126,7 +126,7 @@ page.image=design/material/images/MaterialLight.png
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-    <em>영화를 재생하려면 기기 화면을 클릭합니다.</em>
+    <em>영화를 재생하려면 기기 화면을 클릭하세요.</em>
   </div>
 </div>
 
@@ -171,7 +171,7 @@ page.image=design/material/images/MaterialLight.png
 
 <h3>드로어블</h3>
 
-<p>드로어블에 대한 다음과 같은 새 기능을 통해 머티어리얼 디자인 앱을 쉽게 구현할 수 있습니다.</p>
+<p>드로어블에 대한 다음과 같은 새 기능을 통해 머티리얼 디자인 앱을 쉽게 구현할 수 있습니다.</p>
 
 <ul>
 <li><strong>벡터 드로어블</strong>은 단색 인앱 아이콘에
@@ -182,5 +182,5 @@ page.image=design/material/images/MaterialLight.png
 비트맵 이미지에서 주요 색상을 자동으로 추출할 수 있게 해줍니다.</li>
 </ul>
 
-<p>자세한 내용은 <a href="{@docRoot}training/material/drawables.html">Drawable
+<p>자세한 내용은 <a href="{@docRoot}training/material/drawables.html">드로어블
 사용</a>을 참조하세요.</p>

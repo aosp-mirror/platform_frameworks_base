@@ -13,7 +13,6 @@ page.title=Build System Overview
    <li><a href="{@docRoot}sdk/installing/studio.html">
    Getting Started with Android Studio</a></li>
    <li><a href="{@docRoot}tools/studio/index.html">Android Studio Basics</a></li>
-   <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a></li>
 </div>
 </div>
 
@@ -85,7 +84,7 @@ directory.</p>
     usage when the application is -running on a device.</li>
   </ul>
 
-<p class="note"><b>Note:</b> Apps are limited to a 64K method reference limit. If your app reaches
+<p class="note"><b>Note:</b> Apps are limited to a 65K method reference limit. If your app reaches
 this limit, the build process outputs the following error message:
 
 <pre>Unable to execute dex: method ID not in [0, 0xffff]: 65536.</pre>

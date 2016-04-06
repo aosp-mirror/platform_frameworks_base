@@ -1,0 +1,5 @@
+The source file for pinning_vs_locktaskmode.png is a
+Google Doc owned by Matt Werner, mattwerner@google.com.
+You can access the diagram in this doc:
+
+https://docs.google.com/document/d/1boC0uWSPxEDNGt6iCC6N3QxrvP1siwoZLXdD379Gmzs/edit

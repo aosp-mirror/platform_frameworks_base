@@ -8,6 +8,7 @@ parent.link=available-resources.html
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html">2D Graphics</a></li>
+      <li><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></li>
     </ol>
   </div>
 </div>
@@ -607,7 +608,7 @@ fit the size of the container, due to resizing caused by the offset images.</p>
 that uses a several different images to represent the same graphic, depending on the state of
 the object. For example, a {@link
 android.widget.Button} widget can exist in one of several different states (pressed, focused,
-or niether) and, using a state list drawable, you can provide a different background image for each
+or neither) and, using a state list drawable, you can provide a different background image for each
 state.</p>
 
 <p>You can describe the state list in an XML file. Each graphic is represented by an {@code

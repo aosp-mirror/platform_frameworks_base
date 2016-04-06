@@ -1,0 +1,80 @@
+page.title=Saved games help bring players back to Leo’s Fortune
+page.metaDescription=1337 & Senri implemented Google Play games services saved games in their game Leo’s Fortune.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/leos-fortune.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/leos-fortune-icon.png"
+  height="113" />
+</div>
+
+<p>
+  1337 & Senri, a software development firm based in Gothenburg, Sweden, have
+  collaborated on a number of games, including
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.leosfortune">
+  Leo’s Fortune</a> and
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.senri.da">Devil's
+  Attorney</a>.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Senri implemented Google Play games services saved games in Leo’s Fortune. Each saved game includes a screenshot showing the date and time of the last play session, as well as the current chapter and total play time. In addition progress information is displayed clearly in Play Games destination app’s home screen.
+</p>
+
+<p>
+  In addition, they also implemented one Leaderboard per chapter, which fits
+  well with the flow and objective of the game.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:304px">
+  <img
+   src="{@docRoot}images/distribute/stories/leos-fortune-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/leos-fortune-screenshot.png 1x
+  {@docRoot}images/distribute/stories/leos-fortune-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Players can view and restart games
+  </p>
+</div>
+
+<p>
+  Adoption of cloud saved games, achievements, and leaderboards was very high
+  among players of Leo’s Fortune.
+</p>
+
+<p>
+  They found that Google Play games services users are 22 percent more likely to
+  come back after 1 day and 17 percent more likely after 2 days.
+</p>
+
+<p>
+  See examples of how 1337 & Senri integrated Google Play games services saved
+  games, achievements, and leaderboards into the
+  <a class="external-link"
+  href="{@docRoot}shareables/stories/Senri_LeosFortune_gpgs.pdf">
+  UI of Leo's Fortune</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to add
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/savedgames">
+  saved games</a> to your games and discover more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase player
+  engagement and revenues.
+</p>

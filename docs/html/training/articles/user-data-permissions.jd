@@ -1,0 +1,381 @@
+page.title=Best Practices for App Permissions
+page.metaDescription=How to manage permissions to give users context and control.
+page.tags=permissions, user data
+meta.tags="permissions", "user data"
+page.image=images/cards/card-user-permissions_2x.png
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#tenets_of_working_with_android_permissions">Tenets</a></li>
+      <li><a href="#version_specific_details_permissions_in_m">Permissions in Android
+      6.0+</h2></a></li>
+      <li><a href="#avoid_requesting_unnecessary_permissions">Avoid Requesting
+Unnecessary Permissions</h2></a>
+      <ol>
+        <li><a href="#a_camera_contact_access_with_real-time_user_requests">Camera/Contact
+        access with realtime user requests</a></li>
+        <li><a href="#b_running_in_the_background_after_losing_audio_focus">Running in
+the background after losing audio focus</a></li>
+        <li><a href="#c_determine_the_device_your_instance_is_running_on">Determine the
+device your instance is running on</a></li>
+        <li><a href="#d_create_a_unique_identifier_for_advertising_or_user_analytics">
+Create a unique identifier for advertising or user analytics</a></li>
+      </ol>
+      </li>
+      <li><a href="#know_the_libraries_you're_working_with">Know the Libraries You're
+Working With</a></li>
+      <li><a href="#be_transparent">Be Transparent</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/security/permissions.html">System Permissions</a></li>
+      <li><a href="{@docRoot}training/permissions/index.html">Working with System
+      Permissions</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Permission requests protect sensitive information available from a device and
+  should only be used when access to information is necessary for the
+  functioning of your app. This document provides tips on ways you might be
+  able to achieve the same (or better) functionality without requiring access
+  to such information; it is not an exhaustive discussion of how permissions
+  work in the Android operating system.
+</p>
+
+<p>
+  For a more general look at Android permissions, please see <a href=
+  "{@docRoot}training/articles/user-data-overview.html">Permissions
+  and User Data</a>. For details on how to work with permissions in your code,
+  see <a href="{@docRoot}training/permissions/index.html">Working with System Permissions</a>.
+  For best practices for working with unique identifiers, please see <a href=
+  "{@docRoot}training/articles/user-data-ids.html">Best Practices for
+  Unique Identifiers</a>. 
+</p>
+
+<h2 id="tenets_of_working_with_android_permissions">Tenets of Working
+with Android Permissions</h2>
+
+<p>
+  We recommend following these tenets when working with Android permissions:
+</p>
+
+<p>
+  <em><strong>#1: Only use the permissions necessary for your app to
+  work</strong></em>. Depending on how you are using the permissions, there may
+  be another way to do what you need (system intents, identifiers,
+  backgrounding for phone calls) without relying on access to sensitive
+  information.
+</p>
+
+<p>
+  <em><strong>#2: Pay attention to permissions required by
+  libraries.</strong></em> When you include a library, you also inherit its
+  permission requirements. You should be aware of what you're including, the
+  permissions they require, and what those permissions are used for.
+</p>
+
+<p>
+  <em><strong>#3: Be transparent.</strong></em> When you make a permissions
+  request, be clear about what you’re accessing, and why, so users can make
+  informed decisions. Make this information available alongside the permission
+  request including install, runtime, or update permission dialogues.
+</p>
+
+<p>
+  <em><strong>#4: Make system accesses explicit.</strong></em> Providing
+  continuous indications when you access sensitive capabilities (for example, the
+  camera or microphone) makes it clear to users when you’re collecting data and
+  avoids the perception that you're collecting data surreptitiously.
+</p>
+
+<p>
+  The remaining sections of this guide elaborate on these rules in the context
+  of developing Android applications.
+</p>
+
+<h2 id="version_specific_details_permissions_in_m">Permissions in Android 6.0+</h2>
+
+<p>
+  Android 6.0 Marshmallow introduced a <a href=
+  "{@docRoot}training/permissions/requesting.html">new permissions model</a> that
+  lets apps request permissions from the user at runtime, rather than prior to
+  installation. Apps that support the new model request permissions when the app
+  actually requires the services or data protected by the services. While this
+  doesn't (necessarily) change overall app behavior, it does create a few
+  changes relevant to the way sensitive user data is handled:
+</p>
+
+<p>
+  <em><strong>Increased situational context</strong></em>: Users are
+  prompted at runtime, in the context of your app, for permission to access the
+  functionality covered by those permission groups. Users are more sensitive to
+  the context in which the permission is requested, and if there’s a mismatch
+  between what you are requesting and the purpose of your app, it's even
+  more important to provide detailed explanation to the user as to why you’re
+  requesting the permission; whenever possible, you should provide an
+  explanation of your request both at the time of the request and in a
+  follow-up dialog if the user denies the request.
+</p>
+
+<p>
+  <em><strong>Greater flexibility in granting permissions</strong></em>: Users
+  can deny access to individual permissions at the time they’re requested
+  <em>and</em> in settings, but they may still be surprised when functionality is
+  broken as a result. It’s a good idea to monitor how many users are denying
+  permissions (e.g. using Google Analytics) so that you can either refactor
+  your app to avoid depending on that permission or provide a better
+  explanation of why you need the permission for your app to work properly. You
+  should also make sure that your app handles exceptions created when users
+  deny permission requests or toggle off permissions in settings.
+</p>
+
+<p>
+  <em><strong>Increased transactional burden</strong></em>: Users will be asked
+  to grant access for permission groups individually and not as a set. This
+  makes it extremely important to minimize the number of permissions you’re
+  requesting because it increases the user burden for granting permissions and
+  increases the probability that at least one of the requests will be denied.
+</p>
+
+<h2 id="avoid_requesting_unnecessary_permissions">Avoid Requesting
+Unnecessary Permissions</h2>
+
+<p>
+  This section provides alternatives to common use-cases that will help you
+  limit the number of permission requests you make. Since the number and type
+  of user-surfaced permissions requested affects downloads compared to other
+  similar apps requesting fewer permissions, it’s best to avoid requesting
+  permissions for unnecessary functionality.
+</p>
+
+<h3 id="a_camera_contact_access_with_real-time_user_requests">Camera/contact
+access with realtime user requests</h3>
+
+<p>
+  <em>In this case, you need occasional access to the device's camera or
+  contact information and don’t mind the user being asked every time you need
+  access.</em>
+</p>
+
+<p>
+  If your requirement for access to user data is infrequent &mdash; in other
+  words, it's not unacceptably disruptive for the user to be presented with a
+  runtime dialogue each time you need to access data &mdash; you can use an
+  <em>intent based request</em>. Android provides some system intents that
+  applications can use without requiring permissions because the user chooses
+  what, if anything, to share with the app at the time the intent based request
+  is issued.
+</p>
+
+<p>
+  For example, an intent action type of <code><a href=
+  "{@docRoot}reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a></code>
+  or <code><a href=
+  "{@docRoot}reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a></code>
+  can be used to capture images or videos without directly using the <a href=
+  "{@docRoot}reference/android/hardware/Camera.html">Camera</a> object (or
+  requiring the permission). In this case, the system intent will ask for the
+  user’s permission on your behalf every time an image is captured.
+</p>
+
+<h3 id="b_running_in_the_background_after_losing_audio_focus">Running in
+the background after losing audio focus</h3>
+
+<p>
+  <em>In this case, your application needs to go into the background when the
+  user gets a phone call and refocus only once the call stops.</em>
+</p>
+
+<p>
+  The common approach in these cases - for example, a media player muting or
+  pausing during a phone call - is to listen for changes in the call state
+  using <code>PhoneStateListener</code> or listening for the broadcast of
+  <code>android.intent.action.PHONE_STATE</code>. The problem with this
+  solution is that it requires the <code>READ_PHONE_STATE</code> permission,
+  which forces the user to grant access to a wide cross section of sensitive
+  data such as their device and SIM hardware IDs and the phone number of the
+  incoming call.
+</p>
+
+<p>
+  You can avoid this by requesting <code>AudioFocus</code> for your app, which
+  doesn't require explicit permissions (because it does not access sensitive
+  information). Simply put the code required to background your audio in the
+  <code><a href=
+  "{@docRoot}reference/android/media/AudioManager.OnAudioFocusChangeListener.html#onAudioFocusChange(int)">
+  onAudioFocusChange()</a></code> event handler and it will run automatically
+  when the OS shifts its audio focus. More detailed documentation on how to do
+  this can be found <a href=
+  "{@docRoot}training/managing-audio/audio-focus.html">here</a>.
+</p>
+
+<h3 id="c_determine_the_device_your_instance_is_running_on">Determine the
+device your instance is running on</h3>
+
+<p>
+  <em>In this case, you need a unique identifier to determine which device the
+  instance of your app is running on.</em>
+</p>
+
+<p>
+  Applications may have device-specific preferences or messaging (e.g., saving
+  a device-specific playlist for a user in the cloud so that they can have a
+  different playlist for their car and at home). A common solution is to
+  leverage device identifiers such as <code>Device IMEI</code>, but this
+  requires the <code>Device ID and call information</code>
+  permission group (<code>PHONE</code> in M+). It also uses an identifier which
+  cannot be reset and is shared across all apps.
+</p>
+
+<p>
+  There are two alternatives to using these types of identifiers:
+</p>
+
+<ol>
+  <li> Use the <code>com.google.android.gms.iid</code> InstanceID API.
+  <code>getInstance(Context context).getID()<strong></code> </strong>will return a
+  unique device identifier for your application instance. The
+result is an app instance scoped identifier that can be used as a key when
+storing information about the app and is reset if the user re-installs the app.
+  <li> Create your own identifier that’s scoped to your app’s storage using basic
+  system functions like <a
+  href="{@docRoot}reference/java/util/UUID.html#randomUUID()"><code>randomUUID()</code></a>.</li>
+</ol>
+
+<h3 id="d_create_a_unique_identifier_for_advertising_or_user_analytics">Create a unique
+identifier for advertising or user analytics</h3>
+
+<p>
+  <em>In this case, you need a unique identifier for building a profile for
+  users who are not signed in to your app (e.g., for ads targeting or measuring
+  conversions).</em>
+</p>
+
+<p>
+  Building a profile for advertising and user analytics sometimes requires an
+  identifier that is shared across other applications. Common solutions for
+  this involve leveraging device identifiers such as <code>Device IMEI</code>,
+  which requires the <code>Device ID</code> <code>and call information</code>
+  permission group (<code>PHONE</code> in API level 23+) and cannot be reset by
+  the user. In any of these cases, in addition to using a non-resettable
+  identifier and requesting a permission that might seem unusual to users, you
+  will also be in violation of the <a href=
+  "https://play.google.com/about/developer-content-policy.html">Play Developer
+  Program Policies</a>.
+</p>
+
+<p>
+  Unfortunately, in these cases using the
+  <code>com.google.android.gms.iid</code> InstanceID API or system functions to
+  create an app-scoped ID are not appropriate solutions because the ID may need
+  to be shared across apps. An alternative solution is to use the
+  <code>Advertising Identifier</code> available from the <code><a href=
+  "{@docRoot}reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html">
+  AdvertisingIdClient.Info</a></code> class via the <code>getId()</code>
+  method. You can create an <code>AdvertisingIdClient.Info</code> object using
+  the <code>getAdvertisingIdInfo(Context)</code> method and call the
+  <code>getId()</code> method to use the identifier. <em><strong>Note that this
+  method is blocking</strong></em>, so you should not call it from the main
+  thread; a detailed explanation of this method is available <a href=
+  "{@docRoot}google/play-services/id.html">here</a>.
+</p>
+
+<h2 id="know_the_libraries_you're_working_with">Know the Libraries You're
+Working With</h2>
+
+<p>
+  Sometimes permissions are required by the libraries you use in your app. For
+  example, ads and analytics libraries may require access to the
+  <code>Location</code> or <code>Identity</code> permissions groups to
+  implement the required functionality. But from the user’s point of view, the
+  permission request comes from your app, not the library.
+</p>
+
+<p>
+  Just as users select apps that use fewer permissions for the same
+  functionality, developers should review their libraries and select
+  third-party SDKs that are not using unnecessary permissions. For example, try
+  to avoid libraries that require the <code>Identity</code> permission group
+  unless there is a clear user-facing reason why the app needs those permissions.
+  In particular, for libraries that provide location functionality, make sure you
+  are not required to request the <code>FINE_LOCATION</code> permission unless
+  you are using location-based targeting functionality.
+</p>
+
+<h2 id="be_transparent">Be Transparent</h2>
+
+<p>You should inform your users about what you’re accessing and why. Research shows
+that users are much less uncomfortable with permissions requests if they know
+why the app needs them. A user study showed that:</p>
+
+<div style="padding:.5em 2em;">
+<div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
+<p>...a user’s willingness to grant a given permission to a given mobile app is
+strongly influenced by the purpose associated with such a permission. For
+instance a user’s willingness to grant access to his or her location will vary
+based on whether the request is required to support the app’s core
+functionality or whether it is to share this information with an advertising
+network or an analytics company.<span
+style="font-size:.8em;color:#777"><sup><em><a
+  href="#references" style="color:#777;padding-left:.1em;">1</a></em></sup></span></p>
+</div>
+</div>
+
+<p>
+  Based on his group’s research, Professor Jason Hong from CMU concluded that,
+  in general:
+</p>
+
+<div style="padding:.5em 2em;">
+<div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
+<p>...when people know why an app is using something as sensitive as their location &mdash;
+for example, for targeted advertising &mdash; it makes them more comfortable than
+when simply told an app is using their location.<span
+style="font-size:.8em;color:#777"><sup><em><a
+  href="#references" style="color:#777;padding-left:.1em;">1</a></em></sup></span></p>
+</div>
+</div>
+
+<p>
+  As a result, if you’re only using a fraction of the API calls that fall under
+  a permission group, it helps to explicitly list which of those permissions
+  you're using, and why. For example:
+</p>
+
+<ul>
+  <li> If you’re only using coarse location, let the user know this in your app
+  description or in help articles about your app. </li>
+  <li> If you need access to SMS messages to receive authentication codes that
+  protect the user from fraud, let the user know this in your app description
+  and/or the first time you access the data.</li>
+</ul>
+
+<p>
+  Under certain conditions, it's also advantageous to let users know about
+  sensitive data accesses in real-time. For example, if you’re accessing the
+  camera or microphone, it’s usually a good idea to let the user know with a
+  notification icon somewhere in your app, or in the notification tray (if the
+  application is running in the background), so it doesn't seem like you're
+  collecting data surreptitiously.
+</p>
+
+<p>
+  Ultimately, if you need to request a permission to make something in your app
+  work, but the reason is not clear to the user, find a way to let the user
+  know why you need the most sensitive permissions.
+</p>
+
+<h2 id="references">References</h2>
+
+<p>
+  [1] <em>Modeling Users’ Mobile App Privacy Preferences: Restoring Usability
+  in a Sea of Permission Settings</em>, by J. Lin B. Liu, N. Sadeh and J. Hong.
+  In Proceedings of SOUPS 2014.
+</p>

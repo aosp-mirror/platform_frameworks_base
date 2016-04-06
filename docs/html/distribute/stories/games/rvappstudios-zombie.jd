@@ -1,0 +1,70 @@
+page.title=Localization improves Zombie Ragdoll engagement at launch
+page.metaDescription=Zombie Ragdoll is a physics based zombie shooting game launched by RV AppStudios in August 2013. Having attended Google I/O talks, the team at RV AppStudios was inspired to go global with Zombie Ragdoll at launch.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/rvappstudios-zombie.jpg
+page.timestamp=1454440882
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/rvappstudios-zombie-icon.png" height="113" />
+</div>
+
+<p>
+  <a class="external-link" href="
+  https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll">
+  Zombie Ragdoll</a> is a physics based zombie shooting game launched by RV AppStudios in August
+  2013. Inspired by Google I/O talks about reaching global users on Google Play, the team at RV
+  AppStudios was inspired to go global with Zombie Ragdoll at launch.
+</p>
+
+
+<h3>What they did</h3>
+
+<p>
+  Using the App Translation Service in the Google Play Developer Console,
+  RV AppStudios launched Zombie Ragdoll localized into 20 languages.
+  In addition to localizing the text within the game, they also localized
+  game assets to specific countries and cultures.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:380px">
+  <img width="380"
+   src="{@docRoot}images/distribute/stories/rvappstudios-zombie-screenshot.jpg"
+   srcset=
+  "{@docRoot}images/distribute/stories/rvappstudios-zombie-screenshot.jpg 1x
+  {@docRoot}images/distribute/stories/rvappstudios-zombie-screenshot_2x.jpg 2x">
+  <p class="img-caption">
+    Hindi version of Zombie Ragdoll
+  </p>
+</div>
+
+<p>
+  After launch 80% of downloads came from non-English speaking countries,
+  improving engagement with users worldwide. In addition, there was
+  growth in use in countries where their apps hadn’t been as popular
+  before; achieving significant traction in countries such as Vietnam,
+  Russia, Philippines, and Thailand.
+</p>
+
+<p>
+  Vivek Dave, founder of RV AppStudios says, “Users want a personalized
+  experience, and by offering a localized game with translation of text and
+  graphic assets, we believe users will connect at a much deeper level.""
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about the App Translation Service <a href="
+  http://developer.android.com/distribute/tools/localization-checklist.html#gp-trans">
+  here</a> and read the full <a href="
+  https://developer.android.com/distribute/tools/localization-checklist.html">
+  Localization checklist</a> to simplify the process of localizing your app
+  or game for users across the globe.
+</p>

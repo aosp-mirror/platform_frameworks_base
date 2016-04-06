@@ -1,0 +1,46 @@
+toc:
+- title: Get Started
+  path: /wear/preview/start.html
+
+- title: UI Overview
+  path: /wear/design/user-interface.html
+
+- title: Design Principles
+  path: /wear/design/index.html
+
+- title: Creating Notifications for Android Wear
+  path: /wear/notifications/creating.html
+
+- title: Receiving Voice Input from a Notification
+  path: /wear/notifications/remote-input.html
+
+- title: Adding Pages to a Notification
+  path: /wear/notifications/pages.html
+
+- title: Stacking Notifications
+  path: /wear/notifications/stacks.html
+
+- title: Notification Reference
+  path: /reference/android/preview/support/package-summary.html
+  section:
+  - title: android.preview.support.v4.app
+    section:
+    - title: NotificationManagerCompat
+      path: /reference/android/preview/support/v4/app/NotificationManagerCompat.html
+  - title: android.preview.support.wearable.notifications
+    section:
+    - title: RemoteInput
+      path: /reference/android/preview/support/wearable/notifications/RemoteInput.html
+    - title: RemoteInput.Builder
+      path: /reference/android/preview/support/wearable/notifications/RemoteInput.Builder.html
+    - title: WearableNotifications
+      path: /reference/android/preview/support/wearable/notifications/WearableNotifications.html
+    - title: WearableNotifications.Action
+      path: /reference/android/preview/support/wearable/notifications/WearableNotifications.Action.html
+    - title: WearableNotifications.Action.Builder
+      path: /reference/android/preview/support/wearable/notifications/WearableNotifications.Action.Builder.html
+    - title: WearableNotifications.Builder
+      path: /reference/android/preview/support/wearable/notifications/WearableNotifications.Builder.html
+
+- title: License Agreement
+  path: /wear/license.html

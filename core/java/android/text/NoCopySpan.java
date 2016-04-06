@@ -18,7 +18,7 @@ package android.text;
 
 /**
  * This interface should be added to a span object that should not be copied
- * into a new Spenned when performing a slice or copy operation on the original
+ * into a new Spanned when performing a slice or copy operation on the original
  * Spanned it was placed in.
  */
 public interface NoCopySpan {

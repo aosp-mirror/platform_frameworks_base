@@ -1,0 +1,171 @@
+page.title=Начало работы
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#ApplyTheme">Применение темы Material Design</a></li>
+  <li><a href="#Layouts">Разработка макетов</a></li>
+  <li><a href="#Depth">Установка высоты представлений</a></li>
+  <li><a href="#ListsCards">Создание списков и карточек</a></li>
+  <li><a href="#Animations">Настройка анимации</a></li>
+</ol>
+<h2>См. также</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Спецификация Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design в Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Порядок создания приложения с элементами Material Design</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    Ознакомьтесь со <a href="http://www.google.com/design/spec">спецификацией Material Design</a>.</li>
+  <li style="margin-bottom:10px">
+    Примените <strong>тему Material Design</strong> к своему приложению.</li>
+  <li style="margin-bottom:10px">
+    Создайте <strong>макеты</strong> в соответствии с рекомендациями Material Design.</li>
+  <li style="margin-bottom:10px">
+    Установите <strong>высоту</strong> своих представлений для отбрасывания теней.</li>
+  <li style="margin-bottom:10px">
+    Используйте системные <strong>виджеты</strong> для списков и карточек.</li>
+  <li style="margin-bottom:10px">
+    Настройте <strong>анимацию</strong> в своем приложении.</li>
+</ol>
+
+<h3>Обеспечение обратной совместимости</h3>
+
+<p>В приложении можно реализовать множество функций Material Design и одновременно сохранить его совместимость с версиями Android, предшествующими версии 5.0.
+ Дополнительные сведения представлены на странице
+<a href="{@docRoot}training/material/compatibility.html">Обеспечение совместимости</a>.</p>
+
+<h3>Обновление приложения с добавлением элементов Material Design</h3>
+
+<p>Чтобы дополнить существующее приложение функциями и элементами Material Design, обновите макеты в соответствии с рекомендациями Material Design.
+ Также не забудьте добавить в приложение функции глубины, реакции на касание и анимации.
+</p>
+
+<h3>Создание новых приложений с элементами Material Design</h3>
+
+<p>При создании приложений с "материальными" функциями следуйте <a href="http://www.google.com/design/spec">рекомендациям Material Design</a>, которые позволят вам получить целостное представление о новых принципах дизайна.
+ При проектировании и разработке своего приложения следуйте инструкциям и используйте новые функциональные возможности платформы Android.
+</p>
+
+
+<h2 id="ApplyTheme">Применение темы Material Design</h2>
+
+<p>Чтобы применить тему Material Design в своем приложении, укажите стиль, который наследует от 
+<code>android:Theme.Material</code>:</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>В теме Material Design содержатся обновленные системные виджеты, для которых можно настраивать цветовую палитру, а также стандартные анимации для реакции на касания и переходы.
+ Дополнительные сведения представлены в разделе
+<a href="{@docRoot}training/material/theme.html">Использование темы Material Design</a>.</p>
+
+
+<h2 id="Layouts">Разработка макетов</h2>
+
+<p>Помимо применения и настройки темы Material Design, необходимо соответствие
+<a href="http://www.google.com/design/spec">рекомендациям Material Design</a> используемых макетов. При разработке макетов необходимо контролировать следующие элементы:
+</p>
+
+<ul>
+<li>сетки базовых линий;</li>
+<li>контуры;</li>
+<li>интервалы;</li>
+<li>размер целевой области касания;</li>
+<li>структура макета.</li>
+</ul>
+
+
+<h2 id="Depth">Определение высоты представлений</h2>
+
+<p>Представления могут отбрасывать тени, и значение высоты определяет размер тени и порядок ее прорисовки.
+ Чтобы установить высоту представления, используйте в макетах атрибут
+<code>android:elevation</code>:</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>С помощью нового свойства <code>translationZ</code> можно создавать анимации, которые отражают временные изменения в высоте представления.
+ Изменения высоты могут быть полезны при
+<a href="{@docRoot}training/material/animations.html#ViewState">реагировании на сенсорные
+жесты</a>.</p>
+
+<p>Дополнительные сведения представлены в разделе <a href="{@docRoot}training/material/shadows-clipping.html">Определение теней и обрезка представлений</a>.
+</p>
+
+
+<h2 id="ListsCards">Создание списков и карточек</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} представляет собой более гибкую версию {@link
+android.widget.ListView}. Она поддерживает различные типы макетов и способствует повышению производительности.
+{@link android.support.v7.widget.CardView} обеспечивает единообразное отображение фрагментов информации внутри карточек в разных приложениях.
+ В следующем примере показано, как включить
+{@link android.support.v7.widget.CardView} в макет:</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>Дополнительные сведения представлены в разделе <a href="{@docRoot}training/material/lists-cards.html">Создание списков и карточек</a>.
+</p>
+
+
+<h2 id="Animations">Настройка анимации</h2>
+
+<p>В состав Android 5.0 (уровень API 21) входят новые API для создания в приложении настраиваемой анимации.
+Например, можно разрешать переходы между операциями и задавать для операций конечный переход:
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>При запуске одной операции из другой активируется конечный переход.</p>
+
+<p>Подробные сведения о новых API для анимации см. в разделе <a href="{@docRoot}training/material/animations.html">Определение настраиваемой анимации</a>.</p>

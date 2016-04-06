@@ -13,10 +13,10 @@ page.metaDescription=The Action bar is an essential design element for all apps.
   </div>
 </a>
 
-<a class="notice-developers" href="{@docRoot}guide/topics/ui/actionbar.html">
+<a class="notice-developers" href="{@docRoot}training/appbar/index.html">
   <div>
     <h3>Developer Docs</h3>
-    <p>Action Bar</p>
+    <p>Adding the App Bar</p>
   </div>
 </a>
 

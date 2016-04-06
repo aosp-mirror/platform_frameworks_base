@@ -1,0 +1,301 @@
+page.title=In-app Promotions
+parent.title=In-app Billing
+parent.link=index.html
+page.metaDescription=Support promo codes in your app, which let you give content or features away to a limited number of users free of charge.
+page.image=/images/play_dev.jpg
+page.tags="promotions, billing, promo codes"
+meta.tags="monetization, inappbilling, promotions"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Quickview</h2>
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#workflow">Creating and Redeeming Promo Codes</a></li>
+    <li><a href="#supporting">Supporting Promo Codes In Your App</a></li>
+    <li><a href="#testing">Testing In-app Promotions</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing
+    In-app Billing</a></li>
+    <!-- TODO: link to blog post when available -->
+  </ol>
+</div>
+</div>
+
+<p>
+  Promo codes let you give content or features away to a limited number of
+  users free of charge. Once you create a promo code, you can distribute it
+  subject to the
+  <!--TODO: Link to TOS when/if they're available as a web page --> terms of
+  service. The user enters the promo code in your app or in the Play Store app,
+  and gets the item at no cost. You can use promo codes in many ways to
+  creatively engage with users. For example:
+</p>
+
+<ul>
+  <li>A game could have a special item, such as a character or decoration,
+  that's only available to players who attend an event. The developer could
+  distribute cards with promo codes at the event, and users would enter their
+  promo code to unlock the item.
+  </li>
+
+  <li>An app developer might distribute promo codes at local businesses, to
+  encourage potential users to try the app.
+  </li>
+
+  <li>An app developer might give out "friends and family" codes to its employees to
+  share with their friends.
+  </li>
+</ul>
+
+<p>
+  Every promo code is associated with a particular <em>product ID</em> (also
+  known as a <em>SKU</em>). You can create promo codes for your existing in-app
+  products. You can also keep a SKU off the Play Store, so the only way to get
+  that item is by entering that SKU's promo code. When a user enters the promo
+  code in the Play Store or in their app, the user gets the item, just as if
+  they paid full price for it. If your app already uses <a href=
+  "{@docRoot}google/play/billing/api.html">In-app Billing version 3</a> to
+  support in-app purchases, it's easy to add support for promo codes.
+</p>
+
+<h2 id="workflow">Creating and Redeeming Promo Codes</h2>
+
+<p>
+  You create promo codes through the <a href=
+  "https://play.google.com/apps/publish/" class="external-link">Google Play
+  Developer Console</a>. Each promo code is associated with a single product item
+  registered in the developer console.
+</p>
+
+<p>
+  When a user gets a promo code, they redeem it in one of two ways:
+</p>
+
+<ul>
+  <li>The user can enter the promo code as part of the app's ordinary purchase flow, as
+  described in <a href="{@docRoot}google/play/billing/billing_integrate.html">
+  Implementing In-app Billing</a>. As far as the app is concerned, this is
+  just like an ordinary purchase, except that the user makes payment with a
+  promo code instead of with money.
+  </li>
+
+  <li>The user can redeem the code in the Google Play Store app. Once the user
+  enters the code, the Play Store prompts the user to open the app (if they have
+  the latest version installed) or to download or update it. (We do not
+  currently support redeeming promo codes from the Google Play web store.)
+  </li>
+</ul>
+
+<p>
+  If the promo code is for a <a href=
+  "{@docRoot}google/play/billing/api.html#consumetypes">consumable product</a>,
+  the user can apply an additional code for the same product <em>after</em> the first
+  product is consumed. For example, a game might offer promo codes for a bundle
+  of extra lives. Betty has two different promo codes for that bundle. She
+  redeems a single promo code, then launches the game. When the game launches,
+  the her character receives the lives, consuming the item. She can now redeem
+  the second promo code for another bundle of lives. (She cannot redeem the
+  second promo code until after she consumes the item she purchased with the
+  first promo code.)
+</p>
+
+<h2 id="supporting">Supporting Promo Codes In Your App</h2>
+
+<p>
+  To support promotion codes, your app should call the <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  method whenever the app starts or resumes. This method returns a bundle of all
+  current, unconsumed purchases, including purchases the user made by redeeming
+  a promo code. This simplest approach is to call <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  in your activity's {@link android.app.Activity#onResume onResume()} method,
+  since that callback fires when the activity is created, as well as when the
+  activity is unpaused. Calling <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  on startup and resume guarantees that your app will find out about all
+  purchases and redemptions the user may have made while the app wasn't
+  running. Furthermore, if a user makes a purchase while the app is running and
+  your app misses it for any reason, your app will still find out about the
+  purchase the next time the activity resumes and calls <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>.
+</p>
+
+<p>
+  In addition, your app should allow users to redeem promo codes inside the app
+  itself. If your app supports the in-app purchase workflow (described in
+  <a href=
+  "{@docRoot}google/play/billing/billing_integrate.html#billing-requests">Making
+  In-app Billing Requests</a>), your app automatically supports in-app
+  redemption of promo codes. When you launch the in-app purchase UI,
+  the user has the option to pay for the purchase with
+  a promo code. Your activity's {@link android.app.Activity#onActivityResult
+  onActivityResult()} method receives a response intent telling the app whether the
+  purchase was completed. However, your app should still call <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  on startup and resume, just in case the purchase and consumption workflow
+  didn't complete. For example, if the user successfully redeems a promo code,
+  and then your app crashes before the item is consumed, your app still gets
+  information about the purchase when the app calls <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a> on its next startup.
+</p>
+
+<p>
+  Your app should also support the scenario where a user redeems a promo code
+  in the Play Store app while the app is running. Your app can find out right
+  away when the user redeems a code by registering a listener for the
+  <code>PURCHASES_UPDATED</code> intent. The Play Store fires this intent
+  whenever a user redeems a promo code.
+</p>
+
+<p>
+  To listen for the <code>PURCHASES_UPDATED</code> intent, dynamically create a
+  {@link android.content.BroadcastReceiver} object and register it to listen
+  for <code>"com.android.vending.billing.PURCHASES_UPDATED"</code>. Register
+  the receiver by putting code like this in your activity's {@link
+  android.app.Activity#onResume onResume()} method:
+</p>
+
+<pre>IntentFilter promoFilter =
+    new IntentFilter("com.android.vending.billing.PURCHASES_UPDATED");
+registerReceiver(myPromoReceiver, promoFilter);</pre>
+
+<p>
+  When the user makes a purchase, the system invokes your broadcast receiver's
+  {@link android.content.BroadcastReceiver#onReceive onReceive()} method. That
+  method should call <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  to see what purchases the user has made.
+</p>
+
+<p>
+  Your activity's {@link android.app.Activity#onPause onPause()} method should
+  unregister the broadcast receiver, to reduce system overhead when your app
+  isn't running:
+</p>
+
+<pre>unRegisterReceiver(myPromoReceiver);</pre>
+
+<p class="note">
+  <strong>Note:</strong> You should not register this broadcast receiver in the
+  app manifest. Declaring the receiver in the manifest can cause the system to
+  launch the app to handle the intent if the user makes a purchase while the app
+  isn't running. This behavior is not necessary, and may be annoying to the
+  user. Instead, your app should call <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  when the user launches it, to find out about any purchases the user made
+  while the app wasn't running.
+</p>
+
+<h2 id="testing">Testing In-app Promotions</h2>
+
+<p>
+  If your app supports in-app promotions, you should test the following use
+  cases.
+</p>
+
+<h3 id="test-inapp">User redeems promo code in the app</h3>
+
+<p>
+  If the user redeems a promo code within the app's purchase flow, as described
+  in <a href=
+  "{@docRoot}google/play/billing/billing_integrate.html#billing-requests">Making
+  In-app Billing Requests</a>, the system invokes your activity's {@link
+  android.app.Activity#onActivityResult onActivityResult()} method to handle
+  the purchase. Verify that {@link android.app.Activity#onActivityResult
+  onActivityResult()} handles the purchase properly, whether the user uses cash
+  or a promo code.
+</p>
+
+<h3 id="test-playstore">User redeems promo code in the Play Store</h3>
+
+<p>
+  If the user redeems a promo code in the Play Store, there are several
+  possible workflows. You should verify each one of these.
+</p>
+
+<h4 id="test-app-uninstalled">App is not installed</h4>
+
+<p>
+  If the user redeems a promo code for an app that is not installed on the
+  device, the Play Store prompts the user to install the app. (If the app is
+  installed but not up-to-date, the Play Store prompts the user to update the
+  app.) You should test the following sequence on a device that does not
+  have your app installed.
+</p>
+
+<ol>
+  <li>User redeems a promo code for the app in the Play Store. The Play Store
+  prompts the user to install your app.
+  </li>
+
+  <li>User installs and launches your app. Verify that on startup, the app
+  calls <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  and correctly detects the purchase the user made with the promo code.
+  </li>
+</ol>
+
+<h4 id="test-app-not-running">App is installed, but not running</h4>
+
+<p>
+  If the user redeems a promo code for an app that is installed on the device,
+  the Play Store prompts the user to switch to the app.  You should test the
+  following sequence on a device that has your app installed but not running:
+</p>
+
+<ol>
+  <li>User redeems a promo code for the app in the Play Store. The Play Store
+  prompts the user to switch to your app.
+  </li>
+
+  <li>User launches your app. Verify that on startup, the app calls <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>
+  and correctly detects the purchase the user made with the promo code.
+  </li>
+</ol>
+
+<h4 id="test-app-running">App is installed and running
+</h4>
+
+<p>
+  If the user redeems a promo code for an app that is currently running on the
+  device, the Play Store notifies the app via a <code>PURCHASES_UPDATED</code>
+  intent. You should test the following sequence:
+</p>
+
+<ol>
+  <li>User launches the app. Verify that the app has properly registered itself to
+  receive the <code>PURCHASES_UPDATED</code> intent.
+  </li>
+
+  <li>User launches the Play Store app and redeems a promo code for the app. The Play
+  Store fires a <code>PURCHASES_UPDATED</code> intent. Verify that your app's
+  {@link android.content.BroadcastReceiver#onReceive
+  BroadcastReceiver.onReceive()} callback fires to handle the intent.
+  </li>
+
+  <li>Your {@link android.content.BroadcastReceiver#onReceive onReceive()}
+  method should respond to the intent by calling <a href=
+  "{@docRoot}google/play/billing/billing_reference.html#getPurchases"
+  ><code>getPurchases()</code></a>. Verify that it calls this method, and that
+  it correctly detects the purchase the user made with the promo code.
+  </li>
+
+  <li>User switches back to your app. Verify that the user has the purchased
+  item.
+  </li>
+</ol>

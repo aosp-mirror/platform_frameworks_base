@@ -1,0 +1,103 @@
+page.title=リソースの概要
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>トピック</h2>
+  <ol>
+    <li><a href="providing-resources.html">リソースの提供</a></li>
+    <li><a href="accessing-resources.html">リソースへのアクセス</a></li>
+    <li><a href="runtime-changes.html">実行時の変更の処理</a></li>
+    <li><a href="localization.html">Localization</a></li>
+  </ol>
+
+  <h2>リファレンス</h2>
+  <ol>
+    <li><a href="available-resources.html">Resource Types</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>画像や文字列といったリソースは、常にアプリケーション コードの外部に置くようにすることで、独立して保持できるようになります。
+さらに、リソースを外部化することで、言語や画面サイズが異なるような特定の端末構成をサポートする代替リソースを提供できるようになります。異なる構成を持つ Android ベースの端末が増えていることから、この外部化がますます重要になってきています。
+
+
+異なる構成に互換性を持たせるには、リソースをタイプや構成ごとにグループ化するさまざまなサブディレクトリを使用して、プロジェクトの {@code res/} ディレクトリ内にリソースを整理する必要があります。
+
+
+</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>図 1.</strong> デフォルト レイアウトを使用する 2 つの異なる端末（アプリによる代替レイアウトの提供なし）。
+</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>図 2.</strong> 画面サイズが違うレイアウトを使用する 2 つの異なる端末
+</p>
+</div>
+
+<p>すべてのリソースタイプに対して、アプリケーションの<em>デフォルト</em> レイアウトと複数の<em>代替</em>リソースを指定できます。
+</p>
+<ul>
+  <li>デフォルト リソースは、端末構成に関係なく使われるものであり、現在の構成に一致する代替リソースがない場合に使用されます。
+
+</li>
+  <li>代替リソースは、特定の構成で使うために作成したリソースです。
+リソースのグループを特定の構成に使用するよう指定するには、適切な構成修飾子をディレクトリ名の後ろに追加します。
+</li>
+</ul>
+
+<p>たとえば、デフォルトの UI レイアウトが {@code res/layout/} ディレクトリに保存してある場合、{@code res/layout-land/} ディレクトリにレイアウトを保存しておくことで、横向きの画面を使用する際の別のレイアウトを指定できます。
+
+
+Android は、現在の端末の構成とリソースのディレクトリ名をマッチングさせ、適切なリソースを自動的に適用します。
+</p>
+
+<p>図 1 は、代替リソースがない場合に、システムが 2 つの異なる端末に同じレイアウトを適用する様子を表しています。
+図 2 は、大きい画面の代替レイアウト リソースを追加した場合の、レイアウトの適用の様子を表しています。
+</p>
+
+<p>次のドキュメントには、アプリケーション リソースの整理、代替リソースの指定、アプリケーションでのアクセスなどに関する情報が詳細に記載されています。
+</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">リソースの提供</a></strong></dt>
+  <dd>アプリで提供可能なリソースの種類、保存場所、特定の端末構成用の代替リソースの作成方法。
+</dd>
+  <dt><strong><a href="accessing-resources.html">リソースへのアクセス</a></strong></dt>
+  <dd>アプリケーション コードまたは他の XML リソースからの参照による、提供済みリソースの使用方法。
+</dd>
+  <dt><strong><a href="runtime-changes.html">実行時の変更の処理</a></strong></dt>
+  <dd>アクティビティの実行中に生じた構成の変更の管理方法。</dd>
+  <dt><strong><a href="localization.html">Localization</a></strong></dt>
+  <dd>代替リソースを使用したアプリケーションのローカライズのためのボトムアップ ガイド。代替リソースの特定の使用方法を 1 つだけ解説していますが、複数のユーザーが利用する場合には非常に重要になります。
+
+</dd>
+  <dt><strong><a href="available-resources.html">Resource Types</a></strong></dt>
+  <dd>提供可能な各種リソースタイプのリファレンス。XML 要素、属性、構文について説明しています。
+たとえば、このリファレンスには、アプリケーション メニュー、ドローアブル、アニメーションなどの作成方法が記載されています。
+</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

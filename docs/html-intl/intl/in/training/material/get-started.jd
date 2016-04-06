@@ -1,0 +1,171 @@
+page.title=Memulai
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#ApplyTheme">Menerapkan Tema Bahan</a></li>
+  <li><a href="#Layouts">Mendesain Layout Anda</a></li>
+  <li><a href="#Depth">Menetapkan Ketinggian di Tampilan Anda</a></li>
+  <li><a href="#ListsCards">Membuat Daftar dan Kartu</a></li>
+  <li><a href="#Animations">Menyesuaikan Animasi Anda</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Untuk membuat aplikasi dengan desain bahan:</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    Tinjaulah <a href="http://www.google.com/design/spec">spesifikasi desain bahan</a>.</li>
+  <li style="margin-bottom:10px">
+    Terapkan <strong>tema</strong> bahan ke aplikasi Anda.</li>
+  <li style="margin-bottom:10px">
+    Buat <strong>layout</strong> agar mengikuti panduan desain bahan.</li>
+  <li style="margin-bottom:10px">
+    Tetapkan <strong>ketinggian</strong> tampilan Anda untuk menghasilkan bayangan.</li>
+  <li style="margin-bottom:10px">
+    Gunakan <strong>widget</strong> sistem untuk daftar dan kartu.</li>
+  <li style="margin-bottom:10px">
+    Sesuaikan <strong>animasi</strong> di aplikasi Anda.</li>
+</ol>
+
+<h3>Mempertahankan kompatibilitas mundur</h3>
+
+<p>Anda bisa menambahkan banyak fitur desain bahan ke aplikasi sekaligus mempertahankan kompatibilitas dengan
+versi Android sebelum 5.0. Untuk informasi selengkapnya, lihat
+<a href="{@docRoot}training/material/compatibility.html">Mempertahankan Kompatibilitas</a>.</p>
+
+<h3>Memperbarui aplikasi dengan desain bahan</h3>
+
+<p>Untuk memperbarui aplikasi yang ada guna memasukkan desain bahan, perbarui layout Anda dengan mengikuti
+panduan desain bahan. Juga pastikan memasukkan kedalaman, umpan balik sentuh, dan
+animasi.</p>
+
+<h3>Membuat aplikasi baru dengan desain bahan</h3>
+
+<p>Jika Anda sedang membuat aplikasi baru dengan fitur desain bahan, <a href="http://www.google.com/design/spec">panduan desain bahan</a> akan memberi Anda
+kerangka kerja desain yang kohesif. Ikuti panduan itu dan gunakan fungsionalitas baru di
+kerangka kerja Android untuk mendesain dan mengembangkan aplikasi Anda.</p>
+
+
+<h2 id="ApplyTheme">Menerapkan Tema Bahan</h2>
+
+<p>Untuk menerapkan tema bahan dalam aplikasi Anda, tetapkan gaya yang mewarisi
+<code>android:Theme.Material</code>:</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>Tema bahan menyediakan widget sistem terbaru yang memungkinkan Anda mengatur palet warnanya dan
+animasi default untuk umpan balik sentuh dan transisi aktivitas. Untuk detail selengkapnya, lihat
+<a href="{@docRoot}training/material/theme.html">Menggunakan Tema Bahan</a>.</p>
+
+
+<h2 id="Layouts">Mendesain Layout Anda</h2>
+
+<p>Selain menerapkan dan menyesuaikan tema bahan, layout Anda harus mematuhi
+<a href="http://www.google.com/design/spec">panduan desain bahan</a>. Bila Anda mendesain
+layout, berikan perhatian khusus pada hal-hal berikut:</p>
+
+<ul>
+<li>Petak patokan</li>
+<li>Garis utama</li>
+<li>Pengaturan Jarak</li>
+<li>Ukuran target sentuh</li>
+<li>Struktur layout</li>
+</ul>
+
+
+<h2 id="Depth">Menetapkan Ketinggian di Tampilan Anda</h2>
+
+<p>Tampilan bisa menghasilkan bayangan, dan nilai ketinggian tampilan
+menentukan ukuran bayangan dan urutan penggambarannya. Untuk mengatur ketinggian tampilan, gunakan
+atribut <code>android:elevation</code> dalam layout:</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>Properti <code>translationZ</code> baru memungkinkan Anda membuat animasi yang mencerminkan
+perubahan sementara pada ketinggian tampilan. Perubahan ketinggian bisa berguna saat
+<a href="{@docRoot}training/material/animations.html#ViewState">merespons
+gerakan sentuh</a>.</p>
+
+<p>Untuk detail selengkapnya, lihat <a href="{@docRoot}training/material/shadows-clipping.html">Mendefinisikan
+Bayangan dan Memangkas Tampilan</a>.</p>
+
+
+<h2 id="ListsCards">Membuat Daftar dan Kartu</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} adalah versi {@link
+android.widget.ListView} yang lebih mudah dimasukkan dan mendukung beragam tipe layout serta memberikan peningkatan kinerja.
+{@link android.support.v7.widget.CardView} memungkinkan Anda menampilkan potongan informasi dalam kartu dengan
+tampilan konsisten di seluruh aplikasi. Contoh kode berikut memperagakan cara menyertakan
+{@link android.support.v7.widget.CardView} dalam layout Anda:</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/lists-cards.html">Membuat Daftar
+dan Kartu</a>.</p>
+
+
+<h2 id="Animations">Menyesuaikan Animasi Anda</h2>
+
+<p>Android 5.0 (API level 21) menyertakan API baru untuk membuat animasi custom di aplikasi Anda.
+Misalnya, Anda bisa mengaktifkan transisi aktivitas dan mendefinisikan transisi keluar di
+aktivitas:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>Bila Anda memulai aktivitas lain dari aktivitas ini, transisi keluar akan diaktifkan.</p>
+
+<p>Untuk mengetahui selengkapnya tentang API animasi yang baru, lihat <a href="{@docRoot}training/material/animations.html">Mendefinisikan Animasi Custom</a>.</p>

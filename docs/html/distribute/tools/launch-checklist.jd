@@ -290,7 +290,7 @@ data-maxresults="6">
 <p>
   The overall size of your app can affect its design and how you publish it on
   Google Play. Currently, the maximum size for an APK published on Google Play
-  is <strong>50 MB</strong>. If your app exceeds that size, or if you want to
+  is <strong>100 MB</strong>. If your app exceeds that size, or if you want to
   offer a secondary download, you can use <a href=
   "{@docRoot}google/play/expansion-files.html">APK Expansion Files</a>, which
   Google Play will host for free on its server infrastructure and automatically
@@ -300,7 +300,7 @@ data-maxresults="6">
 <ul>
   <li>
     <p>
-      The maximum size for an APK published on Google Play is 50 MB.
+      The maximum size for an APK published on Google Play is 100 MB.
     </p>
   </li>
 

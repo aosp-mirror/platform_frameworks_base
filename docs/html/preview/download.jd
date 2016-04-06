@@ -1,5 +1,7 @@
-page.title=Downloads
-page.image=images/cards/card-download_16-9_2x.png
+page.title=Test on a Device
+meta.tags="preview", "nexus","system image"
+page.tags="preview", "androidn"
+page.image=images/cards/card-n-downloads_2x.png
 
 @jd:body
 
@@ -7,8 +9,9 @@ page.image=images/cards/card-download_16-9_2x.png
 
   <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
 
-    <p class="sdk-terms-intro">Before downloading and installing components of the Android Preview
-      SDK, you must agree to the following terms and conditions.</p>
+    <p class="sdk-terms-intro">Before downloading and installing components of
+      the Android Preview SDK, you must agree to the following terms and
+      conditions.</p>
 
     <h2 class="norule">Terms and Conditions</h2>
 
@@ -21,7 +24,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 1.2 "Android" means the Android software stack for devices, as made available under the Android Open Source Project, which is located at the following URL: http://source.android.com/, as updated from time to time.
 
-1.3 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
+1.3 “Android-compatible” means any Android implemation that (i) complies with the Android Compatibility Definition document, which can be found at the Android compatibility website (http://source.android.com/compatibility) and which may be updated from time to time; and (ii) successfully passes the Android Compatibility Test Suite (CTS).
+
+1.4 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
 
 2. Accepting the License Agreement
 
@@ -35,13 +40,13 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 3. Preview License from Google
 
-3.1 Subject to the terms of the License Agreement, Google grants you a royalty-free, non-assignable, non-exclusive, non-sublicensable, limited, revocable license to use the Preview, personally or internally within your company or organization, solely to develop applications to run on the Android platform.
+3.1 Subject to the terms of this License Agreement, Google grants you a limited, worldwide, royalty-free, non-assignable, non-exclusive, and non-sublicensable license to use the Preview solely to develop applications for compatible implementations of Android.
 
-3.2 You agree that Google or third parties owns all legal right, title and interest in and to the Preview, including any Intellectual Property Rights that subsist in the Preview. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
+3.2 You may not use this Preview to develop applications for other platforms (including non-compatible implementations of Android) or to develop another SDK. You are of course free to develop applications for other platforms, including non-compatible implementations of Android, provided that this Preview is not used for that purpose.
 
-3.3 You may not use the Preview for any purpose not expressly permitted by the License Agreement. Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the Preview or any part of the Preview; or (b) load any part of the Preview onto a mobile handset or any other hardware device except a personal computer, combine any part of the Preview with other software, or distribute any software or device incorporating a part of the Preview.
+3.3 You agree that Google or third parties owns all legal right, title and interest in and to the Preview, including any Intellectual Property Rights that subsist in the Preview. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-3.4 You agree that you will not take any actions that may cause or result in the fragmentation of Android, including but not limited to distributing, participating in the creation of, or promoting in any way a software development kit derived from the Preview.
+3.4 You may not use the Preview for any purpose not expressly permitted by the License Agreement. Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the Preview or any part of the Preview; or (b) load any part of the Preview onto a mobile handset or any other hardware device except a personal computer, combine any part of the Preview with other software, or distribute any software or device incorporating a part of the Preview.
 
 3.5 Use, reproduction and distribution of components of the Preview licensed under an open source software license are governed solely by the terms of that open source software license and not the License Agreement. You agree to remain a licensee in good standing in regard to such open source software licenses under all the rights granted and to refrain from any actions that may terminate, suspend, or breach such rights.
 
@@ -164,79 +169,128 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk">Android 6.0 SDK</a></li>
-        <li><a href="#docs">Developer Documentation</a></li>
-        <li><a href="#images">Hardware System Images</a></li>
+        <li><a href="#device-preview">Set up a hardware device</a>
+          <ol>
+            <li><a href="#ota">Get over-the-air updates</a></li>
+            <li><a href="#flash">Manually flash a device</a></li>
+            <li><a href="#revertDevice">Uninstalling</a></li>
+          </ol>
+        </li>
+        <li><a href="#setupAVD">Set up an emulator</a></li>
       </ol>
-
-     <h2>Legacy downloads</h2>
-        <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
-        </ol>
   </div>
 </div>
 
+<p>
+  To run and test your app on the new platform you need to set up an Android N
+  runtime environment. You can do that in either of these ways:
+</p>
+
+<ul>
+  <li>Install Android N on a supported hardware device, or</li>
+  <li>Set up an Android emulator running Android N</li>
+</ul>
 
 <p>
-  The Android M Preview SDK includes development tools, Android system images, and library files to
-  help you test your app and the new APIs coming in the next release of the platform. This document
-  describes how to get the downloadable components of the preview for testing your app.
+  If you want an environment for basic compatibility testing of your app on the
+  new platform, all you need is your current APK and a hardware device or
+  emulator. You don't necessarily need to update your full development
+  environment to do basic testing.
+</p>
+
+<p>
+  If you want to modify your app to target Android N or use new Android N APIs,
+  you need to set up a development environment that's updated to support
+  Android N. <a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for
+  Android N</a> has details.
 </p>
 
 
-<h2 id="sdk">Android 6.0 SDK</h2>
+<h2 id="device-preview">Set up a hardware device</h2>
 
 <p>
-  With Developer Preview 3, the official Android 6.0 SDK is now available for download through the <a href=
-  "{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. For more information on
-  downloading and configuring the SDK, see <a href=
-  "{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the SDK</a>.
+  The N Developer Preview offers system updates for a range of hardware devices
+  that you can use for testing your app, from phones to tablets and TV.
 </p>
-
-
-<h2 id="docs">Developer Documentation</h2>
 
 <p>
-  The developer documentation for Developer Preview 3 is released as Android 6.0 (API level 23) and
-  is available online, including the <a href="{@docRoot}reference/packages.html">API level 23
-  reference</a> and <a href="{@docRoot}sdk/api_diff/23/changes.html">diff report</a>. The following
-  developer documentation download package provides additional, incremental difference reports
-  between the preview releases.
+  If you have access to a supported device, you can update it to a Developer
+  Preview milestone build in one of these ways:
 </p>
 
-<table>
-  <tr>
-    <th scope="col">Description</th>
-    <th scope="col">Download / Checksums</th>
-  </tr>
-  <tr id="docs-dl">
-    <td>Android M Preview 3<br>Developer Docs</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-3-developer-docs.zip</a><br>
-      MD5: d99b14b0c06d31c8dfecb25072654ca3<br>
-      SHA-1: 9cefeeda07676130da606a1796e1c00fffc667c1
-    </td>
-  </tr>
-<table>
+<ul>
+  <li><strong>Enroll the device in automatic OTA system updates</strong> through the
+  <a href="https://g.co/androidbeta">Android Beta Program</a>. Once enrolled, your device will receive regular
+  over-the-air (OTA) updates of all milestone builds in the N Developer Preview. This
+  approach is recommended because it lets you seamlessly transition from your current
+  environment through the various releases of the N Developer Preview.</li>
+  <li><strong>Download a Developer Preview system image and flash the device</strong>.
+  OTA updates are not provided automatically for devices that you flash manually, but
+  you can enroll those devices in Android Beta Program to get OTA updates. </li>
+</ul>
 
-
-<h2 id="images">Hardware System Images</h2>
+<h3 id="ota">Enroll the device in automatic OTA updates</h3>
 
 <p>
-  These system images allow you to install a preview version of the platform on a physical device for
-  testing. By configuring a device with one of these images, you can install and test your app to
-  see how it performs on the next version of the platform. The process of installing a system image
-  on a device <em>removes all data from the device</em>, so you should backup your data before
-  installing a system image.
+  If you have access to a supported device (see the list in the Downloads
+  table), you can receive over-the-air updates to preview versions of Android
+  by enrolling that device in the <a href="https://g.co/androidbeta">Android Beta Program</a>. These updates are
+  automatically downloaded and will update your device just like official
+  system updates.
 </p>
 
-<p class="warning">
-  <b>Warning:</b> The following Android system images are previews and are subject to change. Your
-  use of these system images is governed by the Android SDK Preview License Agreement. The Android
-  preview system images are not stable releases, and may contain errors and defects that can result
-  in damage to your computer systems, devices, and data. The preview Android system images are not
-  subject to the same testing as the factory OS and can cause your phone and installed services and
-  applications to stop working.
+<p>
+  You can un-enroll a device at any time. The device will receive an OTA update
+  to the most recent production version of Android available for that device
+  (for example, Android 6.0 Marshmallow). The update requires a full device
+  reset, so user data on the device will be removed. Make sure to <strong>back
+  up important data</strong> before un-enrolling a device.
+</p>
+
+<p>
+  For more information and to enroll your device, see
+  the <a href="https://g.co/androidbeta">Android Beta Program</a> web site.
+</p>
+
+<p class="note"><strong>Note:</strong>
+  Un-enrolling requires a full device reset. Back up
+  important data first.
+</p>
+
+<h3 id="flash">Flashing a device manually</h3>
+
+<p>
+  At any time you can download the latest Developer Preview system image and
+  manually flash it to your device. See the table below to download the system
+  image for your test device. Manually flashing a device is useful if you need
+  precise control over the test environment or need to reinstall frequently,
+  such as for automated testing.
+</p>
+
+<!-- You can flash by ota or system image --><p>
+  Installing a system image on a device <strong>removes all data from the
+  device</strong>, so you should back up your data first.
+</p>
+
+<p>
+  After you back up your device data and download the system image below that
+  matches your device, follow the instructions at <a href=
+  "https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+  to flash the image onto your device.
+</p>
+
+<p>
+  Manually flashed system images <strong>do not
+  automatically receive OTA updates</strong> to later Developer Preview
+  milestone builds. Make sure to keep your environment up-to-date and flash a
+  new system image at each Developer Preview milestone.
+</p>
+
+<p>
+  If you decide you want to get OTA updates after manually flashing a device,
+  all you need to do is enroll the device in the <a href="https://g.co/androidbeta">Android
+  Beta Program</a>. You can enroll the device at any time to receive the next Preview
+  update over the air.
 </p>
 
 <table>
@@ -244,75 +298,202 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <th scope="col">Device</th>
     <th scope="col">Download / Checksums</th>
   </tr>
-  <tr id="hammerhead">
-    <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
+
+  <tr id="bullhead">
+    <td>Nexus 5X <br>"bullhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
-      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
-      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
+      >bullhead-npc56w-preview-d86c7559.tgz</a><br>
+      MD5: d84b6c31a7754e505149594887b3481a<br>
+      SHA-1: d86c7559c93724cca6af91040b012c48529f2c94
     </td>
   </tr>
+
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
-      MD5: ac6e58da86125073d9c395257fd42664<br>
-      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
+      >shamu-npc56p-preview-54b13c67.tgz</a><br>
+      MD5: af183638cf34e0eb944a1957d7696f60<br>
+      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
     </td>
   </tr>
+
+  <tr id="angler">
+    <td>Nexus 6P <br>"angler"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >angler-npc56w-preview-2834ca3c.tgz</a><br>
+      MD5: fd5c74f256cf82262779513854869570<br>
+      SHA-1: 2834ca3c425d7a61f5dfabb9d8dd108aec1ab58b
+    </td>
+  </tr>
+
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
-      MD5: 7f83768757913d3fea945a661020d185<br>
-      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
+      >volantis-npc56x-preview-5c323abd.tgz</a><br>
+      MD5: 474a13915e22d683cab5cf59ed868157<br>
+      SHA-1: 5c323abdec121b2f07fdabaa3d70d12106e450ad
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>"volantisg"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantisg-npc56x-preview-41ae398c.tgz</a><br>
+      MD5: 5a145a546a4a9f68c2b8e2624cf9832b<br>
+      SHA-1: 41ae398c30536a2d96b04d61b9ef97a043bf59cf
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPA44I-preview-2860040a.tgz</a><br>
-      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
-      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
+      >fugu-npc56r-preview-7027d5b6.tgz</a><br>
+      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
+      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    </td>
+  </tr>
+
+  <tr id="ryu">
+    <td>Pixel C <br>"ryu"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >ryu-npc56p-preview-335a86a4.tgz</a><br>
+      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
+      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    </td>
+  </tr>
+  <tr id="seed">
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
+      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
+      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
     </td>
   </tr>
 
 </table>
 
-<h3 id="install-image">Install an Image to a Device</h3>
+<h3 id="revertDevice">Uninstalling the Preview from a device</h3>
 
 <p>
-  In order to use a device image for testing, you must install it on a compatible device. Follow
-  the instructions below to install a system image:
+  If you want to uninstall the preview from a device, you can do so in one of
+  these ways: </p>
+  <ul>
+    <li><strong>Obtain a factory spec system image</strong> and then manually
+    flash it to the device.
+      <ul>
+          <li>For <strong>Nexus devices and Pixel C devices</strong>, see
+        the <a href="http://developers.google.com/android/nexus/images">Factory Images
+        for Nexus Devices</a> page for downloads. </li>
+        <li>For <strong>other devices</strong>, please contact the device manufacturer
+        directly. Alternatively, if the device is supported
+        in the Android Beta Program, you can enroll the device in the
+        program and then un-enroll it (see below).</li>
+      </ul>
+    </li>
+    <li><strong>Un-enroll the device from Android Beta Program</strong>. If the
+    device is enrolled in the <a href="https://g.co/androidbeta">Android Beta
+    Program</a>, regardless of device, you can simply un-enroll it from the program.
+  <p>
+    The device will receive an OTA update to the most recent production version
+    of Android available for that device (for example, Android 6.0 Marshmallow).
+    The update requires a full device reset, so user data on the device will be
+    removed. Make sure to <strong>back up important data</strong> before
+    un-enrolling a device.
+  </p>
+  </li>
+</ul>
+
+<p class="note"><strong>Note:</strong>
+  Uninstalling a Developer Preview system image prior to
+  the end of the program requires a full device reset and removes all user data
+  on the device.
 </p>
+
+
+<h2 id="setupAVD">Set up an emulator</h2>
+
+<p>To use the Android Emulator to run the Android N Preview, you need to
+download the Android N Preview SDK and create a virtual device for the
+emulator.</p>
+
+<p>First, download the Android N Preview SDK as follows (if you
+already got it while <a href="{@docRoot}preview/setup-sdk.html">setting up
+to develop for Android N</a>, you can skip this part):
 
 <ol>
-  <li>Download and uncompress one of the system image packages listed here.</li>
-  <li>Backup any data you want to preserve from the device.</li>
-  <li>Follow the instructions at
-  <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
-  to flash the image onto your device.</li>
+  <li>In Android Studio, open the Settings dialog
+    (<strong>File &gt; Settings</strong> on Windows/Linux, or
+    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
+    panel, select <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Click the <strong>SDK Platforms</strong> tab, then select the
+  <strong>Android N Preview</strong> check box.</li>
+
+  <li>Click the <strong>SDK Tools</strong> tab, then select the
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong>, and <strong>Android SDK Tools</strong> check
+    boxes.
+  </li>
+
+  <li>Click <strong>OK</strong> and accept the license
+    agreements for any packages to be installed.
+  </li>
 </ol>
 
-<h3 id="update-image">Updating a Device with the Preview</h3>
+<p>You should now have <strong>Android SDK Built-Tools 24.0 0 rc1</strong>,
+<strong>Platform-Tools 24.0.0 rc1</strong>, and <strong>SDK Tools
+25.0.9</strong>. If you do not update the SDK Tools to 25.0.9, then you won't
+be able to run the x86_64 system images for Android N.</p>
+
+
+<p>Now create a virtual device with the Android N system image:</p>
+
+<ol>
+  <li>Open the AVD Manager by selecting <strong>Tools > Android >
+    AVD Manager</strong>.</li>
+  <li>Click <strong>Create Virtual Device</strong>.</li>
+  <li>Select a device such as Nexus 5X, Nexus 6P, Nexus 9, or Android TV,
+    then click <strong>Next</strong>.</li>
+  <li>Select the <strong>N</strong> system image (with the
+    <strong>x86</strong> ABI), then click <strong>Next</strong>.
+    (Only x86 system images are currently supported with the Android Emulator
+for the Android N Preview.)
+  <li>Complete the rest of the AVD configuration and click
+    <strong>Finish</strong>.</li>
+</ol>
+
+<p>You can now launch the Android Emulator with the Android N Preview AVD.</p>
 
 <p>
-  Once you have installed a preview system image on a development device, the device is upgraded
-  automatically with the next preview release through over-the-air (OTA) updates. When the update
-  is available, the device displays notification that an update is available and allows you to
-  install it. You can also manually install the next preview image by repeating the procedure in
-  the previous section.
+For the best experience in the Android Emulator, install
+Android Studio 2.1 Preview, which supports the <a
+href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>
+with much faster performance compared to the Emulator in
+Android Studio 1.5.</p>
+
+<p class="note"><strong>Note:</strong>
+  If you're currently using Android Studio 2.0 Beta, there's a known issue
+  that prevents you from creating AVDs with the N Preview system images, so
+  you currently need to use the Android Studio 2.1 preview to create AVDs.
 </p>
 
-<h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
-
-<p>
-  If you want to uninstall the preview and revert the device to factory specifications, go to
-  <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a> and
-  download the image you want to flash to for your device. Follow the instructions on that page to
-  flash the image to your device.
+<p>For more information about creating virtual devices, see <a href=
+  "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
 </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   </div><!-- landing -->
 

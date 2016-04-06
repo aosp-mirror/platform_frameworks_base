@@ -1,0 +1,126 @@
+page.title=使用图片
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#DrawableTint">为图片资源着色</a></li>
+  <li><a href="#ColorExtract">从图像萃取突出颜色</a></li>
+  <li><a href="#VectorDrawables">创建矢量图片</a></li>
+</ol>
+<h2>您也应该阅读</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料设计规范</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 材料设计</a></li>
+</ul>
+</div>
+</div>
+
+<p>下列适用于图片的功能将协助您在您的应用中实现材料设计：</p>
+
+<ul>
+<li>图片着色</li>
+<li>突出颜色萃取</li>
+<li>矢量图片</li>
+</ul>
+
+<p>本课程将向您展示如何在您的应用中使用这些功能。</p>
+
+
+<h2 id="DrawableTint">为图片资源着色</h2>
+
+<p>利用 Android 5.0（API 级别 21）及更高版本，您可为位图以及定义为 Alpha 蒙版的点九图着色。
+您可使用颜色资源或分解为颜色资源（例如 <code>?android:attr/colorPrimary</code>）的主题属性为其着色。
+通常，您只有一次机会创建这些资产并自动为其上色以符合您的主题。
+</p>
+
+<p>您可利用 {@code setTint()} 方法为 {@link android.graphics.drawable.BitmapDrawable} 或 {@link
+android.graphics.drawable.NinePatchDrawable} 对象着色。您也可以利用 <code>android:tint</code> 以及
+<code>android:tintMode</code> 属性设置您的布局中的着色颜色和模式。
+</p>
+
+
+<h2 id="ColorExtract">从图像萃取突出颜色</h2>
+
+<p>Android 支持内容库 r21 及更高版本包括 {@link
+android.support.v7.graphics.Palette} 类别，可让您从图像萃取突出颜色。此类别将萃取下列突出颜色：
+</p>
+
+<ul>
+<li>鲜艳</li>
+<li>鲜艳深色</li>
+<li>鲜艳浅色</li>
+<li>低调</li>
+<li>低调深色</li>
+<li>低调浅色</li>
+</ul>
+
+<p>如果要萃取这些颜色，请将 {@link android.graphics.Bitmap} 对象传递给位于您上载图像的背景线程的
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} 静态方法。
+如果您无法使用此线程，请调用
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} 方法并提供一个侦听程序。
+</p>
+
+<p>您可使用
+<code>Palette</code> 类别（例如 <code>Palette.getVibrantColor</code>）中的 getter 方法从图像检索突出颜色。</p>
+
+<p>如果要在项目中使用 {@link android.support.v7.graphics.Palette} 类别，请将下列
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依赖项</a>添加至您的应用模块：
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>如果要了解更多信息，请参阅{@link android.support.v7.graphics.Palette}
+类别的 API 参考文档。</p>
+
+
+<h2 id="VectorDrawables">创建矢量图片</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>视频</h3>
+    <p>Android 矢量图形</p>
+</div>
+</a>
+
+<p>在 Android 5.0（API 级别 21）及更高版本中，您可定义矢量图片，而且图片可在不损失清晰度的情况下缩放。
+您只需一个资产文件即可创建一个矢量图像，而位图图像则需要为每个屏幕密度提供一个资产文件。
+如果要创建一个矢量图像，请您在 <code>&lt;vector&gt;</code> XML 元素中定义形状的详情。
+</p>
+
+<p>下列示例以心形定义一个矢量图像：</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>矢量图像在 Android 中以 {@link android.graphics.drawable.VectorDrawable}
+对象表示。如果要了解更多有关 <code>pathData</code> 语法的信息，请参阅 <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">SVG 路径参考</a>。如果要了解更多有关为矢量图片属性添加动画的信息，请参阅<a href="{@docRoot}training/material/animations.html#AnimVector">为矢量图片添加动画</a>。
+
+</p>

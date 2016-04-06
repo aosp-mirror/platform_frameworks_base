@@ -1,0 +1,291 @@
+page.title=輸入事件
+parent.title=使用者介面
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#EventListeners">事件接聽器</a></li>
+    <li><a href="#EventHandlers">事件處理常式</a></li>
+    <li><a href="#TouchMode">輕觸模式</a></li>
+    <li><a href="#HandlingFocus">處理焦點</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>在 Android，有多種方法可以攔截使用者與應用程式互動的事件。
+如果考慮的是使用者介面內的事件，方法就是從與使用者互動的特定檢視物件中擷取事件。
+檢視類別提供執行此動作的方法。</p>
+
+<p>在您用來撰寫版面配置的各種檢視類別中，您會發現多種公用回呼方法，對 UI 事件似乎相當實用。
+當該物件發生個別動作時，Android 架構會呼叫這些方法。
+例如，輕觸檢視 (例如按鈕) 時，會在該物件上呼叫 <code>onTouchEvent()</code> 方法。
+不過，為了攔截這個事件，您必須延伸類別並覆寫方法。
+然而，延伸每個檢視物件以便處理這類事件並不實際。
+這就是檢視類別也包含巢狀介面與回呼的集合的原因，這樣您就能更輕鬆地定義。
+這些介面稱為<a href="#EventListeners">事件接聽器</a>，就是用來擷取使用者與您 UI 互動的票券。
+</p>
+
+<p>雖然您更常使用事件接聽器來接聽使用者互動，未來您可能會想要延伸檢視類別以建置自訂元件。
+或許您想要延伸 {@link android.widget.Button} 類別讓一些項目更為出色。
+
+在這種情況下，您能夠使用類別<a href="#EventHandlers">事件處理常式</a>來為您的類別定義預設事件行為。
+</p>
+
+
+<h2 id="EventListeners">事件接聽器</h2>
+
+<p>事件接聽器是 {@link android.view.View} 類別中的一個介面，該類別包含單一回呼方法。
+當使用者與 UI 中的項目互動並觸發接聽器所註冊的檢視時，Android 架構就會呼叫這些方法。
+</p>
+
+<p>事件接聽器介面包含下列回呼方法：</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>從 {@link android.view.View.OnClickListener}。使用者輕觸項目 (處於輕觸模式時)，或將焦點放在具有導覽鍵或軌跡球的項目上，然後按適當的 "enter" 鍵或按下軌跡球時，就會呼叫。
+
+
+</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>從 {@link android.view.View.OnLongClickListener}。使用者輕觸並按住項目 (處於輕觸模式時)，或將焦點放在具有導覽鍵或軌跡球的項目上，然後按住適當的 "enter" 鍵或按住軌跡球 (一秒) 時，就會呼叫。
+
+
+</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>從 {@link android.view.View.OnFocusChangeListener}。使用者使用導覽鍵或軌跡球導覽至項目或離開項目時，就會呼叫。
+</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>從 {@link android.view.View.OnKeyListener}。使用者將焦點放在項目上，然後按下或放開裝置上的硬體鍵時，就會呼叫。
+</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>從 {@link android.view.View.OnTouchListener}。當使用者執行符合輕觸事件資格的動作時，包括按下、放開或在螢幕上的任何移動手勢 (在項目邊界內)，就會呼叫。
+
+</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>從 {@link android.view.View.OnCreateContextMenuListener}。建置操作選單時 (產生持續「長按」的效果)，就會呼叫。
+請參閱<a href="{@docRoot}guide/topics/ui/menus.html#context-menu">選單</a>開發人員指南的操作選單相關討論。
+
+</dd>
+</dl>
+
+<p>這些方法是其個別介面的唯一要素。如要定義其中一種方法並處理您的事件，可在您的 Activity 中實作巢狀介面或將它定義為匿名類別。然後，將您的實作執行個體傳送至個別的 <code>View.set...Listener()</code> 方法。
+
+
+(例如，呼叫
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code>，將您的 {@link android.view.View.OnClickListener OnClickListener} 實作傳送給它。)
+</p>
+
+<p>下列範例說明如何為某個按鈕註冊 on-click 接聽器。 </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>您也會發現在 Activity 中實作 OnClickListener 會更為方便。這樣可避免額外的類別載入和物件配置。
+例如：</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>請注意，上述範例的 <code>onClick()</code> 回呼不會傳回任何值，但某些其他事件接聽器方法必須傳回布林值。
+這個原因取決於事件。
+少數執行此事件的原因如下：</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> - 這會傳回一個布林值，指出您是否已使用此事件，未來不應該繼續執行。
+亦即，傳回 <em>true</em> 指出您已處理事件，應該在這裡停止；如果您未處理事件和/或事件應該繼續在任何其他 on-click 接聽器上執行，則會傳回 <em>false</em>。
+
+
+</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> - 這會傳回一個布林值，指出您是否已使用此事件，未來不應該繼續執行。
+
+    亦即，傳回 <em>true</em> 指出您已處理事件，應該在這裡停止；如果您未處理事件和/或事件應該繼續在任何其他 on-key 接聽器上執行，則會傳回 <em>false</em>。
+
+</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> - 這會傳回一個布林值，指出您的接聽器是否已使用此事件。
+最重要的是，這個事件可以處理彼此接續的多個動作。
+因此，收到向下動作事件時如果您傳回 <em>false</em>，就表示您尚未使用事件，而且對於這個事件的後續動作也不感興趣。
+
+因此，您不需要在事件內執行任何其他動作，例如手指手勢或最終動作事件。
+</li>
+</ul>
+
+<p>請記住，硬體按鍵事件一律會傳送至目前焦點中的檢視。它們會從檢視階層的最上層開始發送，然後往下直到到達適當的目的地為止。
+如果焦點現在位於您的檢視 (或檢視的子項)，則您可以透過 <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code> 方法查看事件過程。
+作為透過您的檢視擷取按鍵事件的替代方法，您也可以使用 <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code> 和 <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code> 接收您 Activity 內的所有事件。
+
+</p>
+
+<p>此外，當您思考應用程式的文字輸入時，請記住，許多裝置只有軟體輸入方法。
+這類方法不需要以按鍵為基礎；有些可能會使用語音輸入、手寫等方式。即使輸入方法出現類似鍵盤的介面，也通常<strong>不會</strong>觸發事件的
+<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code> 系列。
+您不應該建置需要按下特定按鍵才能控制的 UI，除非您想將應用程式限制為使用硬體鍵盤的裝置。
+
+尤其是當使用者按 Return 鍵時，不要藉助這些方法來驗證輸入；改為使用像 {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} 的動作向輸入方法示意您應用程式預期的反應方式，讓它能夠以有意義的方式變更其 UI。
+
+避免假設軟體輸入方法應該會如何運作，只要相信它能為您的應用程式提供既有的格式化文字。
+</p>
+
+<p class="note"><strong>注意：</strong>Android 會先呼叫事件處理常式，然後再從類別定義呼叫適當的預設處理常式。
+因此，從這些事件接聽器傳回 <em>true</em> 將會停止將事件傳播到其他事件接聽器，也會封鎖對檢視中預設事件處理常式的回呼。
+
+因此，要確定您傳回 <em>true</em> 時要終止事件。</p>
+
+
+<h2 id="EventHandlers">事件處理常式</h2>
+
+<p>如果您正從檢視建置自訂元件，則您就能定義多種回呼方法做為預設事件處理常式。在<a href="{@docRoot}guide/topics/ui/custom-components.html">自訂元件</a>的相關文件中，您將瞭解事件處理常式的一些常見回呼，包括：
+
+
+
+</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - 當發生新的按鍵事件時就會進行呼叫。</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - 當發生向上鍵事件時就會進行呼叫。</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - 當發生軌跡球動作事件時就會進行呼叫。</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - 當發生觸控螢幕動作事件時就會進行呼叫。</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - 當檢視獲得或失去焦點時就會進行呼叫。</li>
+</ul>
+<p>您還必須注意其他一些方法，這些方法不屬於檢視類別，但會直接影響您能夠處理事件的方式。
+因此，在版面配置中管理更複雜的事件時，請考量下列其他方法：
+</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - 這讓您的 {@link
+android.app.Activity} 能在發送至視窗之前攔截所有輕觸事件。</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - 這讓 {@link
+android.view.ViewGroup} 在發送至子檢視時能監控事件。</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - 呼叫這個父檢視以指出不應該使用 <code>{@link 
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code> 攔截輕觸事件。
+</li>
+</ul>
+
+<h2 id="TouchMode">輕觸模式</h2>
+<p>
+使用者以方向鍵或軌跡球瀏覽使用者介面時，必須對可動作的項目 (例如按鈕) 提供焦點，這樣使用者就能看到什麼項目將接受輸入。
+
+不過，如果裝置具有輕觸功能，而且使用者透過輕觸方式開始與介面互動，就不需要再將項目反白顯示，或是對特定檢視提供焦點。
+
+因此，這就是名稱為「輕觸模式」的互動模式。
+ 
+</p>
+<p>
+如果是具備輕觸功能的裝置，使用者輕觸螢幕之後，裝置就會進入輕觸模式。
+從這點以此類推，只有 
+{@link android.view.View#isFocusableInTouchMode} 為 true 的檢視才可設定焦點，例如文字編輯小工具。
+其他可輕觸的檢視，例如按鈕，在輕觸時不會成為焦點；按下時，只會觸發 on-click 接聽器。
+
+</p>
+<p>
+使用者在任何時候點擊方向鍵或使用軌跡球捲動時，裝置會結束輕觸模式，然後找尋要成為焦點的檢視。
+現在，使用者可繼續與使用者介面互動，而不必輕觸螢幕。
+
+</p>
+<p>
+整個系統 (所有視窗和 Activity) 都會保留輕觸模式的狀態。如要查詢目前的狀態，您可以呼叫 
+{@link android.view.View#isInTouchMode} 以查看裝置目前是否處於輕觸模式。
+
+</p>
+
+
+<h2 id="HandlingFocus">處理焦點</h2>
+
+<p>架構會處理慣例焦點移動以回應使用者輸入。
+這包括在移除或隱藏檢視時變更焦點，或是新檢視可用時。
+檢視可透過 <code>{@link android.view.View#isFocusable()}</code> 方法指出它們成為焦點的意願。
+如要變更檢視是否可成為焦點，可呼叫 <code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code>。
+處於輕觸模式時，您可使用 <code>{@link android.view.View#isFocusableInTouchMode()}</code> 查詢檢視是否允許成為焦點。
+
+您可以使用 <code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code> 進行變更。
+</p>
+
+<p>焦點移動是以演算法為依據，在指定的方向尋找最接近的項目。
+在少數情況下，預設的演算法與開發人員預期的行為可能不符。
+在這些情況下，您可以在版面配置檔案使用下列 XML 屬性進行明確的覆寫：
+
+<var>nextFocusDown</var>、 <var>nextFocusLeft</var>、 <var>nextFocusRight</var>和
+<var>nextFocusUp</var>。在移出焦點的檢視中，新增下列其中一個屬性<em></em>。
+將屬性的值定義為應該成為焦點之檢視的 ID<em></em>。
+例如：</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>一般來說，在這個直式版面配置中，從第一個按鈕往上瀏覽或從第二個按鈕往下瀏覽都不會到任何地方。
+現在，上方按鈕已將下方按鈕定義為
+ <var>nextFocusUp</var> (反之亦然)，導覽焦點會從上到下以及從下到上循環。
+</p>
+
+<p>如果您想在 UI 中將檢視宣告為可設定焦點 (傳統上不行)，可在您的版面配置宣告中將 <code>android:focusable</code> XML 屬性新增至檢視。
+
+將值設定為 <var>true</var>。您也可以使用 <code>android:focusableInTouchMode</code> 在輕觸模式中將檢視宣告為可設定焦點。
+</p>
+<p>如要要求特定檢視成為焦點，可呼叫 <code>{@link android.view.View#requestFocus()}</code>。</p>
+<p>如要接聽焦點事件 (在檢視獲得或失去焦點時收到通知)，可使用
+<code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code> (如上述<a href="#EventListeners">事件接聽器</a>中所討論)。
+</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

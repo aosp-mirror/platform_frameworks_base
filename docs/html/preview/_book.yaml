@@ -1,0 +1,94 @@
+toc:
+- title: Program Overview
+  path: /preview/overview.html
+  custom_link_attributes:
+  - es-lang="Información general del programa"
+  - ja-lang="プログラム概要"
+  - ko-lang="프로그램 개요"
+  - pt-br-lang="Visão geral do programa"
+  - ru-lang="Обзор программы"
+  - zh-cn-lang="计划概览"
+  - zh-tw-lang="程式總覽"
+
+- title: Support and Release Notes
+  path: /preview/support.html
+
+- title: Set Up to Develop
+  path: /preview/setup-sdk.html
+  custom_link_attributes:
+  - es-lang="Configurar el SDK de la versión preliminar"
+  - ja-lang="Preview SDK のセットアップ"
+  - ko-lang="미리 보기 SDK 설정하기"
+  - pt-br-lang="Configuração do Preview SDK"
+  - ru-lang="Настройка пакета SDK Preview"
+  - zh-cn-lang="设置预览版 SDK"
+  - zh-tw-lang="設定預覽版 SDK"
+
+- title: Test on a Device
+  path: /preview/download.html
+
+- title: Behavior Changes
+  path: /preview/behavior-changes.html
+  custom_link_attributes:
+  - es-lang="Cambios en los comportamientos"
+  - ja-lang="動作の変更点"
+  - ko-lang="동작 변경"
+  - pt-br-lang="Mudanças de comportamento"
+  - ru-lang="Изменения в работе"
+  - zh-cn-lang="行为变更"
+  - zh-tw-lang="行為變更"
+  section:
+  - title: Background Optimizations
+    path: /preview/features/background-optimization.html
+  - title: Language and Locale
+    path: /preview/features/multilingual-support.html
+
+- title: Android N for Developers
+  path: /preview/api-overview.html
+  custom_link_attributes:
+  - es-lang="Información general de la API"
+  - ja-lang="API の概要"
+  - ko-lang="API 개요"
+  - pt-br-lang="Visão geral da API"
+  - ru-lang="Обзор API-интерфейсов"
+  - zh-cn-lang="API 概览"
+  - zh-tw-lang="API 總覽"
+  section:
+  - title: Multi-Window Support
+    path: /preview/features/multi-window.html
+  - title: Notifications
+    path: /preview/features/notification-updates.html
+  - title: Data Saver
+    path: /preview/features/data-saver.html
+  - title: TV Recording
+    path: /preview/features/tv-recording-api.html
+  - title: Network Security Configuration
+    path: /preview/features/security-config.html
+  - title: ICU4J Support
+    path: /preview/features/icu4j-framework.html
+  - title: Java 8 Language Features
+    path: /preview/j8-jack.html
+  - title: Android for Work Updates
+    path: /preview/features/afw.html
+
+- title: Samples
+  path: /preview/samples.html
+  custom_link_attributes:
+  - es-lang="Ejemplos"
+  - ja-lang="サンプル"
+  - ko-lang="샘플"
+  - pt-br-lang="Exemplos"
+  - ru-lang="Примеры"
+  - zh-cn-lang="示例"
+  - zh-tw-lang="範例"
+
+- title: License Agreement
+  path: /preview/license.html
+  custom_link_attributes:
+  - es-lang="Contrato de licencia"
+  - ja-lang="使用許諾契約"
+  - ko-lang="라이선스 계약"
+  - pt-br-lang="Contrato de licença"
+  - ru-lang="Лицензионное соглашение"
+  - zh-cn-lang="许可协议"
+  - zh-tw-lang="授權協議"

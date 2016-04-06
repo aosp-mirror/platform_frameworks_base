@@ -1,0 +1,34 @@
+page.title=Developer Stories: Apps
+meta.tags="apps, developer story"
+page.timestamp=1381449601
+page.image=images/cards/distribute/stories/intuit-mint.png
+page.metaDescription=How app developers are making use of localization, tablet features.
+
+@jd:body
+
+<p>
+  Learn more about how app developers are using Google Play services to delight
+  their users.
+</p>
+
+<section class="dac-section dac-small" id="app-videos"><div class="wrap">
+  <h2 class="norule">Videos</h2>
+
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:youtube+tag:developerstory+tag:apps"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="6"></div>
+</div></section>
+
+<section class="dac-section dac-small" id="apps-articles"><div class="wrap">
+  <h2 class="norule">Articles</h2>
+
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:distribute+tag:developerstory+tag:apps"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="3"></div>
+</div></section>

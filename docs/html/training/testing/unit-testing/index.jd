@@ -1,5 +1,6 @@
 page.title=Building Effective Unit Tests
 page.tags=testing,androidjunitrunner,junit,unit test
+page.image=images/testing/hwtest_junit_success.png
 
 trainingnavtop=true
 startpage=true

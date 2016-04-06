@@ -4,6 +4,7 @@ fullpage=true
 no_footer_links=true
 page.type=about
 page.image=/images/cards/android-auto_2x.png
+nonavpage=true
 
 @jd:body
 
@@ -331,7 +332,8 @@ page.image=/images/cards/android-auto_2x.png
           </div>
           <div class="landing-body landing-align-center">
               <div class="landing-subhead">
-                Android Auto is coming soon to new cars from these manufacturers
+              We've partnered with manufacturers around the world to bring
+               the Android platform to cars.
               </div>
           </div>
 
@@ -430,20 +432,28 @@ page.image=/images/cards/android-auto_2x.png
               </a>
             </div>
             <div class="col-5">
+              <a href="http://www.genesismotors.com/en/index.html">
+                  <img src="{@docRoot}auto/images/logos/auto/genesis.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+
+            <div class="col-5">
               <a href="http://www.gmc.com/">
                   <img src="{@docRoot}auto/images/logos/auto/gmc.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.holden.com/">
                   <img src="{@docRoot}auto/images/logos/auto/holden.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
 
-          <div class="cols cols-leftp">
+
             <div class="col-5">
               <a href="http://www.honda.com/">
                   <img src="{@docRoot}auto/images/logos/auto/honda.png"
@@ -462,21 +472,42 @@ page.image=/images/cards/android-auto_2x.png
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            </div>
+            <div class="cols cols-leftp">
+             <div class="col-5">
+              <a href="http://www.jaguar.com/index.html">
+                  <img src="{@docRoot}auto/images/logos/auto/jaguar.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
             <div class="col-5">
               <a href="http://www.jeep.com/">
                   <img src="{@docRoot}auto/images/logos/auto/jeep.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
 
-          <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.kia.com/worldwide/">
                   <img src="{@docRoot}auto/images/logos/auto/kia.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            <div class="col-5">
+              <a href=" http://www.lamborghini.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/lambo.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+            </div>
+            <div class="cols cols-leftp">
+            <div class="col-5">
+              <a href=" http://www.landrover.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/landrover.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+
             <div class="col-5">
               <a href="http://www.mahindra.com/">
                   <img src="{@docRoot}auto/images/logos/auto/mahindra.png"
@@ -495,15 +526,16 @@ page.image=/images/cards/android-auto_2x.png
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
+            </div>
 
-          <div class="cols cols-leftp">
-            <div class="col-5">
+              <div class="cols cols-leftp">
+              <div class="col-5">
               <a href="http://www.mitsubishi-motors.com/">
                   <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.nissan-global.com/">
                   <img src="{@docRoot}auto/images/logos/auto/nissan.png"
@@ -522,15 +554,15 @@ page.image=/images/cards/android-auto_2x.png
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
-
-          <div class="cols cols-leftp">
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.ramtrucks.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ram.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.renault.com/">
                   <img src="{@docRoot}auto/images/logos/auto/renault.png"
@@ -549,21 +581,23 @@ page.image=/images/cards/android-auto_2x.png
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
-
-          <div class="cols cols-leftp">
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.smotor.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ssangyong.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.subaru-global.com/">
                   <img src="{@docRoot}auto/images/logos/auto/subaru.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
+
             <div class="col-5">
               <a href="http://www.globalsuzuki.com/automobile/">
                   <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
@@ -576,25 +610,22 @@ page.image=/images/cards/android-auto_2x.png
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-          </div>
-
-          <div class="cols cols-leftp">
-            <div class="col-5"></div>
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.volkswagen.com/">
                   <img src="{@docRoot}auto/images/logos/auto/volkswagen.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.volvocars.com/intl">
                   <img src="{@docRoot}auto/images/logos/auto/volvo.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            <div class="col-5"></div>
-
-          </div>
+            </div>
         </div>
       </div>
 
@@ -619,25 +650,6 @@ page.image=/images/cards/android-auto_2x.png
         </div>
       </div>
   </div>
-  <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement"
-    style="border-top: none;">
-
-    <div class="layout-content-col col-16" style="padding-top:4px">
-      <style>#___plusone_0 {float:right !important;}</style>
-      <div class="g-plusone" data-size="medium"></div>
-    </div>
-  </div>
-
-  <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
-    <div id="copyright">
-        Except as noted, this content is
-        licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
-        Creative Commons Attribution 2.5</a>. For details and
-        restrictions, see the <a href="{@docRoot}license.html">Content
-        License</a>.
-    </div>
-  </div>
-</div> <!-- end .landing-hero-container -->
 
   <script>
   $("a.landing-down-arrow").on("click", function(e) {

@@ -115,7 +115,7 @@ within the activity's window and can respond to user interaction. For example, a
 button that initiates an action when the user touches it.</p>
 
 <p>Android provides a number of ready-made views that you can use to design and organize your
-layout. "Widgets" are views that provide a visual (and interactive) elements for the screen, such
+layout. "Widgets" are views that provide visual (and interactive) elements for the screen, such
 as a button, text field, checkbox, or just an image. "Layouts" are views derived from {@link
 android.view.ViewGroup} that provide a unique layout model for its child views, such as a linear
 layout, a grid layout, or relative layout. You can also subclass the {@link android.view.View} and
@@ -661,7 +661,7 @@ that should be saved. Almost every widget in the Android framework implements th
 appropriate, such that any visible changes to the UI are automatically saved and restored when your
 activity is recreated. For example, the {@link android.widget.EditText} widget saves any text
 entered by the user and the {@link android.widget.CheckBox} widget saves whether it's checked or
-not. The only work required by you is to provide a unique ID (with the <a
+not. The only work required of you is to provide a unique ID (with the <a
 href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>
 attribute) for each widget you want to save its state. If a widget does not have an ID, then the
 system cannot save its state.</p>

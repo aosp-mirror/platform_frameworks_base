@@ -1,0 +1,317 @@
+page.title=Optimizing Content for the Assistant
+page.metaDescription=Support contextually relevant actions through the Assist API.
+page.tags=assist, accessibility, now, now on tap
+meta.tags="assistant", "marshmallow", "now"
+page.image=images/cards/card-assist_16-9_2x.png
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#assist_api">Using the Assist API</a>
+      <ol>
+        <li><a href="#assist_api_lifecycle">Assist API Lifecycle</a></li>
+        <li><a href="#source_app">Source App</a></li>
+        <li><a href="#destination_app">Destination App</a></li>
+      </ol>
+      </li>
+      <li><a href="#implementing_your_own_assistant">Implementing your
+      own assistant</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Android 6.0 Marshmallow introduces a new way for users to engage with apps
+  through the assistant.
+</p>
+
+<p>
+  Users summon the assistant with a long-press on the Home button or by saying
+  the {@link android.service.voice.AlwaysOnHotwordDetector keyphrase}. In
+  response to the long-press, the system opens a top-level window that displays
+  contextually relevant actions for the current activity. These potential
+  actions might include deep links to other apps on the device.
+</p>
+
+<p>
+  This guide explains how Android apps use Android's Assist API to improve the
+  assistant user experience.
+</p>
+
+
+<h2 id="assist_api">Using the Assist API</h2>
+
+<p>
+  The example below shows how Google Now integrates with the Android assistant
+  using a feature called Now on Tap.
+</p>
+
+<p>
+  The assistant overlay window in our example (2, 3) is implemented by Google
+  Now through a feature called Now on Tap, which works in concert with the
+  Android platform-level functionality. The system allows the user to select
+  the assistant app (Figure 2) that obtains contextual information from the
+  <em>source</em> app using the Assist API which is a part of the platform.
+</p>
+
+
+<div>
+  <img src="{@docRoot}images/training/assistant/image01.png">
+  <p class="img-caption" style="text-align:center;">
+    Figure 1. Assistant interaction example with the Now on Tap feature of
+    Google Now
+  </p>
+</div>
+
+<p>
+  An Android user first configures the assistant and can change system options
+  such as using text and view hierarchy as well as the screenshot of the
+  current screen (Figure 2).
+</p>
+
+<p>
+  From there, the assistant receives the information only when the user
+  activates assistance, such as when they tap and hold the Home button ( shown
+  in Figure 1, step 1).
+</p>
+
+<div style="float:right;margin:1em;max-width:300px">
+  <img src="{@docRoot}images/training/assistant/image02.png">
+  <p class="img-caption" style="text-align:center;">
+    Figure 2. Assist &amp; voice input settings (<em>Settings/Apps/Default
+    Apps/Assist &amp; voice input</em>)
+  </p>
+</div>
+
+<h3 id="assist_api_lifecycle">Assist API Lifecycle</h3>
+
+<p>
+  Going back to our example from Figure 1, the Assist API callbacks are invoked
+  in the <em>source</em> app after step 1 (user long-presses the Home button)
+  and before step 2 (the assistant renders the overlay window). Once the user
+  selects the action to perform (step 3), the assistant executes it, for
+  example by firing an intent with a deep link to the (<em>destination</em>)
+  restaurant app (step 4).
+</p>
+
+<h3 id="source_app">Source App</h3>
+
+<p>
+  In most cases, your app does not need to do anything extra to integrate with
+  the assistant if you already follow <a href=
+  "{@docRoot}guide/topics/ui/accessibility/apps.html">accessibility best
+  practices</a>. This section describes how to provide additional information
+  to help improve the assistant user experience, as well as scenarios, such as
+  custom Views, that need special handling.
+</p>
+
+<h4 id="share_additional_information_with_the_assistant">Share Additional Information with the Assistant</h4>
+
+<p>
+  In addition to the text and the screenshot, your app can share
+  <em>additional</em> information with the assistant. For example, your music
+  app can choose to pass current album information, so that the assistant can
+  suggest smarter actions tailored to the current activity.
+</p>
+
+<p>
+  To provide additional information to the assistant, your app provides
+  <em>global application context</em> by registering an app listener and
+  supplies activity-specific information with activity callbacks as shown in
+  Figure 3.
+</p>
+
+<div>
+  <img src="{@docRoot}images/training/assistant/image03.png">
+  <p class="img-caption" style="text-align:center;">
+    Figure 3. Assist API lifecycle sequence diagram.
+  </p>
+</div>
+
+<p>
+  To provide global application context, the app creates an implementation of
+  {@link android.app.Application.OnProvideAssistDataListener} and registers it
+  using {@link
+  android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener)}.
+  In order to provide activity-specific contextual information, activity
+  overrides {@link android.app.Activity#onProvideAssistData(android.os.Bundle)}
+  and {@link
+  android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent)}.
+  The two activity methods are called <em>after</em> the optional global
+  callback (registered with {@link
+  android.app.Application#registerOnProvideAssistDataListener(android.app.Application.OnProvideAssistDataListener)})
+  is invoked. Since the callbacks execute on the main thread, they should
+  complete <a href="{@docRoot}training/articles/perf-anr.html">promptly</a>.
+  The callbacks are invoked only when the activity is <a href=
+  "{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">running</a>.
+</p>
+
+<h5 id="providing_context">Providing Context</h5>
+
+<p>
+  {@link android.app.Activity#onProvideAssistData(android.os.Bundle)} is called
+  when the user is requesting the assistant to build a full {@link
+  android.content.Intent#ACTION_ASSIST} Intent with all of the context of the
+  current application represented as an instance of the {@link
+  android.app.assist.AssistStructure}. You can override this method to place
+  into the bundle anything you would like to appear in the
+  <code>EXTRA_ASSIST_CONTEXT</code> part of the assist Intent.
+</p>
+
+<h5 id="describing_content">Describing Content</h5>
+
+<p>
+  Your app can implement {@link
+  android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent)}
+  to improve assistant user experience by providing references to content
+  related to the current activity. You can describe the app content using the
+  common vocabulary defined by <a href="https://schema.org">Schema.org</a>
+  through a JSON-LD object. In the example below, a music app provides
+  structured data to describe the music album the user is currently
+  looking at.
+</p>
+
+<pre class="prettyprint">
+&commat;Override
+public void onProvideAssistContent(AssistContent <strong>assistContent</strong>) {
+  super.onProvideAssistContent(<strong>assistContent</strong>);
+
+  String structuredJson = <strong>new </strong>JSONObject()
+       .put(<strong>"@type"</strong>, <strong>"MusicRecording"</strong>)
+       .put(<strong>"@id"</strong>, <strong>"https://example.com/music/recording"</strong>)
+       .put(<strong>"name"</strong>, <strong>"Album Title"</strong>)
+       .toString();
+
+  <strong>assistContent</strong>.setStructuredData(structuredJson);
+}
+</pre>
+
+<p>
+  Custom implementations of {@link
+  android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent)}
+  may also adjust the provided {@link
+  android.app.assist.AssistContent#setIntent(android.content.Intent) content
+  intent} to better reflect the top-level context of the activity, supply
+  {@link android.app.assist.AssistContent#setWebUri(android.net.Uri) the URI}
+  of the displayed content, and fill in its {@link
+  android.app.assist.AssistContent#setClipData(android.content.ClipData)} with
+  additional content of interest that the user is currently viewing.
+</p>
+
+<h4 id="default_implementation">Default Implementation</h4>
+
+<p>
+  If neither {@link
+  android.app.Activity#onProvideAssistData(android.os.Bundle)} nor {@link
+  android.app.Activity#onProvideAssistContent(android.app.assist.AssistContent)}
+  callbacks are implemented, the system will still proceed and pass the
+  information collected automatically to the assistant unless the current
+  window is flagged as <a href="#excluding_views">secure</a>.
+  As shown in Figure 3, the system uses the default implementations of {@link
+  android.view.View#onProvideStructure(android.view.ViewStructure)} and {@link
+  android.view.View#onProvideVirtualStructure(android.view.ViewStructure)} to
+  collect text and view hierarchy information. If your view implements custom
+  text drawing, you should override {@link
+  android.view.View#onProvideStructure(android.view.ViewStructure)} to provide
+  the assistant with the text shown to the user by calling {@link
+  android.view.ViewStructure#setText(java.lang.CharSequence)}.
+</p>
+
+<p>
+  <strong>In most cases, implementing accessibility support will enable the
+  assistant to obtain the information it needs.</strong> This includes
+  providing {@link android.R.attr#contentDescription
+  android:contentDescription} attributes, populating {@link
+  android.view.accessibility.AccessibilityNodeInfo} for custom views, making
+  sure custom {@link android.view.ViewGroup ViewGroups} correctly {@link
+  android.view.ViewGroup#getChildAt(int) expose} their children, and following
+  the best practices described in <a href=
+  "{@docRoot}guide/topics/ui/accessibility/apps.html">“Making Applications
+  Accessible”</a>.
+</p>
+
+<h4 id="excluding_views">Excluding views from the assistant</h4>
+
+<p>
+  An activity can exclude the current view from the assistant. This is accomplished
+  by setting the {@link android.view.WindowManager.LayoutParams#FLAG_SECURE
+  FLAG_SECURE} layout parameter of the WindowManager and must be done
+  explicitly for every window created by the activity, including Dialogs. Your
+  app can also use {@link android.view.SurfaceView#setSecure(boolean)
+  SurfaceView.setSecure} to exclude a surface from the assistant. There is no
+  global (app-level) mechanism to exclude all views from the assistant. Note
+  that <code>FLAG_SECURE</code> does not cause the Assist API callbacks to stop
+  firing. The activity which uses <code>FLAG_SECURE</code> can still explicitly
+  provide information to the assistant using the callbacks described earlier
+  this guide.
+</p>
+
+<h4 id="voice_interactions">Voice Interactions</h4>
+
+<p>
+  Assist API callbacks are also invoked upon {@link
+  android.service.voice.AlwaysOnHotwordDetector keyphrase detection}. For more
+  information see the <a href="https://developers.google.com/voice-actions/">voice
+  actions</a> documentation.
+</p>
+
+<h4 id="z-order_considerations">Z-order considerations</h4>
+
+<p>
+  The assistant uses a lightweight overlay window displayed on top of the
+  current activity. The assistant can be summoned by the user at any time.
+  Therefore, apps should not create permanent {@link
+  android.Manifest.permission#SYSTEM_ALERT_WINDOW system alert}
+  windows interfering with the overlay window shown in Figure 4.
+</p>
+
+<div style="">
+  <img src="{@docRoot}images/training/assistant/image04.png">
+  <p class="img-caption" style="text-align:center;">
+    Figure 4. Assist layer Z-order.
+  </p>
+</div>
+
+<p>
+  If your app uses {@link
+  android.Manifest.permission#SYSTEM_ALERT_WINDOW system alert} windows, it
+  must promptly remove them as leaving them on the screen will degrade user
+  experience and annoy the users.
+</p>
+
+<h3 id="destination_app">Destination App</h3>
+
+<p>
+  The matching between the current user context and potential actions displayed
+  in the overlay window (shown in step 3 in Figure 1) is specific to the
+  assistant’s implementation. However, consider adding <a href=
+  "{@docRoot}training/app-indexing/deep-linking.html">deep linking</a> support
+  to your app. The assistant will typically take advantage of deep linking. For
+  example, Google Now uses deep linking and <a href=
+  "https://developers.google.com/app-indexing/">App Indexing</a> in order to
+  drive traffic to destination apps.
+</p>
+
+<h2 id="implementing_your_own_assistant">Implementing your own assistant </h2>
+
+<p>
+  Some developers may wish to implement their own assistant. As shown in Figure
+  2, the active assistant app can be selected by the Android user. The
+  assistant app must provide an implementation of {@link
+  android.service.voice.VoiceInteractionSessionService} and {@link
+  android.service.voice.VoiceInteractionSession} as shown in <a href=
+  "https://android.googlesource.com/platform/frameworks/base/+/android-5.0.1_r1/tests/VoiceInteraction?autodive=0%2F%2F%2F%2F%2F%2F">
+  this</a> example and it requires the {@link
+  android.Manifest.permission#BIND_VOICE_INTERACTION} permission. It can then
+  receive the text and view hierarchy represented as an instance of the {@link
+  android.app.assist.AssistStructure} in {@link
+  android.service.voice.VoiceInteractionSession#onHandleAssist(android.os.Bundle,
+  android.app.assist.AssistStructure,android.app.assist.AssistContent) onHandleAssist()}.
+  The assistant receives the screenshot through {@link
+  android.service.voice.VoiceInteractionSession#onHandleScreenshot(android.graphics.Bitmap)
+  onHandleScreenshot()}.
+</p>

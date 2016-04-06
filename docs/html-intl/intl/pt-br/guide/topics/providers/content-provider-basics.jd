@@ -1,0 +1,1196 @@
+page.title=Preceitos do provedor de conteúdo
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>Neste documento</h2>
+<ol>
+    <li>
+        <a href="#Basics">Visão geral</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">Acesso a um provedor</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">URIs de conteúdo</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">Recuperação de dados do provedor</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">Solicitação de permissão de acesso para leitura</a>
+            </li>
+            <li>
+                <a href="#Query">Construção da consulta</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">Exibição dos resultados da consulta</a>
+            </li>
+            <li>
+                <a href="#GettingResults">Obtenção de dados de resultados da consulta</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">Permissões do provedor de conteúdo</a>
+    </li>
+    <li>
+        <a href="#Modifications">Inserção, atualização e exclusão de dados</a>
+        <ol>
+            <li>
+                <a href="#Inserting">Inserção de dados</a>
+            </li>
+            <li>
+                <a href="#Updating">Atualização de dados</a>
+            </li>
+            <li>
+                <a href="#Deleting">Exclusão de dados</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">Tipos de dados do provedor</a>
+    </li>
+    <li>
+        <a href="#AltForms">Formas alternativas de acesso ao provedor</a>
+        <ol>
+            <li>
+                <a href="#Batch">Acesso em lote</a>
+            </li>
+            <li>
+                <a href="#Intents">Acesso a dados via intenções</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">Classes de contrato</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">Referência de tipo MIME</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Classes principais</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>Exemplos relacionados</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Cursor (Pessoas)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Cursor (Telefones)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>Veja também</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            Criação de um Provedor de conteúdo</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Provedor de agenda</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    O provedor de conteúdo gerencia o acesso a um repositório central de dados. Um provedor
+    é parte de um aplicativo do Android, que, em geral, fornece a própria IU para trabalhar com
+    os dados. Contudo, provedores de conteúdo destinam-se principalmente ao uso por outros
+    aplicativos, que acessam o provedor usando um objeto cliente do provedor. Juntos, provedores
+    e clientes do provedor oferecem interface padronizada e consistente para dados que também lidam com
+    comunicação em processos internos e garantem acesso a dados.
+</p>
+<p>
+    Esse tópico descreve os conceitos básicos do seguinte:
+</p>
+    <ul>
+        <li>Como os provedores de conteúdo funcionam.</li>
+        <li>A API usada para recuperar dados de um provedor de conteúdo.</li>
+        <li>A API usada para inserir, atualizar ou excluir dados em um provedor de conteúdo.</li>
+        <li>Outros recursos de API que facilitam o trabalho com provedores.</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">Visão geral</h2>
+<p>
+    O provedor de conteúdo apresenta dados a aplicativos externos na forma de uma ou mais tabelas
+    similares às tabelas encontradas em um banco de dados relacional. Uma linha representa uma instância de algum tipo
+    de dados que o provedor coleta e cada coluna na linha representa uma parte individual de
+    dados coletados por uma instância.
+</p>
+<p>
+    Por exemplo: um dos provedores embutidos na plataforma do Android é o dicionário do usuário, que
+    armazena as grafias de palavras incomuns que o usuário deseja manter. A tabela 1 ilustra
+    como podem ser os dados nesta tabela do provedor:
+</p>
+<p class="table-caption">
+    <strong>Tabela 1:</strong> Tabela de dicionário do usuário de exemplo.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">palavra</th>
+        <th style="width:20%" align="center" scope="col">id do aplicativo</th>
+        <th style="width:20%" align="center" scope="col">frequência</th>
+        <th style="width:20%" align="center" scope="col">localidade</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">reduçãodomapa</td>
+        <td align="center">usuário1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">pré-compilador</td>
+        <td align="center">usuário14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">usuário2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">usuário1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">usuário5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    Na tabela 1, cada linha representa uma instância de uma palavra que pode não ser
+    encontrada em um dicionário comum. Cada coluna representa alguns dados dessa palavra, como
+    a localidade em que foi encontrada pela primeira vez. Os cabeçalhos da coluna são nomes de coluna armazenados
+    no provedor. Para consultar a localidade de uma linha, consulte a sua coluna <code>locale</code>. Para
+    esse provedor, a coluna <code>_ID</code> serve como uma coluna de "chave principal" que
+    o provedor mantém automaticamente.
+</p>
+<p class="note">
+    <strong>Observação:</strong> os provedores não precisam ter uma chave principal e não precisam
+    usar <code>_ID</code> como o nome de coluna de uma chave principal se uma for apresentada. Contudo,
+    se você deseja agrupar dados de um provedor em um {@link android.widget.ListView}, um dos
+    nomes de coluna deve ser <code>_ID</code>. Esse requisito é explicado com mais detalhes
+    na seção <a href="#DisplayResults">Exibição dos resultados da consulta</a>.
+</p>
+<h3 id="ClientProvider">Acesso a um provedor</h3>
+<p>
+    Os aplicativos acessam dados a partir de um provedor de conteúdo
+    com um objeto cliente {@link android.content.ContentResolver}. Esse objeto tem métodos que chamam
+    métodos de nome idêntico no objeto do provedor, uma instância de uma das subclasses
+    concretas de {@link android.content.ContentProvider}. 
+    Os métodos {@link android.content.ContentResolver} fornecem as funções básicas
+    do "CRUD" (criar, recuperar, atualizar e excluir) de armazenamento persistente.
+</p>
+<p>
+    O objeto {@link android.content.ContentResolver} no processo do aplicativo
+    cliente e o objeto {@link android.content.ContentProvider} no aplicativo que possui
+    o provedor lidam automaticamente com a comunicação de processos internos.
+    {@link android.content.ContentProvider} também age como uma camada de abstração entre
+    ser repositório de dados e a aparência externa de dados na forma de tabelas.
+</p>
+<p class="note">
+    <strong>Observação:</strong> para acessar um provedor, o aplicativo normalmente precisa solicitar permissões
+    específicas no arquivo de manifesto. Isso é descrito com mais detalhes na seção
+    <a href="#Permissions">Permissões do provedor de conteúdo</a>.
+</p>
+<p>
+    Por exemplo: para obter uma lista das palavras e respectivas localidades do Provedor de dicionário do usuário,
+    chama-se {@link android.content.ContentResolver#query ContentResolver.query()}.
+    O método {@link android.content.ContentResolver#query query()} chama
+    o método {@link android.content.ContentProvider#query ContentProvider.query()} definido pelo
+    Provedor de dicionário do usuário. As linhas de código a seguir exibem
+    uma chamada {@link android.content.ContentResolver#query ContentResolver.query()}:
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    A tabela 2 mostra como os argumentos para
+    {@link android.content.ContentResolver#query 
+    query(Uri,projection,selection,selectionArgs,sortOrder)} correspondem a uma declaração SQL SELECT:
+</p>
+<p class="table-caption">
+    <strong>Tabela 2:</strong> Query() comparada à consulta SQL.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">Argumento query()</th>
+        <th style="width:25%" align="center" scope="col">Palavra-chave/parâmetro de SELEÇÃO</th>
+        <th style="width:50%" align="center" scope="col">Observações</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> mapeia para a tabela no provedor chamado <em>table_name</em>.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> é uma matriz de colunas que devem ser incluídas para cada linha
+            recuperada.
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> especifica o critério para a seleção de linhas.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (Não exatamente equivalente. Argumentos de seleção substituem marcadores de posição <code>?</code>
+            na cláusula de seleção.)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> especifica a ordem em que as linhas aparecem
+            no {@link android.database.Cursor} retornado.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">URIs de conteúdo</h3>
+<p>
+    <strong>URI de conteúdo</strong> é uma URI que identifica dados em um provedor. URIs de conteúdo
+    contêm o nome simbólico de todo o provedor (sua <strong>autoridade</strong>)
+    e um nome que aponta para uma tabela (um <strong>caminho</strong>). Ao chamar
+    um método cliente para acessar uma tabela em um provedor, a URI de conteúdo da tabela é
+    um dos argumentos.
+</p>
+<p>
+    Nas linhas de código anteriores, a constante
+    {@link android.provider.UserDictionary.Words#CONTENT_URI} contém a URI de conteúdo
+    da tabela de "palavras" do dicionário do usuário. O objeto {@link android.content.ContentResolver}
+    analisa a autoridade da URI e usa-na para "determinar" o provedor
+    comparando a autoridade a uma tabela de provedores conhecidos do sistema. 
+    O {@link android.content.ContentResolver} pode, então, enviar os argumentos da consulta ao provedor
+    correto.
+</p>
+<p>
+    O {@link android.content.ContentProvider} usa o caminho que é parte da URI de conteúdo para escolher
+    a tabela para acessar. Os provedores normalmente têm um <strong>caminho</strong> para cada tabela exposta.
+</p>
+<p>
+    Nas linhas de código anteriores, a URI completa da tabela de "palavras" é:
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    onde a string <code>user_dictionary</code> é a autoridade do provedor e
+    a string <code>words</code> é o caminho da tabela. A string
+    <code>content://</code> (o <strong>esquema</strong>) está sempre presente
+    e identifica isso como uma URI de conteúdo.
+</p>
+<p>
+    Muitos provedores permitem acesso a uma única linha em uma tabela, por meio da anexação do valor de um ID
+    no fim da URI. Por exemplo, para recuperar uma linha em que <code>_ID</code> seja
+    <code>4</code> do dicionário do usuário, é possível usar essa URI de conteúdo:
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    Normalmente usam-se valores de ID ao recuperar um conjunto de linhas e, em seguida, é necessário atualizar ou excluir
+    uma delas.
+</p>
+<p class="note">
+    <strong>Observação:</strong> as classes {@link android.net.Uri} e {@link android.net.Uri.Builder}
+    contêm métodos convenientes para a construção de objetos de URI bem formados a partir de strings. 
+    As {@link android.content.ContentUris} contêm métodos conveniente para anexar valores de ID
+    a uma URI. O fragmento anterior usa {@link android.content.ContentUris#withAppendedId
+    withAppendedId()} para anexar um ID à URI de conteúdo UserDictionary.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">Recuperação de dados pelo Provedor</h2>
+<p>
+    Esta seção descreve como recuperar dados de um provedor usando o Provedor de dicionário do usuário
+    como um exemplo.
+</p>
+<p class="note">
+    Por uma questão de clareza, os fragmentos de código nesta seção chamam
+    {@link android.content.ContentResolver#query ContentResolver.query()} no "encadeamento da IU". 
+    No código atual, contudo, deve-se realizar consultas assincronamente em um encadeamento separado. Um modo de fazê-lo
+    é usar a classe {@link android.content.CursorLoader}, descrita
+    com mais detalhes no guia <a href="{@docRoot}guide/components/loaders.html">
+    Carregadores</a>. Além disso, as linhas de código são somente fragmentos — não mostram um aplicativo
+    completo.
+</p>
+<p>
+    Para recuperar dados de um provedor, siga essas etapas básicas:
+</p>
+<ol>
+   <li>
+        Solicite a permissão de acesso para leitura para um provedor.
+   </li>
+   <li>
+        Defina o código que envia uma consulta ao provedor.
+   </li>
+</ol>
+<h3 id="RequestPermissions">Solicitação de permissão de acesso para leitura</h3>
+<p>
+    Para recuperar dados de um provedor, o aplicativo precisa de "permissão de acesso a leitura"
+    para o provedor. Não é possível solicitar essa permissão em tempo de execução. Em vez disso, deve-se especificar
+    que precisa dessa permissão no manifesto com o elemento
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    e o nome da permissão exata definida
+    pelo provedor. Ao especificar esse elemento no manifesto, você está efetivamente "solicitando" essa
+    permissão para o aplicativo. Quando usuários instalam seu aplicativo, eles concedem essa solicitação
+    implicitamente.
+</p>
+<p>
+    Para encontrar o nome exato da permissão de acesso para leitura do provedor que está usando, bem
+    como os nomes de outras permissões de acesso usadas pelo provedor, consulte a documentação
+    do provedor.
+</p>
+<p>
+    O papel das permissões no acesso a provedores é descrito com mais detalhes na seção
+    <a href="#Permissions">Permissões do provedor de conteúdo</a>.
+</p>
+<p>
+    O Provedor de Dicionário do Usuário define a permissão
+    <code>android.permission.READ_USER_DICTIONARY</code> no arquivo de manifesto, portanto, se um
+    aplicativo quiser ler pelo provedor, deve solicitar essa permissão.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">Construção da consulta</h3>
+<p>
+    A próxima etapa na recuperação de dados de um provedor é construir uma consulta. Este primeiro fragmento
+    define algumas variáveis para acessar o Provedor de Dicionário do Usuário:
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    O próximo fragmento mostra como usar
+    {@link android.content.ContentResolver#query ContentResolver.query()} usando o Provedor de
+    Dicionário do Usuário como exemplo. Uma consulta cliente do provedor é similar a uma consulta SQL e contém um
+    conjunto de colunas para retornar, um conjunto de critérios de seleção e uma classificação ordenada.
+</p>
+<p>
+    O conjunto de colunas que a consulta deve retornar é chamado de <strong>projeção</strong>
+    (a variável <code>mProjection</code>).
+</p>
+<p>
+    A expressão que especifica as linhas a recuperar é dividida em uma cláusula de seleção
+    e em argumentos de seleção. A cláusula de seleção é uma combinação de expressões lógicas e booleanas
+    e nomes e valores de colunas (a variável <code>mSelectionClause</code>). Ao especificar
+    o parâmetro <code>?</code> substituível em vez de um valor, o método da consulta recupera o valor
+    da matriz de argumentos de seleção (a variável <code>mSelectionArgs</code>).
+</p>
+<p>
+    No próximo fragmento, se o usuário não inserir nenhuma palavra, a cláusula de seleção será definida como
+    <code>null</code> e a consulta retornará todas as palavras no provedor. Se o usuário inserir
+    uma palavra, a cláusula de seleção será definida como <code>UserDictionary.Words.WORD + " = ?"</code>
+    e o primeiro elemento da matriz de argumentos de seleção é definida como a palavra que o usuário inserir.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    Essa consulta é análoga à declaração SQL:
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    Nesta declaração SQL, os nomes de coluna reais são usados no lugar de constantes de classes de contrato.
+</p>
+<h4 id="Injection">Proteção contra inserções mal-intencionadas</h4>
+<p>
+    Se os dados gerenciados pelo provedor de conteúdo estiverem em um banco de dados SQL, inclusive dados não confiáveis
+    externos nas declarações SQL brutas, existe a possibilidade de haver uma injeção de SQL.
+</p>
+<p>
+    Considere esta cláusula de seleção:
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    Se você fizer isso, estará permitindo que o usuário concatene SQL mal-intencionados na sua declaração SQL.
+    Por exemplo: o usuário poderia inserir "nada; REMOVER TABELA *;" para <code>mUserInput</code>, o que
+    resultaria na cláusula de seleção <code>var = nothing; DROP TABLE *;</code>. Como
+    a cláusula de seleção é tratada como uma declaração SQL, isso pode fazer com que o provedor apague todas
+    as tabelas no banco de dados SQLite em questão (a menos que o provedor esteja configurado para capturar
+    tentativas de <a href="http://en.wikipedia.org/wiki/SQL_injection">injeção de SQL</a>).
+</p>
+<p>
+    Para evitar este problema, use uma cláusula de seleção que use <code>?</code> como um parâmetro
+    substituível e uma matriz de argumentos de seleção separada. Ao fazer isso, a inserção de dados do usuário
+    limita-se diretamente à consulta em vez de ser interpretada como parte de uma declaração SQL.
+    Pelo fato de não ser tratada como SQL, a inserção de dados do usuário não injeta SQL mal-intencionados. Em vez de usar
+    a concatenação para incluir a inserção de dados do usuário, use esta cláusula de seleção:
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    Configure a matriz de argumentos de seleção desta maneira:
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    Insira um valor na matriz de argumentos de seleção desta maneira:
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    Usar uma cláusula de seleção que use <code>?</code> como um parâmetro substituível e uma matriz
+    de argumentos de seleção é o melhor modo de especificar uma seleção, mesmo que o provedor se baseie
+    base em um banco de dados SQL.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">Exibição dos resultados da consulta</h3>
+<p>
+    O método cliente {@link android.content.ContentResolver#query ContentResolver.query()} sempre
+    retorna um {@link android.database.Cursor} contendo as colunas especificadas pela projeção
+    da consulta para as linhas que atendem aos critérios de seleção da consulta. 
+    Um objeto {@link android.database.Cursor} fornece acesso para leitura aleatório para as linhas e colunas que
+    contém. Usando métodos {@link android.database.Cursor}, é possível repetir as linhas
+    nos resultados, determinar o tipo dos dados de cada coluna, extrair os dados de uma coluna e examinar
+    outras propriedades dos resultados. Algumas implementações do {@link android.database.Cursor} atualizam o objeto
+    automaticamente quando os dados do provedor mudam ou acionam métodos em um objeto observador
+    quando o {@link android.database.Cursor} muda, ou ambos.
+</p>
+<p class="note">
+    <strong>Observação:</strong> os provedores podem restringir acesso a colunas com base na natureza
+    do objeto que realiza a consulta. Por exemplo: o Provedor de Contatos restringe o acesso de algumas colunas
+    a adaptadores de sincronização, por isso ela não os retornará a uma atividade ou serviço.
+</p>
+<p>
+    Se nenhuma linha atender aos critérios de seleção, o provedor
+    retorna um objeto {@link android.database.Cursor} para o qual
+    {@link android.database.Cursor#getCount Cursor.getCount()} é 0 (um cursor vazio).
+</p>
+<p>
+    Se ocorrer um erro interno, os resultados da consulta dependem do provedor determinado. Ele pode
+    escolher retornar <code>null</code> ou pode gerar uma {@link java.lang.Exception}.
+</p>
+<p>
+    Já que {@link android.database.Cursor} é uma "lista" de linhas, um bom modo de exibir
+    o conteúdo de um {@link android.database.Cursor} é vinculá-lo a uma {@link android.widget.ListView}
+    por meio de um {@link android.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    O fragmento a seguir continua o código do fragmento anterior. Ele cria
+    um objeto {@link android.widget.SimpleCursorAdapter} contendo o {@link android.database.Cursor}
+    recuperado pela consulta e configura esse objeto para ser o adaptador de uma
+    {@link android.widget.ListView}:
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>Observação:</strong> para retornar uma {@link android.widget.ListView} com um
+    {@link android.database.Cursor}, o cursor deve conter uma coluna chamada <code>_ID</code>.
+    Por isso, a consulta exibida anteriormente recupera a coluna <code>_ID</code> da
+    tabelas de "palavras", mesmo que a {@link android.widget.ListView} não a exiba.
+    Essa restrição também explica por que a maioria dos provedores tem uma coluna <code>_ID</code> para cada
+    tabela.
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">Obtenção de dados de resultados da consulta</h3>
+<p>
+    Em vez de simplesmente exibir resultados da consulta, é possível usá-los para outras tarefas. Por
+    exemplo: é possível recuperar grafias de um dicionário do usuário e, em seguida, procurá-los
+    em outros provedores. Para isso, repetem-se as linhas no {@link android.database.Cursor}:
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    As implementações {@link android.database.Cursor} contêm diversos métodos "get" (obter)
+    para recuperar diferentes tipos de dados do objeto. Por exemplo, o fragmento anterior
+    usa {@link android.database.Cursor#getString getString()}. Elas também têm
+    um método {@link android.database.Cursor#getType getType()} que retorna um valor indicando
+    o tipo dos dados da coluna.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">Permissões do provedor de conteúdo</h2>
+<p>
+    Um aplicativo do provedor pode especificar permissões que outros aplicativos devem ter para
+    acessar os dados do provedor. Essas permissões garantem que o usuário saiba quais dados
+    um aplicativo tentará acessar. Com base nos requisitos do provedor, outros aplicativos
+    solicitam as permissões de que precisam para acessar o provedor. Usuários finais veem as permissões
+    solicitadas quando instalam o aplicativo.
+</p>
+<p>
+    Se um aplicativo do provedor não especificar nenhuma permissão, outros aplicativos não terão
+    acesso aos dados do provedor. No entanto, os componentes no aplicativo do provedor sempre têm
+    acesso total para leitura e gravação, independentemente das permissões especificadas.
+</p>
+<p>
+    Como observado anteriormente, o Provedor de Dicionário do Usuário requer
+    a permissão <code>android.permission.READ_USER_DICTIONARY</code> para recuperar dados dele.
+    O provedor tem a permissão <code>android.permission.WRITE_USER_DICTIONARY</code>
+    separadamente para inserção, atualização ou exclusão de dados.
+</p>
+<p>
+    Para obter as permissões necessárias para acessar um provedor, um aplicativo as solicita
+como um elemento <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    no arquivo de manifesto. Quando o Android Package Manager (gerente de pacotes do Android) instala o aplicativo, o usuário
+    precisa aprovar todas as permissões que o aplicativo solicita. Se o usuário aprovar todas elas,
+    o gerente de pacotes continua a instalação; se o usuário não as aprovar, o gerente de pacotes
+    aborta a instalação.
+</p>
+<p>
+    O elemento
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> a seguir
+     solicita acesso para leitura ao Provedor de Dicionário do Usuário:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    O impacto das permissões no acesso ao provedor é explicado com mais detalhes
+    no guia <a href="{@docRoot}guide/topics/security/security.html">Permissões e segurança</a>.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">Inserção, atualização e exclusão de dados</h2>
+<p>
+    Do mesmo modo que se recupera dados de um provedor, também usa-se a interação entre
+    um cliente do provedor e o {@link android.content.ContentProvider} do provedor para modificar dados.
+    Chama-se um método de {@link android.content.ContentResolver} com argumentos que são passados para
+    o método correspondente de {@link android.content.ContentProvider}. O provedor e o cliente
+    do provedor tratam automaticamente da segurança e da comunicação de processos internos.
+</p>
+<h3 id="Inserting">Inserção de dados</h3>
+<p>
+    Para inserir dados em um provedor, chame
+    o método
+{@link android.content.ContentResolver#insert ContentResolver.insert()}. Esse método insere uma nova linha no provedor e retorna uma URI de conteúdo dessa linha.
+    Este fragmento mostra como inserir uma nova palavra no Provedor de Dicionário do Usuário:
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    Os dados da nova linha vão para um objeto {@link android.content.ContentValues} único, que
+    tem forma semelhante a um cursor de uma linha. As colunas nesse objeto não precisam ter
+    o mesmo tipo de dados e, se você não quiser especificar um valor, pode definir uma coluna
+    como <code>null</code> usando {@link android.content.ContentValues#putNull ContentValues.putNull()}.
+</p>
+<p>
+    O fragmento não adiciona a coluna <code>_ID</code> porque essa coluna é mantida
+    automaticamente. O provedor atribui um valor exclusivo de <code>_ID</code> para cada linha
+    adicionada. Os provedores normalmente usam esse valor como a chave principal da tabela.
+</p>
+<p>
+    A URI de conteúdo retornada em <code>newUri</code> identifica a linha recentemente adicionada com
+    o seguinte formato:
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    O <code>&lt;id_value&gt;</code> é o conteúdo de <code>_ID</code> da nova linha.
+    A maioria dos provedores pode detectar essa forma de URI de conteúdo automaticamente e, em seguida, realizar a operação
+    solicitada naquela linha.
+</p>
+<p>
+    Para obter o valor de <code>_ID</code> do {@link android.net.Uri} retornado, chame
+    {@link android.content.ContentUris#parseId ContentUris.parseId()}.
+</p>
+<h3 id="Updating">Atualização de dados</h3>
+<p>
+    Para atualizar uma linha, use um objeto {@link android.content.ContentValues} com os valores
+    e os critérios de seleção atualizados, como se faz com uma inserção e em uma consulta, respectivamente.
+    O método cliente usado é
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Só é necessário adicionar
+    valores ao objeto {@link android.content.ContentValues} das colunas que forem atualizadas. Se você
+    deseja apagar o conteúdo de uma coluna, defina o valor como <code>null</code>.
+</p>
+<p>
+    O fragmento a seguir altera todas as linhas cuja localidade tem o idioma "en" para
+    terem uma localidade de <code>null</code>. O valor de retorno é o número de linhas que foram atualizadas:
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Você também deve filtrar a inserção de dados do usuário ao chamar
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Para saber mais sobre
+    isso, leia a seção <a href="#Injection">Proteção contra inserções mal-intencionadas</a>.
+</p>
+<h3 id="Deleting">Exclusão de dados</h3>
+<p>
+    Excluir linhas é semelhante a recuperar dados de linhas: especificam-se critérios de seleção para as linhas
+    que se deseja excluir e o método cliente retorna o número de linhas excluídas.
+    O fragmento a seguir exclui linhas cujo appid (id do aplicativo) corresponda a "usuário". O método retorna
+    o número de linhas excluídas.
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Também se deve filtrar a inserção de dados do usuário ao chamar
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Para saber mais sobre
+    isso, leia a seção <a href="#Injection">Proteção contra inserções mal-intencionadas</a>.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">Tipos de dados do provedor</h2>
+<p>
+    Provedores de conteúdo podem oferecer muitos tipos de dados diferentes. O Provedor de Dicionário do Usuário oferece somente
+    texto, mas provedores também podem oferecer os seguintes formatos:
+</p>
+    <ul>
+        <li>
+            número inteiro
+        </li>
+        <li>
+            número inteiro longo (longo)
+        </li>
+        <li>
+            ponto flutuante
+        </li>
+        <li>
+            ponto flutuante longo (duplo)
+        </li>
+    </ul>
+<p>
+    Outros tipos de dados que provedores usam com frequência são objetos binários largos (BLOB) implementados como uma
+    matriz de byte de 64 kB. É possível ver os tipos de dados disponíveis consultando
+    os métodos "get" da classe {@link android.database.Cursor}.
+</p>
+<p>
+    O tipo dos dados para cada coluna em um provedor normalmente é listado na documentação do provedor.
+    Os tipos de dados do Provedor de Dicionário do Usuário são listados na documentação de referência
+    para sua classe de contrato {@link android.provider.UserDictionary.Words} (classes de contrato são
+    descritas na seção <a href="#ContractClasses">Classes de contrato</a>).
+    Também é possível determinar o tipo dos dados chamando {@link android.database.Cursor#getType
+    Cursor.getType()}.
+</p>
+<p>
+    Os provedores também mantêm informações do tipo MIME de dados para cada URI de conteúdo que definem. É possível
+    usar as informações do tipo MIME para descobrir se o aplicativo pode tratar de dados que
+    o provedor fornece ou para escolher um tipo de tratamento com base no tipo MIME. Normalmente é necessário ter
+    o tipo MIME ao trabalhar com um provedor que contenha estruturas
+    complexas de dados ou arquivos. Por exemplo: a tabela {@link android.provider.ContactsContract.Data}
+    no Provedor de contatos usa tipos MIME para etiquetar o tipo dos dados de contato armazenados em cada
+    linha. Para obter o tipo MIME correspondente a uma URI de conteúdo, chame
+    {@link android.content.ContentResolver#getType ContentResolver.getType()}.
+</p>
+<p>
+    A seção <a href="#MIMETypeReference">Referência de tipo MIME</a> descreve
+    a sintaxe de tipos MIME padrão e personalizados.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">Formas alternativas de acessar o provedor</h2>
+<p>
+    Três formas alternativas de acesso ao provedor são importantes no desenvolvimento do aplicativo:
+</p>
+<ul>
+    <li>
+        <a href="#Batch">Acesso em lote</a>: É possível criar um lote de chamadas de acesso com métodos na
+        classe {@link android.content.ContentProviderOperation} e, em seguida, aplicá-los com
+        {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}.
+    </li>
+    <li>
+        Consultas assíncronas: Devem-se realizar consultas em um encadeamento separado. Um modo de fazer isso é
+        usar um objeto {@link android.content.CursorLoader}. Os exemplos
+        no guia <a href="{@docRoot}guide/components/loaders.html">Carregadores</a> demonstram
+        como fazer isso.
+    </li>
+    <li>
+        <a href="#Intents">Acesso a dados via intenções</a> Embora não seja possível enviar uma intenção
+        diretamente a um provedor, é possível enviar uma intenção ao aplicativo do provedor, que
+        normalmente é o recomendável para modificar os dados do provedor.
+    </li>
+</ul>
+<p>
+    O acesso em lote e a modificação via intenções são descritos nas seções a seguir.
+</p>
+<h3 id="Batch">Acesso em lote</h3>
+<p>
+    O acesso em lote a um provedor é útil para inserir uma grande quantidade de linhas ou para inserir
+    linhas em diversas tabelas na mesma chamada de método ou, em geral, para realizar um conjunto de
+    operações dentre limites de processo como uma transação (uma operação atômica).
+</p>
+<p>
+    Para acessar um provedor em "modo de lote",
+    cria-se uma matriz de objetos {@link android.content.ContentProviderOperation} e, em seguida,
+    envia-os a um provedor de conteúdo com
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Confere-se a 
+    <em>autoridade</em> do provedor de conteúdo para esse método em vez de para uma URI de conteúdo específica.
+    Isso permite que cada objeto {@link android.content.ContentProviderOperation} na matriz trabalhe
+    com uma tabela diferente. Chamar {@link android.content.ContentResolver#applyBatch
+    ContentResolver.applyBatch()} retorna uma matriz de resultados.
+</p>
+<p>
+    A descrição da classe de contrato {@link android.provider.ContactsContract.RawContacts}
+    contém um fragmento de código que demonstra a inserção em lote. 
+O aplicativo de exemplo do <a href="{@docRoot}resources/samples/ContactManager/index.html">Gerente de contato</a>
+    contém um exemplo de acesso em lote em seu
+    arquivo de origem <code>ContactAdder.java</code>.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Exibição de dados usando um aplicativo auxiliar</h2>
+<p>
+    Se o seu aplicativo <em>tem</em> permissões de acesso, ainda é possível usar
+    uma intenção para exibir dados em outro aplicativo. Por exemplo: o aplicativo Agenda aceita
+    uma intenção {@link android.content.Intent#ACTION_VIEW} que exibe uma data ou evento específico.
+    Isso permite a exibição de informações da agenda sem precisar criar a própria IU.
+    Para saber mais sobre esse recurso, consulte
+    o guia <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Provedor de agenda</a>.
+</p>
+<p>
+    O aplicativo para o qual você enviou uma intenção não precisa ser o aplicativo
+    associado ao provedor. Por exemplo: você pode recuperar um contato
+    do Provedor de Contatos e, em seguida, enviar uma intenção {@link android.content.Intent#ACTION_VIEW}
+    que contém a URI de conteúdo da imagem do contato para um visualizador de imagens.
+</p>
+</div>
+</div>
+<h3 id="Intents">Acesso a dados via intenções</h3>
+<p>
+    Intenções podem fornecer acesso indireto a um provedor de conteúdo. Basta permitir que o usuário acesse
+    dados em um provedor mesmo se o aplicativo não tiver permissões de acesso, tanto
+    retornando uma intenção de resultado de um aplicativo que tem permissões quanto ativando
+    um aplicativo que tem permissões e permitindo que o usuário trabalhe nele.
+</p>
+<h4>Obtenção de acesso com permissões temporárias</h4>
+<p>
+    É possível acessar dados em um provedor de conteúdo, mesmo sem s permissões
+    de acesso adequadas. Basta enviar uma intenção a um aplicativo que tenha as permissões e
+    receber de volta uma intenção de resultado contendo permissões da "URI".
+    Essas são permissões para uma URI de conteúdo específica que duram enquanto durar a atividade
+    que as recebeu. O aplicativo que tem permissões permanentes concedem permissões
+    temporárias ativando um sinalizador na intenção de resultado:
+</p>
+<ul>
+    <li>
+        <strong>Permissão de leitura:</strong>
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>Permissão de gravação:</strong>
+        {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>Observação:</strong> esses sinalizadores não fornecem acesso geral de leitura ou gravação ao provedor
+    cuja autoridade esteja contida na URI de conteúdo. O acesso destina-se somente à URI.
+</p>
+<p>
+    Um provedor define permissões de URI para URIs de conteúdo no manifesto usando o atributo
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+    do elemento
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>,
+    bem como o elemento filho
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+    do elemento
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+. O mecanismo das permissões de URI é explicado com mais detalhes
+    no guia <a href="{@docRoot}guide/topics/security/security.html">Permissões e segurança</a>,
+    na seção "Permissões da URI".
+</p>
+<p>
+    Por exemplo: é possível recuperar dados de um contato no Provedor de Contatos, mesmo sem
+    a permissão {@link android.Manifest.permission#READ_CONTACTS}. Você pode desejar fazer
+    isso em um aplicativo que envie e-mails de parabenização a um contato no aniversário dele. Em vez de
+    solicitar {@link android.Manifest.permission#READ_CONTACTS}, que fornece acesso a todos
+    os contatos do usuário e suas informações, é preferível deixar que o usuário controle quais
+    contatos serão usados pelo seu aplicativo. Para isso, use o processo a seguir:
+</p>
+<ol>
+    <li>
+        O aplicativo envia uma intenção contendo a ação
+    {@link android.content.Intent#ACTION_PICK} e o tipo MIME
+    {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} dos "contatos" usando
+    o método {@link android.app.Activity#startActivityForResult
+        startActivityForResult()}.
+    </li>
+    <li>
+        Como essa intenção corresponde ao filtro de intenções da
+        atividade de "seleção" do aplicativo Pessoas, a atividade ficará em primeiro plano.
+    </li>
+    <li>
+        Na atividade de seleção, o usuário seleciona
+        um contato para atualizar. Quando isso acontece, a atividade de seleção chama
+        {@link android.app.Activity#setResult setResult(resultcode, intent)}
+        para configurar uma intenção para retornar ao aplicativo. A intenção contém a URI de conteúdo
+        do contato que o usuário selecionou e os sinalizadores "extras"
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}. Esses sinalizadores concedem
+        permissão de URI para que o aplicativo leia dados do contato apontados pela
+        URI de conteúdo. A atividade de seleção, em seguida, chama {@link android.app.Activity#finish()} para
+        retornar o controle para o aplicativo.
+    </li>
+    <li>
+        A atividade volta ao primeiro plano e o sistema chama o
+        método {@link android.app.Activity#onActivityResult onActivityResult()}
+        da sua atividade. Esse método recebe a intenção de resultado criada pela atividade de seleção
+        no aplicativo Pessoas.
+    </li>
+    <li>
+        Com a URI de conteúdo da intenção de resultado, é possível ler os dados do contato
+        a partir do Provedor de Contatos, mesmo que não tenha solicitado permissão permanente de acesso a leitura
+        para o provedor no manifesto. Pode-se, então, pode obter as informações de data de nascimento do contato
+        ou seu endereço de e-mail e, assim, enviar um e-mail de parabenização.
+    </li>
+</ol>
+<h4>Uso de outro aplicativo</h4>
+<p>
+    Um modo simples que permite ao usuário modificar dados para os quais você não tem permissões de acesso é
+    ativar um aplicativo que tenha permissões e deixar o usuário fazer o resto.
+</p>
+<p>
+    Por exemplo: o aplicativo Agenda aceita uma
+    intenção {@link android.content.Intent#ACTION_INSERT} que permite a ativação da
+    IU de inserção do aplicativo. Você pode passar dados "extras" nessa intenção que o aplicativo
+    usa para "pré-preencher" a IU. como os eventos recorrentes têm sintaxe complexa, o modo
+    recomendado de inserir eventos no Provedor de Agenda é ativar o aplicativo Agenda com um
+    {@link android.content.Intent#ACTION_INSERT} e, em seguida, deixar o usuário inserir o evento.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">Classes de contrato</h2>
+<p>
+    As classes de contrato definem constantes que ajudam os aplicativos a trabalhar com URIs de conteúdo, nomes
+    de colunas, ações de intenções e outros recursos de um provedor de conteúdo. Elas não estão
+    automaticamente inclusas em um provedor; o desenvolvedor do provedor deve defini-las e
+    disponibilizá-las a outros desenvolvedores. Muitos dos provedores incluídos na plataforma
+    do Android têm classes de contrato correspondentes no pacote {@link android.provider}.
+</p>
+<p>
+    Por exemplo: o Provedor de Dicionário do Usuário tem uma classe de contrato
+    {@link android.provider.UserDictionary} que contém constantes de URI de conteúdo e de nome de coluna. 
+    A URI de conteúdo da tabela de "palavras" é definida na constante
+    {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
+    A classe {@link android.provider.UserDictionary.Words} também contém constantes de nome de coluna
+    que são usadas nos fragmentos de exemplo neste guia. Por exemplo, uma projeção de consulta pode ser
+    definida como:
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    Outra classe de contrato é {@link android.provider.ContactsContract} para o Provedor de Contatos.
+    A documentação de referência desta classe contém fragmentos de código de exemplo. Uma das suas
+    subclasses, {@link android.provider.ContactsContract.Intents.Insert}, é uma classe
+    de contrato que contém constantes para intenções e dados da intenção.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">Referência do tipo MIME</h2>
+<p>
+    Provedores de conteúdo podem retornar tipos MIME de mídia, strings de tipos MIME personalizados ou ambos.
+</p>
+<p>
+    Tipos MIME têm o formato
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    Por exemplo: o tipo MIME <code>text/html</code> conhecido tem o tipo <code>text</code>
+    e o subtipo <code>html</code>. Se o provedor retornar esse tipo para uma URI,
+    uma consulta usando essa URI retornará um texto que contém tags HTML.
+</p>
+<p>
+    Strings de tipo MIME personalizado, também chamadas de tipos MIME "específicos do fornecedor" (vendor-specific), têm mais
+    valores de <em>tipo</em> e <em>subtipo</em> complexos. O valor de <em>tipo</em> é sempre
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    para diversas linhas ou
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    para uma única linha.
+</p>
+<p>
+    O <em>subtipo</em> é específico do provedor. Os provedores embutidos do Android normalmente têm um subtipo
+    simples. Por exemplo, quando o aplicativo de contatos cria uma linha para um número de telefone,
+    ele configura o seguinte tipo MIME na linha:
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    Observe que o valor do subtipo é simplesmente <code>phone_v2</code>.
+</p>
+<p>
+    Outros desenvolvedores de provedor podem criar os próprios padrões de subtipos com base
+    na autoridade do provedor e nos nomes da tabela. Por exemplo: considere um provedor que contenha horários de trens.
+    A autoridade do provedor é <code>com.example.trains</code> e ele contém as tabelas
+    Linha1, Linha2 e Linha3. Em resposta à URI de conteúdo
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    para a tabela Linha1, o provedor retorna o tipo MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     Em resposta à URI de conteúdo
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    da linha 5 na tabela Linha2, o provedor retorna o tipo MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    A maioria dos provedores define constantes de classe de contrato para os tipos MIME que usam. 
+    A classe de contrato {@link android.provider.ContactsContract.RawContacts} do Provedor de Contatos,
+    por exemplo, define a constante
+    {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} para o tipo MIME
+    de uma linha exclusiva do contato bruto.
+</p>
+<p>
+    URIs de conteúdo de linhas exclusivas são descritas na seção
+    <a href="#ContentURIs">URIs de conteúdo</a>.
+</p>

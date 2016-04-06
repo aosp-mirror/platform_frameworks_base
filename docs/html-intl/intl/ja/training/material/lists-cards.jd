@@ -1,0 +1,266 @@
+page.title=リストとカードの作成
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#RecyclerView">リストを作成する</a></li>
+  <li><a href="#CardView">カードを作成する</a></li>
+  <li><a href="#Dependencies">依存関係を追加する</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>マテリアル デザインのスタイルを適用した複雑なリストやカードをアプリで作成するには、
+{@link android.support.v7.widget.RecyclerView} ウィジェットや {@link android.support.v7.widget.CardView}
+ ウィジェットを使用します。</p>
+
+
+<h2 id="RecyclerView">リストを作成する</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} ウィジェットは、{@link android.widget.ListView} をさらに進化させて柔軟にしたものです。
+このウィジェットは、大きなデータセットを表示するためのコンテナであり、限られたビューを維持することで非常に効率的にスクロールできます。
+ユーザーのアクションやネットワークのイベントに基づいて、実行時に要素が変わるデータ コレクションを持つ場合には、
+{@link android.support.v7.widget.RecyclerView} ウィジェットを使用してください。
+</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} クラスは次の機能を提供することで、簡単に大きなデータセットを表示したり処理したりできます。
+</p>
+
+<ul>
+  <li>アイテムの位置調整を行うレイアウト マネージャー</li>
+  <li>アイテムの削除や追加のような一般的な操作のデフォルト アニメーション</li>
+</ul>
+
+<p>また、{@link
+android.support.v7.widget.RecyclerView} ウィジェットのカスタム レイアウト マネージャーやアニメーションも柔軟に定義できます。</p>
+
+<img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
+<p class="img-caption">
+<strong>図 1</strong> <code>RecyclerView</code> ウィジェット。
+</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} ウィジェットを使用するには、アダプターとレイアウト マネージャーを指定する必要があります。
+アダプターを作成するには、{@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter} クラスを拡張します。具体的な実装方法は、データセットの詳細やビューの種類によって異なります。
+詳細については、下記の<a href="#RVExamples">例</a>をご覧ください。
+</p>
+
+<div style="float:right">
+<img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
+<p class="img-caption" style="margin-left:8px">
+<strong>図 2</strong> - <code>RecyclerView</code> を使ったリスト。
+</p>
+</div>
+
+<p><strong>レイアウト マネージャー</strong>は、{@link
+android.support.v7.widget.RecyclerView} 内でアイテムビューを位置付けし、ユーザーから見えなくなったアイテムビューを再利用するタイミングを決定します。
+ビューを再利用（または<em>リサイクル</em>）するために、レイアウト マネージャーからアダプターにデータセットの異なる要素でビューの内容を入れ替えるよう求められることがあります。
+このようにビューをリサイクルすることで、不要なビューを作成したりコストのかかる {@link android.app.Activity#findViewById findViewById()} のルックアップをしたりせずに済み、パフォーマンスが向上します。
+
+</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} には、次のレイアウト マネージャーが組み込まれています。</p>
+
+<ul>
+<li>{@link android.support.v7.widget.LinearLayoutManager} は、アイテムを縦方向か横方向のスクロール リストに表示します。
+</li>
+<li>{@link android.support.v7.widget.GridLayoutManager} は、アイテムをグリッドに表示します。</li>
+<li>{@link android.support.v7.widget.StaggeredGridLayoutManager} は、アイテムをスタッガード グリッドに表示します。</li>
+</ul>
+
+<p>カスタム レイアウト マネージャーを作成するには、{@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager} クラスを拡張します。</p>
+
+<h3>アニメーション</h3>
+
+<p>{@link
+android.support.v7.widget.RecyclerView} では、アイテムの追加や削除のアニメーションがデフォルトで有効になっています。これらのアニメーションをカスタマイズするには、
+{@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} クラスを拡張し、{@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}
+ メソッドを使用します。
+</p>
+
+<h3 id="RVExamples">例</h3>
+
+<p>次のコードは、レイアウトに
+{@link android.support.v7.widget.RecyclerView} を追加する方法の一例です。</p>
+
+<pre>
+&lt;!-- A RecyclerView with some commonly used attributes -->
+&lt;android.support.v7.widget.RecyclerView
+    android:id="@+id/my_recycler_view"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</pre>
+
+<p>レイアウトに {@link android.support.v7.widget.RecyclerView} ウィジェットを追加したら、オブジェクトのハンドルを取得してレイアウト マネージャーに接続し、表示するデータのアダプターを添付します。
+
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+    ...
+}
+</pre>
+
+<p>アダプターによって、データセット内の各項目にアクセスしたり、アイテムのビューを作成したり、元のアイテムが見えなくなったときにビューのコンテンツの一部を新しいデータアイテムと入れ替えたりできます。
+
+次のコードはデータセットを実装する簡易な例です。このデータセットは、{@link android.widget.TextView} ウィジェットを使用して表示した文字列の配列で構成されています。
+</p>
+
+<pre>
+public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
+    private String[] mDataset;
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+        }
+    }
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(String[] myDataset) {
+        mDataset = myDataset;
+    }
+
+    // Create new views (invoked by the layout manager)
+    &#64;Override
+    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext())
+                               .inflate(R.layout.my_text_view, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ...
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    &#64;Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.mTextView.setText(mDataset[position]);
+
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<div style="float:right;margin-top:15px;margin-left:30px">
+<img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
+<p class="img-caption" style="margin-left:12px">
+<strong>図 3</strong> カードの例。
+</p>
+</div>
+
+<h2 id="CardView">カードを作成する</h2>
+
+<p>{@link android.support.v7.widget.CardView} は {@link android.widget.FrameLayout} クラスを拡張して、あらゆるプラットフォームで統一された外観のカード内に情報を表示できます。
+{@link
+android.support.v7.widget.CardView} ウィジェットは、シャドウを付けたり角を丸くしたりできます。</p>
+
+<p>シャドウ付きのカードを作成するには、<code>card_view:cardElevation</code> 属性を使用します。
+{@link android.support.v7.widget.CardView} は Android 5.0（API レベル 21）以降ではリアルなエレベーションや動きのあるシャドウを使用し、それより前のバージョンではプログラム的なシャドウを使用します。
+
+詳細については、<a href="{@docRoot}training/material/compatibility.html">互換性の維持</a>をご覧ください。
+</p>
+
+<p>
+{@link android.support.v7.widget.CardView} ウィジェットの外観をカスタマイズするには、次のプロパティを使用します。</p>
+
+<ul>
+  <li>レイアウトで角の丸みを設定するには、<code>card_view:cardCornerRadius</code> 属性を使用します。
+</li>
+  <li>コードで角の丸みを設定するには、<code>CardView.setRadius</code> メソッドを使用します。</li>
+  <li>カードの背景色を設定するには、<code>card_view:cardBackgroundColor</code> 属性を使用します。
+</li>
+</ul>
+
+<p>次のコードは、レイアウトに {@link android.support.v7.widget.CardView}
+ ウィジェットを含める方法の一例です。</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    ... >
+    &lt;!-- A CardView that contains a TextView -->
+    &lt;android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        card_view:cardCornerRadius="4dp">
+
+        &lt;TextView
+            android:id="@+id/info_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    &lt;/android.support.v7.widget.CardView>
+&lt;/LinearLayout>
+</pre>
+
+<p>詳細については、API リファレンスの {@link android.support.v7.widget.CardView} をご覧ください。</p>
+
+
+<h2 id="Dependencies">依存関係を追加する</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} ウィジェットと {@link android.support.v7.widget.CardView} ウィジェットは、<a href="{@docRoot}tools/support-library/features.html#v7">v7 サポート ライブラリ</a>の一部です。
+
+プロジェクトでこれらのウィジェットを使うには、次のようにアプリのモジュールに
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依存関係</a>を追加します。
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>

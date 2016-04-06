@@ -37,7 +37,7 @@ next.link=connectivity_patterns.html
 
 <p>To ensure that your caching doesn't result in your app displaying stale data, be sure to extract the time at which the requested content was last updated, and when it expires, from within the HTTP response headers. This will allow you to determine when the associated content should be refreshed.</p>
 
-<pre>long currentTime = System.currentTimeMillis());
+<pre>long currentTime = System.currentTimeMillis();
 
 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -54,7 +54,7 @@ if (lastModified < lastUpdateTime) {
 
 <p>Using this approach, you can also effectively cache dynamic content while ensuring it doesn't result in your application displaying stale information.</p>
 
-<p>You can cache non-sensitive data can in the unmanaged external cache directory:</p>
+<p>You can cache non-sensitive data in the unmanaged external cache directory:</p>
 
 <pre>Context.getExternalCacheDir();</pre>
 
@@ -84,4 +84,4 @@ if (lastModified < lastUpdateTime) {
 
 <p>With the cache installed, fully cached HTTP requests can be served directly from local storage, eliminating the need to open a network connection. Conditionally cached responses can validate their freshness from the server, eliminating the bandwidth cost associated with the download.</p>
 
-<p>Uncached responses get stored in the response cache for for future requests.</p>
+<p>Uncached responses get stored in the response cache for future requests.</p>

@@ -1,0 +1,798 @@
+page.title=Диалоговые окна
+page.tags=alertdialog,dialogfragment
+
+@jd:body
+
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Содержание документа</h2>
+<ol>
+  <li><a href="#DialogFragment">Создание фрагмента диалогового окна</a></li>
+  <li><a href="#AlertDialog">Создание диалогового окна оповещения</a>
+    <ol>
+      <li><a href="#AddingButtons">Добавление кнопок</a></li>
+      <li><a href="#AddingAList">Добавление списка</a></li>
+      <li><a href="#CustomLayout">Создание пользовательского макета</a></li>
+    </ol>
+  </li>
+  <li><a href="#PassingEvents">Передача событий обратно в основное приложение</a></li>
+  <li><a href="#ShowingADialog">Отображение диалогового окна</a></li>
+  <li><a href="#FullscreenDialog">Отображение диалогового окна в полноэкранном режиме или в виде встроенного фрагмента</a>
+    <ol>
+      <li><a href="#ActivityAsDialog">Отображение операции в качестве диалога на больших экранах</a></li>
+    </ol>
+  </li>
+  <li><a href="#DismissingADialog">Закрытие диалогового окна</a></li>
+</ol>
+
+    <h2>Ключевые классы</h2>
+    <ol>
+      <li>{@link android.app.DialogFragment}</li>
+      <li>{@link android.app.AlertDialog}</li>
+    </ol>
+    
+    <h2>См. также:</h2>
+    <ol>
+      <li><a href="{@docRoot}design/building-blocks/dialogs.html">Руководство по дизайну диалоговых окон</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/controls/pickers.html">Элементы выбора</a> (диалоговые окна выбора даты/времени)</li>
+    </ol>
+  </div>
+</div>
+
+<p>Диалоговое окно — это небольшое окно, которое предлагает пользователю
+принять решение или ввести дополнительную информацию. Диалоговое окно не заполняет весь экран и,
+как правило, используется при модальных событиях, для продолжения которых требуется действие пользователя.</p>
+
+<div class="note design">
+<p><strong>Дизайн диалогового окна</strong></p>
+  <p>Подробную информацию о дизайне диалоговых окон, включая рекомендации
+  для вашего языка см. в <a href="{@docRoot}design/building-blocks/dialogs.html">Руководстве</a> по дизайну диалоговых окон.</p>
+</div>
+
+<img src="{@docRoot}images/ui/dialogs.png" />
+
+<p>Класс {@link android.app.Dialog} — это базовый класс для создания диалоговых окон, но
+реализовывать напрямую класс {@link android.app.Dialog} не рекомендуется.
+Вместо этого следует использовать один из следующих подклассов:</p>
+<dl>
+  <dt>{@link android.app.AlertDialog}</dt>
+  <dd>Диалоговое окно, в котором могут отображаться заголовок, кнопки вплоть до трех штук, список
+    из выбираемых элементов либо пользовательский макет.</dd>
+  <dt>{@link android.app.DatePickerDialog} или {@link android.app.TimePickerDialog}</dt>
+  <dd>Диалоговое окно с предопределенным пользовательским интерфейсом, с помощью которого пользователь указывает значения даты или времени.</dd>
+</dl>
+
+<div class="sidebox">
+<h2>Следует избегать ProgressDialog</h2>
+<p>В Android имеется другой класс диалоговых окон под названием
+{@link android.app.ProgressDialog}, которые отображают диалоговое окно с индикатором выполнения процесса. Тем не менее, если
+необходимо отобразить прогресс загрузки или неопределенный процес, рекомендуется следовать
+инструкциям по дизайну <a href="{@docRoot}design/building-blocks/progress.html">Выполнение &amp;
+Операции</a>, чтобы использовать {@link android.widget.ProgressBar} в вашем макете.</p>
+</div>
+
+<p>Эти классы определяют стиль и структуру вашего диалогового окна, однако следует
+использовать{@link android.support.v4.app.DialogFragment} в качестве контейнера вашего диалогового окна.
+Класс {@link android.support.v4.app.DialogFragment} предоставляет все функции,
+необходимые для создания диалогового окна и управления его внешним видом, вместо вызова методов
+к объекту{@link android.app.Dialog}.</p>
+
+<p>Использование {@link android.support.v4.app.DialogFragment} для управления диалоговым окном
+обеспечивает корректную обработку событий жизненного цикла
+, таких как нажатие пользователем кнопки <em>Назад</em> или поворот экрана. С помощью класса {@link
+android.support.v4.app.DialogFragment} также происходит повторное использование пользовательского интерфейса диалогового окна в качестве
+встраиваемого компонента в пользовательский интерфейс более высокого уровня — подобно традиционному классу {@link
+android.support.v4.app.Fragment} (например, когда необходимо различное отображение пользовательского интерфеса диалогового окна
+на больших и маленьких экранах).</p>
+
+<p>В следующих разделах руководства описано использование {@link
+android.support.v4.app.DialogFragment} в сочетании с объектом {@link android.app.AlertDialog}
+. Если необходимо создать элемент выбора даты или времени, обратитесь к руководству
+<a href="{@docRoot}guide/topics/ui/controls/pickers.html">Элементы выбора</a>.</p>
+
+<p class="note"><strong>Примечание:</strong>
+Поскольку класс {@link android.app.DialogFragment} изначально включен в
+Android 3.0 (уровень API 11), в настоящем документе описывается использование класса {@link
+android.support.v4.app.DialogFragment}, предоставляемого в <a href="{@docRoot}tools/support-library/index.html">Библиотеке поддержки</a>. После добавления этой библиотеки
+в приложение появится возможность использовать{@link android.support.v4.app.DialogFragment} и множество других
+API на устройствах, работающих на Android 1.6 и выше. Если минимальная версия вашего приложения поддерживает
+уровень API 11 и выше, можно использовать фреймворк-версию {@link
+android.app.DialogFragment}, но следует иметь в виду, что данный документ ссылается на API
+ со вспомогательными библиотеками. При использовании вспомогательной библиотеки
+необходимо импортировать класс <code>android.support.v4.app.DialogFragment</code>
+, а <em>не</em> <code>android.app.DialogFragment</code>.</p>
+
+
+<h2 id="DialogFragment">Создание фрагмента диалогового окна</h2>
+
+<p>Вы можете реализовать широкие возможности дизайна диалоговых окон, включая создание
+пользовательских макетов, а также пути, описанные в руководстве по дизайну <a href="{@docRoot}design/building-blocks/dialogs.html">Диалоговых окон</a>
+&mdash;путем расширения
+{@link android.support.v4.app.DialogFragment} и создания{@link android.app.AlertDialog}
+в методе обратного вызова {@link android.support.v4.app.DialogFragment#onCreateDialog
+onCreateDialog()}.</p>
+
+<p>Например, имеется базовый класс {@link android.app.AlertDialog}, управляемый в рамках
+{@link android.support.v4.app.DialogFragment}:</p>
+
+<pre>
+public class FireMissilesDialogFragment extends DialogFragment {
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // FIRE ZE MISSILES!
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        // Create the AlertDialog object and return it
+        return builder.create();
+    }
+}
+</pre>
+
+<div class="figure" style="width:290px;margin:0 0 0 20px">
+<img src="{@docRoot}images/ui/dialog_buttons.png" alt="" />
+<p class="img-caption"><strong>Рисунок 1.</strong>
+Диалоговое окно с сообщением и двумя кнопками действия.</p>
+</div>
+
+<p>Итак, после создания экземпляра этого класса и вызова {@link
+android.support.v4.app.DialogFragment#show show()} к этому объекту появляется диалоговое окно,
+показанное на рисунке 1.</p>
+
+<p>В следующем разделе предоставлена более подробная информация об использовании API {@link android.app.AlertDialog.Builder}
+для создания диалоговых окон.</p>
+
+<p>В зависимости от сложности создаваемого диалогового окна возможно реализовать множество других методов
+обратного вызова в {@link android.support.v4.app.DialogFragment}, включая все базовые
+<a href="{@docRoot}guide/components/fragments.html#Lifecycle">методы жизненных циклов фрагментов</a>.
+
+
+
+
+
+<h2 id="AlertDialog">Создание диалогового окна оповещения</h2>
+
+
+<p>С помощью класса {@link android.app.AlertDialog} создается многообразие решений касательно внешнего вида диалогового окна
+, и зачастую этого класса вполне достаточно.
+Как показано на рис. 2, диалоговое окно состоит из трех областей:</p>
+
+<div class="figure" style="width:311px;margin-top:0">
+<img src="{@docRoot}images/ui/dialogs_regions.png" alt="" style="margin-bottom:0" />
+<p class="img-caption"><strong>Рисунок 2.</strong> Макет диалогового окна.</p>
+</div>
+
+<ol>
+<li><b>Заголовок</b>
+  <p>Это дополнительная возможность, которая используется только в случае, если область содержимого
+  занята подробным сообщением, списком или пользовательским макетом. Если необходимо отобразить
+  простое сообщение или вопрос (как, например, в диалоге на рисунке 1), заголовок не нужен.</li>
+<li><b>Область содержимого</b>
+  <p>Здесь может отображаться сообщение, список или другой пользовательский макет.</p></li>
+<li><b>Кнопки действия</b>
+  <p>В диалоговом окне не должно содержаться более трех кнопок действия.</p></li>
+</ol>
+
+<p>Класс {@link android.app.AlertDialog.Builder}
+предоставляет API, с помощью которых можно создавать {@link android.app.AlertDialog}
+с этими видами содержимого, включая пользовательский макет.</p>
+
+<p>Создание {@link android.app.AlertDialog}:</p>
+
+<pre>
+<b>// 1. Instantiate an {@link android.app.AlertDialog.Builder} with its constructor</b>
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+<b>// 2. Chain together various setter methods to set the dialog characteristics</b>
+builder.setMessage(R.string.dialog_message)
+       .setTitle(R.string.dialog_title);
+
+<b>// 3. Get the {@link android.app.AlertDialog} from {@link android.app.AlertDialog.Builder#create()}</b>
+AlertDialog dialog = builder.create();
+</pre>
+
+<p>В следующих главах показано, как определять различные атрибуты диалоговых окон с помощью класса
+{@link android.app.AlertDialog.Builder}.</p>
+
+
+
+
+<h3 id="AddingButtons">Добавление кнопок</h3>
+
+<p>Для добавления кнопок, изображенных на рисунке 2,
+вызывайте методы {@link android.app.AlertDialog.Builder#setPositiveButton setPositiveButton()} и
+{@link android.app.AlertDialog.Builder#setNegativeButton setNegativeButton()}:</p>
+
+<pre style="clear:right">
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+// Add the buttons
+builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User clicked OK button
+           }
+       });
+builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User cancelled the dialog
+           }
+       });
+// Set other dialog properties
+...
+
+// Create the AlertDialog
+AlertDialog dialog = builder.create();
+</pre>
+
+<p>Методы <code>set...Button()</code> предполагают заголовок для кнопки (реализуемый
+через <a href="{@docRoot}guide/topics/resources/string-resource.html">строковый ресурс</a>) и 
+{@link android.content.DialogInterface.OnClickListener}, который определяет действие, 
+следующее за нажатием кнопки пользователем.</p>
+
+<p>Реализована возможность добавлять три различных вида кнопок действий:</p>
+<dl>
+  <dt>Положительные</dt>
+  <dd>Используются для подтверждения и продолжения дейстия (кнопка «ОК»).</dd>
+  <dt>Отрицательные</dt>
+  <dd>Используются для отмены действия.</dd>
+  <dt>Нейтральные</dt>
+  <dd>Используются в случаях, когда пользователь может не желать продолжить действие,
+  но при этом необязательно хочет его отменить. Появляется между положительными и отрицательнымиI
+  кнопками. Примером такого действия может быть «Напомнить позже».</dd> 
+</dl>
+
+<p>Можно добавлять только одну кнопку каждого вида в {@link
+android.app.AlertDialog}. Это означает, что нельзя использовать более одной «положительной» кнопки.</p>
+
+
+
+<div class="figure" style="width:290px;margin:0 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_list.png" alt="" />
+<p class="img-caption"><strong>Рисунок 3.</strong>
+Диалоговое окно с заголовком и списком.</p>
+</div>
+
+<h3 id="AddingAList">Добавление списка</h3>
+
+<p>В API {@link android.app.AlertDialog} реализована возможность использования трех видов списков:</p>
+<ul>
+<li>Традиционный список с выбором одного варианта</li>
+<li>Интерактивный список с выбором одного варианта (переключатели)</li>
+<li>Интерактивный список с выбором нескольких вариантов (флажки)</li>
+</ul>
+
+<p>Для создания списка с выбором одного варианта, как на рисунке 3, 
+используйте метод{@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setTitle(R.string.pick_color)
+           .setItems(R.array.colors_array, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int which) {
+               // The 'which' argument contains the index position
+               // of the selected item
+           }
+    });
+    return builder.create();
+}
+</pre>
+
+<p>Поскольку список отображается в области содержимого диалогового окна, 
+диалоговое окно не может показать одновременно сообщение и список, поэтому необходимо задать заголовок
+диалогового окна с помощью {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+Для указания элементов списка необходимо вызвать {@link
+android.app.AlertDialog.Builder#setItems setItems()}, передающий указатель.
+В качестве другого варианта можно указать список с помощью {@link
+android.app.AlertDialog.Builder#setAdapter setAdapter()}. Наполнение списка
+динамическими данными (например, из базы данных) происходит с помощью {@link android.widget.ListAdapter}.</p>
+
+<p>Если вы предпочтете реализовать список с помощью {@link android.widget.ListAdapter},
+рекомендуется использовать {@link android.support.v4.content.Loader}, чтобы содержимое загружалось
+асинхронно. Подробно этот процесс описан далее в руководстве по
+<a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Созданию макетов
+с помощью адаптера</a> и <a href="{@docRoot}guide/components/loaders.html">загрузчиков</a>
+.</p>
+
+<p class="note"><strong>Примечание:</strong> По умолчанию нажатие по элементу списка отменяет диалоговое окно,
+за исключением случаев, когда используется один из следующих интерактивных списков.</p>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_checkboxes.png" />
+<p class="img-caption"><strong>Рисунок 4.</strong>
+Список с несколькими вариантами ответов.</p>
+</div>
+
+
+<h4 id="Checkboxes">Добавление интерактивного списка с одним или несколькими вариантами ответов</h4>
+
+<p>Для добавления списка с несколькими вариантами ответов (флажки) или
+списка с одним вариантом ответа (переключатели) используйте методы
+{@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} или 
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} соответственно.</p>
+
+<p>Например, таким образом можно создать список с несколькими вариантами ответов, как на
+рисунке 4, который сохраняет выбранные
+элементы в {@link java.util.ArrayList}:</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    mSelectedItems = new ArrayList();  // Where we track the selected items
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Set the dialog title
+    builder.setTitle(R.string.pick_toppings)
+    // Specify the list array, the items to be selected by default (null for none),
+    // and the listener through which to receive callbacks when items are selected
+           .setMultiChoiceItems(R.array.toppings, null,
+                      new DialogInterface.OnMultiChoiceClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int which,
+                       boolean isChecked) {
+                   if (isChecked) {
+                       // If the user checked the item, add it to the selected items
+                       mSelectedItems.add(which);
+                   } else if (mSelectedItems.contains(which)) {
+                       // Else, if the item is already in the array, remove it 
+                       mSelectedItems.remove(Integer.valueOf(which));
+                   }
+               }
+           })
+    // Set the action buttons
+           .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // User clicked OK, so save the mSelectedItems results somewhere
+                   // or return them to the component that opened the dialog
+                   ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   ...
+               }
+           });
+
+    return builder.create();
+}
+</pre>
+
+<p>Несмотря на то, что и традиционный список, и список с переключателями 
+предполагают действие по выбору одного элемента, вам необходимо использовать {@link
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()}, чтобы сохранить выбор пользователя.
+Это значит, что при повторном открытии диалогового окна будет отображаться текущий выбор пользователя,
+а затем создается список с переключателями.</p>
+
+
+
+
+
+<h3 id="CustomLayout">Создание пользовательского макета</h3>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_custom.png" alt="" />
+<p class="img-caption"><strong>Рисунок 5</strong>. Пользовательский макет диалогового окна.</p>
+</div>
+
+<p>Если в диалоговом окне необходим пользовательский макет, нужно создать макет и добавить его в
+{@link android.app.AlertDialog} путем вызова {@link
+android.app.AlertDialog.Builder#setView setView()} в объекте {@link
+android.app.AlertDialog.Builder}.</p>
+
+<p>По умолчанию пользовательский мает заполняет окно диалога, при это все равно можно
+использовать методы {@link android.app.AlertDialog.Builder} для добавления кнопок и заголовка.</p>
+
+<p>В качестве примера на рисунке 5 приведен файл макета для диалогового окна.</p>
+
+<p style="clear:right" class="code-caption">res/layout/dialog_signin.xml</p>
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    &lt;ImageView
+        android:src="@drawable/header_logo"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:scaleType="center"
+        android:background="#FFFFBB33"
+        android:contentDescription="@string/app_name" />
+    &lt;EditText
+        android:id="@+id/username"
+        android:inputType="textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="@string/username" />
+    &lt;EditText
+        android:id="@+id/password"
+        android:inputType="textPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"
+        android:hint="@string/password"/>
+&lt;/LinearLayout>
+</pre>
+
+<p class="note"><strong>Совет.</strong> По умолчанию при настройке элемента {@link android.widget.EditText}
+ для типа ввода {@code "textPassword"} используется семейство шрифтов фиксированной ширины, поэтому
+необходимо изменить семейство шрифтов на{@code "sans-serif"}, чтобы в обоих текстовых полях использовались
+одинаковые стили шрифта.</p>
+
+<p>Для применения макета в вашем {@link android.support.v4.app.DialogFragment}
+вам понадобится {@link android.view.LayoutInflater} с 
+{@link android.app.Activity#getLayoutInflater()} и вызов
+{@link android.view.LayoutInflater#inflate inflate()}, где первым параметром будет являться
+ID ресурса макета, а вторым параметром — исходный вид макета.
+Затем можно вызвать{@link android.app.AlertDialog#setView setView()}
+для размещения макета в диалоговом окне.</p>
+
+<pre>
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Get the layout inflater
+    LayoutInflater inflater = getActivity().getLayoutInflater();
+
+    // Inflate and set the layout for the dialog
+    // Pass null as the parent view because its going in the dialog layout
+    builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+    // Add action buttons
+           .setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // sign in the user ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int id) {
+                   LoginDialogFragment.this.getDialog().cancel();
+               }
+           });      
+    return builder.create();
+}
+</pre>
+
+<div class="note">
+<p><strong>Совет.</strong> Если необходимо пользовательское диалоговое окно,
+можно отображать {@link android.app.Activity} в качестве диалога
+вместо API {@link android.app.Dialog}. Нужно создать операцию и установить тему
+{@link android.R.style#Theme_Holo_Dialog Theme.Holo.Dialog}
+в элементе манифеста<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;операция&gt;}</a>:</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.Dialog" >
+</pre>
+<p>Готово. Операция теперь отображается в диалоговом окне, а не в полноэкранном режиме.</p>
+</div>
+
+
+
+<h2 id="PassingEvents">Передача событий обратно в основное диалоговое приложение</h2>
+
+<p>Когда пользователь нажимает одну из кнопок действий в диалоговом окне, либо выбирает элемент из списка,
+ {@link android.support.v4.app.DialogFragment} может самостоятельно произвести необходимое
+действие, однако зачастую вам может понадобиться доставить информацию о событии операции или фрагменту, которые
+открыли диалоговое окно. Для этого нобходимо определить интерфейс метода для каждого типа события нажатия.
+Затем этот интерфейс применяется в основном компоненте приложения, которое
+получает информацию о событиях из диалогового окна.</p>
+
+<p>Например, {@link android.support.v4.app.DialogFragment} определяет
+интерфейс, по который доставляет события обратно в основной компонент операции:</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    
+    /* The activity that creates an instance of this dialog fragment must
+     * implement this interface in order to receive event callbacks.
+     * Each method passes the DialogFragment in case the host needs to query it. */
+    public interface NoticeDialogListener {
+        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogNegativeClick(DialogFragment dialog);
+    }
+    
+    // Use this instance of the interface to deliver action events
+    NoticeDialogListener mListener;
+    
+    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (NoticeDialogListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>Операция, выполняемая диалоговым окном, создает экземпляр диалогового окна
+с помощью конструктора фрагментов диалогового окна и получает события
+диалога с помощью реализации интерфейса {@code NoticeDialogListener}:</p>
+
+<pre>
+public class MainActivity extends FragmentActivity
+                          implements NoticeDialogFragment.NoticeDialogListener{
+    ...
+    
+    public void showNoticeDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new NoticeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
+    }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    &#64;Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button
+        ...
+    }
+
+    &#64;Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+        ...
+    }
+}
+</pre>
+
+<p>Поскольку выполняемая операция реализуется через {@code NoticeDialogListener}
+с помощью метода обратного вызова
+ {@link android.support.v4.app.Fragment#onAttach onAttach()}, во фрагменте диалога могут использоваться
+методы обратного вызова интерфейса для доставки событий нажатий к операциям:</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    ...
+
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Build the dialog and set up the button click handlers
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the positive button event back to the host activity
+                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the negative button event back to the host activity
+                       mListener.onDialogNegativeClick(NoticeDialogFragment.this);
+                   }
+               });
+        return builder.create();
+    }
+}
+</pre>
+
+
+
+<h2 id="ShowingADialog">Отображение диалогового окна</h2>
+
+<p>Для отображения диалогового окна необходимо создать экземпляр {@link
+android.support.v4.app.DialogFragment} и вызвать {@link android.support.v4.app.DialogFragment#show
+show()}, передавая {@link android.support.v4.app.FragmentManager} и наименование тега
+для фрагмента диалога.</p>
+
+<p>Можно получить {@link android.support.v4.app.FragmentManager} путем вызова
+{@link android.support.v4.app.FragmentActivity#getSupportFragmentManager()} из
+ {@link android.support.v4.app.FragmentActivity} или {@link
+android.support.v4.app.Fragment#getFragmentManager()} из {@link
+android.support.v4.app.Fragment}. Пример:</p>
+
+<pre>
+public void confirmFireMissiles() {
+    DialogFragment newFragment = new FireMissilesDialogFragment();
+    newFragment.show(getSupportFragmentManager(), "missiles");
+}
+</pre>
+
+<p>Второй аргумент, {@code "missiles"}, — это уникальное наименование тега, которое система использует для сохранения
+и восстановления состояния фрагмента, когда это необходимо. С помощью этого тега также можно управлять
+фрагментом путем вызова {@link android.support.v4.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}.</p>
+
+
+
+
+<h2 id="FullscreenDialog">Отображение диалогового окна в полноэкранном режиме или в виде встроенного фрагмента</h2>
+
+<p>Вам может понадобиться макет пользовательского интерфейса, в котором в некоторых ситуациях часть пользовательского интерфейса должна появляться как диалоговое окно
+, отображаемое в полноэкранном режиме либо в виде встроенного фрагмента (возможно, в зависимости от того,
+маленький или большой экран у устройства). С помощью класса {@link android.support.v4.app.DialogFragment}
+обеспечивается гибкость решения, поскольку он может вести себя как встраиваемый {@link
+android.support.v4.app.Fragment}.</p>
+
+<p>Тем не менее, в этом случае нельзя использовать{@link android.app.AlertDialog.Builder AlertDialog.Builder}
+или другие объекты {@link android.app.Dialog} для построения диалогового окна. Если
+необходимо сделать {@link android.support.v4.app.DialogFragment} 
+встраиваемым, нужно определить пользовательский интерфейс диалогового окна в макете методом обратного вызова
+{@link android.support.v4.app.DialogFragment#onCreateView
+onCreateView()}.</p>
+
+<p>В качестве примера приведен {@link android.support.v4.app.DialogFragment}, который появляется либо в виде
+диалогового окна, либо в виде встраиваемого фрагмента (используя макет с наименованием <code>purchase_items.xml</code>):</p>
+
+<pre>
+public class CustomDialogFragment extends DialogFragment {
+    /** The system calls this to get the DialogFragment's layout, regardless
+        of whether it's being displayed as a dialog or an embedded fragment. */
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        // Inflate the layout to use as dialog or embedded fragment
+        return inflater.inflate(R.layout.purchase_items, container, false);
+    }
+  
+    /** The system calls this only when creating the layout in a dialog. */
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // The only reason you might override this method when using onCreateView() is
+        // to modify any dialog characteristics. For example, the dialog includes a
+        // title by default, but your custom layout might not need it. So here you can
+        // remove the dialog title, but you must call the superclass to get the Dialog.
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
+    }
+}
+</pre>
+
+<p>Приведен пример кода, реализующего принятие решения об отображении фргмента в качестве диалогового окна
+или полноэкранного пользовательского интерфейса на основе размера экрана:</p>
+
+<pre>
+public void showDialog() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    CustomDialogFragment newFragment = new CustomDialogFragment();
+    
+    if (mIsLargeLayout) {
+        // The device is using a large layout, so show the fragment as a dialog
+        newFragment.show(fragmentManager, "dialog");
+    } else {
+        // The device is smaller, so show the fragment fullscreen
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                   .addToBackStack(null).commit();
+    }
+}
+</pre>
+
+<p>Подробные сведения о выполнении операций с фрагментами приведены в руководстве 
+<a href="{@docRoot}guide/components/fragments.html">Фрагменты</a>.</p>
+
+<p>В приведенном примере <code>mIsLargeLayout</code> булеан указывает, должно ли текущее устройство использовать
+ большой макет приложения  (и отображать фрагмент как диалоговое окно, а не
+в полноэкранном режиме). Лучшим способом установить такой вид булеана является объявление 
+<a href="{@docRoot}guide/topics/resources/more-resources.html#Bool">значения булевой переменной</a>
+с <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">альтернативным</a> значением для других размеров экранов. В качестве примера приведены два
+варианта булевых ресурсов для различных размеров экранов:</p>
+
+<p class="code-caption">res/values/bools.xml</p>
+<pre>
+&lt;!-- Default boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">false&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p class="code-caption">res/values-large/bools.xml</p>
+<pre>
+&lt;!-- Large screen boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">true&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p>Затем можно инизиализировать значение {@code mIsLargeLayout} в течение выполнения метода операции
+{@link android.app.Activity#onCreate onCreate()}:</p>
+
+<pre>
+boolean mIsLargeLayout;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
+}
+</pre>
+
+
+
+<h3 id="ActivityAsDialog">Отображение операции в качестве диалога на больших экранах</h3>
+
+<p>Вместо отображения диалогового окна в полноэкранном режиме на экранах малого размера можно
+отображать {@link android.app.Activity} в качестве диалогового окна на
+экранах большого размера. Выбор зависит от дизайна приложения, но
+отображение операции в качестве диалогового окна имеет смысл, когда приложение предназначено для использования на малых
+экранах, и необходимо улучшить взаимодейтсвие с ним на планшетах, показывая кратковременные операции
+в качестве диалогового окна.</p>
+
+<p>Для отображения операции в качестве диалогового окна только на больших экранах
+необходимо применить тему {@link android.R.style#Theme_Holo_DialogWhenLarge Theme.Holo.DialogWhenLarge}
+к элементу манифеста <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;операция&gt;}</a>:</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.DialogWhenLarge" >
+</pre>
+
+<p>Подробная информация о темах операций приведена в руководстве <a href="{@docRoot}guide/topics/ui/themes.html">Стили и темы</a>.</p>
+
+
+
+<h2 id="DismissingADialog">Закрытие диалогового окна</h2>
+
+<p>Когда пользователь нажимает кнопки, созданные с помощью
+{@link android.app.AlertDialog.Builder}, система закрывает диалоговое окно самостоятельно.</p>
+
+<p>Система также закрывает диалоговое окно, когда пользователь нажимает на элемент списка в диалоговом окне, за исключением
+списков с переключателями или флажками. В иных случаях можно вручную закрыть диалоговое окно
+путем вызова {@link android.support.v4.app.DialogFragment#dismiss()} в {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p>В случае, если необходимо произвести определенные
+действия после закрытия диалогового окна, можно реализовать метод {@link
+android.support.v4.app.DialogFragment#onDismiss onDismiss()} в {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p>Также можно <em>отменить</em> диалоговое окно. Это особое событие, возникающее, когда пользователь
+покинул диалоговое окно, не завершив задачу. Так происходит, когда пользователь нажимает кнопку 
+<em>Назад</em>, касается экрана за областью диалогового окна,
+либо когда задано {@link android.app.Dialog#cancel()} в {@link
+android.app.Dialog} (например, в качестве отклика на нажатие кнопки «Отмена» в диалоговом окне).</p>
+
+<p>Как показано в примере выше, можно ответить на событие отмены с помощью
+{@link android.support.v4.app.DialogFragment#onCancel onCancel()} в классе {@link
+android.support.v4.app.DialogFragment}.</p>
+
+<p class="note"><strong>Примечание:</strong> Система вызывает
+{@link android.support.v4.app.DialogFragment#onDismiss onDismiss()} при каждом событии,
+которое вызывается методом обратного вызова{@link android.support.v4.app.DialogFragment#onCancel onCancel()}. Тем не менее,
+при вызове{@link android.app.Dialog#dismiss Dialog.dismiss()} или {@link
+android.support.v4.app.DialogFragment#dismiss DialogFragment.dismiss()},
+система вызывает {@link android.support.v4.app.DialogFragment#onDismiss onDismiss()} <em>, а
+не</em> {@link android.support.v4.app.DialogFragment#onCancel onCancel()}. Поэтому в общих случаях
+вызов{@link android.support.v4.app.DialogFragment#dismiss dismiss()} производится при нажатии пользователем
+<em>положительной</em> кнопки в диалоговом окне, а после диалоговое окно закрывается.</p>
+
+

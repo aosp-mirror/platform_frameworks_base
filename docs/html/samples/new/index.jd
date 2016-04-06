@@ -4,8 +4,8 @@ page.image=images/cards/samples-new_2x.png
 @jd:body
 
 <p>The following code samples were recently published. You can
-download them in the Android SDK Manager under the <b>SDK Samples</b> component
-for API 21.</p>
+download them in the Android SDK Manager under the <b>Samples for SDK</b>
+component for Android 6.0 (API 23).</p>
 
 <p class="note">
   <strong>Note:</strong> The downloadable projects are designed
@@ -14,342 +14,115 @@ for API 21.</p>
 
 <!-- NOTE TO EDITORS: add most recent samples first -->
 
-<h3 id="MediaBrowserService"><a href="/samples/MediaBrowserService/index.html">Media Browser Service</a></h3>
+<h3 id="ActiveNotification">
+  <a href="{@docRoot}samples/ActiveNotifications/index.html">Active
+  Notification</a>
+</h3>
 
 <p>
-This sample is a simple audio media app that exposes its media
-library and provides metadata and playback controls through the new
-MediaBrowserService and MediaSession APIs from API 21.
-The sample is compatible with Android Auto and also provides a basic UI
-when not connected to a car.
+  This sample demonstrates how to use the {@link
+  android.app.NotificationManager} to tell you how many notifications your app
+  is currently showing.
 </p>
 
-<p class="note">
-  <strong>Note:</strong> This sample is compatible with <a
-  href="http://android.com/auto">Android Auto</a>.
-</p>
-
-
-<h3 id="MessagingService"><a href="/samples/MessagingService/index.html">Messaging Service</a></h3>
+<h3 id="AutomaticBackup">
+  <a href="{@docRoot}samples/AutoBackupForApps/index.html">Auto Backup for
+  Apps</a>
+</h3>
 
 <p>
-This sample shows a simple service that sends notifications using
-NotificationCompat. In addition to sending a notification, it also extends
-the notification with a CarExtender to make it compatible with Android Auto.
-Each unread conversation from a user is sent as a distinct notification.
+  Android 6.0 (API level 23) introduces automatic backup for app settings. This
+  sample demonstrates how to add filtering rules to an app to manage settings
+  backup.
 </p>
 
-<p class="note">
-  <strong>Note:</strong> This sample is compatible with <a
-  href="http://android.com/auto">Android Auto</a>.
+<h3 id="Camera2Raw">
+  <a href="{@docRoot}samples/Camera2Raw/index.html">Camera 2 Raw</a>
+</h3>
+
+<p>
+  This sample demonstrates how to use the
+  <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">
+  <code>Camera2</code></a> API to capture RAW camera buffers and save them as
+  DNG files.
 </p>
 
-
-<h3 id="SpeedTracker"><a href="/samples/SpeedTracker/index.html">Speed Tracker (Wear)</a></h3>
+<h3 id="ConfirmCredential">
+  <a href="{@docRoot}samples/ConfirmCredential/index.html">Confirm
+  Credential</a>
+</h3>
 
 <p>
-This sample uses the FusedLocation APIs of Google Play Services on Android Wear 
-devices that have a hardware GPS built in. In those cases, this sample provides
-a simple screen that shows the current speed of the wearable device. User can
-set a speed limit and if the speed approaches that limit, it changes the color
-to yellow and if it exceeds the limit, it turns red. User can also enable
-recording of coordinates and when it pairs back with the phone, this data
-is synced with the phone component of the app and user can see a track
-made of those coordinates on a map on the phone.
+ This sample demonstrates how to use device credentials as an authentication method in your app.
 </p>
 
-
-<h3 id="AppRestrictionSchema"><a href="/samples/AppRestrictionSchema/index.html">AppRestrictionSchema</a></h3>
+<h3 id="DeviceOwner">
+  <a href="{@docRoot}samples/DeviceOwner/index.html">Device Owner</a>
+</h3>
 
 <p>
-This sample shows how to use app restrictions. This application has one boolean
-restriction with a key "can_say_hello" that defines whether the only feature of this
-app (press the button to show "Hello" message) is enabled or disabled. Use
-AppRestrictionEnforcer sample to toggle the restriction.
+  This sample demonstrates how to use the device owner features to manage and
+  configure a device.
 </p>
 
-
-<h3 id="AppRestrictionEnforcer"><a href="/samples/AppRestrictionEnforcer/index.html">AppRestrictionEnforcer</a></h3>
+<h3 id="DirectShare">
+  <a href="{@docRoot}samples/DirectShare/index.html">Direct Share</a>
+</h3>
 
 <p>
-This sample demonstrates how to set restrictions to other apps as a profile owner.
-Use AppRestrictionSchema sample as a app with available restrictions.
+  This sample demonstrates how to provide the
+  <a href="{@docRoot}about/versions/marshmallow/android-6.0.html#direct-share">Direct
+  Share</a> feature. The app shows some options directly in the list of share
+  intent candidates.
 </p>
 
-
-<h3 id="DocumentCentricRelinquishIdentity"><a href="/samples/DocumentCentricRelinquishIdentity/index.html">DocumentCentricRelinquishIdentity</a></h3>
+<h3 id="FingerprintDialog">
+  <a href="{@docRoot}samples/FingerprintDialog/index.html">Fingerprint
+  Dialog</a>
+</h3>
 
 <p>
-This sample shows how to relinquish identity to activities above it in the task stack.
+  This sample demonstrates how to recognize registered fingerprints to
+  authenticate your app's user.
 </p>
 
-
-<h3 id="DocumentCentricApps"><a href="/samples/DocumentCentricApps/index.html">DocumentCentricApps</a></h3>
+<h3 id="MidiScope">
+  <a href="{@docRoot}samples/MidiScope/index.html">MidiScope</a>
+</h3>
 
 <p>
-This sample shows the basic usage of the new "Document Centric Apps" API.
-It let's you create new documents in the system overview menu and persists its
-state through reboots. If "Task per document" is checked a new task will be
-created for every new document in the overview menu.
+  This sample demonstrates how to use the <a href=
+  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
+  receive and process MIDI signals coming from an attached input device.
 </p>
 
-
-<h3 id="HdrViewfinder"><a href="/samples/HdrViewfinder/index.html">HdrViewfinder</a></h3>
+<h3 id="MidiSynth">
+  <a href="{@docRoot}samples/MidiSynth/index.html">MidiSynth</a>
+</h3>
 
 <p>
-This demo implements a real-time high-dynamic-range camera viewfinder, by alternating
-the sensor's exposure time between two exposure values on even and odd frames, and then
-compositing together the latest two frames whenever a new frame is captured.
+  This sample demonstrates how to use the <a href=
+  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
+  receive and play MIDI messages coming from an attached input device.
 </p>
 
-
-<h3 id="Interpolator"><a href="/samples/Interpolator/index.html">Interpolator</a></h3>
+<h3 id="NfcProvisioning">
+  <a href="{@docRoot}samples/NfcProvisioning/index.html">NFC Provisioning</a>
+</h3>
 
 <p>
-This sample demonstrates the use of animation interpolators and path animations for
-Material Design. It shows how an ObjectAnimator is used to animate two properties of a
-view (scale X and Y) along a path.
+  This sample demonstrates how to use NFC to provision other devices with a
+  specific device owner.
 </p>
 
-
-<h3 id="DrawableTinting"><a href="/samples/DrawableTinting/index.html">DrawableTinting</a></h3>
-
-<p>Sample that shows applying tinting and color filters to Drawables both programmatically
-and as Drawable resources in XML.</p>
-<p>Tinting is set on a nine-patch drawable through the "tint" and "tintMode" parameters.
-A color state list is referenced as the tint color, which defines colors for different
-states of a View (for example disabled/enabled, focused, pressed or selected).</p>
-<p>Programmatically, tinting is applied to a Drawable through its "setColorFilter" method,
-with a reference to a color and a PorterDuff blend mode. The color and blend mode can be
-changed from the UI to see the effect of different options.</p>
-
-
-<h3 id="LNotifications"><a href="/samples/LNotifications/index.html">LNotifications</a></h3>
+<h3 id="RuntimePermissions">
+  <a href=
+  "{@docRoot}samples/RuntimePermissions/index.html">RuntimePermissions</a>
+</h3>
 
 <p>
-This sample demonstrates how new features for notifications introduced in Android 5.0
-are used such as Heads-Up notifications, visibility, people, category and priority
-metadata. </p>
-
-
-<h3 id="CardView"><a href="/samples/CardView/index.html">CardView</a></h3>
-
-<p>
-This sample demonstrates how to use the CardView UI widget introduced in Android 5.0, using the support library for backward compatibility.
+  This sample shows runtime permissions available in Android 6.0 (API level 23)
+  and higher. Display the log on screen to follow the execution. If executed on
+  an Android 6.0 device, the app displays an additional option to access
+  contacts using an 6.0-only optional permission.
 </p>
-
-
-<h3 id="RecyclerView"><a href="/samples/RecyclerView/index.html">RecyclerView</a></h3>
-
-<p>
-Demonstration of using RecyclerView with a LayoutManager to create a vertical ListView.
-</p>
-
-
-<h3 id="RevealEffectBasic"><a href="/samples/RevealEffectBasic/index.html">RevealEffectBasic</a></h3>
-
-<p>
-A sample demonstrating how to perform a reveal effect for UI elements within the Material Design framework.
-</p>
-
-
-<h3 id="FloatingActionButtonBasic"><a href="/samples/FloatingActionButtonBasic/index.html">FloatingActionButtonBasic</a></h3>
-
-<p>
-This sample shows the two sizes of Floating Action Buttons and how to interact with
-them.
-</p>
-
-
-<!--
-<h3 id="">SampleName</h3>
-
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
-
-<p>
-**description**
-</p>
--->
-
-<h3 id="JobSchedulerSample"><a href="/samples/JobScheduler/index.html">JobScheduler</a></h3>
-
-<p>
-This sample app allows the user to schedule jobs through the UI, and shows
-visual cues when the jobs are executed.
-</p>
-
-
-<h3 id="AndroidTVLeanbackSample"><a href="https://github.com/googlesamples/androidtv-leanback">AndroidTVLeanbackSample</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample demonstrates use of the Android TV Leanback Support Library.
-</p>
-
-<h3 id="Visual-Game-Controller"><a href="https://github.com/googlesamples/androidtv-VisualGameController">Visual-Game-Controller</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample displays events received from a game controller shown on the screen.
-</p>
-
-
-<h3 id="GameControllerSample"><a href="https://github.com/googlesamples/androidtv-GameController/">GameControllerSample</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample implements a multi-player game, demonstrating game controller input
-handling.
-</p>
-
-
-<h3 id="ClippingBasic"><a href="/samples/ClippingBasic/index.html">ClippingBasic</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample demonstrates clipping on a {@link android.view.View}.
-</p>
-
-<div class="figure" style="width:220px">
-  <img src="{@docRoot}samples/images/JobSchedulerSample.png"
-      srcset="{@docRoot}samples/images/JobSchedulerSample@2x.png 2x"
-      alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure 1.</strong> The JobSchedulerSample sample app.
-  </p>
-</div>
-
-
-<h3 id="ElevationDrag"><a href="/samples/ElevationDrag/index.html">ElevationDrag</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>This sample demonstrates a drag and drop action on different shapes.
-Elevation and z-translation are used to render the shadows. The views are
-clipped using different outlines.</p>
-
-
-<h3 id="ElevationBasic"><a href="/samples/ElevationBasic/index.html">ElevationBasic</a></h3>
-<!--
-<div class="figure" style="width:220px">
-<img src="" srcset="@2x.png 2x" alt="" height="375" />
-    <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample demonstrates two alternative ways to move a view in the z-axis:</p>
-
-<ul>
-  <li>With a fixed elevation, using XML.</li>
-  <li>Raising the elevation when the user taps on it, using
-      <code>setTranslationZ()</code>.</li>
-</ul>
-
-
-<h3 id="ActivitySceneTransitionBasic"><a href="/samples/ActivitySceneTransitionBasic/index.html">ActivitySceneTransitionBasic</a></h3>
-<div class="figure" style="width:220px">
-  <img src="{@docRoot}samples/images/ActivitySceneTransitionBasic.png"
-      srcset="{@docRoot}samples/images/ActivitySceneTransitionBasic@2x.png 2x"
-      alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure 2.</strong> The ActivitySceneTransitionBasic sample app.
-  </p>
-  </div>
-
-<p> This sample demonstrates how to the use {@link android.app.Activity} scene
-transitions when transitioning from one activity to another. Uses a combination
-of <code>moveImage</code> and <code>changeBounds</code> to nicely transition
-from a grid of images to an activity with a large image and detail text. </p>
-
-
-<h3 id="Camera2Video"><a href="/samples/Camera2Video/index.html">Camera2Video</a></h3>
-<!--
-<div class="figure" style="width:220px">
-<img src="" srcset="@2x.png 2x" alt="" height="375" />
-    <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>This sample demonstrates how to record video using the Camera2 API.</p>
-
-
-<h3 id="Camera2Basic"><a href="/samples/Camera2Basic/index.html">Camera2Basic</a></h3>
-
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>This sample demonstrates the basic use of the Camera2 API. The sample code
-demonstrates how you can display camera preview and take pictures.</p>
-
-
-<h3 id="BasicManagedProfile"><a href="/samples/BasicManagedProfile/index.html">BasicManagedProfile</a></h3>
-<div class="figure" style="width:220px">
-  <img src="{@docRoot}samples/images/BasicManagedProfile.png"
-     srcset="{@docRoot}samples/images/BasicManagedProfile@2x.png 2x"
-     alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure 3.</strong> The BasicManagedProfile sample app.
-  </p>
-</div>
-
-<p>This sample demonstrates how to create a managed profile. You can also:</p>
-<ul>
-  <li>Enable or disable other apps, and set restrictions on them.</li>
-  <li>Configure intents to be forwarded between the primary account and the
-   managed profile.</li>
-  <li>Wipe all the data associated with the managed profile.</li>
-</ul>
-
-<p class="note"><strong>Note:</strong> There can be only one managed profile on
-  a device at a time.</p>
-

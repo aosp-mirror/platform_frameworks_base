@@ -1,0 +1,133 @@
+page.title=Como definir sombras e recortar visualizações
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#Elevation">Atribuir elevação a visualizações</a></li>
+  <li><a href="#Shadows">Personalizar sombras e contornos de visualizações</a></li>
+  <li><a href="#Clip">Recortar visualizações</a></li>
+</ol>
+<h2>Você também deve ler</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificações do Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design no Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>O Material Design introduz a elevação em elementos da interface do usuário. A elevação ajuda os usuários a entender
+a importância relativa de cada elemento e concentrar a atenção deles nas tarefas à mão.</p>
+
+<p>A elevação de uma visualização, representada pela propriedade Z, determina a aparência visual das
+sombras: visualizações com valores de Z mais altos lançam sombras maiores e mais suaves. Visualizações com valores de Z mais altos ocultam
+visualizações com valores de Z mais baixos, mas o valor de Z de uma visualização não afeta o tamanho dela.</p>
+
+<p>As sombras são desenhadas pelo pai da visualização elevada e, por isso, estão sujeitas a recortes padrão de
+visualização, recortadas pelo pai por padrão.</p>
+
+<p>A elevação também é útil para criar animações em que os widgets se elevam temporariamente
+sobre o plano de visualização ao realizar alguma ação.</p>
+
+<p>Para obter mais informações sobre elevação no Material Design, consulte
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">Objetos
+no espaço 3D</a>.</p>
+
+
+<h2 id="Elevation">Atribuir elevação a visualizações</h2>
+
+<p>O valor de Z para uma visualização tem dois componentes:
+
+<ul>
+<li>Elevação: o componente estático.</li>
+<li>Movimentação: o componente dinâmico usado para animações.</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>Figura 1</strong> - sombras para diferentes elevações de visualização.</p>
+
+<p>Para definir a elevação de uma visualização em uma definição de layout, use o atributo <code>android:elevation</code>
+. Para definir a elevação de uma visualização no código de uma atividade, use o método
+{@link android.view.View#setElevation View.setElevation()}.</p>
+
+<p>Para definir a conversão de uma visualização, use o método {@link android.view.View#setTranslationZ
+View.setTranslationZ()}.</p>
+
+<p>Os novos métodos {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} e {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} permitem
+animar facilmente a elevação de visualizações. Para obter mais informações, consulte a referência de API para
+{@link android.view.ViewPropertyAnimator} e o guia do desenvolvedor <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Animação de
+propriedade</a>.</p>
+
+<p>Você também pode usar um {@link android.animation.StateListAnimator} para
+especificar essas animações de um modo declarativo, o que é especialmente útil para casos em que o estado muda
+as animações de acionamento, como quando um usuário pressiona um botão. Para obter mais informações, consulte
+<a href="{@docRoot}training/material/animations.html#ViewState">Mudanças de estado de visualização da animação</a>.</p>
+
+<p>Os valores de Z são medidos em dp (pixels independentes de densidade).</p>
+
+
+<h2 id="Shadows">Personalizar sombras e contornos de visualizações</h2>
+
+<p>Os limites de um desenhável do segundo plano da visualização determinam a forma padrão da sombra.
+<strong>Contornos</strong> representam a forma externa de um objeto gráfico e definem a área
+de ondulação para o feedback de toque.</p>
+
+<p>Analise esta visualização, definida com um desenhável de segundo plano:</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>O desenhável do segundo plano é definido como um retângulo com bordas arredondadas:</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>A visualização lança uma sombra com bordas arredondadas, uma vez que o desenhável de segundo plano
+define o contorno da visualização. Fornecer um contorno personalizado neutraliza a forma padrão de uma sombra da visualização.</p>
+
+<p>Para definir um contorno personalizado para uma visualização no seu código:<p>
+
+<ol>
+<li>Amplie a classe {@link android.view.ViewOutlineProvider}.</li>
+<li>Neutralize o método {@link android.view.ViewOutlineProvider#getOutline getOutline()}.</li>
+<li>Atribua o novo fornecedor de contorno à visualização com o método {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()}.</li>
+</ol>
+
+<p>Você pode criar contornos ovais e retangulares com bordas arredondadas usando os métodos na classe
+{@link android.graphics.Outline}. O fornecedor de contorno padrão para visualizações obtém o contorno
+do segundo plano da visualização. Para evitar que uma visualização lance uma sombra, defina o fornecedor de contorno
+dela como <code>null</code>.</p>
+
+
+<h2 id="Clip">Recortar visualizações</h2>
+
+<p>Recortar visualizações permite mudar facilmente a forma de uma visualização. Você pode recortar visualizações
+para obter consistência com outros elementos de design ou para mudar a forma de uma visualização em resposta à interação do usuário.
+É possível recortar uma visualização na área do contorno usando o método {@link android.view.View#setClipToOutline
+View.setClipToOutline()} ou o atributo <code>android:clipToOutline</code>. Somente
+contornos retangulares, circulares e retangulares redondos são compatíveis com recorte, conforme determinado pelo método
+{@link android.graphics.Outline#canClip Outline.canClip()}.</p>
+
+<p>Para recortar uma visualização na forma de um desenhável, defina o desenhável como o segundo plano da visualização
+(conforme exibido acima) e chame o método {@link android.view.View#setClipToOutline View.setClipToOutline()}
+.</p>
+
+<p>O recorte de visualizações é uma operação cara, por isso, não anime a forma que você
+usa para recortar uma visualização. Para atingir esse efeito, use a animação <a href="{@docRoot}training/material/animations.html#Reveal">Efeito de Revelação</a>.</p>

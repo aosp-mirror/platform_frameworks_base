@@ -1,0 +1,899 @@
+page.title=意圖和意圖篩選器
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容</h2>
+<ol>
+  <li><a href="#Types">意圖類型</a></li>
+  <li><a href="#Building">建置意圖</a>
+    <ol>
+      <li><a href="#ExampleExplicit">明確意圖範例</a></li>
+      <li><a href="#ExampleSend">隱含意圖範例</a></li>
+      <li><a href="#ForceChooser">強制顯示應用程式選擇器</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">接收隱含意圖</a>
+    <ol>
+      <li><a href="#ExampleFilters">篩選器範例</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">使用待處理意圖</a></li>
+  <li><a href="#Resolution">意圖解析</a>
+    <ol>
+      <li><a href="#ActionTest">動作測試</a></li>
+      <li><a href="#CategoryTest">類別測試</a></li>
+      <li><a href="#DataTest">資料測試</a></li>
+      <li><a href="#imatch">意圖比對</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">與其他應用程式互動</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">分享內容</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent} 是可用來向另一個<a href="{@docRoot}guide/components/fundamentals.html#Components">應用程式元件</a>要求動作的傳訊物件。
+
+雖然意圖有幾種方式可加速元件間的通訊，但共有三種基本使用案例：
+</p>
+
+<ul>
+<li><b>如何啟動 Activity：</b>
+<p>{@link android.app.Activity} 代表應用程式中的單一畫面。您可以將 {@link android.content.Intent} 傳送至 {@link android.content.Context#startActivity startActivity()} 來啟動
+{@link android.app.Activity} 的新執行個體。
+{@link android.content.Intent} 可描述要啟動的 Activity 並攜帶任何必要資料。
+</p>
+
+<p>如果您想要在 Activity 完成時收到結果，
+請呼叫 {@link android.app.Activity#startActivityForResult
+startActivityForResult()}。Activity 的 {@link android.app.Activity#onActivityResult onActivityResult()}回呼中的個別 {@link android.content.Intent} 物件，就是 Activity 收到的結果。
+
+如需詳細資訊，請參閱 <a href="{@docRoot}guide/components/activities.html">Activity</a> 指南。
+</p></li>
+
+<li><b>如何啟動服務：</b>
+<p>{@link android.app.Service} 是可以在背景中執行操作的元件，但沒有使用者介面。
+您可以將 {@link android.content.Intent} 傳送至
+{@link android.content.Context#startService startService()} 來啟動服務以執行一次性操作 (例如下載檔案)。
+{@link android.content.Intent} 可描述要啟動的服務並攜帶任何必要資料。
+</p>
+
+<p>如果服務是採用主從介面設計，您可以將 {@link android.content.Intent} 傳送至 {@link
+android.content.Context#bindService bindService()} 來繫結至另一個元件的服務。</code>
+如需詳細資訊，請參閱<a href="{@docRoot}guide/components/services.html">服務</a>指南。</p></li>
+
+<li><b>如何傳送廣播：</b>
+<p>廣播是指任何應用程式都可接收的訊息。系統會傳送各種系統事件廣播，例如系統開機或裝置開始充電。
+您可以將 {@link android.content.Intent} 傳送至 {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、
+{@link android.content.Context#sendOrderedBroadcast(Intent, String) 或{@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}，以向其他應用程式傳送廣播。
+
+
+</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">意圖類型</h2>
+
+<p>意圖類型分為兩種：</p>
+
+<ul>
+<li><b>明確意圖</b>：可依名稱 (完整類別名稱) 指定要啟動的元件。
+一般情況下，您會使用明確意圖啟動您應用程式中的元件，這是因為您知道 Activity 的類別名稱或您想要啟動的服務。
+例如，為回應使用者動作而啟動新的 Activity，或啟動服務以在背景下載檔案。
+
+</li>
+
+<li><b>隱含意圖</b>：不會指定特定元件，而會宣告要執行的一般動作，讓另一個應用程式的元件來處理它。
+例如，如果您想要向使用者顯示地圖上的某個位置，可以使用隱含意圖，要求另一個支援應用程式在地圖上顯示指定的位置。
+
+</li>
+</ul>
+
+<p>當您建立明確意圖以啟動 Activity 或服務時，系統會立即啟動
+{@link android.content.Intent} 物件中指定的應用程式元件。</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>圖 1.</strong>說明如何透過系統傳送隱含意圖以啟動另一個 Activity：<b>[1]</b> Activity A <em></em> 會建立含有動作描述的{@link android.content.Intent} 並傳送至 {@link
+android.content.Context#startActivity startActivity()}。<b>[2]</b> Android 系統會搜尋所有應用程式，以找出符合該意圖的意圖篩選器。
+
+
+找到相符項目時，<b>[3]</b> 系統會呼叫其 {@link android.app.Activity#onCreate onCreate()} 方法，並將 {@link android.content.Intent} 傳送給它來啟動相符的 Activity (Activity B<em></em>)。
+
+
+</p>
+</div>
+
+<p>當您建立隱含意圖時，Android 系統會比較意圖內容和裝置上其他應用程式的<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">宣示說明檔案</a>中宣告的「意圖篩選器」<em></em>，以找出要啟動的適當元件。
+
+如果意圖和意圖篩選器相符，系統會啟動該元件，並將 {@link android.content.Intent} 物件傳送給它。
+如果有多個意圖篩選器符合意圖，系統會顯示對話方塊，供使用者挑選要使用的應用程式。
+</p>
+
+<p>意圖篩選器是應用程式宣示說明檔案中的運算式，可指定元件要接收的意圖類型。
+
+例如，藉由宣告 Activity 的意圖篩選器，可讓其他應用程式使用特定意圖類型直接啟動您的 Activity。
+同樣地，如果您「不」<em></em>為 Activity 宣告任何意圖篩選器，就只能以明確意圖啟動它。
+
+</p>
+
+<p class="caution"><strong>注意：</strong>為了確保您的應用程式安全，請一律使用明確意圖啟動 {@link android.app.Service}，並且不要宣告服務的意圖篩選器。
+
+使用隱含意圖啟動服務會危害安全性，原因在於您無法確定哪個服務會回應意圖，而且使用者無法得知系統會啟動哪項服務。
+
+從 Android 5.0 (API 級別 21) 開始，如果您使用隱含意圖呼叫 {@link android.content.Context#bindService bindService()}，系統都會擲回例外狀況。
+
+</p>
+
+
+
+
+
+<h2 id="Building">建置意圖</h2>
+
+<p>{@link android.content.Intent} 物件攜帶 Android 系統用來判斷要啟動哪個元件的資訊 (例如應接收意圖的確切元件名稱或元件類別)，再加上接收者元件用以適當執行動作的資訊 (例如要執行的動作和據以執行的資料)。
+
+
+</p>
+
+
+<p>{@link android.content.Intent} 包含的主要資訊如下：</p>
+
+<dl>
+
+<dt><b>元件名稱</b></dt>
+<dd>要啟動元件的名稱。
+
+<p>雖可選擇是否使用，但這卻是讓意圖「明確」<b></b>的重要資訊，表示意圖只能傳送至元件名稱所定義的應用程式元件。
+
+如果不使用元件名稱，意圖會是「隱含」<b></b>的，因此系統會根據其他意圖資訊來決定哪個元件應接收意圖 (例如動作、資料及類別 &mdash; 如下所述)。
+
+如果您需要啟動應用程式中的特定元件，就應該指定元件名稱。
+</p>
+
+<p class="note"><strong>注意：</strong>啟動 {@link android.app.Service} 時，請務必指定元件名稱。
+<strong></strong>否則，您無法確定哪個服務會回應意圖，而且使用者無法得知系統會啟動哪項服務。
+</p>
+
+<p>{@link android.content.Intent} 的這個欄位是
+{@link android.content.ComponentName} 物件，您可以使用目標元件的完整類別名稱加以指定，包括應用程式的封裝名稱。例如，
+
+{@code com.example.ExampleActivity}。您可以使用 {@link
+android.content.Intent#setComponent setComponent()}、{@link android.content.Intent#setClass
+setClass()}、{@link android.content.Intent#setClassName(String, String) setClassName()} 或
+{@link android.content.Intent} 建構函式來設定元件名稱。</p>
+
+</dd>
+
+<p><dt><b>動作</b></dt>
+<dd>以字串指定要執行的一般動作 (例如「檢視」<em></em>或「挑選」<em></em>)。
+
+<p>就廣播意圖而言，這是指已發生且系統回報的動作。動作大半決定其餘意圖的建構方式 &mdash; 特別是資料與額外資料中包含的項目。
+
+
+
+<p>您可以在應用程式內指定自己的動作以供意圖使用 (或由其他應用程式用來呼叫應用程式中的元件)，但您應使用 {@link android.content.Intent} 類別或其他架構類別定義的動作常數。
+
+以下是可啟動 Activity 的一些常見動作：
+</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>當您有一些資訊可讓 Activity 向使用者顯示時，例如要在圖庫應用程式檢視的相片或要在地圖應用程式檢視的地址，就可以透過 {@link android.content.Context#startActivity startActivity()} 使用意圖中的這個動作。
+
+
+</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>也稱為「分享」意圖，當您有一些資料可供使用者透過其他應用程式分享時，例如電子郵件應用程式或社交分享應用程式，才應透過 {@link android.content.Context#startActivity startActivity()} 使用意圖中的這個動作。
+
+</dd>
+</dl>
+
+<p>如要進一步瞭解定義一般動作的常數，請參閱 {@link android.content.Intent} 類別參考文件。
+其他動作則是在 Android 架構的其他位置完成定義，例如可在系統設定應用程式中開啟特定畫面的動作位在 {@link android.provider.Settings} 中。
+
+</p>
+
+<p>您可以透過 {@link android.content.Intent#setAction
+setAction()} 或 {@link android.content.Intent} 建構函式來指定意圖的動作。</p>
+
+<p>如果您定義自己的動作，請務必加入您應用程式的封裝名稱做為前置詞。
+例如：</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>資料</b></dt>
+<dd>URI ({@link android.net.Uri} 物件) 可參考據以執行的資料和/或該資料的 MIME 類型。
+提供的資料類型通常是由意圖的動作控制。例如，如果動作是 {@link android.content.Intent#ACTION_EDIT}，資料就應包含欲編輯文件的 URI。
+
+
+
+<p>建立意圖時，除了意圖的 URI 以外，請務必指定資料類型 (其 MIME 類型)。
+
+
+例如，能夠顯示影像的 Activity 可能無法播放音訊檔案，即使有類似的 URI 格式。
+因此，指定資料的 MIME 格式可協助 Android 系統找出最適合接收意圖的元件。
+
+不過 &mdash; 尤其是當資料指出資料位在裝置何處且受
+{@link android.content.ContentProvider} 控制讓系統看見資料 MIME 類型的
+{@code content:} URI 時，有時能夠從 URI 推論出 MIME 類型。</p>
+
+<p>如果您只想設定資料 URI，請呼叫 {@link android.content.Intent#setData setData()}。
+如要設定 MIME 類型，請呼叫 {@link android.content.Intent#setType setType()}。您還可以視需要利用
+{@link
+android.content.Intent#setDataAndType setDataAndType()} 明確設定兩者。</p>
+
+<p class="caution"><strong>注意：</strong>如果您想同時設定 URI 與 MIME 類型，「請勿」<strong></strong>呼叫 {@link android.content.Intent#setData setData()} 和
+{@link android.content.Intent#setType setType()}，原因是這兩者會抵銷彼此的值。
+請務必使用 {@link android.content.Intent#setDataAndType setDataAndType()} 來設定 URI 與 MIME 類型。
+
+</p>
+</dd>
+
+<p><dt><b>類別</b></dt>
+<dd>字串當中包含哪種元件應處理意圖的其他相關資訊。
+意圖中可放置的類別描述數目並沒有限制，但大多數意圖都不需要類別。
+以下是一些常見類別：
+
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>目標 Activity 允許自己由網頁瀏覽器啟動，以顯示連結所參照的資料 &mdash; 例如影像或電子郵件訊息。
+
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>Activity 是工作的初始 Activity，而且列在系統的應用程式啟動器中。
+
+  </dd>
+</dl>
+
+<p>如需類別的完整清單，請參閱 {@link android.content.Intent} 類別描述。
+</p>
+
+<p>您可以使用 {@link android.content.Intent#addCategory addCategory()} 來指定類別。</p>
+</dd>
+</dl>
+
+
+<p>以上列出的屬性 (元件名稱、動作、資料及類別) 代表意圖的定義特性。
+藉由讀取這些屬性，Android 系統就能分析出應啟動的應用程式元件。
+</p>
+
+<p>不過，意圖還能攜帶其他不影響如何將它解析成應用程式元件的資訊。
+意圖還能提供：</p>
+
+<dl>
+<dt><b>額外資料</b></dt>
+<dd>鍵值對當中攜帶完成要求動作所需的其他資訊。
+和有些動作會使用特定種類的資料 URI 一樣，有些動作也會使用特定的額外資料。
+
+<p>您可以使用各種 {@link android.content.Intent#putExtra putExtra()}方法來新增額外資料，每種方法都接受兩個參數：索引鍵名稱與值。
+
+
+您也可以使用所有的額外資料建立 {@link android.os.Bundle} 物件，再透過 {@link
+android.content.Intent#putExtras putExtras()} 將 {@link android.content.Intent} 插入 {@link android.os.Bundle}。</p>
+
+<p>例如，建立意圖以使用
+{@link android.content.Intent#ACTION_SEND} 來傳送電子郵件時，您可以利用
+{@link android.content.Intent#EXTRA_EMAIL} 索引鍵指定「收件者」，並使用
+{@link android.content.Intent#EXTRA_SUBJECT} 索引鍵指定「主旨」。</p>
+
+<p>{@link android.content.Intent} 類別指定許多用於標準化資料類型的
+{@code EXTRA_*} 常數。如果您需要宣告自己的額外資料索引鍵 (用於您應用程式接收的意圖)，請務必加入您應用程式的封裝名稱做為前置詞。
+
+例如：</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>旗標</b></dt>
+<dd>{@link android.content.Intent} 類別中定義的旗標，可當成意圖的中繼資料使用。
+旗標可指示 Android 系統如何啟動 Activity (例如，Activity 屬於哪個
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">工作</a>) 以及如何處理已啟動的 Activity (例如，它是否屬於最近 Activity 清單)。
+
+
+
+<p>如需詳細資訊，請參閱 {@link android.content.Intent#setFlags setFlags()} 方法。</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">明確意圖範例</h3>
+
+<p>您用來啟動特定應用程式元件的就是明確意圖，例如應用程式中的特定 Activity 或服務。如要建立明確意圖，請定義
+
+{@link android.content.Intent}物件的元件名稱 &mdash; 其他意圖屬性均為選用性質。
+</p>
+
+<p>例如，您在應用程式中建置稱為 {@code DownloadService} 的服務，其設計為從網頁下載檔案，您可以使用下列程式碼來啟動該服務：
+</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>{@link android.content.Intent#Intent(Context,Class)} 建構函式提供應用程式 {@link android.content.Context} 與元件 ({@link java.lang.Class} 物件)。
+
+因此，這個意圖會明確啟動應用程式中的
+{@code DownloadService} 類別。</p>
+
+<p>如要進一步瞭解如何建置及啟動服務，請參閱<a href="{@docRoot}guide/components/services.html">服務</a>指南。
+</p>
+
+
+
+
+<h3 id="ExampleSend">隱含意圖範例</h3>
+
+<p>隱藏意圖指定的動作會呼叫裝置上任何能執行該動作的應用程式。
+當您的應用程式無法執行該動作，但其他應用程式或許能執行，而您想讓使用者挑選要使用的應用程式時，使用隱含意圖相當有用。
+</p>
+
+<p>例如，您有想讓使用者與其他人分享的內容，可使用
+{@link android.content.Intent#ACTION_SEND} 動作來建立意圖，以及新增可指定要分享內容的額外資料。
+當您使用該意圖呼叫
+{@link android.content.Context#startActivity startActivity()} 時，使用者就能挑選要用以分享內容的應用程式。
+</p>
+
+<p class="caution"><strong>注意：</strong>使用者可能會沒有「任何」<em></em>
+應用程式可處理您傳送至 {@link android.content.Context#startActivity
+startActivity()} 的隱含意圖。如果發生這種情況，呼叫會失敗且應用程式將會當機。如要確認 Activity 將可收到意圖，請在
+{@link android.content.Intent} 物件上呼叫 {@link android.content.Intent#resolveActivity
+resolveActivity()}。如果結果不是 null，表示至少有一個應用程式能夠處理該意圖，可以放心呼叫
+
+{@link android.content.Context#startActivity startActivity()}。如果結果為 null，表示您不應使用該意圖，可以的話您還必須將發出該意圖的功能停用。
+
+</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>在這種情況下，不會使用 URI，但會宣告意圖的資料類型，以指定額外資料所攜帶的內容。
+</p>
+
+
+<p>呼叫 {@link android.content.Context#startActivity startActivity()} 時，系統會檢查所有安裝的應用程式，判斷哪些可以處理這種意圖 (含有 {@link android.content.Intent#ACTION_SEND}動作和攜帶「純文字」資料的意圖)。
+
+
+如果只有一個應用程式能夠處理，該應用程式會立即開啟並獲派該意圖。
+如果有多個 Activity 接受該意圖，系統會顯示對話方塊，供使用者挑選要使用的應用程式。
+</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>圖 2.</strong>選擇器對話方塊。</p>
+</div>
+
+<h3 id="ForceChooser">強制顯示應用程式選擇器</h3>
+
+<p>有多個應用程式均回應您的隱含意圖時，使用者可以選擇要使用的應用程式，並將該應用程式當成動作的預設選擇。
+
+如果在執行動作時使用者希望之後都使用同一應用程式 (例如使用者偏好使用某個特定網頁瀏覽器開啟網頁，這項功能就非常實用。
+
+</p>
+
+<p>不過，如果有多個應用程式能回應該意圖，而使用者每次都想使用不同的應用程式，您應該明確顯示選擇器對話方塊。
+選擇器對話方塊每次都會要求使用者選取要用於該動作的應用程式 (使用者無法為該動作選取預設應用程式)。
+
+例如，當您的應用程式使用 {@link
+android.content.Intent#ACTION_SEND} 動作執行「分享」時，使用者可能希望根據當下的情況使用不同的應用程式來分享，此時您應該一律使用選擇器對話方塊，如圖 2 所示。
+</p>
+
+
+
+
+<p>如要顯示選擇器，請使用 {@link
+android.content.Intent#createChooser createChooser()} 建立 {@link android.content.Intent}，並將其傳送至 {@link
+android.app.Activity#startActivity startActivity()}。例如：</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>以上範例會顯示對話方塊 (將回應意圖的應用程式清單傳送至 {@link
+android.content.Intent#createChooser createChooser()} 方法)，並使用提供的文字做為對話方塊的標題。
+</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">接收隱含意圖</h2>
+
+<p>如要通知應用程式可接收的隱含內容，請在<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">宣告說明檔案</a>中利用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素，針對您的每個應用程式元件宣告一或多個意圖篩選器。每個意圖篩選器都會根據意圖的動作、資料和類別，指定其接受的意圖類型。
+
+
+
+只有在意圖通過您的其中一個意圖篩選器時，系統才會將隱含意圖傳送至您的應用程式元件。
+</p>
+
+<p class="note"><strong>注意：</strong>不論元件宣告的意圖篩選器為何，明確意圖一律會傳送至其目標。
+</p>
+
+<p>應用程式元件應為其所能執行的各個獨特工作宣告不同的篩選器。例如，圖片庫應用程式中的一個 Activity 可能會有兩個篩選器：一個用於檢視圖片的篩選器，以及另一個用於編輯圖片的篩選器。
+
+當 Activity 啟動時，它會檢查
+{@link android.content.Intent} 並根據
+{@link android.content.Intent} 中的資訊決定如何運作 (例如，是否要檢視編輯器控制項)。</p>
+
+<p>每個意圖篩選器都是由 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素定義在應用程式的宣示說明檔案中，以巢狀方式置於對應的應用程式元件 (例如，<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素)。
+
+
+在 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 內，您可以使用以下三個元素當中的一或多個元素，指定要接受的意圖類型：
+
+</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>在 {@code name} 屬性中，宣告接受的意圖動作。值必須是動作的常值字串值，不得為類別常數。
+</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>使用一或多項屬性指定資料 URI (
+<code>scheme</code>、<code>host</code>、<code>port</code>、
+<code>path</code> 等) 與 MIME 類型的各層面，以宣告接受的資料類型。</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>在 {@code name} 屬性中，宣告接受的意圖類別。值必須是動作的常值字串值，不得為類別常數。
+
+
+  <p class="note"><strong>注意：</strong>如要接收隱含意圖，您「必須」<strong></strong>在意圖篩選器中納入 {@link android.content.Intent#CATEGORY_DEFAULT} 類別。
+
+
+{@link android.app.Activity#startActivity startActivity()} 與
+{@link android.app.Activity#startActivityForResult startActivityForResult()} 方法對所有意圖進行處理時，就像已宣告
+{@link android.content.Intent#CATEGORY_DEFAULT} 類別一樣。
+  如果您未在意圖篩選器中宣告此類別，任何隱含意圖都不會解析為 Activity。
+</p>
+  </dd>
+</dl>
+
+<p>例如，假設資料類型為文字，以下 Activity 宣告的意圖篩選器都可接受
+{@link android.content.Intent#ACTION_SEND} 意圖：</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>想要建立包含多個
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>、
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 或
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> 執行個體的篩選器也沒關係。
+如果您這樣做，只需要確定該元件能處理這些篩選器元素的任何組合。
+</p>
+
+<p>當您想要處理多種意圖，但只限特定的動作、資料及類別類型組合時，您必須建立多個意圖篩選器。
+</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>限制存取元件</h2>
+<p>使用意圖篩選器並無法安全地防止其他應用程式啟動您的元件。
+雖然意圖篩選器限制元件只能回應特定的隱含意圖，如果開發人員決定您的元件名稱，另一款應用程式還是有可能使用明確意圖來啟動您的應用程式元件。
+
+
+如果必須「限定只有您自己的應用程式」<em></em>才能啟動您的元件，請將該元件的
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> 屬性設定為 {@code "false"}。
+</p>
+</div>
+</div>
+
+<p>藉由將意圖與三個元素個別比較，針對篩選器來測試隱含意圖。
+如要傳送至元件，意圖必須通過共三個測試。
+
+如果無一相符，Android 系統就不會將意圖傳送至該元件。不過，由於元件可能會有多個意圖篩選器，未通過其中一個元件篩選器的意圖可能會通過另一個篩選器。
+
+
+如要進一步瞭解系統如何解析意圖，請參閱下文的<a href="#Resolution">意圖解析</a>。</p>
+
+<p class="caution"><strong>注意：</strong>如要避免一時疏忽而執行不同應用程式的
+{@link android.app.Service}，請一律使用明確意圖啟動您自己的服務，同時不要宣告服務的意圖篩選器。
+</p>
+
+<p class="note"><strong>注意：</strong>對於所有 Activity，您都必須在宣示說明檔案中宣告意圖篩選器。
+
+不過，廣播接收器的篩選器可以藉由呼叫
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()} 進行動態註冊。您之後可以利用 {@link
+android.content.Context#unregisterReceiver unregisterReceiver()} 來取消註冊接收器。這樣做可在您的應用程式執行時，讓應用程式只能在指定期間內接聽特定廣播。
+
+</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">篩選器範例</h3>
+
+<p>如要進一步瞭解意圖篩選器行為，可以看看社交分享應用程式宣示說明檔案中的以下程式碼片段。
+</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>第一個 Activity {@code MainActivity} 是應用程式的主要進入點 &mdash; 這個 Activity 會在使用者使用啟動器圖示初次啟動應用程式時開啟：
+</p>
+<ul>
+  <li>{@link android.content.Intent#ACTION_MAIN} 動作可指出這是主要進入點且預期沒有任何意圖資料。
+</li>
+  <li>{@link android.content.Intent#CATEGORY_LAUNCHER} 類別可指出此 Activity 的圖示應該放在系統的應用程式啟動器中。
+如果 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>元素未以 {@code icon} 指定圖示，系統會使用 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> 元素中的圖示。
+
+</li>
+</ul>
+<p>上述兩項必須成對，Activity 才會顯示在應用程式啟動器中。</p>
+
+<p>第二個 Activity {@code ShareActivity} 是用來加速分享文字與媒體內容。
+雖然使用者可能藉由從 {@code MainActivity} 來瀏覽它而進入此 Activity，但它們也能從發出隱含意圖 (符合兩個意圖篩選器之一) 的另一款應用程式直接進入 {@code ShareActivity}。
+
+</p>
+
+<p class="note"><strong>注意：</strong>
+<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a> MIME 類型是指定全景相片的特殊資料類型，您可以透過
+<a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google 全景</a> API 來處理。
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">使用待處理意圖</h2>
+
+<p>{@link android.app.PendingIntent} 物件是環繞 {@link
+android.content.Intent} 物件的包裝函式。{@link android.app.PendingIntent} 的主要用途是將權限授予外部應用程式，以便使用包含的 {@link android.content.Intent}，有如從應用程式自己的程序執行一般。
+
+
+</p>
+
+<p>待處理意圖的主要使用案例包括：</p>
+<ul>
+  <li>宣告當使用者透過您的<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">通知</a>執行動作時要執行的意圖 (Android 系統的 {@link android.app.NotificationManager} 會執行 {@link android.content.Intent})。
+
+
+  <li>宣告當使用者透過您的<a href="{@docRoot}guide/topics/appwidgets/index.html">應用程式小工具</a>執行動作時要執行的意圖 (主螢幕應用程式會執行 {@link android.content.Intent})。
+
+
+  <li>宣告要在未來的指定時間內執行的意圖 (Android 系統的 {@link android.app.AlarmManager} 會執行 {@link android.content.Intent})。
+
+</ul>
+
+<p>由於每個 {@link android.content.Intent} 物件都設計為要由特定的應用程式元件類型來處理 ({@link android.app.Activity}、{@link android.app.Service} 或 {@link android.content.BroadcastReceiver})，因此請務必以相同的考量建立 {@link android.app.PendingIntent}。
+
+
+使用待處理意圖時，您的應用程式將不會透過像是
+{@link android.content.Context#startActivity
+startActivity()} 的呼叫來執行意圖。當您藉由呼叫以下的個別建立者方法建立
+{@link android.app.PendingIntent} 時，您必須改為宣告意圖元件類型：</p>
+
+<ul>
+  <li>{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()} 適用於啟動 {@link android.app.Activity} 的 {@link android.content.Intent}。
+</li>
+  <li>{@link android.app.PendingIntent#getService PendingIntent.getService()} 適用於啟動 {@link android.app.Service} 的 {@link android.content.Intent}。
+</li>
+  <li>{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()} 適用於啟動 {@link android.content.BroadcastReceiver} 的 {@link android.content.Intent}。
+</li>
+</ul>
+
+<p>除非您的應用程式「收到」<em></em>來自其他應用程式的待處理意圖，否則您可能只需要上述建立
+{@link android.app.PendingIntent} 的
+{@link android.app.PendingIntent} 方法。</p>
+
+<p>每個方法會採用目前的應用程式 {@link android.content.Context}、您要包裝的
+{@link android.content.Intent} 以及一或多個指定應如何使用意圖的旗標 (例如該意圖是否能使用多次)。
+</p>
+
+<p>如要進一步瞭解如何使用待處理意圖，請參閱個別使用案例的參考文件，例如<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">通知</a>以及<a href="{@docRoot}guide/topics/appwidgets/index.html">應用程式小工具</a> API 指南。
+
+</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">意圖解析</h2>
+
+
+<p>當系統收到要啟動 Activity 的隱含意圖時，會根據三個層面來比較意圖與意圖篩選器，以便為該意圖搜尋最適合的 Activity。
+</p>
+
+<ul>
+  <li>意圖動作
+  <li>意圖資料 (URI 與資料類型)
+  <li>意圖類別
+</ul>
+
+<p>下列各節就如何在應用程式宣示說明檔案中宣告意圖篩選器這點，說明如何比對意圖以找出適當的元件。
+</p>
+
+
+<h3 id="ActionTest">動作測試</h3>
+
+<p>如要指定接受的意圖動作，意圖篩選器可以宣告零或多個
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 元素。例如：</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>如要通過此篩選器，{@link android.content.Intent} 中指定的動作必須與篩選器中列出的其中一個動作相符。
+</p>
+
+<p>如果篩選器未列出任何可供意圖比對的動作，所有意圖都無法通過測試。
+不過，如果 {@link android.content.Intent} 未指定任何動作，它就會通過測試 (只要篩選器至少包含一個動作即可)。
+
+</p>
+
+
+
+<h3 id="CategoryTest">類別測試</h3>
+
+<p>如要指定接受的意圖類別，意圖篩選器可以宣告零或多個
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 元素。例如：</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>{@link android.content.Intent} 中的每個類別都必須與篩選器中的類別相符，意圖才會通過類別測試。
+不需要反向進行 &mdash; 意圖篩選器宣告的類別可以比
+{@link android.content.Intent} 中指定的類別多，而
+{@link android.content.Intent} 仍可通過測試。因此，不論篩選器中宣告的類別為何，未包含類別的意圖一律可通過此測試。
+</p>
+
+<p class="note"><strong>注意：</strong>Android 會將 {@link android.content.Intent#CATEGORY_DEFAULT} 類別自動套用到所有傳送至 {@link
+android.content.Context#startActivity startActivity()} 與 {@link
+android.app.Activity#startActivityForResult startActivityForResult()} 的隱含意圖。因此，如果您希望 Activity 收到隱含意圖，Activity 的意圖篩選器就必須包含
+{@code "android.intent.category.DEFAULT"} 的類別 (如先前的 {@code &lt;intent-filter&gt;} 範例中所示)。
+
+
+
+</p>
+
+
+
+<h3 id="DataTest">資料測試</h3>
+
+<p>如要指定接受的意圖資料，意圖篩選器可以宣告零或多個
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 元素。例如：</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>每個 <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+ 元素都能指定 URI 結構與資料類型 (MIME 媒體類型)。URI 的每個部分都有個別的屬性：
+{@code scheme}、{@code host}、{@code port} 和 {@code path}。
+
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+例如：
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>在這個 URI 中，配置為 {@code content}、主機為 {@code com.example.project}、連接埠為 {@code 200}，而路徑為 {@code folder/subfolder/etc}。
+
+</p>
+
+<p>在 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素中，上述所有屬性均為選用性質，但具有線性相依性：
+</p>
+<ul>
+  <li>如果未指定配置，就會忽略主機。</li>
+  <li>如果未指定主機，就會忽略連接埠。</li>
+  <li>如果配置與主機均未指定，就會忽略路徑。</li>
+</ul>
+
+<p>將意圖中的 URI 與篩選器中的 URI 規格比較時，只會比較篩選器中所包含的 URI 部分。
+例如：</p>
+<ul>
+  <li>如果篩選器只指定配置，含有該配置的所有 URI 都會與篩選器相符。
+</li>
+  <li>如果篩選器指定了配置與授權，但未指定路徑，不論其路徑為何，含有相同配置與授權的所有 URI 都會通過篩選器。
+</li>
+  <li>如果篩選器指定了配置、授權和路徑，則只有包含相同配置、授權和路徑的 URI 才會通過篩選器。
+</li>
+</ul>
+
+<p class="note"><strong>注意：</strong>路徑規格可以包含萬用字元星號 (*)，以要求僅部分相符的路徑名稱。
+</p>
+
+<p>資料測試會比較意圖中的 URI 與 MIME 類型，以及篩選器中指定的 URI 與 MIME 類型。
+以下說明規則：
+</p>
+
+<ol type="a">
+<li>只有在篩選器未指定任何 URI 或 MIME 類型時，未包含 URI 或 MIME 類型的意圖才會通過測試。
+</li>
+
+<li>只有在其 URI 與篩選器的 URI 格式相符，而且篩選器同樣未指定 MIME 類型時，包含 URI 但沒有 MIME 類型 (既非明確也無法從 URI 推測得出) 的意圖才會通過測試。
+
+</li>
+
+<li>只有在篩選器列出相同的 MIME 類型且未指定 URI 格式時，包含 MIME 類型但沒有 URI 的意圖才會通過測試。
+</li>
+
+<li>只有在 MIME 類型與篩選器中列出的類型相符時，包含 URI 與 MIME 類型 (明確或可從 URI 推測得出) 的意圖才會通過 MIME 類型部分的測試。
+
+如果它的 URI 與篩選器中的 URI 相符，或如果它有
+{@code content:} 或 {@code file:} URI，而且篩選器未指定 URI 時，就會通過 URI 部分的測試。換句話說，如果它的篩選器「只」<em></em>列出 MIME 類型，就會假設元件支援 {@code content:} 與 {@code file:} 資料。
+
+
+</p></li>
+</ol>
+
+<p>
+最後一項規則 (規則 (d)) 可反映出希望元件能夠從檔案或內容供應程式取得本機資料的期望。
+
+因此，其篩選器可以只列出資料類型，同時不需要明確命名
+{@code content:} 與 {@code file:} 配置。
+此為典型案例。例如，如下所示的 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素可以告訴 Android，元件能夠從內容供應程式取得影像資料並加以顯示：
+
+
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+由於大部分可用資料都是由內容供應程式分配，因此指定資料類型但未指定 URI 的篩選器也許會最常見。
+
+</p>
+
+<p>
+另一個常見的設定是含有配置與資料類型的篩選器。例如，如下所示的
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>元素可以告訴 Android，元件能夠從網路擷取影片資料以執行動作：
+
+
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">意圖比對</h3>
+
+<p>和意圖篩選器比對的意圖不只可探尋要啟動的目標元件，還能探尋裝置上元件集合的相關資料。
+
+例如，主畫面應用程式會利用指定
+{@link android.content.Intent#ACTION_MAIN} 動作與
+{@link android.content.Intent#CATEGORY_LAUNCHER} 類別的意圖篩選器來尋找所有 Activity，以填入應用程式啟動器。
+</p>
+
+<p>您的應用程式能以類似的方式使用意圖比對。
+{@link android.content.pm.PackageManager} 有一組 {@code query...()}方法可將接受特定意圖的所有元件傳回，還有一系列類似的
+{@code resolve...()} 方法可決定回應意圖的最佳元件。
+
+例如，
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} 會傳回所有 Activity 清單，上述的 Activity 都可以執行當成引數傳送的意圖，以及
+{@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} 可傳回類似的服務清單。
+
+這些方法不會啟動元件，只會列出可以回應的元件。類似的方法
+{@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()} 可用於廣播接收器。
+</p>
+
+
+
+

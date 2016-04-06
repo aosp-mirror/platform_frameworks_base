@@ -1,0 +1,94 @@
+page.title=Showing Pop-Up Messages
+page.tags="Snackbar","Toast"
+helpoutsWidget=true
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li><a href="{@docRoot}tools/support-library/features.html#design">Design
+    Support Library</a></li>
+</ul>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/implementing-navigation/index.html">
+    Implementing Effective Navigation</a></li>
+  <li><a href="https://www.google.com/design/spec/components/snackbars-toasts.html">
+    Material Design: Snackbars &amp; toasts</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>
+  There are many situations where you might want your app to show a quick
+  message to the user, without necessarily waiting for the user to respond.
+  For example, when a user performs an action like sending an email or deleting
+  a file, your app should show a quick confirmation to the user. Often the user
+  doesn't need to respond to the message. The message needs to be prominent
+  enough that the user can see it, but not so prominent that it prevents the
+  user from working with your app.
+</p>
+
+<p>
+  Android provides the {@link android.support.design.widget.Snackbar} widget
+  for this common use case.
+  A {@link android.support.design.widget.Snackbar} provides a quick pop-up
+  message to the user. The current activity remains visible and interactive
+  while the {@link android.support.design.widget.Snackbar} is displayed. After a
+  short time, the Snackbar automatically dismisses itself.
+</p>
+
+<p>
+  This class teaches you how to use {@link
+  android.support.design.widget.Snackbar} to show pop-up messages.
+</p>
+
+<div class="figure" style="width:400px">
+  <img src="{@docRoot}images/training/snackbar/snackbar_drive_2x.png"
+    srcset="{@docRoot}images/training/snackbar/snackbar_drive.png 1x,
+        {@docRoot}images/training/snackbar/snackbar_drive_2x.png 2x"
+    width="400" alt="">
+  <p class="img-caption">
+    <strong>Figure 1.</strong> A {@link android.support.design.widget.Snackbar}
+    shows a message at the bottom of the
+    activity, but the rest of the activity is still usable.
+  </p>
+</div>
+
+<p class="note">
+  <strong>Note:</strong> The {@link
+  android.support.design.widget.Snackbar} class supersedes {@link
+  android.widget.Toast}. While {@link android.widget.Toast} is currently still
+  supported, {@link android.support.design.widget.Snackbar} is now the
+  preferred way to display brief, transient messages to the user.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+    <b><a href="showing.html">Using a Snackbar to Show a Message</a></b>
+  </dt>
+
+  <dd>
+    Learn how to use a {@link android.support.design.widget.Snackbar} to display
+    a brief message to the user.
+  </dd>
+
+  <dt>
+    <b><a href="action.html">Adding an Action to a Message</a></b>
+  </dt>
+
+  <dd>
+    Learn how to add an action to a message, allowing the user to respond to
+    the message.
+  </dd>
+</dl>

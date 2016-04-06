@@ -1,0 +1,256 @@
+page.title=概览屏幕
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#adding">将任务添加到概览屏幕</a>
+      <ol>
+        <li><a href="#flag-new-doc">使用 Intent 标志添加任务</a></li>
+        <li><a href="#attr-doclaunch">使用 Activity 属性添加任务</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">删除任务</a>
+      <ol>
+        <li><a href="#apptask-remove">使用 AppTask 类删除任务</a></li>
+        <li><a href="#retain-finished">保留已完成的任务</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>关键类</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>示例代码</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">以文档为中心的应用</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>概览屏幕（也称为最新动态屏幕、最近任务列表或最近使用的应用）是一个系统级别
+UI，其中列出了最近访问过的<a href="{@docRoot}guide/components/activities.html">Activity</a>和<a href="{@docRoot}guide/components/tasks-and-back-stack.html">任务</a>。
+用户可以浏览该列表并选择要恢复的任务，也可以通过滑动清除任务将其从列表中删除。
+
+对于
+Android 5.0 版本（API 级别 21），包含多个文档的同一 Activity 的多个实例可能会以任务的形式显示在概览屏幕中。例如，Google Drive 可能对多个
+Google 文档中的每个文档均执行一个任务。每个文档均以任务的形式显示在概览屏幕中。
+</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>图 1. </strong>显示了三个
+Google Drive 文档的概览屏幕，每个文档分别以一个单独的任务表示。</p>
+
+<p>通常，您应该允许系统定义任务和 Activity 在概览屏幕中的显示方法，并且无需修改此行为。不过，应用可以确定 Activity 在概览屏幕中的显示方式和时间。
+
+您可以使用 {@link android.app.ActivityManager.AppTask}
+类来管理任务，使用
+{@link android.content.Intent}
+类的 Activity 标志来指定某 Activity 添加到概览屏幕或从中删除的时间。此外，您也可以使用 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 属性在清单文件中设置该行为。</p>
+
+<h2 id="adding">将任务添加到概览屏幕</h2>
+
+<p>通过使用 {@link android.content.Intent}
+类的标志添加任务，您可以更好地控制某文档在概览屏幕中打开或重新打开的时间和方式。使用
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+属性时，您可以选择始终在新任务中打开文档，或选择对文档重复使用现有任务。
+</p>
+
+<h3 id="flag-new-doc">使用 Intent 标志添加任务</h3>
+
+<p>为 Activity 创建新文档时，可调用
+{@link android.app.ActivityManager.AppTask}
+类的 {@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+方法，以向其传递启动 Activity 的 Intent。要插入逻辑换行符以便系统将 Activity 视为新任务显示在概览屏幕中，可在启动 Activity 的
+{@link android.content.Intent}
+的 {@link android.content.Intent#addFlags(int) addFlags()} 方法中传递 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+标志。</p>
+
+<p class="note"><strong>注：</strong>{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+标志取代了 {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET}
+标志，后者自 Android 5.0（API 级别 21）起已弃用。</p>
+
+<p>如果在创建新文档时设置
+{@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+标志，则系统始终会以目标 Activity 作为根创建新任务。此设置允许同一文档在多个任务中打开。以下代码演示了主 Activity 如何执行此操作：
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">DocumentCentricActivity.java</a>
+</p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>注：</strong>使用 {@code FLAG_ACTIVITY_NEW_DOCUMENT}
+标志启动的 Activity 必须具有在清单文件中设置的 {@code android:launchMode="standard"}
+属性值（默认）。</p>
+
+<p>当主 Activity 启动新 Activity 时，系统会搜遍现有任务，看看是否有任务的 Intent 与 Activity 的 Intent 组件名称和 Intent 数据相匹配。
+如果未找到任务或者 Intent 包含
+{@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+标志，则会以该 Activity 作为其根创建新任务。如果找到的话，则会将该任务转到前台并将新
+ Intent 
+传递给
+{@link android.app.Activity#onNewIntent onNewIntent()}。新 Activity 将获得 Intent 并在概览屏幕中创建新文档，如下例所示：</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">NewDocumentActivity.java</a>
+</p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">使用 Activity 属性添加任务</h3>
+
+<p>此外，Activity 还可以在其清单文件中指定始终通过使用
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+属性 <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">{@code android:documentLaunchMode}</a> 进入新任务。
+此属性有四个值，会在用户使用该应用打开文档时产生以下效果：
+</p>
+
+<dl>
+  <dt>“{@code intoExisting}”</dt>
+  <dd>该 Activity 会对文档重复使用现有任务。这与不设置
+{@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+标志、但设置
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 标志所产生的效果相同，如上文的<a href="#flag-new-doc">使用 Intent 标志添加任务</a>中所述。<em></em></dd>
+
+  <dt>“{@code always}”</dt>
+  <dd>该 Activity 为文档创建新任务，即便文档已打开也是如此。使用此值与同时设置
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+和 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 标志所产生的效果相同。</dd>
+
+  <dt>“{@code none”}</dt>
+  <dd>该 Activity 不会为文档创建新任务。概览屏幕将按其默认方式对待此 Activity：为应用显示单个任务，该任务将从用户上次调用的任意 Activity 开始继续执行。
+
+</dd>
+
+  <dt>“{@code never}”</dt>
+  <dd>该 Activity 不会为文档创建新任务。设置此值会替代
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+和 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 标志的行为（如果在
+ Intent 
+中设置了其中一个标志），并且概览屏幕将为应用显示单个任务，该任务将从用户上次调用的任意 Activity 开始继续执行。</dd>
+</dl>
+
+<p class="note"><strong>注：</strong>对于除 {@code none} 和 {@code never}
+以外的值，必须使用 {@code launchMode="standard"} 定义 Activity。如果未指定此属性，则使用
+{@code documentLaunchMode="none"}。</p>
+
+<h2 id="removing">删除任务</h2>
+
+<p>默认情况下，在 Activity 结束后，文档任务会从概览屏幕中自动删除。
+您可以使用 {@link android.app.ActivityManager.AppTask}
+类、{@link android.content.Intent} 标志或 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 属性替代此行为。</p>
+
+<p>通过将
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+属性<a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> 设置为 {@code true}，您可以始终将任务从概览屏幕中完全排除。</p>
+
+<p>您可以通过将
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+属性 <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a>设置为整型值，设置应用能够包括在概览屏幕中的最大任务数。默认值为 16。达到最大任务数后，最近最少使用的任务将从概览屏幕中删除。
+{@code android:maxRecents}
+的最大值为 50（内存不足的设备上为 25）；小于 1 的值无效。</p>
+
+<h3 id="#apptask-remove">使用 AppTask 类删除任务</h3>
+
+<p>在于概览屏幕创建新任务的 Activity 中，您可以通过调用
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+方法指定何时删除该任务以及结束所有与之相关的 Activity。</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">NewDocumentActivity.java</a>
+</p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>注：</strong>如下所述，使用
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+方法代替使用 {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}
+标记。</p>
+
+<h3 id="#retain-finished">保留已完成的任务</h3>
+
+<p>若要将任务保留在概览屏幕中（即使其 Activity 已完成），可在启动 Activity 的
+ Intent 的 {@link android.content.Intent#addFlags(int) addFlags()} 方法中传递
+{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} 标志。</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">DocumentCentricActivity.java</a>
+</p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>要达到同样的效果，请将
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+属性<a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> 设置为 {@code false}。文档 Activity 的默认值为
+{@code true}，常规 Activity 的默认值为 {@code false}。如前所述，使用此属性替代
+{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} 标志。</p>
+
+
+
+
+
+
+

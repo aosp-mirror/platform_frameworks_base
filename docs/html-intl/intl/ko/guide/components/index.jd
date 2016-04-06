@@ -1,0 +1,57 @@
+page.title=앱 구성 요소
+page.landing=true
+page.landing.intro=Android의 애플리케이션 프레임워크는 일련의 재사용 가능한 구성 요소를 사용하여 풍성하고 혁신적인 앱을 생성할 수 있습니다. 이 섹션에서는 앱의 구성 단위를 정의 내리는 구성 요소를 구축하는 방법과 인텐트를 사용하여 이와 같은 구성 요소를 연결시키는 법을 설명합니다. 
+page.metaDescription=Android의 애플리케이션 프레임워크는 일련의 재사용 가능한 구성 요소를 사용하여 풍성하고 혁신적인 앱을 생성할 수 있습니다. 이 섹션에서는 앱의 구성 단위를 정의 내리는 구성 요소를 구축하는 방법과 인텐트를 사용하여 이와 같은 구성 요소를 연결시키는 법을 설명합니다. 
+page.landing.image=images/develop/app_components.png
+page.image=images/develop/app_components.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>블로그 문서</h3>
+    
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>DialogFragment 사용하기</h4>
+      <p>이 포스트에서는 v4 지원 라이브러리와 함께 DialogFragment를 사용하여(Honeycomb 이전 기기에서 이전 버전과의 호환성을 위해) 간단한 편집 대화를 표시하고 인터페이스를 사용하여 호출 중인 액티비티에 결과를 반환하는 법을 보여드립니다.</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>모두를 위한 프래그먼트</h4>
+      <p>Google에서는 오늘 같은 프래그먼트 API를 노출하는 정적 라이브러리를 출시했습니다(새로운 LoaderManager와 몇 가지 다른 클래스도 포함). 이 덕분에 Android 1.6 이후 버전과 호환되는 애플리케이션이 프래그먼트를 사용하여 태블릿과 호환되는 사용자 인터페이스를 생성할 수 있게 되었습니다. </p>
+    </a>
+    
+    <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>성능을 위한 다중 스레딩</h4>
+      <p>반응형 애플리케이션을 생성할 때에는 주요 UI 스레드가 최소한의 작업만 
+하도록 하는 것이 좋습니다. 애플리케이션을 중단시킬 수 있는, 
+길어질 수 있는 작업은 모두 다른 스레드에서 처리해야 합니다.</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+    <h3>교육</h3>
+    
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>액티비티 수명 주기 관리하기</h4>
+      <p>이 클래스에서는 각각의 액티비티 
+인스턴스가 수신하는 중요한 수명 주기 콜백 메서드를 설명합니다. 또한 이러한 콜백 메서드를 사용하여 액티비티가 
+사용자가 원하는 작업을 하고, 액티비티가 필요로 하지 않을 때 시스템 리소스 사용을 방지하는 방법에 대해서도 설명합니다.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>프래그먼트로 동적 UI 구축하기</h4>
+      <p>이 클래스에서는 Android 1.6만큼 오래된 버전을 실행하는 기기도 
+계속 지원하면서 프래그먼트로 동적 사용자 경험을 생성하고, 기기의 화면 크기에 따라 앱의 사용자 환경을 
+최적화할 수 있는 방법을 보여줍니다.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>콘텐츠 공유하기</h4>
+      <p>이 클래스는 인텐트 API와 ActionProvider 객체를 사용하여 여러 애플리케이션 사이에서 
+콘텐츠를 전송하고 수신하는 몇 가지 보편적인 방법을 다룹니다.</p>
+    </a>
+  </div>
+
+</div>

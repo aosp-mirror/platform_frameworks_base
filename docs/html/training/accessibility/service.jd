@@ -132,7 +132,7 @@ public void onServiceConnected() {
 }
 </pre>
 
-<p>Starting with Android 4.0, there is a second option available: configure the
+<p>The second option is to configure the
 service using an XML file.  Certain configuration options like
 {@link android.R.attr#canRetrieveWindowContent} are only available if you
 configure your service using XML.  The same configuration options above, defined
@@ -201,8 +201,7 @@ public void onAccessibilityEvent(AccessibilityEvent event) {
 </pre>
 
 <h2 id="query">Query the View Heirarchy for More Context</h2>
-<p>This step is optional, but highly useful.  One of the new features in Android
-4.0 (API Level 14) is the ability for an
+<p>This step is optional, but highly useful. The Android platform provides the ability for an
 {@link android.accessibilityservice.AccessibilityService} to query the view
 hierarchy, collecting information about the UI component that generated an event, and
 its parent and children.  In order to do this, make sure that you set the

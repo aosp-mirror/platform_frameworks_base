@@ -1,0 +1,492 @@
+page.title=布局
+page.tags=view,viewgroup
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文内容</h2>
+<ol>
+  <li><a href="#write">编写 XML</a></li>
+  <li><a href="#load">加载 XML 资源</a></li>
+  <li><a href="#attributes">属性</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">布局参数</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">布局位置</a></li>
+  <li><a href="#SizePaddingMargins">尺寸、内边距和外边距</a></li>
+  <li><a href="#CommonLayouts">常见布局</a></li>
+  <li><a href="#AdapterViews">使用适配器构建布局</a>
+    <ol>
+      <li><a href="#FillingTheLayout">使用数据填充适配器视图</a></li>
+      <li><a href="#HandlingUserSelections">处理点击事件</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>关键类</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>另请参阅</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">构建简单的用户界面</a>
+</li> </div>
+</div>
+
+<p>布局定义用户界面的视觉结构，如<a href="{@docRoot}guide/components/activities.html">Activity</a>或<a href="{@docRoot}guide/topics/appwidgets/index.html">应用小工具</a>的
+UI。您可以通过两种方式声明布局：</p>
+<ul>
+<li><strong>在 XML 中声明 UI 元素</strong>。Android 提供了对应于 View 类及其子类的简明 XML
+词汇，如用于小工具和布局的词汇；</li>
+<li><strong>运行时实例化布局元素</strong>。您的应用可以通过编程创建
+View 对象和 ViewGroup 对象（并操纵其属性）。 </li>
+</ul>
+
+<p>Android 框架让您可以灵活地使用以下一种或两种方法来声明和管理应用的 UI。例如，您可以在 XML 中声明应用的默认布局，包括将出现在布局中的屏幕元素及其属性。然后，您可以在应用中添加可在运行时修改屏幕对象（包括那些已在 XML 中声明的对象）状态的代码。 </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
+  Plugin for Eclipse</a> 提供了 XML 的布局预览&mdash;
+  在 XML 文件处于打开状态时选择 <strong>Layout</strong> 选项卡</li>
+  <li>您还应尝试使用<a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">层次结构查看器</a>工具来调试布局&mdash;当您在模拟器或设备上进行调试时，它会显示布局属性值、绘制具有内边距/外边距指示符的线框以及完整渲染视图。
+
+
+
+</li>
+  <li>您可以利用 <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> 工具快速分析布局和层次结构中是否存在低效环节或其他问题。
+</li>
+</div>
+</div>
+
+<p>在 XML 中声明 UI 的优点在于，您可以更好地将应用的外观与控制应用行为的代码隔离。您的 UI 描述位于应用代码外部，这意味着您在修改或调整描述时无需修改您的源代码并重新编译。例如，您可以创建适用于不同屏幕方向、不同设备屏幕尺寸和不同语言的 XML 布局。此外，在 XML 中声明布局还能更轻松地显示 UI 的结构，从而简化问题调试过程。因此，本文将侧重于示范如何在 XML 中声明布局。如果您对在运行时实例化 View
+对象感兴趣，请参阅 {@link android.view.ViewGroup} 类和
+{@link android.view.View} 类的参考资料。</p>
+
+<p>一般而言，用于声明 UI 元素的 XML 词汇严格遵循类和方法的结构和命名方式，其中元素名称对应于类名称，属性名称对应于方法。实际上，这种对应关系往往非常直接，让您可以猜到对应于类方法的 XML 属性，或对应于给定 XML 元素的类。但请注意，并非所有词汇都完全相同。在某些情况下，在命名上略有差异。例如，EditText 元素具有的
+<code>text</code> 属性对应的类方法是 <code>EditText.setText()</code>。
+ </p>
+
+<p class="note"><strong>提示</strong>：如需了解有关不同布局类型的更多信息，请参阅<a href="{@docRoot}guide/topics/ui/layout-objects.html">常见布局对象</a>。
+
+<a href="{@docRoot}resources/tutorials/views/index.html">Hello 视图</a>教程指南中也提供了一系列有关构建各种布局的教程。</p>
+
+<h2 id="write">编写 XML</h2>
+
+<p>您可以利用 Android 的 XML 词汇，按照在 HTML 中创建包含一系列嵌套元素的网页的相同方式快速设计 UI 布局及其包含的屏幕元素。 </p>
+
+<p>每个布局文件都必须只包含一个根元素，并且该元素必须是视图对象或 ViewGroup 对象。定义根元素之后，即可再以子元素的形式添加其他布局对象或小工具，从而逐步构建定义布局的视图层次结构。例如，以下这个 XML 布局使用垂直 {@link android.widget.LinearLayout}
+来储存一个 {@link android.widget.TextView} 和一个 {@link android.widget.Button}：</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>在 XML 中声明布局后，请在您的 Android 项目 <code>res/layout/</code> 目录中以 <code>.xml</code> 扩展名保存文件，以便其能够正确编译。
+ </p>
+
+<p><a href="{@docRoot}guide/topics/resources/layout-resource.html">布局资源</a>文档中提供了有关布局 XML 文件语法的更多信息。</p>
+
+<h2 id="load">加载 XML 资源</h2>
+
+<p>当您编译应用时，每个 XML 布局文件都会编译到一个
+{@link android.view.View} 资源中。您应该在
+{@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()}
+回调实现中从您的应用代码加载布局资源。请通过调用 <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>，以
+<code>R.layout.<em>layout_file_name</em></code>
+形式向其传递对布局资源的引用来执行此操作。例如，如果您的
+XML 布局保存为
+<code>main_layout.xml</code>，则需要像下面这样为您的 Activity 加载该布局：</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>启动您的 Activity 时，Android
+框架会调用 Activity 中的
+<code>onCreate()</code>
+回调方法（请参阅<a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity</a>文档中有关生命周期的阐述）。</p>
+
+
+<h2 id="attributes">属性</h2>
+
+<p>每个视图对象和 ViewGroup 对象都支持各自的各类 XML
+属性。某些属性是视图对象的专用属性（例如，TextView 支持 <code>textSize</code>
+属性），但这些属性也会被任何可以扩展此类的视图对象继承。某些属性通用于所有 View
+对象，因为它们继承自根 View 类（如 <code>id</code>
+属性）。此外，其他属性被视为“布局参数”，即描述 View
+对象特定布局方向的属性，如该对象的父 ViewGroup
+对象所定义的属性。</p>
+
+<h3 id="id">ID</h3>
+
+<p>任何视图对象都可能具有关联的整型 ID，此 ID 用于在结构树中对 View
+对象进行唯一标识。编译应用后，此 ID 将作为整型数引用，但在布局 XML
+文件中，通常会在 <code>id</code> 属性中为该 ID 赋予字符串值。这是所有
+View 对象共用的 XML 属性（由 {@link android.view.View}
+类定义），您会经常用到它。XML 标记内部的 ID
+语法是：</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>字符串开头处的 @ 符号指示 XML 解析程序应该解析并展开
+ID 字符串的其余部分，并将其标识为 ID 资源。加号 (+)
+表示这是一个新的资源名称，必须创建该名称并将其添加到我们的资源（在 <code>R.java</code> 文件中）内。Android 框架还提供了许多其他 ID
+资源。引用 Android 资源 ID 时，不需要加号，但必须添加
+<code>android</code> 软件包命名空间，如下所示：</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p>添加 <code>android</code> 软件包命名空间之后，现在，我们将从 <code>android.R</code>
+资源类而非本地资源类引用 ID。</p>
+
+<p>要想创建视图并从应用中引用它们，常见的模式是：</p>
+<ol>
+  <li>在布局文件中定义一个视图/小工具，并为其分配一个唯一的 ID：
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>然后创建一个 view
+对象实例，并从布局中捕获它（通常使用 <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code> 方法）：
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>创建 {@link android.widget.RelativeLayout}
+时，为 view 对象定义 ID 非常重要。在相对布局中，同级视图可以定义其相对于其他同级视图的布局，同级视图通过唯一的 ID
+进行引用。</p>
+<p>ID
+不需要在整个结构树中具有唯一性，但在您要搜索的结构树部分应具有唯一性（要搜索的部分往往是整个结构树，因此最好尽可能具有全局唯一性）。
+</p>
+
+
+<h3 id="layout-params">布局参数</h3>
+
+<p>名为 <code>layout_<em>something</em></code> 的 XML
+布局属性可为视图定义与其所在的 ViewGroup 相适的布局参数。</p>
+
+<p>每个 ViewGroup 类都会实现一个扩展 {@link
+android.view.ViewGroup.LayoutParams} 的嵌套类。此子类包含的属性类型会根据需要为视图组的每个子视图定义尺寸和位置。
+
+正如您在图 1
+中所见，父视图组为每个子视图（包括子视图组）定义布局参数。</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>图 1. </strong>以可视化方式表示的视图层次结构，其中包含与每个视图关联的布局参数。
+</p>
+
+<p>请注意，每个 LayoutParams
+子类都有自己的值设置语法。每个子元素都必须定义适合其父元素的
+LayoutParams，但父元素也可为其子元素定义不同的 LayoutParams。 </p>
+
+<p>所有视图组都包括宽度和高度（<code>layout_width</code> 和
+<code>layout_height</code>），并且每个视图都必须定义它们。许多
+LayoutParams 还包括可选的外边距和边框。 <p>
+
+<p>您可以指定具有确切尺寸的宽度和高度，但您多半不想经常这样做。
+在更多的情况下，您会使用以下常量之一来设置宽度或高度：
+ </p>
+
+<ul>
+  <li><var>wrap_content</var> 指示您的视图将其大小调整为内容所需的尺寸
+</li>
+  <li><var>match_parent</var> （在 API 级别 8 之前名为 <var>fill_parent</var> ）指示您的视图尽可能采用其父视图组所允许的最大尺寸
+</li>
+</ul>
+
+<p>一般而言，建议不要使用绝对单位（如像素）来指定布局宽度和高度，
+而是使用相对测量单位，如密度无关像素单位
+(<var>dp</var>)、 <var>wrap_content</var> 或
+<var>match_parent</var>，这种方法更好，因为它有助于确保您的应用在各类尺寸的设备屏幕上正确显示。<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">可用资源</a>文档中定义了可接受的测量单位类型。
+
+
+
+</p>
+
+
+<h2 id="Position">布局位置</h2>
+   <p>
+   视图的几何形状就是矩形的几何形状。视图具有一个位置（以一对<em>水平向左</em>和<em>垂直向上</em>坐标表示）和两个尺寸（以宽度和高度表示）。
+
+位置和尺寸的单位是像素。
+
+   </p>
+
+   <p>
+   可以通过调用方法
+   {@link android.view.View#getLeft()} 和方法 {@link android.view.View#getTop()} 来检索视图的位置。前者会返回表示视图的矩形的水平向左（或称 X 轴）
+ 坐标。后者会返回表示视图的矩形的垂直向上（或称 Y 轴）坐标。
+这些方法都会返回视图相对于其父项的位置。
+例如，如果 <code>getLeft()</code> 返回 20，则意味着视图位于其直接父项左边缘向右 20 个像素处。
+
+
+   </p>
+
+   <p>
+   此外，系统还提供了几种便捷方法来避免不必要的计算，即 {@link android.view.View#getRight()} 和 {@link android.view.View#getBottom()}。
+
+   这些方法会返回表示视图的矩形的右边缘和下边缘的坐标。
+例如，调用 {@link android.view.View#getRight()}
+   类似于进行以下计算：<code>getLeft() + getWidth()</code>。
+   </p>
+
+
+<h2 id="SizePaddingMargins">尺寸、内边距和外边距</h2>
+   <p>
+   视图的尺寸通过宽度和高度表示。视图实际上具有两对宽度和高度值。
+
+   </p>
+
+   <p>
+   第一对称为<em>测量宽度</em>和<em>测量高度</em>。
+这些尺寸定义视图想要在其父项内具有的大小。
+
+   这些测量尺寸可以通过调用 {@link android.view.View#getMeasuredWidth()}
+   和 {@link android.view.View#getMeasuredHeight()} 来获得。
+   </p>
+
+   <p>
+   第二对简称为<em>宽度</em>和<em>高度</em>，有时称为<em>绘制宽度</em>和<em>绘制高度</em>。
+这些尺寸定义视图在绘制时和布局后在屏幕上的实际尺寸。
+
+这些值可以（但不必）与测量宽度和测量高度不同。
+宽度和高度可以通过调用
+   {@link android.view.View#getWidth()} 和 {@link android.view.View#getHeight()} 来获得。
+   </p>
+
+   <p>
+   要想测量其尺寸，视图需要将其内边距考虑在内。内边距以视图左侧、顶部、右侧和底部各部分的像素数表示。
+
+   内边距可用于以特定数量的
+   像素弥补视图的内容。例如，左侧内边距为 2，会将视图的内容从左边缘向右推
+ 2 个像素。可以使用
+   {@link android.view.View#setPadding(int, int, int, int)} 方法设置内边距，并通过调用
+   {@link android.view.View#getPaddingLeft()}、{@link android.view.View#getPaddingTop()}、{@link android.view.View#getPaddingRight()} 和 {@link android.view.View#getPaddingBottom()} 进行查询。
+
+   </p>
+
+   <p>
+   尽管视图可以定义内边距，但它并不支持外边距。
+不过，视图组可以提供此类支持。如需了解更多信息，请参阅
+   {@link android.view.ViewGroup} 和
+   {@link android.view.ViewGroup.MarginLayoutParams}。
+   </p>
+
+   <p>如需了解有关尺寸的详细信息，请参阅
+   <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">尺寸值</a>。
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">常见布局</h2>
+
+<p>{@link android.view.ViewGroup}
+类的每个子类都提供了一种独特的方式来显示您在其中嵌套的视图。以下是
+Android 平台中内置的一些较为常见的布局类型。</p>
+
+<p class="note"><strong>注：</strong>尽管您可以通过将一个或多个布局嵌套在另一个布局内来实现您的
+UI
+设计，但应该使您的布局层次结构尽可能简略。布局的嵌套布局越少，绘制速度越快（扁平的视图层次结构优于深层的视图层次结构）。
+</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">线性布局</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>一种使用单个水平行或垂直行来组织子项的布局。它会在窗口长度超出屏幕长度时创建一个滚动条。
+</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">相对布局</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>让您能够指定子对象彼此之间的相对位置（子对象 A
+在子对象 B 左侧）或子对象与父对象的相对位置（与父对象顶部对齐）。</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">Web 视图</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>显示网页。</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">使用适配器构建布局</h2>
+
+<p>如果布局的内容是属于动态或未预先确定的内容，您可以使用这样一种布局：在运行时通过子类
+{@link android.widget.AdapterView} 用视图填充布局。{@link android.widget.AdapterView}
+类的子类使用 {@link android.widget.Adapter}
+将数据与其布局绑定。{@link android.widget.Adapter}
+充当数据源与 {@link android.widget.AdapterView}
+布局之间的中间人&mdash;{@link android.widget.Adapter}（从数组或数据库查询等来源）检索数据，并将每个条目转换为可以添加到 {@link android.widget.AdapterView}
+布局中的视图。</p>
+
+<p>适配器支持的常见布局包括：</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">列表视图</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>显示滚动的单列列表。</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">网格视图</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>显示滚动的行列网格。</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">使用数据填充适配器视图</h3>
+
+<p>您可以通过将 {@link android.widget.AdapterView} 实例与 {@link android.widget.Adapter} 绑定来填充 {@link android.widget.AdapterView}（如 {@link android.widget.ListView} 或
+{@link android.widget.GridView}），此操作会从外部来源检索数据，并创建表示每个数据条目的
+{@link
+android.view.View}。</p>
+
+<p>Android 提供了几个 {@link android.widget.Adapter} 子类，用于检索不同种类的数据和构建
+{@link android.widget.AdapterView} 的视图。两种最常见的适配器是：
+</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>请在数据源为数组时使用此适配器。默认情况下，{@link
+android.widget.ArrayAdapter} 会通过在每个项目上调用 {@link
+java.lang.Object#toString()} 并将内容放入 {@link
+android.widget.TextView} 来为每个数组项创建视图。
+      <p>例如，如果您具有想要在 {@link
+android.widget.ListView} 中显示的字符串数组，请使用构造函数初始化一个新的
+{@link android.widget.ArrayAdapter}，为每个字符串和字符串数组指定布局：</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>此构造函数的参数是：</p>
+<ul>
+  <li>您的应用 {@link android.content.Context}</li>
+  <li>包含数组中每个字符串的 {@link android.widget.TextView} 的布局</li>
+  <li>字符串数组</li>
+</ul>
+<p>然后，只需在您的 {@link android.widget.ListView} 上调用
+{@link android.widget.ListView#setAdapter setAdapter()}：</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>要想自定义每个项的外观，您可以重写数组中各个对象的 {@link
+java.lang.Object#toString()} 方法。或者，要想为
+{@link android.widget.TextView} 之外的每个项创建视图（例如，如果您想为每个数组项创建一个
+{@link android.widget.ImageView}），请扩展 {@link
+android.widget.ArrayAdapter} 类并重写 {@link android.widget.ArrayAdapter#getView
+getView()} 以返回您想要为每个项获取的视图类型。</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>请在数据来自 {@link android.database.Cursor} 时使用此适配器。使用
+{@link android.widget.SimpleCursorAdapter} 时，您必须指定要为 {@link android.database.Cursor}
+中的每个行使用的布局，以及应该在哪些布局视图中插入 {@link android.database.Cursor}
+中的哪些列。例如，如果您想创建人员姓名和电话号码列表，则可以执行一个返回
+{@link
+android.database.Cursor}（包含对应每个人的行，以及对应姓名和号码的列）的查询。
+然后，您可以创建一个字符串数组，指定您想要在每个结果的布局中包含 {@link
+android.database.Cursor}
+中的哪些列，并创建一个整型数组，指定应该将每个列放入的对应视图：</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>当您实例化 {@link android.widget.SimpleCursorAdapter}
+时，请传递要用于每个结果的布局、包含结果的 {@link android.database.Cursor} 以及以下两个数组：</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>然后，{@link android.widget.SimpleCursorAdapter} 会使用提供的布局，将每个
+{@code
+fromColumns} 项插入对应的 {@code toViews} 视图，为 {@link android.database.Cursor} 中的每个行创建一个视图。</p>.</dd>
+</dl>
+
+
+<p>如果您在应用的生命周期中更改了适配器读取的底层数据，则应调用
+{@link android.widget.ArrayAdapter#notifyDataSetChanged()}。此操作会通知附加的视图，数据发生了变化，它应该自行刷新。
+</p>
+
+
+
+<h3 id="HandlingUserSelections">处理点击事件</h3>
+
+<p>您可以通过实现 {@link android.widget.AdapterView.OnItemClickListener}
+界面来响应 {@link android.widget.AdapterView} 中每一项上的点击事件。例如：</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

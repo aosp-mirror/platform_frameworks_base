@@ -107,7 +107,7 @@ To create the notification itself, you call
 {@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
 which returns a {@link android.app.Notification} object containing your specifications. To issue the
 notification, you pass the {@link android.app.Notification} object to the system by calling
-{@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+{@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.</p>
 
 <h3 id="Required">Required notification contents</h3>
 <p>

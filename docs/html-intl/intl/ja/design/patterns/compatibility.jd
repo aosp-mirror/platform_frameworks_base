@@ -1,0 +1,70 @@
+page.title=下方互換性
+page.tags="support"
+page.metaDescription=Android 4.x がバージョンの古いハードウェアや OS 向けにデザインされた UI にどのように対応するかについての注意事項。
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>デベロッパー ドキュメント</h3>
+    <p>異なる端末のサポート</p>
+  </div>
+</a>
+
+<p>Android 3.0 での大きな変更点には、以下のような点があります。</p>
+<ul>
+<li>仮想コントロール（Back、Home、Recents）のナビゲーション処理の導入によるナビゲーション ハードウェア キー（Back、Menu、Search、Home）の廃止
+</li>
+<li>アクションバーでメニュー項目を使用する際の表現パターンの強化</li>
+</ul>
+<p>Android 4.0 では、こういったタブレット向けの変更点が携帯端末プラットフォームにも導入されました。</p>
+
+<h2 id="older-hardware">古いハードウェアやアプリへの Android 4.0 の対応</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>仮想ナビゲーション コントロールのある携帯端末</h4>
+<p>Android 3.0 以降をターゲットにした Android アプリは、アクションをアクションバーに表示します。アクションバーに収まらないアクションや、トップレベルに表示するほど重要ではないアクションは、アクション オーバーフローに表示されます。
+
+</p>
+<p>ユーザーは、アクションバーをタップすることで、アクション オーバーフローにアクセスできます。</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>物理ナビゲーション キーのある携帯端末</h4>
+<p>従来型のナビゲーション ハードウェア キーのある Android 携帯端末では、画面下部に仮想ナビゲーション バーは表示されません。
+代わりに、メニュー ハードウェア キーからアクション オーバーフローを利用できます。そのため、ポップアップするアクションは先ほどの例と同じように利用できますが、画面の下部に表示される点が異なります。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>仮想ナビゲーション コントロールのある携帯端末でのレガシー アプリ</h4>
+<p>Android 2.3 以前をターゲットにビルドされたアプリを仮想ナビゲーション コントロールのある携帯端末で実行すると、仮想ナビゲーション バーの右側にアクション オーバーフロー コントロールが表示されます。
+コントロールをタップすると、アプリのアクションを従来型の Android メニュー形式で表示できます。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

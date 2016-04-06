@@ -1,6 +1,10 @@
-page.title=Features
-page.metaDescription=Learn about the Android Studio features.
-page.tags=studio, features
+page.title=Android Studio Features
+page.image=images/cards/card-studio-modules_crop_2x.png
+page.metaDescription=A quick look at Android Studio features that make your work faster.
+page.tags=studio, tools, sdk
+meta.tags="studio"
+
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -42,23 +46,23 @@ and
 
 
 <h2 id="trans-editor">Translations Editor</h2>
-<p>Multi-language support is enhanced with the Translations Editor plugin so you can easily add
-a variety of locales to the app's translation file. With
-<a class="external-link" href="https://tools.ietf.org/html/bcp47">BCP 47</a> support, the editor
-combines language and
-region codes into a single selection for targeted localizations. Color codes indicate whether a
-locale is complete or still missing string translations. </p>
+<p>If your application supports multiple languages, you need to properly manage your
+translated string resources. The Translations Editor lets you view and update all your string
+resources in one convenient place.</p>
 
-<p>To access the Translations Editor, open a <code>strings.xml</code> file and click the
-<strong>Open Editor</strong> link, or click the globe icon
-(<img src="{@docRoot}images/tools/studio-globe-icon.png" style="vertical-align:bottom;margin:0;height:19px" />) in the Design layout view.  </p>
+<p>
+Use the Translations Editor to view all your translated resources, modify translations, and add
+new locales. You can provide default values for your resources and mark resources as
+untranslatable. The Translations Editor also marks resources with missing translations in red,
+and provides a link to a page where you can upload resource files and order translation services.
+</p>
 
+<p>For more details on the Translations Editor, see
+<a href="{@docRoot}tools/help/translations-editor.html">Translations Editor</a>.</p>
 
-    <img src="{@docRoot}images/tools/studio-translationeditoropen.png" />
-    <p class="img-caption"><strong>Figure 1.</strong> Add locales and strings in the
+    <img src="{@docRoot}images/tools/studio-translations-editor.png" />
+    <p class="img-caption"><strong>Figure 1.</strong> Manage locales and strings in the
     Translations Editor.</p>
-
-
 
 <h2 id="git-samples">Android Code Samples on GitHub</h2>
 <p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or <em>Welcome</em>

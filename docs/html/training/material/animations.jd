@@ -85,7 +85,7 @@ int cx = myView.getWidth() / 2;
 int cy = myView.getHeight() / 2;
 
 // get the final radius for the clipping circle
-int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+float finalRadius = (float) Math.hypot(cx, cy);
 
 // create the animator for this view (the start radius is zero)
 Animator anim =
@@ -107,7 +107,7 @@ int cx = myView.getWidth() / 2;
 int cy = myView.getHeight() / 2;
 
 // get the initial radius for the clipping circle
-int initialRadius = myView.getWidth();
+float initialRadius = (float) Math.hypot(cx, cy);
 
 // create the animation (the final radius is zero)
 Animator anim =
@@ -194,16 +194,16 @@ activated between the entering and exiting activities.</p>
   <strong>Figure 2</strong> - A scene transition with one shared element.
 </p>
 
-<h3>Specify custom transitions</h3>
+<h3 id="custom-trans">Specify custom transitions</h3>
 
-<p>First, enable window content transitions with the <code>android:windowContentTransitions</code>
+<p>First, enable window content transitions with the <code>android:windowActivityTransitions</code>
 attribute when you define a style that inherits from the material theme. You can also specify
 enter, exit, and shared element transitions in your style definition:</p>
 
 <pre>
 &lt;style name="BaseAppTheme" parent="android:Theme.Material">
   &lt;!-- enable window content transitions -->
-  &lt;item name="android:windowContentTransitions">true&lt;/item>
+  &lt;item name="android:windowActivityTransitions">true&lt;/item>
 
   &lt;!-- specify enter and exit transitions -->
   &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>

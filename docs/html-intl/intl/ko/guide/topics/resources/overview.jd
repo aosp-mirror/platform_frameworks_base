@@ -1,0 +1,103 @@
+page.title=리소스 개요
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>주제</h2>
+  <ol>
+    <li><a href="providing-resources.html">리소스 제공</a></li>
+    <li><a href="accessing-resources.html">리소스 액세스</a></li>
+    <li><a href="runtime-changes.html">런타임 변경 처리</a></li>
+    <li><a href="localization.html">지역화</a></li>
+  </ol>
+
+  <h2>참조</h2>
+  <ol>
+    <li><a href="available-resources.html">리소스 유형</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>이미지나 문자열 같은 리소스는 항상 애플리케이션 코드에서 
+외부화하여 독립적으로 유지해야 합니다. 리소스를 외부화하면 
+다양한 언어나 화면 크기와 같은 특정 기기 구성을 지원하는
+대체 리소스를 제공할 수 있습니다. 이러한 기능은 Android 구동 장치를
+다양한 구성에서 이용하게 되면서 점점 더 중요해지고 있습니다. 여러 가지 구성에 
+호환성을 제공하려면 프로젝트의 
+{@code res/} 디렉터리 안에 리소스를 정리해야 합니다. 이때 여러 가지 하위 디렉터리를 사용하여 리소스를 유형과 구성 
+기준으로 그룹화하면 좋습니다.</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>그림 1.</strong> 각각 기본 레이아웃을 사용하는 서로 다른 두 개의 기기입니다
+(앱에서 대체 레이아웃을 제공하지 않습니다).</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>그림 2.</strong> 서로 다른 두 개의 기기로, 각각 다른 화면 크기에 맞게 제공된 서로 다른 
+레이아웃을 사용하고 있습니다.</p>
+</div>
+
+<p>어떤 유형의 리소스든 애플리케이션에 맞게<em>기본값</em>과 여러
+<em>대체</em> 리소스를 지정할 수 있습니다.</p>
+<ul>
+  <li>기본 리소스는 기기 구성에 관계없이 항상 사용하거나
+기존 구성에 일치하는 대체 리소스가 없을 때 
+사용합니다.</li>
+  <li>대체 리소스는 특정 구성에서 사용하기 위해 개발자가 특별히 디자인한 것을 
+말합니다. 리소스 그룹을 특정 구성용으로 지정하려면, 
+디렉터리 이름에 적절한 구성 한정자를 추가하십시오.</li>
+</ul>
+
+<p>예를 들어 기본 UI 레이아웃은 
+{@code res/layout/} 디렉터리에 저장되어 있더라도 화면이 가로 방향일 때 사용할 
+다른 레이아웃을 지정할 수도 있습니다. 이를 {@code res/layout-land/}
+디렉터리에 저장하면 됩니다. Android는
+기기의 현재 구성을 리소스 디렉터리 이름과 일치시켜서 적절한 리소스를 적용합니다.</p>
+
+<p>그림 1은 이용 가능한 대체 리소스가 없을 경우 시스템이 서로 다른 두 개의 기기에 
+같은 레이아웃을 적용하는 방법을 보여줍니다. 그림 2는 
+같은 애플리케이션에 큰 화면용 레이아웃 리소스를 추가한 모습을 나타낸 것입니다.</p>
+
+<p>다음 문서는 대체 리소스를 체계화하고, 
+대체 리소스를 지정하고, 애플리케이션에 액세스 하는 등의 방법에 관한 완전한 지침을 제공합니다.</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">리소스 제공</a></strong></dt>
+  <dd>앱에 포함할 수 있는 여러 가지 종류의 리소스와, 이러한 리소스를 저장하는 장소, 특정 기기 구성에 대한 
+대체 리소스를 생성하는 방법입니다.</dd>
+  <dt><strong><a href="accessing-resources.html">리소스 액세스</a></strong></dt>
+  <dd>제공한 리소스를 사용하는 방법입니다. 이를 애플리케이션 코드에서 참조하거나 
+다른 XML 리소스에서 참조하는 방식을 씁니다.</dd>
+  <dt><strong><a href="runtime-changes.html">런타임 변경 처리</a></strong></dt>
+  <dd>액티비티가 실행 중인 동안 발생한 구성 변경을 관리하는 방법입니다.</dd>
+  <dt><strong><a href="localization.html">지역화</a></strong></dt>
+  <dd>대체 리소스를 사용하여 애플리케이션을 지역화하는 방법에 대한 상세한 가이드입니다. 이것은 대체 
+리소스를 사용하는 한 가지 방법에 불과하지만, 더 많은 사용자에게 도달하려면 매우 중요한 
+방법입니다.</dd>
+  <dt><strong><a href="available-resources.html">리소스 유형</a></strong></dt>
+  <dd>개발자가 제공할 수 있는 다양한 리소스 유형의 참조로, 각각의 XML 요소, 
+속성과 구문을 설명하는 것입니다. 예를 들어, 이 참조는 애플리케이션 메뉴와 드로어블 리소스, 
+애니메이션에 대한 리소스를 생성하는 법을 보여줍니다.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

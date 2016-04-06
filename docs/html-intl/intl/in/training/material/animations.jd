@@ -1,0 +1,550 @@
+page.title=Mendefinisikan Animasi Custom
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#Touch">Menyesuaikan Umpan Balik Sentuh</a></li>
+  <li><a href="#Reveal">Menggunakan Reveal Effect</a></li>
+  <li><a href="#Transitions">Menyesuaikan Transisi Aktivitas</a></li>
+  <li><a href="#ViewState">Menganimasikan Perubahan Status Tampilan</a></li>
+  <li><a href="#AnimVector">Menganimasikan Drawable Vektor</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Animasi dalam desain bahan memberi pengguna umpan balik tentang tindakannya dan menyediakan
+kesinambungan visual saat pengguna berinteraksi dengan aplikasi Anda. Tema bahan menyediakan beberapa animasi default
+untuk tombol dan transisi aktivitas, dan Android 5.0 (API level 21) ke atas memungkinkan Anda menyesuaikan
+animasi ini dan membuat yang baru:</p>
+
+<ul>
+<li>Umpan balik sentuh</li>
+<li>Singkap Melingkar</li>
+<li>Transisi aktivitas</li>
+<li>Gerakan melengkung</li>
+<li>Perubahan status tampilan</li>
+</ul>
+
+
+<h2 id="Touch">Menyesuaikan Umpan Balik Sentuh</h2>
+
+<p>Umpan balik sentuh dalam desain bahan menyediakan konfirmasi visual seketika pada
+titik kontak bila pengguna berinteraksi dengan elemen UI. Animasi umpan balik sentuh default
+untuk tombol menggunakan kelas {@link android.graphics.drawable.RippleDrawable} baru, yang bertransisi
+di antara berbagai status dengan efek riak.</p>
+
+<p>Di sebagian besar kasus, Anda harus menerapkan fungsionalitas ini dalam XML tampilan dengan menetapkan
+latar belakang tampilan sebagai:</p>
+
+<ul>
+<li><code>?android:attr/selectableItemBackground</code> untuk riak berbatas.</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> untuk riak yang meluas ke luar
+tampilan. Latar belakang ini akan digambar di atas, dan dibatasi oleh, induk tampilan terdekat dengan
+latar belakang non-null.</li>
+</ul>
+
+<p class="note"><strong>Catatan:</strong> <code>selectableItemBackgroundBorderless</code> adalah
+atribut baru yang diperkenalkan di API level 21.</p>
+
+
+<p>Atau, Anda bisa mendefinisikan {@link android.graphics.drawable.RippleDrawable}
+sebagai sumber daya XML dengan menggunakan elemen <code>ripple</code>.</p>
+
+<p>Anda bisa menetapkan warna ke objek-objek {@link android.graphics.drawable.RippleDrawable}. Untuk mengubah
+warna default umpan balik sentuh, gunakan atribut <code>android:colorControlHighlight</code>
+tema.</p>
+
+<p>Untuk informasi selengkapnya, lihat referensi API bagi kelas {@link
+android.graphics.drawable.RippleDrawable}.</p>
+
+
+<h2 id="Reveal">Menggunakan Reveal Effect</h2>
+
+<p>Animasi singkap memberi pengguna kesinambungan visual saat menampilkan atau menyembunyikan sekelompok
+elemen UI. Metode {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} memungkinkan Anda menganimasikan lingkaran terpangkas
+untuk memperlihatkan atau menyembunyikan tampilan.</p>
+
+<p>Untuk memperlihatkan tampilan yang sebelumnya tidak terlihat dengan menggunakan efek ini:</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+
+// create the animator for this view (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+
+// make the view visible and start the animation
+myView.setVisibility(View.VISIBLE);
+anim.start();
+</pre>
+
+<p>Untuk menyembunyikan sebuah tampilan yang sebelumnya terlihat dengan menggunakan efek ini:</p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">Menyesuaikan Transisi Aktivitas</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Gambar 1</strong> - Transisi
+    dengan elemen bersama.</p>
+    <em>Untuk memutar ulang film, klik layar perangkat</em>
+  </div>
+</div>
+
+<p>Transisi aktivitas dalam aplikasi desain bahan memberikan koneksi visual antar berbagai status
+melalui gerakan dan transformasi di antara elemen umum. Anda bisa menetapkan animasi custom untuk
+masuk ke dan keluar dari transisi dan untuk transisi elemen bersama di antara aktivitas.</p>
+
+<ul>
+<li>Transisi <strong>masuk</strong> menentukan cara tampilan di aktivitas memasuki suatu babak.
+misalnya, dalam transisi masuk <em>explode</em>, tampilan memasuki babak dari sisi luar
+dan melayang masuk ke arah tengah layar.</li>
+
+<li>Transisi <strong>keluar</strong> menentukan cara tampilan di aktivitas keluar dari suatu babak. Misalnya
+, dalam transisi keluar <em>explode</em>, tampilan akan keluar dari babak dari bagian
+tengahnya.</li>
+
+<li>Transisi <strong>elemen bersama</strong> menentukan cara menggunakan bersama suatu tampilan
+oleh dua transisi aktivitas di antara aktivitas-aktivitas ini. Misalnya, jika dua aktivitas memiliki
+gambar yang sama dengan posisi dan ukuran berbeda, transisi elemen bersama <em>changeImageTransform</em>
+mentransformasikan dan menskalakan gambar secara mulus di antara aktivitas-aktivitas ini.</li>
+</ul>
+
+<p>Android 5.0 (API level 21) mendukung transisi masuk dan transisi keluar ini:</p>
+
+<ul>
+<li><em>explode</em> - Memindahkan tampilan masuk ke atau keluar dari tengah babak.</li>
+<li><em>slide</em> - Memindahkan tampilan masuk ke atau keluar dari salah satu tepi babak.</li>
+<li><em>fade</em> - Menambahkan atau menghapus tampilan dari babak dengan mengubah opasitasnya.</li>
+</ul>
+
+<p>Transisi apa pun yang memperluas kelas {@link android.transition.Visibility} didukung
+sebagai transisi masuk atau transisi keluar. Untuk informasi selengkapnya, lihat referensi API untuk kelas
+{@link android.transition.Transition}.</p>
+
+<p>Android 5.0 (API level 21) juga mendukung transisi elemen bersama ini:</p>
+
+<ul>
+<li><em>changeBounds</em> - Menganimasikan perubahan pada batas-batas layout tampilan target.</li>
+<li><em>changeClipBounds</em> - Menganimasikan perubahan pada batas-batas pemangkasan tampilan target.</li>
+<li><em>changeTransform</em> - Menganimasikan perubahan pada skala dan rotasi tampilan target.</li>
+<li><em>changeImageTransform</em> - Menganimasikan perubahan pada ukuran dan skala gambar target.</li>
+</ul>
+
+<p>Bila Anda mengaktifkan transisi aktivitas dalam aplikasi, transisi memudar-silang default akan
+diaktifkan di antara aktivitas masuk dan aktivitas keluar.</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
+<p class="img-caption">
+  <strong>Gambar 2</strong> - Transisi babak dengan satu elemen bersama.
+</p>
+
+<h3>Menetapkan transisi custom</h3>
+
+<p>Pertama, aktifkan transisi konten jendela dengan atribut <code>android:windowContentTransitions</code>
+bila Anda mendefinisikan gaya yang mewarisi tema bahan. Anda juga bisa menetapkan
+transisi-transisi masuk, keluar, dan elemen bersama dalam definisi gaya:</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>Transisi <code>change_image_transform</code> dalam contoh ini didefinisikan sebagai berikut:</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p>Elemen <code>changeImageTransform</code> menunjukkan
+kelas {@link android.transition.ChangeImageTransform}. Untuk informasi selengkapnya, lihat referensi
+API untuk {@link android.transition.Transition}.</p>
+
+<p>Sebaliknya, untuk mengaktifkan transisi konten jendela dalam kode Anda, panggil
+metode {@link android.view.Window#requestFeature Window.requestFeature()}:</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>Untuk menetapkan transisi dalam kode Anda, panggil metode-metode ini dengan objek {@link
+android.transition.Transition}:</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>Metode {@link android.view.Window#setExitTransition setExitTransition()} dan {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} mendefinisikan
+transisi keluar untuk aktivitas yang memanggil. Metode {@link android.view.Window#setEnterTransition
+setEnterTransition()} dan {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} mendefinisikan transisi masuk untuk aktivitas yang dipanggil.</p>
+
+<p>Untuk mendapatkan efek penuh sebuah transisi, Anda harus mengaktifkan transisi konten jendela pada
+aktivitas yang memanggil maupun aktivitas yang dipanggil. Jika tidak, aktivitas yang memanggil akan memulai transisi keluar,
+namun kemudian Anda akan melihat transisi jendela (seperti mengelupas atau memudar).</p>
+
+<p>Untuk memulai transisi masuk sesegera mungkin, gunakan metode
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+pada aktivitas yang dipanggil. Ini memungkinkan Anda mendapatkan transisi masuk yang lebih dramatis.</p>
+
+<h3>Memulai aktivitas dengan menggunakan transisi</h3>
+
+<p>Jika Anda mengaktifkan transisi dan mengatur transisi keluar untuk aktivitas, transisi itu akan diaktifkan
+bila Anda menjalankan aktivitas lain sebagai berikut:</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>Jika Anda telah mengatur transisi masuk untuk aktivitas kedua, transisi juga akan diaktifkan
+bila aktivitas dimulai. Untuk menonaktifkan transisi bila Anda memulai aktivitas lain, sediakan
+bundel opsi <code>null</code>.</p>
+
+<h3>Memulai aktivitas dengan satu elemen bersama</h3>
+
+<p>Untuk membuat animasi transisi layar di antara dua aktivitas yang memiliki satu elemen bersama:</p>
+
+<ol>
+<li>Aktifkan transisi konten jendela dalam tema Anda.</li>
+<li>Tetapkan transisi elemen bersama dalam gaya Anda.</li>
+<li>Definisikan transisi Anda sebagai sumber daya XML.</li>
+<li>Tetapkan nama umum pada elemen bersama dalam kedua layout dengan
+    atribut <code>android:transitionName</code>.</li>
+<li>Gunakan metode {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()}.</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>Untuk tampilan dinamis bersama yang Anda hasilkan dalam kode, gunakan
+metode {@link android.view.View#setTransitionName View.setTransitionName()} untuk menetapkan
+nama elemen umum di kedua aktivitas.</p>
+
+<p>Untuk membalik animasi transisi babak bila Anda menyelesaikan aktivitas kedua, panggil metode
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+sebagai ganti {@link android.app.Activity#finish Activity.finish()}.</p>
+
+<h3>Memulai aktivitas dengan beberapa elemen bersama</h3>
+
+<p>Untuk membuat animasi transisi babak antara dua aktivitas yang memiliki lebih dari satu
+elemen bersama, definisikan elemen bersama di kedua layout dengan atribut <code>android:transitionName</code>
+ (atau gunakan metode {@link android.view.View#setTransitionName View.setTransitionName()}
+di kedua aktivitas), dan buat sebuah objek {@link android.app.ActivityOptions} sebagai berikut:</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">Menggunakan Gerakan Melengkung</h2>
+
+<p>Animasi dalam desain bahan mengandalkan kurva untuk pola interpolasi waktu dan
+gerakan spasial. Dengan Android 5.0 (API level 21) ke atas, Anda bisa mendefinisikan kurva pewaktuan custom dan
+pola gerakan melengkung untuk animasi.</p>
+
+<p>Kelas {@link android.view.animation.PathInterpolator} adalah interpolator baru berdasarkan sebuah
+kurva Bézier atau objek {@link android.graphics.Path}. Interpolator ini menetapkan kurva gerakan
+dalam bujur sangkar 1x1, dengan titik-titik jangkar di (0,0) dan (1,1) dan titik-titik kontrol sebagaimana ditetapkan menggunakan
+argumen konstruktor. Anda juga bisa mendefinisikan interpolator path sebagai sumber daya XML:</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>Sistem menyediakan sumber daya XML untuk tiga kurva dasar dalam
+spesifikasi desain bahan:</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>Anda bisa meneruskan objek {@link android.view.animation.PathInterpolator} ke metode {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
+
+<p>Kelas {@link android.animation.ObjectAnimator} memiliki konstruktor-konstruktor baru yang memungkinkan Anda menganimasikan
+koordinat bersama sebuah path dengan menggunakan dua atau beberapa properti sekaligus. Misalnya, animator berikut
+menggunakan objek {@link android.graphics.Path} untuk menganimasikan properti X dan Y sebuah tampilan:</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">Menganimasikan Perubahan Status Tampilan</h2>
+
+<p>Kelas {@link android.animation.StateListAnimator} memungkinkan Anda mendefinisikan animator yang berjalan bila
+status tampilan berubah. Contoh berikut menampilkan cara mendefinisikan {@link
+android.animation.StateListAnimator} sebagai sumber daya XML:</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>Untuk menyertakan animasi status tampilan custom ke tampilan, definisikan animator menggunakan
+elemen <code>selector</code> dalam sumber daya file XML sebagaimana dalam contoh ini, dan tetapkan ke
+tampilan Anda dengan atribut <code>android:stateListAnimator</code>. Untuk menetapkan animator daftar status
+ke sebuah tampilan dalam kode Anda, gunakan metode {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()}, dan tetapkan animator ke tampilan dengan
+metode {@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
+
+<p>Bila tema Anda memperluas tema bahan, tombol-tombol akan memiliki animasi Z secara default. Untuk menghindari
+perilaku ini di tombol Anda, aturlah atribut <code>android:stateListAnimator</code> ke
+<code>@null</code>.</p>
+
+<p>Kelas {@link android.graphics.drawable.AnimatedStateListDrawable} memungkinkan Anda membuat drawable
+yang menampilkan animasi di antara perubahan status tampilan terkait. Sebagian widget sistem di
+Android 5.0 menggunakan animasi ini secara default. Contoh berikut menampilkan cara
+mendefinisikan {@link android.graphics.drawable.AnimatedStateListDrawable} sebagai sumber daya XML:</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">Menganimasikan Drawable Vektor</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Drawable Vektor </a>
+bisa diubah skalanya tanpa kehilangan definisi. Kelas {@link android.graphics.drawable.AnimatedVectorDrawable}
+memungkinkan Anda menganimasikan properti drawable vektor.</p>
+
+<p>Anda biasanya mendefinisikan drawable vektor yang dianimasikan dalam tiga file XML:</p>
+
+<ul>
+<li>Drawable vektor dengan elemen <code>&lt;vector&gt;</code> dalam
+<code>res/drawable/</code></li>
+<li>Drawable vektor animasi dengan elemen <code>&lt;animated-vector&gt;</code> dalam
+<code>res/drawable/</code></li>
+<li>Satu atau beberapa animator objek dengan elemen <code>&lt;objectAnimator&gt;</code> dalam
+<code>res/anim/</code></li>
+</ul>
+
+<p>Drawable vektor yang dianimasikan bisa menganimasikan atribut elemen <code>&lt;group&gt;</code> dan
+<code>&lt;path&gt;</code>. Elemen <code>&lt;group&gt;</code> mendefinisikan satu set
+path atau subgrup, dan elemen <code>&lt;path&gt;</code> mendefinisikan path yang harus digambar.</p>
+
+<p>Bila Anda mendefinisikan drawable vektor yang ingin dianimasikan, gunakan atribut <code>android:name</code>
+untuk menetapkan nama unik ke grup dan path, sehingga Anda bisa merujuknya dari
+definisi animator Anda. Misalnya:</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>Definisi drawable vektor yang dianimasikan merujuk pada grup dan path dalam drawable vektor
+berdasarkan namanya:</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>Definisi animasi menyatakan objek {@link android.animation.ObjectAnimator} atau {@link
+android.animation.AnimatorSet}. Animator pertama dalam contoh ini memutar
+grup target sebanyak 360 derajat:</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>Animator kedua dalam contoh ini perlahan-lahan mengubah bentuk path drawable vektor dari satu bentuk ke
+bentuk yang lain. Kedua path harus kompatibel untuk morphing: keduanya harus memiliki jumlah perintah yang sama
+dan jumlah parameter yang sama untuk setiap perintah.</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>Untuk informasi selengkapnya, lihat referensi API bagi {@link
+android.graphics.drawable.AnimatedVectorDrawable}.</p>

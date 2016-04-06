@@ -1,0 +1,66 @@
+page.title=Enabling Background Playback
+page.tags=tv, play, playback, background
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#background">Request Background Playback</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+A user watching content on a TV device may decide to switch to the TV launcher at any time.
+If a user switches to the launcher while using a TV playback app, by default the app is paused.
+Since the user did not explicitly request to pause playback, the default behavior might seem
+abrupt and unexpected. This lesson describes how to enable background playback in your app,
+which provides a better user experience.
+</p>
+
+<h2 id="background">Request Background Playback</h2>
+
+<p>Normally, when the user clicks on <strong>Home</strong> to display the TV
+launcher, the activity pauses. However, your app can request background playback, in
+which the activity continues playing behind the TV launcher.</p>
+
+<p>To request background playback, call
+{@link android.app.Activity#requestVisibleBehind requestVisibleBehind()}.
+Be sure to clean up media resources if the activity stops being
+visible. For example, you should free media resources if
+{@link android.app.Activity#requestVisibleBehind requestVisibleBehind()}
+returns <code>false</code> to indicate that the request failed, or if the system calls
+your override of {@link android.app.Activity#onVisibleBehindCanceled onVisibleBehindCanceled()}.
+</p>
+
+<pre>
+&commat;Override
+public void onPause() &lbrace;
+  super.onPause();
+  if (mVideoView.isPlaying()) &lbrace;
+    // Argument equals true to notify the system that the activity
+    // wishes to be visible behind other translucent activities
+    if (! requestVisibleBehind(true)) &lbrace;
+      // App-specific method to stop playback and release resources
+      // because call to requestVisibleBehind(true) failed
+      stopPlayback();
+    &rbrace;
+  &rbrace; else &lbrace;
+    // Argument equals false because the activity is not playing
+    requestVisibleBehind(false);
+  &rbrace;
+&rbrace;
+
+&commat;Override
+public void onVisibleBehindCanceled() &lbrace;
+  // App-specific method to stop playback and release resources
+  stopPlayback();
+  super.onVisibleBehindCanceled();
+&rbrace;
+</pre>
+

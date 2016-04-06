@@ -1,0 +1,550 @@
+page.title=사용자지정 애니메이션의 정의
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#Touch">사용자지정 터치 피드백</a></li>
+  <li><a href="#Reveal">표시 효과 사용</a></li>
+  <li><a href="#Transitions">사용자지정 액티비티 전환</a></li>
+  <li><a href="#ViewState">뷰 상태 변경 애니메이트</a></li>
+  <li><a href="#AnimVector">벡터 드로어블 애니메이트</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>머티리얼 디자인에서 애니메이션은 사용자에게 자신의 동작에 대한 피드백을 제공하고, 앱과 상호작용할 때 시각적 연속성을 제공합니다.
+ 머티리얼 테마는 버튼 및 액티비티 전환을 위한 몇 가지 기본 애니메이션을 제공합니다. Android 5.0(API 레벨 21) 이상에서는 이러한 애니메이션을 사용자가 지정하거나 새로운 애니메이션을 만들 수 있습니다.
+
+</p>
+
+<ul>
+<li>터치 피드백</li>
+<li>회전하며 나타나기</li>
+<li>액티비티 전환</li>
+<li>커브 모션</li>
+<li>뷰 상태 변경</li>
+</ul>
+
+
+<h2 id="Touch">사용자지정 터치 피드백</h2>
+
+<p>머티리얼 디자인의 터치 피드백은 사용자가 UI 요소와 상호작용하는 시점에서 즉시 시각적으로 확인할 수 있습니다.
+ 버튼의 기본 터치 피드백 애니메이션은 물결 효과를 통해 서로 다른 상태 간에 전환하는 새 {@link android.graphics.drawable.RippleDrawable} 클래스를 사용합니다.
+
+</p>
+
+<p>대부분의 경우, 다음과 같이 뷰 배경을 지정하는 방식으로 뷰 XML에서 이 기능을 적용해야 합니다.
+</p>
+
+<ul>
+<li>제한된 물결의 경우, <code>?android:attr/selectableItemBackground</code></li>
+<li>뷰를 넘어 확장되는 물결의 경우, <code>?android:attr/selectableItemBackgroundBorderless</code> 
+ 이 경우 물결이 null이 아닌 배경을 가진 뷰의 가장 가까운 상위 요소 위에 그려지고 해당 상위 요소까지로 제한됩니다.
+</li>
+</ul>
+
+<p class="note"><strong>참고:</strong> <code>selectableItemBackgroundBorderless</code>는 API 레벨 21에서 새로 도입된 특성입니다.
+</p>
+
+
+<p>또는 <code>ripple</code> 요소를 사용하여 {@link android.graphics.drawable.RippleDrawable}
+을 XML 리소스로 정의할 수 있습니다.</p>
+
+<p>{@link android.graphics.drawable.RippleDrawable} 객체에 색상을 지정할 수 있습니다. 기본 터치 피드백 색상을 변경하려면 테마의 <code>android:colorControlHighlight</code>
+특성을 사용합니다.
+</p>
+
+<p>자세한 내용은 {@link
+android.graphics.drawable.RippleDrawable} 클래스의 API 레퍼런스를 참조하세요.</p>
+
+
+<h2 id="Reveal">표시 효과 사용</h2>
+
+<p>표시 애니메이션은 UI 요소 그룹을 표시하거나 숨길 때 사용자에게 시각적 연속성을 제공합니다.
+ {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} 메서드를 사용하면 클리핑 서클을 애니메이트하여 뷰를 표시하거나 숨길 수 있습니다.
+</p>
+
+<p>이 효과를 사용하여 이전에 보이지 않았던 뷰를 표시하려면:</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+
+// create the animator for this view (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+
+// make the view visible and start the animation
+myView.setVisibility(View.VISIBLE);
+anim.start();
+</pre>
+
+<p>이 효과를 사용하여 이전에 보였던 뷰를 숨기려면:</p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">사용자지정 액티비티 전환</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>그림 1</strong> - 
+    공유 요소를 이용한 전환.</p>
+    <em>영화를 재생하려면 기기 화면을 클릭하세요.</em>
+  </div>
+</div>
+
+<p>머티리얼 디자인 앱의 액티비티 전환은 공통 요소 간의 모션 및 변환을 통해 서로 다른 상태 간에 시각적 연결을 제공합니다.
+ 들어가기 및 나가기 전환과 액티비티 간 공유 요소의 전환을 위한 사용자지정 애니메이션을 지정할 수 있습니다.
+</p>
+
+<ul>
+<li><strong>들어가기</strong> 전환은 액티비티에서 뷰가 장면 속으로 들어가는 방식을 결정합니다. 예를 들어, <em>explode</em> 들어가기 전환의 경우, 뷰가 밖에서 장면 속으로 들어가며 화면의 중앙으로 향합니다.
+
+</li>
+
+<li><strong>나가기</strong> 전환은 액티비티의 뷰가 장면을 나가는 방식을 결정합니다. 예를 들어, 나가기 전환으로 <em>explode</em>를 지정하면 뷰가 중앙에서부터 화면을 벗어납니다.
+
+</li>
+
+<li><strong>공유 요소</strong> 전환은 두 액티비티 간에 공유되는 뷰가 이 두 액티비티 간에 전환되는 방식을 결정합니다.
+ 예를 들어 두 액티비티에서 사용하는 동일한 이미지가 다른 위치에 있고 크기도 다를 경우, <em>changeImageTransform</em> 공유 요소 전환은 두 액티비티 간에 이미지를 매끄럽게 변환하고 배율을 조정합니다.
+
+</li>
+</ul>
+
+<p>Android 5.0(API 레벨 21)은 다음 들어가기 및 나가기 전환을 지원합니다.</p>
+
+<ul>
+<li><em>explode</em> - 뷰를 장면의 중앙에서 안이나 밖으로 이동합니다.</li>
+<li><em>slide</em> - 뷰를 장면의 가장자리 중 하나에서 안이나 밖으로 이동합니다.</li>
+<li><em>fade</em> - 불투명도를 변경하여 뷰를 추가하거나 장면에서 제거합니다.</li>
+</ul>
+
+<p>{@link android.transition.Visibility} 클래스를 확장하는 모든 전환은 들어가기 또는 나가기 전환으로 지원됩니다.
+ 자세한 내용은
+{@link android.transition.Transition} 클래스의 API 레퍼런스를 참조하세요.</p>
+
+<p>Android 5.0(API 레벨 21)은 다음의 공유 요소 전환도 지원합니다.</p>
+
+<ul>
+<li><em>changeBounds</em> - 대상 뷰의 레이아웃 경계에서 변경을 애니메이트합니다.</li>
+<li><em>changeClipBounds</em> - 대상 뷰의 클리핑 경계에서 변경을 애니메이트합니다.</li>
+<li><em>changeTransform</em> - 대상 뷰의 배율 및 회전 변경을 애니메이트합니다.</li>
+<li><em>changeImageTransform</em> - 대상 이미지의 크기 및 배율 변경을 애니메이트합니다.</li>
+</ul>
+
+<p>앱에서 액티비티 전환을 활성화할 경우, 들어가기 및 나가기 액티비티 간에 기본 크로스페이딩(cross-fading) 전환이 활성화됩니다.
+</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
+<p class="img-caption">
+  <strong>그림 2</strong> - 하나의 공유 요소로 장면 전환.
+</p>
+
+<h3>사용자지정 전환 지정</h3>
+
+<p>먼저 머티리얼 테마에서 상속하는 스타일을 정의할 때, <code>android:windowContentTransitions</code>
+특성을 통해 창 콘텐츠 전환을 활성화합니다. 들어가기, 나가기 및 공유 요소 전환도 스타일 정의에서 지정할 수 있습니다.
+</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>이 예에서 <code>change_image_transform</code> 전환은 다음과 같이 정의됩니다.</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p><code>changeImageTransform</code> 요소는
+{@link android.transition.ChangeImageTransform} 클래스에 해당합니다. 자세한 내용은 {@link android.transition.Transition}의 API 레퍼런스를 참조하세요.
+</p>
+
+<p>코드에서 창 콘텐츠 전환을 활성화하려면
+{@link android.view.Window#requestFeature Window.requestFeature()} 메서드를 호출합니다.</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>코드에서 전환을 지정하려면 {@link
+android.transition.Transition} 객체를 사용하여 다음과 같은 메서드를 호출합니다.</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>{@link android.view.Window#setExitTransition setExitTransition()} 및 {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} 메서드는 호출하는 액티비티의 나가기 전환을 정의합니다.
+ {@link android.view.Window#setEnterTransition
+setEnterTransition()} 및 {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} 메서드는 호출되는 액티비티의 들어가기 전환을 정의합니다.</p>
+
+<p>전환 효과를 극대화하려면 호출하는 액티비티와 호출되는 액티비티 모두에서 창 콘텐츠 전환을 활성화해야 합니다.
+ 그렇지 않으면 호출하는 액티비티가 나가기 전환을 시작하지만, 배율 또는 페이드와 같은 창 전환이 나타납니다.
+</p>
+
+<p>들어가기 전환을 최대한 빨리 시작하려면 호출되는 액티비티에서 
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+ 메서드를 사용하세요. 그러면 더욱 인상적인 들어가기 전환이 가능합니다.</p>
+
+<h3>전환을 사용하여 액티비티 시작</h3>
+
+<p>전환을 활성화하고 액티비티에 대해 나가기 전환을 설정한 경우, 다음과 같이 다른 액티비티를 시작하면 전환이 활성화됩니다.
+</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>두 번째 액티비티에 대해 들어가기 전환을 설정한 경우, 액티비티가 시작되면 전환도 활성화됩니다.
+ 다른 액티비티를 시작할 때 전환을 비활성화하려면 <code>null</code> 옵션 번들을 제공하십시오.
+</p>
+
+<h3>공유 요소를 가진 액티비티 시작</h3>
+
+<p>공유 요소를 가진 두 액티비티 간에 화면 전환 애니메이션을 만들려면:</p>
+
+<ol>
+<li>테마에서 창 콘텐츠 전환을 활성화합니다.</li>
+<li>스타일에서 공유 요소 전환을 지정합니다.</li>
+<li>전환을 XML 리소스로 정의합니다.</li>
+<li>
+ <code>android:transitionName</code> 특성을 사용하여 두 레이아웃의 공유 요소에 공통 이름을 지정합니다.</li>
+<li>{@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()} 메서드를 사용합니다.</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>코드에서 생성하는 공유된 동적 뷰의 경우, 
+{@link android.view.View#setTransitionName View.setTransitionName()} 메서드를 사용하여 두 액티비티의 공통 요소 이름을 지정합니다.
+</p>
+
+<p>두 번째 액티비티 종료 시, 장면 전환 애니메이션을 되돌리려면 {@link android.app.Activity#finish Activity.finish()} 대신
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+ 메서드를 호출합니다.</p>
+
+<h3>여러 공유 요소를 가진 액티비티 시작</h3>
+
+<p>2개 이상의 공유 요소를 가진 두 액티비티 간에 적용할 장면 전환 애니메이션을 만들려면 <code>android:transitionName</code>
+특성으로 (또는 두 액티비티에서{@link android.view.View#setTransitionName View.setTransitionName()} 메서드를 사용하여) 두 레이아웃의 공유 요소를 정의하고 다음과 같이 {@link android.app.ActivityOptions} 개체를 생성합니다.
+
+</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">커브 모션 사용</h2>
+
+<p>머티리얼 디자인의 애니메이션은 시간 보간 및 공간 이동 패턴에서 커브를 사용합니다.
+ Android 5.0(API 레벨 21) 이상에서 애니메이션의 사용자지정 타이밍 커브 및 커브 모션 패턴을 정의할 수 있습니다.
+</p>
+
+<p>{@link android.view.animation.PathInterpolator} 클래스는 베지어 곡선 또는 {@link android.graphics.Path} 개체를 기반으로 하는 새 보간기입니다.
+ 이 보간기는 생성자 인수를 사용하여 지정된 기준점 (0,0) 및 (1,1)과 제어점으로 모션 커브를 1x1 정사각형 안에 지정합니다.
+
+ 또한 경로 보간기를 XML 리소스로 정의할 수도 있습니다.</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>시스템은 머티리얼 디자인 사양에서 세 가지 기본 커브에 대한 XML 리소스를 제공합니다.
+</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>{@link android.view.animation.PathInterpolator} 객체를 {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()} 메서드에 전달할 수 있습니다.</p>
+
+<p>{@link android.animation.ObjectAnimator} 클래스에는 한 번에 2개 이상의 속성을 사용하여 경로를 따라 좌표를 애니메이트할 수 있는 새 생성자가 있습니다.
+ 예를 들어 다음 애니메이터는 뷰의 X 및 Y 속성을 애니메이트하기 위해 {@link android.graphics.Path} 객체를 사용합니다.
+</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">뷰 상태 변경 애니메이트</h2>
+
+<p>{@link android.animation.StateListAnimator} 클래스를 사용하면 뷰의 상태가 변경될 때 실행되는 애니메이터를 정의할 수 있습니다.
+ 다음 예는 {@link
+android.animation.StateListAnimator}를 XML 리소스로 정의하는 방법을 보여줍니다.</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>사용자지정 뷰 상태 애니메이션을 뷰에 첨부하려면 이 예와 같이 XML 리소스 파일의 
+<code>selector</code> 요소를 사용하여 애니메이터를 정의한 후에 <code>android:stateListAnimator</code> 특성을 통해 뷰에 할당합니다.
+ 코드에서 뷰에 상태 목록 애니메이터를 할당하려면 {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} 메서드를 사용하고,
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()} 메서드로 애니메이터를 뷰에 할당합니다.
+</p>
+
+<p>머티리얼 테마를 확장하는 테마의 경우, 버튼은 기본적으로 Z 애니메이션을 가집니다. 버튼에서 이러한 동작을 피하려면 <code>android:stateListAnimator</code> 특성을
+<code>@null</code>로 설정합니다.
+</p>
+
+<p>{@link android.graphics.drawable.AnimatedStateListDrawable} 클래스를 사용하면 연관된 뷰의 상태 변경 사이에 애니메이션을 보여주는 Drawable을 생성할 수 있습니다.
+ Android 5.0의 일부 시스템 위젯은 이러한 애니메이션을 기본적으로 사용합니다.
+ 다음 예는 {@link android.graphics.drawable.AnimatedStateListDrawable}를 XML 리소스로 정의하는 방법을 보여줍니다.
+</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">벡터 드로어블 애니메이트</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">벡터 드로어블</a>은 정의를 잃지 않고 확대할 수 있습니다.
+ {@link android.graphics.drawable.AnimatedVectorDrawable}
+클래스를 사용하면 Vector Drawable의 속성을 애니메이트할 수 있습니다.</p>
+
+<p>일반적으로 애니메이트된 벡터 드로어블은 다음 3개의 XML 파일에서 정의합니다.</p>
+
+<ul>
+<li>
+<code>res/drawable/</code>의 <code>&lt;vector&gt;</code> 요소를 가진 벡터 드로어블</li>
+<li>
+<code>res/drawable/</code>의 <code>&lt;animated-vector&gt;</code> 요소를 가진 애니메이트된 벡터 드로어블</li>
+<li>
+<code>res/anim/</code>의 <code>&lt;objectAnimator&gt;</code> 요소를 가진 하나 이상의 객체 애니메이터</li>
+</ul>
+
+<p>애니메이트된 벡터 드로어블은 <code>&lt;group&gt;</code> 및
+<code>&lt;path&gt;</code> 요소의 특성을 애니메이트할 수 있습니다. <code>&lt;group&gt;</code> 요소는 경로 또는 하위 그룹 집합을 정의하며, <code>&lt;path&gt;</code> 요소는 그릴 경로를 정의합니다.
+</p>
+
+<p>애니메이트할 벡터 드로어블을 정의하는 경우, 애니메이터 정의에서 참조할 수 있도록 <code>android:name</code>
+특성을 사용하여 그룹 및 경로에 고유한 이름을 할당합니다.
+ 예:</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>애니메이트된 벡터 드로어블 정의는 벡터 드로어블의 그룹 및 경로를 이름으로 참조합니다.
+</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>애니메이션 정의는 {@link android.animation.ObjectAnimator} 또는 {@link
+android.animation.AnimatorSet} 객체를 나타냅니다. 이 예의 첫 번째 애니메이터는 대상 그룹을 360도 회전합니다.
+</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>두 번째 애니메이터는 벡터 드로어블의 경로를 다른 모양으로 모핑합니다.
+ 두 경로 모두 모핑이 가능해야 하며, 같은 수의 명령어와 각 명령어에 대해 같은 수의 매개변수가 있어야 합니다.
+</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>자세한 내용은 {@link
+android.graphics.drawable.AnimatedVectorDrawable}의 API 레퍼런스를 참조하세요.</p>

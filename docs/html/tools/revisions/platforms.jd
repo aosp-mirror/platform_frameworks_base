@@ -26,7 +26,7 @@ for app development. If you want details about the features and APIs added in ea
 version, instead read the highlights in the <a href="{@docRoot}about/index.html">About</a>
 section.</p>
 
-<p>In order to compile your application against a particular version of Android, you must use the
+<p>To compile your application against a particular version of Android, you must use the
 <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to download and install the SDK
 Platform for that release. If you want to test your application on an emulator, you must also
 download at least one System Image for that Android version.</p>
@@ -58,7 +58,25 @@ packages may not be available for download.</p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(November 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed bugs in the layout rendering library used by Android Studio.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r23 or higher is required.</li>
+      <li>Android SDK Tools 24.3.4 or higher is required.</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(August 2015)</em>
   </p>
 
@@ -80,7 +98,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(August 2015)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(March 2015)</em>
   </p>
 
@@ -102,7 +120,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(March 2015)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2014)</em>
   </p>
 
@@ -118,7 +136,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2014)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
   </p>
 
@@ -150,7 +168,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
 
 <div class="toggle-content open">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
   </p>
 
@@ -167,7 +185,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(June 2014)</em>
   </p>
 
@@ -196,7 +214,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(June 2014)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
   </p>
 
@@ -215,7 +233,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   </p>
 
@@ -238,7 +256,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 4</a> <em>(March 2014)</em>
   </p>
 
@@ -253,7 +271,7 @@ class="toggle-content-img" alt="" />Revision 4</a> <em>(March 2014)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(February 2014)</em>
   </p>
 
@@ -268,7 +286,7 @@ class="toggle-content-img" alt="" />Revision 3</a> <em>(February 2014)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
   </p>
 
@@ -282,7 +300,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   </p>
 
@@ -303,7 +321,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
   </p>
 
@@ -322,7 +340,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
   </p>
 
@@ -342,7 +360,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(September 2013)</em>
   </p>
 
@@ -357,7 +375,7 @@ class="toggle-content-img" alt="" />Revision 3</a> <em>(September 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
   </p>
 
@@ -372,7 +390,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(August 2013)</em>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
   </p>
 
@@ -393,7 +411,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(July 2013)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(February 2013)</em>
   </p>
 
@@ -411,7 +429,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(February 2013)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(November 2012)</em>
   </p>
 
@@ -499,7 +517,7 @@ Devices in the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>:<
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(October 2012)</em>
   </p>
 
@@ -517,7 +535,7 @@ class="toggle-content-img" alt="" />Revision 3</a> <em>(October 2012)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(July 2012)</em>
   </p>
 
@@ -535,7 +553,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(July 2012)</em>
 <div class="toggle-content closed" >
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(June 2012)</em>
   </p>
 
@@ -612,7 +630,7 @@ emulator configuration.</p>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(March 2012)</em>
   </p>
 
@@ -633,7 +651,7 @@ hardware graphics acceleration when used with SDK Tools r17 or higher.
 <div class="toggle-content closed" >
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(January 2012)</em>
   </p>
 
@@ -651,7 +669,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(January 2012)</em>
 <div class="toggle-content closed" >
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(December 2011)</em>
   </p>
 
@@ -721,7 +739,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(December 2011)</em>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 4.0, Revision 2</a> <em>(December 2011)</em>
   </p>
 
@@ -737,7 +755,7 @@ class="toggle-content-img" alt="" />Android 4.0, Revision 2</a> <em>(December 20
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 4.0, Revision 1</a> <em>(October 2011)</em>
   </p>
 
@@ -814,7 +832,7 @@ the one for the WXGA720 skin, we recommend that you primarily use the traditiona
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 3.2, Revision 1</a> <em>(July 2011)</em>
   </p>
 
@@ -868,7 +886,7 @@ Screens</a>.</p>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 3.1, Revision 3</a> <em>(July 2011)</em>
 </p>
 
@@ -896,7 +914,7 @@ ADT 12.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 3.1, Revision 2</a> <em>(May 2011)</em>
 </p>
 
@@ -922,7 +940,7 @@ running in ADT.</p>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 3.1, Revision 1</a> <em>(May 2011)</em>
 </p>
 
@@ -971,7 +989,7 @@ Screens</a>.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 3.0, Revision 2</a> <em>(July 2011)</em>
 </p>
 
@@ -998,7 +1016,7 @@ ADT 12.</p>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
        alt="" />Android 3.0, Revision 1</a> <em>(February 2011)</em>
 </p>
 
@@ -1049,7 +1067,7 @@ ADT 12.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
        alt="" />Android 2.3.4, Revision 1</a> <em>(May 2011)</em>
 </p>
 
@@ -1109,7 +1127,7 @@ emulator skins are:</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 2.3.3, Revision 2</a> <em>(July 2011)</em>
 </p>
 
@@ -1136,7 +1154,7 @@ ADT 12.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android 2.3.3, Revision 1</a> <em>(February 2011)</em>
 </p>
 
@@ -1196,7 +1214,7 @@ emulator skins are:</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
        alt="" />Android 2.3, Revision 1</a> <em>(December 2010)</em>
 </p>
 
@@ -1252,7 +1270,7 @@ emulator skins are:</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
 </p>
 
@@ -1279,7 +1297,7 @@ ADT 12.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em>
 </p>
 
@@ -1307,7 +1325,7 @@ Backup</a>.</li>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em></p>
 
 <div class="toggle-content-toggleme">

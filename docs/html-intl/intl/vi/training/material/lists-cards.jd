@@ -1,0 +1,266 @@
+page.title=Tạo Danh sách và Thẻ
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#RecyclerView">Tạo Danh sách</a></li>
+  <li><a href="#CardView">Tạo Thẻ</a></li>
+  <li><a href="#Dependencies">Thêm Phụ thuộc</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Để tạo danh sách và thẻ phức tạp bằng phong cách material design trong ứng dụng của mình, bạn có thể sử dụng widget
+{@link android.support.v7.widget.RecyclerView} và {@link android.support.v7.widget.CardView}
+.</p>
+
+
+<h2 id="RecyclerView">Tạo Danh sách</h2>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} là một phiên bản nâng cao và linh hoạt hơn
+của {@link android.widget.ListView}. Widget này là một bộ chứa để hiển thị các tập dữ liệu
+lớn có thể được cuộn rất hiệu quả bằng cách duy trì một số dạng xem hữu hạn. Sử dụng widget
+{@link android.support.v7.widget.RecyclerView} khi bạn có các bộ sưu tập dữ liệu với phần tử
+thay đổi vào thời gian chạy dựa vào hành động của người dùng hoặc sự kiện mạng.</p>
+
+<p>Lớp {@link android.support.v7.widget.RecyclerView} đơn giản hóa việc hiển thị và xử lý
+các tập dữ liệu lớn bằng cách cung cấp:</p>
+
+<ul>
+  <li>Trình quản lý bố trí để định vị mục</li>
+  <li>Hoạt hình mặc định cho các thao tác chung đối với mục như loại bỏ hoặc thêm mục</li>
+</ul>
+
+<p>Bạn cũng có sự linh hoạt để định nghĩa các trình quản lý bố trí tùy chỉnh và hoạt hình cho widget {@link
+android.support.v7.widget.RecyclerView}.</p>
+
+<img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
+<p class="img-caption">
+<strong>Hình 1</strong>. Widget <code>RecyclerView</code>.
+</p>
+
+<p>Để sử dụng widget {@link android.support.v7.widget.RecyclerView}, bạn phải quy định một
+trình điều hợp và trình quản lý bố trí. Để tạo một trình điều hợp, hãy mở rộng lớp {@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter}. Chi tiết
+của triển khai phụ thuộc vào các chỉ định của tập dữ liệu của bạn và kiểu dạng xem. Để biết thêm
+thông tin, hãy xem <a href="#RVExamples">ví dụ</a> bên dưới.</p>
+
+<div style="float:right">
+<img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
+<p class="img-caption" style="margin-left:8px">
+<strong>Hình 2</strong> - Danh sách với <code>RecyclerView</code>.
+</p>
+</div>
+
+<p><strong>Trình quản lý bố trí</strong> sẽ định vị các dạng xem mục bên trong {@link
+android.support.v7.widget.RecyclerView} và xác định thời điểm sử dụng lại các dạng xem mục
+không còn hiển thị trước người dùng nữa. Để sử dụng lại (hoặc <em>tái chế</em>) một dạng xem, trình quản lý bố
+trí có thể yêu cầu trình điều hợp thay thế nội dung của dạng xem bằng một phần tử khác từ tập dữ liệu. Tái chế
+dạng xem bằng cách này sẽ cải thiện hiệu năng nhờ tránh tạo những dạng xem không cần thiết hoặc thực hiện
+tra cứu {@link android.app.Activity#findViewById findViewById()} tốn kém.</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} cung cấp những trình quản lý bố trí dựng sẵn sau:</p>
+
+<ul>
+<li>{@link android.support.v7.widget.LinearLayoutManager} hiện các mục trong một danh sách cuộn
+thẳng đứng hoặc nằm ngang.</li>
+<li>{@link android.support.v7.widget.GridLayoutManager} hiện các mục trong lưới.</li>
+<li>{@link android.support.v7.widget.StaggeredGridLayoutManager} hiện các mục trong một lưới so le.</li>
+</ul>
+
+<p>Để tạo một trình quản lý bố trí tùy chỉnh, hãy mở rộng lớp {@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}.</p>
+
+<h3>Hoạt hình</h3>
+
+<p>Hoạt hình để thêm và loại bỏ mục được kích hoạt theo mặc định trong {@link
+android.support.v7.widget.RecyclerView}. Để tùy chỉnh những hoạt hình này, hãy mở rộng lớp
+{@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} và sử dụng
+phương thức {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}
+.</p>
+
+<h3 id="RVExamples">Ví dụ</h3>
+
+<p>Ví dụ đoạn mã sau minh họa cách thêm
+{@link android.support.v7.widget.RecyclerView} vào bố trí:</p>
+
+<pre>
+&lt;!-- A RecyclerView with some commonly used attributes -->
+&lt;android.support.v7.widget.RecyclerView
+    android:id="@+id/my_recycler_view"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</pre>
+
+<p>Sau khi thêm widget {@link android.support.v7.widget.RecyclerView} vào bố trí của bạn,
+hãy lấy một núm điều tác tới đối tượng, kết nối nó với một trình quản lý bố trí và gắn kèm một trình điều hợp cho dữ liệu
+cần được hiển thị:</p>
+
+<pre>
+public class MyActivity extends Activity {
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+    ...
+}
+</pre>
+
+<p>Trình điều hợp cung cấp truy cập vào các mục trong tập dữ liệu của bạn, tạo dạng xem cho mục và
+thay thế nội dung của một số dạng xem bằng mục dữ liệu mới khi mục ban đầu không còn
+hiển thị. Ví dụ đoạn mã sau đây thể hiện việc triển khai đơn giản của tập dữ liệu bao gồm
+một mảng xâu được hiển thị bằng widget {@link android.widget.TextView}:</p>
+
+<pre>
+public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
+    private String[] mDataset;
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+        }
+    }
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(String[] myDataset) {
+        mDataset = myDataset;
+    }
+
+    // Create new views (invoked by the layout manager)
+    &#64;Override
+    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext())
+                               .inflate(R.layout.my_text_view, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ...
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    &#64;Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.mTextView.setText(mDataset[position]);
+
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<div style="float:right;margin-top:15px;margin-left:30px">
+<img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
+<p class="img-caption" style="margin-left:12px">
+<strong>Hình 3</strong>. Ví dụ thẻ.
+</p>
+</div>
+
+<h2 id="CardView">Tạo Thẻ</h2>
+
+<p>{@link android.support.v7.widget.CardView} mở rộng lớp {@link android.widget.FrameLayout} và
+cho phép bạn hiển thị thông tin bên trong các thẻ có diện mạo nhất quán trên khắp nền tảng. Widget {@link
+android.support.v7.widget.CardView} có thể có đổ bóng và góc bo tròn.</p>
+
+<p>Để tạo một thẻ có bóng, hãy sử dụng thuộc tính <code>card_view:cardElevation</code>.
+{@link android.support.v7.widget.CardView} sử dụng độ cao thực và đổ bóng động trên Android 5.0
+(API mức 21) và cao hơn, và quay lại triển khai đổ bóng theo lập trình trên các phiên bản cũ hơn.
+Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/compatibility.html">Duy trì
+Tính tương thích</a>.</p>
+
+<p>Sử dụng những thuộc tính sau để tùy chỉnh diện mạo của widget 
+{@link android.support.v7.widget.CardView}:</p>
+
+<ul>
+  <li>Để đặt bán kính góc trong bố trí của bạn, hãy sử dụng thuộc tính <code>card_view:cardCornerRadius</code>
+.</li>
+  <li>Để đặt bán kính góc trong mã của bạn, hãy sử dụng phương thức <code>CardView.setRadius</code>.</li>
+  <li>Để đặt màu nền của thẻ, hãy sử dụng thuộc tính <code>card_view:cardBackgroundColor</code>
+.</li>
+</ul>
+
+<p>Ví dụ về mã sau đây cho bạn thấy cách thêm widget {@link android.support.v7.widget.CardView}
+trong bố trí của mình:</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    ... >
+    &lt;!-- A CardView that contains a TextView -->
+    &lt;android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        card_view:cardCornerRadius="4dp">
+
+        &lt;TextView
+            android:id="@+id/info_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    &lt;/android.support.v7.widget.CardView>
+&lt;/LinearLayout>
+</pre>
+
+<p>Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho {@link android.support.v7.widget.CardView}.</p>
+
+
+<h2 id="Dependencies">Thêm Phụ thuộc</h2>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} và {@link android.support.v7.widget.CardView}
+là bộ phận của <a href="{@docRoot}tools/support-library/features.html#v7">Thư viện Hỗ trợ
+v7</a>. Để sử dụng những widget này trong dự án của mình, hãy thêm những
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Phụ thuộc Gradle</a> này vào mô-đun
+ứng dụng của bạn:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>

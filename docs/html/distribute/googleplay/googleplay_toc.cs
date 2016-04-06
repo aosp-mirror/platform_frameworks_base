@@ -39,19 +39,6 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/guide.html"
-       es-lang="Cómo tener éxito en Google Play"
-       ja-lang="Google Play で成功を手にする"
-       ko-lang="Google Play에서 성공 모색"
-       pt-br-lang="Obtendo sucesso no Google Play"
-       ru-lang="Найдите свой путь к успеху в Google Play"
-       zh-cn-lang="在 Google Play 上取得成功"
-       zh-tw-lang="在 Google Play 上尋找成功">
-           Find Success on <span style="white-space:nowrap">Google Play
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/wear.html"
        es-lang="Distribución para Android Wear"
        ja-lang="Android Wear への配布"
@@ -132,7 +119,20 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
-          <span class="en">Build VR with <span style="white-space:nowrap">Google Cardboard</span></span>
+          <span class="en">Build VR with <span style="white-space:nowrap">Cardboard</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/guide.html"
+       es-lang="Cómo tener éxito en Google Play"
+       ja-lang="Google Play で成功を手にする"
+       ko-lang="Google Play에서 성공 모색"
+       pt-br-lang="Obtendo sucesso no Google Play"
+       ru-lang="Найдите свой путь к успеху в Google Play"
+       zh-cn-lang="在 Google Play 上取得成功"
+       zh-tw-lang="在 Google Play 上尋找成功">
+           Find Success on <span style="white-space:nowrap">Google Play
         </a>
     </div>
   </li>

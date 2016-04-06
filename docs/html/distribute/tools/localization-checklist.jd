@@ -549,12 +549,6 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
 </div>
 
-<h3 class="rel-resources clearfloat">Related resources</h3>
-
-<div class="resource-widget resource-flow-layout col-13" data-query=
-"collection:distribute/toolsreference/localizationchecklist/translatestrings"
-data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
-</div>
 
 <div class="headerLine">
   <h2 id="test">

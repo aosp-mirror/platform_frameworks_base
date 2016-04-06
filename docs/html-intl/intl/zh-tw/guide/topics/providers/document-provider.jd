@@ -1,0 +1,916 @@
+page.title=儲存空間存取架構
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容
+<a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">顯示更多</span>
+        <span class="less" style="display:none">顯示較少</span></a></h2>
+<ol id="toc44" class="hide-nested">
+    <li>
+        <a href="#overview">總覽</a>
+    </li>
+    <li>
+        <a href="#flow">控管流程</a>
+    </li>
+    <li>
+        <a href="#client">編寫用戶端應用程式</a>
+        <ol>
+        <li><a href="#search">搜尋文件</a></li>
+        <li><a href="#process">處理結果</a></li>
+        <li><a href="#metadata">檢查文件中繼資料</a></li>
+        <li><a href="#open">開啟文件</a></li>
+        <li><a href="#create">建立新文件</a></li>
+        <li><a href="#delete">刪除文件</a></li>
+        <li><a href="#edit">編輯文件</a></li>
+        <li><a href="#permissions">保留權限</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">編寫自訂文件供應程式</a>
+        <ol>
+        <li><a href="#manifest">宣示說明</a></li>
+        <li><a href="#contract">合約</a></li>
+        <li><a href="#subclass">將 DocumentsProvider 設為子類別</a></li>
+        <li><a href="#security">安全性</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>重要類別</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+</ol>
+
+<h2>相關影片</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">DevBytes：
+Android 4.4 儲存空間存取架構：供應程式</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">DevBytes：
+Android 4.4 儲存空間存取架構：用戶端</a></li>
+</ol>
+
+
+<h2>程式碼範例</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">儲存空間供應程式</a>
+</li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">StorageClient</a>
+</li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        內容供應程式基本概念
+        </a>
+    </li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Android 4.4 (API 級別 19) 導入了「儲存空間存取架構」(Storage Access Framework (SAF))，SAF 可方便使用者透過偏好的文件儲存空間供應程式開啟文件、圖片等其他檔案。
+
+提供簡單易用的標準 UI 可讓使用者在各種應用程式和供應程式中，以相同的方式瀏覽檔案及存取近期開啟的檔案。
+</p>
+
+<p>雲端或本機儲存服務可實作會封裝服務本身的
+{@link android.provider.DocumentsProvider}，藉此加入這個生態系統。您只需編寫幾行程式碼，即可將需要存取供應程式文件的用戶端應用程式與 SAF 整合。
+
+</p>
+
+<p>SAF 內含下列項目：</p>
+
+<ul>
+<li><strong>文件供應程式</strong> &mdash; 可讓儲存服務 (例如 Google 雲端硬碟) 顯示所管理檔案的內容供應程式。
+文件供應程式是當作
+{@link android.provider.DocumentsProvider} 類別的子類別使用。文件供應程式結構定義是以傳統檔案階層為依據，不論您為文件供應程式設定的資料儲存方式為何。Android 平台內建數種文件供應程式，例如「下載」、「圖片」和「影片」。
+
+
+
+</li>
+
+<li><strong>用戶端應用程式</strong> &mdash; 可呼叫
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 和 (或)
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} 意圖及接收文件供應程式所傳回檔案的自訂應用程式。
+</li>
+
+<li><strong>挑選器</strong> &mdash; 可讓使用者透過所有符合用戶端應用程式搜尋條件的文件供應程式存取文件的系統 UI。
+</li>
+</ul>
+
+<p>以下是 SAF 提供的部分功能：</p>
+<ul>
+<li>可讓使用者透過所有文件供應程式 (而非單一應用程式) 瀏覽內容。</li>
+<li>可將文件供應程式所擁有文件的存取權永久授予您的應用程式，
+方便使用者透過相關供應程式新增、編輯、儲存及刪除檔案。
+</li>
+<li>支援多個使用者帳戶和暫時性的根目錄，例如只在插入電腦時才會顯示的 USB 儲存空間供應程式。
+ </li>
+</ul>
+
+<h2 id ="overview">總覽</h2>
+
+<p>SAF 是以內容供應程式 ({@link android.provider.DocumentsProvider} 類別的子類別) 為基礎。
+「文件供應程式」<em></em>中的資料結構採用如下所示的傳統檔案階層：
+</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>圖 1.</strong>文件供應程式資料模型。「根目錄」會指向單一「文件」，接著該文件會展開成樹狀結構的分支。請注意下列事項：
+</p>
+
+<p></p>
+<ul>
+
+<li>每個文件供應程式都會回報一或多個「根目錄」(也就是文件樹狀結構的起始點)。每個根目錄都有專屬的 {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID}，可導向至代表該根目錄所含內容的某份文件 (某個目錄)。根目錄的設計架構是動態的，能夠支援多重帳戶、暫時性 USB 儲存裝置或使用者登入/登出等使用狀況。
+
+
+
+
+
+</li>
+
+<li>每個根目錄都內含一份文件，而該文件會指向 N<em></em> 份文件的 1，每份文件又可指向另外 N<em></em> 份文件的 1。
+ </li>
+
+<li>每個儲存空間後端都會透過唯一的
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} 來參照個別檔案，藉此顯示這些檔案及目錄。文件 ID 不得重複而且一旦核發便不得更改，原因在於裝置重新啟動時會將這些 ID 用於永久 URI 授權。
+
+
+</li>
+
+
+<li>文件可以是可開啟的檔案 (類型為 MIME) 或內含其他文件的目錄 (類型為
+{@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR} MIME )。
+</li>
+
+<li>每份文件的功能會視
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS} 而有所不同，例如 {@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE}、
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE} 和
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL}。相同的 {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} 可以納入多個目錄中。
+
+
+</li>
+</ul>
+
+<h2 id="flow">控管流程</h2>
+<p>如上所述，文件供應程式資料模型是以傳統檔案階層為基礎。
+不過，您可以自己偏好的方式儲存您的資料，只要所儲存資料可透過 {@link android.provider.DocumentsProvider} API 存取即可。例如，您可以將資料存放在標籤式的雲端儲存空間。
+
+</p>
+
+<p>圖 2 是相片應用程式如何使用 SAF 存取已儲存資料的說明範例：
+</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>圖 2.</strong>儲存空間存取架構</p>
+
+<p>請注意下列事項：</p>
+<ul>
+
+<li>在 SAF 中，供應程式與用戶端無法直接進行互動。
+用戶端必須取得相關權限才能與檔案進行互動 (也就是讀取、編輯、建立或刪除檔案)。
+</li>
+
+<li>應用程式 (在此範例中為相片應用程式) 觸發
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 或 {@link android.content.Intent#ACTION_CREATE_DOCUMENT} 意圖後，互動程序便會開始。意圖可能包括用於縮小條件範圍的篩選器 &mdash; 例如「將所有內含　MIME 類型『圖片』的可開啟檔案提供給我」。
+
+</li>
+
+<li>一旦觸發意圖，系統挑選器就會前往所有已註冊的供應程式，並且向使用者顯示相符的內容根目錄。
+</li>
+
+<li>即便底層文件供應程式可能不盡相同，挑選器仍會提供使用者可用於存取文件的標準介面。
+例如圖 2 中的 Google 雲端硬碟供應程式、USB 供應程式和雲端供應程式。
+</li>
+</ul>
+
+<p>圖 3 顯示的是使用者搜尋指定 Google 雲端硬碟帳戶中的圖片時所用的挑選器：
+</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>圖 3.</strong>挑選器</p>
+
+<p>使用者選取 Google 雲端硬碟後，系統就會顯示相關圖片 (如圖 4 所示)。
+此時，使用者即可與這些圖片進行供應程式和用戶端應用程式支援的互動。
+
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>圖 4.</strong>相關圖片</p>
+
+<h2 id="client">編寫用戶端應用程式</h2>
+
+<p>如果您想讓應用程式在搭載 Android 4.3 以下版本的裝置上從其他應用程式擷取檔案，您的應用程式就必須呼叫 {@link android.content.Intent#ACTION_PICK}或 {@link android.content.Intent#ACTION_GET_CONTENT} 意圖。
+
+接著，使用者必須選取某款應用程式來選取檔案，而且選定的應用程式必須提供使用者介面，讓使用者瀏覽及挑選可用的檔案。
+
+ </p>
+
+<p>針對搭載 Android 4.4 以上版本的裝置，您的應用程式還可以呼叫 
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖，以顯示系統所控管的挑選器 UI，方便使用者瀏覽其他應用程式提供的所有檔案。
+
+透過這個單一 UI，使用者可以從任何受支援的應用程式挑選檔案。
+</p>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 並不是 {@link android.content.Intent#ACTION_GET_CONTENT} 的替代意圖，實際上應呼叫的意圖取決於您應用程式的需求。
+
+</p>
+
+<ul>
+<li>如果您只想讓應用程式讀取/匯入資料，請呼叫 {@link android.content.Intent#ACTION_GET_CONTENT}，
+以便應用程式匯入資料 (例如圖片檔) 的複本。
+</li>
+
+<li>如果您想將文件供應程式所擁有文件的存取權永久授予您的應用程式，請呼叫 {@link android.content.Intent#ACTION_OPEN_DOCUMENT}。
+
+例如可讓使用者編輯文件供應程式中所儲存圖片的相片編輯應用程式。
+ </li>
+
+</ul>
+
+
+<p>本節說明如何根據
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 和
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} 意圖編寫用戶端應用程式。</p>
+
+
+<h3 id="search">搜尋文件</h3>
+
+<p>
+以下程式碼片段採用 {@link android.content.Intent#ACTION_OPEN_DOCUMENT}，可搜尋內含圖片檔的文件供應程式：
+
+</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>請注意下列事項：</p>
+<ul>
+<li>當應用程式觸發 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖時，挑選器便會啟動並顯示所有相符的文件供應程式。
+</li>
+
+<li>將 {@link android.content.Intent#CATEGORY_OPENABLE} 這個類別加入意圖中可篩選搜尋結果，限定系統只顯示可開啟的文件 (例如圖片檔)。
+</li>
+
+<li>使用 {@code intent.setType("image/*")} 陳述式可進一步篩選搜尋結果，顯示系統只顯示內含 MIME 類型圖片的文件。
+</li>
+</ul>
+
+<h3 id="results">處理結果</h3>
+
+<p>使用者在挑選器中選取某份文件後，便會呼叫
+{@link android.app.Activity#onActivityResult onActivityResult()}。指向所選文件的 URI 包含在 {@code resultData} 參數中。
+
+請使用 {@link android.content.Intent#getData getData()} 擷取 URI，然後使用該 URI 擷取使用者所需的文件。
+例如：
+</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">檢查文件中繼資料</h3>
+
+<p>取得文件的 URI 後，您就可以存取該文件的中繼資料。以下程式碼片段會擷取 URI 所指定文件的中繼資料並且加以記錄：
+</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">開啟文件</h3>
+
+<p>取得文件的 URI 後，您就可以開啟該文件或是對該文件執行任何所需操作。
+</p>
+
+<h4>點陣圖</h4>
+
+<p>以下範例可開啟 {@link android.graphics.Bitmap}：</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>請注意，請不要針對 UI 執行緒進行這項作業，請在背景中使用 {@link android.os.AsyncTask} 進行。
+開啟點陣圖後，您就可以在 {@link android.widget.ImageView} 中顯示該點陣圖。
+
+</p>
+
+<h4>取得 InputStream</h4>
+
+<p>以下範例可從 URI 中取得 {@link java.io.InputStream}。在這個程式碼片段中，系統會將每行檔案解讀為單一字串：
+</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">建立新文件</h3>
+
+<p>應用程式可在文件供應程式中使用
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} 意圖建立新文件。
+如要建立新檔案，請將 MIME 類型和檔案名稱提供給意圖，然後使用專屬的要求程式碼執行該意圖。
+系統會為您完成其餘的作業：</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>建立新文件後，您可在
+{@link android.app.Activity#onActivityResult onActivityResult()} 中取得該文件的 URI，
+以便繼續在其中編寫程式碼。</p>
+
+<h3 id="delete">刪除文件</h3>
+
+<p>如果您已取得文件的 URI，而且文件的
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS} 含有
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE}，您就可以刪除該文件。
+
+例如：</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">編輯文件</h3>
+
+<p>您可以使用 SAF 即時編輯文字文件。以下程式碼片段會觸發 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖並使用 {@link android.content.Intent#CATEGORY_OPENABLE} 類別限制系統只顯示可開啟的文件。
+
+
+
+此外，這個程式碼還會進一步篩選搜尋結果，讓系統只顯示文字檔：</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>接著，您可以利用 {@link android.app.Activity#onActivityResult onActivityResult()} (詳情請參閱<a href="#results">處理結果</a>) 呼叫程式碼執行編輯動作。以下程式碼片段會利用 {@link android.content.ContentResolver} 取得 {@link java.io.FileOutputStream}。
+
+
+在預設情況下，這個程式碼片段會使用「寫入」模式。這種方法可索取最少量的所需存取權，因此如果您只需要寫入存取權，請勿要求讀取/寫入：
+
+</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">保留權限</h3>
+
+<p>應用程式開啟要讀取或寫入的檔案後，系統會將該檔案的 URI 權限授予您的應用程式。
+除非使用者重新啟動裝置，否則這項權限會持續保持有效狀態。不過，假如您的應用程式為圖片編輯應用程式，而您希望使用者可直接透過您的應用程式存取他們最近編輯的 5 張圖片。如果使用者重新啟動的裝置，就您必須將使用者傳回系統挑選器來搜尋所需檔案，而這並非最佳做法。
+
+
+
+</p>
+
+<p>為了避免這種情況發生，您可以保留系統授予您應用程式的權限。實際上，您的應用程式會「取得」系統授予的永久性 URI 權限。
+
+這種權限可讓使用者持續透過您的應用程式存取檔案，即使其裝置重新啟動也無妨：
+</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>除了上述指示外，您還需要完成最後一個步驟。您儲存了您的應用程式最近存取的 URI，但這些 URI 有可能已失效 &mdash; 原因在於其他應用程式刪除或修改了文件。
+
+因此，建議您一律呼叫
+{@code getContentResolver().takePersistableUriPermission()} 檢查最新資料。
+</p>
+
+<h2 id="custom">編寫自訂文件供應程式</h2>
+
+<p>
+如果您想開發可提供檔案儲存服務 (例如雲端儲存服務) 的應用程式，可以編寫自訂文件供應程式透過 SAF 提供您的檔案。
+
+本節說明如何編寫這類程式。
+</p>
+
+
+<h3 id="manifest">宣示說明</h3>
+
+<p>如要實作自訂文件供應程式，請將以下項目加入應用程式的宣示說明：
+</p>
+<ul>
+
+<li>19 以上的 API 級別目標。</li>
+
+<li>宣告自訂儲存空間供應程式的
+<code>&lt;provider&gt;</code> 元素。 </li>
+
+<li>供應程式的名稱 (也就是供應程式的類別名稱)，包括套件名稱。範例：<code>com.example.android.storageprovider.MyCloudProvider</code>。
+</li>
+
+<li>授權的名稱 (也就是套件的名稱；在此範例中為 
+<code>com.example.android.storageprovider</code>) 以及內容供應程式的類型
+(<code>documents</code>)。範例：{@code com.example.android.storageprovider.documents}。</li>
+
+<li>設為 <code>&quot;true&quot;</code> 的 <code>android:exported</code> 屬性。您必須將供應程式匯出，方便其他應用程式加以偵測。
+</li>
+
+<li>設為 <code>&quot;true&quot;</code> 的
+<code>android:grantUriPermissions</code> 屬性。這項設定可讓系統將供應程式內容的存取權授予其他應用程式。
+如果想瞭解如何保留特定文件的權限，請參閱<a href="#permissions">保留權限</a>。
+</li>
+
+<li>{@code MANAGE_DOCUMENTS} 權限。在預設情況下，所有人都可使用供應程式。
+加入這項權限可針對系統設定供應程式限制，藉此提高其安全性。
+</li>
+
+<li>設定資源檔案所定義布林值的 {@code android:enabled} 屬性。
+這項屬性可用於針對搭載 Android 4.3 以下版本的裝置停用供應程式。範例：{@code android:enabled="@bool/atLeastKitKat"}。
+除了在宣示說明中加入這項屬性以外，您還必須執行下列操作：
+
+<ul>
+<li>在位於 {@code res/values/} 的 {@code bool.xml} 資源檔案中，新增以下程式碼：
+ <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>在位於 {@code res/values-v19/} 的 {@code bool.xml} 資源檔案中，新增以下程式碼：
+ <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
+
+<li>內含 
+{@code android.content.action.DOCUMENTS_PROVIDER} 動作的意圖篩選器，讓您的供應程式能夠在系統搜尋供應程式時顯示在挑選器中。
+</li>
+
+</ul>
+<p>以下是內含供應程式的範例宣示說明例外狀況：</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4 id="43">支援搭載 Android 4.3 以下版本的裝置</h4>
+
+<p>只有搭載 Android 4.4 以上版本的裝置可使用 
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖。如果您想讓應用程式支援 {@link android.content.Intent#ACTION_GET_CONTENT} 以便與搭載 Android 4.3 以下版本的裝置相容，請針對搭載 Android 4.4 以上版本的裝置停用宣示說明中的 {@link android.content.Intent#ACTION_GET_CONTENT} 意圖篩選器。
+
+
+
+
+文件供應器和 {@link android.content.Intent#ACTION_GET_CONTENT} 是完全不同的項目。
+
+如果您同時支援這兩個項目，您的應用程式就會重複出現在系統挑選器 UI 中，讓使用者可透過兩種不同方式存取您儲存的資料，
+
+而這樣會造成混淆。</p>
+
+<p>以下提供針對搭載 Android 4.4 以上版本的裝置停用
+{@link android.content.Intent#ACTION_GET_CONTENT} 意圖篩選器的建議做法：
+</p>
+
+<ol>
+<li>在位於 {@code res/values/} 的 {@code bool.xml} 資源檔案中，新增以下程式碼：
+ <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>在位於 {@code res/values-v19/} 的 {@code bool.xml} 資源檔案中，新增以下程式碼：
+ <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>新增
+<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">Activity 別名</a>來針對搭載 Android 4.4 (API 級別 19) 以上版本的裝置停用 {@link android.content.Intent#ACTION_GET_CONTENT} 意圖篩選器。
+
+例如：
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">合約</h3>
+
+<p>一般來說，當您編寫自訂內容供應程式時，需要完成的其中一項工作為實作合約類別 (詳情請參閱<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">內容供應程式</a>開發人員指南)。
+
+
+合約類別是 {@code public final} 類別，內含以下項目的固定不變定義：URI、欄名稱、MIME 類型以及供應程式擁有的其他中繼資料。
+
+SAF 可為您提供以下合約類別，因此您不必自行編 寫合約：
+
+</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>例如，以下是在文件供應程式查詢文件或根目錄時可能會傳回的資料欄：
+</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">將 DocumentsProvider 設為子類別</h3>
+
+<p>編寫自動文件供應程式的下一個步驟是，將抽象類別 {@link android.provider.DocumentsProvider} 設為子類別。
+您至少必須實作下列方法：
+</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>以上是您必須實作的方法，不過您可能會視需要實作其他方法。
+詳情請參閱 {@link android.provider.DocumentsProvider}。
+</p>
+
+<h4 id="queryRoots">實作 queryRoots</h4>
+
+<p>實作 {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} 後系統會使用 {@link android.provider.DocumentsContract.Root} 中定義的資料欄，傳回指向文件供應程式所有根目錄的 {@link android.database.Cursor}。
+
+</p>
+
+<p>在以下程式碼片段中，{@code projection} 參數代表呼叫者想返回的特定欄位。
+這個程式碼片隊會建立新游標並在其中加入一列 &mdash; 也就是根目錄或頂層目錄 (例如「下載」或「圖片」)。
+
+大多數供應程式只有一個根目錄。而您可以有多個根目錄，例如擁有多個使用者帳戶的情況下。
+在這種情況下，只要在游標中加入第二列即可。
+</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">實作 queryChildDocuments</h4>
+
+<p>實作
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()} 後系統會使用
+{@link android.provider.DocumentsContract.Document} 中定義的資料欄，傳回指向特定目錄中所有檔案的 {@link android.database.Cursor}。
+
+</p>
+
+<p>當您在挑選器 UI 中選擇應用程式的根目錄後，就會呼叫這個方法，藉此取得根目錄內某個目錄中的下層文件。
+您可以在檔案階層的任何層級中呼叫這個方法，而不單單只能在根目錄中呼叫。
+以下程式碼片段會使用要求的資料欄建立新游標，然後加入該游標中上層目錄的任何下層物件相關資訊。下層物件可以是圖片、其他目錄等任何檔案：
+
+
+</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">實作 queryDocument</h4>
+
+<p>實作
+{@link android.provider.DocumentsProvider#queryDocument queryDocument()} 後系統會使用 {@link android.provider.DocumentsContract.Document} 中定義的資料欄，傳回指向特定檔案的 {@link android.database.Cursor}。
+
+
+</p>
+
+<p>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}方法會針對特定檔案傳回
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()} 所傳送的相同資訊：
+
+</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">實作 openDocument</h4>
+
+<p>您必須實作 {@link android.provider.DocumentsProvider#openDocument
+openDocument()} 來傳回代表特定檔案的 
+{@link android.os.ParcelFileDescriptor}。其他應用程式可利用傳回的 {@link android.os.ParcelFileDescriptor} 傳輸資料。
+使用者選取檔案而且用戶端應用程式呼叫
+{@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()} 要求存取該檔案後，系統就會呼叫這個方法。範例：
+
+</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">安全性</h3>
+
+<p>假如您的文件供應程式為受密碼保護的雲端儲存服務，而您先想確認使用者都已登入，然後再開始分享其檔案。那麼在使用者未登入的情況下，您的應用程式應採取什麼行動？
+
+解決方案是不要讓文件供應程式在您實作 {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} 後傳回任何根目錄。
+換句話說，就是讓供應程式傳回空的根目錄游標：</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>另一個需採取的步驟是呼叫 {@code getContentResolver().notifyChange()}。還記得 {@link android.provider.DocumentsContract} 嗎？
+我們會使用該類別建立 URI。以下程式碼片段會指示系統在使用者的登入狀態變更時，查詢文件供應程式的根目錄。
+
+如果使用者未登入，呼叫 {@link android.provider.DocumentsProvider#queryRoots queryRoots()} 就會如上所述傳回空的游標。
+
+這樣可確保只有登入供應程式的使用者可存取其中的文件。
+</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

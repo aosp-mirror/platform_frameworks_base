@@ -1,0 +1,103 @@
+page.title=資源總覽
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文主題</h2>
+  <ol>
+    <li><a href="providing-resources.html">提供資源</a></li>
+    <li><a href="accessing-resources.html">存取資源</a></li>
+    <li><a href="runtime-changes.html">處理執行階段變更</a></li>
+    <li><a href="localization.html">本地化</a></li>
+  </ol>
+
+  <h2>參考資料</h2>
+  <ol>
+    <li><a href="available-resources.html">資源類型</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>建議您一律將應用程式程式碼當中像是圖片和字串的資源具體化，以便個別加以維護。
+將資源具體化也可讓您提供支援特定裝置設定的替代資源，例如不同語言或螢幕大小，隨著提供不同設定的 Android 裝置日漸增加，這點也變得日益重要。
+
+
+為了提供不同設定的相容性，您必須整理專案的 {@code res/} 目錄中的資源，使用各種子目錄按類型與設定將資源分門別類。
+
+
+</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>圖 1.</strong>兩個不同的裝置，個別使用預設的版面配置 (應用程式未提供替代的版面配置)。
+</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>圖 2.</strong>兩個不同的裝置，個別使用不同螢幕大小所提供的不同版面配置。
+</p>
+</div>
+
+<p>針對任何資源類型，您都能為應用程式指定「預設」<em></em>與多項「替代」<em></em>資源。
+</p>
+<ul>
+  <li>不論裝置設定為何，或在沒有符合目前設定的替代資源時，您都應該使用預設資源。
+
+</li>
+  <li>您設計用來與特定設定搭配使用的就是替代資源。
+如要為某個設定指定一組資源，請將適當的設定限定詞附加到目錄名稱。
+</li>
+</ul>
+
+<p>例如，假設您的預設 UI 版面配置儲存在 {@code res/layout/} 目錄，您可能要指定一個不同的版面配置並儲存在
+{@code res/layout-land/} 目錄中，以在螢幕處於橫向時使用。
+
+Android 會在比對裝置目前的設定與您的資源目錄名稱後，自動套用適當的資源。
+</p>
+
+<p>圖 1 說明系統如何在沒有替代資源可用時，對兩個不同裝置套用相同的版面配置。
+圖 2 說明相同的應用程式為較大的螢幕新增替代版面配置資源的情況。
+</p>
+
+<p>下文提供完整的說明，指引您如何整理應用程式資源、指定替代資源、在您的應用程式中存取這些資源等等：
+</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">提供資源</a></strong></dt>
+  <dd>您可在應用程式中加入哪些資源類型，儲存在哪裡以及如何針對不同的裝置設定建立替代資源。
+</dd>
+  <dt><strong><a href="accessing-resources.html">存取資源</a></strong></dt>
+  <dd>如何使用您提供的資源 (在應用程式的程式碼中或在其他 XML 資源中參考)。
+</dd>
+  <dt><strong><a href="runtime-changes.html">處理執行階段變更</a></strong></dt>
+  <dd>如何管理在 Activity 執行期間發生的設定變更。</dd>
+  <dt><strong><a href="localization.html">本地化</a></strong></dt>
+  <dd>從細節到整體的說明，指引您使用替代資源將應用程式本地化。雖然這只是替代資源的一種特殊用途，但為了觸及更多使用者，這樣做非常重要。
+
+</dd>
+  <dt><strong><a href="available-resources.html">資源類型</a></strong></dt>
+  <dd>您能提供的各種資源類型參考資料，描述其 XML 元件、屬性及語法。
+例如，此參考資料說明如何建立應用程式選單、可繪項目、動畫等資源。
+</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

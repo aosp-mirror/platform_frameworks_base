@@ -1,0 +1,979 @@
+page.title=Thông báo
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#Design">Cân nhắc Thiết kế</a></li>
+  <li><a href="#CreateNotification">Tạo một Thông báo</a>
+    <ol>
+      <li><a href="#Required">Nội dung thông báo được yêu cầu</a></li>
+      <li><a href="#Optional">Nội dung và cài đặt thông báo tùy chọn</a></li>
+      <li><a href="#Actions">Hành động thông báo</a></li>
+      <li><a href="#Priority">Mức ưu tiên của thông báo</a></li>
+      <li><a href="#SimpleNotification">Tạo một thông báo đơn giản</a></li>
+      <li><a href="#ApplyStyle">Áp dụng bố trí mở rộng cho một thông báo</a></li>
+      <li><a href="#Compatibility">Xử lý tính tương thích</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">Quản lý Thông báo</a>
+    <ol>
+      <li><a href="#Updating">Cập nhật thông báo</a></li>
+      <li><a href="#Removing">Loại bỏ thông báo</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">Giữ lại Điều hướng khi Bắt đầu một Hoạt động</a>
+    <ol>
+      <li><a href="#DirectEntry">Thiết đặt một PendingIntent cho hoạt động thường xuyên</a></li>
+      <li><a href="#ExtendedNotification">Thiết đặt một PendingIntent cho hoạt động đặc biệt</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">Hiển thị Tiến độ trong một Thông báo</a>
+    <ol>
+      <li><a href="#FixedProgress">Hiển thị một chỉ báo tiến độ thời lượng cố định</a></li>
+      <li><a href="#ActivityIndicator">Hiển thị một chỉ báo hoạt động liên tục</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">Siêu dữ liệu Thông báo</a></li>
+  <li><a href="#Heads-up">Thông báo Cảnh báo</a></li>
+  <li><a href="#lockscreenNotification">Thông báo Màn hình Khóa</a></li>
+    <ol>
+      <li><a href="#visibility">Thiết đặt Khả năng Hiển thị</a></li>
+      <li><a href="#controllingMedia">Điều khiển Phát lại Phương tiện trên Màn hình Khóa</a></li>
+    </ol>
+  <li><a href="#CustomNotification">Bố trí Thông báo Tùy chỉnh</a></li>
+</ol>
+
+    <h2>Lớp khóa</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>Video</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">
+            Thông báo trong 4.1</a>
+        </li>
+    </ol>
+<h2>Xem thêm</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Thiết kế Android: Thông báo</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Thông báo là một thông điệp bạn có thể hiển thị với người dùng bên ngoài
+    UI bình thường của ứng dụng của bạn. Khi bạn yêu cầu hệ thống phát hành một thông báo, trước tiên nó xuất hiện như một biểu tượng trong
+    <strong>khu vực thông báo</strong>. Để xem chi tiết thông báo, người dùng mở
+    <strong>ngăn kéo thông báo</strong>. Cả khu vực thông báo và ngăn kéo thông báo đều
+    là các khu vực do hệ thống kiểm soát mà người dùng có thể xem vào bất cứ lúc nào.
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>Hình 1.</strong> Thông báo trong khu vực thông báo.
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>Hình 2.</strong> Thông báo trong ngăn kéo thông báo.
+</p>
+
+<p class="note"><strong>Lưu ý:</strong> Ngoại trừ phần được lưu ý, hướng dẫn này nhắc đến
+lớp {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}
+trong phiên bản 4 của <a href="{@docRoot}tools/support-library/index.html">Thư viện Hỗ trợ</a>.
+Lớp {@link android.app.Notification.Builder Notification.Builder} đã được thêm vào trong Android
+3.0 (API mức 11).</p>
+
+<h2 id="Design">Cân nhắc Thiết kế</h2>
+
+<p>Là một phần quan trọng của giao diện người dùng Android, thông báo có các hướng dẫn thiết kế của riêng mình.
+Những thay đổi thiết kế cơ bản được giới thiệu trong Android 5.0 (API mức 21) đặc biệt
+quan trọng và bạn nên xem phần đào tạo về <a href="{@docRoot}training/material/index.html">Thiết kế Material</a>
+để biết thêm thông tin. Để tìm hiểu cách thiết kế thông báo và tương tác của chúng, hãy đọc hướng dẫn thiết kế
+<a href="{@docRoot}design/patterns/notifications.html">Thông báo</a>.</p>
+
+<h2 id="CreateNotification">Tạo một Thông báo</h2>
+
+<p>Bạn quy định thông tin UI và các hành động cho một thông báo trong một đối tượng
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+Để tạo chính thông báo, bạn gọi
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
+nó sẽ trả về một đối tượng {@link android.app.Notification} chứa những đặc tả của bạn. Để phát hành
+thông báo, bạn chuyển đối tượng {@link android.app.Notification} tới hệ thống bằng cách gọi
+{@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+
+<h3 id="Required">Nội dung thông báo được yêu cầu</h3>
+<p>
+    Một đối tượng {@link android.app.Notification} <em>phải</em> chứa những điều sau:
+</p>
+<ul>
+    <li>
+        Một biểu tượng nhỏ được đặt bởi
+        {@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()}
+    </li>
+    <li>
+        Một tiêu đề được đặt bởi
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()}
+    </li>
+    <li>
+        Văn bản chi tiết được đặt bởi
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()}
+    </li>
+</ul>
+<h3 id="Optional">Nội dung và cài đặt thông báo tùy chọn</h3>
+<p>
+    Tất cả cài đặt và nội dung thông báo khác đều mang tính tùy chọn. Để tìm hiểu thêm về chúng,
+    hãy xem tài liệu tham khảo cho {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">Hành động thông báo</h3>
+<p>
+    Mặc dù chúng mang tính tùy chọn, bạn nên thêm ít nhất một hành động vào thông báo của mình.
+    Một hành động cho phép người dùng đi trực tiếp từ thông báo tới một
+    {@link android.app.Activity} trong ứng dụng của bạn, nơi mà họ có thể xem thêm một hoặc nhiều sự kiện
+    hoặc làm việc thêm.
+</p>
+<p>
+    Một thông báo có thể cung cấp nhiều hành động. Bạn nên luôn định nghĩa hành động mà được
+    kích khởi khi người dùng nhấp vào thông báo; thường thì hành động này mở ra một
+    {@link android.app.Activity} trong ứng dụng của bạn. Bạn cũng có thể thêm các nút vào thông báo
+    để thực hiện những hành động bổ sung chẳng hạn như báo lại báo thức hay hồi đáp ngay lập tức một tin nhắn
+    văn bản; tính năng này sẵn có từ phiên bản Android 4.1. Nếu sử dụng các nút hành động bổ sung, bạn
+    cũng phải cung cấp tính năng của chúng trong một {@link android.app.Activity} trong ứng dụng của bạn; xem
+    phần <a href="#Compatibility">Xử lý tính tương thích</a> để biết thêm chi tiết.
+</p>
+<p>
+    Bên trong một {@link android.app.Notification}, bản thân hành động được định nghĩa bởi một
+    {@link android.app.PendingIntent} chứa một
+    {@link android.content.Intent} có chức năng bắt đầu
+    một {@link android.app.Activity} trong ứng dụng của bạn. Để liên kết
+    {@link android.app.PendingIntent} với một cử chỉ, hãy gọi phương pháp 
+    {@link android.support.v4.app.NotificationCompat.Builder} phù hợp. Ví dụ, nếu bạn muốn bắt đầu
+    {@link android.app.Activity} khi người dùng nhấp vào văn bản thông báo trong
+    ngăn kéo thông báo, bạn hãy thêm {@link android.app.PendingIntent} bằng cách gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}.
+</p>
+<p>
+    Bắt đầu một {@link android.app.Activity} khi người dùng nhấp vào thông báo là kịch bản
+    hành động phổ biến nhất. Bạn cũng có thể bắt đầu một {@link android.app.Activity} khi người dùng
+    bỏ một thông báo. Trong phiên bản Android 4.1 và sau đó, bạn có thể bắt đầu một
+    {@link android.app.Activity} từ một nút hành động. Để tìm hiểu thêm, hãy đọc hướng dẫn tham khảo cho
+    {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Mức ưu tiên của thông báo</h3>
+<p>
+    Nếu muốn, bạn có thể đặt mức ưu tiên của một thông báo. Mức ưu tiên đóng vai trò
+    như một gợi ý cho UI của thiết bị về cách thông báo sẽ được hiển thị.
+    Để đặt mức ưu tiên của một thông báo, hãy gọi {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} và chuyển trong một trong các hằng số mức ưu tiên {@link
+    android.support.v4.app.NotificationCompat}. Có năm mức ưu tiên,
+    dao động từ {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) đến {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); nếu không được đặt,
+    mức ưu tiên mặc định thành {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> Để biết thông tin về việc đặt một mức ưu tiên phù hợp, hãy xem phần "Đặt
+    và quản lý mức ưu tiên của thông báo cho đúng" trong hướng dẫn Thiết kế <a href="{@docRoot}design/patterns/notifications.html">Thông báo</a>
+.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">Tạo một thông báo đơn giản</h3>
+<p>
+    Đoạn mã HTML sau minh họa một thông báo đơn giản, trong đó quy định một hoạt động sẽ mở khi
+    người dùng nhấp vào thông báo. Để ý rằng đoạn mã này sẽ tạo một đối tượng
+    {@link android.support.v4.app.TaskStackBuilder} và sử dụng nó để tạo
+    {@link android.app.PendingIntent} cho hành động. Kiểu mẫu này được giải thích chi tiết hơn
+   trong phần <a href="#NotificationResponse">
+    Giữ lại Điều hướng khi Bắt đầu một Hoạt động</a>:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>Vậy là xong. Người dùng của bạn hiện đã được thông báo.</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">Áp dụng bố trí mở rộng cho một thông báo</h3>
+<p>
+    Để có một thông báo xuất hiện trong một dạng xem mở rộng, trước tiên hãy tạo một đối tượng
+    {@link android.support.v4.app.NotificationCompat.Builder} với các tùy chọn dạng xem thông thường
+    mà bạn muốn. Tiếp theo, hãy gọi {@link android.support.v4.app.NotificationCompat.Builder#setStyle
+    Builder.setStyle()} với một đối tượng bố trí mở rộng làm tham đối.
+</p>
+<p>
+    Ghi nhớ rằng các thông báo mở rộng không sẵn có trên các nền tảng trước Android 4.1. Để
+    tìm hiểu về cách xử lý thông báo đối với nền tảng phiên bản Android 4.1 và trước đó, hãy đọc
+    phần <a href="#Compatibility">Xử lý tính tương thích</a>.
+</p>
+<p>
+    Ví dụ, đoạn mã HTML sau minh họa cách thay đổi thông báo được tạo
+    trong đoạn mã HTML trước để sử dụng bố trí mở rộng:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">Xử lý tính tương thích</h3>
+
+<p>
+    Không phải tất cả tính năng thông báo đều sẵn có đối với một phiên bản cụ thể, mặc dù
+    các phương pháp đặt chúng đều nằm trong lớp thư viện hỗ trợ
+    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+    Ví dụ, nút hành động phụ thuộc vào thông báo mở rộng chỉ xuất hiện trên phiên bản Android
+    4.1 trở lên, bởi bản thân thông báo mở rộng chỉ sẵn có trên phiên bản
+    Android 4.1 trở lên.
+</p>
+<p>
+    Để đảm bảo tính tương thích tốt nhất, hãy tạo thông báo bằng
+    {@link android.support.v4.app.NotificationCompat NotificationCompat} và các lớp con của nó,
+    đặc biệt là {@link android.support.v4.app.NotificationCompat.Builder
+    NotificationCompat.Builder}. Bên cạnh đó, hãy tuân theo tiến trình sau khi bạn triển khai một thông báo:
+</p>
+<ol>
+    <li>
+        Cung cấp tất cả tính năng thông báo cho tất cả người dùng, không phụ thuộc vào phiên bản
+        mà họ đang sử dụng. Để làm vậy, hãy xác minh rằng tất cả tính năng đều sẵn có từ một
+        {@link android.app.Activity} trong ứng dụng của bạn. Bạn có thể muốn thêm một
+        {@link android.app.Activity} mới để làm điều này.
+        <p>
+            Ví dụ, nếu bạn muốn sử dụng
+            {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} để
+            cung cấp khả năng điều khiển dừng và bắt đầu phát lại phương tiện, trước tiên hãy triển khai khả năng
+            điều khiển này trong một {@link android.app.Activity} trong ứng dụng của bạn.
+        </p>
+    </li>
+    <li>
+        Đảm bảo rằng tất cả người dùng đều có thể tiếp cận với tính năng trong {@link android.app.Activity},
+        bằng cách cho nó khởi động khi người dùng nhấp vào thông báo. Để làm điều này,
+        hãy tạo một {@link android.app.PendingIntent}
+        cho {@link android.app.Activity}. Gọi
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+        setContentIntent()} để thêm {@link android.app.PendingIntent} vào thông báo.
+    </li>
+    <li>
+        Bây giờ, hãy thêm các tính năng thông báo mở rộng mà bạn muốn sử dụng vào thông báo. Ghi nhớ
+        rằng bất kỳ tính năng nào mà bạn thêm cũng phải sẵn có trong {@link android.app.Activity}
+        mà bắt đầu khi người dùng nhấp vào thông báo.
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">Quản lý Thông báo</h2>
+<p>
+    Khi cần phát hành một thông báo nhiều lần cho cùng loại sự kiện, bạn
+    nên tránh tạo một thông báo hoàn toàn mới. Thay vào đó, bạn nên cân nhắc cập nhật
+    một thông báo trước đó, hoặc bằng cách thay đổi một vài giá trị hoặc bằng cách thêm vào nó, hoặc cả hai.
+</p>
+<p>
+    Ví dụ, Gmail thông báo với người dùng rằng e-mail mới đã đến bằng cách tăng số đếm
+    tin nhắn chưa đọc và bằng cách thêm một phần tóm tắt từng e-mail vào thông báo. Đây được gọi là
+    "xếp chồng" thông báo; nó được mô tả chi tiết hơn trong phần hướng dẫn Thiết kế
+    <a href="{@docRoot}design/patterns/notifications.html">Thông báo</a>.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Tính năng Gmail này yêu cầu bố trí mở rộng "hộp thư đến", đó là
+    một phần của tính năng thông báo mở rộng sẵn có bắt đầu từ Android 4.1.
+</p>
+<p>
+    Phần sau mô tả cách cập nhật thông báo và cả cách loại bỏ chúng.
+</p>
+<h3 id="Updating">Cập nhật thông báo</h3>
+<p>
+    Để thiết lập một thông báo để nó có thể được cập nhật, hãy phát hành nó cùng một ID thông báo bằng cách gọi
+    {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
+    Để cập nhật thông báo sau khi bạn đã phát hành
+    nó, hãy cập nhật hoặc tạo một đối tượng {@link android.support.v4.app.NotificationCompat.Builder},
+    xây dựng một đối tượng {@link android.app.Notification} từ nó, và phát hành
+    {@link android.app.Notification} với cùng ID mà bạn đã sử dụng trước đó. Nếu
+    thông báo trước đó vẫn hiển thị, hệ thống sẽ cập nhật nó từ nội dung của
+    đối tượng {@link android.app.Notification}. Nếu thông báo trước đó đã bị bỏ đi, một
+    thông báo mới sẽ được tạo thay thế.
+</p>
+<p>
+    Đoạn mã HTML sau minh họa một thông báo được cập nhật để phản ánh
+    số sự kiện đã xảy ra. Nó xếp chồng thông báo, hiển thị một tóm tắt:
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">Loại bỏ thông báo</h3>
+<p>
+    Thông báo vẫn hiển thị cho tới khi xảy ra một trong những điều sau:
+</p>
+<ul>
+    <li>
+        Người dùng bỏ từng thông báo một hoặc bỏ tất cả bằng cách sử dụng "Xóa Tất cả" (nếu
+        thông báo có thể xóa được).
+    </li>
+    <li>
+        Người dùng nhấp vào thông báo và bạn đã gọi
+        {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()} khi
+        tạo thông báo.
+    </li>
+    <li>
+        Bạn gọi {@link android.app.NotificationManager#cancel(int) cancel()} cho một ID thông báo
+        cụ thể. Phương pháp này cũng xóa các thông báo đang diễn ra.
+    </li>
+    <li>
+        Bạn gọi {@link android.app.NotificationManager#cancelAll() cancelAll()}, nó sẽ xóa
+        tất cả thông báo mà bạn đã phát hành trước đó.
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">Giữ lại Điều hướng khi Bắt đầu một Hoạt động</h2>
+<p>
+    Khi bạn bắt đầu một {@link android.app.Activity} từ một thông báo, bạn phải giữ lại trải nghiệm điều hướng kỳ vọng
+    của người dùng. Nhấp vào <i>Quay lại</i> sẽ đưa người dùng quay lại thông qua
+    tiến trình làm việc bình thường của ứng dụng về màn hình Trang chủ, và nhấp vào <i>Gần đây</i> sẽ hiển thị
+    {@link android.app.Activity} như một tác vụ riêng. Để giữ lại trải nghiệm điều hướng, bạn
+    nên bắt đầu {@link android.app.Activity} trong một tác vụ mới. Cách bạn thiết lập
+    {@link android.app.PendingIntent} để cấp cho bạn một tác vụ mới sẽ phụ thuộc vào tính chất của
+    {@link android.app.Activity} mà bạn đang bắt đầu. Có hai tình huống thông thường:
+</p>
+<dl>
+    <dt>
+        Hoạt động thường xuyên
+    </dt>
+    <dd>
+        Bạn đang bắt đầu một {@link android.app.Activity} là một phần của tiến trình công việc
+        bình thường của ứng dụng. Trong tình huống này, hãy thiết lập {@link android.app.PendingIntent} để
+        bắt đầu một tác vụ mới, và cung cấp {@link android.app.PendingIntent} với một ngăn xếp
+        có chức năng tái tạo lại hành vi thông thường <i>Quay lại</i> của ứng dụng.
+        <p>
+            Thông báo từ ứng dụng Gmail thể hiện điều này. Khi bạn nhấp vào một thông báo
+            cho một thư e-mail đơn lẻ, bạn sẽ thấy chính thư đó. Chạm vào <b>Quay lại</b> sẽ đưa bạn
+           ngược lại qua Gmail về màn hình Trang chủ, giống như thể bạn đã vào Gmail từ
+            màn hình Trang chủ chứ không phải vào từ một thông báo.
+        </p>
+        <p>
+            Điều này xảy ra mà không phụ thuộc vào ứng dụng bạn đang ở trong khi chạm vào
+            thông báo. Ví dụ, nếu bạn đang vào Gmail để soạn thư, và bạn nhấp vào một
+            thông báo cho một e-mail đơn lẻ, bạn sẽ đến e-mail đó ngay lập tức. Chạm vào <i>Quay lại</i>
+            sẽ đưa bạn về hộp thư đến rồi tới màn hình Trang chủ, thay vì đưa bạn tới
+            thư mà bạn đang soạn.
+        </p>
+    </dd>
+    <dt>
+        Hoạt động đặc biệt
+    </dt>
+    <dd>
+        Người dùng chỉ thấy {@link android.app.Activity} này nếu nó được bắt đầu từ một thông báo.
+        Nghĩa là, {@link android.app.Activity} mở rộng thông báo bằng cách cung cấp
+        thông tin mà sẽ khó hiển thị trong chính thông báo đó. Đối với tình huống này,
+        hãy thiết lập {@link android.app.PendingIntent} để bắt đầu một tác vụ mới. Tuy nhiên, không cần tạo
+        một ngăn xếp vì {@link android.app.Activity} được bắt đầu không phải là một phần trong
+        tiến trình hoạt động của ứng dụng. Nhấp vào <i>Quay lại</i> sẽ vẫn đưa người dùng đến
+        màn hình Trang chủ.
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">Thiết đặt một PendingIntent cho hoạt động thường xuyên</h3>
+<p>
+    Để thiết lập {@link android.app.PendingIntent} để bắt đầu một mục nhập trực tiếp
+    {@link android.app.Activity}, hãy làm theo những bước sau:
+</p>
+<ol>
+    <li>
+        Định nghĩa phân cấp {@link android.app.Activity} của ứng dụng của bạn trong bản kê khai.
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Thêm hỗ trợ cho phiên bản Android 4.0.3 và trước đó. Để làm điều này, hãy quy định mẹ của
+                {@link android.app.Activity} mà bạn đang bắt đầu bằng cách thêm phần tử 
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+                làm con của
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
+                <p>
+                    Đối với phần tử này, hãy đặt
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
+                    Đặt
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>
+                    trong đó <code>&lt;parent_activity_name&gt;</code> là giá trị của
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
+                    đối với phần tử
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                    mẹ. Xem ví dụ trong XML sau.
+                </p>
+            </li>
+            <li>
+                Cũng thêm hỗ trợ cho phiên bản Android 4.1 và sau đó. Để làm điều này, hãy thêm thuộc tính 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
+                vào phần tử 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                của {@link android.app.Activity} mà bạn đang bắt đầu.
+            </li>
+        </ol>
+        <p>
+            XML cuối cùng sẽ trông như sau:
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        Tạo một ngăn xếp dựa trên {@link android.content.Intent} mà bắt đầu
+        {@link android.app.Activity}:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Tạo {@link android.content.Intent} để bắt đầu {@link android.app.Activity}.
+            </li>
+            <li>
+                Tạo một bộ dựng chồng bằng cách gọi {@link android.app.TaskStackBuilder#create
+                TaskStackBuilder.create()}.
+            </li>
+            <li>
+                Thêm ngăn xếp vào bộ dựng ngăn xếp bằng cách gọi
+                {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}.
+                Đối với mỗi {@link android.app.Activity} trong phân cấp mà bạn đã định nghĩa trong
+                bản kê khai, ngăn xếp chứa một đối tượng {@link android.content.Intent} mà
+                sẽ khởi động {@link android.app.Activity}. Phương pháp này cũng thêm cờ có chức năng bắt đầu
+                chồng trong một tác vụ mới.
+                <p class="note">
+                    <strong>Lưu ý:</strong> Mặc dù tham đối đến
+                    {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}
+                    là một tham chiếu tới {@link android.app.Activity} được bắt đầu, phương pháp gọi
+                    không thêm {@link android.content.Intent} có chức năng bắt đầu
+                    {@link android.app.Activity}. Thay vào đó, nó được xử lý ở bước tiếp theo.
+                </p>
+            </li>
+            <li>
+                Thêm {@link android.content.Intent} có chức năng bắt đầu {@link android.app.Activity}
+                từ thông báo bằng cách gọi
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+                Chuyển {@link android.content.Intent} mà bạn đã tạo ở bước đầu tiên làm
+                tham đối tới
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+            </li>
+            <li>
+                Nếu bạn cần, hãy thêm các tham đối tới các đối tượng {@link android.content.Intent} trên chồng
+                bằng cách gọi {@link android.support.v4.app.TaskStackBuilder#editIntentAt
+                TaskStackBuilder.editIntentAt()}. Đôi khi cần phải đảm bảo rằng
+                {@link android.app.Activity} mục tiêu sẽ hiển thị dữ liệu có ý nghĩa khi người dùng điều hướng
+               tới nó bằng cách sử dụng <i>Quay lại</i>.
+            </li>
+            <li>
+                Nhận một {@link android.app.PendingIntent} cho ngăn xếp này bằng cách gọi
+                {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()}.
+                Sau đó, bạn có thể sử dụng {@link android.app.PendingIntent} này làm tham đối tới
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    Đoạn mã HTML sau minh họa tiến trình:
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">Thiết đặt một PendingIntent cho hoạt động đặc biệt</h3>
+<p>
+    Phần sau mô tả cách thiết lập một
+    {@link android.app.PendingIntent} cho hoạt động đặc biệt.
+</p>
+<p>
+    Một {@link android.app.Activity} đặc biệt không cần ngăn xếp, vì thế bạn không phải
+    định nghĩa phân cấp {@link android.app.Activity} của nó trong bản kê khai, và bạn không phải
+    gọi
+    {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} để xây dựng một
+    ngăn xếp. Thay vào đó, hãy sử dụng bản kê khai để thiết lập các tùy chọn tác vụ {@link android.app.Activity},
+    và tạo {@link android.app.PendingIntent} bằng cách gọi
+    {@link android.app.PendingIntent#getActivity getActivity()}:
+</p>
+<ol>
+    <li>
+        Trong bản kê khai của mình, hãy thêm các thuộc tính sau vào phần tử
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+        cho {@link android.app.Activity}
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                Tên lớp được xác định đầy đủ của hoạt động.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                Kết hợp với cờ
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                mà bạn đặt trong mã, điều này đảm bảo rằng {@link android.app.Activity} này không
+                đi đến tác vụ mặc định của ứng dụng. Bất kỳ tác vụ hiện tại nào mà có
+                bố trí mặc định của ứng dụng đều không bị ảnh hưởng.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                Loại bỏ tác vụ mới khỏi <i>Gần đây</i>, sao cho người dùng không thể vô tình
+                điều hướng quay lại nó.
+            </dd>
+        </dl>
+        <p>
+            Đoạn mã HTML này thể hiện phần tử:
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        Xây dựng và phát hành thông báo:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Tạo một {@link android.content.Intent} có chức năng bắt đầu
+                {@link android.app.Activity}.
+            </li>
+            <li>
+                Đặt {@link android.app.Activity} để bắt đầu trong một tác vụ mới, trống bằng cách gọi
+                {@link android.content.Intent#setFlags setFlags()} với các cờ
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                và
+                {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK}.
+            </li>
+            <li>
+                Đặt bất kỳ tùy chọn nào khác mà bạn cần cho {@link android.content.Intent}.
+            </li>
+            <li>
+                Tạo một {@link android.app.PendingIntent} từ {@link android.content.Intent}
+                bằng cách gọi {@link android.app.PendingIntent#getActivity getActivity()}.
+                Sau đó, bạn có thể sử dụng {@link android.app.PendingIntent} này làm tham đối tới
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+    <p>
+        Đoạn mã HTML sau minh họa tiến trình:
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">Hiển thị Tiến độ trong một Thông báo</h2>
+<p>
+    Thông báo có thể bao gồm một chỉ báo tiến độ dạng hoạt ảnh để cho người dùng thấy trạng thái
+    của một thao tác đang diễn ra. Nếu bạn có thể ước lượng thao tác mất bao lâu và nó được
+    được hoàn thành bao nhiêu vào bất cứ lúc nào, hãy sử dụng hình thức "xác định" của chỉ báo
+    (thanh tiến độ). Nếu bạn không thể ước lượng thời lượng của thao tác, hãy sử dụng hình thức
+    "không xác định" của chỉ báo (chỉ báo hoạt động).
+</p>
+<p>
+    Chỉ báo tiến độ được hiển thị bằng triển khai lớp
+    {@link android.widget.ProgressBar} của nền tảng.
+</p>
+<p>
+    Để sử dụng chỉ báo tiến độ trên các nền tảng bắt đầu từ Android 4.0, hãy gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. Đối
+    với các phiên bản trước đây, bạn phải tạo bố trí thông báo tùy chỉnh của chính mình
+    trong đó chứa một dạng xem {@link android.widget.ProgressBar}.
+</p>
+<p>
+    Phần sau đây mô tả cách hiển thị tiến độ trong một thông báo bằng cách sử dụng
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">Hiển thị một chỉ báo tiến độ thời lượng cố định</h3>
+<p>
+    Để hiển thị một thanh tiến độ xác định, hãy thêm thanh vào thông báo của bạn bằng cách gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(max, progress, false)} rồi phát hành thông báo. Khi thông báo của bạn tiến hành,
+    tăng dần<code>progress</code>, và cập nhật thông báo. Khi kết thúc thao tác,
+    <code>progress</code> sẽ bằng <code>max</code>. Một cách thông thường để gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
+    đó là đặt <code>max</code> thành 100 rồi tăng dần <code>progress</code> dưới dạng giá trị
+    "phần trăm hoàn thành" cho thao tác.
+</p>
+<p>
+    Bạn có thể hoặc để thanh tiến độ hiển thị khi nào thì thao tác hoàn thành, hoặc loại bỏ nó. Dù
+    trong trường hợp nào hãy nhớ cập nhật văn bản thông báo để hiển thị thao tác hoàn tất.
+    Để loại bỏ thanh tiến độ, hãy gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(0, 0, false)}. Ví dụ:
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">Hiển thị một chỉ báo hoạt động liên tục</h3>
+<p>
+    Để hiển thị một chỉ báo hoạt động không xác định, hãy thêm nó vào thông báo của bạn bằng
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
+    (hai tham đối đầu tiên bị bỏ qua), và phát hành thông báo. Kết quả là một chỉ báo
+    mà có cùng kiểu như một thanh tiến độ, khác ở chỗ hoạt ảnh của nó đang diễn ra.
+</p>
+<p>
+    Phát hành thông báo khi bắt đầu thao tác. Hoạt ảnh sẽ chạy tới khi bạn
+    sửa đổi thông báo của mình. Khi thao tác hoàn thành, hãy gọi
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)}
+    và rồi cập nhật thông báo để loại bỏ chỉ báo hoạt động.
+    Luôn làm điều này; nếu không, hoạt ảnh sẽ chạy ngay cả khi thao tác đã hoàn thành. Đồng thời
+   hãy nhớ thay đổi văn bản thông báo để biểu thị thao tác hoàn tất.
+</p>
+<p>
+    Để xem chỉ báo hoạt động vận hành như thế nào, hãy tham khảo đoạn mã HTML trước. Định vị các dòng sau:
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    Thay thế các dòng bạn đã tìm thấy bằng các dòng sau:
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">Siêu dữ liệu Thông báo</h2>
+
+<p>Thông báo có thể được sắp xếp theo siêu dữ liệu mà bạn gán cho bằng các
+phương pháp {@link android.support.v4.app.NotificationCompat.Builder} sau:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()}
+    thông báo hệ thống cách xử lý thông báo ứng dụng của bạn khi thiết bị đang trong chế độ Ưu tiên
+    (ví dụ, nếu thông báo của bạn biểu diễn một cuộc gọi đến, tin nhắn tức thời hoặc báo thức).</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} khiến
+    thông báo với trường mức ưu tiên được đặt thành {@code PRIORITY_MAX} hoặc {@code PRIORITY_HIGH} xuất hiện
+    trong một cửa sổ nổi nhỏ nếu thông báo cũng có âm thanh hoặc rung.</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()}
+    cho phép bạn thêm một danh sách người vào thông báo. Ứng dụng của bạn có thể sử dụng tín hiệu này cho
+    hệ thống mà nó sẽ nhóm cùng với thông báo từ những người được quy định, hoặc xếp hạng thông báo
+    từ những người này là quan trọng hơn.</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>Hình 3.</strong> Hoạt động toàn màn hình thể hiện một thông báo cảnh báo
+  </p>
+</div>
+
+<h2 id="Heads-up">Thông báo Cảnh báo</h2>
+
+<p>Với Android 5.0 (API mức 21), thông báo có thể xuất hiện trong một cửa sổ nổi nhỏ
+(còn gọi là <em>thông báo cảnh báo</em>) khi thiết bị hiện hoạt
+(tức là thiết bị được mở khóa và màn hình của nó đang bật). Những thông báo
+này có vẻ tương tự như dạng rút gọn thông báo của bạn, chỉ khác là
+thông báo cảnh báo cũng hiển thị các nút hành động. Người dùng có thể hành động trên đó, hoặc bỏ,
+một thông báo cảnh báo mà không phải rời khỏi ứng dụng hiện tại.</p>
+
+<p>Các ví dụ về điều kiện có thể kích khởi thông báo cảnh báo bao gồm:</p>
+
+<ul>
+  <li>Hoạt động của người dùng đang trong chế độ toàn màn hình (ứng dụng sử dụng
+{@link android.app.Notification#fullScreenIntent}), hoặc</li>
+  <li>Thông báo có mức ưu tiên cao và sử dụng nhạc chuông hoặc
+    rung</li>
+</ul>
+
+<h2 id="lockscreenNotification">Thông báo Màn hình Khóa</h2>
+
+<p>Với việc phát hành Android 5.0 (API mức 21), giờ đây thông báo có thể xuất hiện trên màn hình
+khóa. Ứng dụng của bạn có thể sử dụng tính năng này để cung cấp các chức năng điều khiển phát lại phương tiện và các hành động
+thông dụng khác. Người dùng có thể chọn thông qua Cài đặt để xem có hiển thị thông báo trên màn hình khóa không, và
+bạn có thể chỉ định xem thông báo từ ứng dụng của mình có hiển thị trên màn hình khóa không.</p>
+
+<h3 id="visibility">Thiết đặt Khả năng Hiển thị</h3>
+
+<p>Ứng dụng của bạn có thể điều khiển mức chi tiết có thể nhìn thấy được trong thông báo được hiển thị trên một
+màn hình khóa bảo mật. Bạn gọi {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}
+và quy định một trong những giá trị sau:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} hiển thị đầy đủ nội dung của
+    thông báo.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} không hiển thị bất kỳ phần nào của
+    thông báo này trên màn hình khóa.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} hiển thị thông tin cơ bản,
+    chẳng hạn như biểu tượng và tiêu đề nội dung của thông báo, nhưng ẩn nội dung đầy đủ của thông báo.</li>
+</ul>
+
+<p>Khi {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} được đặt, bạn cũng có thể
+cung cấp một phiên bản thay thế cho nội dung thông báo, trong đó ẩn một số chi tiết nhất định. Ví dụ,
+một ứng dụng SMS có thể hiển thị một thông báo hiển thị <em>Bạn có 3 tin nhắn văn bản mới</em>, nhưng ẩn
+nội dung của tin nhắn và người gửi. Để cung cấp thông báo thay thế này, trước tiên hãy tạo thông báo
+thay thế bằng cách sử dụng {@link android.support.v4.app.NotificationCompat.Builder}. Khi bạn tạo
+đối tượng thông báo riêng tư, hãy đính kèm thông báo thay thế cho nó thông qua phương pháp
+{@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}
+.</p>
+
+<h3 id="controllingMedia">Điều khiển Phát lại Phương tiện trên Màn hình Khóa</h3>
+
+<p>Trong Android 5.0 (API mức 21) màn hình khóa không còn hiển thị điều khiển phương tiện
+dựa trên {@link android.media.RemoteControlClient}, điều mà nay đã bị bỏ đi. Thay vào đó, hãy sử dụng mẫu
+{@link android.app.Notification.MediaStyle} với phương pháp
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+, có chức năng chuyển hành động thành các biểu tượng có thể nhấp.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Mẫu và phương pháp {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+không nằm trong thư viện hỗ trợ, vì thế những tính năng này chỉ chạy trong phiên bản Android 5.0 trở lên
+.</p>
+
+<p>Để hiển thị điều khiển phát lại phương tiện trên màn hình khóa trong Android 5.0, hãy đặt mức độ nhìn thấy
+thành {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, như mô tả bên trên. Sau đó thêm
+các hành động và đặt mẫu {@link android.app.Notification.MediaStyle}, như được mô tả trong
+đoạn mã mẫu sau:</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Việc rút bỏ {@link android.media.RemoteControlClient}
+còn có nhiều ý nghĩa khác đối với việc điều khiển phương tiện. Xem phần
+<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Điều khiển Phát lại Phương tiện</a>
+để biết thêm thông tin về các API mới đối với quản lý phiên phương tiện và điều khiển phát lại này.</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">Bố trí Thông báo Tùy chỉnh</h2>
+<p>
+    Khuôn khổ thông báo cho phép bạn định nghĩa một bố trí thông báo tùy chỉnh, nó
+    định nghĩa hình thức của thông báo trong một đối tượng {@link android.widget.RemoteViews}.
+    Thông báo có bố trí tùy chỉnh tương tự như thông báo thường, nhưng chúng được dựa trên
+    {@link android.widget.RemoteViews} được định nghĩa trong một tệp bố trí XML.
+</p>
+<p>
+    Chiều cao sẵn có cho bố trí thông báo tùy chỉnh phụ thuộc vào dạng xem thông báo. Bố trí dạng xem bình thường
+    được giới hạn ở 64 dp, và bố trí dạng xem mở rộng được giới hạn ở 256 dp.
+</p>
+<p>
+    Để định nghĩa một bố trí thông báo tùy chỉnh, hãy bắt đầu bằng việc khởi tạo đối tượng
+    {@link android.widget.RemoteViews} để bung một tệp bố trí XML. Sau đó,
+    thay vì gọi các phương pháp như
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()},
+    hãy gọi {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Để đặt
+    chi tiết nội dung trong thông báo tùy chỉnh, hãy sử dụng các phương pháp
+    {@link android.widget.RemoteViews} để đặt giá trị của các tập con của dạng xem:
+</p>
+<ol>
+    <li>
+        Tạo một bố trí XML cho thông báo trong một tệp riêng. Bạn có thể sử dụng bất kỳ tên tệp nào
+        mà bạn muốn, nhưng phải sử dụng phần mở rộng <code>.xml</code>
+    </li>
+    <li>
+        Trong ứng dụng của bạn, hãy sử dụng các phương pháp {@link android.widget.RemoteViews} để định nghĩa các biểu tượng và văn bản
+        của thông báo của bạn. Đặt đối tượng {@link android.widget.RemoteViews} này vào
+        {@link android.support.v4.app.NotificationCompat.Builder} của bạn bằng cách gọi
+        {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Tránh
+        đặt một {@link android.graphics.drawable.Drawable} nền trên đối tượng
+        {@link android.widget.RemoteViews} của bạn, vì màu văn bản của bạn có thể không đọc được.
+    </li>
+</ol>
+<p>
+    Lớp {@link android.widget.RemoteViews} cũng bao gồm các phương pháp mà bạn có thể sử dụng để dễ dạng
+    thêm một {@link android.widget.Chronometer} hoặc {@link android.widget.ProgressBar}
+    vào bố trí thông báo của bạn. Để biết thêm thông tin về việc tạo bố trí tùy chỉnh cho thông báo
+    của mình, hãy tham khảo tài liệu tham khảo {@link android.widget.RemoteViews}.
+</p>
+<p class="caution">
+    <strong>Chú ý:</strong> Khi bạn sử dụng một bố trí thông báo tùy chỉnh, hãy đặc biệt cẩn thận
+    để đảm bảo rằng bố trí tùy chỉnh của bạn có tác dụng với các hướng và độ phân giải thiết bị khác nhau. Trong khi
+    lời khuyên này áp dụng cho tất cả bố trí Dạng xem, nó đặc biệt quan trọng đối với thông báo
+    vì khoảng trống trong ngăn kéo thông báo rất hạn chế. Không được tạo bố trí tùy chỉnh của bạn quá
+    phức tạp và đảm bảo kiểm tra nó trong các cấu hình khác nhau.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>Sử dụng các tài nguyên kiểu cho văn bản thông báo tùy chỉnh</h4>
+<p>
+    Luôn sử dụng tài nguyên kiểu cho văn bản của một thông báo tùy chỉnh. Màu nền của thông báo
+    có thể thay đổi giữa các thiết bị và phiên bản khác nhau, và việc sử dụng tài nguyên kiểu
+    sẽ giúp bạn khắc phục điều này. Bắt đầu từ Android 2.3, hệ thống đã định nghĩa kiểu cho
+    văn bản bố trí thông báo chuẩn. Nếu bạn sử dụng cùng kiểu trong các ứng dụng nhắm đến phiên bản Android
+    2.3 hoặc cao hơn, bạn sẽ phải đảm bảo rằng văn bản của bạn nhìn thấy được trên nền hiển thị.
+</p>

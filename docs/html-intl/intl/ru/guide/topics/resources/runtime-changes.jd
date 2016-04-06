@@ -1,0 +1,281 @@
+page.title=Обработка изменений в режиме выполнения
+page.tags=операция,жизненный цикл
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Содержание документа</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">Сохранение объекта во время изменения конфигурации</a></li>
+    <li><a href="#HandlingTheChange">Самостоятельная обработка изменения конфигурации</a>
+  </ol>
+
+  <h2>См. также:</h2>
+  <ol>
+    <li><a href="providing-resources.html">Предоставление ресурсов</a></li>
+    <li><a href="accessing-resources.html">Доступ к ресурсам</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Более
+быстрое изменение ориентации экрана</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Некоторые конфигурации устройств могут изменяться в режиме выполнения
+(например, ориентация экрана, доступность клавиатуры и язык). Когда происходит такое изменение,
+Android перезапускает выполнение
+{@link android.app.Activity} (вызывается {@link android.app.Activity#onDestroy()}, затем {@link
+android.app.Activity#onCreate(Bundle) onCreate()}). Поведение при перезапуске позволяет
+приложению учитывать новые конфигурации путем автоматической перезагрузки в приложение
+альтернативных ресурсов, которые соответствуют новой конфигурации устройства.</p>
+
+<p>Для правильной обработки перезапуска важно, чтобы операция восстанавливала предыдущее
+состояние в течение нормального <a href="{@docRoot}guide/components/activities.html#Lifecycle">жизненного цикла
+операции</a>, при котором Android вызывает
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} перед уничтожением
+операции, чтобы вы могли сохранить данные о состоянии приложения. Затем вы можете восстановить состояние
+во время выполнения метода {@link android.app.Activity#onCreate(Bundle) onCreate()} или {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()}.</p>
+
+<p>Чтобы проверить, перезапускается ли приложение в неизмененном состоянии, следует
+вызывать изменение конфигурации (например, изменение ориентации экрана) во время выполнения различных
+задач в приложении. Приложение должно перезапускаться в любой момент без потери
+пользовательских данных и состояния, чтобы обработать события, например, изменение конфигурации или получение пользователем
+входящего телефонного звонка с последующим возвращением в приложение после того, как процесс
+приложения мог быть уничтожен. Чтобы узнать, как восстановить состояние операции, прочитайте раздел <a href="{@docRoot}guide/components/activities.html#Lifecycle">Жизненный цикл операции</a>.</p>
+
+<p>Однако возможна ситуация, при которой перезапуск приложения и
+восстановление значительного объема данных может быть слишком ресурсоемким и может создавать неприятное впечатление у пользователя. В такой ситуации
+есть два других варианта:</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">Сохранение объекта во время изменения конфигурации</a>
+  <p>Необходимо позволить перезапуск операции при изменении конфигурации, при этом перенести объект
+с сохранением состояния в новый экземпляр операции.</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">Самостоятельная обработка изменения конфигурации</a>
+  <p>Не допускайте перезапуска операции системой во время определенных изменений конфигурации,
+но получайте обратный вызов при изменении конфигурации, чтобы при необходимости можно было вручную обновить
+операцию.</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">Сохранение объекта во время изменения конфигурации</h2>
+
+<p>Если перезапуск операции требует восстановления больших объемов данных, повторного подключения к сети
+или выполнения других масштабных действий, то полный перезапуск вследствие изменения конфигурации
+может тормозить работу пользователя. Кроме того, может быть невозможно полное восстановление состояния операции
+ из объекта {@link android.os.Bundle}, который система сохраняет с помощью обратного вызова {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()}, поскольку он не
+предназначен для переноса больших объектов (таких как растровые изображения), и данные в нем должны быть преобразованы в последовательную
+форму, а затем обратно, что потребляет много памяти и тормозит изменение конфигурации. В такой ситуации
+вы можете облегчить бремя повторной инициализации операции путем сохранения фрагмента {@link
+android.app.Fragment} в случае перезапуска операции вследствие изменения конфигурации. Этот фрагмент
+может содержать ссылки на объекты с сохранением состояния, которые требуется сохранить.</p>
+
+<p>Когда система Android завершает операцию вследствие изменения конфигурации, фрагменты
+операции, отмеченные для сохранения, не уничтожаются. Такие фрагменты можно добавлять в операцию
+для защиты объектов с сохранением состояния.</p>
+
+<p>Сохранение объектов с сохранением состояния во фрагменте во время изменения конфигурации в режиме выполнения:</p>
+
+<ol>
+  <li>Расширьте класс {@link android.app.Fragment} и объявите ссылки на объекты,
+сохраняющие состояние.</li>
+  <li>Вызовите {@link android.app.Fragment#setRetainInstance(boolean)}, когда фрагмент создан.
+      </li>
+  <li>Добавьте фрагмент в операцию.</li>
+  <li>Используйте {@link android.app.FragmentManager} для извлечения фрагмента при перезапуске
+операции.</li>
+</ol>
+
+<p>В качестве привмера приведено определение фрагмента следующим образом:</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Хотя можно сохранить любой объект,
+не следует передавать объект, связанный с {@link android.app.Activity}, например, {@link
+android.graphics.drawable.Drawable}, {@link android.widget.Adapter}, {@link android.view.View}
+или любой другой объект, связанный с {@link android.content.Context}. В этом случае произойдет
+утечка всех видов и ресурсов исходного экземпляра операции. (Утечка ресурсов
+означает, что приложение удерживает их, и система не может очистить от них память, поэтому
+может теряться значительный объем памяти).</p>
+
+<p>Затем используйте {@link android.app.FragmentManager} для добавления фрагмента в операцию. 
+Можно получить объект данных из фрагмента, когда операция повторно запускается в результате изменения конфигурации
+в режиме выполнения. В качестве примера операция определена следующим образом:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>В этом примере {@link android.app.Activity#onCreate(Bundle) onCreate()} добавляет фрагмент
+или восстанавливает ссылку на него. Метод {@link android.app.Activity#onCreate(Bundle) onCreate()} также
+хранит объект, сохраняющий состояние, внутри экземпляра фрагмента.
+Метод {@link android.app.Activity#onDestroy() onDestroy()} обновляет объект, сохраняющий состояние, внутри 
+сохраненного экземпляра фрагмента.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">Самостоятельная обработка изменения конфигурации</h2>
+
+<p>Если приложению не требуется обновление ресурсов во время определенного изменения
+конфигурации <em>и</em> имеются ограничения производительности, не разрешающие
+перезапуск операции, можно объявить самостоятельную обработку операцией изменения конфигурации
+, что запрещает системе перезапускать эту операцию.</p>
+
+<p class="note"><strong>Примечание.</strong> Самостоятельная обработка изменения конфигурации может
+значительно затруднить использование альтернативных ресурсов, так как система не
+применяет их автоматически. Этот подход может применяться в крайнем случае, когда необходимо избежать перезапуска в результате
+изменения конфигурации, и для большинства приложений его использование не рекомендуется.</p>
+
+<p>Для объявления самостоятельной обработки изменения конфигурации операцией отредактируйте соответствующий элемент <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+в файле манифеста и включите в него атрибут <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> со значением, представляющим конфигурацию, которую
+требуется обрабатывать самостоятельно. Возможные значения перечислены в документации для атрибута <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> (наиболее часто используются значения {@code "orientation"} для
+предотвращения перезапуска при изменении ориентации экрана и {@code "keyboardHidden"} для предотвращения
+перезапуска при изменении доступности клавиатуры).  Можно объявить несколько значений конфигурации
+в атрибуте, разделяя их символом вертикальной черты {@code |}.</p>
+
+<p>Например, следующий код манифеста объявляет операцию, которая обрабатывает как
+изменение ориентации экрана, так и изменение доступности экрана:</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>Теперь, при изменении одного из этих элементов конфигурации, операция {@code MyActivity} не перезапускается.
+Вместо этого {@code MyActivity} получает вызов {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Этот метод
+получает объект {@link android.content.res.Configuration}, в котором указана
+новая конфигурация устройства. При считываении полей {@link android.content.res.Configuration}
+можно определить новую конфигурацию и внести соответствующие изменения, обновляя
+ресурсы, которые используются в интерфейсе. В момент
+вызова этого метода объект {@link android.content.res.Resources} операции обновляется
+и возвращает ресурсы на основе новой конфигурации, поэтому можно просто
+сбросить элементы пользовательского интерфейса без перезапуска операции системой.</p>
+
+<p class="caution"><strong>Внимание!</strong> Начиная с Android 3.2 (уровень API 13), <strong>
+«размер экрана» также изменяется</strong> при переходе между книжной и альбомной
+ориентациями устройства. Таким образом, если в режиме выполнения требуется предотвратить перезапуск вследствие изменения ориентации при разработке для
+уровня API 13 или выше (как объявлено в атрибутах <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> и <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+), необходимо включить значение {@code "screenSize"} в дополнение к значению {@code
+"orientation"}. То есть необходимо объявить {@code
+android:configChanges="orientation|screenSize"}. Однако, если приложение нацелено на уровень API
+12 или ниже, ваша операция всегда обрабатывает это изменение конфигурации самостоятельно (это изменение
+конфигурации не перезапускает операцию даже при работе на устройстве с Android 3.2 или более поздней версией).</p>
+
+<p>Например, следующая реализация метода {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}
+проверяет текущую ориентацию устройства:</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>Объект {@link android.content.res.Configuration} представляет все текущие
+конфигурации, а не только изменившиеся. В большинстве случаев неважно,
+как именно изменилась конфигурация, поэтому можно просто переназначить все ресурсы, предоставляющие альтернативу
+для обрабатываемой конфигурации. Например, так как объект {@link
+android.content.res.Resources} обновлен, можно сбросить
+любые виды {@link android.widget.ImageView} с помощью {@link android.widget.ImageView#setImageResource(int)
+setImageResource()}
+, и после этого будут использоваться ресурсы, соответствующие новой конфигурации (как описано в разделе <a href="providing-resources.html#AlternateResources">Предоставление ресурсов</a>).</p>
+
+<p>Обратите внимание, что значения из полей {@link
+android.content.res.Configuration} являются целыми, которые соответствуют определенным константам
+из класса {@link android.content.res.Configuration}. Документацию об используемых константах
+для каждого поля см. в соответствующем поле по ссылке {@link
+android.content.res.Configuration}.</p>
+
+<p class="note"><strong>Помните!</strong> При объявлении операции, обрабатывающей изменение
+конфигурации, вы отвечаете за сброс любых элементов, для которых вы предоставили альтернативы. Если вы
+объявили, что операция обрабатывает изменение ориентации, и у вас есть изображения, которые должны быть заменены при переходе между
+альбомной и книжной ориентацией, вы должны переназначить каждый ресурс каждому элементу во время выполнения метода {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}.</p>
+
+<p>Если вам не требуется обновлять приложение на основе этих изменений
+конфигурации, можно вместо этого <em>не</em> реализовывать метод {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. В этом
+случае все ресурсы, использованные до изменения конфигурации, продолжают использоваться
+, просто не происходит перезапуск операции. Однако ваше приложение обязательно должно быть
+способно выключаться и перезапускаться в предыдущем состоянии, поэтому не следует использовать эту технику
+как способ избежать сохранения состояния во время нормального жизненного цикла операции. Не только потому, что
+есть другие изменения конфигурации, которые приведут к перезапуску приложения, но
+также и потому, что вы должны обрабатывать события, например, когда пользователь покидает приложение, и оно
+закрывается до возвращения в него пользователя.</p>
+
+<p>Более подробную информацию об изменениях конфигурации, которые можно обрабатывать внутри операции, см. в документации <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> и описании
+класса {@link android.content.res.Configuration}.</p>

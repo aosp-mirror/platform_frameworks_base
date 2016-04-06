@@ -20,13 +20,13 @@ o botão <em>Para Cima</em>, consistindo no ícone do aplicativo e em um cursor 
 
 <img src="{@docRoot}design/media/navigation_with_back_and_up.png">
 
-<h2 id="up-vs-back">Para Cima vs. Voltar</h2>
+<h2 id="up-vs-back">Para Cima vs Voltar</h2>
 
 <p>O botão Para Cima é usado para navegar dentro de um aplicativo com base nos relacionamentos hierárquicos
-entre telas. Por exemplo, se a tela A exibe uma lista de itens e, selecionar um item leva à
-tela B (que apresenta aquele item em mais detalhes), então a tela B deve oferecer um botão Para Cima que
+entre telas. Por exemplo, se a tela A exibe uma lista de itens e selecionar um item leva à
+tela B (que apresenta aquele item em mais detalhes), a tela B deve oferecer um botão Para Cima que
 volte à tela A.</p>
-<p>Se determinada tela é a superior na hierarquia de um aplicativo (ou seja, a página inicial do aplicativo), ela não deve apresentar um botão
+<p>Se determinada tela é a superior na hierarquia de um aplicativo (ou seja, a tela inicial do aplicativo), ela não deve apresentar um botão
 Para Cima.</p>
 
 <p>O botão Voltar do sistema é usado para navegar, em ordem cronológica inversa, pelo histórico
@@ -50,9 +50,9 @@ Voltar pode retornar o usuário à tela inicial ou até mesmo a um aplicativo di
 <h2 id="within-app">Navegação dentro do seu aplicativo</h2>
 
 <h4>Navegação para telas com vários pontos de entrada</h4>
-<p>Algumas vezes, uma tela não tem uma posição estrita dentro da hierarquia do aplicativo e pode ser atingida
-de vários pontos de entrada &mdash; como uma tela de configurações que pode ser atingida de qualquer outra tela
-do aplicativo. Nesse caso, o botão Para Cima deve escolher voltar para a tela anterior, comportando-se
+<p>Algumas vezes, uma tela não tem uma posição rigorosa dentro da hierarquia do aplicativo e pode ser acessada
+de vários pontos de entrada &mdash; como uma tela de configurações que pode ser acessada de qualquer outra tela
+no aplicativo. Nesse caso, o botão Para Cima deve escolher voltar à tela anterior, comportando-se
 de forma idêntica a Voltar.</p>
 <h4>Mudança de vista dentro de uma tela</h4>
 <p>Mudar opções de vista de uma tela não muda o comportamento de Para Cima nem de Voltar: a tela ainda
@@ -60,7 +60,7 @@ estará no mesmo lugar dentro da hierarquia do aplicativo e nenhum histórico de
 <p>Exemplos de tais mudanças de vista são:</p>
 <ul>
 <li>Alternar vistas usando guias e/ou deslizando para a esquerda e para a direita</li>
-<li>Alternar vistas usando um menu suspenso (também chamados de abas recolhidas)</li>
+<li>Alternar vistas usando um menu suspenso (também chamadas de abas recolhidas)</li>
 <li>Filtrar uma lista</li>
 <li>Classificar uma lista</li>
 <li>Mudar características de exibição (como mudar o zoom)</li>
@@ -78,7 +78,7 @@ navegação não muda o comportamento de Para Cima ou Voltar.</p>
 vinculadas pela lista de referência &mdash; por exemplo, ao navegar na Play Store entre aplicativos
 do mesmo desenvolvedor ou álbuns do mesmo artista. Nesses casos, seguir cada link cria
 um histórico, fazendo com que o botão Voltar passe por cada tela visualizada anteriormente. Para Cima deve continuar a
-ignorar essas relacionadas e navegar para a tela do contêiner visualizada mais recentemente.</p>
+ignorar essas telas relacionadas e navegar para a tela do contêiner visualizada mais recentemente.</p>
 
 <img src="{@docRoot}design/media/navigation_between_siblings_market1.png">
 
@@ -89,9 +89,9 @@ Livro visualizado para os detalhes da adaptação do Filme. Nesse caso, Para Cim
 
 <img src="{@docRoot}design/media/navigation_between_siblings_market2.png">
 
-<h2 id="into-your-app">Navegação para o seu aplicativo pelos widgets de página inicial e notificações</h2>
+<h2 id="into-your-app">Navegação para o seu aplicativo pelos widgets de tela inicial e notificações</h2>
 
-<p>Você pode usar widget de página inicial ou notificações para ajudar seus usuários a navegar diretamente para telas
+<p>Você pode usar widgets de tela inicial ou notificações para ajudar os usuários a navegar diretamente para telas
 profundas na hierarquia do seu aplicativo. Por exemplo, o widget Caixa de Entrada do Gmail e a notificação de nova mensagem podem
 ignorar a tela Caixa de Entrada, levando o usuário diretamente a uma vista de conversa.</p>
 
@@ -100,17 +100,17 @@ ignorar a tela Caixa de Entrada, levando o usuário diretamente a uma vista de c
 <ul>
 <li><em>Se a tela de destino é normalmente acessada de uma determinada tela dentro do
 aplicativo</em>, Para Cima deve navegar para essa tela.</li>
-<li><em>Caso contrário</em>, Para Cima deve navegar para a tela superior ("Página inicial") do aplicativo.</li>
+<li><em>Caso contrário</em>, Para Cima deve navegar para a tela superior ("Tela inicial") do aplicativo.</li>
 </ul>
 
 <p>No caso do botão Voltar, você deve tornar a navegação mais previsível inserindo o caminho de navegação para cima
-completo na pilha de retorno da tarefa, até a tela superior do aplicativo. Isso permite que usuários
+completo na pilha de retorno da tarefa até a tela superior do aplicativo. Isso permite que usuários
 que se esqueceram de como entraram no aplicativo naveguem para a tela superior do aplicativo
 antes de saírem.</p>
 
-<p>Como exemplo, o widget da Página inicial do Gmail tem um botão para mergulhar diretamente para a tela
+<p>Como exemplo, o widget da Tela inicial do Gmail tem um botão para mergulhar diretamente para a tela
 de composição. Para Cima ou Voltar na tela de composição deve levar o usuário à Caixa de Entrada e, de lá, o
-botão Voltar continua até a Página inicial.</p>
+botão Voltar continua até a Tela inicial.</p>
 
 <img src="{@docRoot}design/media/navigation_from_outside_back.png">
 
@@ -123,7 +123,7 @@ chamadas de <em>notificações indiretas</em>.</p>
 
 <p>Diferentemente de em notificações padrão (diretas), pressionar Voltar em uma tela intersticial da
 notificação indireta retorna o usuário ao ponto em que a notificação foi acionada &mdash; nenhuma
-tela adicional é inserida na pilha de retorno. Quando o usuário prossegue para o aplicativo a partir da
+tela adicional é inserida na pilha de retorno. Quando o usuário prossegue para o aplicativo da
 tela intersticial, Para Cima e Voltar se comportam como em notificações padrão, como descrito acima:
 navegando dentro do aplicativo em vez de voltar à tela intersticial.</p>
 
@@ -166,13 +166,13 @@ discutida abaixo.</p>
 
 <p>No Android, uma <strong>atividade</strong> é um componente do aplicativo que define uma tela de
 informações e todas as ações associadas que o usuário pode executar. Seu aplicativo é uma coleção de
-atividades, consistindo em atividades que você cria e aquelas que reutiliza de outros aplicativos.</p>
+atividades, consistindo em atividades que você cria e naquelas que reutiliza de outros aplicativos.</p>
 
 <p>Uma <strong>tarefa</strong> é a sequência de atividades que um usuário segue para atingir um objetivo. Uma
 única tarefa pode usar atividades apenas de um aplicativo ou pode retirar atividades de uma série 
 de outros aplicativos.</p>
 
-<p>Uma <strong>intenção</strong> é um mecanismo para que um aplicativo sinalize que gostaria da assistência de outro
+<p>Uma <strong>intenção</strong> é um mecanismo para que um aplicativo sinalize que gostaria a assistência de outro
 aplicativo para realizar uma ação. As atividades de um aplicativo podem indicar a que intenções
 ele responde. Para intenções comuns, como "Compartilhar", o usuário pode ter vários aplicativos
 instalados que atendam a essa solicitação.</p>
@@ -180,7 +180,7 @@ instalados que atendam a essa solicitação.</p>
 <h4>Exemplo: navegação entre aplicativos para suporte a compartilhamento</h4>
 
 <p>Para entender como atividades, tarefas e intenções funcionam juntas, entenda como um aplicativo permite que usuários
-compartilhem conteúdo usando outro aplicativo. Por exemplo, executar o aplicativo Play Store na tela inicial inicia
+compartilhem conteúdo usando outro aplicativo. Por exemplo, executar o aplicativo Play Store na tela inicial começa
 uma nova Tarefa A (veja a figura baixo). Depois de navegar pela Play Store e tocar em um livro em promoção
 para ver os detalhes, o usuário permanecerá na mesma tarefa, estendendo-a ao adicionar atividades. Acionar
 a ação Compartilhar exibe ao usuário uma caixa de diálogo listando cada uma das atividades (de diferentes aplicativos)
@@ -209,5 +209,5 @@ Recentes). Se o Gmail já tivesse a própria tarefa em execução em segundo pla
 pela Tarefa B &mdash; o contexto anterior é abandonado em favor do novo objetivo do usuário.</p>
 
 <p>Quando o aplicativo é registrado para tratar intenções com uma atividade em um ponto profundo da hierarquia do aplicativo,
-consulte <a href="#into-your-app">Navegação para o seu aplicativo pelos widgets de página 
+consulte <a href="#into-your-app">Navegação para o seu aplicativo pelos widgets de tela 
 inicial e notificações</a> para ver orientações sobre como especificar a navegação Para Cima.</p>

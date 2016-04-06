@@ -159,7 +159,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * that set them will vary among the different subclasses of views. Note that
  * properties that are known at build time can be set in the XML layout
  * files.</li>
- * <li><strong>Set focus:</strong> The framework will handled moving focus in
+ * <li><strong>Set focus:</strong> The framework will handle moving focus in
  * response to user input. To force focus to a specific view, call
  * {@link #requestFocus}.</li>
  * <li><strong>Set up listeners:</strong> Views allow clients to set listeners

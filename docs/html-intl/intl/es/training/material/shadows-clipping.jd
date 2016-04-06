@@ -1,0 +1,133 @@
+page.title=Definir vistas de recorte y sombras
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lección te enseña a realizar lo siguiente:</h2>
+<ol>
+  <li><a href="#Elevation">Asignar elevación a tus vistas</a></li>
+  <li><a href="#Shadows">Personalizar vistas de sombras y contornos</a></li>
+  <li><a href="#Clip">Recortar vistas</a></li>
+</ol>
+<h2>También deberías leer</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificación de Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design en Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Material Design introduce una elevación para los elementos de la IU. La elevación ayuda a los usuarios a comprender la
+importancia relativa de cada elemento y a centrar su atención en la tarea para realizar.</p>
+
+<p>La elevación de una vista, representada por la propiedad Z, determina la apariencia visual de su
+sombra: las vistas con valores Z superiores, proyectan sombras más grandes y suaves. Las vistas con valores Z superiores ocluyen
+las vistas con valores Z inferiores. Sin embargo, el valor Z de una vista no afecta el tamaño de la vista.</p>
+
+<p>El padre de la vista elevada se encarga de dibujar las sombras y así, sujetas al recorte de vista estándar, son
+recortadas por el padre de manera predeterminada.</p>
+
+<p>La elevación también es útil para crear animaciones donde los widgets suben temporalmente sobre el
+plano visual cuando realizan alguna acción.</p>
+
+<p>Para más información sobre la elevación en Material Design, consulta
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">Objetos
+en el espacio 3D</a>.</p>
+
+
+<h2 id="Elevation">Asignar elevación a tus vistas</h2>
+
+<p>El valor Z de una vista cualquiera tiene dos componentes:
+
+<ul>
+<li>Elevación: El componente estático.</li>
+<li>Traducción: El componente dinámico usado para las animaciones.</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>Figura 1</strong>: sombras para diferentes elevaciones de vistas.</p>
+
+<p>Para establecer la elevación de una vista al definir un diseño, usa el atributo <code>android:elevation</code>.
+ Para establecer la elevación de una vista en el código de una actividad, usa el método
+{@link android.view.View#setElevation View.setElevation()}.</p>
+
+<p>Para establecer la traducción de una vista, usa el método {@link android.view.View#setTranslationZ
+View.setTranslationZ()}.</p>
+
+<p>Los nuevos métodos {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} y {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} te permiten
+animar fácilmente la elevación de las vistas. Para más información, consulta la referencia de la API para
+{@link android.view.ViewPropertyAnimator} y la guía del desarrollador <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Animación de propiedades</a>.
+</p>
+
+<p>También puedes usar un {@link android.animation.StateListAnimator} para
+especificar estas animaciones de manera declarativa. Esto es especialmente útil para casos en donde los cambios de
+estados desencadenan animaciones, como cuando un usuario pulsa un botón. Para más información, consulta
+<a href="{@docRoot}training/material/animations.html#ViewState">Animar cambios de estados de las vistas</a>.</p>
+
+<p>Los valores Z se miden en dp (píxeles independientes de la densidad).</p>
+
+
+<h2 id="Shadows">Personalizar visualización de sombras y contornos</h2>
+
+<p>Los límites de la interfaz dibujable en segundo plano de una vista determinan la forma predeterminada de su sombra.
+Los <strong>contornos</strong> representan la forma externa de un objeto gráfico y definen el área del efecto de ondas
+para la respuesta táctil.</p>
+
+<p>Examina esta vista, definida con una interfaz dibujable en segundo plano:</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>La interfaz dibujable en segundo plano está definida como un rectángulo con esquinas redondeadas:</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>La vista proyecta una sombra con esquinas redondeadas, ya que la interfaz dibujable en segundo plano
+define el contorno de la vista. Un contorno personalizado reemplazaría la forma predeterminada de la sombra de una vista.</p>
+
+<p>Para definir un contorno personalizado para una vista en tu código:<p>
+
+<ol>
+<li>Extiende la clase {@link android.view.ViewOutlineProvider}.</li>
+<li>Reemplaza el método {@link android.view.ViewOutlineProvider#getOutline getOutline()}.</li>
+<li>Asigna el nuevo proveedor de contornos a tu vista con el método {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()}.</li>
+</ol>
+
+<p>Puedes crear contornos rectangulares y ovalados con esquinas redondeadas mediante el uso de métodos en la clase
+{@link android.graphics.Outline}. El proveedor de contornos predeterminado para las
+vistas obtiene el contorno a partir del plano de fondo de la vista. Para evitar que una vista proyecte una sombra, establece su proveedor de contornos
+en <code>null</code>.</p>
+
+
+<h2 id="Clip">Recortar vistas</h2>
+
+<p>Recortar vistas te permite cambiar fácilmente la forma de una vista. Puedes recortar vistas para
+mantener la uniformidad con otros elementos del diseño o para cambiar la forma de una vista en respuesta a una señal de entrada del usuario.
+Puedes recortar una vista a partir de su área de contorno mediante el método {@link android.view.View#setClipToOutline
+View.setClipToOutline()} o el atributo <code>android:clipToOutline</code>. Solo
+los contornos rectangulares, circulares y redondeados admiten el recorte, según lo determinado por el método
+{@link android.graphics.Outline#canClip Outline.canClip()}.</p>
+
+<p>Para recortar una vista a partir de una interfaz dibujable, establece la interfaz dibujable como el plano de fondo de la vista
+(como se muestra más arriba) y llama al método {@link android.view.View#setClipToOutline View.setClipToOutline()}.
+</p>
+
+<p>Recortar vistas es una operación costosa, así que no animes la forma que usas para
+recortar una vista. Para lograr este efecto, usa la animación <a href="{@docRoot}training/material/animations.html#Reveal">Efecto revelar</a>.</p>

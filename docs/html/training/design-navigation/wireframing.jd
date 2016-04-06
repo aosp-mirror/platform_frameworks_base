@@ -78,9 +78,6 @@ previous.link=ancestral-temporal.html
   <li>What's the learning curve? Professional vector illustration tools may have a steep learning curve, while tools designed for wireframing may offer a smaller set of features that are more relevant to the task.</li>
 </ul>
 
-<p>Lastly, the XML Layout Editor that comes with the <a href="{@docRoot}tools/help/adt.html">Android Development Tools (ADT)</a> plugin for Eclipse can often be used for prototyping. However, you should be careful to focus more on the high-level layout and less on visual design details at this point.</p>
-
-
 <h2 id="wireframe-digital">Create Digital Wireframes</h2>
 
 <p>After sketching out layouts on paper and choosing a digital wireframing tool that works for you, you can create the digital wireframes that will serve as the starting point for your application's visual design. Below are example wireframes for our news application, corresponding one-to-one with our screen maps from earlier in this lesson.</p>

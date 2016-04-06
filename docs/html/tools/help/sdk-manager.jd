@@ -34,7 +34,7 @@ SDK checking: </p>
 </ul>
 
 <p class="note"><strong>Tip:</strong> The standalone SDK Manager is still available from the
-command line, but we recommend it only for use with Eclipse ADT and standalone SDK installations.</p>
+command line, but we recommend it only for use with standalone SDK installations.</p>
 
 <p>By default, the SDK Manager installs the latest packages and tools. Click the checkbox next to
 each additional SDK platform and tool that you want to install. Clear the
@@ -95,19 +95,27 @@ Android Virtual Devices (AVDs) in the
 <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>. </dd>
 
   <dt>Android Support Library</dt>
-  <dd>Recommended. Includes a static library that allows you to use some of the latest
-Android APIs (such as <a href="{@docRoot}guide/components/fragments.html">fragments</a>,
-plus others not included in the framework at all) on devices running
-a platform version as old as Android 1.6. All of the activity templates available when creating
-a new project with the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a>
-require this. For more information, read <a
-href="{@docRoot}tools/support-library/index.html">Support Library</a>.</dd>
+  <dd>Recommended. Includes a static library that provides an extended set of
+  APIs that are compatible with most versions of Android. It's required for
+  products such as <a href="{@docRoot}wear/index.html">Android Wear</a>, <a
+  href="{@docRoot}tv/index.html">Android TV</a>, and <a
+  href="https://developers.google.com/cast/">Google Cast</a>. For more
+  information, read <a href="{@docRoot}tools/support-library/index.html">Support
+  Library</a>.
+  </dd>
 
   <dt>Android Support Repository</dt>
   <dd>Recommended. Includes local Maven repository for Support libraries.</dd>
 
   <dt>Google Play services</dt>
-  <dd>Recommended. Includes Google Play services client library and sample code.</dd>
+  <dd>Recommended. Includes the Google Play services client library, which
+  provides a variety of features and services for your 
+  apps, such as <a
+  href="https://developers.google.com/identity/sign-in/android/">Google
+  sign-in</a>,<a
+  href="https://developers.google.com/maps/documentation/android-api/">Google
+  Maps</a>, <a href="https://developers.google.com/games/services/">Games
+  achievements and leaderboards</a>, and much more.</dd>
 
   <dt>Google Repository</dt>
   <dd>Recommended. Includes local Maven repository for Google libraries.</dd>

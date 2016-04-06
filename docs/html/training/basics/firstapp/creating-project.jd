@@ -18,7 +18,6 @@ next.link=running-app.html
 
 <ol>
   <li><a href="#Studio">Create a Project with Android Studio</a></li>
-  <li><a href="#CommandLine">Create a Project with Command Line Tools</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -53,16 +52,11 @@ lesson.</p>
       <li>If you don't have a project opened, in the <strong>Welcome</strong> screen, click <strong>
         New Project</strong>.</li>
       <li>If you have a project opened, from the <strong>File</strong> menu, select <strong>New
-        Project</strong>.</li>
+        Project</strong>. The <em>Create New Project</em> screen appears.</li>
     </ul>
   </li>
-  <div class="figure" style="width:420px">
-    <img src="{@docRoot}images/training/firstapp/studio-setup-1.png" alt="" />
-    <p class="img-caption"><strong>Figure 1.</strong> Configuring a new project in Android Studio.</p>
-  </div>
-  <li>Under <strong>Configure your new project</strong>, fill in the fields as shown in figure 1
-    and click <strong>Next</strong>.
-    <p>It will probably be easier to follow these lessons if you use the same values as shown.</p>
+  <li>Fill out the fields on the screen, and click <strong>Next</strong>.
+    <p>It is easier to follow these lessons if you use the same values as shown.</p>
     <ul>
       <li><strong>Application Name</strong> is the app name that appears to users.
           For this project, use "My First App."</li>
@@ -102,10 +96,10 @@ lesson.</p>
   </div>
   <li>Under <strong>Add an activity to &lt;<em>template</em>&gt;</strong>, select <strong>Blank
     Activity</strong> and click <strong>Next</strong>.</li>
-  <li>Under <strong>Choose options for your new file</strong>, change the
+  <li>Under <strong>Customize the Activity</strong>, change the
     <strong>Activity Name</strong> to <em>MyActivity</em>. The <strong>Layout Name</strong> changes
     to <em>activity_my</em>, and the <strong>Title</strong> to <em>MyActivity</em>. The
-    <strong>Menu Resource Name</strong> is <em>menu_my</em>. 
+    <strong>Menu Resource Name</strong> is <em>menu_my</em>.
    <li>Click the <strong>Finish</strong> button to create the project.</li>
 </ol>
 
@@ -114,10 +108,18 @@ moment to review the most important of these:</p>
 
 <dl>
   <dt><code>app/src/main/res/layout/activity_my.xml</code></dt>
-  <dd>This is the XML layout file for the activity you added when you created the project with Android
-    Studio. Following the New Project workflow, Android Studio presents this file with both a text
-    view and a preview of the screen UI. The file includes some default settings and a <code>TextView</code>
-    element that displays the message, "Hello world!"</dd>
+  <dd>This XML layout file is for the activity you added when you created the project
+  with Android Studio. Following the New Project workflow, Android Studio presents this file
+  with both a text
+    view and a preview of the screen UI. The file contains some default interface elements
+    from the material design library, including the
+    <a href="{@docRoot}training/appbar/index.html">app bar</a> and a floating action button.
+    It also includes a separate layout file with the main content.</dd>
+
+  <dt><code>app/src/main/res/layout/content_my.xml</code></dt>
+  <dd>This XML layout file resides in {@code activity_my.xml}, and contains some settings and
+  a {@code TextView} element that displays the message, "Hello world!".</dd>
+
   <dt><code>app/src/main/java/com.mycompany.myfirstapp/MyActivity.java</code></dt>
   <dd>A tab for this file appears in Android Studio when the New Project workflow finishes. When you
     select the file you see the class definition for the activity you created. When you build and
@@ -159,59 +161,24 @@ moment to review the most important of these:</p>
 <p>Note also the <code>/res</code> subdirectories that contain the
 <a href="{@docRoot}guide/topics/resources/overview.html">resources</a> for your application:</p>
 <dl>
-  <dt><code>drawable<em>&lt;density&gt;</em>/</code></dt>
-    <dd>Directories for drawable objects (such as bitmaps) that are designed for various densities,
-    such as medium-density (mdpi) and high-density (hdpi) screens. Other drawable directories
-    contain assets designed for other screen densities.
-    Here you'll find the ic_launcher.png that appears when you run the default app.</dd>
+  <dt><code>drawable<em>-&lt;density&gt;</em>/</code></dt>
+    <dd>Directories for <a href="{@docRoot}guide/topics/resources/drawable-resource.html">
+    drawable resources</a>, other than launcher icons, designed
+    for various <a href="{@docRoot}training/multiscreen/screendensities.html">densities</a>.
+</dd>
   <dt><code>layout/</code></dt>
-    <dd>Directory for files that define your app's user interface like activity_my.xml,
-      discussed above, which describes a basic layout for the MyActivity class.</dd>
+    <dd>Directory for files that define your app's user interface like {@code activity_my.xml},
+      discussed above, which describes a basic layout for the {@code MyActivity}
+      class.</dd>
   <dt><code>menu/</code></dt>
     <dd>Directory for files that define your app's menu items.</dd>
+  <dt><code>mipmap/</code></dt>
+    <dd>Launcher icons reside in the {@code mipmap/} folder rather than the
+    {@code drawable/} folders. This folder contains the {@code ic_launcher.png} image
+    that appears when you run the default app.</dd>
   <dt><code>values/</code></dt>
     <dd>Directory for other XML files that contain a collection of resources, such as
-      string and color definitions. The strings.xml file defines the "Hello world!" string that
-      displays when you run the default app.</dd>
+      string and color definitions.</dd>
 </dl>
 
 <p>To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
-
-<h2 id="CommandLine">Create a Project with Command Line Tools</h2>
-
-<p>If you're not using the Android Studio IDE, you can instead create your project
-using the SDK tools from a command line:</p>
-
-<ol>
-  <li>Change directories into the Android SDK’s <code>sdk/</code> path.</li>
-  <li>Execute:
-<pre class="no-pretty-print">tools/android list targets</pre>
-<p>This prints a list of the available Android platforms that you’ve downloaded for your SDK. Find
-the platform against which you want to compile your app. Make a note of the target ID. We
-recommend that you select the highest version possible. You can still build your app to
-support older versions, but setting the build target to the latest version allows you to optimize
-your app for the latest devices.</p>
-<p>If you don't see any targets listed, you need to
-install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK
-  Packages</a>.</p></li>
-  <li>Execute:
-<pre class="no-pretty-print">
-android create project --target &lt;target-id> --name MyFirstApp \
---path &lt;path-to-workspace>/MyFirstApp --activity MyActivity \
---package com.example.myfirstapp
-</pre>
-<p>Replace <code>&lt;target-id></code> with an ID from the list of targets (from the previous step)
-and replace
-<code>&lt;path-to-workspace></code> with the location in which you want to save your Android
-projects.</p></li>
-</ol>
-
-<p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the
-<code>tools/</code> directory to your <code>PATH</code> environment variable.</p>
-
-<p>Your Android project is now a basic "Hello World" app that contains some default files.
-To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
-
-
-

@@ -42,10 +42,10 @@ display the dialog in front of whatever the user was doing (such as dialing a
 phone call, for example). That behavior would not work for your application or
 for the user. </p>
 
-<p>To avoid these problems, your application should use the proper system 
-facility for notifying the user &mdash; the 
+<p>To avoid these problems, your application should use the proper system
+facility for notifying the user &mdash; the
 {@link android.app.Notification Notification} classes. Using
-notifications, your application can signal the user that an event has 
+notifications, your application can signal the user that an event has
 taken place, by displaying an icon in the status bar rather than taking
 focus and interrupting the user.</p>
 
@@ -141,7 +141,7 @@ the application is hung and offers to kill it for the user.</p>
 on the event handler thread, effectively blocking the event handler. This will
 delay input processing, and result in the ANR dialogs. To avoid this, move
 your computations to a thread. This <a
-href="responsiveness.html">Design for Responsiveness</a> document 
+href="responsiveness.html">Design for Responsiveness</a> document
 discusses how to do that..</p>
 
 <h2 id="multiple-activities">Don't Overload a Single Activity Screen</h2>
@@ -176,16 +176,16 @@ the details, read <a href="{@docRoot}guide/topics/ui/themes.html">Styles and The
 
 <h2 id="flexui">Design Your UI to Work with Multiple Screen Resolutions</h2>
 
-<p>Different Android-powered devices will support different screen resolutions. 
-Some will even be able to change resolutions on the fly, such as by switching 
-to landscape mode. It's important to make sure your layouts and drawables 
+<p>Different Android-powered devices will support different screen resolutions.
+Some will even be able to change resolutions on the fly, such as by switching
+to landscape mode. It's important to make sure your layouts and drawables
 are flexible enough to display properly on a variety of device screens.</p>
 
-<p>Fortunately, this is very easy to do. In brief, what you must do is 
-provide different versions of your artwork (if you use any) for the key 
-resolutions, and then design your layout to accommodate various dimensions. 
-(For example, avoid using hard-coded positions and instead use relative 
-layouts.) If you do that much, the system handles the rest, and your 
+<p>Fortunately, this is very easy to do. In brief, what you must do is
+provide different versions of your artwork (if you use any) for the key
+resolutions, and then design your layout to accommodate various dimensions.
+(For example, avoid using hard-coded positions and instead use relative
+layouts.) If you do that much, the system handles the rest, and your
 application looks great on any device.</p>
 
 <h2 id="network">Assume the Network is Slow</h2>
@@ -209,9 +209,9 @@ likely to be unpopular.</p>
 you're using the emulator, since the emulator uses your desktop computer's
 network connection. That's almost guaranteed to be much faster than a cell
 network, so you'll want to change the settings on the emulator that simulate
-slower network speeds. You can do this in Eclipse, in the "Emulator Settings"
-tab of your launch configuration or via a <a
-href="{@docRoot}tools/help/emulator.html#netspeed">command-line 
+slower network speeds. You can do this in Android Studio via the AVD Manager,
+or via a <a
+href="{@docRoot}tools/help/emulator.html#netspeed">command-line
 option</a> when starting the emulator.</p>
 
 <h2 id="keyboard">Don't Assume Touchscreen or Keyboard</h2>

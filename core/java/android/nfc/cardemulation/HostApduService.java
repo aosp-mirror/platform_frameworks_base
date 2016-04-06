@@ -36,9 +36,9 @@ import android.util.Log;
  *
  * <div class="special reference">
  * <h3>Developer Guide</h3>
- * For a general introduction into the topic of card emulation,
- * please read the <a href="{@docRoot}guide/topics/nfc/ce.html">
- * NFC card emulation developer guide.</a></p>
+ * For a general introduction to card emulation, see
+ * <a href="{@docRoot}guide/topics/connectivity/nfc/hce.html">
+ * Host-based Card Emulation</a>.</p>
  * </div>
  *
  * <h3>NFC Protocols</h3>

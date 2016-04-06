@@ -111,7 +111,7 @@ parent.link=index.html
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Throwable" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Throwable-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -313,7 +313,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 

@@ -549,7 +549,7 @@ the default signature of the <code>root()</code> function defines.</p>
 </dl>
 
 <p class="note"><strong>Note:</strong> Although Filterscript support is in the platform, developer
-support will be available in ADT and SDK Tools Release 21.0.1. </p>
+support will be available in SDK Tools Release 21.0.1. </p>
 
 
 <p>For a detailed view of all API changes in Android 4.2, see the

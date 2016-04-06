@@ -1,0 +1,71 @@
+page.title=Glu increased their conversion rate over 2% with Store Listing Experiments
+page.metaDescription=Glu Mobile decided to use Store Listing Experiments to see if different background colors in the game’s icon would affect installs. They found that a lighter background resulted in more installs.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/glu-tap-baseball.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/glu-tap-baseball-icon.jpg"
+  height="113" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.glu.baseball15&hl=en">
+  Tap Sports Baseball 2015</a> is a sports game by US games developer Glu
+  Mobile. Founded in 2001, Glu Mobile is a leading global developer and
+  publisher of free-to-play games for smartphone and tablet devices.
+</p>
+
+<p>
+  Glu Mobile decided to use
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> to see if different background colors in the
+  game’s icon would affect installs. They found that a lighter background
+  resulted in more installs.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/dev?id=8633921029894576093">Glu
+  Mobile</a> used a global store listing experiment in the Google Play Developer
+  Console to test three different background colors in the game’s icon.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The results showed that of three different color schemes —  blue, light blue,
+  and light red — an icon with a light blue background converted 2.9 percent
+  more visitors than the original control icon.
+</p>
+
+
+  <img
+   src="{@docRoot}images/distribute/stories/glu-tap-baseball-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/glu-tap-baseball-screenshot.png 1x
+  {@docRoot}images/distribute/stories/glu-tap-baseball-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+
+
+<h3>Get started</h3>
+
+<p>
+  Learn how to run
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> and read our best practices for
+  <a href="https://developer.android.com/distribute/users/experiments.html">
+  running successful experiments</a>.
+</p>

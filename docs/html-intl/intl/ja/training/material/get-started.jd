@@ -1,0 +1,171 @@
+page.title=スタートガイド
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#ApplyTheme">マテリアル テーマを適用する</a></li>
+  <li><a href="#Layouts">レイアウトを設計する</a></li>
+  <li><a href="#Depth">ビューでエレベーションを指定する</a></li>
+  <li><a href="#ListsCards">リストとカードを作成する</a></li>
+  <li><a href="#Animations">アニメーションをカスタマイズする</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>マテリアル デザインでアプリを作成するには: </p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    <a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a>を確認します。</li>
+  <li style="margin-bottom:10px">
+    マテリアル <strong>テーマ</strong>をアプリに適用します。</li>
+  <li style="margin-bottom:10px">
+    マテリアル デザインのガイドラインに沿って<strong>レイアウト</strong>を作成します。</li>
+  <li style="margin-bottom:10px">
+    ビューの<strong>エレベーション</strong>を設定してシャドウを付与します。</li>
+  <li style="margin-bottom:10px">
+    リストやカードにシステム<strong>ウィジェット</strong>を使用します。</li>
+  <li style="margin-bottom:10px">
+    アプリで<strong>アニメーション</strong>をカスタマイズします。</li>
+</ol>
+
+<h3>下方互換性を維持する</h3>
+
+<p>Android 5.0 より前のバージョンとの互換性を維持しながら、マテリアル デザインのさまざまな機能をアプリに追加できます。
+詳細については、
+<a href="{@docRoot}training/material/compatibility.html">互換性の維持</a>をご覧ください。</p>
+
+<h3>マテリアル デザインでアプリをアップデートする</h3>
+
+<p>既存のアプリをアップデートしてマテリアル デザインを組み込むには、マテリアル デザインのガイドラインに沿ってレイアウトをアップデートします。
+深度、タッチ フィードバック、アニメーションを組み込んでいることも確認してください。
+</p>
+
+<h3>マテリアル デザインで新しいアプリを作成する</h3>
+
+<p>マテリアル デザインの機能を使って新しいアプリを作成すると、<a href="http://www.google.com/design/spec">マテリアル デザインのガイドライン</a>から凝縮したデザイン フレームワークが得られます。
+ガイドラインに従い、Android フレームワークの新しい機能を使ってアプリを設計、開発してください。
+</p>
+
+
+<h2 id="ApplyTheme">マテリアル テーマを適用する</h2>
+
+<p>アプリでマテリアル テーマを適用するには、次のように
+<code>android:Theme.Material</code> から継承したスタイルを指定します。</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>マテリアル テーマはアップデートされたシステム ウィジェットを提供しています。これにより、タッチ フィードバックやアクティビティ遷移のためのカラーパレットやデフォルトのアニメーションを指定できます。
+詳細については、
+<a href="{@docRoot}training/material/theme.html">マテリアル テーマの使用</a>をご覧ください。</p>
+
+
+<h2 id="Layouts">レイアウトを設計する</h2>
+
+<p>マテリアル テーマを適用したり、カスタマイズしたりすることに加えて、レイアウトが<a href="http://www.google.com/design/spec">マテリアル デザインのガイドライン</a>に準拠している必要があります。
+レイアウトを設計するときは、次の項目に特に注意してください。
+</p>
+
+<ul>
+<li>ベースライン グリッド</li>
+<li>キーライン</li>
+<li>空白スペース</li>
+<li>タッチ ターゲット サイズ</li>
+<li>レイアウト構成</li>
+</ul>
+
+
+<h2 id="Depth">ビューでエレベーションを指定する</h2>
+
+<p>ビューにはシャドウを付与できます。ビューのエレベーションの値によって、付与されるシャドウのサイズと表示される順序が決まります。
+ビューのエレベーションを設定するには、次のようにレイアウトの
+<code>android:elevation</code> 属性を使用します。</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>新しい <code>translationZ</code> プロパティを使用すると、ビューのエレベーションの一時的な変更が反映されるアニメーションを作成できます。
+エレベーションの変更は、
+<a href="{@docRoot}training/material/animations.html#ViewState">タッチ操作に応答</a>するときに便利です。
+</p>
+
+<p>詳細については、<a href="{@docRoot}training/material/shadows-clipping.html">シャドウとクリッピング ビューの定義</a>をご覧ください。
+</p>
+
+
+<h2 id="ListsCards">リストとカードを作成する</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} は {@link
+android.widget.ListView} のさらに柔軟なバージョンで、異なるレイアウト タイプをサポートしてパフォーマンスを向上します。
+{@link android.support.v7.widget.CardView} を使用すると、あらゆるアプリで一貫した外観でカードの中に情報を表示できます。
+次のコードは、レイアウトに
+{@link android.support.v7.widget.CardView} を含める方法の一例です。</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>詳細については、<a href="{@docRoot}training/material/lists-cards.html">リストとカードの作成</a>をご覧ください。
+</p>
+
+
+<h2 id="Animations">アニメーションをカスタマイズする</h2>
+
+<p>Android 5.0（API レベル 21）には、アプリでカスタム アニメーションを作成する新たな API が含まれています。
+たとえば次のように、アクティビティ遷移を有効にしてアクティビティ内部で ExitTransition を定義できます。
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>このアクティビティから別のアクティビティを開始するときに Exit 遷移がアクティベートされます。</p>
+
+<p>新しいアニメーション API の詳細については、<a href="{@docRoot}training/material/animations.html">カスタム アニメーションの定義</a>をご覧ください。</p>

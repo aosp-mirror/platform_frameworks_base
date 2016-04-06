@@ -1,178 +1,232 @@
-page.title=Set Up the SDK
-page.image=images/cards/card-set-up_16-9_2x.png
+page.title=Set Up the Preview
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-sdk_2x.png
 
 @jd:body
 
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>In this document</h2>
-      <ol>
-        <li><a href="#get-as13">Get Android Studio 1.3</a></li>
-        <li><a href="#get-sdk">Get the Android 6.0 SDK</a></li>
-        <li><a href="#create-update">Create or Update a Project</a></li>
-        <li><a href="#setup-test">Set Up for Testing</a></li>
-      </ol>
+<ol>
+  <li><a href="#get-as13">Get Android Studio 2.1</a></li>
+  <li><a href="#get-sdk">Get the Android N SDK</a>
+    <ol>
+      <li><a href="#docs-dl">Reference documentation</a>
+    </ol>
+  </li>
+  <li><a href="#java8">Get the Java 8 JDK and JRE</a></li>
+  <li><a href="#create-update">Update or Create a Project</a></li>
+  <li><a href="#next">Next Steps</a></li>
+</ol>
   </div>
 </div>
 
-<p>With Developer Preview 3, the <strong>official Android 6.0 SDK is now available</strong> from the Android SDK
-Manager. This document assumes that you are familiar with Android app development, such
-as using the Android SDK Manager and creating projects. If you are new to
-Android, see <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First
-App</a> training lesson first.</p>
+<p>To develop apps for the Android N Preview, you need to make some updates
+to your developer environment, as described on this page.</p>
+
+<p>To simply test your app's compatibility on the
+Android N system image, follow the guide to <a
+href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
+
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
 
 
-<h2 id="get-as13">Get Android Studio 1.3</h2>
+<h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
 
-<p>
-  It is highly recommended that you install the Android Studio 1.3 to work best with
-  the Android 6.0 SDK. Please update your Android Studio installation to version 1.3 or
-  higher, or follow the instructions for
-  <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Installing Android Studio</a>.
+<p>The Android N platform adds support for <a
+href="{@docRoot}preview/j8-jack.html">Java 8 language features</a>,
+which require a new compiler called Jack. The latest version of Jack
+is currently supported only in Android Studio 2.1. So if you want to
+use Java 8 language features, you need to use Android Studio 2.1 to
+build your app. Otherwise, you don't need to use the Jack compiler, but you
+still need to update to JDK 8 to compile against the Android N platform,
+as described below.
 </p>
 
+<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
 
-<h2 id="get-sdk">Get the Android 6.0 SDK</h2>
+<p>Android Studio 2.1 is currently available as a preview in the canary
+release channel. If you already
+have Android Studio and don't want to update to the canary channel, you can
+download Android Studio 2.1 as a separate installation and use it
+for development with Android N, leaving your primary Android Studio
+environment unaffected.</p>
 
-<p>To add the Android 6.0 SDK components to your development environment:</p>
+<p>To download Android Studio 2.1 as a separate installation, follow these
+steps (or if you want to receive Android Studio 2.1 as an update to your
+existing installation, skip to step 4):</p>
 
 <ol>
-  <li>Launch Android Studio 1.3 or higher.
+  <li>Edit the name of your
+  existing Android Studio installation and append the version number. This way,
+  when you install the new version, it will not override the existing one.</li>
+  <li>Download the appropriate ZIP file for your operating system from the
+    <a href="http://tools.android.com/download/studio/canary/latest"
+    >canary channel download page</a>.
   </li>
-
-  <li>Open the <strong>Settings</strong> window (on Windows, you can do this
-  by choosing <strong>File &gt; Settings</strong>). Choose the
-  <strong>Appearance &amp; Behavior &gt; System
-  Settings &gt; Updates</strong> panel.
-
-    <p class="aside">On Mac OS X, you can find the <strong>Appearance &amp;
-    Behavior</strong> panel
-    in Android Studio's <strong>Preferences</strong> window.</p>
+  <li>Unzip the package and move the Android Studio 2.1 contents to the
+    appropriate location for applications on your system, then launch it.</li>
+  <li>Open the Settings dialog
+    (<strong>File &gt; Settings</strong> on Windows/Linux, or
+    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
+    panel, select <strong>Appearance &amp; Behavior &gt; System Settings &gt;
+    Updates</strong>.
   </li>
-
-  <li>On the <strong>Updates</strong> panel, choose the option for
-  <strong>Automatically check updates for Android SDK: Preview Channel</strong>.
-  </li>
-
-  <li>Launch the <strong>Android SDK Manager</strong>. (With Android Studio 1.3,
-  the SDK Manager is integrated into Android Studio instead of being a
-  standalone application.)
-  </li>
-
-  <li>Under the <strong>Platforms</strong> section, select <strong>Android 6.0</strong>.
-  </li>
-
-  <li>In the <strong>Tools</strong> section, select the latest Android <strong>
-    SDK Tools</strong>, <strong>Platform-tools</strong>, and
-    <strong>Build-tools</strong>.
-  </li>
-
-  <li>Click <strong>Install packages</strong> and accept the licensing
-    agreement for all of the packages.
-  </li>
-
-  <li>Verify that the Android 6.0 SDK is installed by opening the <strong>
-    Settings</strong> window and choosing the <strong>Appearance &amp; Behavior
-    &gt; System Settings &gt; Android SDK</strong> panel.</li>
-
-  <li>On the <strong>Android SDK</strong> panel, choose
-    the <strong>SDK Platforms</strong> tab. <strong>Android 6.0</strong> should be listed as <em>Installed</em>. Also, open the
-    <strong>SDK Tools</strong> tab to verify that the latest tools are
-    installed.
+  <li>On the Updates panel, select the <strong>Automatically
+    check updates for</strong> check box and select
+    <strong>Canary Channel</strong> from the drop-down list.
   </li>
 </ol>
-<p>After completing these steps, the preview components are available in your development
-  environment. </p>
+
+<p>Keep this settings window open for the next step.</p>
 
 
-<h2 id="create-update">Create or Update a Project</h2>
+<h2 id="get-sdk">Get the N Preview SDK</h2>
+
+<p>To start developing with Android N APIs, you need to install the
+Android N Preview SDK in Android Studio as follows:</p>
+
+<ol>
+  <li>While still viewing the Updates panel (step 4 from above),
+  select the <strong>Automatically
+    check updates for Android SDK</strong> check box and select
+    <strong>Preview Channel</strong> from the drop-down list.
+  </li>
+  <li>Click <strong>Check Now</strong>.</li>
+
+  <li>In the left panel, select <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Click the <strong>SDK Platforms</strong> tab, then select the
+  <strong>Android N Preview</strong> check box.</li>
+
+  <li>Click the <strong>SDK Tools</strong> tab, then select the
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong>, and <strong>Android SDK Tools</strong> check
+    boxes.
+  </li>
+
+  <li>Click <strong>OK</strong>, then accept the licensing
+    agreements for any packages that need to be installed.
+  </li>
+</ol>
+
+<h3 id="docs-dl">Get the N Preview reference documentation</h3>
 
 <p>
-  In order to use the preview APIs, you must create or update a development project to use
-  the preview components.
+  Detailed information about the Android N APIs is available in the N Preview
+  reference documentation, which you can download from the following table.
+  This package contains an abridged, offline version of the Android developer
+  web site, and includes an updated API reference for the Android N APIs and an
+  API difference report.
 </p>
 
+<table>
+  <tr>
+    <th scope="col">Documentation</th>
+    <th scope="col">Checksums</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap">
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip"
+      >n-preview-1-docs.zip</a></td>
+    <td width="100%">
+      MD5: 4ab33ccbe698f46f125cc5b807cf9c2f<br>
+      SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
+    </td>
+  </tr>
+<table>
 
-<h3 id="create">Create a new project</h3>
+
+
+<h2 id="java8">Get the Java 8 JDK and JRE</h2>
+
+<p>To compile your app against the Android N platform, you need to use
+the Java 8 Developer Kit (JDK 8), and in order to use some tools with Android
+Studio 2.1, you need to install the Java 8 Runtime Environment (JRE 8). So, if
+you don't have the latest version of each already, download JDK 8 and JRE 8
+now.</p>
+
+<p>Then set the JDK version in Android Studio as follows:</p>
+
+<ol>
+  <li>Open an Android project in Android Studio, then open the
+    Project Structure dialog by selecting <strong>File &gt;
+        Project Structure</strong>. (Alternatively, you can set the default
+        for all projects by selecting <strong>File &gt; Other Settings &gt;
+        Default Project Structure</strong>.)
+   </li>
+   <li>In the left panel of the dialog, click <strong>SDK Location</strong>.
+   </li>
+   <li>In the <strong>JDK Location</strong> field, enter the location of the
+    Java 8 JDK (click the button on the right
+    to browse your files), then click <strong>OK</strong>.
+   </li>
+</ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700"
+  alt="" />
+
+
+<h2 id="create-update">Update or Create a Project</h2>
 
 <p>
-  We recommend using Android Studio to create a project with the preview. Follow the steps
-  described in <a href="{@docRoot}sdk/installing/create-project.html">Creating a Project</a>
-  until you arrive at the <em>Form Factors</em> screen in the project wizard. Then perform
-  the following steps to create a project configured for the preview.
+  To use the Android N APIs, your project must be configured appropriately.
 </p>
 
-<ul>
-  <li>Check <strong>Phone and Tablet</strong>.</li>
-  <li>Select <strong>API 23: Android 6.0 (Marshmallow)</strong> in <strong>Minimum
-    SDK</strong>.</li>
-</ul>
+<p>If you plan to use Java 8 language features, you should also read
+<a href="{@docRoot}preview/j8-jack.html">Java 8 Language Features</a>
+for information about the supported Java 8 features and
+how to configure your project with the Jack compiler.</p>
 
 
 <h3 id="update">Update an existing project</h3>
 
-<p>
-  For existing projects, if you are using Android 6.0 APIs (API level 23) you must
-  modify the project configuration. In your development environment, open the
-  <code>build.gradle</code> file for your module and
-  set these values as follows:
+<p>Open the
+  <code>build.gradle</code> file for your module and update the values as
+  follows:
 </p>
 
-<ul>
-  <li><code>compileSdkVersion</code> is set to <code>'23'</code></li>
-  <li><code>targetSdkVersion</code> is set to <code>'23'</code></li>
-</ul>
+<pre>
+android {
+  compileSdkVersion <strong>'android-N'</strong>
+  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'N'</strong>
+     targetSdkVersion <strong>'N'</strong>
+     ...
+  }
+  ...
+}</pre>
 
 
-<h2 id="setup-test">Set Up for Testing</h2>
+<h3 id="create">Create a new project</h3>
 
-<p>
-  Testing an app with the preview requires that you have a device or virtual device configured with
-  the preview version of the platform. If you have a compatible device, you can install the preview
-  platform for testing. Otherwise, you can configure a virtual device for testing.
-</p>
 
-<h3 id="setup-device">Set up a physical device</h3>
-
-<p>
-  If you have a Nexus 5, Nexus 6, Nexus 9, or Android TV, you can install a preview
-  system image on these devices for testing your app.
-  You can set up a virtual device with the preview version of the platform from within Android Studio
-  using the Android Virtual Device Manager tool.
-</p>
-
-<p class="caution">
-  <strong>Important:</strong> Installing a preview image on a device <em>removes all data from
-  it</em>, so you should backup any data before installing a preview image.
-</p>
-
-<h3 id="setupAVD">Set up a virtual device</h3>
-
-<p>
-  You can set up virtual device with the preview version of the platform from within Android Studio
-  using the Android Virtual Device Manager tool.
-</p>
-
-<p>To create an AVD with the AVD Manager:</p>
+<p>To create a new project for development with the Android N Preview SDK:</p>
 
 <ol>
-  <li>Install the Preview SDK in your development environment, as described
-      in <a href="{@docRoot}preview/setup-sdk.html">Setting Up the Preview
-      SDK.</a></li>
-  <li>Follow the steps in
-      <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
-      Manager</a>. Use the following settings:
-    <ul>
-      <li><strong>Device:</strong> Nexus 5, Nexus 6, Nexus 9, or Android TV</li>
-      <li><strong>Target:</strong>
-       Android M (Preview) - API Level M</li>
-      <li><strong>ABI:</strong> x86</li>
-    </ul>
+  <li>Click <strong>File > New Project</strong>. and follow the steps until
+  you reach the Target Android Devices page.
   </li>
+  <li>On this page, select <strong>Phone and Tablet</strong> option.</li>
+  <li>Under <strong>Phone and Tablet</strong> option, in the <strong>Minimum
+    SDK</strong> option list, select
+    <strong>N: Android API 23, N Preview (Preview)</strong>.</li>
 </ol>
 
-<p>
-  For more information about creating virtual devices for testing, see <a href=
-  "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
-</p>
+
+<h2 id="next">Next Steps</h2>
+
+<ul>
+  <li>Follow the guide to <a
+href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</li>
+  <li>Learn more about the Android N platform with
+<a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>
+and <a href="{@docRoot}preview/api-overview.html">Android N APIs
+and Features</a>.</li>
+</ul>
+

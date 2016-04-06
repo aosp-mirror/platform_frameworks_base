@@ -12,10 +12,7 @@ trainingnavtop=true
 <ol>
   <li><a href="#40">Hide the Status Bar on Android 4.0 and Lower</a></li>
   <li><a href="#41">Hide the Status Bar on Android 4.1 and Higher</a></li>
-  <li><a href="#44">Hide the Status Bar on Android 4.4 and Higher</a></li>
-
   <li><a href="#behind">Make Content Appear Behind the Status Bar</a></li>
-  <li><a href="#action-bar">Synchronize the Status Bar with Action Bar Transition</a></li>
 </ol>
 
 <!-- other docs (NOT javadocs) -->
@@ -23,7 +20,7 @@ trainingnavtop=true
 
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+        <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>
     </li>
     <li>
         <a href="{@docRoot}design/index.html">
@@ -104,7 +101,7 @@ your app:</p>
         super.onCreate(savedInstanceState);
         // If the Android version is lower than Jellybean, use this call to hide
         // the status bar.
-        if (Build.VERSION.SDK_INT < 16) {
+        if (Build.VERSION.SDK_INT &lt; 16) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
@@ -194,33 +191,3 @@ The {@link android.view.View#fitSystemWindows fitSystemWindows()} method is call
 view hierarchy when the content insets for a window have changed, to allow the window to
 adjust its content accordingly. By overriding this method you can handle the
 insets (and hence your app's layout) however you want. </p>
-
- <h2 id="action-bar">Synchronize the Status Bar with Action Bar Transition</h2>
-
-  <p>On Android 4.1 and higher, to avoid resizing your layout when the action bar hides and
-  shows, you can enable overlay mode for the <a href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.
-  When in overlay mode, your activity layout uses all the
-  space available as if the action bar is not there and the system draws the action bar in
-  front of your layout. This obscures some of the layout at the top, but now when the
-  action bar hides or appears, the system does not need to resize your layout and the
-  transition is seamless.</p>
-
-  <p>To enable overlay mode for the action bar, you need to create a custom theme that
-  extends an existing theme with an action bar and set the
-  {@code android:windowActionBarOverlay} attribute
-  to {@code true}. For more discussion of this topic, see
-  <a href="{@docRoot}training/basics/actionbar/overlaying.html#EnableOverlay">
-  Overlaying the Action Bar</a> in the <a href="{@docRoot}training/basics/actionbar/index.html">
-  Adding the Action Bar</a> class.</p>
-
-
-<p>Then use
-{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN},
-as described above,
-to set  your activity layout to use the same screen area that's available when you've enabled
-{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
-
-When you want to hide the system UI, use
-{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}.
-This also hides the action bar (because {@code windowActionBarOverlay=”true”)} and does
-so with a coordinated animation when both hiding and showing the two.</p>

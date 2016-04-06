@@ -1,0 +1,133 @@
+page.title=定义阴影与裁剪视图
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#Elevation">指定视图高度</a></li>
+  <li><a href="#Shadows">定制视图阴影与轮廓</a></li>
+  <li><a href="#Clip">裁剪视图</a></li>
+</ol>
+<h2>您也应该阅读</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料设计规范</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 材料设计</a></li>
+</ul>
+</div>
+</div>
+
+<p>材料设计为 UI 元素引入高度。高度将帮助用户了解每个元素的相对重要性，让他们能够集中于手边的工作。
+</p>
+
+<p>由 Z 属性所表示的视图高度将决定其阴影的视觉外观：拥有较高 Z 值的视图将投射更大且更柔和的阴影。
+拥有较高 Z 值的视图将挡住拥有较低 Z 值的视图；不过视图的 Z 值并不影响视图的大小。
+</p>
+
+<p>阴影是由提升的视图的父项所绘制，因此将受到标准视图裁剪的影响，而在默认情况下裁剪将由父项执行。
+</p>
+
+<p>此外，在创建其中的小组件在执行某些操作行为时会暂时升至视图平面之上的动画时，高度也很实用。
+</p>
+
+<p>要了解更多有关材料设计高度的信息，请参阅
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">3D 空间内的对象</a>。
+</p>
+
+
+<h2 id="Elevation">指定视图高度</h2>
+
+<p>视图的 Z 值包含两个组件：
+
+<ul>
+<li>高度：静态组件。</li>
+<li>转换：用于动画的动态组件。</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>图 1</strong> - 不同视图高度的阴影。</p>
+
+<p>如果要在布局定义中设置视图的高度，请使用 <code>android:elevation</code>
+ 属性。如果要在操作行为的代码中设置视图高度，请使用
+{@link android.view.View#setElevation View.setElevation()} 方法。</p>
+
+<p>如果要设置视图转换，请使用 {@link android.view.View#setTranslationZ
+View.setTranslationZ()} 方法。</p>
+
+<p>全新的 {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} 与 {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} 方法让您能够轻松地为视图高度添加动画。
+如果要了解更多信息，请参阅
+{@link android.view.ViewPropertyAnimator} 的 API 参考以及<a href="{@docRoot}guide/topics/graphics/prop-animation.html">属性动画</a>开发指南。
+</p>
+
+<p>您也可使用 {@link android.animation.StateListAnimator} 以说明性方式指定这些动画。
+当状态改变会触发动画（例如当用户按下按钮）时，此方法特别有用。
+如果要了解更多信息，请参阅<a href="{@docRoot}training/material/animations.html#ViewState">为视图状态改变添加动画</a>。
+</p>
+
+<p>Z 值以 dp（密度独立像素）为单位度量。</p>
+
+
+<h2 id="Shadows">定制视图阴影与轮廓</h2>
+
+<p>视图的背景图片的边界将决定其阴影的默认形状。<strong>轮廓</strong>代表图形对象的外形并定义触摸反馈的波纹区域。
+
+</p>
+
+<p>下面举一个以背景图片定义的视图示例：</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>背景图片被定义为一个拥有圆角的矩形：</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>视图将投射一个带有圆角的阴影，因为背景图片将定义视图的轮廓。
+如果提供一个定制轮廓，则此轮廓将替代视图阴影的默认形状。</p>
+
+<p>如果要为您的代码中的视图定义定制轮廓：<p>
+
+<ol>
+<li>扩展 {@link android.view.ViewOutlineProvider} 类别。</li>
+<li>替代 {@link android.view.ViewOutlineProvider#getOutline getOutline()} 方法。</li>
+<li>利用 {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()} 方法向您的视图指定新的轮廓提供程序。</li>
+</ol>
+
+<p>您可使用
+{@link android.graphics.Outline} 类别中的方法创建带有圆角的椭圆形和矩形轮廓。视图的默认轮廓提供程序将从视图背景取得轮廓。
+如果要防止视图投射阴影，请将其轮廓提供程序设置为 <code>null</code>。
+</p>
+
+
+<h2 id="Clip">裁剪视图</h2>
+
+<p>裁剪视图让您能够轻松改变视图形状。您可以裁剪视图，以便与其他设计元素保持一致，也可以根据用户输入改变视图形状。您可使用 {@link android.view.View#setClipToOutline
+View.setClipToOutline()} 方法或 <code>android:clipToOutline</code> 属性将视图裁剪至其轮廓区域。
+
+由
+{@link android.graphics.Outline#canClip Outline.canClip()} 方法所决定，仅有矩形、圆形和圆角矩形轮廓支持裁剪。
+</p>
+
+<p>如果要将视图裁剪至图片的形状，请将图片设置为视图背景（如上所示）并调用 {@link android.view.View#setClipToOutline View.setClipToOutline()}
+方法。
+</p>
+
+<p>裁剪视图是一个成本高昂的操作，因此不可为您用于裁剪视图的形状添加动画。
+如果要实现此效果，请使用<a href="{@docRoot}training/material/animations.html#Reveal">揭露效果</a>动画。</p>

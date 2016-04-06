@@ -1,0 +1,126 @@
+page.title=Работа с элементами дизайна
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#DrawableTint">Тонирование элементов дизайна</a></li>
+  <li><a href="#ColorExtract">Извлечение главных цветов на изображении</a></li>
+  <li><a href="#VectorDrawables">Создание векторных элементов</a></li>
+</ol>
+<h2>См. также</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Спецификация Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design в Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Указанные ниже возможности по работе с элементами дизайна позволяют реализовать в приложении элементы Material Design:</p>
+
+<ul>
+<li>тонирование элементов дизайна;</li>
+<li>извлечение главного цвета;</li>
+<li>создание векторных элементов.</li>
+</ul>
+
+<p>В этом уроке рассматривается порядок использования этих функций в приложении.</p>
+
+
+<h2 id="DrawableTint">Тонирование элементов дизайна</h2>
+
+<p>В Android 5.0 (уровень API 21) и более поздних версий можно тонировать растровые изображения и изображения в формате NinePatch, определенные как
+альфа-маски. Для тонирования можно применять как цветовые ресурсы, так и атрибуты темы, которые
+разрешаются в цветовые ресурсы (например, <code>?android:attr/colorPrimary</code>). Обычно такие ресурсы создаются
+только один раз, после чего они автоматически окрашиваются для соответствия цветам темы.</p>
+
+<p>Тонирование можно применить к объектам {@link android.graphics.drawable.BitmapDrawable} и {@link
+android.graphics.drawable.NinePatchDrawable} с помощью метода {@code setTint()}. Также можно
+задать цвет и способ тонирования в макетах, используя для этого атрибуты <code>android:tint</code> и 
+<code>android:tintMode</code>.</p>
+
+
+<h2 id="ColorExtract">Извлечение главных цветов на изображении</h2>
+
+<p>Во вспомогательной библиотеке Android r21 и более поздних версий содержится класс {@link
+android.support.v7.graphics.Palette},
+с помощью которого можно извлекать следующие главные цвета на изображении:</p>
+
+<ul>
+<li>насыщенные цвета;</li>
+<li>насыщенные темные цвета;</li>
+<li>насыщенные светлые цвета;</li>
+<li>приглушенные цвета;</li>
+<li>приглушенные темные цвета;</li>
+<li>приглушенные светлые цвета.</li>
+</ul>
+
+<p>Для извлечения этих цветов передайте объект {@link android.graphics.Bitmap} в статический метод
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} в фоновом
+потоке, где загружаются изображения. Если невозможно использовать этот поток, вместо этого вызовите метод
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} и укажите
+модуль прослушивания.</p>
+
+<p>Извлечь главные цвета на изображении можно также с помощью методов getter из класса
+<code>Palette</code>, таких как <code>Palette.getVibrantColor</code>.</p>
+
+<p>Чтобы использовать класс {@link android.support.v7.graphics.Palette} в своем проекте, добавьте в модуль своего приложения следующую
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">зависимость Gradle</a>:
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>Дополнительные сведения представлены в справке по API для класса {@link android.support.v7.graphics.Palette}
+.</p>
+
+
+<h2 id="VectorDrawables">Создание векторных элементов</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>Видео</h3>
+    <p>Векторная графика в Android</p>
+</div>
+</a>
+
+<p>В Android 5.0 (уровень API 21) и более поздних версий имеется возможность определить векторные элементы, которые можно масштабировать без ущерба для четкости.
+ Для векторного изображения требуется лишь один файл ресурсов, тогда как для растровых изображений необходим отдельный файл ресурсов для каждой плотности экрана.
+ Чтобы создать векторное изображение, укажите детали формы в XML-элементе <code>&lt;vector&gt;</code>.
+</p>
+
+<p>В следующем примере создается векторное изображение в форме сердца.</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Векторные изображения представлены в Android как объекты {@link android.graphics.drawable.VectorDrawable}.
+ Дополнительные сведения о синтаксисе <code>pathData</code> см. в <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">справке по траекториям SVG</a>. Дополнительные сведения
+об анимации свойств векторных элементов см. в разделе
+<a href="{@docRoot}training/material/animations.html#AnimVector">Анимация векторных элементов</a>.</p>

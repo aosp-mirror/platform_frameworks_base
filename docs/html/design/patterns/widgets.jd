@@ -87,7 +87,10 @@ A music player widget is primarily a control widget, but also keeps the user inf
 <div class="cols">
   <div class="col-6">
     <h3>Widget resizing</h3>
-    <p>With version 3.1, Android introduced resizable widgets to the platform. Resizing allows users to adjust the height and/or the width of a widget within the constraints of the home panel placement grid. You can decide if your widget is freely resizable or if it is constrained to horizontal or vertical size changes. You do not have to support resizing if your particular widget is inherently fixed-size.</p>
+    <p>Resizing allows users to adjust the height and/or the width of a widget within the
+constraints of the home panel placement grid. You can decide if your widget is freely resizable or
+if it is constrained to horizontal or vertical size changes. You do not have to support resizing if
+your particular widget is inherently fixed-size.</p>
     <p>Allowing users to resize widgets has important benefits:</p>
     <ul>
       <li>They can fine-tune how much information they want to see on each widget.</li>
@@ -103,7 +106,7 @@ A music player widget is primarily a control widget, but also keeps the user inf
   </div>
 </div>
 
-<p>Planning a resize strategy for your widget depends on the type of widget you're creating. List or grid-based collection widgets are usually straightforward because resizing the widget will simply expand or contract the vertical scrolling area. Regardless of the of the widget's size, the user can still scroll all information elements into view. Information widgets on the other hand require a bit more hands-on planning, since they are not scrollable and all content has to fit within a given size. You will have to dynamically adjust your widget's content and layout to the size the user defined through the resize operation.</p>
+<p>Planning a resize strategy for your widget depends on the type of widget you're creating. List or grid-based collection widgets are usually straightforward because resizing the widget will simply expand or contract the vertical scrolling area. Regardless of the widget's size, the user can still scroll all information elements into view. Information widgets on the other hand require a bit more hands-on planning, since they are not scrollable and all content has to fit within a given size. You will have to dynamically adjust your widget's content and layout to the size the user defined through the resize operation.</p>
 <img src="{@docRoot}design/media/widgets_resizing02.png">
 <p>In this simple example the user can horizontally resize a weather widget in 4 steps and expose richer information about the weather at the current location as the widget grows.</p>
 <p>For each widget size determine how much of your app's information should surface. For smaller sizes concentrate on the essential and then add more contextual information as the widget grows horizontally and vertically.</p>

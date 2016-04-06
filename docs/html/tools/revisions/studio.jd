@@ -39,10 +39,158 @@ select <strong>Android Studio > Check for updates</strong>).</p>
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.5.1</a> <em>(December 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+    <li>Fixed a rendering failure issue in the Layout Editor.
+      <a href="http://b.android.com/194612">Issue: 194612</a> </li>
+    <li>Added the ability to vary <code>description</code> manifest attributes by configuration.
+      <a href="http://b.android.com/194705">Issue: 194705</a>
+    </li>
+     <li>Improved the contrast of the Android Studio Darcula appearance theme in Vector Asset Studio.
+      <a href="http://b.android.com/191819">Issue: 191819</a>
+    </li>
+    <li>Added <em>Help</em> button support to Vector Asset Studio.
+    </li>
+    <li>Added support for the <code>%</code> operator for data binding. <a href="http://b.android.com/194045">Issue: 194045</a>
+      </li>
+    <li>Fixed a case where launching an app for debugging resulted in the debugger connecting to the
+      wrong device. <a href="http://b.android.com/195167">Issue: 195167</a>
+    </li>
+    <li>Fixed a null pointer exception that could occur when attempting to run an app in
+      certain scenarios.
+    </li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.5.0</a> <em>(November 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+    <li>Added new Memory Monitor analysis abilities to Android Monitor. When you view an HPROF file
+      captured from this monitor, the display is now more helpful so you can more quickly locate
+      problems, such as memory leaks. To use this monitor, click <strong>Android Monitor</strong> at
+      the bottom of the main window. In Android Monitor, click the <strong>Memory</strong> tab. While
+      the monitor is running, click the <strong>Dump Java Heap</strong> icon, and then click
+      <strong>Captures</strong> in the main window and double-click the file to view it. Click
+      <em>Capture Analysis</em> on the right. (The
+      Android Device Monitor can't be running at the same time as Android Monitor.)</li>
+    <li>Added new deep link and app link support. The Code Editor can automatically create an
+      intent filter for deep linking in the <code>AndroidManifest.xml</code> file. It can also
+      generate code to help you integrate with the
+      <a href="http://developers.google.com/app-indexing/android/publish" class="external-link">App Indexing API</a>
+      in an activity in a Java file. A deep link testing feature
+      helps you verify that a specified deep link can launch an app. In the <strong>General</strong>
+      tab of the <em>Run/Debug Configurations</em> dialog, you can specify deep link launch
+      options. You can also test App Indexing API calls in an activity by using the Android Monitor
+      <strong>logcat</strong> display. The Android <code>lint</code> tool now has warnings for
+      certain issues involving deep links and the App Indexing API.
+    </li>
+     <li>Added the ability to use short names when code-completing custom views in the Code Editor.
+    </li>
+    <li>Added support for more {@link android.graphics.drawable.VectorDrawable} elements to
+      <a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a>
+      for backward-compatibility. Vector Asset Studio can use these elements to convert vector
+      drawables into PNG raster images to use with Android 4.4 (API level 20) and lower.
+    </li>
+    <li>Added new <code>lint</code> checks for Android TV and Android Auto to give you
+      immediate, actionable feedback in Android Studio, along with several quick fixes. For example,
+      for Android TV, it can report and provide a quick fix for permissions, unsupported hardware,
+      <code>uses-feature</code> element, and missing banner issues. For Android Auto, it can
+      validate the correct usage in the descriptor file referred from your
+      <code>AndroidManifest.xml</code> file, report if there isn't an intent filter for the
+      <code>MediaBrowserService</code> class, and identify certain voice actions issues.
+      </li>
+    <li>Added new <code>lint</code> checks for insecure broadcast receivers,
+    <code>SSLCertificateSocketFactory</code> and <code>HostnameVerifier</code> class uses, and
+    <code>File.setReadable()</code> and <code>File.setWritable()</code> calls. It also detects
+    invalid manifest resource lookups, especially for resources that vary by configuration.
+    </li>
+    <li>Fixed a number of stability issues.
+    </li>
+  </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.4.1</a> <em>(October 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+  <ul>
+    <li>Fixed a Gradle model caching issue that could lead to excessive Gradle syncing when the IDE
+    was restarted.
+    </li>
+    <li>Fixed a native debugging deadlock issue.
+    </li>
+    <li>Fixed an issue blocking users of the Subversion 1.9 version control system.
+    </li>
+    <li>Fixed a <em>Device Chooser</em> dialog problem where after connecting a device that was
+    unauthorized you could no longer select the emulator. <a href="http://b.android.com/189658">Issue: 189658</a>
+    </li>
+    <li>Fixed incorrect translation error reporting for locales that have a region qualifier and a
+    translation in the region (but not in the base locale). <a href="http://b.android.com/188577">Issue: 188577</a>
+    </li>
+    <li>Fixed a deadlock issue in the Theme Editor related to its interaction with the Layout
+    Editor. <a href="http://b.android.com/188070">Issue: 188070</a>
+    </li>
+    <li>Fixed a Theme Editor reload and edit conflict causing attributes to not properly update.
+    <a href="http://b.android.com/187726">Issue: 187726</a>
+    </li>
+    <li>Improved Theme Editor performance.
+    </li>
+    <li>Fixed an issue where the <code>android:required</code> attribute was ignored in the manifest.
+    <a href="http://b.android.com/187665">Issue: 187665</a>
+    </li>
+  </ul>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.4.0</a> <em>(September 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+  <ul>
+    <li>Added the <a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a>
+      tool for importing vector graphics, such as material icons
+      and SVG files. To use this tool, in the Android view of the Project window, right-click the
+      <strong>res</strong> folder and select <strong>New</strong> &gt; <strong>Vector Asset</strong>.
+    </li>
+    <li>Added new Android Monitor functions, GPU and Network. To use these monitors, click
+      <strong>Android Monitor</strong> at the bottom of the main window. The Android Device Monitor
+      can't be running at the same time as Android Monitor.
+    </li>
+    <li>Added an early preview of the new Theme Editor. To use this feature, select
+      <strong>Tools</strong> &gt; <strong>Android</strong> &gt; <strong>Theme Editor</strong>.
+    </li>
+    <li>Updated the Android templates for the Design Support Library. Templates now include support
+      for the Material Design specification, as well as the <code>appcompat</code> Support Library
+      for backwards compatibility.
+    </li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.2</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -65,7 +213,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.1</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -85,7 +233,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.0</a> <em>(July 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -106,7 +254,7 @@ Android Studio, as denoted by revision number. </p>
       <li>Integrated the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
         into Android Studio to simplify package and tools access and provide update notifications.
         <p class="note"><strong>Note:</strong> The standalone SDK Manager is still available from
-        the command line, but is recommended for use with only Eclipse ADT and standalone SDK
+        the command line, but is recommended for use only with standalone SDK
         installations. </p> </li>
       <li>Added the <code>finger</code> command in the emulator console to simulate
         <a href="{@docRoot}tools/studio/studio-features.html#finger-print">fingerprint</a>
@@ -142,7 +290,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.2</a> <em>(June 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -156,7 +304,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.1</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -171,7 +319,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.0</a> <em>(April 2015)</em>
   </p>
 
@@ -218,7 +366,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -246,7 +394,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0.1</a> <em>(December 2014)</em>
   </p>
 
@@ -269,7 +417,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0</a> <em>(December 2014)</em>
   </p>
 
@@ -281,7 +429,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.14</a> <em>(October 2014)</em>
   </p>
 
@@ -294,7 +442,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.6</a> <em>(August 2014)</em>
   </p>
 
@@ -305,7 +453,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.0</a> <em>(June 2014)</em>
   </p>
 
@@ -317,7 +465,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.5.2</a> <em>(May 2014)</em>
   </p>
 
@@ -330,7 +478,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.4.6</a> <em>(March 2014)</em>
   </p>
 
@@ -343,7 +491,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.4.2</a> <em>(Jan 2014)</em>
   </p>
 
@@ -356,7 +504,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.3.2</a> <em>(Oct 2013)</em>
   </p>
 
@@ -369,7 +517,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.2.x</a> <em>(July 2013)</em>
   </p>
 
@@ -430,7 +578,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.1.x</a> <em>(May 2013)</em>
   </p>
 

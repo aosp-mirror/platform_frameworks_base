@@ -1,0 +1,131 @@
+page.title=Usar el tema Material
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lección te enseña a realizar lo siguiente:</h2>
+<ol>
+  <li><a href="#ColorPalette">Personalizar la paleta de colores</a></li>
+  <li><a href="#StatusBar">Personalizar la barra de estado</a></li>
+  <li><a href="#Inheritance">Cambiar el tema de vistas individuales</a></li>
+</ol>
+<h2>También deberías leer</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificación de Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design en Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>El nuevo tema material proporciona:</p>
+
+<ul>
+  <li>Widgets del sistema que te permiten establecer la paleta de colores.</li>
+  <li>Animaciones para la respuesta táctil de los widgets del sistema.</li>
+  <li>Animaciones para transiciones de actividades</li>
+</ul>
+
+<p>Puedes personalizar la apariencia del tema material
+según la identidad de tu marca, con una paleta de colores que esté bajo tu control. Puedes cambiar el matiz de la barra de acción y
+la barra de estado mediante atributos de temas, como se muestra en la <a href="#fig3">figura 3</a>.</p>
+
+<p>Los widgets del sistema tienen un nuevo diseño y animaciones para respuesta táctil. Puedes personalizar tu aplicación cambiando su
+paleta de colores, las animaciones de la respuesta táctil y sus transiciones de actividades.</p>
+
+<p>El tema material se define como:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (versión oscura)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (versión clara)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>Para obtener una lista de estilos de Material, consulta la referencia de la API para
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figura 1</strong>. Tema Material oscuro</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figura 2</strong>. Tema Material claro</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Nota:</strong> El tema material solo está disponible en Android 5.0 (API nivel 21) y
+superior. Las <a href="{@docRoot}tools/support-library/features.html#v7">Bibliotecas de soporte v7</a>
+proporcionan temas con estilos de Material Design para algunos widgets y admiten la personalización de la paleta de
+colores. Para más información, consulta
+<a href="{@docRoot}training/material/compatibility.html">Mantener la compatibilidad</a>.
+</p>
+
+
+<h2 id="ColorPalette">Personalizar la paleta de colores</h2>
+
+<p style="margin-bottom:30px">Si deseas personalizar los colores base del tema para que se adapten a tu marca, define
+tus colores personalizados mediante los atributos de temas cuando heredes del tema material:</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Figura 3</strong>. Personalizar el tema material.</p>
+</div>
+
+
+<h2 id="StatusBar">Personalizar la barra de estado</h2>
+
+<p>El tema material te permite personalizar fácilmente la barra de estado, especifica un
+color que se adapte a tu marca y proporciona suficiente contraste para mostrar los íconos de estado en blanco. Si
+quieres establecer un color personalizado para la barra de estado, usa el atributo <code>android:statusBarColor</code>
+cuando extiendas el tema material. <code>android:statusBarColor</code> hereda el
+valor de <code>android:colorPrimaryDark</code> en forma predeterminada.</p>
+
+<p>También puedes dibujar por detrás de la barra de estado. Por ejemplo, si quieres que la barra de estado se
+muestre en forma transparente sobre una foto, aplica un sutil degradado oscuro para garantizar que los íconos
+de estado blancos sigan visibles. Para hacerlo, establece el atributo <code>android:statusBarColor</code> en
+<code>&#64;android:color/transparent</code> y ajusta los indicadores de la ventana según lo requerido. También puedes
+usar el método {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} para
+las animaciones o el difuminado.</p>
+
+<p class="note">
+<strong>Nota:</strong> La barra de estado casi siempre debe estar delimitada claramente de la
+barra de herramientas principal, excepto para los casos en donde muestres imágenes de un extremo a otro o contenido multimedia detrás
+de estas barras, y también cuando uses un degradado para garantizar que los íconos aún sean visibles.
+</p>
+
+<p>Cuando personalizas la barra de navegación y la barra de estado, haz que ambas sean transparentes o modifica
+solo la barra de estado. La barra de navegación debe permanecer de color negro en todos los otros casos.</p>
+
+
+<h2 id="Inheritance">Vistas individuales del tema</h3>
+
+<p>Los elementos en las definiciones de diseño XML pueden especificar el atributo <code>android:theme</code>,
+que hace referencia al recurso del tema. Este atributo modifica el tema para el elemento y cualquier
+elemento secundario, y esto es útil para modificar las paletas de colores de los temas en una porción específica
+de una interfaz.</p>

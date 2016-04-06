@@ -23,7 +23,7 @@ startpage=true
 </div>
 </div>
 
-<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<a class="notice-developers-video wide" href="https://www.youtube.com/watch?v=yhv8l9F44qo">
 <div>
     <h3>Video</h3>
     <p>Volley: Easy, Fast Networking for Android</p>
@@ -77,9 +77,9 @@ git clone https://android.googlesource.com/platform/frameworks/volley
 </pre>
 </li>
 
-<li>Import the downloaded source into your app project as an Android library project
-(as described in <a href="{@docRoot}tools/projects/projects-eclipse.html">
-Managing Projects from Eclipse with ADT</a>, if you're using Eclipse) or make a
+<li>Import the downloaded source into your app project as an Android library module
+(as described in <a href="{@docRoot}sdk/installing/create-project.html#SettingUpLibraryModule">
+Managing Projects from Android Studio</a>, if you're using Android Studio) or make a
 <a href="{@docRoot}guide/faq/commontasks.html#addexternallibrary"><code>.jar</code> file</a>.</li>
 </ol>
 

@@ -1,0 +1,1202 @@
+page.title=Настройки
+page.tags=preference,preferenceactivity,preferencefragment
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Содержание документа</h2>
+<ol>
+  <li><a href="#Overview">Обзор</a>
+    <ol>
+      <li><a href="#SettingTypes">Предпочтения</a></li>
+    </ol>
+  </li>
+  <li><a href="#DefiningPrefs">Определение предпочтений в XML</a>
+    <ol>
+      <li><a href="#Groups">Создание групп настроек</a></li>
+      <li><a href="#Intents">Использование намерений</a></li>
+    </ol>
+  </li>
+  <li><a href="#Activity">Создание операции предпочтений</a></li>
+  <li><a href="#Fragment">Использование фрагментов предпочтений</a></li>
+  <li><a href="#Defaults">Значения настроек по умолчанию</a></li>
+  <li><a href="#PreferenceHeaders">Использование заголовков предпочтений</a>
+    <ol>
+      <li><a href="#CreateHeaders">Создание файла заголовков</a></li>
+      <li><a href="#DisplayHeaders">Отображение заголовков</a></li>
+      <li><a href="#BackCompatHeaders">Поддержка старых версий посредством заголовков предпочтений</a></li>
+    </ol>
+  </li>
+  <li><a href="#ReadingPrefs">Чтение предпочтений</a>
+    <ol>
+      <li><a href="#Listening">Отслеживание изменений предпочтений</a></li>
+    </ol>
+  </li>
+  <li><a href="#NetworkUsage">Контроль использования сети</a></li>
+  <li><a href="#Custom">Построение пользовательского предпочтения</a>
+    <ol>
+      <li><a href="#CustomSelected">Указание пользовательского интерфейса</a></li>
+      <li><a href="#CustomSave">Сохранение значения настройки</a></li>
+      <li><a href="#CustomInitialize">Инициализация текущего значения</a></li>
+      <li><a href="#CustomDefault">Предоставление значения по умолчанию</a></li>
+      <li><a href="#CustomSaveState">Сохранение и восстановление состояния предпочтений</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Основные классы</h2>
+<ol>
+  <li>{@link android.preference.Preference}</li>
+  <li>{@link android.preference.PreferenceActivity}</li>
+  <li>{@link android.preference.PreferenceFragment}</li>
+</ol>
+
+
+<h2>См. также:</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/settings.html">Руководство по дизайну настроек</a></li>
+</ol>
+</div>
+</div>
+
+
+
+
+<p>В приложениях часто содержатся настройки, которые позволяют пользователю изменять возможности и поведение приложения. Например,
+некоторые приложения позволяют пользователям включать и выключать уведомления или указывать частоту синхронизации
+данных приложения с облаком.</p>
+
+<p>Если вы хотите предоставить настройки для вашего приложения, вы должны использовать
+API-интерфейсы {@link android.preference.Preference} системы Android для построения интерфейса, согласованного с
+привычным для пользователей других приложений Android (включая системные настройки). В этом документе показано,
+как построить настройки вашего приложения посредством API-интерфейсов {@link android.preference.Preference}.</p>
+
+<div class="note design">
+<p><strong>Дизайн настроек</strong></p>
+  <p>Подробную информацию о дизайне настроек см. в руководстве по дизайну <a href="{@docRoot}design/patterns/settings.html">настроек</a>.</p>
+</div>
+
+
+<img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Снимки экранов настроек приложения Android
+для обмена сообщениями. Выбор элемента, заданного посредством {@link android.preference.Preference}, 
+открывает интерфейс для изменения значения.</p>
+
+
+
+
+<h2 id="Overview">Обзор</h2>
+
+<p>Вместо использования отображаемых объектов {@link android.view.View} для построения пользовательского интерфейса, настройки создаются
+с помощью различных подклассов класса {@link android.preference.Preference}, который вы
+объявляете в XML-файле.</p>
+
+<p>Объект {@link android.preference.Preference} является строительным блоком для отдельной
+настройки. Каждый объект {@link android.preference.Preference} отображается в виде элемента в списке и предоставляет
+соответствующий пользовательский интерфейс для изменения настройки пользователями. Например, {@link
+android.preference.CheckBoxPreference} создает элемент списка, который показывает флажок, а {@link
+android.preference.ListPreference} создает элемент, который открывает диалоговое окно со списком вариантов для выбора.</p>
+
+<p>Каждый добавляемый вами объект {@link android.preference.Preference} имеет соответствующую пару «ключ-значение»,
+которую система использует для сохранения настройки в файле {@link android.content.SharedPreferences}
+значений настроек вашего приложения по умолчанию. Когда пользователь изменяет настройку, система обновляет соответствующее
+значение в файле {@link android.content.SharedPreferences}. Вам потребуется
+напрямую взаимодействовать с файлом, связанным с {@link android.content.SharedPreferences}, только в случае,
+когда нужно прочитать значение для определения поведения вашего приложения на основе пользовательских настроек.</p>
+
+<p>Значение, сохраненное в {@link android.content.SharedPreferences} для каждой настройки, может относиться к одному из
+следующих типов данных:</p>
+
+<ul>
+  <li>Логическое значение</li>
+  <li>Число с плавающей точкой</li>
+  <li>Целое число</li>
+  <li>Длинное целое число</li>
+  <li>Строка</li>
+  <li>Строка {@link java.util.Set}</li>
+</ul>
+
+<p>Поскольку пользовательский интерфейс настроек вашего приложения создается посредством объектов {@link android.preference.Preference},
+а не
+объектов {@link android.view.View}, вам потребуется использовать специализированные подклассы {@link android.app.Activity} или
+{@link android.app.Fragment} для отображения настроек из списка:</p>
+
+<ul>
+  <li>Если ваше приложение поддерживает версии Android старше 3.0 (API уровня 10 и ниже), для построения операции
+необходимо наследовать класс {@link android.preference.PreferenceActivity}.</li>
+  <li>В операционных системах Android 3.0 и более поздних версиях вы должны вместо этого использовать традиционный класс {@link android.app.Activity},
+который содержит объект {@link android.preference.PreferenceFragment} для отображения настроек вашего приложения.
+Однако, когда у вас есть несколько групп настроек, вы можете также
+использовать {@link android.preference.PreferenceActivity} для создания макета с двумя панелями для больших экранов.</li>
+</ul>
+
+<p>Настройка объекта {@link android.preference.PreferenceActivity} и экземпляров {@link
+android.preference.PreferenceFragment} описана в разделах <a href="#Activity">Создание операции предпочтения</a> и <a href="#Fragment">Использование
+фрагментов предпочтений</a>.</p>
+
+
+<h3 id="SettingTypes">Предпочтения</h3>
+
+<p>Каждая настройка для вашего приложения представлена конкретным подклассом класса {@link
+android.preference.Preference}. Каждый подкласс содержит набор основных свойств, которые позволяют вам
+указывать, например, заголовок для настройки и ее значение по умолчанию. Каждый подкласс также содержит
+собственные специализированные свойства и пользовательский интерфейс. В качестве примера на рисунке 1 показан снимок экрана настроек 
+приложения Android для обмена сообщениями. Каждый элемент списка на экране настроек возвращается отдельным объектом {@link
+android.preference.Preference}.</p>
+
+<p>Ниже приведены самые распространенные предпочтения:</p>
+
+<dl>
+  <dt>{@link android.preference.CheckBoxPreference}</dt>
+  <dd>Отображает элемент с флажком для настройки, которая может быть включена или выключена. Сохраненное
+значение является логическим (<code>true</code>, если флажок установлен).</dd>
+
+  <dt>{@link android.preference.ListPreference}</dt>
+  <dd>Открывает диалоговое окно со списком переключателей. Сохраненное значение
+может относиться к одному из поддерживаемых типов значений (перечисленных выше).</dd>
+
+  <dt>{@link android.preference.EditTextPreference}</dt>
+  <dd>Открывает диалоговое окно с виджетом {@link android.widget.EditText}. Сохраненное значение — {@link
+java.lang.String}.</dd>
+</dl>
+
+<p>См. класс {@link android.preference.Preference}, который содержит список всех остальных подклассов и их
+соответствующих свойств.</p>
+
+<p>Конечно, встроенные классы не обеспечивают всех потребностей, и вашему приложению может понадобиться
+что-либо более специализированное. Например, в настоящее время система не предоставляет класс {@link
+android.preference.Preference} для выбора числа или даты. Поэтому вам может потребоваться определить
+свой собственный подкласс {@link android.preference.Preference}. См. раздел <a href="#Custom">Построение пользовательского предпочтения</a>.</p>
+
+
+
+<h2 id="DefiningPrefs">Определение предпочтений в XML</h2>
+
+<p>Хотя вы можете создавать новые экземпляры объектов {@link android.preference.Preference} в режиме выполнения, вы должны
+определить список настроек в файле XML с иерархией
+объектов {@link android.preference.Preference}. Использование файла XML для определения вашей коллекции настроек предпочтительней, поскольку файл
+обладает удобочитаемой структурой, которую легко обновлять. Кроме того, настройки вашего приложения
+обычно определены заранее, хотя у вас сохраняется возможность изменять коллекцию в режиме выполнения.</p>
+
+<p>Каждый подкласс класса {@link android.preference.Preference} может быть объявлен посредством элемента XML,
+который соответствует имени класса, например, {@code &lt;CheckBoxPreference&gt;}.</p>
+
+<p>Вы должны сохранить файл XML в каталоге {@code res/xml/}. Хотя вы можете назвать файл любым
+именем, традиционно его называют {@code preferences.xml}. Обычно вам требуется лишь один файл,
+поскольку ветви иерархии (которые открывают собственный список настроек) объявлены с помощью вложенных
+экземпляров {@link android.preference.PreferenceScreen}.</p>
+
+<p class="note"><strong>Примечание.</strong> Если вы хотите создать макет с несколькими панелями для ваших
+настроек, вам потребуются отдельные файлы XML для каждого фрагмента.</p>
+
+<p>Корневой узел XML-файла должен быть элементом {@link android.preference.PreferenceScreen
+&lt;PreferenceScreen&gt;}. Внутри этого элемента вы добавляете каждый элемент {@link
+android.preference.Preference}. Каждый дочерний элемент, который вы добавляете внутри элемента
+{@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;}, отображается в виде одного
+пункта в списке настроек.</p>
+
+<p>Например:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;CheckBoxPreference
+        android:key="pref_sync"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summ"
+        android:defaultValue="true" />
+    &lt;ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_syncConnectionType"
+        android:dialogTitle="@string/pref_syncConnectionType"
+        android:entries="@array/pref_syncConnectionTypes_entries"
+        android:entryValues="@array/pref_syncConnectionTypes_values"
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+&lt;/PreferenceScreen>
+</pre>
+
+<p>В этом примере есть {@link android.preference.CheckBoxPreference} и {@link
+android.preference.ListPreference}. Оба содержат следующие три атрибута:</p>
+
+<dl>
+  <dt>{@code android:key}</dt>
+  <dd>Этот атрибут необходим для предпочтений, которые сохраняют значение данных. Он задает уникальный
+ключ (строку), который использует система при сохранении значения этой настройки в {@link
+android.content.SharedPreferences}. 
+  <p>Этот атрибут <em>не является обязательным</em> только когда предпочтение представляет собой
+{@link android.preference.PreferenceCategory} или {@link android.preference.PreferenceScreen}, либо
+предпочтение указывает намерение {@link android.content.Intent} для вызова (посредством элемента <a href="#Intents">{@code &lt;intent&gt;}</a>) или фрагмент {@link android.app.Fragment} для отображения (с помощью атрибута <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
+android:fragment}</a>).</p>
+  </dd>
+  <dt>{@code android:title}</dt>
+  <dd>Этот атрибут предоставляет имя настройки, отображаемое для пользователя.</dd>
+  <dt>{@code android:defaultValue}</dt>
+  <dd>Этот атрибут указывает исходное значение, которое система должна установить в файле {@link
+android.content.SharedPreferences}. Вы должны указать значения по умолчанию для всех
+настроек.</dd>
+</dl>
+
+<p>Для получения информации обо всех других поддерживаемых атрибутов см. документацию {@link
+android.preference.Preference} (и соответствующий подкласс).</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/ui/settings/settings-titles.png" alt="" />
+  <p class="img-caption"><strong>Рисунок 2.</strong> Создание категорий
+ с заголовками. <br/><b>1.</b> Категория задана элементом {@link
+android.preference.PreferenceCategory &lt;PreferenceCategory&gt;}. <br/><b>2.</b> Заголовок
+задан посредством атрибута {@code android:title}.</p>
+</div>
+
+
+<p>Когда список ваших настроек содержит более 10 элементов, вы, вероятно, захотите добавить заголовки для
+определения групп настроек или отобразить эти группы
+на отдельном экране. Эти возможности описаны в следующих разделах.</p>
+
+
+<h3 id="Groups">Создание групп настроек</h3>
+
+<p>Если вы представляете список из 10 или более настроек, пользователям
+может быть трудно их просматривать, воспринимать и обрабатывать. Это можно исправить,
+разделив некоторые или все настройки на группы, что эффективно преобразует один длинный список в несколько
+более коротких списков. Группа связанных настроек может быть представлена одним из двух способов:</p>
+
+<ul>
+  <li><a href="#Titles">Использование заголовков</a></li>
+  <li><a href="#Subscreens">Использование подэкранов</a></li>
+</ul>
+
+<p>Вы можете пользоваться одним или обоими из этих методов группировки для организации настроек в вашем приложении. Принимая
+решение об используемом варианте и о разделении настроек на группы, вы должны следовать инструкциям в разделе 
+<a href="{@docRoot}design/patterns/settings.html">Настройки</a> руководства «Дизайн для Android».</p>
+
+
+<h4 id="Titles">Использование заголовков</h4>
+
+<p>Если вы хотите создать разделители с заголовками между группами настроек (как показано на рисунке 2),
+поместите каждую группу объектов {@link android.preference.Preference} внутри {@link
+android.preference.PreferenceCategory}.</p>
+
+<p>Например:</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;PreferenceCategory 
+        android:title="&#64;string/pref_sms_storage_title"
+        android:key="pref_key_storage_settings">
+        &lt;CheckBoxPreference
+            android:key="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_auto_delete"
+            android:title="&#64;string/pref_title_auto_delete"
+            android:defaultValue="false"... />
+        &lt;Preference 
+            android:key="pref_key_sms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_sms_delete"... />
+        &lt;Preference 
+            android:key="pref_key_mms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_mms_delete" ... />
+    &lt;/PreferenceCategory>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h4 id="Subscreens">Использование подэкранов</h4>
+
+<p>Если вы хотите поместить группу настроек на подэкран (как показано на рисунке 3), поместите каждую группу
+объектов {@link android.preference.Preference} внутри {@link
+android.preference.PreferenceScreen}.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
+<p class="img-caption"><strong>Рисунок 3.</strong> Создание подэкранов. Элемент {@code
+&lt;PreferenceScreen&gt;}
+создает пункт, при выборе которого открывается отдельный список вложенных настроек.</p>
+
+<p>Например:</p>
+
+<pre>
+&lt;PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- opens a subscreen of settings -->
+    &lt;PreferenceScreen
+        android:key="button_voicemail_category_key"
+        android:title="&#64;string/voicemail"
+        android:persistent="false">
+        &lt;ListPreference
+            android:key="button_voicemail_provider_key"
+            android:title="&#64;string/voicemail_provider" ... />
+        &lt;!-- opens another nested subscreen -->
+        &lt;PreferenceScreen
+            android:key="button_voicemail_setting_key"
+            android:title="&#64;string/voicemail_settings"
+            android:persistent="false">
+            ...
+        &lt;/PreferenceScreen>
+        &lt;RingtonePreference
+            android:key="button_voicemail_ringtone_key"
+            android:title="&#64;string/voicemail_ringtone_title"
+            android:ringtoneType="notification" ... />
+        ...
+    &lt;/PreferenceScreen>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h3 id="Intents">Использование намерений</h3>
+
+<p>В некоторых случаях может потребоваться, чтобы элемент предпочтений открывал другую операцию, а не
+экран настроек, например, веб-браузер для просмотра веб-страницы. Чтобы вызвать {@link
+android.content.Intent}, когда пользователь выбирает элемент предпочтений, добавьте элемент {@code &lt;intent&gt;}
+в качестве дочернего элемента соответствующего элемента {@code &lt;Preference&gt;}.</p>
+
+<p>Например, здесь показано использование элемента предпочтений для открытия веб-страницы:</p>
+
+<pre>
+&lt;Preference android:title="@string/prefs_web_page" >
+    &lt;intent android:action="android.intent.action.VIEW"
+            android:data="http://www.example.com" />
+&lt;/Preference>
+</pre>
+
+<p>Вы можете создавать неявные и явные намерения с помощью следующих атрибутов:</p>
+
+<dl>
+  <dt>{@code android:action}</dt>
+    <dd>Назначаемое действие, как
+в методе {@link android.content.Intent#setAction setAction()}.</dd>
+  <dt>{@code android:data}</dt>
+    <dd>Назначаемые данные, как в методе {@link android.content.Intent#setData setData()}.</dd>
+  <dt>{@code android:mimeType}</dt>
+    <dd>Назначаемый тип MIME, как
+в методе {@link android.content.Intent#setType setType()}.</dd>
+  <dt>{@code android:targetClass}</dt>
+    <dd>Часть имени компонента, означающая класс, как в методе {@link android.content.Intent#setComponent
+setComponent()}.</dd>
+  <dt>{@code android:targetPackage}</dt>
+    <dd>Пакетная часть имени компонента, как в методе {@link
+android.content.Intent#setComponent setComponent()}.</dd>
+</dl>
+
+
+
+<h2 id="Activity">Создание операции предпочтений</h2>
+
+<p>Для отображения ваших настроек в операции наследуйте класс {@link
+android.preference.PreferenceActivity}. Это наследование традиционного класса {@link
+android.app.Activity}, который отображает список настроек на основе иерархии объектов {@link
+android.preference.Preference}. {@link android.preference.PreferenceActivity}
+автоматически сохраняет настройки, связанные с каждым объектом {@link
+android.preference.Preference}, когда пользователь вносит изменения.</p>
+
+<p class="note"><strong>Примечание.</strong> При разработке приложения для версии Android 3.0
+или выше вместо этого следует использовать {@link android.preference.PreferenceFragment}. Прочитайте следующий раздел
+<a href="#Fragment">Использование фрагментов предпочтений</a>.</p>
+
+<p>Запомните самое важное: не загружайте макет отображаемых объектов во время обратного вызова {@link
+android.preference.PreferenceActivity#onCreate onCreate()}. Вместо этого вызовите {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} для
+добавления предпочтений, объявленных в XML-файле для операции. Например, здесь приведен
+ минимальный код, необходимый для работы {@link android.preference.PreferenceActivity}:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+</pre>
+
+<p>Этого кода действительно достаточно для некоторых приложений, поскольку как только пользователь изменяет предпочтение,
+система сохраняет изменения в файле {@link android.content.SharedPreferences} по умолчанию, который
+другие компоненты вашего приложения могут читать, когда требуется проверить пользовательские настройки. Однако многим приложениям
+требуется немного больше кода, чтобы отслеживать изменения, происходящие с предпочтениями.
+Информацию об отслеживании изменений в файле {@link android.content.SharedPreferences}
+см. в разделе <a href="#ReadingPrefs">Чтение предпочтений</a>.</p>
+
+
+
+
+<h2 id="Fragment">Использование фрагментов предпочтений</h2>
+
+<p>При разработке приложений для Android 3.0 (API уровня 11) и более поздних версий необходимо использовать {@link
+android.preference.PreferenceFragment} для отображения списка
+объектов {@link android.preference.Preference}. Вы можете добавить {@link android.preference.PreferenceFragment} в любую операцию, при этом 
+необязательно использовать {@link android.preference.PreferenceActivity}.</p>
+
+<p><a href="{@docRoot}guide/components/fragments.html">Фрагменты</a> обеспечивают более
+универсальную архитектуру для вашего приложения по сравнению с использованием отдельных операций, вне зависимости от типа
+создаваемой операции. Фактически, для управления отображением ваших настроек мы предлагаем вам использовать {@link
+android.preference.PreferenceFragment} вместо {@link
+android.preference.PreferenceActivity} при каждой возможности.</p>
+
+<p>Ваша реализация {@link android.preference.PreferenceFragment} может содержать просто
+определение метода {@link android.preference.PreferenceFragment#onCreate onCreate()} для загрузки
+файла предпочтений посредством {@link android.preference.PreferenceFragment#addPreferencesFromResource
+addPreferencesFromResource()}. Например:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+}
+</pre>
+
+<p>Затем вы можете добавить этот фрагмент в операцию {@link android.app.Activity}, как вы сделали бы это для любого другого фрагмента
+{@link android.app.Fragment}. Например:</p>
+
+<pre>
+public class SettingsActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Фрагмент {@link android.preference.PreferenceFragment} не содержит
+собственного объекта {@link android.content.Context}. Если вам требуется объект {@link android.content.Context},
+вы можете вызвать{@link android.app.Fragment#getActivity()}. Однако разработчик должен быть внимательным и вызывать метод
+{@link android.app.Fragment#getActivity()} только в том случае, когда фрагмент прикреплен к операции. Если
+фрагмент еще не прикреплен или был откреплен в конце его жизненного цикла, метод {@link
+android.app.Fragment#getActivity()} вернет null.</p>
+
+
+<h2 id="Defaults">Установка значений по умолчанию</h2>
+
+<p>Вероятно, создаваемые вами предпочтения определяют важное поведение вашего приложения, поэтому
+необходимо инициализировать соответствующий файл {@link android.content.SharedPreferences},
+записав в него значения по умолчанию для каждого предпочтения {@link android.preference.Preference} при первом запуске вашего
+приложения пользователем.</p>
+
+<p>В первую очередь необходимо указать значение по умолчанию для каждого объекта {@link
+android.preference.Preference}
+в вашем XML-файле посредством атрибута {@code android:defaultValue}. Значение может относиться к любому
+типу данных, подходящему для соответствующего объекта {@link android.preference.Preference}. Например:
+</p>
+
+<pre>
+&lt;!-- default value is a boolean -->
+&lt;CheckBoxPreference
+    android:defaultValue="true"
+    ... />
+
+&lt;!-- default value is a string -->
+&lt;ListPreference
+    android:defaultValue="@string/pref_syncConnectionTypes_default"
+    ... />
+</pre>
+
+<p>Затем из метода {@link android.app.Activity#onCreate onCreate()} основной операции вашего приложения
+(и из любой другой операции, через которую пользователь может войти в ваше приложение
+в первый раз) вызовите {@link android.preference.PreferenceManager#setDefaultValues
+setDefaultValues()}:</p>
+
+<pre>
+PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+</pre>
+
+<p>Вызов этого метода при выполнении {@link android.app.Activity#onCreate onCreate()} гарантирует, что ваше
+приложение правильно инициализируется и получит настройки по умолчанию, которые могут потребоваться вашему приложению
+для определенного поведения (например, следует ли загружать данные при работе
+в сотовой сети).</p>
+
+<p>Этот метод имеет три аргумента:</p>
+<ul>
+  <li>{@link android.content.Context} вашего приложения.</li>
+  <li>Идентификатор ресурса для XML-файла предпочтений, для которого вы хотите установить значения по умолчанию.</li>
+  <li>Логическое значение, которое указывает, требуется ли значения по умолчанию устанавливать более одного раза.
+<p>При значении <code>false</code> система устанавливает значения по умолчанию только в том случае, если этот метод никогда не вызывался ранее
+(или атрибут {@link android.preference.PreferenceManager#KEY_HAS_SET_DEFAULT_VALUES}
+в файле общих предпочтений по умолчанию имеет значение false).</p></li>
+</ul>
+
+<p>Когда для третьего аргумента установлено значение <code>false</code>, вы можете вызывать этот метод
+при каждом запуске операции, не опасаясь перезаписи сохраненных пользовательских предпочтений из-за их сброса в состояние
+по умолчанию. Однако, если установить для этого аргумента значение <code>true</code>, вы будете перезаписывать все предыдущие
+значения значениями по умолчанию.</p>
+
+
+
+<h2 id="PreferenceHeaders">Использование заголовков предпочтений</h2>
+
+<p>В редких случаях может потребоваться такая структура настроек, при которой на первом экране отображается только
+список <a href="#Subscreens">подэкранов</a> (например, как в приложении системных настроек,
+показанных на рисунках 4 и 5). При разработке такого дизайна для Android 3.0 и более поздних версий вы должны
+использовать новую возможность Android 3.0 — «заголовки», вместо создания подэкранов посредством вложенных
+элементов {@link android.preference.PreferenceScreen}.</p>
+
+<p>Чтобы создать настройки с заголовками, выполните следующие действия:</p>
+<ol>
+  <li>Выделите каждую группу настроек в отдельный экземпляр {@link
+android.preference.PreferenceFragment}. Таким образом, каждая группа настроек должна иметь отдельный
+XML-файл.</li>
+  <li>Создайте XML-файл заголовков, в котором перечислены все группы настроек и объявления, какой фрагмент
+содержит соответствующий список настроек.</li>
+  <li>Наследуйте класс {@link android.preference.PreferenceActivity}, который будет содержать ваши настройки.</li>
+  <li>Реализуйте обратный вызов {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()}, чтобы указать
+файл заголовков.</li>
+</ol>
+
+<p>Огромное преимущество использования этого дизайна состоит в том, что при запуске на больших экранах {@link android.preference.PreferenceActivity}
+автоматически создает макет с двумя панелями, показанный на рисунке 4.</p>
+
+<p>Даже если ваше приложение поддерживает версии Android старше 3.0, вы можете создать
+приложение, использующее {@link android.preference.PreferenceFragment} для двухпанельного представления на
+новых устройствах и поддерживающее традиционную многоэкранную иерархию на более старых
+устройствах (см. раздел <a href="#BackCompatHeaders">Поддержка старых версий посредством
+заголовков предпочтений</a>).</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
+<p class="img-caption"><strong>Рисунок 4.</strong> Двухпанельный макет с заголовками. <br/><b>1.</b> Заголовки
+определяются посредством XML-файла заголовков. <br/><b>2.</b> Каждая группа настроек определяется с помощью фрагмента
+{@link android.preference.PreferenceFragment}, который указывается элементом {@code &lt;header&gt;}
+в файле заголовков.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
+<p class="img-caption"><strong>Рисунок 5.</strong> Смартфон с заголовками настроек. При выборе
+пункта вместо заголовков отображается соответствующий
+фрагмент {@link android.preference.PreferenceFragment}.</p>
+
+
+<h3 id="CreateHeaders" style="clear:left">Создание файла заголовков</h3>
+
+<p>Каждая группа настроек в вашем списке заголовков указывается отдельным элементом {@code &lt;header&gt;}
+внутри корневого элемента {@code &lt;preference-headers&gt;}. Например:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;!-- key/value pairs can be included as arguments for the fragment. -->
+        &lt;extra android:name="someKey" android:value="someHeaderValue" />
+    &lt;/header>
+&lt;/preference-headers>
+</pre>
+
+<p>Посредством атрибута {@code android:fragment} каждый заголовок объявляет экземпляр фрагмента {@link
+android.preference.PreferenceFragment}, который должен открываться при выборе этого заголовка пользователем.</p>
+
+<p>Элемент {@code &lt;extras&gt;} позволяет передавать пары «ключ-значение» фрагменту в объекте {@link
+android.os.Bundle}. Фрагмент может извлекать аргументы путем вызова метода {@link
+android.app.Fragment#getArguments()}. Вы можете передавать аргументы фрагменту по различным причинам,
+но хорошим поводом является повторное использование одного и того же подкласса {@link
+android.preference.PreferenceFragment} для каждой группы и использование аргументов для указания
+XML-файла предпочтений, который должен быть загружен фрагментом.</p>
+
+<p>Например, здесь приведен фрагмент, который можно использовать повторно для нескольких групп настроек, когда каждый
+заголовок определяет аргумент {@code &lt;extra&gt;} с ключом {@code "settings"}:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String settings = getArguments().getString("settings");
+        if ("notifications".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_wifi);
+        } else if ("sync".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_sync);
+        }
+    }
+}
+</pre>
+
+
+
+<h3 id="DisplayHeaders">Отображение заголовков</h3>
+
+<p>Чтобы отобразить заголовки предпочтений, вы должны реализовать метод обратного вызова {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} и вызвать 
+{@link android.preference.PreferenceActivity#loadHeadersFromResource
+loadHeadersFromResource()}. Например:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onBuildHeaders(List&lt;Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+}
+</pre>
+
+<p>Когда пользователь выбирает пункт в списке заголовков, система открывает связанный {@link
+android.preference.PreferenceFragment}.</p>
+
+<p class="note"><strong>Примечание.</strong> При использовании заголовков предпочтений ваш подкласс {@link
+android.preference.PreferenceActivity} не должен реализовывать метод {@link
+android.preference.PreferenceActivity#onCreate onCreate()}, поскольку единственной обязательной задачей
+операции является загрузка заголовков.</p>
+
+
+<h3 id="BackCompatHeaders">Поддержка старых версий с заголовками предпочтений</h3>
+
+<p>Если ваше приложение поддерживает версии Android старше 3.0, вы можете использовать заголовки для
+предоставления двухпанельного макета при работе на Android 3.0 или более поздней версии. Достаточно создать
+дополнительный XML-файл настроек, использующий базовые элементы {@link android.preference.Preference
+&lt;Preference&gt;}, которые ведут себя аналогично пунктам заголовка (для использования в более старых версиях
+Android).</p>
+
+<p>Вместо открытия новых экранов {@link android.preference.PreferenceScreen} каждый из элементов {@link
+android.preference.Preference &lt;Preference&gt;} отправляет намерение {@link android.content.Intent} в
+{@link android.preference.PreferenceActivity} с указанием XML-файла предпочтений
+для загрузки.</p>
+
+<p>В качестве примера приведен XML-файл для заголовков предпочтений, который используется в Android версии 3.0
+и более поздних версий ({@code res/xml/preference_headers.xml}):</p> 
+
+<pre>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" />
+&lt;/preference-headers>
+</pre>
+
+<p>А здесь представлен файл предпочтений, который содержит те же самые заголовки для версий старше 
+Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;Preference 
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one"  >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_ONE" />
+    &lt;/Preference>
+    &lt;Preference 
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_TWO" />
+    &lt;/Preference>
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Так как поддержка {@code &lt;preference-headers&gt;} была добавлена в версии Android 3.0, система вызывает
+{@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} в методе {@link
+android.preference.PreferenceActivity} только при работе в Android версии 3.0 или более поздней версии. Чтобы загрузить
+«старый» файл заголовков ({@code preference_headers_legacy.xml}), вы должны проверить версию Android
+и, если версия старше Android 3.0 ({@link
+android.os.Build.VERSION_CODES#HONEYCOMB}), вызвать {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} для
+загрузки старого файла заголовков. Например:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+
+// Called only on Honeycomb and later
+&#64;Override
+public void onBuildHeaders(List&lt;Header> target) {
+   loadHeadersFromResource(R.xml.preference_headers, target);
+}
+</pre>
+
+<p>Остается обработать намерение {@link android.content.Intent}, переданное
+в операцию, чтобы идентифицировать файл предпочтений для загрузки. Поэтому извлеките операцию намерения и сравните ее
+с известными строками действия, которые вы использовали в тегах {@code &lt;intent&gt;} XML-файла предпочтений:</p>
+
+<pre>
+final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";
+...
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    String action = getIntent().getAction();
+    if (action != null &amp;&amp; action.equals(ACTION_PREFS_ONE)) {
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+
+    else if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+</pre>
+
+<p>При этом помните, что последующие вызовы {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} будут помещать
+все предпочтения в один список, поэтому обязательно используйте операторы else-if, чтобы обеспечить только
+однократный вызов метода при изменении условий.</p>
+
+
+
+
+
+<h2 id="ReadingPrefs">Чтение предпочтений</h2>
+
+<p>По умолчанию все предпочтения вашего приложения сохраняются в файле, который доступен из любого места
+вашего приложения посредством вызова статического метода {@link
+android.preference.PreferenceManager#getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences()}. Он возвращает объект {@link
+android.content.SharedPreferences}, содержащий все пары «ключ-значение», связанные
+с объектами {@link android.preference.Preference}, использованными в вашей операции {@link
+android.preference.PreferenceActivity}.</p>
+
+<p>В качестве примера показано чтение одного из значений предпочтений из любой другой операции в вашем
+приложении:</p>
+
+<pre>
+SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+</pre>
+
+
+
+<h3 id="Listening">Отслеживание изменений предпочтений</h3>
+
+<p>Существует несколько причин, по которым вы можете захотеть получать уведомления, как только пользователь изменяет одно из
+предпочтений. Чтобы получать обратный вызов при изменении любого из предпочтений,
+реализуйте интерфейс {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
+SharedPreference.OnSharedPreferenceChangeListener} и зарегистрируйте приемник для объекта
+{@link android.content.SharedPreferences} посредством вызова {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}.</p>
+
+<p>Этот интерфейс содержит только один метод обратного вызова, {@link
+android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+onSharedPreferenceChanged()}, и вы, вероятно, сочтете его самым простым способом реализации интерфейса в составе своей
+операции. Например:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity
+                              implements OnSharedPreferenceChangeListener {
+    public static final String KEY_PREF_SYNC_CONN = "pref_syncConnectionType";
+    ...
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        String key) {
+        if (key.equals(KEY_PREF_SYNC_CONN)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+}
+</pre>
+
+<p>В этом примере метод проверяет, выполнено ли изменение настройки для известного ключа предпочтений. Он
+вызывает {@link android.preference.PreferenceActivity#findPreference findPreference()} для получения объекта
+{@link android.preference.Preference}, который был изменен, поэтому он может изменить сводку пункта
+, описывающего выбор пользователя. То есть, когда настройка представляет собой {@link
+android.preference.ListPreference} или другую настройку с несколькими вариантами выбора, при изменении этой настройки вы должны вызвать {@link
+android.preference.Preference#setSummary setSummary()} для отображения
+текущего состояния (например, настройка спящего режима, показанная на рисунке 5).</p>
+
+<p class="note"><strong>Примечание.</strong> В соответствии с рекомендациями раздела <a href="{@docRoot}design/patterns/settings.html">Настройки</a> руководства «Дизайн для Android», мы рекомендуем вам обновлять
+сводку для {@link android.preference.ListPreference} при каждом изменении предпочтения пользователем,
+чтобы описать текущую настройку.</p>
+
+<p>Для правильного управления жизненным циклом в операции мы рекомендуем вам регистрировать или отменять регистрацию
+вашего приемника {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener} во время выполнения обратных вызовов {@link
+android.app.Activity#onResume} и {@link android.app.Activity#onPause} соответственно:</p>
+
+<pre>
+&#64;Override
+protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
+}
+</pre>
+
+<p class="caution"><strong>Внимание!</strong> Когда вы вызываете приемник {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}, диспетчер предпочтений не
+сохраняет строгую ссылку на приемник. Вы должны сохранить строгую
+ссылку на приемник, в противном случае она будет чувствительной к очистке памяти. Мы
+рекомендуем хранить ссылку на приемник в данных экземпляра объекта
+, который будет существовать, пока вам нужен приемник.</p>
+
+<p>Например, в следующем коде вызывающий объект не сохраняет
+ссылку на приемник. В результате этого приемник будет удален при очистке памяти
+и через некоторое время приведет к сбою:</p>
+
+<pre>
+prefs.registerOnSharedPreferenceChangeListener(
+  // Bad! The listener is subject to garbage collection!
+  new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+});
+</pre>
+
+<p>Вместо этого сохраните ссылку на приемник в поле данных экземпляра объекта
+, который будет существовать, пока нужен приемник:</p>
+
+<pre>
+SharedPreferences.OnSharedPreferenceChangeListener listener =
+    new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+};
+prefs.registerOnSharedPreferenceChangeListener(listener);
+</pre>
+
+<h2 id="NetworkUsage">Контроль использования сети</h2>
+
+
+<p>Начиная с версии Android 4.0, системное приложение «Настройки» позволяет пользователям просматривать использование
+сетевых данных приложениями, работающими на переднем плане и в фоновом режиме. После этого пользователи могут
+отключить использование данных в фоновом режиме для отдельных приложений. Для того, чтобы пользователи не отключали доступ вашего приложения к данным
+в фоновом режиме, вы должны эффективно использовать подключение в режиме передачи данных и предоставить
+пользователям возможность настройки использования данных вашим приложением посредством настроек приложения.<p>
+
+<p>Например, вы можете позволить пользователям управлять частотой синхронизации данных приложения, выполнением загрузки
+только в режиме подключения по Wi-Fi, использованием данных в роуминге и т. д. Когда
+эти возможности управления доступны, пользователи с меньшей вероятностью отключат доступ вашего приложения к данным,
+когда оно достигает установленных в системных настройках лимитов, поскольку вместо отключения они могут
+точно контролировать объем данных, который использует ваше приложение.</p>
+
+<p>После добавления необходимых предпочтений в вашу операцию {@link android.preference.PreferenceActivity}
+для управления поведением вашего приложения в отношении данных вы должны добавить фильтр намерений для {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} в вашем файле манифеста. Например:</p>
+
+<pre>
+&lt;activity android:name="SettingsActivity" ... >
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Этот фильтр манифеста указывает системе, что эта операция управляет использованием
+данных вашим приложением. Так, когда пользователь проверяет объем использованных приложением данных в системном приложении
+«Настройки», отображается кнопка <em>Просмотреть настройки приложения</em>, которая запускает вашу операцию
+{@link android.preference.PreferenceActivity}, чтобы пользователь мог уточнить, сколько данных использует
+ваше приложение.</p>
+
+
+
+
+
+
+
+<h2 id="Custom">Построение пользовательского предпочтения</h2>
+
+<p>Система Android содержит множество подклассов {@link android.preference.Preference}, которые
+позволяют вам строить пользовательский интерфейс для нескольких различных типов настроек.
+Тем не менее, вы можете обнаружить, что для нужной вам настройки нет встроенного решения, например, для выбора
+числа или даты. В таком случае вам потребуется создать нестандартное предпочтение путем наследования
+класса {@link android.preference.Preference} или одного из других подклассов.</p>
+
+<p>При наследовании класса {@link android.preference.Preference} нужно выполнить несколько
+важных пунктов:</p>
+
+<ul>
+  <li>Укажите пользовательский интерфейс, который должен отображаться при выборе этой настройки пользователем.</li>
+  <li>При необходимости сохраните значение настройки.</li>
+  <li>Инициализируйте {@link android.preference.Preference} текущим значением (или значением по умолчанию),
+когда предпочтение отображается.</li>
+  <li>Укажите значение по умолчанию в ответ на запрос системы.</li>
+  <li>Если {@link android.preference.Preference} содержит свой собственный пользовательский интерфейс (например, диалоговое окно), сохраните
+и восстановите состояние для обработки изменений жизненного цикла (например, когда пользователь поворачивает экран).</li>
+</ul>
+
+<p>В следующих разделах описано выполнение каждой из этих задач.</p>
+
+
+
+<h3 id="CustomSelected">Указание пользовательского интерфейса</h3>
+
+  <p>Если вы наследуете класс {@link android.preference.Preference} непосредственно, вы должны реализовать метод
+{@link android.preference.Preference#onClick()}, чтобы задать действие, происходящее при выборе
+пункта пользователем. Однако большая часть нестандартных настроек наследует {@link android.preference.DialogPreference}, чтобы
+отобразить диалоговое окно, что упрощает процедуру. Когда вы наследуете {@link
+android.preference.DialogPreference}, вы должны вызвать {@link
+android.preference.DialogPreference#setDialogLayoutResource setDialogLayoutResourcs()}, находясь в конструкторе
+класса, чтобы указать макет диалогового окна.</p>
+
+  <p>В качестве примера показан конструктор нестандартного диалогового окна {@link
+android.preference.DialogPreference}, в котором объявляется макет и указывается текст для
+положительной и отрицательной кнопок диалога по умолчанию:</p>
+
+<pre>
+public class NumberPickerPreference extends DialogPreference {
+    public NumberPickerPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        
+        setDialogLayoutResource(R.layout.numberpicker_dialog);
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+        
+        setDialogIcon(null);
+    }
+    ...
+}
+</pre>
+
+
+
+<h3 id="CustomSave">Сохранение значения настройки</h3>
+
+<p>Вы можете сохранить значение настройки в любой момент, вызвав один из методов {@code persist*()} класса {@link
+android.preference.Preference}, например, {@link
+android.preference.Preference#persistInt persistInt()}, если настройка имеет целое значение, или 
+{@link android.preference.Preference#persistBoolean persistBoolean()} для сохранения логического значения.</p>
+
+<p class="note"><strong>Примечание.</strong> Каждое предпочтение {@link android.preference.Preference} может сохранять только один
+тип данных, поэтому вы должны использовать метод {@code persist*()}, соответствующий типу данных, используемых вашим
+пользовательским предпочтением {@link android.preference.Preference}.</p>
+
+<p>Выбор метода сохранения настройки может зависеть от наследованного класса {@link
+android.preference.Preference}. Если вы наследуете {@link
+android.preference.DialogPreference}, вы должны сохранять значение только при закрытии диалога
+с положительным результатом (пользователь нажал кнопку «OK»).</p>
+
+<p>Когда {@link android.preference.DialogPreference} закрывается, система вызывает метод {@link
+android.preference.DialogPreference#onDialogClosed onDialogClosed()}. Этот метод содержит
+логический аргумент, который указывает, является ли результат пользователя «положительным» — если аргумент имеет значение
+<code>true</code>, значит пользователь выбрал положительную кнопку и вы должны сохранить новое значение. Например:
+</p>
+
+<pre>
+&#64;Override
+protected void onDialogClosed(boolean positiveResult) {
+    // When the user selects "OK", persist the new value
+    if (positiveResult) {
+        persistInt(mNewValue);
+    }
+}
+</pre>
+
+<p>В этом примере <code>mNewValue</code> — это член класса, который содержит текущее значение
+настройки. При вызове {@link android.preference.Preference#persistInt persistInt()} значение сохраняется
+в файл {@link android.content.SharedPreferences} (с автоматическим использованием ключа,
+указанного в XML-файле для этого предпочтения {@link android.preference.Preference}).</p>
+
+
+<h3 id="CustomInitialize">Инициализация текущего значения</h3>
+
+<p>Когда система добавляет ваше предпочтение {@link android.preference.Preference} на экран, она
+вызывает метод {@link android.preference.Preference#onSetInitialValue onSetInitialValue()}, чтобы уведомить вас,
+имеет ли настройка сохраненное значение. Если сохраненного значения нет, этот вызов предоставляет вам
+значение по умолчанию.</p>
+
+<p>Метод {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} передает
+логическое значение, <code>restorePersistedValue</code>, чтобы показать, было ли уже сохранено значение
+для настройки. Если значение равно <code>true</code>, вы должны извлечь сохраненное значение, вызвав
+один из методов {@code getPersisted*()} класса {@link
+android.preference.Preference}, например, {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} для целого значения. Обычно
+требуется извлечь сохраненное значение, чтобы можно было правильно обновить пользовательский интерфейс для отражения
+ранее сохраненного значения.</p>
+
+<p>Если <code>restorePersistedValue</code> имеет значение <code>false</code>, вы
+должны использовать значение по умолчанию, которое передается во втором аргументе.</p>
+
+<pre>
+&#64;Override
+protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+    if (restorePersistedValue) {
+        // Restore existing state
+        mCurrentValue = this.getPersistedInt(DEFAULT_VALUE);
+    } else {
+        // Set default state from the XML attribute
+        mCurrentValue = (Integer) defaultValue;
+        persistInt(mCurrentValue);
+    }
+}
+</pre>
+
+<p>Каждый метод {@code getPersisted*()} содержит аргумент, который указывает
+значение по умолчанию на случай, когда действительно нет сохраненного значения, или не существует ключ. В
+приведенном выше примере локальная константа служит для указания значения по умолчанию на случай, если {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} не может вернуть сохраненное значение.</p>
+
+<p class="caution"><strong>Внимание!</strong> Вы <strong>не можете</strong> использовать
+<code>defaultValue</code> в качестве значения по умолчанию в методе {@code getPersisted*()}, так как
+его значение всегда равно null, когда <code>restorePersistedValue</code> имеет значение <code>true</code>.</p>
+
+
+<h3 id="CustomDefault">Предоставление значения по умолчанию</h3>
+
+<p>Если экземпляр вашего класса {@link android.preference.Preference} указывает значение по умолчанию 
+(с помощью атрибута {@code android:defaultValue}),
+система вызывает {@link android.preference.Preference#onGetDefaultValue
+onGetDefaultValue()}, когда она создает экземпляр объекта для извлечения значения. Вы должны реализовать
+этот метод, чтобы сохранить значение по умолчанию для системы в {@link
+android.content.SharedPreferences}. Например:</p>
+
+<pre>
+&#64;Override
+protected Object onGetDefaultValue(TypedArray a, int index) {
+    return a.getInteger(index, DEFAULT_VALUE);
+}
+</pre>
+
+<p>Аргументы метода предоставляют все необходимое: массив атрибутов и указатель
+положения {@code android:defaultValue}, который вы должны извлечь. Причина, по которой вы должны
+реализовать этот метод, чтобы извлечь значение по умолчанию из атрибута, состоит в том, что вы должны указать
+локальное значение по умолчанию для атрибута в случае, когда значение не определено.</p>
+
+
+
+<h3 id="CustomSaveState">Сохранение и восстановление состояния предпочтений</h3>
+
+<p>Как и {@link android.view.View} в макете, ваш подкласс {@link android.preference.Preference}
+отвечает за сохранение и восстановление своего состояния в случае перезапуска операции или фрагмента
+(например, когда пользователь поворачивает экран). Чтобы правильно сохранять и восстанавливать
+состояние вашего класса {@link android.preference.Preference}, вы должны реализовать
+методы обратного вызова жизненного цикла {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} и {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}.</p>
+
+<p>Состояние вашего {@link android.preference.Preference} определяется объектом, который реализует
+интерфейс {@link android.os.Parcelable}. Система Android предоставляет вам такой объект
+в качестве начальной точки для определения вашего объекта состояния: класс {@link
+android.preference.Preference.BaseSavedState}.</p>
+
+<p>Чтобы определить, как ваш класс {@link android.preference.Preference} сохраняет свое состояние, вы должны
+наследовать класс {@link android.preference.Preference.BaseSavedState}. Вы должны переопределить лишь
+ несколько методов и определить объект
+{@link android.preference.Preference.BaseSavedState#CREATOR}.</p>
+
+<p>Для большинства приложений вы можете скопировать следующую реализацию и просто изменить строки, которые
+обрабатывают {@code value}, если ваш подкласс {@link android.preference.Preference} сохраняет типы
+данных, отличные от целых.</p>
+
+<pre>
+private static class SavedState extends BaseSavedState {
+    // Member that holds the setting's value
+    // Change this data type to match the type saved by your Preference
+    int value;
+
+    public SavedState(Parcelable superState) {
+        super(superState);
+    }
+
+    public SavedState(Parcel source) {
+        super(source);
+        // Get the current preference's value
+        value = source.readInt();  // Change this to read the appropriate data type
+    }
+
+    &#64;Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        // Write the preference's value
+        dest.writeInt(value);  // Change this to write the appropriate data type
+    }
+
+    // Standard creator object using an instance of this class
+    public static final Parcelable.Creator&lt;SavedState> CREATOR =
+            new Parcelable.Creator&lt;SavedState>() {
+
+        public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+        }
+
+        public SavedState[] newArray(int size) {
+            return new SavedState[size];
+        }
+    };
+}
+</pre>
+
+<p>После добавления показанной выше реализации {@link android.preference.Preference.BaseSavedState}
+в ваше приложение (обычно в качестве подкласса вашего подкласса {@link android.preference.Preference}), вам
+потребуется реализовать методы {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} и {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()} для вашего
+подкласса {@link android.preference.Preference}.</p>
+
+<p>Например:</p>
+
+<pre>
+&#64;Override
+protected Parcelable onSaveInstanceState() {
+    final Parcelable superState = super.onSaveInstanceState();
+    // Check whether this Preference is persistent (continually saved)
+    if (isPersistent()) {
+        // No need to save instance state since it's persistent,
+        // use superclass state
+        return superState;
+    }
+
+    // Create instance of custom BaseSavedState
+    final SavedState myState = new SavedState(superState);
+    // Set the state's value with the class member that holds current
+    // setting value
+    myState.value = mNewValue;
+    return myState;
+}
+
+&#64;Override
+protected void onRestoreInstanceState(Parcelable state) {
+    // Check whether we saved the state in onSaveInstanceState
+    if (state == null || !state.getClass().equals(SavedState.class)) {
+        // Didn't save the state, so call superclass
+        super.onRestoreInstanceState(state);
+        return;
+    }
+
+    // Cast state to custom BaseSavedState and pass to superclass
+    SavedState myState = (SavedState) state;
+    super.onRestoreInstanceState(myState.getSuperState());
+    
+    // Set this Preference's widget to reflect the restored state
+    mNumberPicker.setValue(myState.value);
+}
+</pre>
+

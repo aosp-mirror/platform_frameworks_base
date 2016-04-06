@@ -1,0 +1,1031 @@
+page.title=Меню
+parent.title=Пользовательский интерфейс
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Содержание документа</h2>
+<ol>
+  <li><a href="#xml">Определение меню в файле XML</a></li>
+  <li><a href="#options-menu">Создание меню параметров</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">Обработка нажатий</a></li>
+      <li><a href="#ChangingTheMenu">Изменение пунктов меню во время выполнения</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">Создание контекстного меню</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">Создание плавающего контекстного меню</a></li>
+      <li><a href="#CAB">Использование режима контекстных действий</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">Создание всплывающего меню</a>
+    <ol>
+      <li><a href="#PopupEvents">Обработка нажатий</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">Создание групп меню</a>
+    <ol>
+      <li><a href="#checkable">Использование пунктов меню, которые можно пометить</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">Добавление пунктов меню на основе объектов Intent</a>
+    <ol>
+      <li><a href="#AllowingToAdd">Предоставление возможности добавить свою операцию в другие меню</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Основные классы</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>См. также</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Строка действий</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Ресурс меню</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Попрощайтесь
+с кнопкой "Меню"</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Меню являются стандартным компонентом пользовательского интерфейса в приложениях многих типов. Для обеспечения привычной
+и единообразной технологии работы с приложением следует представлять действия пользователя и другие варианты выбора в своих операциях
+с помощью API-интерфейсов класса {@link android.view.Menu}.</p>
+
+<p>Начиная с версии Android 3.0 (уровень API 11) в устройствах, работающих под управлением Android,
+наличие отдельной кнопки <em>Меню</em> больше не требуется. С учетом этого изменения приложения для Android должны перестать
+зависеть от традиционной панели меню из 6 пунктов. Вместо нее в них должна быть строка действий с часто используемыми
+действиями пользователя.</p>
+
+<p>Несмотря на то что оформление и поведение некоторых пунктов меню изменились, семантика для определения
+набора действий и вариантов по-прежнему основана на API-интерфейсах класса {@link android.view.Menu}. В этом
+руководстве рассказывается, как создавать три основополагающих типа меню или представлений действий в системе 
+Android всех версий:</p>
+
+<dl>
+  <dt><strong>Меню параметров и строка действий</strong></dt>
+    <dd>Пункты <a href="#options-menu">меню параметров</a> представляют собой основные варианты выбора действий в пределах
+операции. Именно здесь следует размещать действия, которые затрагивают приложение в целом, например: 
+"Поиск", "Составить сообщение эл. почты" и "Настройки".
+  <p>При разработке приложений для версии Android 2.3 или более ранних версий пользователи могут
+открыть панель меню параметров нажатием кнопки <em>Меню</em>.</p>
+  <p>В версии Android 3.0 и последующих версиях пункты меню параметров размещаются в <a href="{@docRoot}guide/topics/ui/actionbar.html">строке действий</a> в виде сочетания отображаемых на экране вариантов
+действий и раскрывающегося списка дополнительных вариантов выбора. Начиная с Android 3.0 кнопка <em>Меню</em> больше не используется (на некоторых
+устройствах
+ее нет), поэтому для предоставления доступа к действиям и другим вариантам выбора вам следует перейти к использованию
+строки действий.</p>
+  <p>См. раздел <a href="#options-menu">Создание меню параметров</a></p>
+    </dd>
+    
+  <dt><strong>Контекстное меню и режим контекстных действий</strong></dt>
+  
+   <dd>Контекстное меню ― это <a href="#FloatingContextMenu">плавающее меню</a>, которое открывается, когда
+пользователь длительно нажимает на элемент. В нем содержатся действия, которые затрагивают выбранный контент или
+контекстный кадр.
+  <p>При разработке приложения для версии Android 3.0 или выше вместо этого для обеспечения действий с выбранным контентом следует использовать <a href="#CAB">режим контекстных действий</a>. В этом режиме
+в строке, расположенной вверху экрана, отображаются пункты действий, затрагивающие выбранный контент, причем пользователь может
+выбрать сразу несколько элементов.</p>
+  <p>См. раздел <a href="#context-menu">Создание контекстного меню</a></p>
+</dd>
+    
+  <dt><strong>Всплывающее меню</strong></dt>
+    <dd>Во всплывающем меню отображается вертикальный список пунктов, который привязан к представлению,
+вызвавшему меню. Он хорошо подходит для предоставления возможности дополнительных вариантов действий, относящихся к определенному контенту или
+для выдачи вариантов для второй части команды. Действия во всплывающем меню 
+<strong>не</strong> должны напрямую затрагивать соответствующий контент &mdash; для этого предназначены контекстные
+действия. Всплывающее меню предназначено для расширенных действий, относящихся к областям контента в вашей
+операции.
+  <p>См. раздел <a href="#PopupMenu">Создание всплывающего меню</a></p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">Определение меню в файле XML</h2>
+
+<p>Для определения пунктов меню всех типов в Android используется стандартный формат XML.
+Вместо того чтобы создавать меню в коде своей операции, определять меню и все его пункты следует в
+ <a href="{@docRoot}guide/topics/resources/menu-resource.html">ресурсе меню</a> формата XML. После этого
+ресурс меню можно будет загружать как объект {@link android.view.Menu} в свои операции или
+фрагменты.</p>
+
+<p>Использовать ресурсы меню рекомендуется по нескольким причинам:</p>
+<ul>
+  <li>в XML проще визуализировать структуру меню;</li>
+  <li>это позволяет отделить контент для меню от кода, определяющего работу приложения;</li>
+  <li>это позволяет создавать альтернативные варианты меню для разных версий платформы,
+размеров экрана и других конфигураций путем использования структуры <a href="{@docRoot}guide/topics/resources/index.html">ресурсов приложения</a>.</li>
+</ul>
+
+<p>Чтобы определить меню, создайте файл XML в папке <code>res/menu/</code>
+вашего проекта и постройте меню со следующими элементами:</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>Определяет класс {@link android.view.Menu}, который является контейнером для пунктов меню. Элемент
+<code>&lt;menu></code> должен быть корневым узлом файла, в котором может находиться один или несколько элементов
+<code>&lt;item></code> и <code>&lt;group></code>.</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>Создает класс {@link android.view.MenuItem}, который представляет один пункт меню. Этот
+элемент может содержать вложенный элемент <code>&lt;menu></code> для создания вложенных меню.</dd>
+    
+  <dt><code>&lt;group></code></dt>
+    <dd>Необязательный, невидимый контейнер для элементов {@code &lt;item&gt;}. Он позволяет
+разделять пункты меню на категории и назначать им одинаковые свойства, такие как активное состояние и видимость. Подробные
+сведения изложены в разделе <a href="#groups">Создание групп меню</a>.</dd>
+</dl>
+
+
+<p>Вот пример меню с именем <code>game_menu.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Элемент <code>&lt;item></code> поддерживает несколько атрибутов, с помощью которых можно определить внешний вид и
+поведение пункта меню. Пункты приведенного выше меню имеют следующие атрибуты:</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>Идентификатор ресурса, который является уникальным для этого пункта, что позволяет приложению распознавать пункт,
+когда его выбирает пользователь.</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>Ссылка на графический элемент, который будет использоваться в качестве значка пункта меню.</dd>
+  <dt>{@code android:title}</dt>
+    <dd>Ссылка на строку, которая будет использоваться в качестве названия пункта меню.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>Указывает, когда и как этот пункт должен отображаться в <a href="{@docRoot}guide/topics/ui/actionbar.html">строке действий</a>.</dd>
+</dl>
+
+<p>Это самые важные атрибуты, которые следует использовать, но есть также множество других атрибутов.
+Сведения обо всех поддерживаемых атрибутах см. в документе <a href="{@docRoot}guide/topics/resources/menu-resource.html">Ресурс меню</a>.</p>
+
+<p>К пункту любого меню (кроме вложенного меню) можно прикрепить вложенное меню, добавив элемент {@code &lt;menu&gt;}
+в качестве дочернего элемента {@code &lt;item&gt;}. Вложенные меню полезны, когда в приложении имеется множество
+функций, которые можно разделить на категории подобно строке меню приложения для ПК ("Файл",
+"Правка", "Вид" и т. д.). Например:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Для использования меню в операции необходимо загрузить ресурс меню (преобразовать ресурс XML
+в программируемый объект) с помощью метода {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}. В приведенных далее разделах рассказывается, как загружать меню
+каждого типа.</p>
+
+
+
+<h2 id="options-menu">Создание меню параметров</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>Рисунок 1.</strong> Меню параметров в
+браузере на Android 2.3.</p>
+</div>
+
+<p>В меню параметров следует размещать действия и другие варианты выбора, которые имеют отношение к
+контексту текущей операции, например: "Поиск", "Составить сообщение эл. почты" и "Настройки".</p>
+
+<p>Место, где отображаются на экране пункты вашего меню параметров, определяется версией платформы, для которой
+разработано приложение.</p>
+
+<ul>
+  <li>Если приложение написано для версии <strong>Android 2.3.x (уровень API 10) или
+более ранней</strong>, содержимое вашего меню параметров отображается внизу экрана, когда пользователь
+нажимает кнопку <em>Меню</em>, как показано на рисунке 1. Когда меню открывается, первой видимой частью является меню
+значков,
+в котором имеется шесть пунктов. Если в вашем меню больше шести пунктов, система Android разместит
+шестой и остальные пункты в дополнительном меню, которое пользователь может открыть, выбрав вариант
+ <em>Еще</em>.</li>
+
+  <li>Если приложение предназначено для версии <strong>Android 3.0 (уровень API 11) и
+более поздних</strong>, пункты меню параметров будут отображаться в <a href="{@docRoot}guide/topics/ui/actionbar.html">строке действий</a>. По умолчанию система
+размещает все действия на панели дополнительных вариантов, которые пользователь может открыть с помощью значка дополнительных действий, расположенного
+с правой стороны строки действий (либо нажатием кнопки <em>Меню</em>, если на устройстве есть такая кнопка). Чтобы
+обеспечить
+быстрый доступ к важным действиям, можно принудительно разместить несколько пунктов меню в строке действий, добавив
+{@code android:showAsAction="ifRoom"} к соответствующим элементам {@code &lt;item&gt;} (см. рисунок
+2). <p>Подробные сведения о пунктах действий и других особенностях строки действий см. в руководстве <a href="{@docRoot}guide/topics/ui/actionbar.html">Строка действий</a>. </p>
+<p class="note"><strong>Примечание.</strong> Даже если ваше приложение <em>не</em> предназначено для работы в версии Android 3.0 или
+более поздней, можно создать собственный макет со строкой действий, чтобы реализовать похожий эффект. Пример того, как можно
+поддерживать работу строки действий в старых версиях Android см. в образце кода, иллюстрирующем
+ <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">Совместимость строки действий</a>.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Рисунок 2.</strong> Строка действий из приложения <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>, содержащая
+вкладки навигации и пункт включения камеры (а также кнопку открытия дополнительной панели действий).</p>
+
+<p>Объявлять пункты меню параметров можно либо из подкласса {@link android.app.Activity},
+либо из подкласса {@link android.app.Fragment}. Если и ваша операция, и фрагменты
+объявляют пункты меню параметров, в пользовательском интерфейсе они объединяются. Сначала отображаются пункты
+операции, а за ними следуют пункты фрагментов в том порядке, в котором каждый фрагмент добавляется в
+операцию. При необходимости можно изменить порядок следования пунктов меню с помощью атрибута {@code android:orderInCategory},
+указываемого в каждом {@code &lt;item&gt;}, который требуется переместить.</p>
+
+<p>Чтобы указать меню параметров для операции, переопределите {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (фрагменты предоставляют собственный обратный
+вызов {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}). В этом
+методе можно загрузить собственный ресурс меню (<a href="#xml">определенный в XML</a>) в класс {@link
+android.view.Menu}, имеющийся в обратном вызове. Например:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>Пункты меню также можно добавлять с помощью {@link android.view.Menu#add(int,int,int,int)
+add()}, а получать их с помощью {@link android.view.Menu#findItem findItem()} для пересмотра их
+свойств с помощью API-интерфейсов {@link android.view.MenuItem}.</p>
+
+<p>Если ваше приложение предназначено для версии Android 2.3.x или более ранней, система вызывает метод {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} для создания меню параметров,
+когда пользователь открывает это меню впервые. Если приложение предназначено для версии Android 3.0 и или более поздней, система
+вызывает метод{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} при
+запуске операции, чтобы отобразить пункты в строке действий.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">Обработка нажатий</h3>
+
+<p>Когда пользователь выбирает пункт меню параметров (в том числе пункты действий из строки действий),
+система вызывает метод {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} вашей операции. Этот метод передает выбранный класс {@link android.view.MenuItem}. Идентифицировать
+пункт меню можно, вызвав метод {@link android.view.MenuItem#getItemId()}, который возвращает уникальный
+идентификатор пункта меню (определенный атрибутом {@code android:id} из ресурса меню или
+целым числом, переданным методу {@link android.view.Menu#add(int,int,int,int) add()}). Этот идентификатор
+можно сопоставить с известными пунктами меню, чтобы выполнить соответствующее действие. Например:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Когда пункт меню успешно обработан, возвращается {@code true}. Если пункт меню не
+обрабатывается, следует вызвать реализацию суперкласса {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} (реализация
+по умолчанию возвращает значение false).</p>
+
+<p>Если в вашей операции имеются фрагменты, система сначала вызовет метод {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} для операции, а затем
+будет вызывать этот метод для каждого фрагмента (в том порядке, в котором они были добавлены), пока он не возвратит
+значение{@code true} или не закончатся фрагменты.</p>
+
+<p class="note"><strong>Совет.</strong> В Android 3.0 появилась возможность определять в XML поведение
+при нажатии для пунктов меню с помощью атрибута {@code android:onClick}. Значением этого
+атрибута должно быть имя метода, определенное операцией с помощью меню. Этот метод
+должен быть общедоступным и принимать один параметр {@link android.view.MenuItem}, &mdash; когда система
+вызывает этот метод, она передает ему выбранный пункт меню. Подробные сведения и пример см. в документе <a href="{@docRoot}guide/topics/resources/menu-resource.html">Ресурс меню</a>.</p>
+
+<p class="note"><strong>Совет.</strong> Если в приложении предусмотрено несколько операций и 
+в некоторых из них имеются одинаковые меню параметров, рассмотрите возможность создания
+операции, которая будет использовать исключительно методы {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} и {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()}. Затем распространите этот класс на все операции, у которых должно быть
+одинаковое меню параметров. Таким образом можно управлять одним набором кода для обработки действий
+меню, а каждый класс-потомок при этом будет наследовать режимы работы меню.
+Если требуется добавить пункты меню в одну из операций-потомков,
+переопределите метод {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} в этой операции. Вызовите метод {@code super.onCreateOptionsMenu(menu)}, с тем чтобы
+создать первоначальные пункты меню, а затем добавьте новые пункты меню с помощью метода {@link
+android.view.Menu#add(int,int,int,int) menu.add()}. Также можно переопределять режимы работы
+суперкласса для отдельных пунктов меню.</p>
+
+
+<h3 id="ChangingTheMenu">Изменение пунктов меню во время выполнения</h3>
+
+<p>После того как система вызовет метод {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}, она сохранит заполненный вами экземпляр {@link android.view.Menu} и
+будет вызывать метод {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+,только если меню по каким-то причинам станет некорректным. Однако метод {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} следует использовать только для создания начального
+состояния меню, а не для внесения в него изменений в течение жизненного цикла операции.</p>
+
+<p>Если вам требуется изменять меню параметров в зависимости от 
+событий, которые возникают в течение жизненного цикла операции, сделать это можно в
+методе{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Этот
+метод передает объект {@link android.view.Menu} в том виде, в котором он в данный момент существует. Его-то и можно изменить
+путем, например, добавления, удаления или отключения пунктов меню. (Фрагменты также предоставляют обратный вызов {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()}.)</p>
+
+<p>В версии Android 2.3.x или более ранней система вызывает метод {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()} каждый раз, когда пользователь открывает меню параметров (нажимает кнопку <em>Меню</em>
+).</p>
+
+<p>В версии Android 3.0 и последующих версиях считается, что меню параметров всегда открыто, когда пункты меню
+приведены в строке действий. Когда возникает событие и требуется обновить меню, следует
+вызвать метод {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()}, чтобы запросить у
+системы вызов метода {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
+
+<p class="note"><strong>Примечание.</strong> 
+Никогда не следует изменять пункты меню параметров с учетом класса {@link android.view.View}, действующего
+в данный момент. В сенсорном режиме (когда пользователь не использует трекбол или кнопки направления движения) фокус
+не может переводиться на представления, поэтому никогда не следует использовать фокус в качестве основы для изменения
+пунктов меню параметров. Если вы желаете предоставить пункты меню, которые зависят от контекста {@link
+android.view.View}, используйте <a href="#context-menu">контекстное меню</a>.</p>
+
+
+
+
+<h2 id="context-menu">Создание контекстного меню</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>Рисунок 3</strong>. Снимки экрана с плавающим контекстным меню (слева)
+и строкой контекстных действий (справа).</p>
+</div>
+
+<p>В контекстном меню содержатся действия, которые затрагивают определенный элемент или контекстный кадр в пользовательском интерфейсе. Контекстное
+меню можно создать для любого представления, но чаще всего они используются для элементов из {@link
+android.widget.ListView}, {@link android.widget.GridView} или других групп представлений, в которых
+пользователь может выполнять действия непосредственно с каждым элементом.</p>
+
+<p>Существует два способа предоставления возможности контекстных действий:</p>
+<ul>
+  <li>В <a href="#FloatingContextMenu">плавающем контекстном меню</a>. Меню отображается в виде
+плавающего списка пунктов меню (наподобие диалогового окна), когда пользователь длительно нажимает на экран (нажимает и
+удерживает нажатым) в представлении, которое объявляет поддержку контекстного меню. Пользователи могут каждый раз выполнять контекстное
+действие только с одним элементом.</li>
+
+  <li>В <a href="#CAB">режиме контекстных действий</a>. Этот режим является системной реализацией
+{@link android.view.ActionMode}, которая отображает <em>строку контекстных действий</em> вверху
+экрана с пунктами действий, которые затрагивают выбранные элементы. Когда этот режим активен, пользователи
+могут одновременно выполнять действие с несколькими элементами (если это допускается приложением).</li>
+</ul>
+
+<p class="note"><strong>Примечание.</strong> Режим контекстных действий поддерживается в версии Android 3.0 (уровень API
+11) и последующих версиях. Если этот режим предусмотрен, именно его рекомендуется использовать для отображения контекстных
+действий. Если ваше приложение поддерживает версии ниже 3.0, то для этих устройств следует вернуться к плавающему
+контекстному меню.</p>
+
+
+<h3 id="FloatingContextMenu">Создание плавающего контекстного меню</h3>
+
+<p>Программирование плавающего контекстного меню</p>
+<ol>
+  <li>Зарегистрируйте класс {@link android.view.View}, с которым следует связать контекстное меню,
+вызвав метод {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} и передав
+ему {@link android.view.View}.
+  <p>Если операция использует {@link android.widget.ListView} или {@link android.widget.GridView} и
+требуется, чтобы каждый элемент предоставлял одинаковое контекстное меню, зарегистрируйте все элементы для контекстного меню,
+передав {@link android.widget.ListView} или {@link android.widget.GridView} методу {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
+</li>
+
+  <li>Реализуйте метод {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} в
+ {@link android.app.Activity} или {@link android.app.Fragment}.
+  <p>Когда зарегистрированное представление примет событие длительного нажатия, система вызовет ваш метод {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+. Именно здесь определяются пункты меню. Делается это обычно путем загрузки ресурса меню. Например:
+</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} позволяет загружать контекстное меню из <a href="{@docRoot}guide/topics/resources/menu-resource.html">ресурса меню</a>. В число параметров метода
+обратного вызова входят {@link android.view.View},
+выбранный пользователем, и объект{@link android.view.ContextMenu.ContextMenuInfo}, который предоставляет
+дополнительную информацию о выбранном элементе. Если в вашей операции есть несколько представлений и все они предоставляют
+разные контекстные меню, то с помощью этих параметров можно определять, какое контекстное меню
+загружать.</p>
+</li>
+
+<li>Реализуйте метод {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}.
+  <p>Когда пользователь выбирает пункт меню, система вызывает этот метод, с тем чтобы вы могли выполнить
+соответствующее действие. Например:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>Метод {@link android.view.MenuItem#getItemId()} запрашивает идентификатор для
+выбранного пункта меню. Идентификаторы должны быть назначены каждому пункту меню в файле XML с помощью атрибута {@code
+android:id}, как описано в разделе <a href="#xml">Определение меню в файле
+XML</a>.</p>
+
+<p>Когда пункт меню успешно обработан, возвращается {@code true}. Если пункт меню не
+обрабатывается, следует передать его реализации суперкласса. Если в вашей операции есть фрагменты,
+то она получит этот обратный вызов первой. Вызывая суперкласс, когда пункт меню не обрабатывается, система
+передает событие соответствующему методу обратного вызова в каждом фрагменте по одному (в порядке
+добавления каждого фрагмента), пока не будет возвращено значение {@code true} или {@code false}. (Реализация
+{@link android.app.Activity} и {@code android.app.Fragment} по умолчанию возвращает {@code
+false}, поэтому, когда событие не обрабатывается, следует всегда вызывать суперкласс.)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">Использование режима контекстных действий</h3>
+
+<p>Режим контекстных действий представляет собой системную реализацию класса {@link android.view.ActionMode}, которая
+направляет пользователя на выполнение контекстных действий при взаимодействии с приложением. Когда
+пользователь использует этот режим, выбирая элемент, вверху экрана открывается <em>строка контекстных действий</em>,
+содержащая действия, которые пользователь может выполнить с выбранными в данный момент элементами. В этом режиме
+пользователь может выбирать несколько элементов (если это допускается приложением), снимать выделения с элементов и продолжать
+навигацию в операции (в тех пределах, в которых это поддерживается приложением). Режим контекстных действий отключается,
+а строка контекстных действий исчезает, когда пользователь снимет выделение со всех элементов, нажмет кнопку НАЗАД
+или выберет действие <em>Готово</em>, расположенное с левой стороны строки.</p>
+
+<p class="note"><strong>Примечание.</strong> Строка контекстных действий не обязательно бывает
+связана со <a href="{@docRoot}guide/topics/ui/actionbar.html">строкой действий</a>. Они работают
+независимо друг от друга, даже несмотря на то, что визуально строка контекстных действий занимает положение
+строки действий.</p>
+
+<p>Если вы разрабатываете приложение для версии Android 3.0 (уровень API 11) или последующих версий, то
+обычно вместо <a href="#FloatingContextMenu">плавающего контекстного меню</a> вам следует использовать контекстные действия.</p>
+
+<p>Для представлений, которые предоставляют возможность контекстные действия, обычно следует вызывать режим контекстных действий
+при возникновении одного из двух (или сразу обоих) событий:</p>
+<ul>
+  <li>пользователь длительно нажимает в представлении;</li>
+  <li>пользователь устанавливает флажок или выбирает другой подобный компонент пользовательского интерфейса в представлении.</li>
+</ul>
+
+<p>То, каким образом ваше представление вызывает режим контекстных действий и определяет поведение каждого
+действия, зависит от вас. Есть два базовых варианта:</p>
+<ul>
+  <li>для контекстных действий в отдельных, произвольных представлениях;</li>
+  <li>для пакетных контекстных действий с группами элементов в {@link
+android.widget.ListView} или {@link android.widget.GridView} (что позволяет пользователю выбирать по несколько
+элементов и выполнять действие с ними всеми).</li>
+</ul>
+
+<p>В следующих разделах описывается конфигурация, необходимая для каждого из этих вариантов.</p>
+
+
+<h4 id="CABforViews">Включение режима контекстных действий для отдельных представлений</h4>
+
+<p>Если вам требуется вызывать режим контекстных действий, только когда пользователь выбирает определенные
+представления, то вам следует:</p>
+<ol>
+  <li>Реализовать интерфейс {@link android.view.ActionMode.Callback}. В его методах обратного вызова вы
+можете указать действия для строки контекстных действий, реагировать на нажатия пунктов действий и 
+обрабатывать другие события жизненного цикла для режима действий.</li>
+  <li>Вызывайте {@link android.app.Activity#startActionMode startActionMode()}, когда требуется показать
+строку (например, когда пользователь выполняет длительное нажатие представления).</li>
+</ol>
+
+<p>Например:</p>
+
+<ol>
+  <li>Реализуйте интерфейс {@link android.view.ActionMode.Callback ActionMode.Callback}:
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>Обратите внимание, что эти обратные вызовы событий почти точно такие же, как и обратные вызовы для <a href="#options-menu">меню параметров</a>. Отличаются они только тем, что каждый из них также передает объект {@link
+android.view.ActionMode}, связанный с событием. С помощью API-интерфейсов {@link
+android.view.ActionMode} можно вносить различные изменения в CAB, например, указывать другой заголовок и
+подзаголовок с помощью {@link android.view.ActionMode#setTitle setTitle()} и {@link
+android.view.ActionMode#setSubtitle setSubtitle()} (удобно для указания количества выбранных
+элементов).</p>
+
+<p>Также обратите внимание, что приведенный выше образец кода задает для переменной {@code mActionMode} значение null, когда 
+режим действия прекращает свое существование. Далее вы узнаете, каким образом он инициализируется и чем может быть
+полезно сохранение составной переменной в операции или фрагменте.</p>
+</li>
+
+  <li>Для включения режима контекстных действий, когда это необходимо, 
+например, в ответ на длительное нажатие {@link
+android.view.View}, вызывайте {@link android.app.Activity#startActionMode startActionMode()}:</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>При вызове метода {@link android.app.Activity#startActionMode startActionMode()} система возвращает
+созданный класс {@link android.view.ActionMode}. Сохранив его в составной переменной, вы сможете
+вносить изменения в строку контекстных действий в ответ на другие события. В приведенном выше образце кода
+{@link android.view.ActionMode} используется для того, чтобы экземпляр {@link android.view.ActionMode}
+не создавался повторно, если он уже активен. Достигается это путем проверки, имеет ли элемент значение null перед запуском
+режима действий.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">Включение пакетных контекстных действий в ListView или GridView</h4>
+
+<p>Если при наличии набора элементов в {@link android.widget.ListView} или {@link
+android.widget.GridView} (либо другом расширении {@link android.widget.AbsListView}) требуется
+разрешить пользователям выполнять пакетные действия, следует:</p>
+
+<ul>
+  <li>реализовать интерфейс {@link android.widget.AbsListView.MultiChoiceModeListener} и задать его
+для группы представлений с помощью метода {@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}; в методах обратного вызова приемника событий вы можете указывать действия
+для строки контекстных действий, реагировать на нажатия пунктов действий и обрабатывать другие обратные вызовы,
+унаследованные от интерфейса {@link android.view.ActionMode.Callback};</li>
+
+  <li>вызвать метод {@link android.widget.AbsListView#setChoiceMode setChoiceMode()} с аргументом {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.</li>
+</ul>
+
+<p>Например:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>Готово. Теперь, когда пользователь выберет элемент с помощью длительного нажатия, система вызовет метод {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+и отобразит строку контекстных действий с указанными действиями. Пока строка
+контекстных действий отображается, пользователи могут выбирать дополнительные элементы.</p>
+
+<p>В некоторых случаях, когда контекстные действия содержат общие пункты, можно
+добавить флажок или другой подобный элемент пользовательского интерфейса, с помощью которого пользователи могут выбирать пункты, поскольку они
+могут не обнаружить варианта с длительным нажатием. Когда пользователь устанавливает флажок, можно
+вызывать режим контекстных действий, переводя соответствующий элемент списка в выбранное
+состояние с помощью {@link android.widget.AbsListView#setItemChecked setItemChecked()}.</p>
+
+
+
+
+<h2 id="PopupMenu">Создание всплывающего меню</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>Рисунок 4</strong>. Всплывающее меню в приложении Gmail, привязанное к расположенной вверху справа кнопке открытия панели
+дополнительных пунктов.</p>
+</div>
+
+<p>{@link android.widget.PopupMenu} является модальным меню, привязанным к {@link android.view.View}.
+Оно отображается ниже представления, к которому привязано, если там есть место, либо поверх него. Варианты использования:</p>
+<ul>
+  <li>Предоставление меню с дополнительными пунктами для действий, которые <em>относятся к</em> определенному контенту (например,
+к заголовкам сообщений Gmail, показанным на рисунке 4).
+    <p class="note"><strong>Примечание.</strong> Оно отличается от контекстного меню, которое
+обычно используется для действий, <em>затрагивающих</em> выбранный контент. Для действий, которые затрагивают выбранный
+контент, используйте <a href="#CAB">режим контекстных действий</a> или <a href="#FloatingContextMenu">плавающее контекстное меню</a>.</p></li>
+  <li>Предоставление второй части командной последовательности (например, кнопки, обозначенной как "Добавить",
+которая открывает всплывающее меню с различными вариантами добавления);</li>
+  <li>Предоставление раскрывающегося меню наподобие {@link android.widget.Spinner}, которое не сохраняет
+постоянное выделение.</li>
+</ul>
+
+
+<p class="note"><strong>Примечание.</strong> Использование класса {@link android.widget.PopupMenu} поддерживается на уровне API
+ 11 и выше.</p>
+
+<p>Если для <a href="#xml">определения меню используется XML</a>, вот каким образом можно показать всплывающее меню:</p>
+<ol>
+  <li>Создайте экземпляр класса {@link android.widget.PopupMenu} с помощью его конструктора, принимающий 
+текущие {@link android.content.Context} и {@link android.view.View} приложения, к которым
+должно быть привязано меню.</li>
+  <li>С помощью {@link android.view.MenuInflater} загрузите свой ресурс меню в объект {@link
+android.view.Menu}, возвращенный методом {@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. На API уровня 14 и выше вместо этого можно использовать
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()}.</li>
+  <li>Вызовите метод {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
+</ol>
+
+<p>Например, вот кнопка с атрибутом {@link android.R.attr#onClick android:onClick},
+которая показывает всплывающее меню:</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>После этого операция сможет показать вот такое всплывающее меню:</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>На API уровня 14 и выше можно объединить две строки, которые загружают меню, с помощью {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}.</p>
+
+<p>Меню закрывается, когда пользователь выбирает один из пунктов или касается экрана за пределами области
+меню. Прослушивать событие закрытия меню можно с помощью {@link
+android.widget.PopupMenu.OnDismissListener}.</p>
+
+<h3 id="PopupEvents">Обработка нажатий</h3>
+
+<p>Для выполнения
+действия, когда пользователь выбирает пункт меню, необходимо реализовать интерфейс {@link
+android.widget.PopupMenu.OnMenuItemClickListener} и зарегистрировать его в своем {@link
+android.widget.PopupMenu}, вызвав метод {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}. Когда пользователь выбирает пункт меню, система выполняет обратный вызов {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} в
+вашем интерфейсе.</p>
+
+<p>Например:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">Создание групп меню</h2>
+
+<p>Группа меню ― это набор пунктов меню с рядом общих характеристик. С помощью группы
+можно:</p>
+<ul>
+  <li>показывать или скрывать все пункты с помощью {@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()};</li>
+  <li>включать или отключать все пункты с помощью {@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()};</li>
+  <li>Указывать, можно ли помечать все пункты, с помощью {@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}.</li>
+</ul>
+
+<p>Для создания группы необходимо вложить элементы {@code &lt;item&gt;} в элемент {@code &lt;group&gt;}
+в своем ресурсе меню либо указать идентификатор группы с помощью метода {@link
+android.view.Menu#add(int,int,int,int) add()}.</p>
+
+<p>Вот пример ресурса меню, в котором имеется группа:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Элементы, находящиеся в группе, отображаются на одном уровне с первым элементом &mdash; все три пункта
+меню являются элементами одного уровня. Однако можно изменить характеристики двух
+пунктов из группы, указав ссылку на идентификатор группы и воспользовавшись приведенными выше методами. Кроме того,
+система никогда не будет разделять сгруппированные пункты. Например, если объявить {@code
+android:showAsAction="ifRoom"} для каждого пункта, то они оба будут отображены либо в строке
+действий, либо в дополнительных действиях.</p>
+
+
+<h3 id="checkable">Использование пунктов меню, которые можно пометить</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>Рисунок 5</strong>. Снимок экрана с вложенным меню, пункты которого можно
+пометить.</p>
+</div>
+
+<p>Такое меню можно использовать в качестве интерфейса для включения и отключения тех или иных параметров. При этом для автономных
+параметров используется флажок, а для групп
+взаимоисключающих вариантов ― переключатель. На рисунке 5 показано вложенное меню с пунктами, которые можно выбирать с помощью
+переключателей.</p>
+
+<p class="note"><strong>Примечание.</strong> Пункты в меню значков (из меню параметров) не могут
+отображать флажки или переключатели. Если вы решите сделать так, чтобы пункты меню значков можно было помечать,
+вам необходимо будет вручную указать помеченное состояние путем замены значка и/или теста
+при каждом изменении состояния.</p>
+
+<p>Определять возможность помечать отдельные пункты меню можно с помощью атрибута {@code
+android:checkable} в элементе {@code &lt;item&gt;}, а для всей группы это делается с помощью
+атрибута {@code android:checkableBehavior} в элементе {@code &lt;group&gt;}. Например
+, все пункты этой группы меню можно помечать с помощью переключателей:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Атрибут {@code android:checkableBehavior} принимает один из трех параметров:
+<dl>
+  <dt>{@code single}</dt>
+    <dd>Только один пункт из группы можно пометить (переключатель)</dd>
+  <dt>{@code all}</dt>
+    <dd>Все пункты можно пометить (флажки)</dd>
+  <dt>{@code none}</dt>
+    <dd>Пометить нельзя ни один пункт</dd>
+</dl>
+
+<p>Для того чтобы применить к пункту помеченное состояние по умолчанию, служит атрибут {@code android:checked} в
+элементе {@code &lt;item&gt;}, а изменить его в коде можно с помощью метода {@link
+android.view.MenuItem#setChecked(boolean) setChecked()}.</p>
+
+<p>Когда выбирается пункт, который может быть помечен, система вызывает соответствующий ему метод обратного вызова
+(например {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). Именно
+здесь необходимо задать состояние флажка, поскольку флажок или переключатель не
+изменяет свое состояние автоматически. Запросить текущее состояние пункта (в котором он находился до того, как был
+выбран пользователем) можно с помощью{@link android.view.MenuItem#isChecked()}, а затем задать помеченное состояние с помощью 
+{@link android.view.MenuItem#setChecked(boolean) setChecked()}. Например:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Если помеченное состояние не установить этим способом, то, когда пользователь выберет пункт, его отображаемое состояние (флажок или
+переключатель) не
+изменится. Если же помеченное состояние установить, операция сохранит его
+для пункта, с тем чтобы, когда пользователь откроет это меню, он увидел,
+что галочка поставлена.</p>
+
+<p class="note"><strong>Примечание.</strong>
+Пункты меню, которые можно пометить галочкой, предназначены для использования только в рамках одного сеанса. Они не сохраняются после
+прекращения существования приложения. Если имеются настройки приложения, которые требуется сохранить для пользователя,
+делать это следует с помощью <a href="{@docRoot}guide/topics/data/data-storage.html#pref">общих настроек</a>.</p>
+
+
+
+<h2 id="intents">Добавление пунктов меню на основе объектов Intent</h2>
+
+<p>Иногда требуется, чтобы пункт меню запускал операцию с помощью объекта {@link android.content.Intent}
+(это может быть операция как из вашего, так и из другого приложения). Когда вам известен объект Intent, который
+требуется использовать, и у вас есть определенный пункт меню, который должен инициировать этот объект Intent, можно выполнить объект
+Intent с помощью {@link android.app.Activity#startActivity(Intent) startActivity()} во время
+выполнения соответствующего метода обратного вызова, запускаемого при выборе пункта меню (например, обратного вызова {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}).</p>
+
+<p>Однако если вы не уверены, что на устройстве пользователя
+есть приложение, которое может обработать этот объект Intent, добавление пункта меню, который его вызывает, может привести
+к тому, что он не будет работать, поскольку объект Intent может не быть передан в
+операцию. Чтобы решить эту проблему, Android позволяет динамически добавлять в меню пункты,
+когда система Android обнаруживает на устройстве операции, которые могут обработать ваш объект Intent.</p>
+
+<p>Добавление пунктов меню на основе имеющихся операций, которые принимают объект Intent:</p>
+<ol>
+  <li>Определите объект
+с категорией {@link android.content.Intent#CATEGORY_ALTERNATIVE} и/или
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE}, а также с любыми другими условиями.</li>
+  <li>Вызовите метод {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}. Затем Android выполнит поиск приложений, которые могут выполнить этот объект Intent,
+и добавит их в ваше меню.</li>
+</ol>
+
+<p>При отсутствии установленных приложений,
+которые удовлетворяют требованиям объекта Intent, ни одного пункта меню добавлено не будет.</p>
+
+<p class="note"><strong>Примечание.</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} используется для обработки элемента, выбранного
+в данный момент на экране. Поэтому его следует использовать только при создании меню в {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()}.</p>
+
+<p>Например:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>Каждая обнаруженная операция, в которой имеется фильтр Intent, соответствующий данному объекту Intent, добавляется в виде
+пункта меню. Для этого значение из элемента <code>android:label</code> фильтра Intent используется в качестве
+заголовка пункта меню, а значок приложения ― в качестве значка этого пункта меню. Метод
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} возвращает количество добавленных пунктов меню.</p>
+
+<p class="note"><strong>Примечание.</strong> При вызове метода {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} он переопределяет все пункты меню по группе меню, указанной в первом
+аргументе.</p>
+
+
+<h3 id="AllowingToAdd">Предоставление возможности добавить свою операцию в другие меню</h3>
+
+<p>Вы также можете предоставить другим приложениям возможность воспользоваться своей операцией, с тем чтобы ваше
+приложение могло быть включено в меню других приложений (процедура, обратная описанной выше).</p>
+
+<p>Чтобы операция могла быть включена в меню других приложений, необходимо определить фильтр
+Intent обычным образом, но непременно включить в него значения {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+и/или {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} для категории фильтра
+Intent. Например:</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>Подробные сведения о написании фильтров Intent см. в документе 
+<a href="/guide/components/intents-filters.html">Объекты Intent и фильтры объектов Intent</a>.</p>
+
+<p>Образец приложения, в котором используется эта методика, см. в образце кода 
+<a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
+Pad</a>.</p>

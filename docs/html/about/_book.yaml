@@ -1,0 +1,49 @@
+toc:
+- title: Marshmallow
+  path: /about/versions/marshmallow/index.html
+  section:
+  - title: Android 6.0 APIs
+    path: /about/versions/marshmallow/android-6.0.html
+  - title: Android 6.0 Changes
+    path: /about/versions/marshmallow/android-6.0-changes.html
+  - title: Android 6.0 Samples
+    path: /about/versions/marshmallow/samples.html
+
+- title: Lollipop
+  path: /about/versions/lollipop.html
+  section:
+  - title: Android 5.1 APIs
+    path: /about/versions/android-5.1.html
+  - title: Android 5.0 APIs
+    path: /about/versions/android-5.0.html
+    custom_link_attributes:
+    - es-lang="API de Android 5.0"
+    - ja-lang="Android 5.0 API"
+    - ko-lang="Android 5.0 API"
+    - ru-lang="API для Android 5.0"
+    - zh-cn-lang="Android 5.0 API"
+    - zh-tw-lang="Android 5.0 API"
+  - title: Android 5.0 Changes
+    path: /about/versions/android-5.0-changes.html
+
+- title: KitKat
+  path: /about/versions/kitkat.html
+  section:
+  - title: Android 4.4 APIs
+    path: /about/versions/android-4.4.html
+
+- title: Jelly Bean
+  path: /about/versions/jelly-bean.html
+  section:
+  - title: Android 4.3 APIs
+    path: /about/versions/android-4.3.html
+  - title: Android 4.2 APIs
+    path: /about/versions/android-4.2.html
+  - title: Android 4.1 APIs
+    path: /about/versions/android-4.1.html
+
+- title: About Android
+  path: /about/android.html
+
+- title: Dashboards
+  path: /about/dashboards/index.html

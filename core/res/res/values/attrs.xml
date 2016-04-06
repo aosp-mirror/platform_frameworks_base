@@ -3366,7 +3366,7 @@ i
              property is set to true by default but should be set to false if your adapter
              will display items of varying heights. When this property is set to true and
              your adapter displays items of varying heights, the scrollbar thumb will
-             change size as the user scrolls through the list. When set to fale, the list
+             change size as the user scrolls through the list. When set to false, the list
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />

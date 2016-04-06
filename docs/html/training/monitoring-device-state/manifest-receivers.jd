@@ -42,7 +42,7 @@ only when necessary.</p>
 
 <h2 id="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve Efficiency </h2> 
  
-<p>Use can use the {@link android.content.pm.PackageManager} to toggle the enabled state on any
+<p>You can use the {@link android.content.pm.PackageManager} to toggle the enabled state on any
 component defined in the manifest, including whichever broadcast receivers you wish to enable or
 disable as shown in the snippet below:</p>
 

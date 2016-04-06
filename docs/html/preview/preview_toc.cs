@@ -14,17 +14,10 @@
 
 
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      es-lang="Descargas"
-      ja-lang="ダウンロード"
-      ko-lang="다운로드"
-      pt-br-lang="Downloads"
-      ru-lang="Загрузки"
-      zh-cn-lang="下载"
-      zh-tw-lang="下載">
-      Downloads</a></div>
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
+      Support and Release Notes</a></div>
   </li>
-
+  
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html"
       es-lang="Configurar el SDK de la versión preliminar"
@@ -34,29 +27,29 @@
       ru-lang="Настройка пакета SDK Preview"
       zh-cn-lang="设置预览版 SDK"
       zh-tw-lang="設定預覽版 SDK">
-      Set up the SDK</a></div>
+      Set Up to Develop</a></div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
+      Test on a Device</a></div>
   </li>
 
+
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/testing/guide.html"
-      es-lang="Guía de prueba"
-      ja-lang="テストガイド"
-      ko-lang="테스트 가이드"
-      pt-br-lang="Guia de teste"
-      ru-lang="Руководство по тестированию"
-      zh-cn-lang="测试指南"
-      zh-tw-lang="測試指南">
-      Testing Guide</a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>preview/behavior-changes.html"
+      es-lang="Cambios en los comportamientos"
+      ja-lang="動作の変更点"
+      ko-lang="동작 변경"
+      pt-br-lang="Mudanças de comportamento"
+      ru-lang="Изменения в работе"
+      zh-cn-lang="行为变更"
+      zh-tw-lang="行為變更">Behavior Changes
+       </a></div>
       <ul>
-        <li><a href="<?cs var:toroot ?>preview/testing/performance.html"
-      es-lang="Prueba de rendimiento de video"
-      ja-lang="表示パフォーマンスのテスト"
-      ko-lang="표시 성능 테스트"
-      pt-br-lang="Teste de desempenho de exibição"
-      ru-lang="Тестирование скорости отображения"
-      zh-cn-lang="测试显示性能"
-      zh-tw-lang="測試顯示效能">
-      Performance Testing</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/background-optimization.html"
+        >Background Optimizations</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
+        >Language and Locale</a></li>
       </ul>
   </li>
 
@@ -68,59 +61,50 @@
       pt-br-lang="Visão geral da API"
       ru-lang="Обзор API-интерфейсов"
       zh-cn-lang="API 概览"
-      zh-tw-lang="API 總覽">API Overview
+      zh-tw-lang="API 總覽">Android N for Developers
       </a></div>
       <ul>
-        <li><a href="<?cs var:toroot ?>preview/features/runtime-permissions.html"
-      es-lang="Permisos"
-      ja-lang="パーミッション"
-      ko-lang="권한"
-      pt-br-lang="Permissões"
-      ru-lang="Разрешения"
-      zh-cn-lang="权限"
-      zh-tw-lang="權限">Permissions
-          </a></li>
-        <li><a href="<?cs var:toroot ?>preview/features/app-linking.html"
-      es-lang="Vínculos de la aplicación"
-      ja-lang="App Links"
-      ko-lang="앱 링크"
-      pt-br-lang="Links de aplicativos"
-      ru-lang="Связи приложений"
-      zh-cn-lang="应用链接"
-      zh-tw-lang="應用程式連結">
-      App Links</a></li>
-        <li><a href="<?cs var:toroot ?>preview/backup/index.html"
-      es-lang="Copia de seguridad automática para aplicaciones"
-      ja-lang="アプリの自動バックアップ"
-      ko-lang="앱용 자동 백업"
-      pt-br-lang="Backup automático para aplicativos"
-      ru-lang="Автоматическое резервное копирование для приложений"
-      zh-cn-lang="自动备份应用"
-      zh-tw-lang="針對應用程式進行自動備份">
-          Auto Backup for Apps</a></li>
-        <li><a href="<?cs var:toroot ?>preview/features/power-mgmt.html"
-      es-lang="Optimizaciones de ahorro de energía"
-      ja-lang="省電力の最適化"
-      ko-lang="절전 최적화"
-      pt-br-lang="Otimizações de economia de energia"
-      ru-lang="Оптимизация экономии энергии"
-      zh-cn-lang="节能优化"
-      zh-tw-lang="省電最佳化">
-      Power-Saving Optimizations</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/multi-window.html"
+        >Multi-Window Support</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
+        >Notifications</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/data-saver.html"
+        >Data Saver</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/tv-recording-api.html"
+        >TV Recording</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/security-config.html"
+        >Network Security Configuration</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
+        >ICU4J Support</a></li>
+        
+        <li><a href="<?cs var:toroot ?>preview/j8-jack.html"
+        >Java 8 Language Features</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/afw.html"
+        >Android for Work Updates</a></li>
       </ul>
   </li>
 
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/behavior-changes.html"
-      es-lang="Cambios en los comportamientos"
-      ja-lang="動作の変更点"
-      ko-lang="동작 변경"
-      pt-br-lang="Mudanças de comportamento"
-      ru-lang="Изменения в работе"
-      zh-cn-lang="行为变更"
-      zh-tw-lang="行為變更">Behavior Changes
-       </a></div>
-  </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html"
       es-lang="Ejemplos"
@@ -131,11 +115,6 @@
       zh-cn-lang="示例"
       zh-tw-lang="範例">
       Samples</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
-      Support & Release Notes</a></div>
   </li>
 
   <li class="nav-section">

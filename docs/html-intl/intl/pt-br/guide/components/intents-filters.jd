@@ -1,0 +1,899 @@
+page.title=Intenções e filtros de intenções
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+  <li><a href="#Types">Tipos de intenções</a></li>
+  <li><a href="#Building">Criação de uma intenção</a>
+    <ol>
+      <li><a href="#ExampleExplicit">Exemplo de intenção explícita</a></li>
+      <li><a href="#ExampleSend">Exemplo de intenção implícita</a></li>
+      <li><a href="#ForceChooser">Forçar um seletor de aplicativo</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">Recepção de uma intenção implícita</a>
+    <ol>
+      <li><a href="#ExampleFilters">Exemplos de filtros</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">Uso de uma intenção pendente</a></li>
+  <li><a href="#Resolution">Resolução de intenções</a>
+    <ol>
+      <li><a href="#ActionTest">Teste de ação</a></li>
+      <li><a href="#CategoryTest">Teste de categoria</a></li>
+      <li><a href="#DataTest">Teste de dados</a></li>
+      <li><a href="#imatch">Correspondência de intenções</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Veja também</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">Interação com outros aplicativos</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">Compartilhamento de conteúdo</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>A {@link android.content.Intent} é um objeto de mensagem que pode ser usado para solicitar uma ação
+de outro <a href="{@docRoot}guide/components/fundamentals.html#Components">componente de aplicativo</a>.
+Embora as intenções facilitem a comunicação entre componentes de diversos modos, há três
+casos de uso fundamentais:</p>
+
+<ul>
+<li><b>Para iniciar uma atividade:</b>
+<p>A {@link android.app.Activity} representa uma única tela em um aplicativo. É possível iniciar uma nova
+instância de uma {@link android.app.Activity} passando uma {@link android.content.Intent}
+a {@link android.content.Context#startActivity startActivity()}. A {@link android.content.Intent}
+descreve a atividade a iniciar e carrega todos os dados necessários.</p>
+
+<p>Se você deseja receber um resultado da atividade quando ela finalizar,
+chame {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Sua atividade recebe o resultado
+como um objeto {@link android.content.Intent} separado no retorno de chamada de {@link
+android.app.Activity#onActivityResult onActivityResult()} da atividade.
+Para obter mais informações, consulte o guia <a href="{@docRoot}guide/components/activities.html">Atividades</a>.</p></li>
+
+<li><b>Para iniciar um serviço:</b>
+<p>O {@link android.app.Service} é um componente que realiza operações em segundo plano
+sem interface de usuário. É possível iniciar um serviço para realizar uma operação que acontece uma vez
+(como baixar um arquivo) passando uma {@link android.content.Intent}
+a {@link android.content.Context#startService startService()}. A {@link android.content.Intent}
+descreve o serviço a iniciar e carrega todos os dados necessários.</p>
+
+<p>Se o serviço for projetado com uma interface servidor-cliente, é possível vincular ao serviço
+a partir de outro componente passando uma {@link android.content.Intent} a {@link
+android.content.Context#bindService bindService()}</code>. Para obter mais informações, consulte o guia <a href="{@docRoot}guide/components/services.html">Serviços</a>.</p></li>
+
+<li><b>Para fornecer uma transmissão:</b>
+<p>Transmissão é uma mensagem que qualquer aplicativo pode receber. O sistema fornece diversas
+transmissões para eventos do sistema, como quando o sistema inicializa ou o dispositivo inicia o carregamento.
+Você pode fornecer uma transmissão a outros aplicativos passando uma {@link android.content.Intent}
+a {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()},
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()} ou {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">Tipos de intenções</h2>
+
+<p>Há dois tipos de intenções:</p>
+
+<ul>
+<li>As <b>intenções explícitas</b> especificam o componente a iniciar pelo nome
+(o nome de classe totalmente qualificado). Normalmente, usa-se uma intenção explícita para iniciar um componente
+no próprio aplicativo porque se sabe o nome de classe da atividade ou serviço que se deseja iniciar.
+Por exemplo, iniciar uma nova atividade em resposta a uma ação do usuário ou iniciar um serviço para baixar
+um arquivo em segundo plano.</li>
+
+<li>As <b>intenções implícitas</b> não nomeiam nenhum componente específico, mas declaram uma ação geral
+a realizar, o que permite que um componente de outro aplicativo a trate. Por exemplo: se você deseja
+exibir ao usuário uma localização em um mapa, pode usar uma intenção implícita para solicitar que outro aplicativo
+capaz exiba uma localização especificada no mapa.</li>
+</ul>
+
+<p>Ao criar uma intenção explícita para iniciar uma atividade ou serviço, o sistema inicia imediatamente
+o componente do aplicativo especificado no objeto {@link android.content.Intent} .</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>Figura 1.</strong> Ilustração de como uma intenção implícita
+é fornecida pelo sistema para iniciar outra atividade: <b>[1]</b> <em>A atividade A</em> cria uma
+{@link android.content.Intent} com uma descrição de ação e passa-a para {@link
+android.content.Context#startActivity startActivity()}. <b>[2]</b> O sistema Android busca, em todos
+os aplicativos, um filtro de intenções que corresponda à intenção. Ao encontrar uma correspondência, <b>[3]</b> o sistema
+inicia a atividade correspondente (<em>atividade B</em>) chamando seu método {@link
+android.app.Activity#onCreate onCreate()} e passando a {@link android.content.Intent} para ele.
+</p>
+</div>
+
+<p>Ao criar uma intenção implícita, o sistema Android encontra o componente adequado para iniciar,
+comparando o conteúdo da intenção aos <em>filtros de intenções</em> declarados no <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">arquivo de manifesto</a> de outros aplicativos
+no dispositivo. Se a intenção corresponder a um filtro de intenções, o sistema iniciará esse componente e entregará
+o objeto {@link android.content.Intent}. Se diversos filtros de intenções corresponderem, o sistema
+exibirá uma caixa de diálogo para que o usuário selecione o aplicativo que deseja usar.</p>
+
+<p>O filtro de intenções é uma expressão em um arquivo de manifesto do aplicativo
+que especifica o tipo de intenções que o componente
+gostaria de receber. Por exemplo, ao declarar um filtro de intenções para uma atividade,
+outros aplicativos se tornam capazes de iniciar diretamente sua atividade com o determinado tipo de intenção.
+Do mesmo modo, se você <em>não</em> declarar nenhum filtro de intenções para uma atividade, ela poderá ser iniciada
+somente com uma intenção explícita.</p>
+
+<p class="caution"><strong>Atenção:</strong> para garantir a segurança do seu aplicativo, sempre use uma intenção
+explícita ao iniciar um {@link android.app.Service} e não
+declare filtros de intenções para os serviços. O uso de uma intenção implícita para iniciar um serviço representa
+um risco de segurança porque não é possível determinar qual serviço responderá à intenção
+e o usuário não poderá ver que serviço é iniciado. A partir do Android 5.0 (API de nível 21), o sistema
+lança uma exceção ao chamar {@link android.content.Context#bindService bindService()}
+com uma intenção implícita.</p>
+
+
+
+
+
+<h2 id="Building">Criação de uma intenção</h2>
+
+<p>Um objeto {@link android.content.Intent} carrega informações que o sistema Android usa
+para determinar o componente a iniciar (como o nome exato do componente ou categoria
+do componente que deve receber a intenção), além de informações que o componente receptor usa para
+realizar a ação adequadamente (como a ação a tomar e os dados a usar).</p>
+
+
+<p>As informações principais contidas em uma {@link android.content.Intent} são as seguintes:</p>
+
+<dl>
+
+<dt><b>Nome do componente</b></dt>
+<dd>O nome do componente a iniciar.
+
+<p>É opcional, mas é a informação fundamental que torna uma intenção
+<b>explícita</b>, o que significa que a intenção deve ser entregue somente ao componente do aplicativo
+definido pelo nome do componente. Sem nome de componente, a intenção será <b>implícita</b>
+e o sistema decidirá qual componente deve receber a intenção, com base nas informações de outra intenção
+(como a ação, os dados e a categoria &mdash; descritos abaixo). Portanto, se for necessário iniciar
+um componente específico no seu aplicativo, deve-se especificar o nome do componente.</p>
+
+<p class="note"><strong>Observação:</strong> ao iniciar um {@link android.app.Service}, deve-se
+<strong>sempre especificar o nome do componente</strong>. Caso contrário, não será possível determinar qual serviço
+responderá à intenção e o usuário não poderá ver que serviço é iniciado.</p>
+
+<p>Esse campo da {@link android.content.Intent} é um
+objeto {@link android.content.ComponentName} que pode ser especificado usando um nome
+de classe totalmente qualificado do componente-alvo, inclusive o nome do pacote do aplicativo. Por exemplo,
+{@code com.example.ExampleActivity}. É possível definir o nome do componente com {@link
+android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()} ou com
+o construtor de {@link android.content.Intent}.</p>
+
+</dd>
+
+<p><dt><b>Ação</b></dt>
+<dd>String que especifica a ação genérica a realizar (como <em>exibir</em> ou <em>selecionar</em>).
+
+<p>No caso de uma intenção de transmissão, essa é a ação que entrou em vigor e que está sendo relatada.
+A ação determina amplamente como o resto da intenção é estruturado &mdash; especificamente,
+o que está contido nos dados e em extras.
+
+<p>É possível especificar as ações para uso por intenções dentro do aplicativo (ou para uso por outros
+aplicativos para chamar componentes no seu aplicativo), mas normalmente usam-se constantes de ação
+definidas pela classe {@link android.content.Intent} ou por outras classes de estrutura. A seguir há algumas
+ações comuns para iniciar uma atividade:</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>Use essa ação em uma intenção com {@link
+   android.content.Context#startActivity startActivity()} quando houver informações que
+   uma atividade possa exibir ao usuário, como uma foto para exibição em um aplicativo de galeria ou um endereço
+   para exibição em um aplicativo de mapa.</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>Também conhecida como a intenção de "compartilhamento", ela deve ser usada em uma intenção com {@link
+   android.content.Context#startActivity startActivity()} quando houver alguns dados que o usuário possa
+   compartilhar por meio de outro aplicativo, como um aplicativo de e-mail ou de compartilhamento social.</dd>
+</dl>
+
+<p>Consulte a referência da classe {@link android.content.Intent} para obter mais
+constantes que definem ações genéricas.  Outras ações são definidas
+em outros locais na estrutura do Android, como nas {@link android.provider.Settings} para ações
+que abrem telas específicas no aplicativo de Configurações do sistema.</p>
+
+<p>É possível especificar a ação para uma intenção com {@link android.content.Intent#setAction
+setAction()} ou com um construtor de {@link android.content.Intent}.</p>
+
+<p>Se você definir as próprias ações, certifique-se de incluir o nome do pacote do seu aplicativo
+como prefixo. Por exemplo:</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>Dados</b></dt>
+<dd>A URI (um objeto {@link android.net.Uri}) que referencia os dados a serem aproveitados e/ou o
+tipo MIME desses dados. O tipo dos dados fornecidos geralmente é determinado pela ação da intenção.
+Por exemplo: se a ação for {@link android.content.Intent#ACTION_EDIT}, os dados devem conter
+a URI do documento a editar.
+
+<p>Ao criar uma intenção,
+em geral, é importante especificar o tipo de dados (seu tipo MIME) em adição à URI.
+Por exemplo: uma atividade capaz de exibir imagens provavelmente não será capaz
+de reproduzir um arquivo de áudio, mesmo que os formatos da URI sejam similares.
+Portanto, especificar o tipo MIME dos dados ajuda o sistema
+Android a encontrar o melhor componente para receber a intenção.
+Contudo, o tipo MIME, às vezes, pode ser inferido a partir da URI &mdash; especificamente quando os dados são
+uma URI de {@code content:}, indicando que os dados se localizam no dispositivo e são controlados
+por um {@link android.content.ContentProvider}, que torna o tipo MIME dos dados visíveis para o sistema.</p>
+
+<p>Para definir somente a URI de dados, chame {@link android.content.Intent#setData setData()}.
+Para definir somente o tipo MIME, chame {@link android.content.Intent#setType setType()}. Se necessário,
+é possível definir ambos explicitamente com {@link
+android.content.Intent#setDataAndType setDataAndType()}.</p>
+
+<p class="caution"><strong>Atenção:</strong> se você deseja definir a URI e o tipo MIME,
+<strong>não</strong> chame {@link android.content.Intent#setData setData()}
+e {@link android.content.Intent#setType setType()}, pois eles anulam seus valores mutuamente.
+Sempre use {@link android.content.Intent#setDataAndType setDataAndType()} para definir
+a URI e o tipo MIME juntos.</p>
+</dd>
+
+<p><dt><b>Categoria</b></dt>
+<dd>String que contém informações adicionais sobre o tipo de componente
+que deve tratar da intenção.  Qualquer número de descrições de categoria pode ser
+inserido em uma intenção, mas a maioria das intenções não requer nenhuma categoria.
+A seguir há algumas categorias comuns:
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>A atividade-alvo permite seu início por um navegador da web para exibir dados
+       referenciados por um link &mdash; como uma imagem ou uma mensagem de e-mail.
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>A atividade é a atividade inicial de uma tarefa e é listada
+       no inicializador do aplicativo do sistema.
+  </dd>
+</dl>
+
+<p>Consulte a descrição da classe {@link android.content.Intent} para obter a lista completa
+de categorias.</p>
+
+<p>É possível especificar uma categoria com {@link android.content.Intent#addCategory addCategory()}.</p>
+</dd>
+</dl>
+
+
+<p>As propriedades listadas abaixo (nome do componente, ação, dados e categoria) representam
+as características de definição de uma intenção. Ao ler estas propriedades, o sistema Android
+será capaz de definir o componente de aplicativo que ele deve iniciar.</p>
+
+<p>Contudo, uma intenção pode carregar informações adicionais que não afetam
+o modo com que é tratada para um componente do aplicativo. As intenções também podem fornecer:</p>
+
+<dl>
+<dt><b>Extras</b></dt>
+<dd>Pares de valores-chave que carregam informações adicionais exigidas para realizar a ação solicitada.
+Assim, como algumas ações usam determinados tipos de URIs de dados, outras também usam determinados extras.
+
+<p>É possível adicionar dados extras com diversos métodos {@link android.content.Intent#putExtra putExtra()},
+cada um aceitando dois parâmetros: o nome principal e o valor.
+Também é possível criar um objeto {@link android.os.Bundle} com todos os dados extras e, em seguida, inserir
+o {@link android.os.Bundle} na {@link android.content.Intent} com {@link
+android.content.Intent#putExtras putExtras()}.</p>
+
+<p>Por exemplo: ao criar uma intenção para enviar um e-mail com
+{@link android.content.Intent#ACTION_SEND}, é possível especificar o recipiente "para" com
+a chave {@link android.content.Intent#EXTRA_EMAIL} e especificar o "assunto" com
+a chave {@link android.content.Intent#EXTRA_SUBJECT}.</p>
+
+<p>A classe {@link android.content.Intent} especifica diversas constantes {@code EXTRA_*}
+para tipos de dados padronizados. Se for necessário declarar chaves extras (para intenções que
+seu aplicativo receba), certifique-se de incluir o nome do pacote do aplicativo
+como prefixo. Por exemplo:</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>Sinalizadores</b></dt>
+<dd>Sinalizadores definidos na classe {@link android.content.Intent} que funcionam como metadados
+para a intenção. Os sinalizadores podem instruir o sistema Android sobre como inicializar uma atividade (por exemplo, a qual
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">tarefa</a> a atividade deve
+pertencer) e como tratá-la após sua inicialização (por exemplo, se ela pertencer a uma lista de atividades
+recentes).
+
+<p>Para obter mais informações, consulte o método {@link android.content.Intent#setFlags setFlags()}.</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">Exemplo de intenção explícita</h3>
+
+<p>A intenção explícita é usada para inicializar um componente específico de um aplicativo, como
+uma atividade ou serviço em particular, no seu aplicativo. Para criar uma intenção explícita, defina
+o nome do componente para o objeto {@link android.content.Intent} &mdash; todas
+as outras propriedades da intenção são opcionais.</p>
+
+<p>Por exemplo: se você criar um serviço no aplicativo, chamado {@code DownloadService} e
+projetado para baixar um arquivo da web, poderá iniciá-lo com o código a seguir:</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>O construtor {@link android.content.Intent#Intent(Context,Class)}
+ fornece {@link android.content.Context} ao aplicativo
+e um objeto {@link java.lang.Class} ao componente. Assim,
+essa intenção inicia explicitamente a classe {@code DownloadService} no aplicativo.</p>
+
+<p>Para obter mais informações sobre a criação e inicialização de um serviço, consulte
+o guia <a href="{@docRoot}guide/components/services.html">Serviços</a>.</p>
+
+
+
+
+<h3 id="ExampleSend">Exemplo de intenção implícita</h3>
+
+<p>A intenção implícita especifica uma ação que possa chamar qualquer aplicativo no dispositivo capaz
+de realizar a ação. A intenção implícita é útil quando o aplicativo não pode realizar
+a ação, mas outros aplicativos provavelmente podem e o usuário seleciona que aplicativo usar.</p>
+
+<p>Por exemplo: se você tem o conteúdo que deseja que o usuário compartilhe com outras pessoas, crie uma intenção
+com a ação {@link android.content.Intent#ACTION_SEND}
+e adicione extras que especifiquem o conteúdo a compartilhar. Ao chamar
+{@link android.content.Context#startActivity startActivity()} com esta intenção, o usuário poderá
+selecionar um aplicativo pelo qual deseja compartilhar o conteúdo.</p>
+
+<p class="caution"><strong>Atenção:</strong> é possível que um usuário não tenha <em>nenhum</em>
+aplicativo que trate da intenção implícita enviada a {@link android.content.Context#startActivity
+startActivity()}. Se isso acontecer, a chamada e seu aplicativo falharão. Para verificar
+se uma atividade receberá a intenção, chame {@link android.content.Intent#resolveActivity
+resolveActivity()} no objeto {@link android.content.Intent}. Se o resultado não for nulo,
+há pelo menos um aplicativo que pode tratar da intenção e será seguro chamar
+{@link android.content.Context#startActivity startActivity()}. Se o resultado for nulo,
+você não deve usar a intenção e, se possível, deve desativar o recurso que emite
+a intenção.</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> nesse caso, não será usada nenhuma URI, mas o tipo de dados da intenção
+será declarado para especificar o conteúdo carregado pelos extras.</p>
+
+
+<p>Quando {@link android.content.Context#startActivity startActivity()} é chamada, o sistema
+avalia todos os aplicativos instalados para determinar quais deles podem tratar esse tipo de intenção
+(uma intenção com a ação {@link android.content.Intent#ACTION_SEND} e que carrega dados
+de "texto/simples". Se houver somente um aplicativo que possa tratá-la, o aplicativo abre imediatamente e recebe
+a intenção. Se diversas atividades aceitarem a intenção, o sistema
+exibirá uma caixa de diálogo para que o usuário selecione que aplicativo usar.</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>Figura 2.</strong> Caixa de diálogo seletora.</p>
+</div>
+
+<h3 id="ForceChooser">Forçar um seletor de aplicativo</h3>
+
+<p>Quando há mais de um aplicativo que responde à intenção implícita,
+o usuário pode selecionar o aplicativo que deseja usar e tornar este aplicativo a escolha padrão para
+a ação. Isso é positivo ao executar uma ação para a qual o usuário
+deseja usar o mesmo aplicativo todas as vezes, como quando abre uma página da web (os usuários
+geralmente usam apenas um navegador).</p>
+
+<p>Contudo, se diversos aplicativos podem responder à intenção e o usuário deve ficar livre para usar um aplicativo
+diferente em cada vez, é preciso exibir uma caixa de diálogo seletora explicitamente. A caixa de diálogo seletora pede que
+o usuário selecione o aplicativo desejado para a ação todas as vezes (o usuário não pode selecionar um aplicativo padrão para
+a ação). Por exemplo: quando o aplicativo realiza "compartilhar" com a ação {@link
+android.content.Intent#ACTION_SEND}, os usuários podem querer compartilhar usando um aplicativo diferente
+conforme a situação, portanto deve-se sempre usar a caixa de diálogo seletora, como ilustrado na figura 2.</p>
+
+
+
+
+<p>Para exibir o seletor, crie uma {@link android.content.Intent} usando {@link
+android.content.Intent#createChooser createChooser()} e passe-a para {@link
+android.app.Activity#startActivity startActivity()}. Por exemplo:</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>Isso exibe uma caixa de diálogo com uma lista de aplicativos que respondem à intenção transmitida ao método {@link
+android.content.Intent#createChooser createChooser()} e utiliza o texto fornecido como
+título da caixa de diálogo.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">Recepção de uma intenção implícita</h2>
+
+<p>Para anunciar quais intenções implícitas o aplicativo pode receber, declare um ou mais filtros de intenções
+para cada um dos componentes do aplicativo com um elemento
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> no <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">arquivo de manifesto</a>.
+Cada filtro de intenções especifica o tipo de intenções aceito com base na ação
+nos dados e na categoria da intenção. O sistema fornecerá uma intenção implícita ao componente do seu aplicativo somente se ela
+puder passar por um dos filtros de intenções.</p>
+
+<p class="note"><strong>Observação:</strong> a intenção explícita é sempre entregue ao alvo
+independentemente dos filtros de intenções que o componente declare.</p>
+
+<p>Os componentes de um aplicativo devem declarar filtros separados para cada trabalho exclusivo que podem fazer.
+Por exemplo, uma atividade em um aplicativo de galeria de imagens pode ter dois filtros: um filtro
+para visualizar uma imagem e outro para editar uma imagem. Quando a atividade inicia,
+ela inspeciona a {@link android.content.Intent} e decide como se comportar com base nas informações
+na {@link android.content.Intent} (como para exibir ou não os controles do editor).</p>
+
+<p>Cada filtro de intenções é definido por um elemento <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+no arquivo de manifesto do aplicativo, aninhado no componente correspondente do aplicativo (como
+um elemento
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>). Dentro de <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>,
+é possível especificar o tipo de intenções aceitas usando um ou mais
+dos três elementos a seguir:</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>Declara a ação da intenção aceita, no atributo {@code name}. O valor
+  deve ser o valor literal da string de uma ação, e não a constante da classe.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>Declara o tipo de dados aceitos usando um ou mais atributos que especificam diversos
+  aspectos da URI de dados (<code>scheme</code>, <code>host</code>, <code>port</code>,
+<code>path</code> etc.) e do tipo MIME.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>Declara a categoria da intenção aceita, no atributo {@code name}. O valor
+  deve ser o valor literal da string de uma ação, e não a constante da classe.
+
+  <p class="note"><strong>Observação:</strong> para receber intenções implícitas,
+  <strong>é preciso incluir</strong> a
+  categoria {@link android.content.Intent#CATEGORY_DEFAULT} no filtro de intenções. Os métodos
+{@link android.app.Activity#startActivity startActivity()} e
+{@link android.app.Activity#startActivityForResult startActivityForResult()} tratam de todas as intenções
+  como se eles declarassem a categoria {@link android.content.Intent#CATEGORY_DEFAULT}.
+  Se você não a declarar no filtro de intenções, nenhuma intenção implícita retomará
+  a sua atividade.</p>
+  </dd>
+</dl>
+
+<p>Por exemplo, abaixo há uma declaração de atividade com um filtro de intenções para receber
+uma intenção {@link android.content.Intent#ACTION_SEND} quando o tipo de dados for texto:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Não há problemas em criar um filtro que inclua mais de uma instância de
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> ou
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>.
+Se você o fizer, basta certificar-se de que o componente possa tratar todas e quaisquer combinações
+daqueles elementos do filtro.</p>
+
+<p>Para tratar de diversos tipos de intenções, mas somente em combinações específicas
+de ações, dados e tipos de categoria, será necessário criar diversos filtros de intenções.</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Restrição de acesso a componentes</h2>
+<p>O uso de filtros de intenção não é um modo seguro de evitar que outros aplicativos iniciem
+componentes. Embora os filtros de intenções restrinjam um componente a responder somente
+a determinados tipos de intenções implícitas, outro aplicativo pode iniciar o componente do aplicativo
+usando uma intenção explícita se o desenvolvedor determinar os nomes dos componentes.
+Se for importante que <em>somente determinado aplicativo</em> inicie um dos seus componentes,
+defina o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> como {@code "false"} para o componente em questão.
+</p>
+</div>
+</div>
+
+<p>As intenções implícitas são testadas em relação a um filtro por meio da comparação da intenção com cada um
+dos três elementos. Para ser entregue ao componente, a intenção deve passar por todos os três testes.
+Se ela falhar em algum deles, o sistema Android não entregará a intenção
+ao componente.  No entanto, como um componente poder ter diversos filtros de intenções, uma intenção que não
+passe por um dos filtros de um componente pode passar por outro filtro.
+Veja mais informações sobre como o sistema resolve intenções na seção abaixo
+sobre <a href="#Resolution">Resolução de intenções</a>.</p>
+
+<p class="caution"><strong>Atenção:</strong> para evitar a execução involuntária de um {@link android.app.Service}
+diferente do aplicativo, sempre use uma intenção explícita para iniciar o próprio serviço
+e não declare filtros de intenções para ele.</p>
+
+<p class="note"><strong>Observação:</strong>
+para todas as atividades, é necessário declarar os filtros de intenções no arquivo de manifesto.
+Contudo, os filtros para receptores de transmissão podem ser registrados dinamicamente chamando
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()}. Assim, será possível cancelar o registro do receptor com {@link
+android.content.Context#unregisterReceiver unregisterReceiver()}. Isso permitirá que o aplicativo
+receba transmissões específicas durante um período de tempo especificado apenas quando o aplicativo
+estiver em execução.</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">Exemplos de filtros</h3>
+
+<p>Para compreender melhor alguns dos comportamentos do filtro de intenções, veja o fragmento a seguir
+do arquivo de manifesto de um aplicativo de compartilhamento social.</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>A primeira atividade, {@code MainActivity}, é o ponto de entrada principal do aplicativo &mdash; a atividade
+que abre quando o usuário inicializa o aplicativo pela primeira vez com o ícone de inicialização:</p>
+<ul>
+  <li>A ação {@link android.content.Intent#ACTION_MAIN}
+  indica que este é o ponto de entrada principal e não espera nenhum dado de intenção.</li>
+  <li>A categoria {@link android.content.Intent#CATEGORY_LAUNCHER} indica que esse ícone
+  da atividade deve ser colocado no inicializador de aplicativo do sistema. Se o elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+  não especificar um ícone com {@code icon}, o sistema usará o ícone do elemento
+  <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>.</li>
+</ul>
+<p>Esses dois devem ser pareados juntos para que a atividade apareça no inicializador do aplicativo.</p>
+
+<p>A segunda atividade, {@code ShareActivity}, destina-se a facilitar o compartilhamento de conteúdo de texto
+e mídia. Apesar de os usuários poderem acessar essa atividade pela {@code MainActivity},
+eles também podem acessar {@code ShareActivity} diretamente de outro aplicativo que emita uma intenção
+implícita que corresponda a um dos dois filtros de intenções.</p>
+
+<p class="note"><strong>Observação:</strong> o tipo MIME,
+<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>, é um tipo de dados especial que especifica
+fotos panorâmicas que podem ser tratadas com as APIs do <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
+Panorama</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">Uso de uma intenção pendente</h2>
+
+<p>Um objeto {@link android.app.PendingIntent} é um agrupador em torno de um objeto {@link
+android.content.Intent}. A principal finalidade de uma {@link android.app.PendingIntent}
+ é conceder permissão a um aplicativo externo
+para usar a {@link android.content.Intent} contida como se ela fosse executada a partir
+do processo do próprio aplicativo.</p>
+
+<p>Os principais casos de uso de uma intenção pendente são:</p>
+<ul>
+  <li>Declarar uma intenção a ser executada quando o usuário realiza uma ação com a <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notificação</a>
+  (o {@link android.app.NotificationManager} do sistema Android
+  executa a {@link android.content.Intent}).
+  <li>Declarar uma intenção a ser executada quando o usuário realiza uma ação com o
+  <a href="{@docRoot}guide/topics/appwidgets/index.html">Widget do aplicativo</a>
+  (o aplicativo de tela inicial executa a {@link android.content.Intent}).
+  <li>Declarar uma intenção a ser executada em um momento específico no futuro (o {@link android.app.AlarmManager}
+  do sistema Android executa a {@link android.content.Intent}).
+</ul>
+
+<p>Como cada objeto {@link android.content.Intent} é projetado para ser tratado por um tipo
+específico de componentes do aplicativo (uma {@link android.app.Activity}, um {@link android.app.Service}
+ou um {@link android.content.BroadcastReceiver}), uma {@link android.app.PendingIntent}
+deve ser criada com a mesma consideração. Ao usar uma intenção pendente, o aplicativo
+não executará a intenção com uma chamada como de {@link android.content.Context#startActivity
+startActivity()}. Em vez disso, deve-se declarar o tipo do componente pretendido ao criar
+a {@link android.app.PendingIntent} chamando o respectivo método criador:</p>
+
+<ul>
+  <li>{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()} para uma
+  {@link android.content.Intent} que inicia uma {@link android.app.Activity}.</li>
+  <li>{@link android.app.PendingIntent#getService PendingIntent.getService()} para uma
+  {@link android.content.Intent} que inicia um {@link android.app.Service}.</li>
+  <li>{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()} para uma
+  {@link android.content.Intent} que inicia um {@link android.content.BroadcastReceiver}.</li>
+</ul>
+
+<p>A menos que o aplicativo esteja <em>recebendo</em> intenções pendentes de outros aplicativos,
+os métodos acima para criar uma {@link android.app.PendingIntent} são provavelmente
+os únicos métodos de {@link android.app.PendingIntent} necessários.</p>
+
+<p>Cada método toma o {@link android.content.Context} do aplicativo atual,
+a {@link android.content.Intent} que você deseja agrupar e um ou mais sinalizadores que especificam
+como a intenção deve ser usada (como se a intenção pudesse ser usada mais de uma vez).</p>
+
+<p>Veja mais informações sobre o uso de intenções pendentes na documentação
+dos respectivos casos de uso, como nos guias das APIs de <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notificações</a>
+e <a href="{@docRoot}guide/topics/appwidgets/index.html">Widget do aplicativo</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">Resolução de intenções</h2>
+
+
+<p>Quando o sistema recebe uma intenção implícita para iniciar uma atividade, ele busca
+as melhores atividades para a intenção comparando-a com os filtros de intenções com base em três aspectos:</p>
+
+<ul>
+  <li>A ação da intenção
+  <li>Os dados da intenção (URI e tipo de dados)
+  <li>A categoria da intenção
+</ul>
+
+<p>As seções a seguir descrevem como uma intenção é combinada com os componentes apropriados
+em termos de como o filtro de intenções é declarado no arquivo de manifesto de um aplicativo.</p>
+
+
+<h3 id="ActionTest">Teste de ação</h3>
+
+<p>Para especificar ações de intenções aceitas, um filtro de intenções pode declarar zero ou mais
+elementos <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>.  Por exemplo:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Para passar por este filtro, a ação especificada na {@link android.content.Intent}
+  deve corresponder a uma das ações listadas no filtro.</p>
+
+<p>Se o filtro não listar nenhuma ação, não há nada a que
+uma intenção corresponda, portanto todas as intenções falharão no teste. Contudo, se uma {@link android.content.Intent}
+não especificar nenhuma ação, ela passará no teste (desde que o filtro
+contenha pelo menos uma ação).</p>
+
+
+
+<h3 id="CategoryTest">Teste de categoria</h3>
+
+<p>Para especificar as categorias de intenção aceitas, um filtro de intenções pode declarar zero ou mais
+elementos <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a>.  Por exemplo:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Para que uma intenção passe no teste de categoria, cada categoria na {@link android.content.Intent}
+deve corresponder a uma categoria no filtro. O inverso não é necessário &mdash; o filtro de intenções pode
+declarar mais categorias das especificadas na {@link android.content.Intent} e
+a {@link android.content.Intent} ainda passará no teste. Portanto, uma intenção sem categorias sempre
+passará nesse teste independentemente das categorias declaradas no filtro.</p>
+
+<p class="note"><strong>Observação:</strong>
+O Android aplica automaticamente a categoria {@link android.content.Intent#CATEGORY_DEFAULT}
+para todas as intenções implícitas passadas a {@link
+android.content.Context#startActivity startActivity()} e {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.
+Por isso, se você deseja que a atividade receba intenções implícitas, ela deve
+conter uma categoria de {@code "android.intent.category.DEFAULT"} nos filtros de intenções (como
+exibido no exemplo de {@code &lt;intent-filter&gt;} anterior).</p>
+
+
+
+<h3 id="DataTest">Teste de dados</h3>
+
+<p>Para especificar dados de intenções aceitas, um filtro de intenções pode declarar zero ou mais
+elementos <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a>.  Por exemplo:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Cada elemento
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code> pode especificar uma estrutura de URI e um tipo de dados (tipo de mídia MIME).  Há atributos
+separados &mdash; {@code scheme}, {@code host}, {@code port} e
+{@code path} &mdash; para cada parte da URI:
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+Por exemplo:
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>Nessa URI, o esquema é {@code content}, o host é {@code com.example.project},
+a porta é {@code 200} e o caminho é {@code folder/subfolder/etc}.
+</p>
+
+<p>Cada um desses atributos é opcional em um elemento <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>,
+mas há dependências lineares:</p>
+<ul>
+  <li>Se não houver esquema especificado, o host será ignorado.</li>
+  <li>Se não houver host especificado, a porta será ignorada.</li>
+  <li>Se não houver esquema nem host especificado, o caminho será ignorado.</li>
+</ul>
+
+<p>Quando a URI em uma intenção é comparada a uma especificação de URI em um filtro,
+a comparação é feita somente com as partes da URI incluídas no filtro. Por exemplo:</p>
+<ul>
+  <li>Se um filtro especificar somente um esquema, todas as URIs com esse esquema atenderão
+ao filtro.</li>
+  <li>Se um filtro especificar um esquema e uma autoridade, mas não um caminho, todas as URIs
+com o mesmo esquema e autoridade passarão pelo filtro independentemente dos caminhos.</li>
+  <li>Se um filtro especificar um esquema, uma autoridade e um caminho, somente URIs com o mesmo esquema,
+autoridade e caminho passarão pelo filtro.</li>
+</ul>
+
+<p class="note"><strong>Observação:</strong> a especificação de caminho pode
+conter um asterisco especial (*) para exigir somente uma correspondência parcial do nome do caminho.</p>
+
+<p>O teste de dados compara a URI e o tipo MIME da intenção com uma URI
+e um tipo MIME especificados no filtro.  As regras são as seguintes:
+</p>
+
+<ol type="a">
+<li>A intenção que não contiver URI nem tipo MIME passará
+no teste somente se o filtro não especificar nenhuma URI nem tipo MIME.</li>
+
+<li>A intenção que contiver URI mas nenhum tipo MIME (nem explícito, nem inferível a partir
+da URI) passará pelo teste somente se a URI corresponder ao formato de URI do filtro
+e se o filtro, igualmente, não especificar um tipo MIME.</li>
+
+<li>A intenção que contiver tipo MIME mas nenhuma URI passará pelo teste
+somente se o filtro listar o mesmo tipo MIME e não especificar nenhum formato de URI.</li>
+
+<li>A intenção que contiver URI e tipo MIME (explícito ou inferível a partir
+da URI) passará a parte do tipo MIME do teste somente se esse
+tipo corresponder a um tipo listado no filtro.  A parte da URI passará no teste
+se corresponder a uma URI no filtro ou se tiver uma URI de {@code content:}
+ou {@code file:} e se o filtro não especificar nenhuma URI. Em outras palavras,
+presume-se que um componente seja compatível com dados de {@code content:} e de {@code file:} se
+o filtro listar <em>somente</em> um tipo MIME.</p></li>
+</ol>
+
+<p>
+Essa última regra (d) reflete a expectativa
+de que os componentes sejam capazes de obter dados de local de um arquivo ou provedor de conteúdo.
+Portanto, os filtros podem listar somente um tipo de dados e não precisam nomear
+explicitamente os esquemas {@code content:} e {@code file:}.
+Este é um caso típico.  Um elemento <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
+como o seguinte, por exemplo, informa ao Android que o componente pode obter dados de imagem de um provedor
+de conteúdo e exibi-los:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+Como a maioria dos dados disponíveis é dispensada pelos provedores de conteúdo, os filtros
+que especificam um tipo de dados mas não uma URI são, talvez, os mais comuns.
+</p>
+
+<p>
+Outra configuração comum é: filtros com um esquema e um tipo de dados.  Por
+exemplo, um elemento
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>, como o seguinte, informa ao Android
+que o componente pode recuperar dados de vídeo da rede para realizar a ação:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">Correspondência de intenções</h3>
+
+<p>Intenções são correspondidas a filtros de intenções não somente para descobrir
+um componente-alvo a ativar, mas também para descobrir algo sobre o conjunto
+de componentes do dispositivo.  Por exemplo: o aplicativo Home preenche o inicializador do aplicativo
+encontrando todas as atividades com filtros de intenções que especifiquem
+a ação {@link android.content.Intent#ACTION_MAIN} e
+a categoria {@link android.content.Intent#CATEGORY_LAUNCHER}.</p>
+
+<p>O aplicativo pode usar a correspondência de intenções de modo similar.
+O {@link android.content.pm.PackageManager} tem um conjunto de métodos
+{@code query...()}, que retornam todos os componentes que podem aceitar uma determinada intenção
+e uma série de métodos {@code resolve...()} similares, que determinam o melhor
+componente para responder a uma intenção.  Por exemplo:
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} retorna uma lista de todas as atividades que podem realizar
+a intenção passada como um argumento e {@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} retorna uma lista de serviços semelhantes.
+Nenhum dos métodos ativa os componentes — eles apenas listam aqueles que
+podem responder.  Há um método semelhante
+para receptores de transmissão — o {@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()}.
+</p>
+
+
+
+

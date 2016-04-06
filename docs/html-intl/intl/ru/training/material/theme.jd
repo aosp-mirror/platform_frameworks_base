@@ -1,0 +1,131 @@
+page.title=Использование темы Material Design
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#ColorPalette">Настройка цветовой палитры</a></li>
+  <li><a href="#StatusBar">Настройка строки состояния</a></li>
+  <li><a href="#Inheritance">Отдельные представления темы</a></li>
+</ol>
+<h2>См. также</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Спецификация Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design в Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Новая тема Material Design предоставляет следующие возможности:</p>
+
+<ul>
+  <li>системные виджеты, для которых можно настраивать цветовую палитру;</li>
+  <li>анимация для реакции на касание для системных виджетов;</li>
+  <li>анимация переходов между операциями.</li>
+</ul>
+
+<p>Внешний вид темы Material Design можно настроить с учетом фирменного стиля, воспользовавшись для этого цветовой палитрой.
+ Можно изменить оттенок строки действий и строки состояния, используя атрибуты темы, как показано на <a href="#fig3">рисунке 3</a>.
+</p>
+
+<p>Системные виджеты отличаются новым дизайном и анимацией отклика на касание. В своем приложении вы можете настроить цветовую палитру, анимацию отклика на касание и переходы между операциями.
+</p>
+
+<p>Тема Material Design задается следующими параметрами:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (темные цвета);</li>
+  <li><code>@android:style/Theme.Material.Light</code> (светлые цвета);</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code>.</li>
+</ul>
+
+<p>Список доступных стилей Material Design см. в справке по API для 
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Рисунок 1</strong>. Тема Material Design в темных тонах.</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Рисунок 2</strong>. Тема Material Design в светлых тонах.</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Примечание.</strong> Темы Material Design доступны только в ОС Android 5.0 (уровень API 21) и более поздних версий.
+ Во <a href="{@docRoot}tools/support-library/features.html#v7">вспомогательных библиотеках v7</a>
+ представлены темы со стилями Material Design для некоторых виджетов. Эти библиотеки также обеспечивают поддержку настройки цветовой палитры.
+ Дополнительные сведения см. на странице 
+<a href="{@docRoot}training/material/compatibility.html">Обеспечение совместимости</a>.
+</p>
+
+
+<h2 id="ColorPalette">Настройка цветовой палитры</h2>
+
+<p style="margin-bottom:30px">Для настройки основных цветов в соответствии с фирменным стилем определите настраиваемые цвета с помощью атрибутов темы при наследовании от темы Material Design:
+</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Рисунок 3</strong>. Настройка темы Material Design.</p>
+</div>
+
+
+<h2 id="StatusBar">Настройка строки состояния</h2>
+
+<p>В теме Material Design можно с легкостью настроить строку состояния, указав нужный цвет в соответствии с фирменным стилем и задав достаточную контрастность для отображения белых значков состояния.
+ Чтобы установить настраиваемый цвет для строки состояния, воспользуйтесь атрибутом <code>android:statusBarColor</code> при наследовании темы Material Design.
+
+ По умолчанию параметр <code>android:statusBarColor</code> наследует значение <code>android:colorPrimaryDark</code>.
+</p>
+
+<p>Кроме того, можно самостоятельно разместить элемент за строкой состояния. Например, если требуется наложить прозрачную строку состояния поверх фотографии, применив еле уловимый темный градиент, чтобы были видны белые значки состояния.
+
+ Для этого задайте для атрибута <code>android:statusBarColor</code> значение 
+<code>&#64;android:color/transparent</code> и настройте флаги окна требуемым образом. Также можно воспользоваться
+методом {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} для применения анимации или эффекта постепенного исчезания.
+</p>
+
+<p class="note">
+<strong>Примечание.</strong> Строка состояния почти всегда должна иметь четкую границу, отделяющую ее от основной панели инструментов, за исключением случаев, когда за этими панелями от края и до края экрана отображается большое количество изображений или мультимедийный контент, а также в случае, когда вы используете градиент, чтобы обеспечить видимость значков.
+
+
+</p>
+
+<p>При настройке панели навигации и строки состояния сделайте их прозрачными либо измените только строку состояния.
+ Во всех остальных случаях панель навигации должна оставаться черной.</p>
+
+
+<h2 id="Inheritance">Отдельные представления темы</h3>
+
+<p>Элементы в определениях макета XML могут задавать атрибут <code>android:theme</code>, который ссылается на ресурс темы.
+ Этот атрибут изменяет тему для элемента и любых дочерних элементов,
+что можно использовать для изменения цветовых палитр темы в определенной области интерфейса.
+</p>

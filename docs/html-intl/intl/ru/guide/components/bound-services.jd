@@ -1,0 +1,658 @@
+page.title=Привязанные службы
+parent.title=Службы
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Содержание документа</h2>
+<ol>
+  <li><a href="#Basics">Основы</a></li>
+  <li><a href="#Creating">Создание привязанной службы</a>
+    <ol>
+      <li><a href="#Binder">Расширение класса Binder</a></li>
+      <li><a href="#Messenger">Использование объекта Messenger</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">Привязка к службе</a></li>
+  <li><a href="#Lifecycle">Управление жизненным циклом привязанной службы</a></li>
+</ol>
+
+<h2>Ключевые классы</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>Примеры</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>См. также:</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">Службы</a></li>
+</ol>
+</div>
+
+
+<p>Привязанная служба предоставляет интерфейс типа клиент-сервер. Привязанная служба позволяет компонентам приложения
+(например, операциям) взаимодействовать со службой, отправлять запросы, получать результаты и даже делать то же самое с другими процессами через
+IPC. Привязанная служба обычно работает, пока другой компонент приложения
+привязан к ней. Она не работает постоянно в фоновом режиме.</p>
+
+<p>В этом документе рассказывается, как создать привязанную службу, включая привязку 
+службы к другим компонентам приложения. Также рекомендуем обратиться к статье <a href="{@docRoot}guide/components/services.html">Службы</a>, чтобы узнать подробнее
+о службах, например, об организации отправки уведомлений от службы, настройке службы 
+на работу на переднем плане и т. д.</p>
+
+
+<h2 id="Basics">Основы</h2>
+
+<p>Привязанная служба представляет собой реализацию класса {@link android.app.Service}, которая позволяет
+другим приложениям привязываться к нему и взаимодействовать с ним. Чтобы обеспечить привязку службы
+, сначала необходимо реализовать метод обратного вызова {@link android.app.Service#onBind onBind()}. Этот
+метод возвращает объект {@link android.os.IBinder}. Он определяет программный интерфейс,
+с помощью которого клиенты могут взаимодействовать со службой.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Привязка к запущенной службе</h3>
+
+<p>Как указано в статье <a href="{@docRoot}guide/components/services.html">Службы</a>,
+можно создать службу, которая одновременно и запущена, и привязана. Это означает, что службу можно запустить
+путем вызова метода {@link android.content.Context#startService startService()}, который позволяет службе
+работать неограниченное время, а также позволяет клиентам привязываться к ней с помощью вызова метода {@link
+android.content.Context#bindService bindService()}.
+  <p>Если разрешить запуск и привязку службы, то после ее запуска
+система <em>не</em> уничтожает ее после отмены всех привязок клиентов. Вместо этого необходимо
+явным образом остановить службу, вызвав метод {@link android.app.Service#stopSelf stopSelf()} или {@link
+android.content.Context#stopService stopService()}.</p>
+
+<p>Несмотря на то, что обычно необходимо реализовывать либо метод {@link android.app.Service#onBind onBind()},
+<em>либо метод</em> {@link android.app.Service#onStartCommand onStartCommand()}, в некоторых случаях требуется
+реализовать оба этих метода. Например, в музыкальном проигрывателе может оказаться полезным разрешить выполнение службы в течение
+неограниченного времени, а также обеспечить ее привязку. Таким образом, операция может запустить службу для воспроизведения музыки
+, которая будет воспроизводиться даже после выхода пользователя из приложения. После того возвращения
+пользователя к приложению операция может отменить привязку к службе, чтобы вернуть управление воспроизведением.</p>
+
+<p>Обязательно ознакомьтесь с разделом, посвященным <a href="#Lifecycle">управлению жизненным циклом привязанной
+службы</a>. В нем представлены подробные сведения о жизненном цикле службы, привязанной к уже
+запущенной службе.</p>
+</div>
+</div>
+
+<p>Для привязки к службе клиент может вызвать метод {@link android.content.Context#bindService
+bindService()}. После привязки он должен предоставить реализацию метода {@link
+android.content.ServiceConnection}, который служит для отслеживания подключения к службе. Метод {@link
+android.content.Context#bindService bindService()} возвращается незамедлительно без значения, однако
+, когда система Android устанавливает подключение 
+клиент-служба, она вызывает метод {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} для {@link
+android.content.ServiceConnection}, чтобы выдать объект {@link android.os.IBinder}, который
+клиент может использовать для взаимодействия со службой.</p>
+
+<p>Одновременно к службе могут подключиться сразу несколько клиентов. Однако система вызывает метод
+{@link android.app.Service#onBind onBind()} вашей службы для получения объекта {@link android.os.IBinder}
+только при первой привязке клиента. После чего система выдает такой же объект {@link android.os.IBinder} для любых
+дополнительных клиентов, которые выполняют привязку, без повторного вызова метода {@link android.app.Service#onBind onBind()}.</p>
+
+<p>Когда отменяется привязка последнего клиента от службы, система уничтожает службу (если только
+служба не была так же запущена методом {@link android.content.Context#startService startService()}).</p>
+
+<p>Самую важную роль в реализации привязанной службы играет определение интерфейса,
+который возвращает ваш метод обратного вызова {@link android.app.Service#onBind onBind()}. Существует несколько
+различных способов определения интерфейса {@link android.os.IBinder} службы. Каждый из них рассматривается в следующем
+разделе.</p>
+
+
+
+<h2 id="Creating">Создание привязанной службы</h2>
+
+<p>При создании службы, обеспечивающей привязку, требуется объект {@link android.os.IBinder},
+который обеспечивает программный интерфейс, с помощью которого клиенты могут взаимодействовать со службой. Существует
+три способа определения такого интерфейса:</p>
+
+<dl>
+  <dt><a href="#Binder">Расширение класса Binder</a></dt>
+  <dd>Если служба является частной и предоставляется в рамках вашего собственного приложения, а также выполняется в том же процессе, что и клиент
+(общий процесс), создавать интерфейс следует путем расширения класса {@link android.os.Binder}
+и возврата его экземпляра из метода
+{@link android.app.Service#onBind onBind()}. Клиент получает объект {@link android.os.Binder},
+после чего он может использовать его для получения прямого доступа к общедоступным методам, имеющимся либо в реализации {@link android.os.Binder},
+либо даже в {@link android.app.Service}.
+  <p>Этот способ является предпочтительным, когда служба просто выполняется в фоновом режиме для
+вашего приложения. Этот способ не подходит для создания интерфейса только тогда, 
+когда ваша служба используется другими приложениями или в отдельных процессах.</dd>
+
+  <dt><a href="#Messenger">Использование объекта Messenger</a></dt>
+  <dd>Если необходимо, чтобы интерфейс службы был доступен для разных процессов, его можно создать
+с помощью объекта {@link android.os.Messenger}. Таким образом, служба
+определяет объект {@link android.os.Handler}, соответствующий различным типам объектов {@link
+android.os.Message}. Этот объект {@link android.os.Handler}
+является основой для объекта {@link android.os.Messenger}, который, в свою очередь, предоставляет клиенту объект {@link android.os.IBinder},
+благодаря чему последний может отправлять команды в службу с помощью объектов {@link
+android.os.Message}. Кроме того, клиент может определить объект {@link android.os.Messenger} для самого
+себя, что позволяет службе возвращать сообщения клиенту.
+  <p>Это самый простой способ организовать взаимодействие процессов, поскольку {@link
+android.os.Messenger} организует очередь всех запросов в рамках одного потока, поэтому вам не нужно делать
+свою службу потокобезопасной.</p>
+  </dd>
+
+  <dt>Использование языка AIDL</dt>
+  <dd>AIDL (Android Interface Definition Language) выполняет всю работу по разделению объектов на
+примитивы, которые операционная система может распознать и распределить по процессам для организации
+взаимодействия между ними (IPC). Предыдущий способ с использованием объекта {@link android.os.Messenger} фактически основан на AIDL, поскольку это его
+базовая структура. Как уже упоминалось выше, объект {@link android.os.Messenger} создает очередь из всех
+запросов клиентов в рамках одного потока, поэтому служба одновременно получает только один запрос. Однако, 
+если необходимо, чтобы служба обрабатывала одновременно сразу несколько запросов, можно использовать AIDL
+напрямую. В таком случае ваша служба должна поддерживать многопоточность и должна быть потокобезопасной.
+  <p>Чтобы использовать AIDL напрямую, необходимо
+создать файл {@code .aidl}, который определяет программный интерфейс. Этот файл используется инструментами SDK Android для
+создания абстрактного класса, который реализует интерфейс и обеспечивает взаимодействие процессов, и который
+в дальнейшем можно расширить в службе.</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>Примечание.</strong> В большинстве приложений <strong>не следует</strong> использовать AIDL для
+создания и привязки службы, поскольку для этого может потребоваться поддержка многопоточности, что, в свою очередь, может привести
+к более сложной реализации. Поэтому AIDL не подходит для большинства приложений,
+и в этой статье мы не будем рассматривать использование этого способа для вашей службы. Если же вы точно уверены, что
+вам необходимо использовать AIDL напрямую, обратитесь к статье
+<a href="{@docRoot}guide/components/aidl.html">AIDL</a>.</p>
+
+
+
+
+<h3 id="Binder">Расширение класса Binder</h3>
+
+<p>Если ваша служба используется только локальным приложением и не взаимодействует с разными процессами,
+можно реализовать собственный класс {@link android.os.Binder}, с помощью которого клиент получает прямой
+доступ к общедоступным методам в службе.</p>
+
+<p class="note"><strong>Примечание.</strong> Этот вариант подходит только в том случае, если клиент и служба выполняются внутри
+одного приложения и процесса, что является наиболее распространенной ситуацией. Например, расширение класса отлично подойдет для
+музыкального приложения, в котором необходимо привязать операцию к собственной службе приложения, которая
+воспроизводит музыку в фоновом режиме.</p>
+
+<p>Вот как это сделать:</p>
+<ol>
+  <li>Создайте в вашей службе экземпляр класса {@link android.os.Binder} со следующими характеристиками:
+    <ul>
+      <li>экземпляр содержит общедоступные методы, которые может вызывать клиент; либо</li>
+      <li>экземпляр возвращает текущий экземпляр класса {@link android.app.Service}, содержащий
+общедоступные методы, которые может вызывать клиент; или</li>
+      <li>экземпляр возвращает экземпляр другого класса, размещенного в службе, содержащий общедоступные методы,
+которые может вызывать клиент.</li>
+    </ul>
+  <li>Верните этот экземпляр класса {@link android.os.Binder} из метода обратного вызова {@link
+android.app.Service#onBind onBind()}.</li>
+  <li>В клиенте получите класс {@link android.os.Binder} от метода обратного вызова {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} и
+выполните вызовы к привязанной службе с помощью предоставленных методов.</li>
+</ol>
+
+<p class="note"><strong>Примечание.</strong> Служба и клиент должны выполняться в одном и том же приложении
+, поскольку в этом случае клиент может транслировать возвращенный объект и надлежащим образом вызывать его API-интерфейсы. Кроме того, служба
+и клиент должны выполняться в рамках одного и того же процесса, поскольку этот способ не подразумевает какого-либо
+распределения по процессам.</p>
+
+<p>Ниже представлен пример службы, которая предоставляет клиентам доступ к методам посредством реализации класса
+{@link android.os.Binder}:</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>Объект {@code LocalBinder} предоставляет для клиентов метод {@code getService()}, чтобы они могли получить
+текущий экземпляр класса {@code LocalService}. Благодаря этому клиенты могут вызывать общедоступные методы в
+службе. Например, клиенты могут вызвать метод {@code getRandomNumber()} из службы.</p>
+
+<p>Ниже представлен пример операции, которая выполняет привязку к классу {@code LocalService} и вызывает метод {@code getRandomNumber()}
+при нажатии кнопки:</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>В примере выше показано, как клиент привязывается к службе с помощью реализации
+{@link android.content.ServiceConnection} и обратного вызова {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}. В
+следующем разделе представлена более подробная информация об этом процессе привязки к службе.</p>
+
+<p class="note"><strong>Примечание.</strong> В примере выше не выполняется явная отмена привязки к службе,
+однако всем клиентам следует отменять привязку в соответствующие сроки (например, когда операция приостанавливается).</p>
+
+<p>Примеры кода представлены в статьях, посвященных классам <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> и <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a>, в <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h3 id="Messenger">Использование объекта Messenger</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>Сравнение с AIDL</h4>
+  <p>Когда необходимо организовать взаимодействие между процессами, использование объекта {@link android.os.Messenger} для интерфейса
+намного проще реализации с помощью AIDL, поскольку объект {@link android.os.Messenger} помещает
+в очередь все запросы к службе, тогда как интерфейс, основанный исключительно на AIDL, отправляет службе несколько запросов одновременно,
+для чего требуется поддержка многопоточности.</p>
+  <p>В большинстве приложений служба не должна поддерживать многопоточность, поэтому при использовании объекта {@link
+android.os.Messenger} служба может одновременно обрабатывать один запрос. Если вам важно,
+чтобы служба была многопоточной, для определения интерфейса следует использовать <a href="{@docRoot}guide/components/aidl.html">AIDL</a>.</p>
+</div>
+</div>
+
+<p>Если необходимо, чтобы служба взаимодействовала с удаленными процессами, для предоставления интерфейса службы можно воспользоваться объектом
+{@link android.os.Messenger}. Такой подход
+позволяет организовать взаимодействие между процессами (IPC) без необходимости использовать AIDL.</p>
+
+<p>Вот краткий обзор того, как следует использовать объект {@link android.os.Messenger}:</p>
+
+<ul>
+  <li>Служба реализует объект {@link android.os.Handler}, который получает обратный вызов для каждого
+вызова от клиента.</li>
+  <li>Объект {@link android.os.Handler} используется для создания объекта {@link android.os.Messenger}
+(который является ссылкой на объект {@link android.os.Handler}).</li>
+  <li>Объект {@link android.os.Messenger} создает объект {@link android.os.IBinder}, который служба
+возвращает клиентам из метода {@link android.app.Service#onBind onBind()}.</li>
+  <li>Клиенты используют полученный объект {@link android.os.IBinder} для создания экземпляра объекта {@link android.os.Messenger}
+(который ссылается на объект {@link android.os.Handler} службы), используемого клиентом для отправки объектов
+{@link android.os.Message} в службу.</li>
+  <li>Служба получает каждый объект {@link android.os.Message} в своем объекте {@link
+android.os.Handler} &mdash; в частности, в методе {@link android.os.Handler#handleMessage
+handleMessage()}.</li>
+</ul>
+
+
+<p>Таким образом, для клиента отсутствуют «методы» для отправки вызова службе. Вместо этого
+клиент отправляет «сообщения» (объекты {@link android.os.Message}), которые служба получает в
+своем объекте {@link android.os.Handler}.</p>
+
+<p>Ниже представлен пример службы, которая использует интерфейс {@link android.os.Messenger}:</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>Обратите внимание, что метод {@link android.os.Handler#handleMessage handleMessage()} в объекте
+{@link android.os.Handler} — это место, где служба получает входящие объекты {@link android.os.Message}
+и решает, что делать дальше, руководствуясь элементом {@link android.os.Message#what}.</p>
+
+<p>Клиенту требуется лишь создать объект {@link android.os.Messenger} на основе объекта {@link
+android.os.IBinder}, возвращенного службой, и отправить сообщение с помощью метода {@link
+android.os.Messenger#send send()}. Ниже представлен пример того, как простая операция выполняет привязку к
+службе и отправляет ей сообщение {@code MSG_SAY_HELLO}:</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>Обратите внимание, что в этом примере не показано, как служба отвечает клиенту. Если требуется,
+чтобы служба реагировала, необходимо создать объект {@link android.os.Messenger} и в клиенте. Затем,
+когда клиент получает обратный вызов {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, она отправляет в службу объект {@link android.os.Message}, который включает объект
+{@link android.os.Messenger} клиента в качестве значения параметра {@link android.os.Message#replyTo}
+метода {@link android.os.Messenger#send send()}.</p>
+
+<p>Пример организации двустороннего обмена сообщениями приведен в примерах кода <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a> (служба) и <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a> (клиент).</p>
+
+
+
+
+
+<h2 id="Binding">Привязка к службе</h2>
+
+<p>Для привязки к службе компоненты приложения (клиенты) могут использовать метод
+{@link android.content.Context#bindService bindService()}. После этого система Android
+вызывает метод {@link android.app.Service#onBind
+onBind()} службы, который возвращает объект {@link android.os.IBinder} для взаимодействия со службой.</p>
+
+<p>Привязка выполняется асинхронно. {@link android.content.Context#bindService
+bindService()} возвращается сразу же и <em>не</em> возвращает клиенту объект 
+{@link android.os.IBinder}. Для получения объекта {@link android.os.IBinder} клиенту необходимо создать экземпляр {@link
+android.content.ServiceConnection} и передать его в метод {@link android.content.Context#bindService
+bindService()}. Интерфейс {@link android.content.ServiceConnection} включает метод обратного вызова,
+который система использует для того, чтобы выдать объект {@link android.os.IBinder}.</p>
+
+<p class="note"><strong>Примечание.</strong> Выполнить привязку к службе могут только операции, другие службы и поставщики контента
+&mdash; вы <strong>не можете</strong> самостоятельно выполнить привязку к службе из ресивера.</p>
+
+<p>Поэтому для привязки к службе из клиента необходимо выполнить указанные ниже действия. </p>
+<ol>
+  <li>Реализуйте интерфейс {@link android.content.ServiceConnection}.
+    <p>Ваша реализация должна переопределять два метода обратного вызова:</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>Система вызывает этот метод, чтобы выдать объект {@link android.os.IBinder}, возвращенный методом
+{@link android.app.Service#onBind onBind()}службы.</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>Система Android вызывает этот метод в случае непредвиденной потери
+подключения к службе, например при сбое в работе службы или в случае ее завершения. Этот метод <em>не</em> вызывается, когда клиент
+отменяет привязку.</dd>
+    </dl>
+  </li>
+  <li>Вызовите метод {@link
+android.content.Context#bindService bindService()}, передав в него реализацию интерфейса {@link
+android.content.ServiceConnection}. </li>
+  <li>Когда система вызывает ваш метод обратного вызова {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, вы можете приступить к выполнению вызовов к службе с помощью
+методов, определенных интерфейсом.</li>
+  <li>Чтобы отключиться от службы, вызовите метод {@link
+android.content.Context#unbindService unbindService()}.
+    <p>В случае уничтожения клиента выполняется отмена его привязки к службе, однако вам всегда следует отменять
+привязку по завершении взаимодействия со службой или в случае приостановки операции, чтобы служба
+могла завершить свою работу, когда она не используется. (Более подробно подходящее время для привязки и ее отмены
+рассматриваются далее в этом документе).</p>
+  </li>
+</ol>
+
+<p>Ниже представлен пример фрагмента кода для подключения клиента к созданной выше службе путем
+<a href="#Binder">расширения класса Binder</a> — клиенту нужно лишь передать возвращенный объект
+{@link android.os.IBinder} в класс {@code LocalService} и запросить экземпляр {@code
+LocalService}:</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>С помощью этого интерфейса {@link android.content.ServiceConnection} клиент может выполнить привязку к службе, передав ее в
+метод {@link android.content.Context#bindService bindService()}. Например:</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>Первый параметр в методе {@link android.content.Context#bindService bindService()} представляет собой объект
+{@link android.content.Intent}, который явным образом именует службу для привязки (хотя переход может быть
+и неявным).</li>
+<li>Второй параметр — это объект {@link android.content.ServiceConnection}.</li>
+<li>Третий параметр представляет собой флаг, указывающий параметры привязки. Обычно им является {@link
+android.content.Context#BIND_AUTO_CREATE}, создающий службу, если она уже не выполняется.
+Другие возможные значения: {@link android.content.Context#BIND_DEBUG_UNBIND}
+и {@link android.content.Context#BIND_NOT_FOREGROUND} или {@code 0}, если значение отсутствует.</li>
+</ul>
+
+
+<h3>Дополнительные примечания</h3>
+
+<p>Ниже представлены некоторые важные замечания о привязке к службе.</p>
+<ul>
+  <li>Всегда отлавливайте исключения {@link android.os.DeadObjectException}, которые выдаются
+при возникновении сбоя подключения. Это единственное исключение, которое выдается удаленными методами.</li>
+  <li>Для объектов всегда учитываются ссылки на них в процессах. </li>
+  <li>Обычно необходимо связать привязку и ее отмену во время
+сопоставления моментов подключения и отключения в жизненном цикле клиента. Например:
+    <ul>
+      <li>Если взаимодействие со службой требуется лишь в то время, когда операция отображается, привязку
+необходимо выполнить во время метода {@link android.app.Activity#onStart onStart()}, а отмену привязки — во время выполнения метода {@link
+android.app.Activity#onStop onStop()}.</li>
+      <li>Если необходимо, чтобы операция получала ответы даже в случае ее остановки во время работы в фоновом режиме,
+то привязку можно выполнить во время {@link android.app.Activity#onCreate onCreate()}, а отмену привязки
+ — во время выполнения {@link android.app.Activity#onDestroy onDestroy()}. Однако следует помнить, что такой способ подразумевает,
+что вашей операции необходимо использовать службу все время, пока она выполняется (даже если она выполняется в фоновом режиме). Поэтому,
+если служба находится в другом процессе, вы тем самым утяжеляете процесс, а это
+повышает вероятность того, что система завершит его.</li>
+    </ul>
+    <p class="note"><strong>Примечание.</strong> Обычно <strong>не</strong> следует выполнять привязку или отменять ее
+во время выполнения методов {@link android.app.Activity#onResume onResume()} и {@link
+android.app.Activity#onPause onPause()} вашей операции, поскольку такие обратные вызовы происходят при каждом переходе из одного состояния в другое,
+ а обработка данных, выполняемая при таких переходах, должна быть минимальной. Кроме того, если к одной и той же
+службе привязано несколько операций в вашем приложении, и имеется переход между 
+двумя этими операциями, служба может быть уничтожена и создана повторно, поскольку текущая операция выполняет отмену привязки
+(во время приостановки) до того, как следующая служба выполнит привязку (во время возобновления). (Подробные сведения о согласовании жизненных циклов операций при таких переходах
+представлены в статье
+<a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Операции</a>.)</p>
+</ul>
+
+<p>Пример кода, в котором показан порядок привязки к службе, см. в статье, посвященной классу <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a>, в <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h2 id="Lifecycle">Управление жизненным циклом привязанной службы</h2>
+
+<p>Когда выполняется отмена привязки службы ко всем клиентам, система Android уничтожает такую службу (если она не была запущена
+вместе с {@link android.app.Service#onStartCommand onStartCommand()}). В таком случае вам не нужно
+управлять жизненным циклом своей службы, если она исключительно привязанная служба
+&mdash; система Android управляет ей за вас на основании привязки службы к любым другим клиентам.</p>
+
+<p>Однако, если вы решите реализовать метод обратного вызова {@link android.app.Service#onStartCommand
+onStartCommand()}, вам необходимо явным образом остановить службу, поскольку в
+этом случае она считается <em>запущенной</em>. В таком случае служба выполняется до тех пор, пока
+сама не остановит свою работу с помощью метода {@link android.app.Service#stopSelf()} или до тех пор, пока другой компонент не вызовет метод {@link
+android.content.Context#stopService stopService()}, независимо от привязки службы к каким-либо
+клиентам.</p>
+
+<p>Кроме того, если ваша служба запущена и принимает привязку, то при вызове системой
+вашего метода {@link android.app.Service#onUnbind onUnbind()} вы также можете вернуть
+{@code true}, если желаете получить вызов к {@link android.app.Service#onRebind
+onRebind()} при следующей привязке к службе (вместо получения вызова к методу {@link
+android.app.Service#onBind onBind()}). Метод {@link android.app.Service#onRebind
+onRebind()} возвращает значение void, однако клиент по-прежнему получает объект {@link android.os.IBinder} в своем методе обратного вызова
+{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}.
+На рисунке 1 ниже иллюстрируется логика жизненного цикла такого рода.</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Жизненный цикл запущенной службы,
+для которой выполняется привязка.</p>
+
+
+<p>Дополнительные сведения о жизненном цикле уже запущенной службы представлены в статье <a href="{@docRoot}guide/components/services.html#Lifecycle">Службы</a>.</p>
+
+
+
+

@@ -261,7 +261,7 @@ android.app.Service#onStartCommand onStartCommand()}, connects to the Internet a
 database transaction. When the transaction is done, the service stops itself and it is
 destroyed.</p>
 
-<p class="caution"><strong>Caution:</strong> A services runs in the same process as the application
+<p class="caution"><strong>Caution:</strong> A service runs in the same process as the application
 in which it is declared and in the main thread of that application, by default. So, if your service
 performs intensive or blocking operations while the user interacts with an activity from the same
 application, the service will slow down activity performance. To avoid impacting application
@@ -336,14 +336,11 @@ public class HelloIntentService extends IntentService {
   protected void onHandleIntent(Intent intent) {
       // Normally we would do some work here, like download a file.
       // For our sample, we just sleep for 5 seconds.
-      long endTime = System.currentTimeMillis() + 5*1000;
-      while (System.currentTimeMillis() &lt; endTime) {
-          synchronized (this) {
-              try {
-                  wait(endTime - System.currentTimeMillis());
-              } catch (Exception e) {
-              }
-          }
+      try {
+          Thread.sleep(5000);
+      } catch (InterruptedException e) {
+          // Restore interrupt status.
+          Thread.currentThread().interrupt();
       }
   }
 }
@@ -405,14 +402,11 @@ public class HelloService extends Service {
       public void handleMessage(Message msg) {
           // Normally we would do some work here, like download a file.
           // For our sample, we just sleep for 5 seconds.
-          long endTime = System.currentTimeMillis() + 5*1000;
-          while (System.currentTimeMillis() &lt; endTime) {
-              synchronized (this) {
-                  try {
-                      wait(endTime - System.currentTimeMillis());
-                  } catch (Exception e) {
-                  }
-              }
+          try {
+              Thread.sleep(5000);
+          } catch (InterruptedException e) {
+              // Restore interrupt status.
+              Thread.currentThread().interrupt();
           }
           // Stop the service using the startId, so that we don't stop
           // the service in the middle of handling another job

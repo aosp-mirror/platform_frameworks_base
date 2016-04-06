@@ -1,0 +1,171 @@
+page.title=入门指南
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#ApplyTheme">使用材料主题</a></li>
+  <li><a href="#Layouts">设计布局</a></li>
+  <li><a href="#Depth">指定您视图内的高度</a></li>
+  <li><a href="#ListsCards">创建列表与卡片</a></li>
+  <li><a href="#Animations">定制您的动画</a></li>
+</ol>
+<h2>您也应该阅读</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料设计规范</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 材料设计</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>如果要使用材料设计创建应用：</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    请查阅<a href="http://www.google.com/design/spec">材料设计规范</a>。</li>
+  <li style="margin-bottom:10px">
+    在您的应用中使用材料<strong>主题</strong>。</li>
+  <li style="margin-bottom:10px">
+    遵循材料设计指导方针创建您的<strong>布局</strong>。</li>
+  <li style="margin-bottom:10px">
+    指定您视图要投射阴影的<strong>高度</strong>。</li>
+  <li style="margin-bottom:10px">
+    使用系统<strong>小组件</strong>呈现列表与卡片。</li>
+  <li style="margin-bottom:10px">
+    定制您的应用中的<strong>动画</strong>。</li>
+</ol>
+
+<h3>保持后向兼容性</h3>
+
+<p>您可将多个材料设计功能添加至您的应用，同时保持与 Android 5.0 之前的 Android 版本的兼容性。
+如果要了解更多信息，请参阅
+<a href="{@docRoot}training/material/compatibility.html">保持兼容性</a>。</p>
+
+<h3>使用材料设计更新您的应用</h3>
+
+<p>如果要更新现有应用以纳入材料设计，请遵循材料设计指导方针更新您的布局。
+同时也须确保纳入深度、触摸反馈和动画。
+</p>
+
+<h3>使用材料设计创建新应用</h3>
+
+<p>如果您要使用材料设计功能创建新应用，<a href="http://www.google.com/design/spec">材料设计指导方针</a>将为您提供一个紧密结合的设计框架。
+请遵循这些指导方针并使用 Android
+框架中的新功能来设计与开发您的应用。</p>
+
+
+<h2 id="ApplyTheme">使用材料主题</h2>
+
+<p>如果要在您的应用中使用材料主题，请指定一个从
+<code>android:Theme.Material</code> 继承的风格：</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>材料主题提供更新的系统小组件，让您能够为触摸反馈以及操作行为转换设置配色工具以及默认动画。
+有关更多详情，请参阅<a href="{@docRoot}training/material/theme.html">使用材料主题</a>。
+</p>
+
+
+<h2 id="Layouts">设计布局</h2>
+
+<p>除了应用及定制材料主题，您的布局同时也应符合<a href="http://www.google.com/design/spec">材料设计指导方针</a>。
+设计布局时，请特别注意下列几点：
+</p>
+
+<ul>
+<li>基线格点</li>
+<li>关键线</li>
+<li>间距</li>
+<li>触摸目标大小</li>
+<li>布局结构</li>
+</ul>
+
+
+<h2 id="Depth">指定您视图内的高度</h2>
+
+<p>视图可透射阴影，而视图的高度值将决定其阴影的大小以及其显示顺序。
+如果要设置视图的高度，请使用您的布局中的
+<code>android:elevation</code> 属性：</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>新的 <code>translationZ</code> 属性可让您创建反映出视图高度临时变化的动画。
+高度变化可在<a href="{@docRoot}training/material/animations.html#ViewState">响应触摸手势</a>时发挥作用。
+
+</p>
+
+<p>有关更多详情，请参阅<a href="{@docRoot}training/material/shadows-clipping.html">定义阴影与裁剪视图</a>。
+</p>
+
+
+<h2 id="ListsCards">创建列表与卡片</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} 是 {@link
+android.widget.ListView} 的可插入版本，支持不同布局类型，具有更高性能。
+{@link android.support.v7.widget.CardView} 让您能够展示卡片内的各种信息并且在各种应用中实现一致的呈现方式。
+下列代码示例将展示如何将
+{@link android.support.v7.widget.CardView} 包括在您的布局中：</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>如需了解详细信息，请参阅<a href="{@docRoot}training/material/lists-cards.html">创建列表和卡片</a>。
+</p>
+
+
+<h2 id="Animations">定制您的动画</h2>
+
+<p>Android 5.0（API 级别 21）包括新 API，可用于在您的应用中创建定制动画。例如，您可启用操作行为转换并定义操作行为内的退出转换：
+
+</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>当您从此操作行为启动另一个操作行为时，退出转换将被激活。</p>
+
+<p>如果要了解有关新动画 API 的更多详情，请参阅<a href="{@docRoot}training/material/animations.html">定义定制动画</a>。</p>

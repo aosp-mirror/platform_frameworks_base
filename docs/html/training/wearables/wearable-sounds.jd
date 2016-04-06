@@ -1,0 +1,63 @@
+page.title=Using Speakers on Wearables
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Detect">Detect the Speaker</a></li>
+  <li><a href="#Play">Play Sounds</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>Some Android Wear devices include speakers, enabling them to incorporate sound into their
+apps and offer an extra dimension of engagement with the user. A speaker-equipped Wear device might
+trigger a clock or timer alarm, complete with audio notification. Games on Wear become become more
+entertaining by offering not just sight, but sound.</p>
+
+<p>This page describes how apps on Wear devices running Android 6.0 (API level 23) can use
+familiar Android APIs to play sounds through the device speaker.</p>
+
+<h2 id="Detect">Detect the Speaker</h2>
+
+<p>A Wear app must first detect whether the wearable device has a speaker. In the following example,
+the app uses the {@link android.media.AudioManager#getDevices(int) getDevices() } method in
+conjunction with the value of {@link android.content.pm.PackageManager#FEATURE_AUDIO_OUTPUT} to
+confirm that the device is equipped with a speaker.</p>
+
+<pre>
+PackageManager packageManager = context.getPackageManager();
+AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+// Check whether the device has a speaker.
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    // Check FEATURE_AUDIO_OUTPUT to guard against false positives.
+    if (!packageManager.hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)) {
+        return false;
+    }
+
+    AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+    for (AudioDeviceInfo device : devices) {
+        if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+            return true;
+        }
+    }
+}
+return false;
+</pre>
+
+<h2 id="Play">Play Sounds</h2>
+
+<p>Once you've detected the speaker, the process for playing sound on Android Wear is the
+same as for a handset or other device. For more information, see
+<a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a>.</p>
+
+<p>If you also want to record audio from the microphone on the wearable, your app must also get
+permission to use the microphone. To learn more, see
+<a href="{@docRoot}training/articles/wear-permissions.html">Permissions on Android Wear.</a></p>

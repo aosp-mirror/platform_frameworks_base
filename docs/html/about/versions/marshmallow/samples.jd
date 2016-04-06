@@ -1,0 +1,89 @@
+page.title=Android 6.0 Samples
+page.image=images/cards/card-build_16x9_2x.png
+page.tags=marshmallow, samples
+meta.tags=marshmallow,androidm,samples
+page.metaDescription=Code to get your started with Android 6.0 APIs.
+@jd:body
+
+<p>
+  Download or browse sample projects to get started with Android 6.0
+  APIs (API level 23). You can download the samples
+  directly from Android Studio &mdash; just select the <b>File > Import
+  Samples</b> menu option and pick the sample you want.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> These downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+<ul>
+<li id="ActiveNotification">
+<a href="{@docRoot}samples/ActiveNotifications/index.html">Active Notification</a>: This sample demonstrates how the
+  <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
+  can tell you how many notifications your app is currently showing.
+</li>
+
+<li id="AutomaticBackup">
+<a href="{@docRoot}samples/AutoBackupForApps/index.html">Auto Backup for Apps</a>: Android 6.0
+(API level 23) introduces automatic backup for app settings. This sample demonstrates how to add
+filtering rules to an app in order to manage settings backup.
+</li>
+
+<li id="CameraRaw">
+<a href="{@docRoot}samples/Camera2Raw/index.html">Camera 2 Raw</a>: This sample demonstrates how to
+use the <code>Camera2</code> API to capture RAW camera buffers and save them as
+<code>DNG</code> files.
+</li>
+
+<li id="ConfirmCredential">
+  <a href="{@docRoot}samples/ConfirmCredential/index.html">Confirm Credential</a>: This sample
+  demonstrates how to use device credentials as an authentication method in your app.
+</li>
+
+<li id="DeviceOwner"><a href="{@docRoot}samples/DeviceOwner/index.html">Device Owner</a>: This
+  sample demonstrates how to use the device owner features to manage and
+  configure a device.
+</li>
+
+<li id="DirectShare"><a href="{@docRoot}samples/DirectShare/index.html">Direct Share</a>:
+  This sample demonstrates how to provide the
+  <a href="{@docRoot}about/versions/marshmallow/android-6.0.html#direct-share">Direct Share</a>
+  feature. The app shows some options directly in the list of share intent candidates.
+</li>
+
+<li id="FingerprintDialog">
+  <a href="{@docRoot}samples/FingerprintDialog/index.html">Fingerprint
+  Dialog</a>:
+  This sample demonstrates how to recognize registered fingerprints to
+  authenticate your app's user.
+</li>
+
+<li id="MidiScope">
+  <a href="{@docRoot}samples/MidiScope/index.html">MidiScope</a>:
+  This sample demonstrates how to use the <a href=
+  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
+  receive and process MIDI signals coming from an attached input device.
+</li>
+
+<li id="MidiSynth">
+  <a href="{@docRoot}samples/MidiSynth/index.html">MidiSynth</a>:
+  This sample demonstrates how to use the <a href=
+  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
+  receive and play MIDI messages coming from an attached input device.
+</li>
+
+<li id="NfcProvisioning"><a href="{@docRoot}samples/NfcProvisioning/index.html">NFC Provisioning</a>:
+  This sample demonstrates how to use NFC to provision other devices with a
+  specific device owner.
+</li>
+
+<li id="RuntimePermissions">
+  <a href=
+  "{@docRoot}samples/RuntimePermissions/index.html">RuntimePermissions</a>:
+  This sample shows runtime permissions available in Android 6.0 (API level 23)
+  and higher. Display the log on screen to follow the execution. If executed on
+  an Android 6.0 device, the app displays an additional option to access
+  contacts using an 6.0-only optional permission.
+</li>
+</ul>

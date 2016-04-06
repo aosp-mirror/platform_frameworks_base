@@ -54,7 +54,7 @@ Depending on the intent you want to create, the data might be a {@link android.n
 one of several other data types, or the intent might not need data at all.</p>
 
 <p>If your data is a {@link android.net.Uri}, there's a simple {@link
-android.content.Intent#Intent(String,Uri) Intent()} constructor you can use define the action and
+android.content.Intent#Intent(String,Uri) Intent()} constructor you can use to define the action and
 data.</p>
 
 <p>For example, here's how to create an intent to initiate a phone call using the {@link

@@ -63,6 +63,23 @@
       </ul>
    </li>
 
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/audio/index.html">
+      <span class="en">Audio</span></a></div>
+      <ul>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/basics.html">Basics</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/opensl-for-android.html">OpenSL ES for
+      Android</a></li>
+      </ul>
+   </li>
+
+      <li class="nav-section">
+      <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>ndk/guides/graphics/index.html">
+      <span class="en">Graphics</span></a></div>
+   </li>
+
+
 </ul>
 
 

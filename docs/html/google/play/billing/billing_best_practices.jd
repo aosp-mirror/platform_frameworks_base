@@ -72,7 +72,7 @@ attacks that can compromise your In-app Billing implementation.</p>
   line to your Proguard configuration file:</p>
   <p><code>-keep class com.android.vending.billing.**</code></p>
 </div>
-  
+
 <h3 id="sample">Modify all sample application code</h3>
 <p>The In-app Billing sample application is publicly distributed and can be downloaded by anyone,
 which means it is relatively easy for an attacker to reverse engineer your application if you use
@@ -90,16 +90,33 @@ replay attacks.</p>
 nonces on the server.</p>
 
 <h3 id="payload">Set the developer payload string when making purchase requests</h3>
-<p>With the In-app Billing Version 3 API, you can include a 'developer payload' string token when sending your purchase request to Google Play. Typically, this is used to pass in a string token that uniquely identifies this purchase request. If you specify a string value, Google Play returns this string along with the purchase response. Subsequently, when you make queries about this purchase, Google Play returns this string together with the purchase details.</p>
-<p>You should pass in a string token that helps your application to identify the user who made the purchase, so that you can later verify that this is a legitimate purchase by that user. For consumable items, you can use a randomly generated string, but for non-consumable items you should use a string that uniquely identifies the user.</p>
-<p>When you get back the response from Google Play, make sure to verify that the developer payload string matches the token that you sent previously with the purchase request. As a further security precaution, you should perform the verification on your own secure server.</p>
+<p>With the In-app Billing Version 3 API, you can include a 'developer payload'
+string token when sending your purchase request to Google Play. Typically, this
+is used to pass in a string token that uniquely identifies this purchase request.
+If you specify a string value, Google Play returns this string along with the
+purchase response. Subsequently, when you make queries about this purchase,
+Google Play returns this string together with the purchase details.</p>
+<p>You should pass in a string token that helps your application to identify the user who
+made the purchase, so that you can later verify that this is a legitimate purchase by
+that user. For consumable items, you can use a randomly generated string, but for non-
+consumable items you should use a string that uniquely identifies the user.</p>
+
+<p class="note">
+  <strong>Note:</strong> Do not use the user's
+  email address in the payload string, since that address may change.
+</p>
+
+<p>When you get back the response from Google Play, make sure to verify that the
+developer payload string matches the token that you sent previously with the purchase
+request. As a further security precaution, you should perform the verification on your
+own secure server.</p>
 
 
 <h3 id="trademark">Take action against trademark and copyright infringement</h3>
 <p>If you see your content being redistributed on Google Play, act quickly and decisively. File a
-<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=141511">trademark notice
-of infringement</a> or a <a href="http://www.google.com/android_dmca.html">copyright notice of
-infringement</a>.</p>
+<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=141511">
+trademark notice of infringement</a> or a <a href="http://www.google.com/android_dmca.html">
+copyright notice of infringement</a>.</p>
 
 <h3 id="revocable">Implement a revocability scheme for unlocked content</h3>
 <p>If you are using a remote server to deliver or manage content, have your application verify the
@@ -112,4 +129,3 @@ literal string. Instead, construct the string at runtime from pieces or use bit 
 example, XOR with some other string) to hide the actual key. The key itself is not secret
 information, but you do not want to make it easy for a hacker or malicious user to replace the
 public key with another key.</p>
-

@@ -1,0 +1,756 @@
+page.title=Activity
+page.tags=Activity,意圖
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>本文件內容</h2>
+<ol>
+  <li><a href="#Creating">建立 Activity</a>
+    <ol>
+      <li><a href="#UI">實作使用者介面</a></li>
+      <li><a href="#Declaring">在宣示說明中宣告 Activity</a></li>
+    </ol>
+  </li>
+  <li><a href="#StartingAnActivity">啟動 Activity</a>
+    <ol>
+      <li><a href="#StartingAnActivityForResult">啟動 Activity 以取得結果</a></li>
+    </ol>
+  </li>
+  <li><a href="#ShuttingDown">關閉 Activity</a></li>
+  <li><a href="#Lifecycle">管理 Activity 生命週期</a>
+    <ol>
+      <li><a href="#ImplementingLifecycleCallbacks">實作生命週期回呼</a></li>
+      <li><a href="#SavingActivityState">儲存 Activity 狀態</a></li>
+      <li><a href="#ConfigurationChanges">處理設定變更</a></li>
+      <li><a href="#CoordinatingActivities">協調 Activity</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>重要類別</h2>
+<ol>
+  <li>{@link android.app.Activity}</li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">工作和返回堆疊</a>
+</li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>{@link android.app.Activity} 是提供畫面的應用程式元件，使用者可以與此畫面互動以執行動作，例如撥號、拍照、傳送電子郵件或檢視地圖。
+
+每個 Activity 都會有專屬視窗，用於繪製其使用者介面。視窗一般會佔滿螢幕，但也可能小於螢幕或在其他視窗上方浮動。
+
+</p>
+
+<p> 應用程式通常由多個 Activity 組成，這些 Activity 之間的繫結鬆散。
+一般來說，應用程式中的某個 Activity 會指定為「主要」Activity。使用者第一次啟動應用程式時，會將此 Activity 向使用者顯示。
+然後，每個 Activity 可以啟動另一個 Activity，以執行不同的動作。
+每次啟動新的 Activity 時，之前的 Activity 會停止，但系統將該 Activity 保留在堆疊中(即「返回堆疊」)。
+
+新的 Activity 啟動時會推送至返回堆疊，然後取得使用者焦點。
+返回堆疊遵循基本的「後進先出」堆疊機制，因此，使用者完成目前的 Activity，按下 [返回] 按鈕<em></em>時，目前的 Activity 會從堆疊被推出 (並終止)，然後繼續之前的 Activity。
+
+(返回堆疊在<a href="{@docRoot}guide/components/tasks-and-back-stack.html">工作和返回堆疊</a>文件中，有更詳細的說明)。
+
+</p>
+
+<p>Activity 因啟動新的 Activity 而停止時，Activity 的生命週期回呼方法會通知此狀態的變更。由於 Activity 狀態的變更 &mdash; 可能是系統建立、停止、繼續或終止 Activity 時 &mdash; Activity 會收到數個回呼方法，而且每個回呼都提供您執行適合該次狀態變更的特定工作機會。
+
+
+
+
+例如，停止時，您的 Activity 應釋放任何大型物件，例如網路或資料庫連線。
+Activity 繼續時，您可以重新取得必要資源，並繼續之前中斷的動作。
+這些狀態轉換都是 Activity 生命週期的一部分。
+</p>
+
+<p>本文件的其他部分會討論建置和使用 Activity 的基本概念，包括完整討論 Activity 生命週期的運作方式，讓您可以正確地管理各種 Activity 狀態之間的轉換。
+
+</p>
+
+
+
+<h2 id="Creating">建立 Activity</h2>
+
+<p>如要建立 Activity，您必須建立 {@link android.app.Activity} 的子類別 (或它現有的子類別)。
+在您的子類別中，您需要實作回呼方法，當 Activity 在其生命週期的各種狀態之間轉換時，系統可以呼叫此回呼方法。例如，Activity 建立、停止、繼續或終止時。
+
+最重要的兩個回呼方法如下：
+</p>
+
+<dl>
+  <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
+  <dd>您必須實作此方法。系統建立您的 Activity 時會呼叫此方法。
+在您的實作中，應該初始化 Activity 的基本元件。
+
+    最重要的是，您必須在這裡呼叫 {@link android.app.Activity#setContentView
+ setContentView()}，才能定義 Activity 使用者介面的版面配置。</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>系統呼叫此方法做為使用者離開您的 Activity 的第一個指標 (但並非一定表示該 Activity 遭到終止)。
+您通常需要透過這個方法提交要在目前的使用者工作階段以外保留的任何變更 (原因在於使用者可能不會返回)。
+
+</dd>
+</dl>
+
+<p>還有一些您應使用的其他生命週期回呼方法，以便提供 Activity 之間流暢的使用者體驗，並處理讓您的 Activity 停止、甚至終止的非預期中斷。
+
+如需所有生命週期回呼方法的相關資訊，請參閱<a href="#Lifecycle">管理 Activity 生命週期</a>。
+</p>
+
+
+
+<h3 id="UI">實作使用者介面</h3>
+
+<p> Activity 的使用者介面是由階層的檢視所提供 &mdash; 衍生自 {@link android.view.View} 類別的物件。
+每個檢視都控制 Activity 視窗內特定的長方形空間，並且可以回應使用者的互動。
+例如，檢視可能是按鈕，使用者觸碰此按鈕時會初始化一個動作。
+</p>
+
+<p>Android 提供許多現成的檢視，您可以用於設計並組織您的版面配置。
+「小工具」是在畫面上提供視覺和互動元素的檢視，例如按鈕、文字欄位、核取方塊或只是一張影像。
+「版面配置」是衍生自 {@link
+android.view.ViewGroup} 的檢視，讓子檢視可具有獨特的版面配置模型，例如線性版面配置、網格版面配置或相對版面配置。
+您也可以製作 {@link android.view.View} 和
+{@link android.view.ViewGroup} 類別 (或現有子類別) 的子類別，以建立您自己的小工具和版面配置，然後套用到您的 Activity 版面配置。
+</p>
+
+<p>使用檢視定義版面配置的最常見方式，是使用 XML 版面配置檔案 (儲存於您的應用程式資源)。
+這樣一來，您可以分別維護使用者介面的設計和定義 Activity 行為的原始程式碼。
+您可以使用 {@link android.app.Activity#setContentView(int) setContentView()} 傳送版面配置的資源 ID，將版面配置設為 Activity 的 UI。
+
+不過，您也可以透過將新的 {@link
+android.view.View} 插入 {@link android.view.ViewGroup}，然後藉由將根
+{@link android.view.ViewGroup} 傳送給 {@link android.app.Activity#setContentView(View)
+setContentView()} 來使用該版面配置，以便在您的 Activity 程式碼中建立新的 {@link android.view.View}，並且建置視圖層次。
+</p>
+
+<p>如需關於建立使用者介面的詳細資訊，請參閱<a href="{@docRoot}guide/topics/ui/index.html">使用者介面</a>。</p>
+
+
+
+<h3 id="Declaring">在宣示說明中宣告 Activity</h3>
+
+<p>您必須在宣示說明檔案中宣告 Activity，系統才能加以存取。
+如要宣告您的 Activity，請開啟宣示說明檔案，然後新增 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素做為 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> 元素的下層物件。
+
+範例：</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+      &lt;activity android:name=".ExampleActivity" /&gt;
+      ...
+  &lt;/application ... &gt;
+  ...
+&lt;/manifest &gt;
+</pre>
+
+<p>您可以包括此元素中的其他屬性 (attribute) 來定義屬性 (property)，例如 Activity 的標籤、Activity 的圖示或 Activity UI 的設計風格。<a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a> 屬性 (attribute) 是唯一必須的屬性 &mdash; 它會指定 Activity 的類別名稱。
+
+
+一旦發佈應用程式，您就不得變更此名稱，這是因為這樣做可能會破壞一些功能，例如應用程式捷徑 (閱讀部落格貼文：<a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">不能變更的事項</a>)。
+
+
+</p>
+
+<p>請參閱 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素參考文件，進一步瞭解如何在宣示說明中宣告 Activity。
+</p>
+
+
+<h4>使用意圖篩選器</h4>
+
+<p><a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> 元素也可以指定各種意圖篩選器 &mdash; 使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 元素 &mdash; 以便宣告其他應用程式元件啟動它的方式。
+</p>
+
+<p>使用 Android SDK 工具建立新的應用程式時，自動為您建立的
+虛設常式 Activity 會內含意圖篩選器。含意圖篩選器會宣告回應
+「主要」動作的 Activity，並且應放置在「啟動器」類別。意圖篩選器看起來會如下所示：
+</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity" android:icon="@drawable/app_icon"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 元素指出這是應用程式的「主要」進入點。<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 元素指出此 Activity 應列於系統的應用程式啟動器 (以允許使用者啟動此 Activity)。
+</p>
+
+<p>如果您本來就要讓應用程式獨自運作，不要讓其他應用程式啟動其 Activity，則不需要任何其他意圖篩選器。
+只有一個 Activity 可以有「主要」動作和「啟動器」類別，如同上一個範例所示。
+您不要讓其他應用程式使用的 Activity，則不應使用意圖篩選器，而且您可以使用明確的意圖自行加以啟動 (將於以下小節討論)。
+
+</p>
+
+<p>不過，如果您的 Activity 需要回應從其他應用程式 (和您自己的應用程式) 傳送過來的隱含式意圖，則必須為您的 Activity 定義額外的意圖篩選器。
+
+針對您要回應的意圖類型，您必須包括 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a>，其中內含
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 元素和 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 元素 (選用) 和/或 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 元素。這些元素會指定您的 Activity 可以回應哪些類型的意圖。
+</p>
+
+<p>如需關於您的 Activity 如何回應意圖的詳細資訊，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+</p>
+
+
+
+<h2 id="StartingAnActivity">啟動 Activity</h2>
+
+<p>透過呼叫 {@link android.app.Activity#startActivity
+ startActivity()}、將 {@link android.content.Intent} (描述要啟動的 Activity) 傳給它，您可以啟動另一個 Activity。
+意圖會指出您要啟動的那個 Activity，或描述您要執行的動作類型 (而讓系統為您選取適當的 Activity，甚至可以是來自不同應用程式的 Activity)。
+
+
+意圖也可以攜帶少量的資料給已啟動的 Activity 使用。
+</p>
+
+<p>在您自己的應用程式內運作時，通常只要啟動已知的 Activity。
+ 建立意圖並明確定義您要啟動的 Activity (使用類別名稱)，可以達成此目的。
+例如，以下示範 Activity 如何啟動另一個名為 {@code
+SignInActivity} 的 Activity：</p>
+
+<pre>
+Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);
+</pre>
+
+<p>不過，您的應用程式也希望可以執行其他動作，例如使用您 Activity 中的資料以傳送電子郵件、文字訊息或狀態更新。
+在此情況下，您的應用程式可能就沒有專屬的 Activity 來執行這類動作。因此，您可以改為運用裝置上其他應用程式提供的 Activity。讓這些 Activity 為您執行所需的動作。
+
+這正是意圖寶貴的地方 &mdash; 您可以建立意圖，在其中描述您要執行的動作，然後系統會從另一個應用程式啟動適當的 Activity。
+
+
+如果有多個 Activity 都可以處理意圖，則使用者可以選取要使用哪個 Activity。
+例如，如果要讓使用者傳送電子郵件訊息，您可以建立下列意圖：
+
+</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);
+startActivity(intent);
+</pre>
+
+<p>加入意圖的 {@link android.content.Intent#EXTRA_EMAIL} 額外值是一個字串陣列，由應該要寄送電子郵件的電子郵件地址所組成。
+電子郵件應用程式回應此意圖時，它會讀取額外值中提供的字串陣列，並將這些內容放置在編寫電子郵件表單的「收件人」欄位。
+
+在此情況下，電子郵件應用程式的 Activity 會啟動，並且會在使用者完成後，繼續您的 Activity。
+</p>
+
+
+
+
+<h3 id="StartingAnActivityForResult">啟動 Activity 以取得結果</h3>
+
+<p>有時候，您會想要收到由您啟動 Activity 的結果。如要接收結果，請透過呼叫 {@link android.app.Activity#startActivityForResult
+ startActivityForResult()} (而非 {@link android.app.Activity#startActivity
+ startActivity()}) 以啟動 Activity。
+如要接收後續 Activity 的結果，請實作 {@link android.app.Activity#onActivityResult onActivityResult()} 回呼方法。
+
+後續 Activity 完成時，會將 {@link
+android.content.Intent} 中的結果傳回到您的 {@link android.app.Activity#onActivityResult onActivityResult()} 方法。
+</p>
+
+<p>例如，您可能會讓使用者在聯絡人中挑選一位，讓您的 Activity 可以針對該聯絡人的資訊進行一些處理。
+以下示範如何建立這類意圖，並處理結果：
+</p>
+
+<pre>
+private void pickContact() {
+    // Create an intent to "pick" a contact, as defined by the content provider URI
+    Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+}
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+    if (resultCode == Activity.RESULT_OK &amp;&amp; requestCode == PICK_CONTACT_REQUEST) {
+        // Perform a query to the contact's content provider for the contact's name
+        Cursor cursor = getContentResolver().query(data.getData(),
+        new String[] {Contacts.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) { // True if the cursor is not empty
+            int columnIndex = cursor.getColumnIndex(Contacts.DISPLAY_NAME);
+            String name = cursor.getString(columnIndex);
+            // Do something with the selected contact's name...
+        }
+    }
+}
+</pre>
+
+<p>此範例顯示您應該在您的 {@link
+android.app.Activity#onActivityResult onActivityResult()} 方法中使用的基本邏輯，以便處理 Activity 結果。
+第一個條件會檢查要求是否成功 &mdash; 如果成功，則{@code resultCode} 會是 {@link android.app.Activity#RESULT_OK} &mdash;，以及此結果回應的要求是否為已知的要求 &mdash; 範例中的 {@code requestCode} 符合以 {@link android.app.Activity#startActivityForResult
+startActivityForResult()} 傳送的第二個參數。
+
+
+程式碼在這裡透過查詢 {@link android.content.Intent} ({@code data} 參數) 中傳回的資料，來處理 Activity 結果。
+</p>
+
+<p>其中的過程是，{@link
+android.content.ContentResolver} 針對內容供應程式執行查詢，所傳回的
+{@link android.database.Cursor} 可以讀取查詢到的資料。如需詳細資訊，請參閱<a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>。
+</p>
+
+<p>如需關於使用意圖的詳細資訊，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+</p>
+
+
+<h2 id="ShuttingDown">關閉 Activity</h2>
+
+<p>呼叫 Activity 的 {@link android.app.Activity#finish
+finish()} 方法，可以關閉此 Activity。您也可以呼叫
+{@link android.app.Activity#finishActivity finishActivity()}，關閉您之前啟動的個別 Activity。</p>
+
+<p class="note"><strong>注意：</strong>大多數情況，您不應使用這些方法明確地結束 Activity。
+如同下一節所討論的 Activity 生命週期，Android 系統會為您管理 Activity 的生命週期，所以您不需要結束您自己的 Activity。
+
+呼叫這些方法對使用者體驗有負面的影響，只有在您十分確定不希望使用者返回 Activity 的此執行個體時，才加以呼叫。
+
+</p>
+
+
+<h2 id="Lifecycle">管理 Activity 生命週期</h2>
+
+<p>實作回呼方法來管理 Activity 的生命週期，對於開發強大且有彈性的應用程式來說，相當重要。
+
+Activity 的生命週期受到相關其他 Activity、本身的工作以及返回堆疊的直接影響。
+</p>
+
+<p>Activity 基本上有以下三種狀態：</p>
+
+<dl>
+  <dt><i>已繼續</i></dt>
+    <dd>Activity 位於螢幕的前景，具有使用者焦點 (此狀態有時候也稱為「執行中」)。
+</dd>
+
+  <dt><i>已暫停</i></dt>
+    <dd>前景中有其他具備焦點的 Activity，但系統仍然可以看到這個 Activity。也就是說，這個 Activity 上方有另一個，該 Activity 為半透明，或是未覆蓋整個螢幕。
+
+已暫停的 Activity 是完全有效的 ({@link android.app.Activity} 物件會保留在記憶體中、維護所有狀態和成員資訊，以及繼續附加至視窗管理員)，但在系統記憶體極低的情況下會遭到終止。
+
+</dd>
+
+  <dt><i>已停止</i></dt>
+    <dd>另一個 Activity 已完全遮蓋原本的 Activity (原本的 Activity 現在位於「背景」)。
+已停止的 Activity 仍然是有效的 ({@link android.app.Activity} 物件會保留在記憶體中、維護所有狀態和成員資訊，但「不會」<em></em>附加至視窗管理員)。
+
+只是使用者不會再看到已停止的 Activity，而且其他地方需要記憶體時，系統會將它終止。
+</dd>
+</dl>
+
+<p>如果 Activity 已暫停或已停止，系統可以透過要求它結束 (呼叫其 {@link android.app.Activity#finish finish()} 方法) 或直接終止其處理程序，將它從記憶體中刪除。
+
+Activity 遭到結束或終止後，再次開啟時，必須全部重新建立。
+</p>
+
+
+
+<h3 id="ImplementingLifecycleCallbacks">實作生命週期回呼</h3>
+
+<p>Activity 在不同的狀態之間轉換時 (如上所述)，會透過各種回呼方法進行通知。
+所有的回呼方法都是虛設，請加以覆寫，以便在 Activity 狀態變更時，執行適當的工作。
+下列主要 Activity 包括每個基礎生命週期方法：
+</p>
+
+
+<pre>
+public class ExampleActivity extends Activity {
+    &#64;Override
+    public void {@link android.app.Activity#onCreate onCreate}(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // The activity is being created.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStart onStart()} {
+        super.onStart();
+        // The activity is about to become visible.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onResume onResume()} {
+        super.onResume();
+        // The activity has become visible (it is now "resumed").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onPause onPause()} {
+        super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStop onStop()} {
+        super.onStop();
+        // The activity is no longer visible (it is now "stopped")
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onDestroy onDestroy()} {
+        super.onDestroy();
+        // The activity is about to be destroyed.
+    }
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>實作這些生命週期方法時，一定要先呼叫超級類別實作，才能執行任何工作，如同以上範例所示。
+</p>
+
+<p>總而言之，這些方法定義了 Activity 的整個生命週期。透過實作這些方法，您可以監視 Activity 生命週期中的三個巢狀迴圈：
+ </p>
+
+<ul>
+<li>Activity 的<b>整個生命週期</b>是介於 {@link
+android.app.Activity#onCreate onCreate()} 呼叫和 {@link
+android.app.Activity#onDestroy} 呼叫之間。您的 Activity 應在 {@link android.app.Activity#onCreate onCreate()} 中設定「全域」狀態 (例如定義版面配置)，並且在 {@link android.app.Activity#onDestroy} 中釋放所有剩餘的資源。
+
+例如，如果您的 Activity 有一個執行緒在背景執行，並從網路下載資料，那麼最好可以在 {@link android.app.Activity#onCreate onCreate()} 中建立該執行緒，然後在 {@link
+android.app.Activity#onDestroy} 中將它停止。
+
+</li>
+
+<li><p>Activity 的<b>可見生命週期</b>是介於 {@link
+android.app.Activity#onStart onStart()} 呼叫和 {@link
+android.app.Activity#onStop onStop()} 呼叫之間。在此期間，使用者可以在螢幕上看到該 Activity，並與之互動。
+例如，啟動新的 Activity，而這個 Activity 不再看得到時，會呼叫 {@link android.app.Activity#onStop onStop()}。
+在這兩個方法之間，您可以維護需要讓使用者看到的資源。
+例如，您可以在{@link
+android.app.Activity#onStart onStart()} 中註冊
+{@link android.content.BroadcastReceiver}，以監視影響到 UI 的變更，然後當使用者不再看到您顯示的內容時，在 {@link android.app.Activity#onStop onStop()} 中將它取消註冊。
+
+系統可以在 Activity 的整個生命週期時，多次呼叫 {@link android.app.Activity#onStart onStart()} 和 {@link
+android.app.Activity#onStop onStop()}，因為 Activity 對使用者而言會一直在顯示和隱藏之間切換。
+</p></li>
+
+<li><p>Activity 的<b>前景生命週期</b>是介於 {@link
+android.app.Activity#onResume onResume()} 呼叫和 {@link android.app.Activity#onPause
+onPause()} 呼叫之間。在此期間，Activity 會在螢幕上所有其他 Activity 的前面，而且具有使用者輸入焦點。
+Activity 可以經常在前景和背景之間轉換 &mdash; 例如，裝置進入睡眠或顯示對話方塊時，會呼叫 {@link android.app.Activity#onPause onPause()}。
+
+由於此狀態可能會經常轉換，因此這兩個方法中的程式碼應十分精簡，這樣可以避免使用者在轉換時等待。
+</p></li>
+</ul>
+
+<p>圖 1 說明 Activity 在轉換狀態時的可能迴圈和路徑。長方形代表您可以實作的回呼方法，以便 Activity 在轉換狀態時執行操作。
+
+ <p>
+
+<img src="{@docRoot}images/activity_lifecycle.png" alt="" />
+<p class="img-caption"><strong>圖 1.</strong>Activity 生命週期。</p>
+
+<p>表 1 列出相同的生命週期回呼方法，其中詳細描述每個回呼方法，並且指出每個回呼方法在 Activity 整個生命週期中的位置，包括系統是否可以在回呼方法完成後終止 Activity。
+
+
+</p>
+
+<p class="table-caption"><strong>表 1.</strong>Activity 生命週期回呼方法摘要。
+</p>
+
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+
+<thead>
+<tr><th colspan="3">方法</th> <th>描述</th> <th>完成後是否可終止？</th> <th>下一個方法</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>一開始建立 Activity 時呼叫。
+      您應該在這裡所有的一般靜態設定 &mdash; 建立檢視、將資料繫結至清單等等。
+「套件」物件會傳送給此方法，如果有擷取到狀態，此物件會內含 Activity 的上一個狀態 (請參閱下文的<a href="#actstate">儲存 Activity 狀態</a>)。
+
+
+
+      <p>後面一定會接著 {@code onStart()}。</p></td>
+  <td align="center">否</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart
+onRestart()}</code></td>
+   <td>Activity 已停止後，即將再次啟動之前呼叫。
+
+       <p>後面一定會接著 {@code onStart()}。</p></td>
+   <td align="center">否</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>Activity 即將要讓使用者看到之前呼叫。
+       <p>如果 Activity 移到前景，後面會接著 {@code onResume()}，如果變成隱藏，後面會接著 {@code onStop()}。
+</p></td>
+    <td align="center">否</td>
+    <td align="center">{@code onResume()} <br/>或<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>Activity 即將與使用者開始互動之前呼叫。
+此時，Activity 位於 Activity 堆疊的最上方，接受使用的輸入。
+
+       <p>後面一定會接著 {@code onPause()}。</p></td>
+   <td align="center">否</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>系統即將開始繼續另一個 Activity 時呼叫。
+認可對永久資料的未儲存變更、停止動畫，以及會使用 CPU 等等資源的其他操作時，一般會使用此方法。
+
+不論此操作會執行什麼動作，都要快速完成，這是因為此方法傳回後，才會繼續下一個 Activity。
+
+       <p>如果 Activity 返回前景，後面會接著 {@code onResume()}，如果變成使用者看不到它，後面會接著 {@code onStop()}。
+
+</td>
+   <td align="center"><strong style="color:#800000">是</strong></td>
+   <td align="center">{@code onResume()} <br/>或<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>使用者看不到 Activity 時呼叫。Activity 遭到終止或另一個 Activity (不論是現有 Activity 或新的 Activity) 已經繼續，而且將它覆蓋住，就會發生此情形。
+
+
+       <p>如果 Activity 回來與使用者互動，後面會接著 {@code onRestart()}，如果 Activity 離開，後面會接著
+ {@code onDestroy()}。
+</p></td>
+   <td align="center"><strong style="color:#800000">是</strong></td>
+   <td align="center">{@code onRestart()} <br/>或<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy
+onDestroy()}</code></td>
+   <td>在 Activity 終止前呼叫。Activity 會接收到的最後呼叫。
+Activity 正在完成 (有人在 Activity 上呼叫 <code>{@link android.app.Activity#finish
+       finish()}</code>)，或系統正在暫時終止 Activity 的這個執行個體以節省空間時，會呼叫此方法。
+
+您可以使用 <code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code> 方法分辨這兩種情況。
+</td>
+   <td align="center"><strong style="color:#800000">是</strong></td>
+   <td align="center"><em>無</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>此欄標示為「完成後是否可終止？」表示系統是否可以「在方法傳回後」隨時終止代管 Activity 的處理程序<em></em>，而不需要執行另一行 Activity 的程式碼。
+
+有三個方法標示為「是」：({@link
+android.app.Activity#onPause
+onPause()}、{@link android.app.Activity#onStop onStop()} 以及 {@link android.app.Activity#onDestroy
+onDestroy()})。由於 {@link android.app.Activity#onPause onPause()} 是這三個方法中的第一個方法，Activity 建立後，{@link android.app.Activity#onPause onPause()} 是一定會呼叫的最後一個方法，之後處理程序才能加以終止<em></em> &mdash; 如果系統必須緊急收回記憶體，可能就不會呼叫 {@link
+android.app.Activity#onStop onStop()} 和 {@link android.app.Activity#onDestroy onDestroy()}。
+
+
+
+因此，您應該使用 {@link android.app.Activity#onPause onPause()} 將極為重要的永久資料 (例如使用者的編輯內容) 寫入儲存空間。
+不過，您應選擇哪些資訊必須在 {@link android.app.Activity#onPause onPause()} 期間加以保留，這是因為此方法中的任何程序遭到封鎖，都無法轉換到下一個 Activity，而且會讓使用者體驗變慢。
+
+
+</p>
+
+<p> 在「是否可終止」<b></b>欄標示為「否」的方法，從呼叫這些方法的那一刻起，會保護代管 Activity 的處理程序不會遭到終止。
+因此，Activity 從 {@link android.app.Activity#onPause onPause()} 傳回到呼叫
+ {@link android.app.Activity#onResume onResume()} 的期間為可終止。
+再次呼叫和傳回
+{@link android.app.Activity#onPause onPause()} 之前，Activity 為不可終止。 </p>
+
+<p class="note"><strong>注意：</strong>表 1 中定義為不是「可終止」的 Activity 仍可遭到系統終止 &mdash; 但只會發生在無技可施的情況下。
+
+Activity 可加以終止的時機，於<a href="{@docRoot}guide/components/processes-and-threads.html">處理和執行緒</a>文件中有更詳細的討論。
+
+</p>
+
+
+<h3 id="SavingActivityState">儲存 Activity 狀態</h3>
+
+<p><a href="#Lifecycle">管理 Activity 生命週期</a>的簡介中提到，當 Activity 暫停或停止時，會保留 Activity 的狀態。
+
+這點是成立的，原因在於當 {@link android.app.Activity} 物件暫停或停止時，它仍然保留在記憶體中 &mdash; 關於它的成員和目前狀態的所有資訊，仍然為有效的。
+
+因此，使用者在 Activity 內所做的任何變更，都會保留下來。所以，當 Activity 返回前景 (當它「繼續」時)，那些變更仍然會在原地。
+
+</p>
+
+<p>不過，當系統終止 Activity 以收回記憶體時，{@link
+android.app.Activity} 物件會遭到終止，所以系統就無法將它及其狀態完好無缺地繼續。
+如果使用者瀏覽回 {@link android.app.Activity} 物件，系統必須加以重新建立。
+但是，使用者不會注意到系統已終止該 Activity 並加以重新建立，可能因此期待 Activity 就跟之前的狀態一樣。
+
+如果是這樣，您可以實作額外的回呼方法，以確認 Activity 狀態相關的重要資訊會保留下來。此回呼方法讓您儲存關於 Activity 狀態的資訊：{@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}。
+
+</p>
+
+<p>系統會在終止 Activity 之前呼叫 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}。
+系統會將 {@link android.os.Bundle} 傳送給此方法，您可以使用 {@link
+android.os.Bundle#putString putString()} 和 {@link
+android.os.Bundle#putInt putInt()} 之類的方法，將 Activity 相關的狀態資訊以名稱-值組的方式儲存。
+
+然後，如果系統終止應用程式處理程序，並且使用者瀏覽回您的 Activity，則系統會重新建立 Activity，然後將 {@link android.os.Bundle} 傳送給 {@link android.app.Activity#onCreate onCreate()} 和 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}。
+
+您可以使用以上其中一種方法，從 {@link android.os.Bundle} 擷取已儲存的狀態，然後還原 Activity 狀態。
+
+如果沒有狀態資訊可供還原，則傳送過來的 {@link
+android.os.Bundle} 為空值 (null) (第一次建立 Activity 時，就是這種情況)。
+</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>圖 2.</strong>Activity 返回使用者焦點，同時具備完整狀態的兩種方式：Activity 遭到終止，然後重新建立，Activity 必須還原之前儲存的狀態；或者Activity 已停止，然後繼續，Activity 狀態維持完整。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>不保證在您的 Activity 遭到終止之前，一定會呼叫 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}，這是因為有時會發生不需要儲存狀態的情形 (例如，使用者使用「返回」按鈕離開您的 Activity 時<em></em>，原因在於使用者明確地關閉 Activity)。
+
+
+
+如果系統要呼叫 {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}，會在 {@link
+android.app.Activity#onStop onStop()} 之前呼叫，可能會在 {@link android.app.Activity#onPause
+onPause()} 之前呼叫。</p>
+
+<p>不過，即使您沒有做任何事，沒有實作 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}，有些 Activity 狀態會經由{@link android.app.Activity} 類別的預設實作 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 而還原。
+具體來說，預設實作會針對版面配置中的每一個 {@link
+android.view.View} 呼叫對應的 {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} 方法，這樣可以讓每個檢視提供本身應該要儲存的相關資訊。
+
+在 Android 架構中，幾乎每個小工具都適當地實作此方法，因此 UI 中可見的變更都會自動儲存，並於 Activity 重新建立時加以還原。
+
+例如，{@link android.widget.EditText} 小工具會儲存使用者輸入的任何文字，而 {@link android.widget.CheckBox} 小工具則會儲存是否勾選。
+
+您只要針對需要儲存狀態的每個小工具，提供唯一的 ID (使用 <a href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a> 屬性) 即可。
+如果小工具沒有 ID，則系統無法儲存其狀態。
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>您也可以明確地讓版面配置中的檢視停止儲存其狀態，只要將
+{@link android.R.attr#saveEnabled android:saveEnabled} 屬性設為 {@code "false"}，或呼叫 {@link android.view.View#setSaveEnabled setSaveEnabled()} 方法即可。
+您通常不應停用儲存狀態的功能，不過，如果您想要還原不同的 Activity UI 狀態，則另當別論。
+</p>
+</div>
+</div>
+
+<p>儘管 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的預設實作會儲存 Activity UI 相關的實用資訊，您仍然需要加以覆寫，以儲存額外的資訊，例如，您需要儲存 Activity 生命期間變更的成員值 (此真可能與 UI 中要還原的值有關，但保留那些 UI 值的成員預設不會加以還原)。
+
+
+
+</p>
+
+<p>由於 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的預設實作可協助儲存 UI 的狀態，因此，如果您覆寫此方法以儲存額外的狀態資訊，一定要再執行任何動作之前，呼叫 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} 的超級類別實作。
+
+
+同樣的情況，您也要呼叫 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} 的超級類別實作 (如果您將它覆寫)，讓預設實作可以還原檢視狀態。
+</p>
+
+<p class="note"><strong>注意：</strong>由於不保證一定會呼叫 {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}，您只能用它來記錄 Activity 的短暫狀態 (UI 的狀態) &mdash; 不應該用它儲存永久資料。
+
+而是要在使用者離開 Activity 時，利用 {@link
+android.app.Activity#onPause onPause()} 來儲存永內資料 (例如要儲存到資料庫的資料)。
+</p>
+
+<p>測試應用程式是否能夠還原其狀態的好方式，只要旋轉裝置，改變螢幕方向即可。
+螢幕方向改變時，系統會終止 Activity 並重新建立，以便套用針對新的螢幕設定而提供使用的替代資源。
+
+單單就這一點而言，您的 Activity 在重新建立時可以完整還原，就非常重要了，這是因為使用者操作應用程式時會經常旋轉螢幕。
+
+</p>
+
+
+<h3 id="ConfigurationChanges">處理設定變更</h3>
+
+<p>有些裝置設定可以在執行階段期間進行變更 (例如，螢幕方向、鍵盤可用性和語言)。
+發生這類變更時，Android 會重新建立執行中的 Activity (系統呼叫 {@link android.app.Activity#onDestroy}，然後立即呼叫 {@link
+android.app.Activity#onCreate onCreate()})。
+此行為的設計透過自動重新載入應用程式與提供的替代資源 (例如針對不同的螢幕方向和大小的不同版面配置)，可協助應用程式適應新的設定。
+
+
+</p>
+
+<p>如果您如上所述正確地設計 Activity，處理由於螢幕方向變更的重新啟動，然後還原 Activity 的狀態，您的應用程式對於 Activity 生命週期中的不可預期事件，會更具有抗性。
+
+</p>
+
+<p>處理這類重新啟動的最佳方式，是使用 {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} 和 {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} (或 {@link
+android.app.Activity#onCreate onCreate()}) 儲存並還原 Activity 的狀態，如同上一節所討論。
+</p>
+
+<p>如需關於執行階段發生的設定變更，以及如何加以處理的詳細資訊，請參閱<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>指南。
+
+</p>
+
+
+
+<h3 id="CoordinatingActivities">協調 Activity</h3>
+
+ <p>Activity 啟動另一個 Activity 時，它們兩者都經歷生命週期轉換。第一個 Activity 暫停並停止 (雖然如果仍然可以在背景看到它，表示它並未真的「停止」)，而另一個 Activity 建立起來。
+
+若這些 Activity 共用儲存到磁碟或其他地方的資料，第一個 Activity 在第二個 Activity 已建立之前，不會完全停止，瞭解這件事很重要。然而，啟動第二個 Activity 的處理程序與停止第一個 Activity 的處理程序會重疊。
+
+
+</p>
+
+<p>生命週期回呼的順序定義的很好，尤其是當兩個 Activity 位於相同的處理程序，而其中一個 Activity 啟動另一個 Activity 時。
+Activity A 啟動 Activity B 時所發生的操作順利如下：
+ </p>
+
+<ol>
+<li>Activity A 的 {@link android.app.Activity#onPause onPause()} 方法會執行。</li>
+
+<li>Activity B 按順序執行 {@link android.app.Activity#onCreate onCreate()}、{@link
+android.app.Activity#onStart onStart()} 以及 {@link android.app.Activity#onResume onResume()} 方法。
+(Activity B 現在擁有使用者焦點)。</li>
+
+<li>然後，如果螢幕上已經看不到 Activity A，就會執行 Activity A 的 {@link
+android.app.Activity#onStop onStop()} 方法。</li>
+</ol>
+
+ <p>這一段可預測的生命週期回呼，可以讓您管理 Activity 之間資訊的轉換。
+例如，如果第一個 Activity 停止時，您必須寫入資料庫，讓接下來的 Activity 可以讀取，那麼您應該在 {@link android.app.Activity#onPause onPause()} 期間寫入，而不是在 {@link
+android.app.Activity#onStop onStop()} 期間寫入。
+
+</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how Android maintains a history of activities and
+enables user multitasking, continue with the <b><a
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></b> document.</p>
+-->

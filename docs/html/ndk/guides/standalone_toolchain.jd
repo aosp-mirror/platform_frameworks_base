@@ -17,7 +17,7 @@ page.title=Standalone Toolchain
   </div>
 
 <p>You can use the toolchains provided with the Android NDK independently, or as plug-ins
-with an existing IDE, such as Eclipse. This flexibility
+with an existing IDE. This flexibility
 can be useful if you already have your own build system, and only need the ability to invoke the
 cross-compiler in order to add support to Android for it.</p>
 

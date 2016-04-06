@@ -1,0 +1,979 @@
+page.title=Notificações
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Neste documento</h2>
+<ol>
+  <li><a href="#Design">Considerações de projeto</a></li>
+  <li><a href="#CreateNotification">Criação de uma notificação</a>
+    <ol>
+      <li><a href="#Required">Conteúdo necessário da notificação</a></li>
+      <li><a href="#Optional">Configurações e conteúdo opcionais da notificação</a></li>
+      <li><a href="#Actions">Ações da notificação</a></li>
+      <li><a href="#Priority">Prioridade da notificação</a></li>
+      <li><a href="#SimpleNotification">Criação de uma notificação simples</a></li>
+      <li><a href="#ApplyStyle">Aplicação de um layout expandido a uma notificação</a></li>
+      <li><a href="#Compatibility">Tratamento da compatibilidade</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">Gerenciamento de notificações</a>
+    <ol>
+      <li><a href="#Updating">Atualização de notificações</a></li>
+      <li><a href="#Removing">Remoção de notificações</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">Preservação da navegação ao iniciar uma atividade</a>
+    <ol>
+      <li><a href="#DirectEntry">Definição de uma atividade PendingIntent comum</a></li>
+      <li><a href="#ExtendedNotification">Definição de uma atividade PendingIntent especial</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">Exibição do progresso em uma notificação</a>
+    <ol>
+      <li><a href="#FixedProgress">Exibição de um indicador de progresso de duração fixa</a></li>
+      <li><a href="#ActivityIndicator">Exibição de um indicador de atividade contínua</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">Metadados de notificação</a></li>
+  <li><a href="#Heads-up">Notificações de informações prévias</a></li>
+  <li><a href="#lockscreenNotification">Notificações na tela de bloqueio</a></li>
+    <ol>
+      <li><a href="#visibility">Configuração de visibilidade</a></li>
+      <li><a href="#controllingMedia">Controle de reprodução de mídia na tela de bloqueio</a></li>
+    </ol>
+  <li><a href="#CustomNotification">Layouts de notificação personalizados</a></li>
+</ol>
+
+    <h2>Classes principais</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>Vídeos</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">
+            Notificações em 4.1</a>
+        </li>
+    </ol>
+<h2>Veja também</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Projeto para Android: Notificações</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Uma notificação é uma mensagem que pode ser exibida ao usuário fora da IU normal do aplicativo.
+Quando você diz ao sistema para emitir uma notificação, ela primeiro aparece como um ícone
+na <strong>área de notificação</strong>. Para ver os detalhes da notificação, o usuário abre
+a <strong>gaveta de notificação</strong>. A área de notificação e a gaveta de notificação
+são áreas controladas pelo sistema que o usuário pode visualizar a qualquer momento.
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>Figura 1.</strong> Notificações na área de notificação.
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>Figura 2.</strong> Notificações na gaveta de notificação.
+</p>
+
+<p class="note"><strong>Observação:</strong> exceto quando notado, este guia menciona a classe
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}
+na versão 4 da <a href="{@docRoot}tools/support-library/index.html">Biblioteca de suporte</a>.
+A classe {@link android.app.Notification.Builder Notification.Builder} foi adicionada no Android
+3.0 (API de nível 11).</p>
+
+<h2 id="Design">Considerações de projeto</h2>
+
+<p>As notificações, como parte importante da interface do usuário do Android, possuem as próprias diretrizes de projeto.
+As alterações do Material Design introduzidas no Android 5.0 (API de nível 21) são de importância
+específica e, por isso, recomenda-se revisar o treinamento do <a href="{@docRoot}training/material/index.html">Material Design</a>
+ para obter mais informações. Para saber como projetar notificações e suas interações, leia o guia de projeto 
+<a href="{@docRoot}design/patterns/notifications.html">Notificações</a>.</p>
+
+<h2 id="CreateNotification">Criação de uma notificação</h2>
+
+<p>Você especifica as ações e informações da IU para uma notificação
+no objeto {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+Para criar a própria notificação, chama-se
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
+que retorna um objeto {@link android.app.Notification} contendo suas especificações. Para emitir a notificação,
+passa-se o objeto {@link android.app.Notification} ao sistema
+chamando {@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+
+<h3 id="Required">Conteúdo necessário da notificação</h3>
+<p>
+    Um objeto {@link android.app.Notification} <em>deve</em> conter o seguinte:
+</p>
+<ul>
+    <li>
+        Um ícone pequeno, definido por
+        {@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()}
+    </li>
+    <li>
+        Um título, definido por
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()}
+    </li>
+    <li>
+        Texto de detalhes, definido por
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()}
+    </li>
+</ul>
+<h3 id="Optional">Configurações e conteúdo opcionais da notificação</h3>
+<p>
+    Todas as outras configurações e o conteúdo da notificação são opcionais. Para saber mais sobre isso,
+    consulte as documentações de referência de {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">Ações da notificação</h3>
+<p>
+    Apesar de serem opcionais, deve-se adicionar pelo menos uma ação à notificação.
+    Uma ação permite que os usuários direcionem-se diretamente da notificação
+    para uma {@link android.app.Activity} no aplicativo, onde podem visualizar um ou mais eventos
+    ou realizar outros trabalhos.
+</p>
+<p>
+    Uma notificação pode fornecer várias ações. Deve-se sempre definir a ação que será ativada
+    quando o usuário clicar na notificação. Geralmente, esta ação abre uma
+    {@link android.app.Activity} no aplicativo. É possível também adicionar botões à notificação
+    que realizem ações adicionais, como ativar a soneca de um alarme imediatamente
+    para uma mensagem de texto. Este recurso está disponível a partir do Android 4.1. Se você usar botões de ação adicionais,
+    também deverá disponibilizar a funcionalidade em uma {@link android.app.Activity} no aplicativo; consulte
+    a seção <a href="#Compatibility">Tratamento da compatibilidade</a> para obter mais informações.
+</p>
+<p>
+    Dentro de uma {@link android.app.Notification}, a própria ação é definida
+    por uma {@link android.app.PendingIntent} contendo uma
+    {@link android.content.Intent} que inicia
+    uma {@link android.app.Activity} no aplicativo. Para associar
+    a {@link android.app.PendingIntent} a um gesto, chame o método adequado
+    de {@link android.support.v4.app.NotificationCompat.Builder}. Por exemplo, se quiser iniciar
+    {@link android.app.Activity} quando o usuário clicar no texto da notificação
+    na gaveta de notificação, deve-se adicionar {@link android.app.PendingIntent} chamando
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}.
+</p>
+<p>
+    Iniciar uma {@link android.app.Activity} quando o usuário clica na notificação
+    é o cenário de ação mais comum. É possível também iniciar uma {@link android.app.Activity} quando o usuário
+    dispensa uma notificação. A partir do Android 4.1, é possível iniciar
+    uma {@link android.app.Activity} a partir de um botão de ação. Para obter mais informações, leia o guia de referência
+    de {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Prioridade da notificação</h3>
+<p>
+    Se quiser, é possível definir a prioridade de uma notificação. A prioridade
+    age como uma sugestão à IU do dispositivo sobre como a notificação deve ser exibida.
+    Para definir a prioridade de uma notificação, chame {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} e passe em uma das constantes de prioridade {@link
+    android.support.v4.app.NotificationCompat}. Há cinco níveis de prioridade,
+    de {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) a {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); se não for definida, a prioridade
+    segue o padrão de {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> Para obter mais informações sobre como definir um nível de prioridade adequado, Consulte "Definição e gerenciamento corretos da prioridade das notificações"
+    no guia de projeto
+    <a href="{@docRoot}design/patterns/notifications.html">Notificações</a>.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">Criação de uma notificação simples</h3>
+<p>
+    O seguinte fragmento ilustra uma notificação simples que especifica uma atividade para abrir quando
+o usuário clica na notificação. Observe que o código cria um objeto
+    {@link android.support.v4.app.TaskStackBuilder} e usa-o para criar
+    a {@link android.app.PendingIntent} para a ação. Este padrão é explicado com mais detalhes
+    na seção <a href="#NotificationResponse">
+    Preservação da navegação ao iniciar uma atividade</a>:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>É isso. O usuário foi notificado.</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">Aplicação de um layout expandido a uma notificação</h3>
+<p>
+    Para que uma notificação apareça em uma vista expandida, cria-se primeiro
+    um objeto {@link android.support.v4.app.NotificationCompat.Builder} com as opções
+    de visualização normal desejadas. Em seguida, chama-se {@link android.support.v4.app.NotificationCompat.Builder#setStyle
+    Builder.setStyle()} com um objeto de layout expandido como o argumento.
+</p>
+<p>
+    Lembre-se de que as notificações expandidas não estão disponíveis em plataformas anteriores ao Android 4.1. Para saber mais
+    sobre como tratar de notificações para Android 4.1 e plataformas anteriores, leia
+    a seção <a href="#Compatibility">Tratamento da compatibilidade</a>.
+</p>
+<p>
+    Por exemplo, o seguinte fragmento de código demonstra como alterar a notificação criada
+    no fragmento anterior para usar o layout expandido:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">Tratamento da compatibilidade</h3>
+
+<p>
+    Nem todos os recursos de notificação estão disponíveis para uma versão específica,
+    mesmo se os métodos que os definem estiverem na classe
+    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} da biblioteca de suporte.
+    Por exemplo, botões de ação, que dependem das notificações expandidas, aparecem somente a partir do Android
+    4.1 ou de posteriores porque as próprias notificações expandidas estão disponíveis somente a partir
+    destas versões.
+</p>
+<p>
+    Para garantir a melhor compatibilidade, crie notificações
+    com {@link android.support.v4.app.NotificationCompat NotificationCompat} e suas subclasses,
+    particularmente {@link android.support.v4.app.NotificationCompat.Builder
+    NotificationCompat.Builder}. Além disso, siga o processo a seguir ao implementar uma notificação:
+</p>
+<ol>
+    <li>
+        Forneça toda a funcionalidade da notificação aos usuários, independentemente
+        da versão que estejam usando. Para fazer isto, verifique se toda a disponibilidade está disponível a partir de uma
+        {@link android.app.Activity} no aplicativo. Pode-se adicionar uma nova
+        {@link android.app.Activity} para fazer isto.
+        <p>
+            Por exemplo, caso queira usar
+        {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()}
+        para fornecer um controle que interrompa e inicie a reprodução de mídia, primeiro implemente
+        este controle em uma {@link android.app.Activity} no aplicativo.
+        </p>
+    </li>
+    <li>
+        Certifique-se de que todos os usuários possam acessar a funcionalidade na {@link android.app.Activity},
+        iniciando-a quando o usuário clicar na notificação. Para fazer isto,
+        crie uma {@link android.app.PendingIntent}
+        para a{@link android.app.Activity}. Chame
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+        setContentIntent()} para adicionar a {@link android.app.PendingIntent} à notificação.
+    </li>
+    <li>
+        Agora, adicione os recursos de notificação expandidos que deseja usar à notificação. Lembre-se
+        de que qualquer funcionalidade adicionada também deve estar disponível na {@link android.app.Activity}
+        que é iniciada quando os usuários clicam na notificação.
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">Gerenciamento de notificações</h2>
+<p>
+    Quando for necessário emitir uma notificação várias vezes para o mesmo tipo de evento,
+    deve-se evitar criar uma notificação completamente nova. Em vez disso, deve-se considerar atualizar
+    uma notificação anterior, alterando e/ou adicionado alguns valores.
+</p>
+<p>
+    Por exemplo, o Gmail notifica o usuário de que novos e-mails foram recebidos aumentando a contagem
+de mensagens não lidas e adicionando um resumo de cada e-mail à notificação. Isto é chamado
+    de "acumular" a notificação. Isto é descrito com mais detalhes no guia de projeto
+    <a href="{@docRoot}design/patterns/notifications.html">Notificações</a>.
+</p>
+<p class="note">
+    <strong>Observação:</strong> este recurso do Gmail requer o layout expandido da "caixa de entrada",
+    que faz parte do recurso de notificação expandida disponível a partir do Android 4.1.
+</p>
+<p>
+    A seguinte seção descreve como atualizar as notificações e como removê-las.
+</p>
+<h3 id="Updating">Atualização de notificações</h3>
+<p>
+    Para definir uma notificação para que possa ser atualizada, deve-se emiti-la com um ID de notificação
+    chamando {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
+    Para atualizar esta notificação após emiti-la,
+    atualize ou crie um objeto {@link android.support.v4.app.NotificationCompat.Builder},
+    compile um objeto {@link android.app.Notification} a partir dele e emita
+    a {@link android.app.Notification} com o mesmo ID usado anteriormente. Se a notificação anterior
+    ainda estiver visível, o sistema a atualizará com o conteúdo
+    do objeto {@link android.app.Notification}. Se a notificação anterior for dispensada,
+    uma nova notificação será criada.
+</p>
+<p>
+    O seguinte fragmento demonstra uma notificação que é atualizada para refletir
+    o número de eventos que ocorreram. Ele acumula a notificação, exibindo um resumo:
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">Remoção de notificações</h3>
+<p>
+    As notificações permanecem visíveis até que um dos seguintes casos aconteça:
+</p>
+<ul>
+    <li>
+        O usuário dispense a notificação individualmente usando "Apagar tudo"
+    (se a notificação puder ser apagada).
+    </li>
+    <li>
+        O usuário clique na notificação
+    e chame-se {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()}
+    quando a notificação é criada.
+    </li>
+    <li>
+        Chame-se {@link android.app.NotificationManager#cancel(int) cancel()}
+    para um ID de notificação específico. Este método também exclui notificações contínuas.
+    </li>
+    <li>
+        Chame-se {@link android.app.NotificationManager#cancelAll() cancelAll()}, que remove
+todas as notificações emitidas anteriormente.
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">Preservação da navegação ao iniciar uma atividade</h2>
+<p>
+    Ao iniciar uma {@link android.app.Activity} a partir de uma notificação, deve-se preservar
+    a experiência de navegação esperada pelo usuário. Clicar em <i>Voltar</i> deve levar o usuário
+    de volta pelo fluxo de trabalho normal do aplicativo à tela Inicial, e clicar em <i>Recentes</i> deve exibir
+    a {@link android.app.Activity} como uma tarefa separada. Para preservar a experiência de navegação,
+    deve-se iniciar a {@link android.app.Activity} em uma tarefa nova. O modo de definição
+    da {@link android.app.PendingIntent} para fornecer uma tarefa nova depende da natureza
+    da {@link android.app.Activity} que está sendo iniciado. Há duas situações gerais:
+</p>
+<dl>
+    <dt>
+        Atividade comum
+    </dt>
+    <dd>
+        Inicia-se uma {@link android.app.Activity} que faz parte do fluxo de trabalho normal
+        do aplicativo. Nesta situação, defina {@link android.app.PendingIntent}
+        para iniciar uma tarefa nova e forneça a {@link android.app.PendingIntent} com uma pilha de retorno
+        que reproduza o comportamento <i>Voltar</i> normal do aplicativo.
+        <p>
+            As notificações do aplicativo do Gmail demonstram isso. Ao clicar em uma notificação
+            para uma única mensagem de e-mail, a própria mensagem será exibida. Tocar em <b>Voltar</b>
+            faz com que o usuário volte ao Gmail até a tela inicial, como se ele tivesse acessado o Gmail
+            a partir da tela inicial em vez de a partir da notificação.
+        </p>
+        <p>
+            Isto acontece independentemente do aplicativo que estava em primeiro plano
+            quando a notificação foi tocada. Por exemplo, se você estiver no Gmail escrevendo uma mensagem e clicar
+            em uma notificação de um e-mail, você acessará este e-mail imediatamente. Tocar em <i>Voltar</i>
+            leva você de volta à caixa de entrada e, em seguida, à tela inicial, em vez de levar
+            à mensagem que estava escrevendo.
+        </p>
+    </dd>
+    <dt>
+        Atividade especial
+    </dt>
+    <dd>
+        O usuário vê apenas esta {@link android.app.Activity} se for iniciada a partir de uma notificação.
+        De certo modo, a {@link android.app.Activity} estende a notificação fornecendo
+        informações que seriam difíceis de exibir na própria notificação. Para estas situações,
+        defina a {@link android.app.PendingIntent} para iniciar em uma tarefa nova. Não há necessidade
+        de criar uma pilha de retorno, pois a {@link android.app.Activity} iniciada
+        não faz parte do fluxo de atividades do aplicativo. Clicar em <i>Voltar</i> ainda levará o usuário
+        à tela inicial.
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">Definição de uma atividade PendingIntent comum</h3>
+<p>
+    Para definir uma {@link android.app.PendingIntent} que inicia uma {@link android.app.Activity} de entrada
+    direta, siga estas etapas:
+</p>
+<ol>
+    <li>
+        Defina a hierarquia de {@link android.app.Activity} do aplicativo no manifesto.
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Adicione compatibilidade com Android 4.0.3 e mais antigos. Para fazer isto, especifique o pai
+                da {@link android.app.Activity} que está iniciando adicionando um elemento
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+                como o filho de 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
+                <p>
+                    Para este elemento, defina 
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
+                    Defina
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>,
+                    onde <code>&lt;parent_activity_name&gt;</code> é o valor de 
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
+                    para o elemento
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                    pai. Veja o XML a seguir para ver um exemplo.
+                </p>
+            </li>
+            <li>
+                Adicione também compatibilidade com Android 4.1 e mais recentes. Para fazer isto, adicione o atributo
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
+                    ao elemento
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                    da {@link android.app.Activity} que estiver iniciando.
+            </li>
+        </ol>
+        <p>
+            O XML final deve parecer-se com isto:
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        Crie uma pilha de retorno com base na {@link android.content.Intent} que inicia
+        a {@link android.app.Activity}:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Crie a {@link android.content.Intent} para iniciar a{@link android.app.Activity}.
+            </li>
+            <li>
+                Crie um compilador de pilhas chamando {@link android.app.TaskStackBuilder#create
+                                TaskStackBuilder.create()}.
+            </li>
+            <li>
+                Adicione a pilha de retorno ao compilador de pilha chamando
+                {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}.
+                Para cada {@link android.app.Activity} na hierarquia definida no manifesto,
+                a pilha de retorno conterá um objeto {@link android.content.Intent}
+                que inicia a {@link android.app.Activity}. Este método adiciona sinalizadores
+                    que iniciam a pilha em uma tarefa nova.
+                <p class="note">
+                    <strong>Observação:</strong> Apesar de o argumento
+                    de {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}
+                    ser uma referência para a {@link android.app.Activity} iniciada, a chamada do método
+                    não adiciona a {@link android.content.Intent} que inicia
+                    a {@link android.app.Activity}. Em vez disso, lidamos com isto na próxima etapa.
+                </p>
+            </li>
+            <li>
+                Adicione a {@link android.content.Intent} que inicia a {@link android.app.Activity}
+                a partir da notificação chamando
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+                Passe a {@link android.content.Intent} criada na primeira etapa
+                como o argumento
+                para {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+            </li>
+            <li>
+                Se for necessário, adicione argumentos para os objetos {@link android.content.Intent}
+                na pilha chamando {@link android.support.v4.app.TaskStackBuilder#editIntentAt
+                TaskStackBuilder.editIntentAt()}. Às vezes, isto é necessário para garantir
+                que a {@link android.app.Activity} alvo exiba dados significantes quando o usuário
+                navegar a ela usando <i>Voltar</i>.
+            </li>
+            <li>
+                Adquira uma {@link android.app.PendingIntent} para esta pilha de retorno chamando
+                {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()}.
+                É possível usar esta {@link android.app.PendingIntent} como o argumento
+                para {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    O seguinte fragmento de código demonstra o processo:
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">Definição de uma atividade PendingIntent especial</h3>
+<p>
+    A seção a seguir descreve como definir uma atividade
+    {@link android.app.PendingIntent} especial.
+</p>
+<p>
+    Uma {@link android.app.Activity} especial não precisa de uma pilha de retorno, então não é necessário
+    definir sua hierarquia de {@link android.app.Activity} no manifesto
+    e chamar
+    {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} para compilar
+    uma pilha de retorno. Em vez disso, use o manifesto para definir as opções de tarefa da {@link android.app.Activity}
+    e crie a {@link android.app.PendingIntent}
+    chamando {@link android.app.PendingIntent#getActivity getActivity()}:
+</p>
+<ol>
+    <li>
+        No manifesto, adicione os seguintes atributos ao elemento
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+        para a {@link android.app.Activity}
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                O nome da classe completamente qualificado da atividade.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                Combinado com o sinalizador
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                que foi definido no código, isto garante que esta {@link android.app.Activity}
+                não acesse a tarefa padrão do aplicativo. Tarefas existentes
+                que tiverem a afinidade padrão do aplicativo não serão afetadas.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                Exclui a nova tarefa de <i>Recentes</i>para que o usuário não
+                navegue acidentalmente de volta.
+            </dd>
+        </dl>
+        <p>
+            Este fragmento mostra o elemento:
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        Compilar e emitir a notificação:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Crie uma {@link android.content.Intent} que inicie
+                a {@link android.app.Activity}.
+            </li>
+            <li>
+                Defina a {@link android.app.Activity} para iniciar em uma tarefa nova e vazia
+                chamando {@link android.content.Intent#setFlags setFlags()} com os sinalizadores
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                e
+                {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK}.
+            </li>
+            <li>
+                Defina quaisquer outras opções necessárias para a {@link android.content.Intent}.
+            </li>
+            <li>
+                Crie uma {@link android.app.PendingIntent} a partir da {@link android.content.Intent}
+                chamando {@link android.app.PendingIntent#getActivity getActivity()}.
+                É possível usar esta {@link android.app.PendingIntent} como o argumento
+                para {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+    <p>
+        O seguinte fragmento de código demonstra o processo:
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">Exibição do progresso em uma notificação</h2>
+<p>
+    As notificações podem incluir um indicador de progresso animado que exibe aos usuários
+    o status de uma operação em andamento. Se for possível estimar a duração da operação
+    e o quanto dela já foi concluído em um determinado momento, use a forma "determinada" do indicador
+    (uma barra de progresso). Se não for possível estimar a duração da operação,
+    use a forma "indeterminada" do indicador (um indicador de atividade).
+</p>
+<p>
+    Os indicadores de progresso são exibidos com a implementação da plataforma
+    da classe {@link android.widget.ProgressBar}.
+</p>
+<p>
+    Para usar o indicador de progresso em plataformas a partir do Android 4.0,
+    chame {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. Para versões mais antigas,
+    deve-se criar o próprio layout personalizado de notificação
+    que inclua uma vista de {@link android.widget.ProgressBar}.
+</p>
+<p>
+    As seguintes seções descrevem como exibir o progresso em uma notificação
+    usando {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">Exibição de um indicador de progresso de duração fixa</h3>
+<p>
+    Para exibir uma determinada barra de progresso, adicione a barra à notificação
+    chamando {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(max, progress, false)} e, em seguida, emitindo a notificação. À medida que a operação prosseguir,
+    incremente <code>progress</code> e atualize a notificação. No término da operação,
+    <code>progress</code> deve ser igual a <code>max</code>. Uma maneira comum de chamar
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
+    é definir <code>max</code> como 100 e, em seguida, incrementar <code>progress</code>
+    como um valor "percentual completo" para a operação.
+</p>
+<p>
+    É possível deixar a barra de progresso em exibição ou removê-la quando a operação for concluída. Em ambos os casos,
+    lembre-se de atualizar o texto da notificação para exibir que a operação foi concluída.
+    Para remover a barra de progresso,
+    chame {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(0, 0, false)}. Por exemplo:
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">Exibição de um indicador de atividade contínua</h3>
+<p>
+    Para exibir um indicador de atividade indeterminado, adicione-o à notificação
+    com {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
+    (os dois primeiros argumentos são ignorados) e emita a notificação. O resultado é um indicador
+    que tem o mesmo estilo que uma barra de progresso, exceto que sua animação é contínua.
+</p>
+<p>
+    Emita a notificação no início da operação. A animação será executada
+    até que a notificação seja modificada. Quando a operação for concluída,
+    chame {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)}
+    e, em seguida, atualize a notificação para remover o indicador de atividade.
+    Sempre faça isso. Caso contrário, a animação será executada mesmo quando a operação for concluída. Lembre-se também de alterar
+    o texto da notificação para indicar que a operação foi concluída.
+</p>
+<p>
+    Para ver como os indicadores de atividade funcionam, consulte o fragmento anterior. Localize as seguintes linhas:
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    Substitua as linhas encontradas pelas seguintes linhas:
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">Metadados de notificação</h2>
+
+<p>As notificações podem ser classificadas de acordo com os metadados atribuídos
+com os seguintes métodos {@link android.support.v4.app.NotificationCompat.Builder}:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()}
+    diz ao sistema como lidar com as notificações do aplicativo quando o dispositivo estiver no modo de Prioridade
+    (por exemplo: se a notificação representar uma chamada recebida, mensagem instantânea ou alarme).</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} faz com que as notificações
+    com o campo de prioridade definido para {@code PRIORITY_MAX} ou {@code PRIORITY_HIGH}
+    apareçam em uma pequena janela flutuante se a notificação também tiver som ou vibração.</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()}
+    permite a adição de uma lista de pessoas a uma notificação. O aplicativo pode usar isto para sinalizar
+    ao sistema que ele deve agrupar as notificações de pessoas específicas, ou classificar notificações
+    destas pessoas como sendo mais importantes.</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>Figura 3.</strong> Atividade de tela cheia exibindo uma notificação de informações prévias
+  </p>
+</div>
+
+<h2 id="Heads-up">Notificação de informações prévias</h2>
+
+<p>Com o Android 5.0 (API de nível 21), as notificações podem aparecer em uma pequena janela flutuante
+(também chamada de <em>notificação de informações prévias</em>) quando o dispositivo estiver ativo
+(ou seja, com o dispositivo desbloqueado e a tela ativada). Essas notificações
+aparecem de maneira semelhante à forma compacta da notificação, exceto que a notificação de informações prévias
+também exibe botões de ação. Os usuários podem agir
+ou dispensar a notificação de informações prévias sem deixar o aplicativo atual.</p>
+
+<p>Exemplos de condições que podem ativar uma notificação de informações prévias incluem:</p>
+
+<ul>
+  <li>A atividade do usuário estar no modo de tela cheia (o aplicativo usar
+{@link android.app.Notification#fullScreenIntent}) ou</li>
+  <li>A notificação tem alta prioridade e usa toques
+ou vibrações</li>
+</ul>
+
+<h2 id="lockscreenNotification">Notificações da tela de bloqueio</h2>
+
+<p>Com o lançamento do Android 5.0 (API de nível 21), as notificações podem aparecer
+na tela de bloqueio. O aplicativo pode usar esta funcionalidade para fornecer controles de reprodução de mídia e outras
+ações comuns. Os usuários podem escolher, acessando Configurações, se querem exibir notificações na tela de bloqueio
+e é possível designar se uma notificação do aplicativo será visível na tela de bloqueio.</p>
+
+<h3 id="visibility">Configuração de visibilidade</h3>
+
+<p>O aplicativo pode controlar o nível de detalhe visível nas notificações exibidas
+em uma tela de bloqueio segura. Chama-se {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}
+e especifica-se um dos seguintes valores:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} exibe o conteúdo completo
+da notificação.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} não exibe parte alguma
+desta notificação na tela de bloqueio.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} exibe informações básicas,
+como o ícone e o título do conteúdo da notificação, mas oculta o conteúdo completo.</li>
+</ul>
+
+<p>Quando {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} é definido, é possível
+fornecer também uma versão alternativa do conteúdo da notificação que oculta determinados detalhes. Por exemplo,
+um aplicativo de SMS pode exibir uma notificação que exiba <em>Você tem 3 novas mensagens de texto</em>, mas oculte
+o conteúdo e o remetente das mensagens. Para fornecer esta notificação alternativa, cria-se primeiro
+uma notificação de substituição usando {@link android.support.v4.app.NotificationCompat.Builder}. Ao criar
+o objeto de notificação privada, anexe a notificação de substituição a ele
+usando o método {@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}
+.</p>
+
+<h3 id="controllingMedia">Controle de reprodução de mídia na tela de bloqueio</h3>
+
+<p>No Android 5.0 (API de nível 21), a tela de bloqueio deixa de exibir controles de mídia
+com base em {@link android.media.RemoteControlClient}, que foi reprovado. Em vez disso, usa-se o modelo
+{@link android.app.Notification.MediaStyle} com o método
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()},
+que converte as ações em ícones clicáveis.</p>
+
+<p class="note"><strong>Observação:</strong> o modelo e o método {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+não estão incluídos na biblioteca de suporte. Portanto, esses recursos funcionam somente no Android 5.0
+e em versões mais recentes.</p>
+
+<p>Para exibir os controles de reprodução de mídia na tela de bloqueio no Android 5.0, defina a visibilidade
+como {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, como descrito acima. Em seguida,
+adicione as ações e defina o modelo {@link android.app.Notification.MediaStyle}, como descrito
+no seguinte exemplo de código:</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>Observação:</strong> a reprovação de {@link android.media.RemoteControlClient}
+tem mais implicações para o controle de mídia. Consulte
+<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Controle de reprodução de mídia</a>
+para obter mais informações sobre as novas APIs para gerenciar a sessão de mídia e o controle de reprodução.</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">Layouts de notificação personalizados</h2>
+<p>
+    A estrutura das notificações permite que um layout de notificação personalizado seja definido,
+    o que define a aparência da notificação em um objeto {@link android.widget.RemoteViews}.
+    As notificações de layout personalizado são parecidas com notificações normais, mas baseiam-se
+    em um {@link android.widget.RemoteViews} definido em um arquivo de layout XML.
+</p>
+<p>
+    A altura disponível para um layout de notificação personalizado depende da vista da notificação. Layouts de vista normal
+    são limitados a 64 dp, e layouts de vista expandida são limitados a 256 dp.
+</p>
+<p>
+    Para definir um layout de notificação personalizada, comece instanciando
+    um objeto {@link android.widget.RemoteViews} que infle um arquivo de layout XML. Em seguida,
+    em vez de chamar métodos como
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()},
+    chame {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Para definir
+    os detalhes do conteúdo na notificação personalizada, use os métodos em
+    {@link android.widget.RemoteViews} para definir os valores dos filhos da vista:
+</p>
+<ol>
+    <li>
+        Crie um layout XML para a notificação em um arquivo separado. É possível usar o nome de arquivo que desejar,
+        mas deve-se usar a extensão <code>.xml</code>
+    </li>
+    <li>
+        No aplicativo, use métodos {@link android.widget.RemoteViews} para definir os ícones
+        e o texto da notificação. Coloque este objeto {@link android.widget.RemoteViews}
+        em {@link android.support.v4.app.NotificationCompat.Builder}
+        chamando {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Evite definir
+        um {@link android.graphics.drawable.Drawable} de segundo plano
+        no objeto {@link android.widget.RemoteViews}, pois a cor do texto pode torná-lo ilegível.
+    </li>
+</ol>
+<p>
+    A classe {@link android.widget.RemoteViews} também inclui métodos que podem ser usados
+    para adicionar facilmente um {@link android.widget.Chronometer} ou uma {@link android.widget.ProgressBar}
+    ao layout da notificação. Para obter mais informações sobre como criar layouts personalizados
+    para a notificação, consulte a documentação de referência de {@link android.widget.RemoteViews}.
+</p>
+<p class="caution">
+    <strong>Atenção:</strong> ao usar um layout personalizado de notificação, certifique-se
+    de garantir que ele funcione com diferentes orientações e resoluções do dispositivo. Enquanto este aviso
+    aplica-se a todos os layouts de vistas, é muito importante para as notificações,
+    pois o espaço na gaveta da notificação é muito restrito. Não torne o layout personalizado muito complexo
+    e certifique-se de testá-lo em várias configurações.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>Uso de recursos de estilo para texto de notificação personalizada</h4>
+<p>
+    Sempre use recursos de estilo para o texto de uma notificação personalizada A cor de fundo
+    da notificação pode variar dentre vários dispositivos e versões e o uso de recursos de estilo
+    ajuda a lidar com isto. A partir do Android 2.3, o sistema definiu um estilo
+    para o texto do layout de notificação padrão. Se usar o mesmo estilo nos aplicativos que usam Android
+    2.3 ou mais recentes, você garantirá que o texto esteja visível em relação ao fundo da exibição.
+</p>

@@ -1,0 +1,494 @@
+page.title=Загрузчики
+parent.title=Операции
+parent.link=activities.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Содержание документа</h2>
+    <ol>
+    <li><a href="#summary">Сводная информация об API-интерфейсе загрузчика</a></li>
+    <li><a href="#app">Использование загрузчиков в приложении</a>
+      <ol>
+        <li><a href="#requirements"></a></li>
+        <li><a href="#starting">Запуск загрузчика</a></li>
+        <li><a href="#restarting">Перезапуск загрузчика</a></li>
+        <li><a href="#callback">Использование обратных вызовов класса LoaderManager</a></li>
+      </ol>
+    </li>
+    <li><a href="#example">Пример</a>
+       <ol>
+         <li><a href="#more_examples">Другие примеры</a></li>
+        </ol>
+    </li>
+  </ol>
+    
+  <h2>Основные классы</h2>
+    <ol>
+      <li>{@link android.app.LoaderManager}</li>
+      <li>{@link android.content.Loader}</li>
+
+    </ol>   
+    
+    <h2>Образцы кода по теме</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a></li>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>Загрузчики, которые появились в Android 3.0, упрощают асинхронную загрузку данных
+в операцию или фрагмент. Загрузчики имеют следующие свойства:</p>
+  <ul>
+    <li>Они имеются для любых операций {@link android.app.Activity} и фрагментов {@link
+android.app.Fragment}.</li>
+    <li>Они обеспечивают асинхронную загрузку данных.</li>
+    <li>Они отслеживают источник своих данных и выдают новые результаты при
+изменении контента.</li>
+    <li>Они автоматически переподключаются к последнему курсору загрузчика при
+воссоздании после изменения конфигурации. Таким образом, им не требуется повторно запрашивать свои
+данные.</li>
+  </ul>
+ 
+<h2 id="summary">Сводная информация об API-интерфейсе загрузчика</h2>
+
+<p>Имеется несколько классов и интерфейсов, которые могут использовать
+загрузчики в приложении. Они приведены в этой таблице:</p>
+
+<table>
+  <tr>
+    <th>Класс/интерфейс</th>
+    <th>Описание</th>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager}</td>
+    <td>Абстрактный класс, связываемый с {@link android.app.Activity} или
+{@link android.app.Fragment} для управления одним или несколькими интерфейсами {@link
+android.content.Loader}. Это позволяет приложению управлять
+длительно выполняющимися операциями вместе с жизненным циклом {@link android.app.Activity}
+или {@link android.app.Fragment}; чаще всего этот класс используется с 
+{@link android.content.CursorLoader}, однако приложения могут писать
+свои собственные загрузчики для работы с другими типами данных.
+    <br />
+    <br />
+    Имеется только один класс {@link android.app.LoaderManager} на операцию или фрагмент. Однако у класса {@link android.app.LoaderManager} может быть
+несколько загрузчиков.</td>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager.LoaderCallbacks}</td>
+    <td>Интерфейс обратного вызова, обеспечивающий взаимодействие клиента с {@link
+android.app.LoaderManager}. Например, с помощью метода обратного вызова {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+создается новый загрузчик.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.Loader}</td>
+    <td>Абстрактный класс, который выполняет асинхронную загрузку данных. Это
+базовый класс для загрузчика. Обычно используется {@link
+android.content.CursorLoader}, но можно реализовать и собственный подкласс. Когда
+загрузчики активны, они должны отслеживать источник своих данных и выдавать новые
+результаты при изменении контента. </td>
+  </tr>
+  <tr>
+    <td>{@link android.content.AsyncTaskLoader}</td>
+    <td>Абстрактный загрузчик, который предоставляет {@link android.os.AsyncTask} для выполнения работы.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.CursorLoader}</td>
+    <td>Подкласс класса {@link android.content.AsyncTaskLoader}, который запрашивает
+{@link android.content.ContentResolver} и возвращает {@link
+android.database.Cursor}. Этот класс реализует протокол {@link
+android.content.Loader} стандартным способом для выполнения запросов к курсорам.
+Он строится на {@link android.content.AsyncTaskLoader} для выполнения запроса к курсору
+в фоновом потоке, чтобы не блокировать пользовательский интерфейс приложения. Использование
+этого загрузчика — это лучший способ асинхронной загрузки данных из {@link
+android.content.ContentProvider} вместо выполнения управляемого запроса через
+платформу или API-интерфейсы операции.</td>
+  </tr>
+</table>
+
+<p>Приведенные в этой таблице классы и интерфейсы являются наиболее важными компонентами,
+с помощью которых в приложении реализуется загрузчик. При создании каждого загрузчика
+не нужно использовать все эти компоненты, однако всегда следует указывать ссылку на {@link
+android.app.LoaderManager} для инициализации загрузчика и использовать реализацию
+класса {@link android.content.Loader}, например {@link
+android.content.CursorLoader}. В следующих разделах рассказывается, как использовать эти
+классы и интерфейсы в приложении.</p>
+
+<h2 id ="app">Использование загрузчиков в приложении</h2>
+<p>В этом разделе описывается использование загрузчиков в приложении для Android. В
+приложениях, использующих загрузчики, обычно имеются следующие элементы:</p>
+<ul>
+  <li>{@link android.app.Activity} или {@link android.app.Fragment};</li>
+  <li>экземпляр {@link android.app.LoaderManager};</li>
+  <li>{@link android.content.CursorLoader} для загрузки данных, выдаваемых {@link
+android.content.ContentProvider}. Вы также можете реализовать собственный подкласс
+класса {@link android.content.Loader} или {@link android.content.AsyncTaskLoader} для
+загрузки данных из другого источника;</li>
+  <li>реализация для {@link android.app.LoaderManager.LoaderCallbacks}.
+Именно здесь создаются новые загрузчики и ведется управление ссылками на существующие
+загрузчики;</li> 
+<li>способ отображения данных загрузчика, например {@link
+android.widget.SimpleCursorAdapter};</li>
+  <li>источник данных, например {@link android.content.ContentProvider}, когда используется 
+{@link android.content.CursorLoader}.</li>
+</ul>
+<h3 id="starting">Запуск загрузчика</h3>
+
+<p>{@link android.app.LoaderManager} управляет одним или несколькими экземплярами {@link
+android.content.Loader} в {@link android.app.Activity} или
+{@link android.app.Fragment}. Имеется только один {@link
+android.app.LoaderManager} на каждую операцию или каждый фрагмент.</p> 
+
+<p>{@link android.content.Loader} обычно
+инициализируется в методе {@link
+android.app.Activity#onCreate onCreate()} операции или в методе фрагмента 
+{@link android.app.Fragment#onActivityCreated onActivityCreated()}. Делается
+это следующим образом:</p>
+
+<pre>// Prepare the loader.  Either re-connect with an existing one,
+// or start a new one.
+getLoaderManager().initLoader(0, null, this);</pre>
+
+<p>Метод {@link android.app.LoaderManager#initLoader initLoader()} принимает
+следующие параметры:</p>
+<ul>
+  <li>уникальный идентификатор, обозначающий загрузчик. В данном примере идентификатором является 0;</li>
+<li>необязательные аргументы, которые передаются загрузчику при
+построении (в данном примере это <code>null</code>);</li> 
+
+<li>реализация {@link android.app.LoaderManager.LoaderCallbacks}, которая
+вызывает класс {@link android.app.LoaderManager} для выдачи событий загрузчика. В данном
+примере локальный класс реализует интерфейс {@link
+android.app.LoaderManager.LoaderCallbacks}, поэтому он передает ссылку
+самому себе: {@code this}.</li> 
+</ul>
+<p>Вызов {@link android.app.LoaderManager#initLoader initLoader()} обеспечивает инициализацию
+загрузчика. Возможен один из двух результатов:</p>
+<ul>
+  <li>Если загрузчик, указанный с помощью идентификатора, уже существует, будет повторно использован загрузчик, созданный
+последним.</li>
+  <li>Если загрузчик, указанный с помощью идентификатора, <em>не</em> существует,
+{@link android.app.LoaderManager#initLoader initLoader()} вызывает метод
+{@link android.app.LoaderManager.LoaderCallbacks} из {@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}.
+Именно здесь реализуется код для создания экземпляра и возврата нового загрузчика.
+Более подробные сведения см. в разделе <a href="#onCreateLoader">onCreateLoader</a>.</li>
+</ul>
+<p>В любом случае данная реализация {@link android.app.LoaderManager.LoaderCallbacks}
+связывается с загрузчиком и будет вызываться
+при изменении состояния загрузчика.  Если в момент этого вызова вызывающий компонент находится в
+запущенном состоянии, это означает, что запрошенный загрузчик уже существует и сформировал свои
+данные. В этом случае система сразу же вызовет {@link
+android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+ (во время{@link android.app.LoaderManager#initLoader initLoader()}),
+будьте готовы к этому. Более подробные сведения об этом обратном вызове см. в разделе <a href="#onLoadFinished">
+onLoadFinished</a>.</p>
+
+<p>Обратите внимание, что метод {@link android.app.LoaderManager#initLoader initLoader()}
+возвращает создаваемый класс {@link android.content.Loader}, но записывать
+ссылку на него не требуется. Класс {@link android.app.LoaderManager} управляет
+жизненным циклом загрузчика автоматически. Класс {@link android.app.LoaderManager}
+начинает загрузку и заканчивает ее при необходимости, а также поддерживает состояние загрузчика
+и связанного с ним контента. А это подразумевает, что вы будете редко взаимодействовать с загрузчиками
+напрямую (однако пример использования методов загрузчика для тонкой настройки его
+поведения см. в образце кода <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>). 
+Для вмешательства в процесс загрузки при возникновении определенных событий обычно используются методы {@link
+android.app.LoaderManager.LoaderCallbacks}
+. Более подробные сведения об этом см. в разделе <a href="#callback">Использование обратных вызовов LoaderManager</a>.</p>
+
+<h3 id="restarting">Перезапуск загрузчика</h3>
+
+<p>При использовании метода {@link android.app.LoaderManager#initLoader initLoader()}, как
+показано выше, он задействует существующий загрузчик с указанным идентификатором — в случае его наличия.
+Если такого загрузчика нет, метод его создаст. Однако иногда старые данные нужно отбросить
+и начать все заново.</p>
+
+<p>Для удаления старых данных используется метод {@link
+android.app.LoaderManager#restartLoader restartLoader()}. Например, эта
+реализация метода{@link android.widget.SearchView.OnQueryTextListener} перезапускает
+загрузчик, когда изменяется запрос пользователя. Загрузчик необходимо перезагрузить,
+ с тем чтобы он мог использовать измененный фильтр поиска для выполнения нового запроса:</p>
+
+<pre>
+public boolean onQueryTextChanged(String newText) {
+    // Called when the action bar search text has changed.  Update
+    // the search filter, and restart the loader to do a new query
+    // with this filter.
+    mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+    getLoaderManager().restartLoader(0, null, this);
+    return true;
+}</pre>
+
+<h3 id="callback">Использование обратных вызовов класса LoaderManager</h3>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} представляет собой интерфейс обратного вызова,
+который позволяет клиенту взаимодействовать с классом {@link android.app.LoaderManager}. </p>
+<p>Ожидается, что загрузчики, в частности {@link android.content.CursorLoader}, будут сохранять
+свои данные после их остановки. Это позволяет приложениям сохранять свои
+данные в методах {@link android.app.Activity#onStop
+onStop()} и {@link android.app.Activity#onStart onStart()} операции или фрагмента, с тем чтобы,
+когда пользователь вернется в приложение, ему не пришлось ждать, пока данные
+загрузятся заново. Методы {@link android.app.LoaderManager.LoaderCallbacks} используются,
+чтобы узнать, когда требуется создать новый загрузчик, а также для того, чтобы указать приложению, когда
+пришло время перестать использовать данные загрузчика.</p>
+
+<p>Интерфейс {@link android.app.LoaderManager.LoaderCallbacks} использует следующие
+методы:</p>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}  —
+создает экземпляр и возвращает новый класс {@link android.content.Loader} для данного идентификатора.
+</li></ul>
+<ul>
+  <li> {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+— вызывается, когда созданный ранее загрузчик завершил загрузку.
+</li></ul>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
+— вызывается, когда состояние созданного ранее загрузчика сбрасывается, в результате чего его данные
+теряются.
+</li>
+</ul>
+<p>Более подробно эти методы описаны в разделах ниже.</p>
+
+<h4 id ="onCreateLoader">onCreateLoader</h4>
+
+<p>При попытке доступа к загрузчику (например, посредством метода {@link
+android.app.LoaderManager#initLoader initLoader()}), он проверяет, существует ли
+загрузчик, указанный с помощью идентификатора. Если он не существует, он вызывает метод {@link
+android.app.LoaderManager.LoaderCallbacks} {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}. Именно
+здесь и создается новый загрузчик. Обычно это будет класс {@link
+android.content.CursorLoader}, однако можно реализовать и собственный подкласс класса {@link
+android.content.Loader}. </p>
+
+<p>В этом примере метод обратного вызова {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+создает класс {@link android.content.CursorLoader}. Вы должны построить
+класс {@link android.content.CursorLoader} с помощью его метода конструктора, для чего
+требуется полный набор информации, которая нужна для выполнения запроса к {@link
+android.content.ContentProvider}. В частности, требуется:</p>
+<ul>
+  <li><em>uri</em> — URI контента, который необходимо получить; </li>
+  <li><em>projection</em> — список столбцов, которые будут возвращены. При передаче
+<code>null</code> будут возвращены все столбцы, а это неэффективно; </li>
+  <li><em>selection</em> — фильтр, объявляющий, какие строки возвращать,
+отформатированный в виде предложения SQL WHERE (за исключением самого WHERE). При передаче
+<code>null</code> будут возвращены все строки для данного URI; </li>
+  <li><em>selectionArgs</em> — в выборку можно включить символы "?", которые будут
+заменены значениями из <em>selectionArgs</em> в порядке следования в
+выборке. Значения будут привязаны как строки; </li>
+  <li><em>sortOrder</em> — порядок расположения строк, отформатированный в виде предложения SQL
+ORDER BY (за исключением самого ORDER BY). При передаче <code>null</code> будет
+использоваться стандартный порядок сортировки, поэтому, список, возможно, будет неотсортирован.</li>
+</ul>
+<p>Например:</p>
+<pre>
+ // If non-null, this is the current filter the user has provided.
+String mCurFilter;
+...
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+    // This is called when a new Loader needs to be created.  This
+    // sample only has one Loader, so we don't care about the ID.
+    // First, pick the base URI to use depending on whether we are
+    // currently filtering.
+    Uri baseUri;
+    if (mCurFilter != null) {
+        baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                  Uri.encode(mCurFilter));
+    } else {
+        baseUri = Contacts.CONTENT_URI;
+    }
+
+    // Now create and return a CursorLoader that will take care of
+    // creating a Cursor for the data being displayed.
+    String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+            + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+            + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+    return new CursorLoader(getActivity(), baseUri,
+            CONTACTS_SUMMARY_PROJECTION, select, null,
+            Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+}</pre>
+<h4 id="onLoadFinished">onLoadFinished</h4>
+
+<p>Этот метод вызывается, когда созданный ранее загрузчик завершил загрузку.
+Этот метод гарантировано вызывается до высвобождения последних данных,
+которые были предоставлены этому загрузчику.  К этому моменту необходимо полностью перестать использовать
+старые данные (поскольку они скоро будут заменены). Однако этого не следует делать
+самостоятельно, поскольку данными владеет загрузчик и он позаботится об этом.</p>
+
+
+<p>Загрузчик высвободит данные, как только узнает, что приложение их больше не
+использует.  Например, если данными является курсор из {@link
+android.content.CursorLoader}, не следует вызывать {@link
+android.database.Cursor#close close()} самостоятельно. Если курсор
+размещается в {@link android.widget.CursorAdapter}, следует использовать метод {@link
+android.widget.SimpleCursorAdapter#swapCursor swapCursor()} с тем, чтобы
+старый {@link android.database.Cursor} не закрылся. Например:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.<br
+/>SimpleCursorAdapter mAdapter;
+...
+
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+    // Swap the new cursor in.  (The framework will take care of closing the
+    // old cursor once we return.)
+    mAdapter.swapCursor(data);
+}</pre>
+
+<h4 id="onLoaderReset">onLoaderReset</h4>
+
+<p>Этот метод вызывается, когда состояние созданного ранее загрузчика сбрасывается, в результате чего
+его данные теряются. Этот обратный вызов позволяет узнать, когда данные
+вот-вот будут высвобождены, с тем чтобы можно было удалить свою ссылку на них.  </p>
+<p>Данная реализация вызывает 
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}  
+со значением <code>null</code>:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.
+SimpleCursorAdapter mAdapter;
+...
+
+public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+    // This is called when the last Cursor provided to onLoadFinished()
+    // above is about to be closed.  We need to make sure we are no
+    // longer using it.
+    mAdapter.swapCursor(null);
+}</pre>
+
+
+<h2 id="example">Пример</h2>
+
+<p>В качестве примера далее приведена полная реализация фрагмента {@link
+android.app.Fragment}, который отображает {@link android.widget.ListView} с
+результатами запроса к поставщику такого контента, как контакты. Для управления запросом к поставщику используется класс {@link
+android.content.CursorLoader}.</p>
+ 
+<p>Чтобы приложение могло обращаться к контактам пользователя, как показано в этом примере, в его
+манифесте должно присутствовать разрешение
+{@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>
+
+<pre>
+public static class CursorLoaderListFragment extends ListFragment
+        implements OnQueryTextListener, LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+
+    // This is the Adapter being used to display the list's data.
+    SimpleCursorAdapter mAdapter;
+
+    // If non-null, this is the current filter the user has provided.
+    String mCurFilter;
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Give some text to display if there is no data.  In a real
+        // application this would come from a resource.
+        setEmptyText(&quot;No phone numbers&quot;);
+
+        // We have a menu item to show in action bar.
+        setHasOptionsMenu(true);
+
+        // Create an empty adapter we will use to display the loaded data.
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2, null,
+                new String[] { Contacts.DISPLAY_NAME, Contacts.CONTACT_STATUS },
+                new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Place an action bar item for searching.
+        MenuItem item = menu.add(&quot;Search&quot;);
+        item.setIcon(android.R.drawable.ic_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        SearchView sv = new SearchView(getActivity());
+        sv.setOnQueryTextListener(this);
+        item.setActionView(sv);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(String query) {
+        // Don't care about this.
+        return true;
+    }
+
+    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        // Insert desired behavior here.
+        Log.i(&quot;FragmentComplexList&quot;, &quot;Item clicked: &quot; + id);
+    }
+
+    // These are the Contacts rows that we will retrieve.
+    static final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.DISPLAY_NAME,
+        Contacts.CONTACT_STATUS,
+        Contacts.CONTACT_PRESENCE,
+        Contacts.PHOTO_ID,
+        Contacts.LOOKUP_KEY,
+    };
+    public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader, so we don't care about the ID.
+        // First, pick the base URI to use depending on whether we are
+        // currently filtering.
+        Uri baseUri;
+        if (mCurFilter != null) {
+            baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                    Uri.encode(mCurFilter));
+        } else {
+            baseUri = Contacts.CONTENT_URI;
+        }
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+                + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+                + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+        return new CursorLoader(getActivity(), baseUri,
+                CONTACTS_SUMMARY_PROJECTION, select, null,
+                Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+    }
+
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+}</pre>
+<h3 id="more_examples">Другие примеры</h3>
+
+<p>В <strong>ApiDemos</strong> есть несколько различных примеров, которые
+иллюстрируют использование загрузчиков:</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a> — полная версия
+показанного выше фрагмента.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> — пример того, как использовать регулирование
+для сокращения числа запросов, выполняемых поставщиком контента при изменении его данных.</li>
+</ul>
+
+<p>Сведения о загрузке и установке образцов кода SDK см. в статье <a href="http://developer.android.com/resources/samples/get.html"> Получение
+образцов кода</a>. </p>
+

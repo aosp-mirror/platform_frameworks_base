@@ -1,0 +1,57 @@
+page.title=Componentes do aplicativo
+page.landing=true
+page.landing.intro=A estrutura de aplicativo do Android permite criar aplicativos ricos e inovadores usando um conjunto de componentes reutilizáveis. Esta seção explica como criar os componentes que definem os blocos de construção do aplicativo e como conectá-los usando intenções. 
+page.metaDescription=A estrutura de aplicativo do Android permite criar aplicativos ricos e inovadores usando um conjunto de componentes reutilizáveis. Esta seção mostra como criar os componentes que definem os blocos de construção do aplicativo e como conectá-los usando intenções. 
+page.landing.image=images/develop/app_components.png
+page.image=images/develop/app_components.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>Artigos de blogue</h3>
+    
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>Uso de DialogFragments</h4>
+      <p>Nesta publicação, mostrarei como usar DialogFragments com a biblioteca de suporte v4 (para compatibilidade retroativa em dispositivos anteriores a Honeycomb) para mostrar uma caixa de diálogo de edição simples e retornar um resultado para a Atividade chamadora usando uma interface.</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>Fragmentos para todos</h4>
+      <p>Hoje, lançamos uma biblioteca estática que expõe a mesma API Fragments (bem como o novo LoaderManager e algumas outras classes) para que aplicativos compatíveis com Android 1.6 e posteriores possam usar fragmentos para criar interfaces de usuário compatíveis com tablets. </p>
+    </a>
+    
+    <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>Multiencadeamento para desempenho</h4>
+      <p>Uma boa prática para criar aplicativos responsivos é garantir que o encadeamento principal da IU
+realize uma quantidade mínima de trabalho. Qualquer tarefa possivelmente longa que possa travar o aplicativo deve ser tratada
+em um encadeamento diferente.</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+    <h3>Treinamento</h3>
+    
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>Gerenciamento do ciclo de vida da atividade</h4>
+      <p>Essa lição explica a importância dos métodos de retorno de chamada do ciclo de vida que cada instância de
+Atividade recebe e como utilizá-los para que a atividade faça o que o usuário espera e não consuma recursos 
+do sistema quando não estiver em uso.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>Como construir uma IU dinâmica com Fragmentos</h4>
+      <p>Esta classe mostra como criar uma experiência dinâmica para o usuário com fragmentos e como otimizar
+a experiência do aplicativo ao usuário para dispositivos com diferentes tamanhos de tela e ainda manter compatibilidade com dispositivos que executem versões
+de plataforma tão antigas quanto o Android 1.6.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>Compartilhamento de conteúdo</h4>
+      <p>Esta classe aborda algumas formas comuns para enviar e receber conteúdo entre
+aplicativos usando APIs de Intenção e o objeto ActionProvider.</p>
+    </a>
+  </div>
+
+</div>

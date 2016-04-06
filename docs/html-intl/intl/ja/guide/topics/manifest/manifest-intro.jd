@@ -1,0 +1,517 @@
+page.title=アプリ マニフェスト
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+<ol>
+<li><a href="#filestruct">マニフェスト ファイルの構造</a></li>
+<li><a href="#filec">ファイルの規則</a>
+<li><a href="#filef">ファイルの特徴</a>
+	<ol>
+	<li><a href="#ifs">インテント フィルタ</a></li>
+	<li><a href="#iconlabel">アイコンとラベル</a></li>
+	<li><a href="#perms">パーミッション</a></li>
+	<li><a href="#libs">ライブラリ</a></li>
+	</ol></li>
+</ol>
+</div>
+</div>
+
+<p>
+  すべてのアプリケーションには、そのルート ディレクトリに AndroidManifest.xml ファイル（名前はこのまま）が必要です。
+ <span itemprop="description">マニフェスト ファイルはアプリに関する重要な情報を Android システムに提示します。これは、システムがアプリのコードを実行する前に必要な情報です。
+
+
+</span> その他、マニフェスト ファイルでは次のことを行います。
+</p>
+
+<ul>
+<li>アプリケーションの Java パッケージ名を指定します。パッケージ名は、アプリケーションの一意の識別子としての機能を果たします。
+</li>
+
+<li>アプリケーションのコンポーネント（アプリケーションを構成するアクティビティ、サービス、ブロードキャスト レシーバー、コンテンツ プロバイダ）を記述します。
+
+各コンポーネントを実装するクラスの名前を指定し、その機能（対応可能な {@link android.content.Intent Intent} メッセージなど）を公開します。
+
+これらの宣言によって、Android システムは、どんなコンポーネントがあり、それらのコンポーネントがどのような条件で起動されるのかを把握できます。
+</li>
+
+<li>アプリケーション コンポーネントをホストするプロセスを決定します。</li>  
+
+<li>アプリケーションが API の保護された部分にアクセスしたり他のアプリケーションとやり取りしたりする際に必要となるパーミッションを宣言します。
+</li>  
+
+<li>他のアプリケーションがアプリケーションのコンポーネントとやり取りするために必要なパーミッションを宣言します。
+</li>
+
+<li>アプリケーションの実行時にプロファイリングやその他の情報を提供する {@link android.app.Instrumentation} クラスを記載します。
+これらの宣言は、アプリケーションの開発時やテスト時にのみマニフェストに含まれ、アプリケーションの公開前に削除されます。
+
+</li>
+
+<li>アプリケーションに必要な Android API の最小限のレベルを宣言します。
+</li>
+
+<li>アプリケーションにリンクする必要があるライブラリを記載します。</li>
+</ul>
+
+
+<h2 id="filestruct">マニフェスト ファイルの構造</h2>
+
+<p>
+次の図は、マニフェスト ファイルの一般的な構造とファイルに含むことができるすべてのエレメントを示します。
+各エレメントとそれぞれの属性はすべて別のファイルに記述されます。
+エレメントの詳細を見るには、図中、図の下にあるアルファベット順のエレメント一覧、またはその他の説明文に表示されているエレメント名をクリックしてください。
+
+
+ 
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration /&gt;</a>  <!-- ##api level 3## -->
+    <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens /&gt;</a>  <!-- ##api level 9## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture /&gt;</a>  <!-- ##api level 11## -->
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;/activity&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;/activity-alias&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data/&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;/service&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;/receiver&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;/application&gt;</a>
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+以下は、マニフェスト ファイルに含むことができるすべてのエレメントをアルファベット順に並べたものです。
+使用が許可されているのはこれらのエレメントのみです。独自のエレメントや属性は追加できません。
+  
+</p>
+
+<p style="margin-left: 2em">
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code>
+</p>
+
+
+    
+
+<h2 id="filec">ファイルの規則</h2>
+
+<p>
+マニフェスト ファイルに含まれるエレメントと属性には、通常、次の規則とルールが適用されます。
+
+</p>
+
+<dl>
+<dt><b>エレメント</b></dt>
+<dd>必須のエレメントは<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> と <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> のみです。両方のエレメントを提示する必要があり、使用できるのはそれぞれ 1 回のみです。
+
+
+その他のほとんどのエレメントは、複数回使ってもまったく使わなくてもかまいませんが、意味のあるマニフェストを行うにはいくつかのエレメントが必要です。
+
+
+
+
+<p>
+内容のあるエレメントには他のエレメントが含まれているためです。すべての値は属性によって設定され、エレメント内に文字データが設定されることはありません。
+
+</p>
+
+<p>
+同じレベルにあるエレメントに順番はありません。たとえば、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> や <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>、<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> エレメントは、どのような順で並べてもかまいません。
+
+
+
+（<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code> エレメントは例外となります。
+
+エイリアスとなっている <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> のすぐ後に記述する必要があります）。
+
+
+</p></dd>
+
+<dt><b>属性</b></dt>
+<dd>正式には、すべての属性はオプションです。しかし、エレメントが目的を達成するために設定しなければならない属性もあります。
+このドキュメントはガイドとしてお使いください。
+真の意味でオプションの属性には、デフォルト値または指定がない場合の動作が記述されています。
+
+
+<p>ルートの <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> エレメントの属性の一部を除き、すべての属性名は {@code android:} 接頭辞で始まります（例: {@code android:alwaysRetainTaskState}）。
+
+
+この接頭辞は共通であるため、ドキュメントで属性が名前で参照されている場合は通常省略されます。
+
+</p></dd>
+
+<dt><b>クラス名の宣言</b></dt>
+<dd>多くのエレメントは Java オブジェクトと一致しています。これらのエレメントには、アプリケーション自体（<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> エレメント）とその主要なコンポーネントであるアクティビティ（<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>）、サービス（<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>）、ブロードキャスト レシーバー（<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>）やコンテンツ プロバイダ（<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>）が含まれます。
+
+
+
+
+
+
+
+
+
+  
+
+<p>
+サブクラスを定義する場合は、コンポーネント クラス（{@link android.app.Activity}、{@link android.app.Service}、{@link android.content.BroadcastReceiver}、{@link android.content.ContentProvider}）でいつも行うように、サブクラスは {@code name} 属性で宣言されます。
+
+
+この名前には、完全なパッケージ名を含む必要があります。
+たとえば、{@link android.app.Service} サブクラスの宣言は以下のようになります。
+
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+ただし、簡素化する方法として、文字列の最初の文字がピリオドの場合、文字列はアプリケーションのパッケージ名に付加されます（<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> エレメントの <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 属性によって指定されるため）。
+
+
+
+
+以下は、上記のものと同じ内容です。 
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+コンポーネントの開始時に、Android は名前が指定されたサブクラスのインスタンスを作成します。サブクラスが指定されていない場合は、基底クラスのインスタンスを作成します。
+
+</p></dd>
+
+<dt><b>複数の値</b></dt>
+<dd>1 つ以上の値が指定されている場合は、1 つのエレメントに複数の値が記載されているのではなく、エレメントが繰り返されているケースがほとんどです。
+たとえば、インテント フィルタには複数のアクションが記載されている場合があります。
+
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>リソースの値</b></dt>
+<dd>属性には、ユーザーに対して表示する値を含むものもあります。たとえば、アクティビティのラベルやアイコンです。
+これらの属性の値は、ローカライズされていなければならないため、リソースまたはテーマから設定する必要があります。
+リソースの値は、以下の形式で記述されます。
+</p>
+
+<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>:<i>name</i>}</p>
+
+<p>
+リソースがアプリケーションと同じパッケージ内にある場合は package 名を省略できます。type はリソースのタイプ（「string」や「drawable」など）、name は特定のリソースの名前です。<i></i>
+<i></i>
+<i></i>次に例を示します。
+
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+テーマからの値も同様の方法で表記されますが、冒頭は '{@code @}' ではなく '{@code ?}' となります。
+
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>:<i>name</i>}
+</p></dd>
+
+<dt><b>文字列の値</b></dt>
+<dd>属性値が文字列で文字をエスケープする場合はダブル バックスラッシュ（'{@code \\}'）を使う必要があります。たとえば、改行は '{@code \\n}'、Unicode の文字は '{@code \\uxxxx}' となります。
+
+</dd>
+</dl>
+
+
+<h2 id="filef">ファイルの特徴</h2>
+
+<p>
+以下のセクションでは、Android の機能がどのようにマニフェスト ファイルに反映されるのかを説明します。
+
+</p>
+
+
+<h3 id="ifs">インテント フィルタ</h3>
+
+<p>
+アプリケーションのコア コンポーネント（アクティビティ、サービス、ブロードキャスト レシーバー）はインテントによって開始されます。
+<i></i>インテントとは、目的とするアクションを記述している情報の束（{@link android.content.Intent} オブジェクト）で、使用されるデータやアクションを実行するコンポーネントのカテゴリ、その他の関連する指示を含みます。
+
+
+Android は、インテントに対応する適切なコンポーネントを捜し出し、必要に応じて新しいインスタンスを起動し、それにインテント オブジェクトを渡します。
+
+
+
+</p>
+
+<p>
+コンポーネントはインテント フィルタを使ってその機能（対応できるインテントの種類）を通知します。
+<i></i>Android システムはコンポーネントを起動する前にコンポーネントが対応できるインテントを知っておく必要があるため、インテント フィルタはマニフェスト ファイルの <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> エレメントで指定されます。
+
+
+
+コンポーネントは、それぞれが異なる機能を記述しているフィルタをいくつでも持つことができます。
+
+</p>
+
+<p>
+対象となるコンポーネントの名前を明示的に指定しているインテントは、コンポーネントを起動します。この場合、フィルタは適用されません。
+対象の名前が指定されていない場合は、コンポーネントのフィルタを通過したインテントのみがコンポーネントを起動できます。
+
+
+</p>
+
+<p>
+インテント フィルタに対してインテント オブジェクトをテストする方法については、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」ドキュメントをご覧ください。
+
+
+
+</p>
+
+
+<h3 id="iconlabel">アイコンとラベル</h3>
+
+<p>
+エレメントは、小さなアイコンやテキスト ラベルをユーザーに表示するために、{@code icon} と {@code label} 属性を持つ場合があります。
+画面に長い説明文を表示するための {@code description} 属性を持つエレメントもあります。
+
+たとえば、<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントはこれらすべての属性を持っています。これによって、アプリケーションがユーザーにパーミッションを付与するかどうかを尋ねる際に、ユーザーに対して、パーミッションを示すアイコン、パーミッションの名前、パーミッションについての説明文を提示できます。
+
+
+
+
+
+</p>
+
+<p>
+どの場合においても、属性を含むエレメントに設定されたアイコンとラベルが、そのすべてのサブエレメントの {@code icon} と {@code label} のデフォルト設定となります。
+そのため、<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> エレメントに設定されたアイコンとラベルは、アプリケーションの各コンポーネントのデフォルトのアイコンとラベルとなります。
+
+
+同様に、コンポーネントに設定されたアイコンとラベルは、&mdash; <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> エレメントのように &mdash; それぞれのコンポーネントの <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> エレメントのデフォルト設定となります。
+
+
+
+
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> エレメントにラベルを設定し、アクティビティとそのインテント フィルタに設定しない場合は、アプリケーション ラベルはアクティビティとインテント フィルタの両方のラベルとして取り扱われます。
+
+
+
+
+</p>
+
+<p>
+インテント フィルタに設定されるアイコンとラベルは、コンポーネントがユーザーに対して提示されるときはいつでも、そのフィルタにより通知されている機能を提供するコンポーネントを示すために使用されます。
+
+たとえば、「{@code android.intent.action.MAIN}」と「{@code android.intent.category.LAUNCHER}」が設定されているフィルタは、アプリケーションを起動するアクティビティを通知しています &mdash; つまり、アプリケーション ランチャーに表示されるということです。
+
+
+
+そのため、このフィルタに設定されているアイコンとラベルがランチャーに表示されるものとなります。
+
+</p>
+
+
+<h3 id="perms">パーミッション</h3>
+
+<p>
+パーミッションは、コードの一部や端末上のデータへのアクセスを制限する機能を提供します。<i></i>
+   誤用や悪用によってユーザーの利用を妨げたり有害な作用をもたらす恐れのある重要なデータやコードを保護したりするための制限を設定します。
+  
+</p>
+
+<p>
+それぞれのパーミッションは一意のラベルで識別されています。通常、ラベルは制限されるアクションを示します。
+以下は、Android により定義されているパーミッションの例です。
+
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+1 つの機能は、1 つのパーミッションでのみ保護できます。
+</p>
+
+<p>
+アプリケーションがパーミッションにより保護されている機能へのアクセスを必要としている場合は、<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> エレメントをマニフェスト ファイルに記述し、そのパーミッションが必要であることを宣言する必要があります。
+
+
+これによって、アプリケーションが端末にインストールされた際に、インストーラーは、アプリケーションの証明書に署名した関係機関を確認し、場合によってはユーザーに尋ねることで、要求されたパーミッションを付与するかどうかを決定します。 
+ 
+ 
+パーミッションが付与されると、アプリケーションは保護された機能を使用できるようになります。
+
+パーミッションが付与されなかった場合は、アプリケーションは機能にアクセスできず、ユーザーに通知が表示されることもありません。
+ 
+</p>
+
+<p>
+アプリケーションは、パーミッションを使って自身のコンポーネント（アクティビティ、サービス、ブロードキャスト レシーバー、コンテンツ プロバイダ）を保護することもできます。
+Android により定義されているパーミッション（{@link android.Manifest.permission android.Manifest.permission} に記載）や他のアプリケーションにより宣言されたパーミッションであればどれでも使用できます。
+
+
+独自のパーミッションを定義することもできます。新しいパーミッションは、<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントを使って宣言します。
+
+
+たとえば、次のようにアクティビティを保護できます。
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+この例では、{@code DEBIT_ACCT} パーミッションは <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントで宣言されているだけではなく、その使用が <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> エレメントで要求されている点に注意してください。
+
+
+
+
+アプリケーション自身によって保護が設定されている場合でも、アプリケーションの他のコンポーネントが保護されたアクティビティを起動するために、その使用を要求する必要があります。
+
+  
+</p>
+
+<p>
+同じ例で、別の場所で宣言されたパーミッションに {@code permission} 属性が設定されている場合（{@code android.permission.CALL_EMERGENCY_NUMBERS} など）は、<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントを使って再度宣言する必要があります。
+
+
+
+
+その場合も <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> でその使用を要求する必要があります。
+ 
+</p>
+
+<p>
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code> エレメントは、コードに定義されるパーミッションの集まりに対するネームスペースを宣言します。
+
+
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code> エレメントは、パーミッションのセットに対するラベル（マニフェスト ファイルに <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントを使って宣言されたもの、その他の場所で宣言されたものの両方）を定義します。
+
+
+
+これは、ユーザーに提示される際のパーミッションのグループ分けのみに影響します。
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code> エレメントでは、パーミッションのグループへの所属は指定されません。グループ名のみが指定されます。
+
+
+パーミッションは、<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> エレメントの <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code> 属性にグループ名を割り当てることによって、グループに配置されます。
+
+
+
+
+
+</p>
+
+
+<h3 id="libs">ライブラリ</h3>
+
+<p>
+すべてのアプリケーションはデフォルトの Android ライブラリにリンクされています。このライブラリには、Activity、Service、Intent、View、Button、Application、ContentProvider などの共通クラスを含む、アプリケーションをビルドするための基本パッケージが含まれています。
+
+
+
+</p>
+
+<p>
+しかし、独自のライブラリに含まれているパッケージもあります。開発中のアプリケーションがこれらのパッケージのコードを使用している場合は、該当するライブラリにリンクするよう明示的に求める必要があります。
+
+この場合は、マニフェスト ファイルに各ライブラリを指定する <code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code> エレメントが別途含まれている必要があります。
+
+（ライブラリ名は該当するパッケージのドキュメントに記載されています）。
+
+</p>

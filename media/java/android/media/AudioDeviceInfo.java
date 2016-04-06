@@ -221,8 +221,9 @@ public final class AudioDeviceInfo {
      * @return An array of audio encodings (e.g. {@link AudioFormat#ENCODING_PCM_16BIT},
      * {@link AudioFormat#ENCODING_PCM_FLOAT}) supported by the audio device.
      * <code>ENCODING_PCM_FLOAT</code> indicates the device supports more
-     * than 16 bits of integer precision.  Specifying <code>ENCODING_PCM_FLOAT</code>
-     * with {@link AudioTrack} or {@link AudioRecord} can preserve at least 24 bits of
+     * than 16 bits of integer precision.  As there is no AudioFormat constant
+     * specifically defined for 24-bit PCM, the value <code>ENCODING_PCM_FLOAT</code>
+     * indicates that {@link AudioTrack} or {@link AudioRecord} can preserve at least 24 bits of
      * integer precision to that device.
      *
      * @see AudioFormat

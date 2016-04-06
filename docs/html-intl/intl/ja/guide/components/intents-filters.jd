@@ -1,0 +1,899 @@
+page.title=インテントとインテント フィルタ
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+<ol>
+  <li><a href="#Types">インテントのタイプ</a></li>
+  <li><a href="#Building">インテントを作成する</a>
+    <ol>
+      <li><a href="#ExampleExplicit">明示的インテントの例</a></li>
+      <li><a href="#ExampleSend">暗黙的インテントの例</a></li>
+      <li><a href="#ForceChooser">アプリチューザを表示する</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">暗黙的インテントを受け取る</a>
+    <ol>
+      <li><a href="#ExampleFilters">フィルタの例</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">ペンディング インテントを使用する</a></li>
+  <li><a href="#Resolution">インテント解決</a>
+    <ol>
+      <li><a href="#ActionTest">アクションのテスト</a></li>
+      <li><a href="#CategoryTest">カテゴリのテスト</a></li>
+      <li><a href="#DataTest">データのテスト</a></li>
+      <li><a href="#imatch">インテントのマッチング</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">Interacting with Other Apps</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent} は、他の<a href="{@docRoot}guide/components/fundamentals.html#Components">アプリ コンポーネント</a>からのアクションを要求するときに使用するメッセージング オブジェクトです。インテントを使用することでコンポーネント間の通信を促進する方法はいくつかありますが、基本的な使用例は次の 3 つです。
+
+
+</p>
+
+<ul>
+<li><b>アクティビティを開始するには:</b>
+<p>{@link android.app.Activity} はアプリ内の 1 つの画面を表します。{@link android.app.Activity} の新しいインスタンスを開始するには、{@link android.content.Intent} を {@link android.content.Context#startActivity startActivity()} に渡します。
+
+{@link android.content.Intent} は、開始するアクティビティを記述し、必要なデータすべてを含んでいます。
+</p>
+
+<p>アクティビティの完了時に結果を受け取る場合は、{@link android.app.Activity#startActivityForResult
+startActivityForResult()} を呼び出します。
+アクティビティは、結果を別の {@link android.content.Intent} オブジェクトとして、アクティビティの {@link
+android.app.Activity#onActivityResult onActivityResult()} コールバック内に受け取ります。詳細については、「<a href="{@docRoot}guide/components/activities.html">Activities</a>」のガイドをご覧ください。
+
+</p></li>
+
+<li><b>サービスを開始するには:</b>
+<p>{@link android.app.Service} は、ユーザー インターフェースを持たず、バックグラウンドで操作を実行するコンポーネントです。
+サービスを開始して 1 回限りの操作を実行する（ファイルのダウンロードなど）には、{@link android.content.Intent} を {@link android.content.Context#startService startService()} に渡します。
+
+{@link android.content.Intent} は、開始するサービスを記述し、必要なデータすべてを含んでいます。
+</p>
+
+<p>クライアントサーバーのインターフェースでサービスがデザインされている場合、{@link android.content.Intent} を {@link
+android.content.Context#bindService bindService()}</code> に渡して、他のコンポーネントからのサービスにバインドできます。
+詳細については、「<a href="{@docRoot}guide/components/services.html">サービス</a>」のガイドをご覧ください。</p></li>
+
+<li><b>ブロードキャストを配信するには:</b>
+<p>ブロードキャストは、アプリが受け取ることのできるメッセージです。システムは、システムの起動や端末の充電開始など、さまざまなシステム イベントを配信します。他のアプリにブロードキャストを配信するには、{@link android.content.Intent} を {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()}、{@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()} のいずれかに渡します。
+
+
+
+</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">インテントのタイプ</h2>
+
+<p>インテントには 2 つのタイプがあります。</p>
+
+<ul>
+<li><b>明示的インテント</b>は、開始するコンポーネントを名前（完全修飾クラス名）で指定します。
+通常は開始するアクティビティやサービスのクラス名がわかっているため、明示的インテントを使用してアプリ内のコンポーネントを開始します。
+たとえば、ユーザー操作に応答して新しいアクティビティを開始したり、バックグラウンドでファイルをダウンロードするサービスを開始したりします。
+
+</li>
+
+<li><b>暗黙的インテント</b>では、特定のコンポーネントを指定せず、代わりに実行する全般的な動作を宣言することで、他のアプリからコンポーネントを処理できるようにします。
+たとえば、マップ上にユーザーの位置を表示する場合、暗黙的インテントを使って、特定の場所をマップ上に表示できる別のアプリにその操作を要求します。
+
+</li>
+</ul>
+
+<p>暗黙的インテントを使用してアクティビティやサービスを開始する際、システムによってただちに {@link android.content.Intent} オブジェクトで指定されたアプリ コンポーネントが開始されます。
+</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>図 1.</strong> 暗黙的インテントが他のアクティビティを開始するようシステム内に配信される仕組みを表しています。<b>[1]</b> <em>Activity A</em> がアクションの記述を使って {@link android.content.Intent} を作成し、それを {@link
+android.content.Context#startActivity startActivity()} に渡します。<b>[2]</b> Android システムがすべてのアプリに対してインテントに一致するインテント フィルタを検索します。
+
+
+一致するものが見つかったら、<b>[3]</b> システムが {@link
+android.app.Activity#onCreate onCreate()} メソッドを呼び出して、{@link android.content.Intent} に渡すことで、そのアクティビティ（<em>Activity B</em>）を開始します。
+
+</p>
+</div>
+
+<p>暗黙的インテントを作成するとき、Android システムはインテントの内容を、端末上の他のアプリの <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">マニフェスト ファイル</a>で定義された <em>インテント フィルタ</em> と比較して、開始すべきコンポーネントを見つけます。
+
+インテントがインテント フィルタに一致した場合、システムがそのコンポーネントを開始して、{@link android.content.Intent} を配信します。
+複数のインテント フィルタが競合する場合、ユーザーが仕様するアプリを選択できるようシステムによってダイアログが表示されます。
+</p>
+
+<p>インテント フィルタは、コンポーネントが受け取りたいインテントのタイプを指定する式で、アプリのマニフェスト ファイルに含まれています。
+
+たとえば、アクティビティのインテント フィルタを宣言すると、特定のインテント タイプを持つアクティビティを他のアプリから直接開始できるようになります。同様に、アクティビティでインテント フィルタを宣言<em>しない</em>場合は、明示的インテントでのみアクティビティを開始できます。
+
+
+</p>
+
+<p class="caution"><strong>警告:</strong> アプリの安全性を保つため、{@link android.app.Service} を開始するときは常に明示的インテントを使用し、サービスでインテント フィルタを宣言しないようにしてください。
+
+暗黙的インテントを使ってサービスを開始すると、どのサービスがインテントに応答するかを把握できず、ユーザーにはどのサービスが開始するのかがわからないため、セキュリティ上の危険が伴います。
+
+Android 5.0（API レベル 21）以降では、暗黙的インテントで {@link android.content.Context#bindService bindService()} を呼び出すと、システムから例外がスローされます。
+
+</p>
+
+
+
+
+
+<h2 id="Building">インテントを作成する</h2>
+
+<p>{@link android.content.Intent} オブジェクトには Android システムが開始するコンポーネントを決定する際に使用する情報（インテントを受け取るべき正確なコンポーネント名やコンポーネントのカテゴリなど）に加えて、受け取る側のコンポーネントがアクションを適切に実行するために使用する情報（実行するアクションと、実行対象のデータなど）が含まれています。
+
+
+</p>
+
+
+<p>{@link android.content.Intent} に含まれる主な情報は次のとおりです。</p>
+
+<dl>
+
+<dt><b>コンポーネント名</b></dt>
+<dd>開始するコンポーネントの名前です。
+
+<p>これは省略可能ですが、インテントを<b>明示的</b>にするためには不可欠な情報です。つまり、コンポーネント名で定義されたアプリ コンポーネントにのみ、インテントが配信されます
+
+コンポーネント名がない場合、インテントは<b>暗黙的</b>になり、他のインテント情報（下記で説明するアクション、データ、カテゴリなど）に基づいてインテントを受け取るべきコンポーネントをシステムが決定します
+
+&mdash;そのため、アプリ内の特定のコンポーネントを開始する必要がある場合は、コンポーネント名を指定する必要があります。
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.app.Service} を開始するときは、<strong>常にコンポーネント名を指定</strong>する必要があります。
+指定しない場合、どのサービスがインテントに応答するかを把握できず、ユーザーにはどのサービスが開始するのかがわからなくなります。
+</p>
+
+<p>{@link android.content.Intent} のフィールドは {@link android.content.ComponentName} オブジェクトで、アプリのパッケージ名など、ターゲットのコンポーネントの完全修飾クラス名を使用して指定できます（例: {@code com.example.ExampleActivity}）。
+
+
+コンポーネント名は、{@link
+android.content.Intent#setComponent setComponent()}、{@link android.content.Intent#setClass
+setClass()}、{@link android.content.Intent#setClassName(String, String) setClassName()}、{@link android.content.Intent} コンストラクタなどを使用して設定できます。
+</p>
+
+</dd>
+
+<p><dt><b>アクション</b></dt>
+<dd>実行する全体的なアクションを指定する文字列です（<em>閲覧</em>や<em>選択</em>など）。
+
+<p>ブロードキャスト インテントの場合、これが発生済みで報告済みのアクションになります。ほとんどのアクションは、残りのインテントがどのように構成されているか、特にデータやエクストラに含まれている内容によって決まります。
+&mdash;
+
+
+<p>インテントによって自身のアプリで使用する（または他のアプリで使用して自身のアプリのコンポーネントを呼び出す）独自のアクションを指定できますが、通常は {@link android.content.Intent} クラスや他のフレームワーク クラスで定義されたアクション定数を使用します。
+
+アクティビティを開始する際の一般的なアクションをいくつか次に示します。
+</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>ギャラリー アプリで表示する写真や、マップアプリで表示する住所など、アクティビティ内にユーザーに表示する情報がある場合は、{@link
+   android.content.Context#startActivity startActivity()} を使ってインテントにこのアクションを使用します。
+
+</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>これは「共有」インテントとしても知られており、メールアプリやソーシャル シェアリング アプリなどの他のアプリ経由でユーザーが共有できるデータがある場合に、{@link
+   android.content.Context#startActivity startActivity()} でインテントに使用します。
+</dd>
+</dl>
+
+<p>全体的なアクションを定義するその他の定数については、{@link android.content.Intent} クラスのリファレンスをご覧ください。
+システムの設定アプリで特定の画面を開くアクションの {@link android.provider.Settings} など、他のアクションは Android フレームワークの別の場所で定義されます。
+
+</p>
+
+<p>インテントのアクションは、{@link android.content.Intent#setAction
+setAction()} や {@link android.content.Intent} コンストラクタを使って指定できます。</p>
+
+<p>独自のアクションを定義したら、接頭辞としてアプリのパッケージ名を必ず含めます。
+次に例を示します。</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>データ</b></dt>
+<dd>アクションの実行対象であるデータや、データの MIME タイプを参照する URI（{@link android.net.Uri} オブジェクト）です。
+提供されるデータタイプは、インテントのアクションによって決まります。たとえば、アクションが {@link android.content.Intent#ACTION_EDIT} の場合、データには編集するドキュメントの URI が含まれます。
+
+
+
+<p>インテントの作成時、URI だけでなくデータタイプ（MINE タイプ）を指定することが重要な場面が多くあります。たとえば、画像を表示できるアクティビティの場合、URI 形式は似ていてもオーディオ ファイルは再生できません。そのため、データの MIME タイプを指定することで、Android システムがインテントを受け取るのに最適なコンポーネントを見つけることができます。ただし、MIME タイプは URI から推測できることもあります。特にデータが {@code content:} URI の場合は、データが端末上にあり、{@link android.content.ContentProvider} に制御されるデータであることを示し、データの MIME タイプがシステムから見えるようになります。
+
+
+
+
+
+&mdash;
+
+</p>
+
+<p>データ URI のみを設定するには、{@link android.content.Intent#setData setData()} を呼び出します。MIME タイプのみを設定するには、{@link android.content.Intent#setType setType()} を呼び出します。
+必要であれば、{@link
+android.content.Intent#setDataAndType setDataAndType()} を使って両方を明示的に設定することもできます。
+</p>
+
+<p class="caution"><strong>警告:</strong> URI と MIME タイプの両方を設定する場合は、お互いの値を無効にしてしまわないよう、{@link android.content.Intent#setData setData()} と {@link android.content.Intent#setType setType()} を<strong>呼び出さないで</strong>ください。URI と MIME タイプの両方を設定する場合は、常に {@link android.content.Intent#setDataAndType setDataAndType()} を使用してください。
+
+
+
+</p>
+</dd>
+
+<p><dt><b>カテゴリ</b></dt>
+<dd>インテントを処理するコンポーネントの種類に関する追加情報が含まれた文字列です。
+カテゴリの記述は、インテントにいくつでも含めることができますが、ほとんどのインテントではカテゴリは必須ではありません。一般的なカテゴリの例を次に示します。
+
+
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>ターゲットのアクティビティは、ウェブブラウザから開始して画像やメール メッセージなど、リンクで参照されたデータを表示できます。
+&mdash;
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>このアクティビティはタスクの初期のアクティビティで、システムのアプリケーション ランチャーの一覧に表示されます。
+
+  </dd>
+</dl>
+
+<p>カテゴリの全一覧は、{@link android.content.Intent} クラスの説明をご覧ください。
+</p>
+
+<p>カテゴリは、{@link android.content.Intent#addCategory addCategory()} を使って指定できます。</p>
+</dd>
+</dl>
+
+
+<p>上記のプロパティ（コンポーネント名、アクション、データ、カテゴリ）は、インテントの特性の定義を表しています。
+これらのプロパティを読み取ることで、Android システムはどのアプリ コンポーネントを開始すべきかを解決できます。
+</p>
+
+<p>ただし、インテントにはアプリ コンポーネントの解決に影響を与えない追加情報を含めることもできます。
+インテントに含めることのできる情報は次のとおりです。</p>
+
+<dl>
+<dt><b>エクストラ</b></dt>
+<dd>要求されたアクションの実行に必要な追加情報のキーと値のペアです。データの URI の特定の種類を使用するアクションがあるのと同様に、特定のエクストラを使用するアクションもあります。
+
+
+<p>エクストラはさまざまな {@link android.content.Intent#putExtra putExtra()} を使って追加でき、それぞれがキー名と値の 2 つのパラメータを受け入れます。また、すべてのエクストラ データを使って {@link android.os.Bundle} オブジェクトを作成し、{@link
+android.content.Intent#putExtras putExtras()} を使って {@link android.os.Bundle} を {@link android.content.Intent} に挿入することもできます。
+
+
+</p>
+
+<p>たとえば、{@link android.content.Intent#ACTION_SEND} を使ってメールを送信するインテントを作成するとき、{@link android.content.Intent#EXTRA_EMAIL} キーを使って「宛先」の受信者を指定したり、{@link android.content.Intent#EXTRA_SUBJECT} を使って「件名」を指定したりできます。
+
+
+</p>
+
+<p>{@link android.content.Intent} クラスは多くの標準データタイプの {@code EXTRA_*} 定数を指定できます。
+独自のエクストラ キーを宣言する必要がある場合は（アプリが受け取るインテント用に）、アプリのパッケージ名を接頭辞として必ず含めます。
+
+次に例を示します。</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>フラグ</b></dt>
+<dd>{@link android.content.Intent} クラスで定義されるフラグは、インテントのメタデータとして機能します。
+フラグは、Android システムにアクティビティの起動方法（アクティビティがどの<a href="{@docRoot}guide/components/tasks-and-back-stack.html">タスク</a>に属するかなど）や、起動後の取り扱い方法（最近のアクティビティの一覧に含めるかどうかなど）を指示します。
+
+
+
+
+<p>詳細については、{@link android.content.Intent#setFlags setFlags()} メソッドをご覧ください。</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">明示的インテントの例</h3>
+
+<p>明示的インテントは、アプリ内の特定のアクティビティやサービスなど、特定のアプリ コンポーネントを起動する際に使用するものです。明示的インテントを作成するには、{@link android.content.Intent} オブジェクトでコンポーネント名を定義します。他のインテント プロパティはすべて省略可能です。
+
+
+&mdash;</p>
+
+<p>たとえば、アプリでウェブからファイルをダウンロードするサービスを {@code DownloadService} という名前でビルドした場合、次のコードでそれを開始できます。
+</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>{@link android.content.Intent#Intent(Context,Class)} コンストラクタがアプリに {@link android.content.Context} を、コンポーネントに {@link java.lang.Class} オブジェクトを提供します。
+
+このようにして、このインテントはアプリの {@code DownloadService} クラスを明示的に開始します。
+</p>
+
+<p>サービスのビルドと開始の詳細については、「<a href="{@docRoot}guide/components/services.html">サービス</a>」のガイドをご覧ください。
+</p>
+
+
+
+
+<h3 id="ExampleSend">暗黙的インテントの例</h3>
+
+<p>暗黙的インテントは、端末上のどんなアプリでも実行できるアクションを指定します。
+暗黙的インテントは、自身のアプリではそのアクションを実行できないが、他のアプリでは実行可能であり、どのアプリを使うかをユーザーに選ばせたい場合に便利です。
+</p>
+
+<p>たとえば、他のユーザーと共有できるようにするコンテンツがある場合は、{@link android.content.Intent#ACTION_SEND} アクションを使ってインテントを作成し、共有するコンテンツを指定するエクストラを追加します。
+
+そのインテントで {@link android.content.Context#startActivity startActivity()} を呼び出すと、ユーザーはどのアプリでコンテンツを共有するかを選択できます。
+
+</p>
+
+<p class="caution"><strong>警告:</strong> {@link android.content.Context#startActivity
+startActivity()} に送る暗黙的インテントを処理できるアプリがユーザーが<em>持っていない</em>場合もあります。
+その場合、呼び出しは失敗し、アプリはクラッシュします。アクティビティが必ずインテントを受け取るようにするには、{@link android.content.Intent} オブジェクトで {@link android.content.Intent#resolveActivity
+resolveActivity()} を呼び出します。
+結果が null 以外の場合は、インテントを処理できるアプリが少なくとも 1 つはあることを意味し、{@link android.content.Context#startActivity startActivity()} を安全に呼び出すことができます。
+
+結果が null の場合は、そのインテントは使用せず、可能であればそのインテントを発行する機能を無効にする必要があります。
+
+</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>注:</strong> この場合、URI は使用されませんが、エクストラに含まれるコンテンツを指定するためインテントのデータタイプは宣言されます。
+</p>
+
+
+<p>{@link android.content.Context#startActivity startActivity()} が呼び出されたとき、システムによってすべてのインストール済みアプリの中にこのタイプのインテント（{@link android.content.Intent#ACTION_SEND} アクションとテキスト/プレーン データが含まれるインテント）を処理できるものがあるかどうかが確認されます
+
+
+インテントを処理できるアプリが 1 つしかない場合は、そのアプリがすぐに開いてインテントを受け取ります。
+インテントを処理できるアクティビティが複数ある場合、ユーザーが使用するアプリを選択できるダイアログが表示されます。
+</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>図 2.</strong> チューザのダイアログ</p>
+</div>
+
+<h3 id="ForceChooser">アプリチューザを表示する</h3>
+
+<p>暗黙的インテントに応答するアプリが 2 つ以上ある場合、ユーザーは使用するアプリを選択でき、そのアプリをアクションに対するデフォルトの選択肢にすることができます。
+
+これは、ウェブ ページを開いたり、（1 つのカメラを選ぶ傾向にあるユーザーが）
+写真を撮影したりといったアクションの実行時に、ユーザーが今後同じアプリの使用を希望するような場合に便利です（ユーザーは常に同じウェブブラウザを使用する傾向があります）。
+</p>
+
+<p>ただし、インテントに応答するアプリが複数あって、ユーザーが毎回別のアプリを使用する可能性がある場合は、チューザのダイアログを明示的に表示する必要があります。
+チューザのダイアログでは、
+アクションのたびに使用するアプリをユーザーに選択させます（ユーザーはアクションのデフォルトのアプリを選択できません）。
+たとえば、アプリが {@link
+android.content.Intent#ACTION_SEND} アクションを使って「共有」を実行するとき、 ユーザーが現在の状況によって別のアプリを使用して共有する場合もあるため、図 2 のようにチューザのダイアログは常に表示する必要があります。
+</p>
+
+
+
+
+<p>チューザを表示するには、{@link
+android.content.Intent#createChooser createChooser()} を使用して {@link android.content.Intent} を作成し、{@link
+android.app.Activity#startActivity startActivity()} に渡します。次に例を示します。</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>これにより、{@link
+android.content.Intent#createChooser createChooser()} メソッドに渡されたインテントに応答するアプリのリストを示すダイアログが表示され、
+指定されたテキストがダイアログのタイトルになります。</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">暗黙的インテントを受け取る</h2>
+
+<p>アプリが受け取ることのできる暗黙的インテントを通知するには、<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">マニフェスト ファイル</a>で <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素を使ってアプリのコンポーネントごとに 1 つ以上のインテント フィルタを宣言します。各インテント フィルタは、インテントのアクション、データ、カテゴリに基づいて受け入れるインテントのタイプを指定します。
+
+
+
+インテントがいずれかのインテント フィルタを通過した場合のみ、システムが暗黙的インテントをアプリのコンポーネントに配信します。
+</p>
+
+<p class="note"><strong>注:</strong> 明示的インテントは、コンポーネントが宣言しているインテント フィルタに関係なく、常にターゲットに配信されます。
+</p>
+
+<p>アプリのコンポーネントは固有のジョブそれぞれに対して個別のフィルタを宣言する必要があります。たとえば、画像キャラリーのアプリの 1 つのアクティビティには、画像を表示するフィルタと、画像を編集するフィルタの 2 つがあります。
+
+アクティビティが開始すると、{@link android.content.Intent} を調べて {@link android.content.Intent} にある情報に基づいてどのように動作するかを決定します（編集コントロールを表示するかどうかなど）。
+
+</p>
+
+<p>各インテント フィルタは、アプリのマニフェスト ファイルの <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素で定義され、これは対応するアプリのコンポーネント（<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 要素など）にネストされます。
+
+
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 内で、次の 3 つの要素のなかで 1 つ以上を使用して、受け入れるインテントのタイプを指定できます。
+
+</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>{@code name} 属性で、受け入れるインテントのアクションを宣言します。値は、クラス定数ではなく、アクションのリテラル文字列値である必要があります。
+</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>データ URI （<code>scheme</code>、<code>host</code>、<code>port</code>、<code>path</code> など） や MIME タイプのさまざまな側面を指定する 1 つ以上の属性を使用して、受け入れるデータのタイプを宣言します。
+
+</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>{@code name} 属性で、受け入れるインテントのカテゴリを宣言します。値は、クラス定数ではなく、アクションのリテラル文字列値である必要があります。
+
+
+  <p class="note"><strong>注:</strong> 暗黙的インテントを受け取るには、インテント フィルタに {@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを<strong>含める</strong>必要があります。
+
+{@link android.app.Activity#startActivity startActivity()} メソッドと {@link android.app.Activity#startActivityForResult startActivityForResult()}メソッドはすべてのインテントを、{@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを宣言しているものとして処理します。
+
+
+
+  インテント フィルタでカテゴリを宣言していない場合、暗黙的インテントはアクティビティに紐付けされません。
+</p>
+  </dd>
+</dl>
+
+<p>次に、データ タイプがテキストの場合に、{@link android.content.Intent#ACTION_SEND} インテントを受け取るインテント フィルタを使用したアクティビティ宣言の例を示します。
+</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> のなかで 2 つ以上のインスタンスを含むフィルタを作成することもできます。その場合、コンポーネントがそれらのフィルタ要素のすべての組み合わせを処理できることを確認しておきます。
+
+
+
+
+</p>
+
+<p>複数のタイプのインテントに対応しながら、アクション、データ、カテゴリタイプの特定の組み合わせのみを処理する場合は、複数のインテント フィルタを作成する必要があります。
+</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>コンポーネントへのアクセスを制限する</h2>
+<p>インテント フィルタを使用して他のアプリでコンポーネントを開始できないようにする方法は安全ではありません。
+インテント フィルタでは暗黙的インテントの特定の種類にのみ応答するようコンポーネントを制限しますが、開発者がコンポーネントを決定する場合は、明示的インテントを使用して別のアプリからアプリのコンポーネントを開始できるようになります。アプリのコンポーネントを<em>自身のアプリでのみ</em>開始できるようにする必要がある場合は、そのコンポーネントの <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> 属性を{@code "false"} に設定します。
+
+
+
+
+</p>
+</div>
+</div>
+
+<p>暗黙的インテントは、3 つの要素それぞれへのインテントを比較して、フィルタでテストされます。
+コンポーネントに配信されるには、インテントが 3 つのテストすべてを通過する必要があります。一致しないものが 1 つでも場合、Android システムはインテントをコンポーネントに配信しません。
+
+ただし、コンポーネントは複数のインテント フィルタを保持していることもあるため、1 つのインテント フィルタを通過できなかったインテントでも、別のフィルタを通過できる場合があります。システムによるインテント解決の詳細は、次のセクションの<a href="#Resolution">インテントの解決</a>で説明します。
+
+
+</p>
+
+<p class="caution"><strong>警告:</strong> 他のアプリの {@link android.app.Service} で誤って実行されないように、自身のサービスは常に明示的インテントを使用して開始し、サービスではインテント フィルタは宣言しないでください。
+
+</p>
+
+<p class="note"><strong>注:</strong> すべてのアクティビティにおいて、インテント フィルタはマニフェスト ファイルで宣言する必要があります。ただし、ブロードキャスト レシーバーのフィルタは、{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()} を呼び出すことで動的に登録できます。
+
+
+その後、レシーバーの登録を解除するには、{@link
+android.content.Context#unregisterReceiver unregisterReceiver()} を使用します。これにより、アプリが実行中の特定の期間だけ、アプリが特定のブロードキャストをリッスンできるようになります。
+
+</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">フィルタの例</h3>
+
+<p>インテント フィルタの動作をより深く理解するため、ソーシャル シェアリング アプリのマニフェスト ファイルからの次のスニペットをご覧ください。
+</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>1 つ目のアクティビティである {@code MainActivity} は、アプリのメイン エントリ ポイントで、ユーザーがランチャー アイコンから初めてアプリを起動したときに開くアクティビティです。&mdash;
+</p>
+<ul>
+  <li>{@link android.content.Intent#ACTION_MAIN} アクションが、これがメインのエントリ ポイントで、インテント データはないことを示しています。
+</li>
+  <li>{@link android.content.Intent#CATEGORY_LAUNCHER} カテゴリが、このアクティビティのアイコンをシステムのアプリ ランチャーに配置する必要があることを示しています。
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 要素が {@code icon} を使ってアイコンを指定しない場合、システムは <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a> 要素からのアイコンを使用します。
+
+</li>
+</ul>
+<p>アクティビティをアプリ ランチャーに表示するには、この 2 つをペアリングする必要があります。</p>
+
+<p>2 つ目のアクティビティである {@code ShareActivity} が、テキストやメディア コンテンツの共有を促します。
+ユーザーは {@code MainActivity} に移動することでこのアクティビティに入ることもありますが、2 つのインテント フィルタのいずれかに一致する暗黙的インテントを発行する別のアプリから直接 {@code ShareActivity} に入ることもできます。
+
+</p>
+
+<p class="note"><strong>注:</strong> MIME タイプ（<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>）は、パノラマ写真を指定する特別なデータタイプで、<a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
+panorama</a> API を使って処理できます。
+
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">ペンディング インテントを使用する</h2>
+
+<p>{@link android.app.PendingIntent} オブジェクトは、{@link
+android.content.Intent} オブジェクトのラッパーです。{@link android.app.PendingIntent} の主な目的は、別のアプリケーションに {@link android.content.Intent} をアプリ自身のプロセスから実行したように使用できるパーミッションを付与することです。
+
+
+</p>
+
+<p>ペンディング インテントの主な使用例には、次のようなものがあります。</p>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">通知</a> を使ってユーザーがアクションを実行するときに実施するインテントを宣言する（Android システムの {@link android.app.NotificationManager} が {@link android.content.Intent} を実行します）。
+
+
+  <li>
+<a href="{@docRoot}guide/topics/appwidgets/index.html">アプリのウィジェット</a> を使ってユーザーがアクションを実行するときに実施するインテントを宣言する（ホーム画面のアプリが {@link android.content.Intent} を実行します）。
+
+  <li>今後の指定された時間に実施するインテントを宣言する（Android システムの {@link android.app.AlarmManager} が {@link android.content.Intent} を実行します）。
+
+</ul>
+
+<p>各 {@link android.content.Intent} オブジェクトはアプリの特定のタイプのコンポーネント（{@link android.app.Activity}、{@link android.app.Service}、{@link android.content.BroadcastReceiver} のいずれか）で処理されることを前提としているため、{@link android.app.PendingIntent} も同様の前提で作成する必要があります。
+
+
+ペンディング インテントを使用する場合、アプリはインテントの実行時に {@link android.content.Context#startActivity
+startActivity()} などの呼び出しを行いません。
+代わりに、{@link android.app.PendingIntent} の作成時にそれぞれのクリエーター メソッドを呼び出して目的のコンポーネント タイプを宣言する必要があります。
+</p>
+
+<ul>
+  <li>{@link android.app.Activity} を開始する {@link android.content.Intent} の場合は、{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()}。
+</li>
+  <li>{@link android.app.Service} を開始する {@link android.content.Intent} の場合は、{@link android.app.PendingIntent#getService PendingIntent.getService()}。
+</li>
+  <li>{@link android.content.BroadcastReceiver} を開始する {@link android.content.Intent} の場合は、{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()}。
+</li>
+</ul>
+
+<p>アプリが他のアプリからペンディング インテントを<em>受け取る</em>場合を除いて、{@link android.app.PendingIntent} の作成時に必要となる {@link android.app.PendingIntent} メソッドはほぼ上記の 3 つのみです。
+
+</p>
+
+<p>各メソッドが現在のアプリの {@link android.content.Context}、ラップする {@link android.content.Intent}、インテントの使用方法を指定する 1 つ以上のフラグ（インテントを 2 回以上できるかどうかなど）を受け取ります。
+
+</p>
+
+<p>ペンディング インテントの使用に関する詳細については、
+「<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">通知</a>」や「<a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>」など、それぞれの使用例の API ガイドをご覧ください。
+</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">インテント解決</h2>
+
+
+<p>システムがアクティビティを開始する暗黙的インテントを受け取ると、次の 3 つの側面に基づいてインテントをインテント フィルタと比較し、そのインテントに最適なアクティビティを検索します。
+</p>
+
+<ul>
+  <li>インテントのアクション
+  <li>インテントのデータ（URI とデータタイプの両方）
+  <li>インテントのカテゴリ
+</ul>
+
+<p>次のセクションでは、インテント フィルタがアプリのマニフェスト ファイルでどのように宣言されているかという観点から、インテントが適切なコンポーネントに紐付けられる方法について説明します。
+</p>
+
+
+<h3 id="ActionTest">アクションのテスト</h3>
+
+<p>受け入れるインテントのアクションを指定するには、インテント フィルタでゼロ個以上の <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 要素を宣言します。
+次に例を示します。</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>このフィルタを通過するには、{@link android.content.Intent} で指定されたアクションが、フィルタにリストされたアクションのいずれかに一致する必要があります。
+</p>
+
+<p>フィルタのリストにアクションが 1 つもない場合は、インテントに一致するものがないため、すべてのインテントがテストに失敗します。
+ただし、{@link android.content.Intent} がアクションを指定していない場合は、テストに合格します（フィルタに少なくとも 1 つのアクションが含まれている必要があります）。
+
+</p>
+
+
+
+<h3 id="CategoryTest">カテゴリのテスト</h3>
+
+<p>受け入れるインテントのカテゴリを指定するには、インテント フィルタでゼロ個以上の <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 要素を宣言します。
+次に例を示します。</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>インテントがカテゴリのテストに合格するには、{@link android.content.Intent} 内のすべてのカテゴリが、フィルタ内のカテゴリに一致する必要があります。
+インテント フィルタでは、{@link android.content.Intent} で指定されたカテゴリよりも多くのカテゴリが宣言されている場合もあるため、すべてが {@link android.content.Intent} に一致しなくてもテストには合格します。&mdash;
+
+そのため、カテゴリのないインテントは、フィルタで宣言されているカテゴリに関係なく、常にこのテストに合格することになります。
+</p>
+
+<p class="note"><strong>注:</strong> Androidは自動的に、{@link
+android.content.Context#startActivity startActivity()} と {@link
+android.app.Activity#startActivityForResult startActivityForResult()} に渡されるすべての暗黙的インテントに {@link android.content.Intent#CATEGORY_DEFAULT} カテゴリを自動的に適用します。そのため、アクティビティで暗黙的インテントを受け取りたい場合は、前出の {@code &lt;intent-filter&gt;} の例のように、アクティビティのインテント フィルタに {@code "android.intent.category.DEFAULT"} のカテゴリを含める必要があります。
+
+
+
+
+</p>
+
+
+
+<h3 id="DataTest">データのテスト</h3>
+
+<p>受け入れるインテント データを指定するには、インテント フィルタでゼロ個以上の <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 要素を宣言します。
+次に例を示します。</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>各 <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code> 要素では、URI 構造とデータタイプ（MIME メディア タイプ）を指定できます。
+URI の各パートには、{@code scheme}、{@code host}、{@code port}、{@code path} の個別の属性があります。&mdash;
+&mdash;
+
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+次に例を示します。
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>この URI では、スキームが {@code content}、ホストが {@code com.example.project}、ポートが {@code 200}、パスが {@code folder/subfolder/etc} です。
+
+</p>
+
+<p>これらの各属性は <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 要素では省略可能ですが、一次従属があります。
+</p>
+<ul>
+  <li>スキームが指定されていない場合、ホストは無視されます。</li>
+  <li>ホストが指定されていない場合、ポートは無視されます。</li>
+  <li>スキームとホストの両方が指定されていない場合、パスは無視されます。</li>
+</ul>
+
+<p>インテントの URI をフィルタの URI 仕様に比較するときは、フィルタに含まれる URI の一部でのみ比較されます。
+次に例を示します。</p>
+<ul>
+  <li>フィルタでスキームのみが指定されている場合、そのスキームを持つすべての URI がフィルタに一致します。
+</li>
+  <li>フィルタでスキームと認証局が指定されていて、パスが指定されていない場合、パスにかかわらず同じスキームと認証局を持つすべての URI がフィルタを通過します。
+</li>
+  <li>フィルタでスキーム、認証局、パスが指定されている場合、同じスキーム、認証局、パスを持つ URI のみがフィルタを通過します。
+</li>
+</ul>
+
+<p class="note"><strong>注:</strong> パスの指定では、ワイルドカードのアスタリスク（*）を使ってパス名の部分一致のみを要求することもできます。
+</p>
+
+<p>データのテストでは、インテントの URI と MIME タイプの両方を、フィルタで指定された URI と MIME タイプと比較します。
+規則は次のとおりです。
+</p>
+
+<ol type="a">
+<li>URI も MIME タイプも含まないインテントは、フィルタで URI や MIME タイプが指定されていない場合のみテストをパスします。
+</li>
+
+<li>URI を含んでいて MIME タイプを含んでいないインテント（明示的にも含まれておらず、URI からも推測できない）場合は、URI がフィルタの URI 形式に一致し、フィルタが MIME タイプを指定していない場合のみテストをパスします。
+
+</li>
+
+<li>MIME タイプを含んでいて、URI を含んでいないインテントは、フィルタのリストに同じ MIME タイプがあり、URI 形式が指定されていない場合のみテストをパスします。
+</li>
+
+<li>URI と MINE タイプの両方を含む（明示的か、URI からの推測）インテントは、MIME タイプがフィルタのリストにあるタイプに一致した場合のみ、テストの MIME タイプのパートをパスします。
+
+テストの URI のパートは、URI がフィルタの URI に一致するか、{@code content:} URI か {@code file:} URI があって URI が指定されていない場合にパスできます。つまり、フィルタにリストに MIME タイプ<em>のみ</em>がある場合、コンポーネントは {@code content:} データと {@code file:} データをサポートすると推定されます。
+
+
+
+</p></li>
+</ol>
+
+<p>
+この最後の規則（d）は、コンポーネントがファイルやコンテンツ プロバイダからのローカル データを取得できるという予測を反映しています。そのため、フィルタにはデータタイプのみをリストして、{@code content:} スキームや {@code file:} スキームを明示的に指定する必要はありません。これは一般的なケースです。
+
+
+
+たとえば、次の <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 要素は、コンポーネントがコンテンツ プロバイダからの画像データを取得し、それを表示できることを Android に伝えています。
+
+
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+利用可能なデータはほとんどコンテンツプロバイダによって投入されることから、データタイプが指定されていて URI 指定されていないデータが最も一般的です
+
+</p>
+
+<p>
+もうひとつ一般的な設定として、スキームと データタイプを使ったフィルタがあります。たとえば、次の <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 要素は、アクションを実行するためにコンポーネントがネットワークから動画データを取得できることを Android に伝えています。
+
+
+
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">インテントのマッチング</h3>
+
+<p>インテントをインテント フィルタにマッチングする目的には、アクティベートするターゲットを発見するということだけでなく、端末上のコンポーネントのセットに関連する何かを発見するという目的があります。
+
+たとえば、ホーム アプリは {@link android.content.Intent#ACTION_MAIN} アクションと {@link android.content.Intent#CATEGORY_LAUNCHER} カテゴリを指定するインテント フィルタを持つすべてのアクティビティを見つけることで、アプリ ランチャーを設定します。
+
+
+</p>
+
+<p>アプリケーションでも、同様の方法でインテントのマッチングを使用できます。{@link android.content.pm.PackageManager} には特定のインテントを受け入れることのできるすべてのコンポーネントを返す一連の {@code query...()} メソッドと、インテントに応答できる最適なコンポーネントを返す同様のシリーズの {@code resolve...()} メソッドがあります。
+
+
+
+たとえば、{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} は引数として渡されたインテントを実行できるすべてのアクティビティの一覧を返し、{@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} は同様のサービスの一覧を返します。いずれのメソッドでもコンポーネントのアクティベートは行われず、応答できるものを列挙するだけです。
+
+
+
+ブロードキャスト レシーバー用にも、同様のメソッド {@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()} があります。
+
+</p>
+
+
+
+

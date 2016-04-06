@@ -21,12 +21,95 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
-
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>SDK Platform-tools, Revision 23.1.0</a> <em>(December 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+        <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Changed Linux requirements for Android SDK Platform-tools revision 23.1.0 and later:
+          it now requires 64-bit Linux.</li>
+      </ul>
+    </dd>
+
+
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.4.1</a> <em>(October 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed a problem where the emulator title bar was hidden off screen.
+        (<a href="http://code.google.com/p/android/issues/detail?id=178344">Issue 178344</a>)</li>
+        <li>Enabled the emulator to resize the user data partition by including e2fsprogs binaries.
+        (<a href="http://code.google.com/p/android/issues/detail?id=189030">Issue 189030</a>)</li>
+        <li>Fixed a regression on the 32-bit Windows OS where the emulator fails to boot Android 6.0
+        (API level 23) through Android 5.0 (API level 21) system images.
+        (<a href="http://code.google.com/p/android/issues/detail?id=188326">Issue 188326</a>)</li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.4.0</a> <em>(October 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Updated the emulator so it can display an upgrade notification when a new version is
+        available.</li>
+        <li>Added the ability for the emulator to send basic crash reports. You <em>must</em> opt-in
+        through Android Studio preferences to enable crash report transmission.</li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.4</a> <em>(August 2015)</em>
   </p>
 
@@ -78,7 +161,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.3</a> <em>(June 2015)</em>
   </p>
 
@@ -106,7 +189,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.2</a> <em>(June 2015)</em>
   </p>
 
@@ -133,7 +216,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.1</a> <em>(June 2015)</em>
   </p>
 
@@ -163,7 +246,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.3.0</a> <em>(June 2015)</em>
   </p>
 
@@ -194,7 +277,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.2.0</a> <em>(May 2015)</em>
   </p>
 
@@ -221,7 +304,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.1.2</a> <em>(February 2015)</em>
   </p>
 
@@ -250,7 +333,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.0.2</a> <em>(December 2014)</em>
   </p>
 
@@ -277,7 +360,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.0.1</a> <em>(December 2014)</em>
   </p>
 
@@ -304,7 +387,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.0.0</a> <em>(December 2014)</em>
   </p>
 
@@ -332,7 +415,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 23.0.5</a> <em>(October 2014)</em>
   </p>
 
@@ -364,7 +447,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 23.0.4</a> <em>(October 2014)</em>
   </p>
 
@@ -396,7 +479,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 23.0.2</a> <em>(July 2014)</em>
   </p>
 
@@ -430,7 +513,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 23.0.0</a> <em>(June 2014)</em>
   </p>
 
@@ -461,7 +544,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6.4</a> <em>(June 2014)</em>
   </p>
 
@@ -494,7 +577,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6.3</a> <em>(April 2014)</em>
   </p>
 
@@ -534,7 +617,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6.2</a> <em>(March 2014)</em>
   </p>
 
@@ -569,7 +652,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6.1</a> <em>(March 2014)</em>
   </p>
 
@@ -617,7 +700,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.6</a> <em>(March 2014)</em>
   </p>
 
@@ -700,7 +783,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.3</a> <em>(October 2013)</em>
   </p>
 
@@ -732,7 +815,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.2.1</a> <em>(September 2013)</em>
   </p>
 
@@ -766,7 +849,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.2</a> <em>(September 2013)</em>
   </p>
 
@@ -814,7 +897,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.0.5</a> <em>(July 2013)</em>
   </p>
 
@@ -854,7 +937,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.0.4</a> <em>(July 2013)</em>
   </p>
 
@@ -890,7 +973,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22.0.1</a> <em>(May 2013)</em>
   </p>
 
@@ -931,7 +1014,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 22</a> <em>(May 2013)</em>
   </p>
 
@@ -986,7 +1069,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 21.1</a> <em>(February 2013)</em>
   </p>
 
@@ -1021,7 +1104,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 21.0.1</a> <em>(December 2012)</em>
   </p>
 
@@ -1124,7 +1207,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 21</a> <em>(November 2012)</em>
   </p>
 
@@ -1210,7 +1293,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 20.0.3</a> <em>(August 2012)</em>
   </p>
 
@@ -1241,7 +1324,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 20.0.1</a> <em>(July 2012)</em>
   </p>
 
@@ -1278,7 +1361,7 @@ unprotected receivers for default Android actions.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 20</a> <em>(June 2012)</em>
   </p>
 
@@ -1352,7 +1435,7 @@ and tested like test applications, including code coverage information.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 19</a> <em>(April 2012)</em>
   </p>
 
@@ -1386,7 +1469,7 @@ acceleration.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 18</a> <em>(April 2012)</em>
   </p>
 
@@ -1428,7 +1511,7 @@ in some cases.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 17</a> <em>(March 2012)</em>
   </p>
 
@@ -1532,7 +1615,7 @@ ignore attribute. (<a
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 16</a> <em>(December 2011)</em>
   </p>
 
@@ -1582,7 +1665,7 @@ ignore attribute. (<a
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 15</a> <em>(October 2011)</em>
   </p>
 
@@ -1630,7 +1713,7 @@ ignore attribute. (<a
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 14</a> <em>(October 2011)</em>
   </p>
 
@@ -1685,7 +1768,7 @@ site</a>.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 13</a> <em>(September 2011)</em>
   </p>
 
@@ -1716,7 +1799,7 @@ Ant</a> 1.8 or later.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 12</a> <em>(July 2011)</em>
   </p>
 
@@ -1744,7 +1827,7 @@ Ant</a> 1.8 or later.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 11</a> <em>(May 2011)</em>
   </p>
 
@@ -1772,7 +1855,7 @@ Ant</a> 1.8 or later.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 10</a> <em>(February 2011)</em>
   </p>
 
@@ -1803,7 +1886,7 @@ Ant</a> 1.8 or later.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 9</a> <em>(January 2011)</em>
   </p>
 
@@ -1862,7 +1945,7 @@ resolve the performance issues and it will improve in future releases.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 8</a> <em>(December 2010)</em>
   </p>
 
@@ -1930,7 +2013,7 @@ documentation. </li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 7</a> <em>(September 2010)</em>
   </p>
 
@@ -1964,7 +2047,7 @@ decimal point.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 6</a> <em>(May 2010)</em>
   </p>
 
@@ -1995,7 +2078,7 @@ provides the equivalent library project support.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 5</a> <em>(March 2010)</em>
   </p>
 
@@ -2044,7 +2127,7 @@ officially supported. </li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 4</a> <em>(December 2009)</em>
   </p>
 
@@ -2094,7 +2177,7 @@ skin name specified.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 3</a> <em>(October 2009)</em>
   </p>
 

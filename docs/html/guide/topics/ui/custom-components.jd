@@ -451,7 +451,7 @@ them is extending an EditText View to make a lined notepad. This is not a
 perfect example, and the APIs for doing this might change from this early
 preview, but it does demonstrate the principles.</p>
 <p>If you haven't done so already, import the 
-NotePad sample into Eclipse (or
+NotePad sample into Android Studio (or
 just look at the source using the link provided). In particular look at the definition of
 <code>MyEditText</code> in the <a
 href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">NoteEditor.java</a>

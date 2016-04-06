@@ -328,7 +328,7 @@ content://user_dictionary/words
 </pre>
 <p>
     where the <code>user_dictionary</code> string is the provider's authority, and
-    <code>words</code> string is the table's path. The string
+    the <code>words</code> string is the table's path. The string
     <code>content://</code> (the <strong>scheme</strong>) is always present,
     and identifies this as a content URI.
 </p>
@@ -346,8 +346,8 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     <strong>Note:</strong> The {@link android.net.Uri} and {@link android.net.Uri.Builder} classes
-    contain convenience methods for constructing well-formed Uri objects from strings. The
-    {@link android.content.ContentUris} contains convenience methods for appending id values to
+    contain convenience methods for constructing well-formed URI objects from strings. The
+    {@link android.content.ContentUris} class contains convenience methods for appending id values to
     a URI. The previous snippet uses {@link android.content.ContentUris#withAppendedId
     withAppendedId()} to append an id to the UserDictionary content URI.
 </p>
@@ -407,7 +407,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 <!-- Constructing the query -->
 <h3 id="Query">Constructing the query</h3>
 <p>
-    The next step in retrieving data a provider is to construct a query. This first snippet
+    The next step in retrieving data from a provider is to construct a query. This first snippet
     defines some variables for accessing the User Dictionary Provider:
 </p>
 <pre class="prettyprint">
@@ -1148,7 +1148,7 @@ vnd.android.cursor.<strong>item</strong>
 </p>
 <p>
     The <em>subtype</em> is provider-specific. The Android built-in providers usually have a simple
-    subtype. For example, the when the Contacts application creates a row for a telephone number,
+    subtype. For example, when the Contacts application creates a row for a telephone number,
     it sets the following MIME type in the row:
 </p>
 <pre>

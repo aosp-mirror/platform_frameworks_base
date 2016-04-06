@@ -1,0 +1,103 @@
+page.title=Visão geral dos recursos
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Tópicos</h2>
+  <ol>
+    <li><a href="providing-resources.html">Fornecimento de recursos</a></li>
+    <li><a href="accessing-resources.html">Acesso aos recursos</a></li>
+    <li><a href="runtime-changes.html">Tratamento de alterações em tempo de execução</a></li>
+    <li><a href="localization.html">Localização</a></li>
+  </ol>
+
+  <h2>Referência</h2>
+  <ol>
+    <li><a href="available-resources.html">Tipos de recursos</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>Deve-se sempre exteriorizar os recursos do aplicativo, como imagens e strings do código do aplicativo,
+para que você possa mantê-los independentemente. Exteriorizar os recursos
+também permite fornecer recursos alternativos que sejam compatíveis com configurações
+de dispositivos específicos, como idiomas ou tamanhos de tela diferentes, que se tornam cada vez
+mais importantes à medida que mais dispositivos com Android são disponibilizados com configurações diferentes. Para fornecer
+compatibilidade com diferentes configurações, é preciso organizar recursos no 
+diretório {@code res/} de seu projeto usando vários subdiretórios que agrupem recursos por tipo e 
+configuração.</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Figura 1.</strong> Dois dispositivos diferentes, cada um usando o layout padrão
+(o aplicativo não fornece layouts alternativos).</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Figura 2.</strong> Dois dispositivos diferentes, cada um usando um layout diferente fornecido
+para diferentes tamanhos de tela.</p>
+</div>
+
+<p>Para qualquer tipo de recurso, é possível especificar recursos <em>padrão</em> e vários recursos
+<em>alternativos</em> para o aplicativo:</p>
+<ul>
+  <li>Recursos padrão são aqueles que devem ser usados independentemente
+da configuração do dispositivo ou quando não há recursos alternativos que correspondam à
+configuração atual.</li>
+  <li>Recursos alternativos são aqueles projetados para uso com uma configuração
+específica. Para definir que um grupo de recursos é para uma configuração específica,
+anexe um qualificador de configuração apropriado ao nome do diretório.</li>
+</ul>
+
+<p>Por exemplo, enquanto o layout da IU padrão
+é salvo no diretório {@code res/layout/}, é possível especificar um layout diferente
+a ser usado quando a tela está na orientação de paisagem salvando-o no diretório {@code res/layout-land/}
+. O Android automaticamente aplica os recursos adequados correspondendo
+a configuração atual do dispositivo com os nomes de diretórios de recursos.</p>
+
+<p>A figura 1 ilustra como o sistema aplica o mesmo layout para dois
+dispositivos diferentes quando não há recursos alternativos disponíveis. A figura 2 mostra
+o mesmo aplicativo quando é adicionado um recurso de layout alternativo para telas maiores.</p>
+
+<p>Os documentos a seguir fornecem um guia completo sobre como organizar os recursos do aplicativo,
+especificar recursos alternativos, acessá-los no aplicativo e muito mais:</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">Como fornecer recursos</a></strong></dt>
+  <dd>Os tipos de recursos que você pode fornecer no aplicativo, onde salvá-los e como criar
+recursos alternativos para configurações específicas de dispositivos.</dd>
+  <dt><strong><a href="accessing-resources.html">Acesso aos recursos</a></strong></dt>
+  <dd>Como usar os recursos que você forneceu referenciando-os no código do aplicativo
+ou de outros recursos XML.</dd>
+  <dt><strong><a href="runtime-changes.html">Tratar alterações no tempo de execução</a></strong></dt>
+  <dd>Como gerenciar alterações de configuração que ocorrem enquanto a Atividade está em execução.</dd>
+  <dt><strong><a href="localization.html">Localização</a></strong></dt>
+  <dd>Um guia ascendente para localizar o aplicativo usando recursos alternativos. Apesar de esse ser
+apenas um uso específico de recursos alternativos, ele é muito importante para atingir mais
+usuários.</dd>
+  <dt><strong><a href="available-resources.html">Tipos de recursos</a></strong></dt>
+  <dd>Uma referência a vários tipos de recursos que você pode fornecer, descrevendo os elementos XML,
+os atributos e a sintaxe. Por exemplo, esta referência mostra como criar um recurso
+para menus do aplicativo, desenháveis, animações e mais.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

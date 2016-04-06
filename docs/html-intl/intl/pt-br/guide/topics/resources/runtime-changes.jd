@@ -1,0 +1,281 @@
+page.title=Tratar alterações no tempo de execução
+page.tags=atividade,ciclo de vida
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">Retenção de um objeto durante uma alteração de configuração</a></li>
+    <li><a href="#HandlingTheChange">Tratar você mesmo da alteração de configuração</a>
+  </ol>
+
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="providing-resources.html">Fornecimento de recursos</a></li>
+    <li><a href="accessing-resources.html">Acesso aos recursos</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Alteração
+mais rápida da orientação da tela</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Algumas configurações do dispositivo podem mudar durante o tempo de execução
+(como orientação de tela, disponibilidade do teclado e idioma). Quando ocorre uma alteração,
+o Android precisa reiniciar a execução
+de {@link android.app.Activity} ({@link android.app.Activity#onDestroy()} é chamado, seguido de {@link
+android.app.Activity#onCreate(Bundle) onCreate()}). O comportamento de reinício foi projetado para ajudar
+o aplicativo a se adaptar a novas configurações recarregando automaticamente o aplicativo
+com recursos alternativos que correspondam com a configuração do dispositivo.</p>
+
+<p>Para tratar adequadamente um reinício, é importante que a atividade se restaure
+ao estado anterior por meio do <a href="{@docRoot}guide/components/activities.html#Lifecycle">ciclo de vida
+da atividade</a>, no qual o Android chama
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} antes de destruir
+a atividade para que seja possível salvar os dados acerca do estado do aplicativo. Em seguida, é possível restaurar o estado
+durante {@link android.app.Activity#onCreate(Bundle) onCreate()} ou {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()}.</p>
+
+<p>Para testar se o aplicativo se reinicia com o estado de aplicativo intacto, deve-se
+invocar as alterações de configuração (como alterações na orientação da tela) enquanto executa diversas
+tarefas no aplicativo. O aplicativo deve ser capaz de reiniciar a qualquer momento sem perda
+de dados do usuário ou estado para tratar eventos como alterações de configuração ou quando o usuário recebe
+uma chamada telefônica e, em seguida, retorna ao aplicativo bem depois
+de destruído o processo do aplicativo. Para ver como restaurar o estado da atividade, leia sobre o <a href="{@docRoot}guide/components/activities.html#Lifecycle">Ciclo de vida da atividade</a>.</p>
+
+<p>No entanto, pode-se encontrar uma situação em que o reinício do aplicativo
+e a restauração representem quantidades significativas de dados que podem ser custosos e prejudicar a experiência do usuário. Nessa situação,
+temos duas opções:</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">Reter um objeto durante uma alteração de configuração</a>
+  <p>Permita que a atividade reinicie quando uma configuração muda, mas transporte um objeto
+de estado para a nova instância da atividade.</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">Tratar você mesmo da alteração de configuração</a>
+  <p>Evite que o sistema reinicie a atividade durante certas alterações
+de configuração, mas receba um retorno de chamada quando as configurações se alteram, para que você atualize manualmente
+a atividade conforme necessário.</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">Retenção de um objeto durante uma alteração de configuração</h2>
+
+<p>Se a retenção da atividade exigir a recuperação de grandes conjuntos de dados, restabelecer uma conexão
+de rede ou executar outras operações intensivas, um reinício completo devido a uma alteração
+de configuração pode prejudicar a experiência do usuário. Além disso, pode não ser possível restaurar completamente
+o estado da atividade com o {@link android.os.Bundle} que o sistema salva com o retorno de chamada {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} &mdash; ele
+não foi projetado para transportar objetos grandes (como bitmaps) e os dados contidos devem ser serializados
+e, em seguida, desserializados, o que pode consumir muita memória e retardar a alteração de configuração. Nesse caso,
+para aliviar o peso de reinicializar a atividade, pode-se reter um {@link
+android.app.Fragment} quando a atividade for reiniciada devido a uma alteração de configuração. Esse fragmento
+pode conter referências a objetos com estado que seja preciso reter.</p>
+
+<p>Quando o sistema Android encerra a atividade devido a uma alteração de configuração, os fragmentos
+da atividade marcados para serem retidos não são destruídos. É possível adicionar esses fragmentos
+à atividade para preservar objetos de estado.</p>
+
+<p>Para reter objetos de estado em um fragmento durante uma alteração de configuração em tempo de execução:</p>
+
+<ol>
+  <li>Estenda a classe {@link android.app.Fragment} e declare referências aos objetos
+de estado.</li>
+  <li>Chame {@link android.app.Fragment#setRetainInstance(boolean)} quando o fragmento for criado.
+      </li>
+  <li>Acrescente o fragmento à atividade.</li>
+  <li>Use {@link android.app.FragmentManager} para recuperar o fragmento quando a atividade for
+reiniciada.</li>
+</ol>
+
+<p>Por exemplo: defina o fragmento da seguinte forma:</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>Atenção:</strong> ao restaurar qualquer objeto,
+não se deve nunca passar um objeto vinculado a {@link android.app.Activity}, como um {@link
+android.graphics.drawable.Drawable}, um {@link android.widget.Adapter}, um {@link android.view.View}
+ou qualquer outro objeto associado a um {@link android.content.Context}. Se o fizer,
+ele vazará todas as vistas e recursos da instância da atividade original (vazar recursos
+significa que o aplicativo mantém a retenção deles, que não podem ser recolhidos, o que
+causa perda de memória).</p>
+
+<p>Em seguida, use {@link android.app.FragmentManager} para adicionar o fragmento à atividade. 
+É possível obter o objeto de dados do fragmento quando a atividade reiniciar durante as alterações
+de configuração em tempo de execução. Por exemplo: defina a atividade da seguinte forma:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>Nesse exemplo, {@link android.app.Activity#onCreate(Bundle) onCreate()} adiciona um fragmento
+ou restaura uma referência a ele. {@link android.app.Activity#onCreate(Bundle) onCreate()} também
+armazena o objeto de estado dentro da instância de fragmento.
+{@link android.app.Activity#onDestroy() onDestroy()} atualiza o objeto de estado dentro
+da instância de fragmento retida.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">Tratar você mesmo da alteração de configuração</h2>
+
+<p>Se o aplicativo não tiver que atualizar recursos durante uma alteração de configuração específica
+<em>e</em> se houver alguma limitação de desempenho que
+impeça a atividade de reiniciar, pode-se declarar que a atividade trata ela mesma da alteração de configuração,
+o que evita que o sistema reinicie a atividade.</p>
+
+<p class="note"><strong>Observação:</strong> Tratar você mesmo da alteração de configuração
+pode dificultar muito o uso de recursos alternativos, pois o sistema não os aplicará
+automaticamente. Esta técnica deve ser considerada um último recurso, quando é preciso evitar reinícios
+devido a uma alteração de configuração e não é recomendada para a maioria dos aplicativos.</p>
+
+<p>Para declarar que a atividade manipula uma alteração de configuração, edite o elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+apropriado no arquivo de manifesto para que inclua o atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> com um valor que represente a configuração
+a tratar. Os valores possíveis estão listados na documentação do atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> (os valores mais comumente usados são {@code "orientation"}, para
+impedir reinícios durante alterações na orientação da tela, e {@code "keyboardHidden"} para impedir
+reinícios quando a disponibilidade do teclado muda).  Para declarar vários valores de configuração
+no atributo, usa-se um separador na forma de caractere barra reta {@code |}.</p>
+
+<p>Por exemplo: o código de manifesto a seguir declara uma atividade que trata tanto
+da alteração de orientação da tela quanto da disponibilidade do teclado:</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>Agora, quando uma dessas configurações mudar, {@code MyActivity} não reiniciará.
+Em vez disso, a {@code MyActivity} recebe uma chamada para {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Um objeto
+{@link android.content.res.Configuration} é passado a esse método e especifica
+a nova configuração do dispositivo. Ao ler os campos em {@link android.content.res.Configuration},
+pode-se determinar a nova configuração e atualizar os recursos na interface para fazer
+as alterações adequadas. No momento
+em que o método é chamado, o objeto {@link android.content.res.Resources} da atividade é atualizado
+para retornar recursos com base na nova configuração, o que facilita
+a redefinição de elementos da IU sem que o sistema reinicie a atividade.</p>
+
+<p class="caution"><strong>Atenção:</strong> a partir do Android 3.2 (nível da API 13), <strong>o "tamanho
+da tela" também muda</strong> quando o dispositivo alterna entre as orientações retrato
+e paisagem. Assim, se você deseja evitar que o tempo de execução reinicie devido a uma mudança da orientação
+ao desenvolver uma API nível 13 ou posterior (conforme declarado pelos atributos <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> e <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>),
+é preciso incluir o valor {@code "screenSize"} além do valor {@code
+"orientation"}. Ou seja, é preciso declarar {@code
+android:configChanges="orientation|screenSize"}. No entanto, se o aplicativo tem como alvo uma API nível
+12 ou inferior, a atividade sempre trata ela mesma a alteração de configuração (essa mudança
+de configuração não reinicia a atividade, mesmo em execução em Android 3.2 ou dispositivo posterior).</p>
+
+<p>Por exemplo: a implementação a seguir {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} verifica
+a orientação de dispositivo atual:</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>O objeto {@link android.content.res.Configuration} representa todas as configurações
+atuais, não somente as que foram alteradas. Na maior parte do tempo, não importa como
+a configuração foi alterada; basta reatribuir todos os recursos que apresentam alternativas
+à configuração que estão sendo tratadas. Por exemplo: como o objeto {@link
+android.content.res.Resources} está atualizado, pode-se redefinir
+qualquer {@link android.widget.ImageView} com {@link android.widget.ImageView#setImageResource(int)
+setImageResource()}
+e será usado o recurso adequado à nova configuração (conforme descrito em <a href="providing-resources.html#AlternateResources">Como fornecer recursos</a>).</p>
+
+<p>Observe que os valores dos campos de {@link
+android.content.res.Configuration} são inteiros que correspondem a constantes específicas
+da classe {@link android.content.res.Configuration}. Para ver a documentação sobre as constantes
+a usar em cada campo, consulte o campo em questão na referência sobre {@link
+android.content.res.Configuration}.</p>
+
+<p class="note"><strong>Lembre-se:</strong> ao declarar a atividade para tratar uma alteração
+de configuração, você é responsável por redefinir todos os elementos que fornecem alternativas. Se você
+declarar a atividade para tratar a alteração de orientação e tiver imagens que alterariam
+entre paisagem e retrato, é preciso reatribuir cada recurso a cada elemento durante {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}.</p>
+
+<p>Se não for necessário atualizar o aplicativo com base nessas alterações
+de configuração, pode-se <em>não</em> implementar {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Nesse
+caso, todos os recursos usados antes da alteração de configuração ainda são usados
+e somente o reinício da atividade é evitado. No entanto, o aplicativo deve sempre ser capaz
+de se encerrar e reiniciar com seu estado anterior intacto, portanto essa técnica não deve
+ser considerada uma fuga da retenção do estado durante o ciclo de vida normal da atividade, Não somente porque
+há outras alterações de configuração impossíveis de evitar que reiniciem o aplicativo,
+mas também porque devem-se tratar eventos como o do usuário que sai do aplicativo e ele é destruído
+antes de o usuário voltar a ele.</p>
+
+<p>Para obter mais informações sobre as alterações de configuração que devem ser tratadas na atividade, consulte a documentação sobre <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> e a classe
+{@link android.content.res.Configuration}.</p>
