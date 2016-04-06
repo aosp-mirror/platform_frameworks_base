@@ -596,27 +596,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         final boolean showBadge;
         final Intent onClickIntent;
-        if (provider.maskedBySuspendedPackage) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (provider.maskedBySuspendedPackage) {
                 UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
                 showBadge = userInfo.isManagedProfile();
                 onClickIntent = mDevicePolicyManagerInternal.createPackageSuspendedDialogIntent(
                         providerPackage, providerUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+            } else if (provider.maskedByQuietProfile) {
+                showBadge = true;
+                onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
+                        providerUserId);
+            } else /* provider.maskedByLockedProfile */ {
+                showBadge = true;
+                onClickIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null, null,
+                        providerUserId);
+                if (onClickIntent != null) {
+                    onClickIntent.setFlags(FLAG_ACTIVITY_NEW_TASK
+                            | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                }
             }
-        } else if (provider.maskedByQuietProfile) {
-            showBadge = true;
-            onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
-                    providerUserId);
-        } else /* provider.maskedByLockedProfile */ {
-            showBadge = true;
-            onClickIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null, null,
-                    providerUserId);
-            if (onClickIntent != null) {
-                onClickIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
 
         for (int j = 0; j < widgetCount; j++) {
