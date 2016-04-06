@@ -4160,6 +4160,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
      * if not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set the configuration for
+     * the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param target Component name of the agent to be enabled.
@@ -4180,7 +4184,7 @@ public class DevicePolicyManager {
             @NonNull ComponentName target, PersistableBundle configuration) {
         if (mService != null) {
             try {
-                mService.setTrustAgentConfiguration(admin, target, configuration);
+                mService.setTrustAgentConfiguration(admin, target, configuration, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4191,6 +4195,10 @@ public class DevicePolicyManager {
      * Gets configuration for the given trust agent based on aggregating all calls to
      * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)} for
      * all device admins.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to retrieve the configuration set
+     * on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. If null,
      * this function returns a list of configurations for all admins that declare
@@ -4211,7 +4219,8 @@ public class DevicePolicyManager {
             @NonNull ComponentName agent, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getTrustAgentConfiguration(admin, agent, userHandle);
+                return mService.getTrustAgentConfiguration(admin, agent, userHandle,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
