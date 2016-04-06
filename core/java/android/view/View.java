@@ -20398,21 +20398,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * the touch point.
          * </p>
          *
-         * @param shadowSize A {@link android.graphics.Point} containing the width and height
+         * @param outShadowSize A {@link android.graphics.Point} containing the width and height
          * of the shadow image. Your application must set {@link android.graphics.Point#x} to the
          * desired width and must set {@link android.graphics.Point#y} to the desired height of the
          * image.
          *
-         * @param shadowTouchPoint A {@link android.graphics.Point} for the position within the
+         * @param outShadowTouchPoint A {@link android.graphics.Point} for the position within the
          * shadow image that should be underneath the touch point during the drag and drop
          * operation. Your application must set {@link android.graphics.Point#x} to the
          * X coordinate and {@link android.graphics.Point#y} to the Y coordinate of this position.
          */
-        public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
+        public void onProvideShadowMetrics(Point outShadowSize, Point outShadowTouchPoint) {
             final View view = mView.get();
             if (view != null) {
-                shadowSize.set(view.getWidth(), view.getHeight());
-                shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2);
+                outShadowSize.set(view.getWidth(), view.getHeight());
+                outShadowTouchPoint.set(outShadowSize.x / 2, outShadowSize.y / 2);
             } else {
                 Log.e(View.VIEW_LOG_TAG, "Asked for drag thumb metrics but no view");
             }
