@@ -402,7 +402,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Motta varsler raskere"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Se dem før du låser opp"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nei, takk"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nei takk"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Konfigurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Avslutt nå"</string>
@@ -411,7 +411,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skjermen er låst"</string>
     <string name="screen_pinning_description" msgid="3577937698406151604">"På denne måten blir skjermen synlig frem til du låser den opp. Trykk og hold inne Tilbake for å låse opp."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Skjønner"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Nei, takk"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Nei takk"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Den vises igjen neste gang du slår den på i innstillingene."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skjul"</string>
