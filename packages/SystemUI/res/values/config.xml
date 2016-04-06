@@ -178,7 +178,7 @@
     <!-- Recents: The relative range of visible tasks from the current scroll position
          while the stack is focused. -->
     <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
-    <item name="recents_layout_focused_range_max" format="float" type="integer">3</item>
+    <item name="recents_layout_focused_range_max" format="float" type="integer">2</item>
 
     <!-- Recents: The relative range of visible tasks from the current scroll position
          while the stack is not focused. -->

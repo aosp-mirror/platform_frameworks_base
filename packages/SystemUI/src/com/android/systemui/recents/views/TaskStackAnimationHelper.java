@@ -456,7 +456,8 @@ public class TaskStackAnimationHelper {
         TaskStack stack = mStackView.getStack();
 
         final float curScroll = stackScroller.getStackScroll();
-        final float newScroll = stackLayout.getStackScrollForTask(newFocusedTask);
+        final float newScroll = stackScroller.getBoundedStackScroll(
+                stackLayout.getStackScrollForTask(newFocusedTask));
         boolean willScrollToFront = newScroll > curScroll;
         boolean willScroll = Float.compare(newScroll, curScroll) != 0;
 
