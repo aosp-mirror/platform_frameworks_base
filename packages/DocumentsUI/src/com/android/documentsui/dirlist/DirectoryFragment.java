@@ -40,6 +40,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -72,8 +73,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toolbar;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DirectoryLoader;
@@ -1229,41 +1230,68 @@ public class DirectoryFragment extends Fragment
                 DocumentInfo.fromDirectoryCursor(cursor));
     }
 
-    private Drawable getDragShadowIcon(List<DocumentInfo> docs) {
-        if (docs.size() == 1) {
-            final DocumentInfo doc = docs.get(0);
-            return mIconHelper.getDocumentIcon(getActivity(), doc.authority, doc.documentId,
-                    doc.mimeType, doc.icon);
+    private static class DragShadowBuilder extends View.DragShadowBuilder {
+
+        private final Context mContext;
+        private final IconHelper mIconHelper;
+        private final LayoutInflater mInflater;
+        private final View mShadowView;
+        private final TextView mTitle;
+        private final ImageView mIcon;
+        private final int mWidth;
+        private final int mHeight;
+
+        public DragShadowBuilder(Context context, IconHelper iconHelper, List<DocumentInfo> docs) {
+            mContext = context;
+            mIconHelper = iconHelper;
+            mInflater = LayoutInflater.from(context);
+
+            mWidth = mContext.getResources().getDimensionPixelSize(R.dimen.drag_shadow_width);
+            mHeight= mContext.getResources().getDimensionPixelSize(R.dimen.drag_shadow_height);
+
+            mShadowView = mInflater.inflate(R.layout.drag_shadow_layout, null);
+            mTitle = (TextView) mShadowView.findViewById(android.R.id.title);
+            mIcon = (ImageView) mShadowView.findViewById(android.R.id.icon);
+
+            mTitle.setText(getTitle(docs));
+            mIcon.setImageDrawable(getIcon(docs));
         }
-        return getActivity().getDrawable(R.drawable.ic_doc_generic);
-    }
 
-    private class DrawableShadowBuilder extends View.DragShadowBuilder {
+        private Drawable getIcon(List<DocumentInfo> docs) {
+            if (docs.size() == 1) {
+                final DocumentInfo doc = docs.get(0);
+                return mIconHelper.getDocumentIcon(mContext, doc.authority, doc.documentId,
+                        doc.mimeType, doc.icon);
+            }
+            return mContext.getDrawable(R.drawable.ic_doc_generic);
+        }
 
-        private final Drawable mShadow;
-
-        private final int mShadowDimension;
-
-        public DrawableShadowBuilder(Drawable shadow) {
-            mShadow = shadow;
-            mShadowDimension = getResources().getDimensionPixelSize(
-                    R.dimen.drag_shadow_size);
-            mShadow.setBounds(0, 0, mShadowDimension, mShadowDimension);
+        private String getTitle(List<DocumentInfo> docs) {
+            if (docs.size() == 1) {
+                final DocumentInfo doc = docs.get(0);
+                return doc.displayName;
+            }
+            return Shared.getQuantityString(mContext, R.plurals.elements_dragged, docs.size());
         }
 
         @Override
         public void onProvideShadowMetrics(
                 Point shadowSize, Point shadowTouchPoint) {
-            shadowSize.set(mShadowDimension, mShadowDimension);
-            shadowTouchPoint.set(mShadowDimension / 2, mShadowDimension / 2);
+            shadowSize.set(mWidth, mHeight);
+            shadowTouchPoint.set(mWidth, mHeight);
         }
 
         @Override
         public void onDrawShadow(Canvas canvas) {
-            mShadow.draw(canvas);
+            Rect r = canvas.getClipBounds();
+            // Calling measure is necessary in order for all child views to get correctly laid out.
+            mShadowView.measure(
+                    View.MeasureSpec.makeMeasureSpec(r.right- r.left, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(r.top- r.bottom, View.MeasureSpec.EXACTLY));
+            mShadowView.layout(r.left, r.top, r.right, r.bottom);
+            mShadowView.draw(canvas);
         }
     }
-
     /**
      * Abstract task providing support for loading documents *off*
      * the main thread. And if it isn't obvious, creating a list
@@ -1414,7 +1442,7 @@ public class DirectoryFragment extends Fragment
                 }
                 v.startDragAndDrop(
                         mClipper.getClipDataForDocuments(docs),
-                        new DrawableShadowBuilder(getDragShadowIcon(docs)),
+                        new DragShadowBuilder(getActivity(), mIconHelper, docs),
                         getDisplayState().stack.peek(),
                         View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
                                 View.DRAG_FLAG_GLOBAL_URI_WRITE
