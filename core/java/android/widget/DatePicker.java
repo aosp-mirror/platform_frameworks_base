@@ -339,7 +339,9 @@ public class DatePicker extends FrameLayout {
      *
      * @return {@code true} if the calendar view is shown
      * @see #getCalendarView()
+     * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @Deprecated
     public boolean getCalendarViewShown() {
         return mDelegate.getCalendarViewShown();
     }
@@ -347,13 +349,18 @@ public class DatePicker extends FrameLayout {
     /**
      * Returns the {@link CalendarView} used by this picker.
      * <p>
-     * <strong>Note:</strong> This method returns {@code null} when the
+     * <strong>Note:</strong> This method throws an
+     * {@link UnsupportedOperationException} when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *
      * @return the calendar view
      * @see #getCalendarViewShown()
+     * @deprecated Not supported by Material-style {@code calendar} mode
+     * @throws UnsupportedOperationException if called when the picker is
+     *         displayed in {@code calendar} mode
      */
+    @Deprecated
     public CalendarView getCalendarView() {
         return mDelegate.getCalendarView();
     }
@@ -367,7 +374,9 @@ public class DatePicker extends FrameLayout {
      *
      * @param shown {@code true} to show the calendar view, {@code false} to
      *              hide it
+     * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @Deprecated
     public void setCalendarViewShown(boolean shown) {
         mDelegate.setCalendarViewShown(shown);
     }
@@ -380,7 +389,9 @@ public class DatePicker extends FrameLayout {
      * to {@code calendar}.
      *
      * @return {@code true} if the spinners are shown
+     * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @Deprecated
     public boolean getSpinnersShown() {
         return mDelegate.getSpinnersShown();
     }
@@ -394,7 +405,9 @@ public class DatePicker extends FrameLayout {
      *
      * @param shown {@code true} to show the spinners, {@code false} to hide
      *              them
+     * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @Deprecated
     public void setSpinnersShown(boolean shown) {
         mDelegate.setSpinnersShown(shown);
     }
