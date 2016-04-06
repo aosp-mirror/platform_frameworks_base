@@ -238,7 +238,7 @@ inline std::unique_ptr<xml::XmlResource> buildXmlDom(const StringPiece& str) {
     std::stringstream in;
     in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
     StdErrDiagnostics diag;
-    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, {});
+    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, Source("test.xml"));
     assert(doc);
     return doc;
 }
