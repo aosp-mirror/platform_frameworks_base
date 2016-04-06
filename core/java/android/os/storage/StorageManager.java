@@ -1178,23 +1178,7 @@ public class StorageManager {
 
     /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
-        final IMountService mountService = IMountService.Stub.asInterface(
-                ServiceManager.getService("mount"));
-        try {
-            final VolumeInfo[] vols = mountService.getVolumes(0);
-            for (VolumeInfo vol : vols) {
-                if ((vol.getType() == VolumeInfo.TYPE_EMULATED
-                        || vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isMountedReadable()) {
-                    final File internalPath = FileUtils.rewriteAfterRename(vol.getPath(),
-                            vol.getInternalPath(), path);
-                    if (internalPath != null && internalPath.exists()) {
-                        return internalPath;
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        // Disabled now that FUSE has been replaced by sdcardfs
         return path;
     }
 
