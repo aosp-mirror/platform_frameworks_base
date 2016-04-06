@@ -35,6 +35,14 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 public class PipOverlayActivity extends Activity implements PipManager.Listener {
     private static final long SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS = 4000;
 
+    /**
+     * A flag to ensure the single instance of PipOverlayActivity to prevent it from restarting.
+     * Note that {@link PipManager} moves the PIPed activity to fullscreen if the activity is
+     * restarted. It's because the activity may be started by the Launcher or an intent again,
+     * but we don't want do so for the PipOverlayActivity.
+     */
+    private static boolean sActivityCreated;
+
     private final PipManager mPipManager = PipManager.getInstance();
     private final Handler mHandler = new Handler();
     private View mGuideOverlayView;
@@ -46,9 +54,23 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         }
     };
 
+    /**
+     * Shows PIP overlay UI only if it's not there.
+     */
+    static void showPipOverlay(Context context) {
+        if (!sActivityCreated) {
+            Intent intent = new Intent(context, PipOverlayActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchStackId(PINNED_STACK_ID);
+            context.startActivity(intent, options.toBundle());
+        }
+    }
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        sActivityCreated = true;
         setContentView(R.layout.tv_pip_overlay);
         mGuideOverlayView = findViewById(R.id.guide_overlay);
         mPipManager.addListener(this);
@@ -71,6 +93,7 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        sActivityCreated = false;
         mHandler.removeCallbacksAndMessages(null);
         mPipManager.removeListener(this);
         mPipManager.resumePipResizing(
