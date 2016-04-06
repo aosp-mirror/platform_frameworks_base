@@ -17003,7 +17003,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         intent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
 
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
-                MATCH_SYSTEM_ONLY | MATCH_DISABLED_COMPONENTS, UserHandle.myUserId());
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                        | MATCH_DISABLED_COMPONENTS,
+                UserHandle.myUserId());
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
