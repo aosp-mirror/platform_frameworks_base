@@ -18,6 +18,7 @@
 #include "ResourceTable.h"
 #include "split/TableSplitter.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <unordered_map>

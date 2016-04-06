@@ -239,13 +239,15 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
     ASSERT_TRUE(generator.generate(u"android", &out));
     std::string actual = out.str();
 
-    EXPECT_NE(std::string::npos, actual.find(
-    R"EOF(/**
+    const char* expectedText =
+R"EOF(/**
      * This is a comment
      * @deprecated
      */
     @Deprecated
-    public static final int foo=0x01010000;)EOF"));
+    public static final int foo=0x01010000;)EOF";
+
+    EXPECT_NE(std::string::npos, actual.find(expectedText));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {

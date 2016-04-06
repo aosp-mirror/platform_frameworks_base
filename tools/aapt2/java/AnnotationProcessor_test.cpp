@@ -49,16 +49,18 @@ struct AnnotationProcessorTest : public ::testing::Test {
 };
 
 TEST_F(AnnotationProcessorTest, EmitsDeprecated) {
-    ASSERT_TRUE(parse(R"EOF(
+    const char* xmlInput = R"EOF(
     <resources>
-      <declare-styleable name="foo">      
+      <declare-styleable name="foo">
         <!-- Some comment, and it should contain
              a marker word, something that marks
              this resource as nor needed.
              {@deprecated That's the marker! } -->
         <attr name="autoText" format="boolean" />
       </declare-styleable>
-    </resources>)EOF"));
+    </resources>)EOF";
+
+    ASSERT_TRUE(parse(xmlInput));
 
     Attribute* attr = test::getValue<Attribute>(&mTable, u"@attr/autoText");
     ASSERT_NE(nullptr, attr);

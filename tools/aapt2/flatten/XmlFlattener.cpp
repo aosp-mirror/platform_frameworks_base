@@ -21,6 +21,7 @@
 #include "xml/XmlDom.h"
 
 #include <androidfw/ResourceTypes.h>
+#include <algorithm>
 #include <utils/misc.h>
 #include <vector>
 
