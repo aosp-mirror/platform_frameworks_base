@@ -124,7 +124,7 @@ public class RecentsTvImpl extends RecentsImpl{
      */
     private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
             ActivityManager.RunningTaskInfo topTask) {
-        Bitmap thumbnail = mThumbnailTransitionBitmapCache;
+        Bitmap thumbnail = mThumbTransitionBitmapCache;
         Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext);
         if (thumbnail != null) {
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,

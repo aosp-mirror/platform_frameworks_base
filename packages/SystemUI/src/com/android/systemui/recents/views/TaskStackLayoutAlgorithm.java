@@ -29,6 +29,7 @@ import android.view.ViewDebug;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -530,8 +531,12 @@ public class TaskStackLayoutAlgorithm {
                 ? stack.indexOfStackTask(launchTask)
                 : mNumStackTasks - 1;
         if (getInitialFocusState() == STATE_FOCUSED) {
+            int maxBottomOffset = mStackBottomOffset + mTaskRect.height();
+            float maxBottomNormX = getNormalizedXFromFocusedY(maxBottomOffset, FROM_BOTTOM);
+            mFocusedRange.offset(0f);
             mMinScrollP = 0;
-            mMaxScrollP = Math.max(mMinScrollP, mNumStackTasks - 1);
+            mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
+                    Math.max(0, mFocusedRange.getAbsoluteX(maxBottomNormX)));
             if (launchState.launchedFromHome) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else {
@@ -555,7 +560,10 @@ public class TaskStackLayoutAlgorithm {
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
             boolean scrollToFront = launchState.launchedFromHome ||
                     launchState.launchedViaDockGesture;
-            if (scrollToFront) {
+            if (launchState.launchedWithAltTab) {
+                mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
+                mInitialNormX = null;
+            } else if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
                 mInitialNormX = null;
             } else {
@@ -652,8 +660,9 @@ public class TaskStackLayoutAlgorithm {
      * Returns the default focus state.
      */
     public int getInitialFocusState() {
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (debugFlags.isPagingEnabled()) {
+        if (debugFlags.isPagingEnabled() || launchState.launchedWithAltTab) {
             return STATE_FOCUSED;
         } else {
             return STATE_UNFOCUSED;
@@ -1027,6 +1036,18 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the normalized x on the focused curve given an absolute Y position (relative to the
+     * stack height).
+     */
+    private float getNormalizedXFromFocusedY(float y, @AnchorSide int fromSide) {
+        float offset = (fromSide == FROM_TOP)
+                ? mStackRect.height() - y
+                : y;
+        float offsetPct = offset / mStackRect.height();
+        return mFocusedCurveInterpolator.getX(offsetPct);
+    }
+
+    /**
      * Creates a new path for the focused curve.
      */
     private Path constructFocusedCurve() {
@@ -1036,10 +1057,13 @@ public class TaskStackLayoutAlgorithm {
         float topPeekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
         float bottomPeekHeightPct = (float) (mStackBottomOffset + mFocusedBottomPeekHeight) /
                 mStackRect.height();
+        float minBottomPeekHeightPct = (float) (mFocusedTopPeekHeight + mTaskRect.height() -
+                mMinMargin) / mStackRect.height();
         Path p = new Path();
         p.moveTo(0f, 1f);
         p.lineTo(0.5f, 1f - topPeekHeightPct);
-        p.lineTo(1f - (0.5f / mFocusedRange.relativeMax), bottomPeekHeightPct);
+        p.lineTo(1f - (0.5f / mFocusedRange.relativeMax), Math.max(1f - minBottomPeekHeightPct,
+                bottomPeekHeightPct));
         p.lineTo(1f, 0f);
         return p;
     }
