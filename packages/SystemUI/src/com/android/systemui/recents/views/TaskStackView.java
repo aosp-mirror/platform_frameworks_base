@@ -90,6 +90,7 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -101,6 +102,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         TaskView.TaskViewCallbacks, TaskStackViewScroller.TaskStackViewScrollerCallbacks,
         TaskStackLayoutAlgorithm.TaskStackLayoutAlgorithmCallbacks,
         ViewPool.ViewPoolConsumer<TaskView, Task> {
+
+    private static final String TAG = "TaskStackView";
 
     private final static String KEY_SAVED_STATE_SUPER = "saved_instance_state_super";
     private final static String KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE =
@@ -2066,5 +2069,38 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
         mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+        String id = Integer.toHexString(System.identityHashCode(this));
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" hasDefRelayout=");
+        writer.print(mDeferredTaskViewLayoutAnimation != null ? "Y" : "N");
+        writer.print(" clipDirty="); writer.print(mTaskViewsClipDirty ? "Y" : "N");
+        writer.print(" awaitingFirstLayout="); writer.print(mAwaitingFirstLayout ? "Y" : "N");
+        writer.print(" initialState="); writer.print(mInitialState);
+        writer.print(" inMeasureLayout="); writer.print(mInMeasureLayout ? "Y" : "N");
+        writer.print(" enterAnimCompleted="); writer.print(mEnterAnimationComplete ? "Y" : "N");
+        writer.print(" touchExplorationOn="); writer.print(mTouchExplorationEnabled ? "Y" : "N");
+        writer.print(" screenPinningOn="); writer.print(mScreenPinningEnabled ? "Y" : "N");
+        writer.print(" numIgnoreTasks="); writer.print(mIgnoreTasks.size());
+        writer.print(" numViewPool="); writer.print(mViewPool.getViews().size());
+        writer.print(" stableStackBounds="); writer.print(Utilities.dumpRect(mStableStackBounds));
+        writer.print(" stackBounds="); writer.print(Utilities.dumpRect(mStackBounds));
+        writer.print(" stableWindow="); writer.print(Utilities.dumpRect(mStableWindowRect));
+        writer.print(" window="); writer.print(Utilities.dumpRect(mWindowRect));
+        writer.print(" [0x"); writer.print(id); writer.print("]");
+        writer.println();
+
+        if (mFocusedTask != null) {
+            writer.print(innerPrefix);
+            writer.print("Focused task: ");
+            mFocusedTask.dump(innerPrefix, writer);
+        }
+
+        mLayoutAlgorithm.dump(innerPrefix, writer);
+        mStackScroller.dump(innerPrefix, writer);
     }
 }

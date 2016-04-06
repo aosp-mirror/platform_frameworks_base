@@ -30,6 +30,8 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Utilities;
 
+import java.io.PrintWriter;
+
 /* The scrolling logic for a TaskStackView */
 public class TaskStackViewScroller {
 
@@ -245,5 +247,11 @@ public class TaskStackViewScroller {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" stackScroll:"); writer.print(mStackScrollP);
+        writer.println();
     }
 }

@@ -78,6 +78,9 @@ import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.statusbar.BaseStatusBar;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
@@ -732,5 +735,21 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         });
         return true;
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        super.dump(prefix, fd, writer, args);
+        String id = Integer.toHexString(System.identityHashCode(this));
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" visible="); writer.print(mIsVisible ? "Y" : "N");
+        writer.print(" [0x"); writer.print(id); writer.print("]");
+        writer.println();
+
+        if (mRecentsView != null) {
+            mRecentsView.dump(prefix, writer);
+        }
+        EventBus.getDefault().dump(prefix, writer);
     }
 }

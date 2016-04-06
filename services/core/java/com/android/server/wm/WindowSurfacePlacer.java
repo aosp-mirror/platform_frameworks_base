@@ -1582,7 +1582,8 @@ class WindowSurfacePlacer {
                 // synchronize its thumbnail surface with the surface for the
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
-                        insets, thumbnailHeader, taskId, mService.mCurConfiguration.orientation);
+                        insets, thumbnailHeader, taskId, mService.mCurConfiguration.uiMode,
+                        mService.mCurConfiguration.orientation);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();
