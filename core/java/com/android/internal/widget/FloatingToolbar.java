@@ -1460,6 +1460,7 @@ public final class FloatingToolbar {
                 super(Preconditions.checkNotNull(popup).mContext);
                 this.mPopup = popup;
                 setScrollBarDefaultDelayBeforeFade(ViewConfiguration.getScrollDefaultDelay() * 3);
+                setScrollIndicators(View.SCROLL_INDICATOR_TOP | View.SCROLL_INDICATOR_BOTTOM);
             }
 
             @Override
