@@ -166,9 +166,9 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
     std::unique_ptr<xml::XmlResource> doc = verifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="android">
-        <application name=".MainApplication" text="hello">
-          <activity name=".activity.Start" />
-          <receiver name="com.google.android.Receiver" />
+        <application android:name=".MainApplication" text="hello">
+          <activity android:name=".activity.Start" />
+          <receiver android:name="com.google.android.Receiver" />
         </application>
       </manifest>)EOF", options);
     ASSERT_NE(nullptr, doc);
@@ -185,7 +185,7 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
     xml::Element* applicationEl = manifestEl->findChild({}, u"application");
     ASSERT_NE(nullptr, applicationEl);
 
-    attr = applicationEl->findAttribute({}, u"name");
+    attr = applicationEl->findAttribute(xml::kSchemaAndroid, u"name");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(std::u16string(u"android.MainApplication"), attr->value);
 
@@ -197,14 +197,14 @@ TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
     el = applicationEl->findChild({}, u"activity");
     ASSERT_NE(nullptr, el);
 
-    attr = el->findAttribute({}, u"name");
+    attr = el->findAttribute(xml::kSchemaAndroid, u"name");
     ASSERT_NE(nullptr, el);
     EXPECT_EQ(std::u16string(u"android.activity.Start"), attr->value);
 
     el = applicationEl->findChild({}, u"receiver");
     ASSERT_NE(nullptr, el);
 
-    attr = el->findAttribute({}, u"name");
+    attr = el->findAttribute(xml::kSchemaAndroid, u"name");
     ASSERT_NE(nullptr, el);
     EXPECT_EQ(std::u16string(u"com.google.android.Receiver"), attr->value);
 }

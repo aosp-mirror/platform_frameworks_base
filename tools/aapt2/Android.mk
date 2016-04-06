@@ -66,6 +66,7 @@ sources := \
 	ResourceValues.cpp \
 	SdkConstants.cpp \
 	StringPool.cpp \
+	xml/XmlActionExecutor.cpp \
 	xml/XmlDom.cpp \
 	xml/XmlPullParser.cpp \
 	xml/XmlUtil.cpp
@@ -107,6 +108,7 @@ testSources := \
 	SdkConstants_test.cpp \
 	StringPool_test.cpp \
 	ValueVisitor_test.cpp \
+	xml/XmlActionExecutor_test.cpp \
 	xml/XmlDom_test.cpp \
 	xml/XmlPullParser_test.cpp \
 	xml/XmlUtil_test.cpp
@@ -140,7 +142,7 @@ else
 endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
-cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
+cppFlags := -std=c++14 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
 protoIncludes := $(call generated-sources-dir-for,STATIC_LIBRARIES,libaapt2,HOST)
 
 # ==========================================================
