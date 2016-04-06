@@ -1063,7 +1063,7 @@
     <string name="select_input_method" msgid="8547250819326693584">"Aldatu teklatua"</string>
     <string name="show_ime" msgid="2506087537466597099">"Erakutsi pantailan teklatu fisikoa aktibo dagoen bitartean"</string>
     <string name="hardware" msgid="194658061510127999">"Erakutsi teklatu birtuala"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfiguratu teklatua fisikoa"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfiguratu teklatu fisikoa"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
