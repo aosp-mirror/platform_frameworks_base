@@ -28,6 +28,12 @@ import java.util.UUID;
 public abstract class DrmInitData {
 
     /**
+     * Prevent public constuctor access
+     */
+    /* package private */ DrmInitData() {
+    }
+
+    /**
      * Retrieves initialization data for a given DRM scheme, specified by its UUID.
      *
      * @param schemeUuid The DRM scheme's UUID.
