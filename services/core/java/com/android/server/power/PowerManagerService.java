@@ -53,6 +53,8 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -72,6 +74,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.vr.VrManagerService;
 import com.android.server.vr.VrStateListener;
 import libcore.util.Objects;
 
@@ -658,7 +661,13 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Secure.BRIGHTNESS_USE_TWILIGHT),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            getLocalService(VrManagerInternal.class).registerListener(mVrStateListener);
+            IVrManager vrManager =
+                    (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
+            try {
+                vrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+            }
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -3008,7 +3017,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private final VrStateListener mVrStateListener = new VrStateListener() {
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
         public void onVrStateChanged(boolean enabled) {
             powerHintInternal(POWER_HINT_VR_MODE, enabled ? 1 : 0);
