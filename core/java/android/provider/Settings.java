@@ -8306,6 +8306,16 @@ public final class Settings {
         public static final String BOOT_COUNT = "boot_count";
 
         /**
+         * Whether the safe boot is disallowed.
+         *
+         * <p>This setting should have the identical value as the corresponding user restriction.
+         * The purpose of the setting is to make the restriction available in early boot stages
+         * before the user restrictions are loaded.
+         * @hide
+         */
+        public static final String SAFE_BOOT_DISALLOWED = "safe_boot_disallowed";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
