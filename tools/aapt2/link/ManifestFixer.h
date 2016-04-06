@@ -19,6 +19,7 @@
 
 #include "process/IResourceTableConsumer.h"
 #include "util/Maybe.h"
+#include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
 #include <string>
@@ -38,13 +39,17 @@ struct ManifestFixerOptions {
  * Verifies that the manifest is correctly formed and inserts defaults
  * where specified with ManifestFixerOptions.
  */
-struct ManifestFixer : public IXmlResourceConsumer {
-    ManifestFixerOptions mOptions;
-
+class ManifestFixer : public IXmlResourceConsumer {
+public:
     ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
     }
 
     bool consume(IAaptContext* context, xml::XmlResource* doc) override;
+
+private:
+    bool buildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+
+    ManifestFixerOptions mOptions;
 };
 
 } // namespace aapt
