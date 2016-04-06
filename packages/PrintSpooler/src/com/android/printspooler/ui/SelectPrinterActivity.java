@@ -18,12 +18,11 @@ package com.android.printspooler.ui;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.Loader;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -34,6 +33,7 @@ import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -80,8 +80,8 @@ public final class SelectPrinterActivity extends Activity implements
 
     private static final String KEY_NOT_FIRST_CREATE = "KEY_NOT_FIRST_CREATE";
 
-    /** If there are any enabled print services */
-    private boolean mHasEnabledPrintServices;
+    /** The currently enabled print services by their ComponentName */
+    private ArrayMap<ComponentName, PrintServiceInfo> mEnabledPrintServices;
 
     private PrinterRegistry mPrinterRegistry;
 
@@ -99,6 +99,8 @@ public final class SelectPrinterActivity extends Activity implements
         getActionBar().setIcon(R.drawable.ic_print);
 
         setContentView(R.layout.select_printer_activity);
+
+        mEnabledPrintServices = new ArrayMap<>();
 
         mPrinterRegistry = new PrinterRegistry(this, null, LOADER_ID_PRINT_REGISTRY,
                 LOADER_ID_PRINT_REGISTRY_INT);
@@ -317,7 +319,7 @@ public final class SelectPrinterActivity extends Activity implements
         }
         TextView titleView = (TextView) findViewById(R.id.title);
         View progressBar = findViewById(R.id.progress_bar);
-        if (!mHasEnabledPrintServices) {
+        if (mEnabledPrintServices.size() > 0) {
             titleView.setText(R.string.print_no_print_services);
             progressBar.setVisibility(View.GONE);
         } else if (adapter.getUnfilteredCount() <= 0) {
@@ -346,11 +348,16 @@ public final class SelectPrinterActivity extends Activity implements
 
     @Override
     public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
-            List<PrintServiceInfo> data) {
-        if (data == null || data.isEmpty()) {
-            mHasEnabledPrintServices = false;
-        } else {
-            mHasEnabledPrintServices = true;
+            List<PrintServiceInfo> services) {
+        mEnabledPrintServices.clear();
+
+        if (services != null && !services.isEmpty()) {
+            final int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                PrintServiceInfo service = services.get(i);
+
+                mEnabledPrintServices.put(service.getComponentName(), service);
+            }
         }
 
         onPrintServicesUpdate();
@@ -533,14 +540,12 @@ public final class SelectPrinterActivity extends Activity implements
             CharSequence title = printer.getName();
             Drawable icon = printer.loadIcon(SelectPrinterActivity.this);
 
-            CharSequence printServiceLabel;
-            try {
-                PackageInfo packageInfo = getPackageManager().getPackageInfo(
-                        printer.getId().getServiceName().getPackageName(), 0);
+            PrintServiceInfo service = mEnabledPrintServices.get(printer.getId().getServiceName());
 
-                printServiceLabel = packageInfo.applicationInfo.loadLabel(getPackageManager());
-            } catch (NameNotFoundException e) {
-                printServiceLabel = null;
+            CharSequence printServiceLabel = null;
+            if (service != null) {
+                printServiceLabel = service.getResolveInfo().loadLabel(getPackageManager())
+                        .toString();
             }
 
             CharSequence description = printer.getDescription();
