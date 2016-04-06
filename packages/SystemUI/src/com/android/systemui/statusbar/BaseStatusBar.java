@@ -107,7 +107,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.GearDisplayedListener;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.ArrayList;
@@ -120,7 +119,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener, GearDisplayedListener {
+        ExpandableNotificationRow.OnExpandClickListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -242,7 +241,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
-    private ExpandableNotificationRow mNotificationGearDisplayed;
 
     private KeyboardShortcuts mKeyboardShortcuts;
 
@@ -1071,10 +1069,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         guts.bindImportance(pmUser, sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }
 
-    protected GearDisplayedListener getGearDisplayedListener() {
-        return this;
-    }
-
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
@@ -1110,7 +1104,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 // Post to ensure the the guts are properly laid out.
                 guts.post(new Runnable() {
                     public void run() {
-                        dismissPopups(-1 /* x */, -1 /* y */, false /* resetGear */);
+                        dismissPopups(-1 /* x */, -1 /* y */, false /* resetGear */,
+                                false /* animate */);
                         guts.setVisibility(View.VISIBLE);
                         final double horz = Math.max(guts.getWidth() - x, x);
                         final double vert = Math.max(guts.getHeight() - y, y);
@@ -1139,22 +1134,22 @@ public abstract class BaseStatusBar extends SystemUI implements
         };
     }
 
-    @Override
-    public void onGearDisplayed(ExpandableNotificationRow row) {
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
-                row.getStatusBarNotification().getPackageName());
-        mNotificationGearDisplayed = row;
+    /**
+     * Returns the exposed NotificationGuts or null if none are exposed.
+     */
+    public NotificationGuts getExposedGuts() {
+        return mNotificationGutsExposed;
     }
 
     public void dismissPopups() {
-        dismissPopups(-1 /* x */, -1 /* y */, true /* resetGear */);
+        dismissPopups(-1 /* x */, -1 /* y */, true /* resetGear */, false /* animate */);
     }
 
     private void dismissPopups(int x, int y) {
-        dismissPopups(x, y, true /* resetGear */);
+        dismissPopups(x, y, true /* resetGear */, false /* animate */);
     }
 
-    public void dismissPopups(int x, int y, boolean resetGear) {
+    public void dismissPopups(int x, int y, boolean resetGear, boolean animate) {
         if (mNotificationGutsExposed != null) {
             final NotificationGuts v = mNotificationGutsExposed;
             mNotificationGutsExposed = null;
@@ -1182,9 +1177,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             v.setExposed(false);
             mStackScroller.onHeightChanged(null, true /* needsAnimation */);
         }
-        if (resetGear && mNotificationGearDisplayed != null) {
-            mNotificationGearDisplayed.resetTranslation();
-            mNotificationGearDisplayed = null;
+        if (resetGear) {
+            mStackScroller.resetExposedGearView(animate, true /* force */);
         }
     }
 

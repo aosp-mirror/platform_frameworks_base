@@ -226,6 +226,10 @@ public class StatusBarWindowView extends FrameLayout {
                 return false;
             }
         }
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mStackScrollLayout.closeControlsIfOutsideTouch(ev);
+        }
+
         return super.dispatchTouchEvent(ev);
     }
 
