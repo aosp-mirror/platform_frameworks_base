@@ -38,4 +38,8 @@
     <dimen name="drag_shadow_size">120dp</dimen>
     <dimen name="grid_item_elevation">2dp</dimen>
     <dimen name="max_drawer_width">280dp</dimen>
+
+    <dimen name="drag_shadow_width">160dp</dimen>
+    <dimen name="drag_shadow_height">48dp</dimen>
+
 </resources>
