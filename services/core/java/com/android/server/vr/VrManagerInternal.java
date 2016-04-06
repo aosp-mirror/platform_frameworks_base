@@ -31,13 +31,6 @@ public abstract class VrManagerInternal {
     public static final int NO_ERROR = 0;
 
     /**
-     * Return current VR mode state.
-     *
-     * @return {@code true} if VR mode is enabled.
-     */
-    public abstract boolean isInVrMode();
-
-    /**
      * Return {@code true} if the given package is the currently bound VrListenerService for the
      * given user.
      *
@@ -58,22 +51,6 @@ public abstract class VrManagerInternal {
      */
     public abstract void setVrMode(boolean enabled, @NonNull ComponentName packageName,
             int userId, @NonNull ComponentName calling);
-
-    /**
-     * Add a listener for VR mode state changes.
-     * <p>
-     * This listener will immediately be called with the current VR mode state.
-     * </p>
-     * @param listener the listener instance to add.
-     */
-    public abstract void registerListener(@NonNull VrStateListener listener);
-
-    /**
-     * Remove the listener from the current set of listeners.
-     *
-     * @param listener the listener to remove.
-     */
-    public abstract void unregisterListener(@NonNull VrStateListener listener);
 
    /**
     * Return NO_ERROR if the given package is installed on the device and enabled as a
