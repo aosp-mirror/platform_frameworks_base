@@ -19,8 +19,20 @@
     <item android:state_focused="true">
         <layer-list>
             <item android:drawable="@drawable/tv_pip_button_focused" />
-            <item android:drawable="@drawable/ic_pause_white_24dp" />
+            <item android:drawable="@drawable/ic_pause_white_24dp"
+                android:top="@dimen/tv_pip_button_icon_padding"
+                android:bottom="@dimen/tv_pip_button_icon_padding"
+                android:left="@dimen/tv_pip_button_icon_padding"
+                android:right="@dimen/tv_pip_button_icon_padding" />
         </layer-list>
     </item>
-    <item android:drawable="@drawable/ic_pause_white_24dp" />
+    <item>
+        <layer-list>
+            <item android:drawable="@drawable/ic_pause_white_24dp"
+                android:top="@dimen/tv_pip_button_icon_padding"
+                android:bottom="@dimen/tv_pip_button_icon_padding"
+                android:left="@dimen/tv_pip_button_icon_padding"
+                android:right="@dimen/tv_pip_button_icon_padding" />
+        </layer-list>
+    </item>
 </selector>

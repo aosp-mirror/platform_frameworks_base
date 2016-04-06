@@ -54,5 +54,7 @@
 
     <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
     <dimen name="tv_pip_bounds_space">3dp</dimen>
+    <!-- Extra space around the PIP control button icon to match with the focused circle -->
+    <dimen name="tv_pip_button_icon_padding">5dp</dimen>
 
 </resources>
