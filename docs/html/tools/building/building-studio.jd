@@ -253,8 +253,9 @@ parent.link=index.html
   style="vertical-align:bottom;margin:0;"> and <strong>Debug</strong> <img src=
   "{@docRoot}images/tools/as-debugbutton.png" alt="" style=
   "vertical-align:bottom;margin:0;"> commands that significantly reduces the
-  time between updates to your app. Instant Run pushes updates to your app
-  without building a new APK, so changes are visible much more quickly.
+  time between updates to your app. Although your first build may take longer
+  to complete, Instant Run pushes subsequent updates to your app without
+  building a new APK, so changes are visible much more quickly.
 </p>
 
 <p>
