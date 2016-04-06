@@ -986,7 +986,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void dismissViewAnimated(View child, Runnable endRunnable, int delay, long duration) {
-        mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration);
+        mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration,
+                true /* isDismissAll */);
     }
 
     public void snapViewIfNeeded(View child) {
@@ -3194,9 +3195,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             disableClipOptimization();
         }
         handleDismissAllClipping();
-        if (mCurrIconRow != null && mCurrIconRow.isVisible()) {
-            mCurrIconRow.getNotificationParent().animateTranslateNotification(0 /* left target */);
-        }
     }
 
     private void handleDismissAllClipping() {
@@ -3639,10 +3637,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         @Override
         public Animator getViewTranslationAnimator(View v, float target,
                 AnimatorUpdateListener listener) {
-            if (mDismissAllInProgress) {
-                // When dismissing all, we translate the entire view instead.
-                return super.getViewTranslationAnimator(v, target, listener);
-            } else if (v instanceof ExpandableNotificationRow) {
+            if (v instanceof ExpandableNotificationRow) {
                 return ((ExpandableNotificationRow) v).getTranslateViewAnimator(target, listener);
             } else {
                 return super.getViewTranslationAnimator(v, target, listener);
@@ -3651,22 +3646,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         @Override
         public void setTranslation(View v, float translate) {
-            if (mDismissAllInProgress) {
-                // When dismissing all, we translate the entire view instead.
-                super.setTranslation(v, translate);
-            } else {
-                ((ExpandableView) v).setTranslation(translate);
-            }
+            ((ExpandableView) v).setTranslation(translate);
         }
 
         @Override
         public float getTranslation(View v) {
-            if (mDismissAllInProgress) {
-                // When dismissing all, we translate the entire view instead.
-                return super.getTranslation(v);
-            } else {
-                return ((ExpandableView) v).getTranslation();
-            }
+            return ((ExpandableView) v).getTranslation();
         }
 
         public void closeControlsIfOutsideTouch(MotionEvent ev) {
