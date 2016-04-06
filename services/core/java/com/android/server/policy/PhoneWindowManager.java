@@ -107,6 +107,7 @@ import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.LongSparseArray;
@@ -396,6 +397,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mBeganFromNonInteractive;
     volatile int mPowerKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
+    volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
+    volatile boolean mGoingToSleep;
 
     boolean mRecentsVisible;
     int mRecentAppsHeldModifiers;
@@ -685,6 +688,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             = new LogDecelerateInterpolator(100, 0);
 
     private boolean mForceWindowDrawsStatusBarBackground;
+    private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -1032,7 +1036,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 GestureLauncherService.class);
         boolean gesturedServiceIntercepted = false;
         if (gestureService != null) {
-            gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive);
+            gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive,
+                    mTmpBoolean);
+            if (mTmpBoolean.value && mGoingToSleep) {
+                mCameraGestureTriggeredDuringGoingToSleep = true;
+            }
         }
 
         // If the power key has still not yet been handled, then detect short
@@ -5948,6 +5956,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void startedGoingToSleep(int why) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Started going to sleep... (why=" + why + ")");
+        mCameraGestureTriggeredDuringGoingToSleep = false;
+        mGoingToSleep = true;
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(why);
         }
@@ -5960,6 +5970,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Finished going to sleep... (why=" + why + ")");
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
+        mGoingToSleep = false;
+
         // We must get this work done here because the power manager will drop
         // the wake lock and let the system suspend once this function returns.
         synchronized (mLock) {
@@ -5969,8 +5981,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateLockScreenTimeout();
         }
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onFinishedGoingToSleep(why);
+            mKeyguardDelegate.onFinishedGoingToSleep(why,
+                    mCameraGestureTriggeredDuringGoingToSleep);
         }
+        mCameraGestureTriggeredDuringGoingToSleep = false;
     }
 
     // Called on the PowerManager's Notifier thread.

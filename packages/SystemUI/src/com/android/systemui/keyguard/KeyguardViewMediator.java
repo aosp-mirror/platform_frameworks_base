@@ -747,7 +747,7 @@ public class KeyguardViewMediator extends SystemUI {
         notifyStartedGoingToSleep();
     }
 
-    public void onFinishedGoingToSleep(int why) {
+    public void onFinishedGoingToSleep(int why, boolean cameraGestureTriggered) {
         if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + why + ")");
         synchronized (this) {
             mDeviceInteractive = false;
@@ -757,6 +757,16 @@ public class KeyguardViewMediator extends SystemUI {
             mHideAnimationRun = false;
 
             notifyFinishedGoingToSleep();
+
+            if (cameraGestureTriggered) {
+                Log.i(TAG, "Camera gesture was triggered, preventing Keyguard locking.");
+
+                // Just to make sure, make sure the device is awake.
+                mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
+                        "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
+                mPendingLock = false;
+                mPendingReset = false;
+            }
 
             if (mPendingReset) {
                 resetStateLocked();
@@ -771,7 +781,7 @@ public class KeyguardViewMediator extends SystemUI {
             // We do not have timeout and power button instant lock setting for profile lock.
             // So we use the personal setting if there is any. But if there is no device
             // we need to make sure we lock it immediately when the screen is off.
-            if (!mLockLater) {
+            if (!mLockLater && !cameraGestureTriggered) {
                 doKeyguardForChildProfilesLocked();
             }
 
