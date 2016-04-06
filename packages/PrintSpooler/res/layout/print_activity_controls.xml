@@ -239,7 +239,8 @@
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:visibility="visible"
-                    android:inputType="textNoSuggestions">
+                    android:inputType="number"
+                    android:digits="0123456789 ,-">
                 </com.android.printspooler.widget.CustomErrorEditText>
 
             </LinearLayout>
