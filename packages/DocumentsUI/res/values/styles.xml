@@ -30,6 +30,7 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="colorActionMode">@color/action_mode</item>
         <item name="android:queryBackground">@color/menu_search_background</item>
+        <item name="android:statusBarColor">@color/status_bar_color</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 

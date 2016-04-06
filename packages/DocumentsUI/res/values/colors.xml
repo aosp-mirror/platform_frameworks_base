@@ -31,6 +31,7 @@
     <color name="accent">@*android:color/accent_material_light</color>
     <color name="accent_dark">@*android:color/accent_material_dark</color>
     <color name="action_mode">@color/material_grey_400</color>
+    <color name="status_bar_color">@*android:color/material_blue_grey_950</color>
 
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
