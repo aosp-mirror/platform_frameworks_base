@@ -130,36 +130,43 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             importanceSlider.setVisibility(View.VISIBLE);
             importanceButtons.setVisibility(View.GONE);
         } else {
-            int userImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+            mStartingImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
             try {
-                userImportance =
+                mStartingImportance =
                         mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
             } catch (RemoteException e) {}
-            bindToggles(importanceButtons, userImportance, systemApp);
+            bindToggles(importanceButtons, mStartingImportance, systemApp);
             importanceButtons.setVisibility(View.VISIBLE);
             importanceSlider.setVisibility(View.GONE);
         }
     }
 
+    public boolean hasImportanceChanged() {
+        return mStartingImportance != getSelectedImportance();
+    }
+
     void saveImportance(final StatusBarNotification sbn) {
-        int progress;
-        if (mSeekBar!= null && mSeekBar.isShown()) {
-            progress = mSeekBar.getProgress();
-        } else {
-            if (mBlock.isChecked()) {
-                progress = NotificationListenerService.Ranking.IMPORTANCE_NONE;
-            } else if (mSilent.isChecked()) {
-                progress = NotificationListenerService.Ranking.IMPORTANCE_LOW;
-            } else {
-                progress = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-            }
-        }
+        int progress = getSelectedImportance();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 progress - mStartingImportance);
         try {
             mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
         } catch (RemoteException e) {
             // :(
+        }
+    }
+
+    private int getSelectedImportance() {
+        if (mSeekBar!= null && mSeekBar.isShown()) {
+            return mSeekBar.getProgress();
+        } else {
+            if (mBlock.isChecked()) {
+                return NotificationListenerService.Ranking.IMPORTANCE_NONE;
+            } else if (mSilent.isChecked()) {
+                return NotificationListenerService.Ranking.IMPORTANCE_LOW;
+            } else {
+                return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+            }
         }
     }
 
