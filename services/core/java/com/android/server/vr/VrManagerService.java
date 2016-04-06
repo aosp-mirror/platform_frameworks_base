@@ -15,6 +15,7 @@
  */
 package com.android.server.vr;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
@@ -29,11 +30,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
+import android.os.Message;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.vr.IVrListener;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.service.vr.VrListenerService;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -46,6 +51,7 @@ import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 
 import java.lang.StringBuilder;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -75,6 +81,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     public static final String TAG = "VrManagerService";
 
+    public static final String VR_MANAGER_BINDER_SERVICE = "vrmanager";
+
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
 
@@ -84,7 +92,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     // State protected by mLock
     private boolean mVrModeEnabled;
-    private final Set<VrStateListener> mListeners = new ArraySet<>();
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
     private Context mContext;
@@ -92,9 +99,36 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private int mCurrentVrModeUser;
     private boolean mWasDefaultGranted;
     private boolean mGuard;
+    private final RemoteCallbackList<IVrStateCallbacks> mRemoteCallbacks =
+            new RemoteCallbackList<>();
     private final ArraySet<String> mPreviousToggledListenerSettings = new ArraySet<>();
     private String mPreviousNotificationPolicyAccessPackage;
     private String mPreviousManageOverlayPackage;
+
+    private static final int MSG_VR_STATE_CHANGE = 0;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+                case MSG_VR_STATE_CHANGE : {
+                    boolean state = (msg.arg1 == 1);
+                    int i = mRemoteCallbacks.beginBroadcast();
+                    while (i > 0) {
+                        i--;
+                        try {
+                            mRemoteCallbacks.getBroadcastItem(i).onVrStateChanged(state);
+                        } catch (RemoteException e) {
+                            // Noop
+                        }
+                    }
+                    mRemoteCallbacks.finishBroadcast();
+                } break;
+                default :
+                    throw new IllegalStateException("Unknown message type: " + msg.what);
+            }
+        }
+    };
 
     private static final BinderChecker sBinderChecker = new BinderChecker() {
         @Override
@@ -125,15 +159,46 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
+    private final IVrManager mVrManager = new IVrManager.Stub() {
+
+        @Override
+        public void registerListener(IVrStateCallbacks cb) {
+            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            if (cb == null) {
+                throw new IllegalArgumentException("Callback binder object is null.");
+            }
+
+            VrManagerService.this.addStateCallback(cb);
+        }
+
+        @Override
+        public void unregisterListener(IVrStateCallbacks cb) {
+            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            if (cb == null) {
+                throw new IllegalArgumentException("Callback binder object is null.");
+            }
+
+            VrManagerService.this.removeStateCallback(cb);
+        }
+
+        @Override
+        public boolean getVrModeState() {
+            return VrManagerService.this.getVrMode();
+        }
+
+    };
+
+    private void enforceCallerPermission(String permission) {
+        if (mContext.checkCallingOrSelfPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold the permission " + permission);
+        }
+    }
+
     /**
      * Implementation of VrManagerInternal.  Callable only from system services.
      */
     private final class LocalService extends VrManagerInternal {
-        @Override
-        public boolean isInVrMode() {
-            return VrManagerService.this.getVrMode();
-        }
-
         @Override
         public void setVrMode(boolean enabled, ComponentName packageName, int userId,
                 ComponentName callingPackage) {
@@ -143,16 +208,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public boolean isCurrentVrListener(String packageName, int userId) {
             return VrManagerService.this.isCurrentVrListener(packageName, userId);
-        }
-
-        @Override
-        public void registerListener(VrStateListener listener) {
-            VrManagerService.this.addListener(listener);
-        }
-
-        @Override
-        public void unregisterListener(VrStateListener listener) {
-            VrManagerService.this.removeListener(listener);
         }
 
         @Override
@@ -173,6 +228,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         publishLocalService(VrManagerInternal.class, new LocalService());
+        publishBinderService(VR_MANAGER_BINDER_SERVICE, mVrManager.asBinder());
     }
 
     @Override
@@ -551,9 +607,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * Note: Must be called while holding {@code mLock}.
      */
     private void onVrModeChangedLocked() {
-        for (VrStateListener l : mListeners) {
-            l.onVrStateChanged(mVrModeEnabled);
-        }
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_VR_STATE_CHANGE,
+                (mVrModeEnabled) ? 1 : 0, 0));
     }
 
     /**
@@ -577,9 +632,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    private boolean getVrMode() {
+    private int hasVrPackage(@NonNull ComponentName targetPackageName, int userId) {
         synchronized (mLock) {
-            return mVrModeEnabled;
+            return mComponentObserver.isValid(targetPackageName, userId);
         }
     }
 
@@ -593,21 +648,21 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    private void addListener(VrStateListener listener) {
-        synchronized (mLock) {
-            mListeners.add(listener);
-        }
+    /*
+     * Implementation of IVrManager calls.
+     */
+
+    private void addStateCallback(IVrStateCallbacks cb) {
+        mRemoteCallbacks.register(cb);
     }
 
-    private void removeListener(VrStateListener listener) {
-        synchronized (mLock) {
-            mListeners.remove(listener);
-        }
+    private void removeStateCallback(IVrStateCallbacks cb) {
+        mRemoteCallbacks.unregister(cb);
     }
 
-    private int hasVrPackage(@NonNull ComponentName targetPackageName, int userId) {
+    private boolean getVrMode() {
         synchronized (mLock) {
-            return mComponentObserver.isValid(targetPackageName, userId);
+            return mVrModeEnabled;
         }
     }
 }

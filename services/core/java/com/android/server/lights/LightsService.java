@@ -18,12 +18,17 @@ package com.android.server.lights;
 
 import com.android.server.SystemService;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.vr.VrManagerService;
 import com.android.server.vr.VrStateListener;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.Slog;
 
 public class LightsService extends SystemService {
@@ -164,13 +169,19 @@ public class LightsService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            getLocalService(VrManagerInternal.class).registerListener(mVrStateListener);
+            IVrManager vrManager =
+                    (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
+            try {
+                vrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+            }
         }
     }
 
-    private final VrStateListener mVrStateListener = new VrStateListener() {
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
-        public void onVrStateChanged(boolean enabled) {
+        public void onVrStateChanged(boolean enabled) throws RemoteException {
             LightImpl l = mLights[LightsManager.LIGHT_ID_BACKLIGHT];
             if (enabled) {
                 if (DEBUG) Slog.v(TAG, "VR mode enabled, setting brightness to low persistence");
