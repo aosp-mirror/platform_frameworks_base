@@ -16,9 +16,13 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -30,6 +34,12 @@ import java.util.Arrays;
  * @hide PROPOSED_NAN_API
  */
 public class PublishConfig implements Parcelable {
+    @IntDef({
+            PUBLISH_TYPE_UNSOLICITED, PUBLISH_TYPE_SOLICITED })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PublishTypes {
+    }
+
     /**
      * Defines an unsolicited publish session - i.e. a publish session where
      * publish packets are transmitted over-the-air. Configuration is done using
@@ -327,7 +337,7 @@ public class PublishConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setServiceName(String serviceName) {
+        public Builder setServiceName(@NonNull String serviceName) {
             mServiceName = serviceName;
             return this;
         }
@@ -369,7 +379,7 @@ public class PublishConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setServiceSpecificInfo(String serviceSpecificInfoStr) {
+        public Builder setServiceSpecificInfo(@NonNull String serviceSpecificInfoStr) {
             mServiceSpecificInfoLength = serviceSpecificInfoStr.length();
             mServiceSpecificInfo = serviceSpecificInfoStr.getBytes();
             return this;
@@ -444,7 +454,7 @@ public class PublishConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setPublishType(int publishType) {
+        public Builder setPublishType(@PublishTypes int publishType) {
             if (publishType < PUBLISH_TYPE_UNSOLICITED || publishType > PUBLISH_TYPE_SOLICITED) {
                 throw new IllegalArgumentException("Invalid publishType - " + publishType);
             }

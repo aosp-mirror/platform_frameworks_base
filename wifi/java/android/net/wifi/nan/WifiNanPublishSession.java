@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -44,7 +45,7 @@ public class WifiNanPublishSession extends WifiNanSession {
      * @param publishConfig The configuration ({@link PublishConfig}) of the
      *            publish session.
      */
-    public void updatePublish(PublishConfig publishConfig) {
+    public void updatePublish(@NonNull PublishConfig publishConfig) {
         if (mTerminated) {
             Log.w(TAG, "updatePublish: called on terminated session");
             return;

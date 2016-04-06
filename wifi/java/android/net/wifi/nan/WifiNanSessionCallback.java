@@ -17,6 +17,7 @@
 package android.net.wifi.nan;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -104,7 +105,7 @@ public class WifiNanSessionCallback {
      * @param session The {@link WifiNanPublishSession} used to control the
      *            discovery session.
      */
-    public void onPublishStarted(WifiNanPublishSession session) {
+    public void onPublishStarted(@NonNull WifiNanPublishSession session) {
         /* empty */
     }
 
@@ -114,7 +115,7 @@ public class WifiNanSessionCallback {
      * @param session The {@link WifiNanSubscribeSession} used to control the
      *            discovery session.
      */
-    public void onSubscribeStarted(WifiNanSubscribeSession session) {
+    public void onSubscribeStarted(@NonNull WifiNanSubscribeSession session) {
         /* empty */
     }
 

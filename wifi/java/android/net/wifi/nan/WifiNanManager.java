@@ -16,6 +16,8 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
@@ -174,7 +176,7 @@ public class WifiNanManager {
      *            connection.
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(Looper looper, WifiNanEventCallback callback) {
+    public void connect(@NonNull Looper looper, @NonNull WifiNanEventCallback callback) {
         connect(looper, callback, null);
     }
 
@@ -189,7 +191,8 @@ public class WifiNanManager {
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      * @param configRequest The requested NAN configuration.
      */
-    public void connect(Looper looper, WifiNanEventCallback callback, ConfigRequest configRequest) {
+    public void connect(@NonNull Looper looper, @NonNull WifiNanEventCallback callback,
+            @Nullable ConfigRequest configRequest) {
         if (VDBG) {
             Log.v(TAG, "connect(): looper=" + looper + ", callback=" + callback + ", configRequest="
                     + configRequest);
@@ -273,7 +276,8 @@ public class WifiNanManager {
      * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
      */
-    public void publish(PublishConfig publishConfig, WifiNanSessionCallback callback) {
+    public void publish(@NonNull PublishConfig publishConfig,
+            @NonNull WifiNanSessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
         int clientId;
@@ -330,7 +334,8 @@ public class WifiNanManager {
      * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
      */
-    public void subscribe(SubscribeConfig subscribeConfig, WifiNanSessionCallback callback) {
+    public void subscribe(@NonNull SubscribeConfig subscribeConfig,
+            @NonNull WifiNanSessionCallback callback) {
         if (VDBG) {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
