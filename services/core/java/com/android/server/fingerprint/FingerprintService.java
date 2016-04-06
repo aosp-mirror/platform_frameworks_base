@@ -107,6 +107,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final int FINGERPRINT_ACQUIRED_GOOD = 0;
     private final String mKeyguardPackage;
     private int mCurrentUserId = UserHandle.USER_CURRENT;
+    private int mUserIdForRemove = UserHandle.USER_NULL;
 
     Handler mHandler = new Handler() {
         @Override
@@ -205,10 +206,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     protected void handleRemoved(long deviceId, int fingerId, int groupId) {
         final ClientMonitor client = mRemoveClient;
         if (fingerId != 0) {
-            removeTemplateForUser(mRemoveClient, fingerId);
+            removeTemplateForUser(mUserIdForRemove, fingerId);
+        } else {
+            mUserIdForRemove = UserHandle.USER_NULL;
         }
         if (client != null && client.sendRemoved(fingerId, groupId)) {
-            removeClient(mRemoveClient);
+            removeClient(client);
         }
     }
 
@@ -325,8 +328,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         return false;
     }
 
-    private void removeTemplateForUser(ClientMonitor clientMonitor, int fingerId) {
-        mFingerprintUtils.removeFingerprintIdForUser(mContext, fingerId, clientMonitor.userId);
+    private void removeTemplateForUser(int userId, int fingerId) {
+        mFingerprintUtils.removeFingerprintIdForUser(mContext, fingerId, userId);
     }
 
     private void addTemplateForUser(ClientMonitor clientMonitor, int fingerId) {
@@ -488,6 +491,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         stopPendingOperations(true);
         mRemoveClient = new ClientMonitor(token, receiver, userId, restricted, token.toString());
+        mUserIdForRemove = mCurrentUserId;
         // The fingerprint template ids will be removed when we get confirmation from the HAL
         try {
             final int result = daemon.remove(fingerId, userId);
