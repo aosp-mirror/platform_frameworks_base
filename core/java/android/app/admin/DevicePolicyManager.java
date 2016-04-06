@@ -5849,8 +5849,43 @@ public class DevicePolicyManager {
     /**
      * Called by the profile owner of a managed profile to obtain a {@link DevicePolicyManager}
      * whose calls act on the parent profile.
-     * <p>
-     * Note only some methods will work on the parent Manager.
+     *
+     * <p>The following methods are supported for the parent instance, all other methods will
+     * throw a SecurityException when called on the parent instance:
+     * <ul>
+     * <li>{@link #getPasswordQuality}</li>
+     * <li>{@link #setPasswordQuality}</li>
+     * <li>{@link #getPasswordMinimumLength}</li>
+     * <li>{@link #setPasswordMinimumLength}</li>
+     * <li>{@link #getPasswordMinimumUpperCase}</li>
+     * <li>{@link #setPasswordMinimumUpperCase}</li>
+     * <li>{@link #getPasswordMinimumLowerCase}</li>
+     * <li>{@link #setPasswordMinimumLowerCase}</li>
+     * <li>{@link #getPasswordMinimumLetters}</li>
+     * <li>{@link #setPasswordMinimumLetters}</li>
+     * <li>{@link #getPasswordMinimumNumeric}</li>
+     * <li>{@link #setPasswordMinimumNumeric}</li>
+     * <li>{@link #getPasswordMinimumSymbols}</li>
+     * <li>{@link #setPasswordMinimumSymbols}</li>
+     * <li>{@link #getPasswordMinimumNonLetter}</li>
+     * <li>{@link #setPasswordMinimumNonLetter}</li>
+     * <li>{@link #getPasswordHistoryLength}</li>
+     * <li>{@link #setPasswordHistoryLength}</li>
+     * <li>{@link #getPasswordExpirationTimeout}</li>
+     * <li>{@link #setPasswordExpirationTimeout}</li>
+     * <li>{@link #getPasswordExpiration}</li>
+     * <li>{@link #isActivePasswordSufficient}</li>
+     * <li>{@link #getCurrentFailedPasswordAttempts}</li>
+     * <li>{@link #getMaximumFailedPasswordsForWipe}</li>
+     * <li>{@link #setMaximumFailedPasswordsForWipe}</li>
+     * <li>{@link #getMaximumTimeToLock}</li>
+     * <li>{@link #setMaximumTimeToLock}</li>
+     * <li>{@link #lockNow}</li>
+     * <li>{@link #getKeyguardDisabledFeatures}</li>
+     * <li>{@link #setKeyguardDisabledFeatures}</li>
+     * <li>{@link #getTrustAgentConfiguration}</li>
+     * <li>{@link #setTrustAgentConfiguration}</li>
+     * </ul>
      *
      * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.
      * @throws SecurityException if {@code admin} is not a profile owner.
