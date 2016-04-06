@@ -66,7 +66,10 @@ static FontCollection *makeFontCollection() {
         ALOGD("makeFontCollection adding %s", fn);
         SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
         if (skFace != NULL) {
-            MinikinFont *font = new MinikinFontSkia(skFace);
+            // TODO: might be a nice optimization to get access to the underlying font
+            // data, but would require us opening the file ourselves and passing that
+            // to the appropriate Create method of SkTypeface.
+            MinikinFont *font = new MinikinFontSkia(skFace, NULL, 0, 0);
             family->addFont(font);
             font->Unref();
         } else {
