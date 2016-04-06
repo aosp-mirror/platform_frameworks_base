@@ -1744,6 +1744,7 @@
   <java-symbol type="integer" name="config_defaultNotificationLedOff" />
   <java-symbol type="integer" name="config_defaultNotificationLedOn" />
   <java-symbol type="integer" name="config_deskDockKeepsScreenOn" />
+  <java-symbol type="integer" name="config_externalHardKeyboardBehavior" />
   <java-symbol type="integer" name="config_lightSensorWarmupTime" />
   <java-symbol type="integer" name="config_lowBatteryCloseWarningBump" />
   <java-symbol type="integer" name="config_lowBatteryWarningLevel" />

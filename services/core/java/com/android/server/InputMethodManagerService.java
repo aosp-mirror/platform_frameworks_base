@@ -15,6 +15,8 @@
 
 package com.android.server;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -37,6 +39,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -133,6 +136,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,6 +182,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
 
+    @Retention(SOURCE)
+    @IntDef({HardKeyboardBehavior.WIRELESS_AFFORDANCE, HardKeyboardBehavior.WIRED_AFFORDANCE})
+    private @interface  HardKeyboardBehavior {
+        int WIRELESS_AFFORDANCE = 0;
+        int WIRED_AFFORDANCE = 1;
+    }
 
     final Context mContext;
     final Resources mRes;
@@ -462,6 +472,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
+    @HardKeyboardBehavior
+    private final int mHardKeyboardBehavior;
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -854,6 +866,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
+        mHardKeyboardBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_externalHardKeyboardBehavior);
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
@@ -1712,11 +1726,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (isScreenLocked()) return false;
         if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
         if (mWindowManagerInternal.isHardKeyboardAvailable()) {
-            // When physical keyboard is attached, we show the ime switcher (or notification if
-            // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
-            // exists in the IME switcher dialog.  Might be OK to remove this condition once
-            // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
-            return true;
+            if (mHardKeyboardBehavior == HardKeyboardBehavior.WIRELESS_AFFORDANCE) {
+                // When physical keyboard is attached, we show the ime switcher (or notification if
+                // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
+                // exists in the IME switcher dialog.  Might be OK to remove this condition once
+                // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
+                return true;
+            }
         } else if ((visibility & InputMethodService.IME_VISIBLE) == 0) {
             return false;
         }
