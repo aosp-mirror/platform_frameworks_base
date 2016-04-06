@@ -16,15 +16,19 @@
 
 package android.app;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.test.uiautomator.UiDevice;
 import android.test.InstrumentationTestCase;
 import android.test.RepetitiveTest;
-import android.test.TimedTest;
+import android.util.Log;
 
+import java.lang.InterruptedException;
+import java.lang.reflect.Method;
 import java.util.Random;
 
 /**
@@ -34,51 +38,78 @@ import java.util.Random;
 public class NotificationStressTest extends InstrumentationTestCase {
 
     private static final int NUM_ITERATIONS = 200;
+    private static final int NUM_ITERATIONS_2 = 30;
+    private static final int LONG_TIMEOUT = 2000;
+    // 50 notifications per app: defined as Variable MAX_PACKAGE_NOTIFICATIONS in
+    // NotificationManagerService.java
+    private static final int MAX_NOTIFCATIONS = 50;
     private static final int[] ICONS = new int[] {
-        android.R.drawable.stat_notify_call_mute,
-        android.R.drawable.stat_notify_chat,
-        android.R.drawable.stat_notify_error,
-        android.R.drawable.stat_notify_missed_call,
-        android.R.drawable.stat_notify_more,
-        android.R.drawable.stat_notify_sdcard,
-        android.R.drawable.stat_notify_sdcard_prepare,
-        android.R.drawable.stat_notify_sdcard_usb,
-        android.R.drawable.stat_notify_sync,
-        android.R.drawable.stat_notify_sync_noanim,
-        android.R.drawable.stat_notify_voicemail,
+            android.R.drawable.stat_notify_call_mute,
+            android.R.drawable.stat_notify_chat,
+            android.R.drawable.stat_notify_error,
+            android.R.drawable.stat_notify_missed_call,
+            android.R.drawable.stat_notify_more,
+            android.R.drawable.stat_notify_sdcard,
+            android.R.drawable.stat_notify_sdcard_prepare,
+            android.R.drawable.stat_notify_sdcard_usb,
+            android.R.drawable.stat_notify_sync,
+            android.R.drawable.stat_notify_sync_noanim,
+            android.R.drawable.stat_notify_voicemail,
     };
 
     private final Random mRandom = new Random();
     private Context mContext;
     private NotificationManager mNotificationManager;
-    private int notifyId = 0;
+    private UiDevice mDevice = null;
+    private int mNotifyId = 0;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        mDevice = UiDevice.getInstance(getInstrumentation());
         mContext = getInstrumentation().getContext();
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
+        mDevice.setOrientationNatural();
+        mNotificationManager.cancelAll();
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+        mDevice.unfreezeRotation();
         mNotificationManager.cancelAll();
     }
 
-    @RepetitiveTest(numIterations=NUM_ITERATIONS)
+    @RepetitiveTest(numIterations = NUM_ITERATIONS)
     public void testNotificationStress() {
         // Cancel one of every five notifications to vary load on notification manager
-        if (notifyId % 5 == 4) {
-            mNotificationManager.cancel(notifyId - 4);
+        if (mNotifyId % 5 == 4) {
+            mNotificationManager.cancel(mNotifyId - 4);
         }
-        sendNotification(notifyId++, "testNotificationStressNotify");
+        sendNotification(mNotifyId++, "testNotificationStressNotify");
+    }
+
+    @RepetitiveTest(numIterations = NUM_ITERATIONS_2)
+    public void testNotificationsWithShadeStress() throws Exception {
+        mDevice.openNotification();
+        Thread.sleep(LONG_TIMEOUT);
+        for (int j = 0; j < MAX_NOTIFCATIONS; j++) {
+            sendNotification(mNotifyId++, "testNotificationStressNotify");
+        }
+        Thread.sleep(500);
+        assertTrue(mNotificationManager.getActiveNotifications().length == MAX_NOTIFCATIONS);
+        for (int j = 0; j < MAX_NOTIFCATIONS; j++) {
+            mNotificationManager.cancel(--mNotifyId);
+        }
+        if (isLockScreen()) {
+            fail("Notification stress test failed, back to lockscreen");
+        }
     }
 
     private void sendNotification(int id, CharSequence text) {
         // Fill in arbitrary content
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"));
+        Intent intent = new Intent(Intent.ACTION_VIEW);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         CharSequence title = text + " " + id;
         CharSequence subtitle = String.valueOf(System.currentTimeMillis());
@@ -90,8 +121,19 @@ public class NotificationStressTest extends InstrumentationTestCase {
                 .setContentTitle(title)
                 .setContentText(subtitle)
                 .setContentIntent(pendingIntent)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .build();
         mNotificationManager.notify(id, notification);
         SystemClock.sleep(10);
+    }
+
+    private boolean isLockScreen() {
+        KeyguardManager myKM = (KeyguardManager) mContext
+                .getSystemService(Context.KEYGUARD_SERVICE);
+        if (myKM.inKeyguardRestrictedInputMode()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
