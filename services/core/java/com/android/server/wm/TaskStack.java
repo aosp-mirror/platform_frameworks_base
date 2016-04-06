@@ -37,8 +37,8 @@ import java.util.ArrayList;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -88,6 +88,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     // Device rotation as of the last time {@link #mBounds} was set.
     int mRotation;
+
+    /** Density as of last time {@link #mBounds} was set. */
+    int mDensity;
 
     /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
     DimLayer mAnimationBackgroundSurface;
@@ -250,9 +253,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
         int rotation = Surface.ROTATION_0;
+        int density = DENSITY_DPI_UNDEFINED;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
             rotation = mDisplayContent.getDisplayInfo().rotation;
+            density = mDisplayContent.getDisplayInfo().logicalDensityDpi;
             mFullscreen = bounds == null;
             if (mFullscreen) {
                 bounds = mTmpRect;
@@ -274,6 +279,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         mBounds.set(bounds);
         mRotation = rotation;
+        mDensity = density;
 
         updateAdjustedBounds();
 
@@ -343,20 +349,21 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         mTmpRect2.set(mBounds);
         final int newRotation = mDisplayContent.getDisplayInfo().rotation;
-        if (mRotation == newRotation) {
+        final int newDensity = mDisplayContent.getDisplayInfo().logicalDensityDpi;
+        if (mRotation == newRotation && mDensity == newDensity) {
             setBounds(mTmpRect2);
         } else {
             mLastUpdateDisplayInfoRotation = newRotation;
-            updateBoundsAfterRotation(true);
+            updateBoundsAfterConfigChange(true);
         }
     }
 
     boolean onConfigurationChanged() {
         mLastConfigChangedRotation = getDisplayInfo().rotation;
-        return updateBoundsAfterRotation(false);
+        return updateBoundsAfterConfigChange(false);
     }
 
-    boolean updateBoundsAfterRotation(boolean scheduleResize) {
+    boolean updateBoundsAfterConfigChange(boolean scheduleResize) {
         if (mLastConfigChangedRotation != mLastUpdateDisplayInfoRotation) {
             // We wait for the rotation values after configuration change and display info. update
             // to be equal before updating the bounds due to rotation change otherwise things might
@@ -365,8 +372,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         final int newRotation = getDisplayInfo().rotation;
+        final int newDensity = getDisplayInfo().logicalDensityDpi;
 
-        if (mRotation == newRotation) {
+        if (mRotation == newRotation && mDensity == newDensity) {
             // Nothing to do here if the rotation didn't change
             return false;
         }

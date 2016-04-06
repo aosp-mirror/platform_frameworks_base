@@ -3627,6 +3627,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private int[] onConfigurationChanged() {
+        mPolicy.onConfigurationChanged();
+        getDefaultDisplayContentLocked().getDockedDividerController().onConfigurationChanged();
         mChangedStackList.clear();
         for (int stackNdx = mStackIdToStack.size() - 1; stackNdx >= 0; stackNdx--) {
             final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
