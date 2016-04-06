@@ -240,16 +240,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         EventBus.getDefault().register(this);
-        getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-
-            @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                mWindowManagerProxy.setTouchRegion(new Rect(mHandle.getLeft(), mHandle.getTop(),
-                        mHandle.getLeft() + mHandle.getWidth(),
-                        mHandle.getTop() + mHandle.getHeight()));
-            }
-        });
     }
 
     @Override
@@ -272,6 +262,15 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             }
         }
         return super.onApplyWindowInsets(insets);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            mWindowManagerProxy.setTouchRegion(new Rect(mHandle.getLeft(), mHandle.getTop(),
+                    mHandle.getRight(), mHandle.getBottom()));
+        }
     }
 
     public void setWindowManager(DividerWindowManager windowManager) {
