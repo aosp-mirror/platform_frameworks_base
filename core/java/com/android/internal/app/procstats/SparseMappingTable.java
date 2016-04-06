@@ -28,7 +28,7 @@ import com.android.internal.util.GrowingArrayUtils;
 
 /**
  * Class that contains a set of tables mapping byte ids to long values.
- * 
+ *
  * This class is used to store the ProcessStats data.  This data happens to be
  * a set of very sparse tables, that is mostly append or overwrite, with infrequent
  * resets of the data.
@@ -59,11 +59,11 @@ public class SparseMappingTable {
     // Where the "index into array" part of the data appears in an offset integer.
     private static final int INDEX_SHIFT = 16;
     private static final int INDEX_MASK = 0xffff;
-    
+
     private int mSequence;
     private int mNextIndex;
     private final ArrayList<long[]> mLongs = new ArrayList<long[]>();
-    
+
     /**
      * A table of data as stored in a SparseMappingTable.
      */
@@ -377,20 +377,24 @@ public class SparseMappingTable {
             // since we were created or reset.
             if (mSequence == UNINITIALIZED_SEQUENCE) {
                 logOrThrow("mSequence == UNINITIALIZED_SEQUENCE in"
-                        + " SparseMappingTable.Table.  mParent.mSequence=" + mParent.mSequence);
+                        + " SparseMappingTable.Table.  -- "
+                        + dumpInternalState());
+                return;
             }
 
             // Assert that our sequence number matches mParent's.  If it isn't that means
-            // we have been reset and our 
+            // we have been reset and our
             if (mSequence != mParent.mSequence) {
                 if (mSequence < mParent.mSequence) {
                     logOrThrow("Sequence mismatch. SparseMappingTable.resetTable()"
                             + " called but not Table.resetTable() -- "
                             + dumpInternalState());
+                    return;
                 } else if (mSequence > mParent.mSequence) {
                     logOrThrow("Sequence mismatch. Table.resetTable()"
                             + " called but not SparseMappingTable.resetTable() -- "
                             + dumpInternalState());
+                    return;
                 }
             }
         }
@@ -423,7 +427,7 @@ public class SparseMappingTable {
 
         /**
          * Check that all the keys are valid locations in the long arrays.
-         * 
+         *
          * If any aren't, log it and return false. Else return true.
          */
         private boolean validateKeys(boolean log) {
@@ -580,7 +584,7 @@ public class SparseMappingTable {
             i++;
         }
     }
-        
+
     /**
      * Extract the id from a key.
      */
@@ -611,7 +615,7 @@ public class SparseMappingTable {
      * this is a debug build.)
      */
     private static void logOrThrow(String message) {
-        logOrThrow(message, null);
+        logOrThrow(message, new RuntimeException("Stack trace"));
     }
 
     /**
