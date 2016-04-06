@@ -882,7 +882,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                 break;
             }
 
-            info.mThumbCompressedSize = image_data.thumbnail_length;
+            info.mThumbCompressedSize = image_data.thumbnail.length;
             info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
             info.mImagePixWidth = image_data.full_width;
             info.mImagePixHeight = image_data.full_height;
@@ -932,19 +932,19 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
                     break;
                 }
 
-                if (image_data.thumbnail_length == 0) {
+                if (image_data.thumbnail.length == 0) {
                     // No thumbnail.
                     break;
                 }
 
-                result = malloc(image_data.thumbnail_length);
+                result = malloc(image_data.thumbnail.length);
                 if (result) {
                     piex::Error err = stream.get()->GetData(
-                            image_data.thumbnail_offset,
-                            image_data.thumbnail_length,
+                            image_data.thumbnail.offset,
+                            image_data.thumbnail.length,
                             (std::uint8_t *)result);
                     if (err == piex::Error::kOk) {
-                        outThumbSize = image_data.thumbnail_length;
+                        outThumbSize = image_data.thumbnail.length;
                     } else {
                         free(result);
                     }
