@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -60,6 +61,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -288,6 +291,31 @@ public abstract class ContentResolver {
     public static final int SYNC_OBSERVER_TYPE_STATUS = 1<<3;
     /** @hide */
     public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                NOTIFY_SYNC_TO_NETWORK,
+                NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NotifyFlags {}
+
+    /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: attempt to sync the change
+     * to the network.
+     */
+    public static final int NOTIFY_SYNC_TO_NETWORK = 1<<0;
+
+    /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: if set, this notification
+     * will be skipped if it is being delivered to the root URI of a ContentObserver that is
+     * using "notify for descendants."  The purpose of this is to allow the provide to send
+     * a general notification of "something under X" changed that observers of that specific
+     * URI can receive, while also sending a specific URI under X.  It would use this flag
+     * when sending the former, so that observers of "X and descendants" only see the latter.
+     */
+    public static final int NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS = 1<<1;
 
     // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.
@@ -1676,7 +1704,7 @@ public abstract class ContentResolver {
      * The observer that originated the change will only receive the notification if it
      * has requested to receive self-change notifications by implementing
      * {@link ContentObserver#deliverSelfNotifications()} to return true.
-     * @param syncToNetwork If true, attempt to sync the change to the network.
+     * @param syncToNetwork If true, same as {@link #NOTIFY_SYNC_TO_NETWORK}.
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
     public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
@@ -1690,6 +1718,32 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Notify registered observers that a row was updated.
+     * To register, call {@link #registerContentObserver(android.net.Uri, boolean, android.database.ContentObserver) registerContentObserver()}.
+     * By default, CursorAdapter objects will get this notification.
+     * If syncToNetwork is true, this will attempt to schedule a local sync using the sync
+     * adapter that's registered for the authority of the provided uri. No account will be
+     * passed to the sync adapter, so all matching accounts will be synchronized.
+     *
+     * @param uri The uri of the content that was changed.
+     * @param observer The observer that originated the change, may be <code>null</null>.
+     * The observer that originated the change will only receive the notification if it
+     * has requested to receive self-change notifications by implementing
+     * {@link ContentObserver#deliverSelfNotifications()} to return true.
+     * @param flags Additional flags: {@link #NOTIFY_SYNC_TO_NETWORK}.
+     * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
+     */
+    public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
+        Preconditions.checkNotNull(uri, "uri");
+        notifyChange(
+                ContentProvider.getUriWithoutUserId(uri),
+                observer,
+                flags,
+                ContentProvider.getUserIdFromUri(uri, UserHandle.myUserId()));
+    }
+
+    /**
      * Notify registered observers within the designated user(s) that a row was updated.
      *
      * @hide
@@ -1699,7 +1753,24 @@ public abstract class ContentResolver {
         try {
             getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
-                    observer != null && observer.deliverSelfNotifications(), syncToNetwork,
+                    observer != null && observer.deliverSelfNotifications(),
+                    syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0,
+                    userHandle);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Notify registered observers within the designated user(s) that a row was updated.
+     *
+     * @hide
+     */
+    public void notifyChange(Uri uri, ContentObserver observer, @NotifyFlags int flags,
+            @UserIdInt int userHandle) {
+        try {
+            getContentService().notifyChange(
+                    uri, observer == null ? null : observer.getContentObserver(),
+                    observer != null && observer.deliverSelfNotifications(), flags,
                     userHandle);
         } catch (RemoteException e) {
         }

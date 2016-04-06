@@ -166,7 +166,7 @@ public class DeviceIdleJobsController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
         mTrackedTasks.remove(jobStatus);
     }
 
