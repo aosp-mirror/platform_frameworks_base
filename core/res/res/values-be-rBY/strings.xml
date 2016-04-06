@@ -238,7 +238,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Бяспечны рэжым"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Сістэма Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Пераключыцца на асабісты"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Пераключыцца на рабочы"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"Пераключыцца на працоўны"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Кантакты"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"атрымліваць доступ да вашых кантактаў"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Месцазнаходжанне"</string>
