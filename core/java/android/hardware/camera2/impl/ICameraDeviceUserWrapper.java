@@ -55,7 +55,9 @@ public class ICameraDeviceUserWrapper {
     }
 
     public void unlinkToDeath(IBinder.DeathRecipient recipient, int flags) {
-        mRemoteDevice.asBinder().unlinkToDeath(recipient, flags);
+        if (mRemoteDevice.asBinder() != null) {
+            mRemoteDevice.asBinder().unlinkToDeath(recipient, flags);
+        }
     }
 
     public void disconnect()  {
