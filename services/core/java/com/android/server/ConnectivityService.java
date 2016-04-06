@@ -2025,11 +2025,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 default:
                     return false;
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
-                    NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    if (isLiveNetworkAgent(nai, msg.what)) {
+                    final NetworkAgentInfo nai;
+                    synchronized (mNetworkForNetId) {
+                        nai = mNetworkForNetId.get(msg.arg2);
+                    }
+                    if (nai != null) {
                         final boolean valid =
                                 (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
-                        if (DBG) log(nai.name() + " validation " + (valid ? " passed" : "failed"));
+                        if (DBG) log(nai.name() + " validation " + (valid ? "passed" : "failed") +
+                                (msg.obj == null ? "" : " with redirect to " + (String)msg.obj));
                         if (valid != nai.lastValidated) {
                             final int oldScore = nai.getCurrentScore();
                             nai.lastValidated = valid;
@@ -2040,10 +2044,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         }
                         updateInetCondition(nai);
                         // Let the NetworkAgent know the state of its network
+                        Bundle redirectUrlBundle = new Bundle();
+                        redirectUrlBundle.putString(NetworkAgent.REDIRECT_URL_KEY, (String)msg.obj);
                         nai.asyncChannel.sendMessage(
-                                android.net.NetworkAgent.CMD_REPORT_NETWORK_STATUS,
+                                NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                                 (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
-                                0, null);
+                                0, redirectUrlBundle);
                     }
                     break;
                 }
