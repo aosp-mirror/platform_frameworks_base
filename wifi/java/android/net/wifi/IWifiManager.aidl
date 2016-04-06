@@ -149,9 +149,6 @@ interface IWifiManager
     void setAllowScansWithTraffic(int enabled);
     int getAllowScansWithTraffic();
 
-    void setHalBasedAutojoinOffload(int enabled);
-    int getHalBasedAutojoinOffload();
-
     boolean enableAutoJoinWhenAssociated(boolean enabled);
     boolean getEnableAutoJoinWhenAssociated();
 

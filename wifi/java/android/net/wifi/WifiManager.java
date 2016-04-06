@@ -28,7 +28,6 @@ import android.net.NetworkRequest;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -43,7 +42,6 @@ import com.android.internal.util.Protocol;
 import com.android.server.net.NetworkPinner;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -2717,29 +2715,6 @@ public class WifiManager {
     public boolean getEnableAutoJoinWhenAssociated() {
         try {
             return mService.getEnableAutoJoinWhenAssociated();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-    /**
-     * Set setting for enabling autojoin Offload thru Wifi HAL layer
-     * @hide
-     */
-    public void setHalBasedAutojoinOffload(int enabled) {
-        try {
-            mService.setHalBasedAutojoinOffload(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get setting for enabling autojoin Offload thru Wifi HAL layer
-     * @hide
-     */
-    public int getHalBasedAutojoinOffload() {
-        try {
-            return mService.getHalBasedAutojoinOffload();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
