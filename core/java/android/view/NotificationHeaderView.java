@@ -22,7 +22,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -37,7 +36,7 @@ public class NotificationHeaderView extends ViewGroup {
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private View mAppName;
-    private View mSubTextView;
+    private View mHeaderText;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
@@ -73,11 +72,10 @@ public class NotificationHeaderView extends ViewGroup {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
-        mSubTextView = findViewById(com.android.internal.R.id.header_sub_text);
+        mHeaderText = findViewById(com.android.internal.R.id.header_text);
         mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
-        mInfo = findViewById(com.android.internal.R.id.header_content_info);
     }
 
     @Override
@@ -105,15 +103,7 @@ public class NotificationHeaderView extends ViewGroup {
         }
         if (totalWidth > givenWidth) {
             int overFlow = totalWidth - givenWidth;
-            // We are overflowing, lets shrink the info first
-            final int infoWidth = mInfo.getMeasuredWidth();
-            if (mInfo.getVisibility() != GONE && infoWidth > mChildMinWidth) {
-                int newSize = infoWidth - Math.min(infoWidth - mChildMinWidth, overFlow);
-                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-                mInfo.measure(childWidthSpec, wrapContentHeightSpec);
-                overFlow -= infoWidth - newSize;
-            }
-            // still overflowing, lets shrink the app name now
+            // We are overflowing, lets shrink the app name first
             final int appWidth = mAppName.getMeasuredWidth();
             if (overFlow > 0 && mAppName.getVisibility() != GONE && appWidth > mChildMinWidth) {
                 int newSize = appWidth - Math.min(appWidth - mChildMinWidth, overFlow);
@@ -121,13 +111,13 @@ public class NotificationHeaderView extends ViewGroup {
                 mAppName.measure(childWidthSpec, wrapContentHeightSpec);
                 overFlow -= appWidth - newSize;
             }
-            // still overflowing, finaly we shrink the subtext
-            if (overFlow > 0 && mSubTextView.getVisibility() != GONE) {
+            // still overflowing, finaly we shrink the header text
+            if (overFlow > 0 && mHeaderText.getVisibility() != GONE) {
                 // we're still too big
-                final int subTextWidth = mSubTextView.getMeasuredWidth();
-                int newSize = Math.max(0, subTextWidth - overFlow);
+                final int textWidth = mHeaderText.getMeasuredWidth();
+                int newSize = Math.max(0, textWidth - overFlow);
                 int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-                mSubTextView.measure(childWidthSpec, wrapContentHeightSpec);
+                mHeaderText.measure(childWidthSpec, wrapContentHeightSpec);
             }
         }
         setMeasuredDimension(givenWidth, givenHeight);
