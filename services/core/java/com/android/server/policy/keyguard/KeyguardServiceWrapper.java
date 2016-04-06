@@ -117,9 +117,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override
-    public void onFinishedGoingToSleep(int reason) {
+    public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
         try {
-            mService.onFinishedGoingToSleep(reason);
+            mService.onFinishedGoingToSleep(reason, cameraGestureTriggered);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
