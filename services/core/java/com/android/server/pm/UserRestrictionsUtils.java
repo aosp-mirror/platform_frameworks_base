@@ -425,6 +425,18 @@ public class UserRestrictionsUtils {
                             }
                         }
                     }
+                    break;
+                case UserManager.DISALLOW_SAFE_BOOT:
+                    // Unlike with the other restrictions, we want to propagate the new value to
+                    // the system settings even if it is false. The other restrictions modify
+                    // settings which could be manually changed by the user from the Settings app
+                    // after the policies enforcing these restrictions have been revoked, so we
+                    // leave re-setting of those settings to the user.
+                    android.provider.Settings.Global.putInt(
+                            context.getContentResolver(),
+                            android.provider.Settings.Global.SAFE_BOOT_DISALLOWED,
+                            newValue ? 1 : 0);
+                    break;
             }
         } finally {
             Binder.restoreCallingIdentity(id);
