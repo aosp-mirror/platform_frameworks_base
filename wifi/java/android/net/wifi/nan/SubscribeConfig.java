@@ -16,9 +16,13 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -30,6 +34,11 @@ import java.util.Arrays;
  * @hide PROPOSED_NAN_API
  */
 public class SubscribeConfig implements Parcelable {
+    @IntDef({
+            SUBSCRIBE_TYPE_PASSIVE, SUBSCRIBE_TYPE_ACTIVE })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SubscribeTypes {
+    }
 
     /**
      * Defines a passive subscribe session - i.e. a subscribe session where
@@ -45,6 +54,12 @@ public class SubscribeConfig implements Parcelable {
      * using {@link SubscribeConfig.Builder#setSubscribeType(int)}.
      */
     public static final int SUBSCRIBE_TYPE_ACTIVE = 1;
+
+    @IntDef({
+            MATCH_STYLE_FIRST_ONLY, MATCH_STYLE_ALL })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MatchStyles {
+    }
 
     /**
      * Specifies that only the first match of a set of identical matches (same
@@ -354,7 +369,7 @@ public class SubscribeConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setServiceName(String serviceName) {
+        public Builder setServiceName(@NonNull String serviceName) {
             mServiceName = serviceName;
             return this;
         }
@@ -397,7 +412,7 @@ public class SubscribeConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setServiceSpecificInfo(String serviceSpecificInfoStr) {
+        public Builder setServiceSpecificInfo(@NonNull String serviceSpecificInfoStr) {
             mServiceSpecificInfoLength = serviceSpecificInfoStr.length();
             mServiceSpecificInfo = serviceSpecificInfoStr.getBytes();
             return this;
@@ -470,7 +485,7 @@ public class SubscribeConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setSubscribeType(int subscribeType) {
+        public Builder setSubscribeType(@SubscribeTypes int subscribeType) {
             if (subscribeType < SUBSCRIBE_TYPE_PASSIVE || subscribeType > SUBSCRIBE_TYPE_ACTIVE) {
                 throw new IllegalArgumentException("Invalid subscribeType - " + subscribeType);
             }
@@ -531,7 +546,7 @@ public class SubscribeConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setMatchStyle(int matchStyle) {
+        public Builder setMatchStyle(@MatchStyles int matchStyle) {
             if (matchStyle != MATCH_STYLE_FIRST_ONLY && matchStyle != MATCH_STYLE_ALL) {
                 throw new IllegalArgumentException(
                         "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
