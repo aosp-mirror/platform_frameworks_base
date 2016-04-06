@@ -53,7 +53,6 @@ import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.tv.animations.FocusAnimationHolder;
 import com.android.systemui.recents.tv.views.RecentsTvView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -79,7 +78,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private boolean mIgnoreAltTabRelease;
 
     private RecentsTvView mRecentsView;
-    private FocusAnimationHolder mRecentsFocusAnimationHolder;
     private View mPipView;
     private TaskStackHorizontalViewAdapter mTaskStackViewAdapter;
     private FinishRecentsRunnable mFinishLaunchHomeRunnable;
@@ -133,13 +131,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        mRecentsFocusAnimationHolder.startFocusLoseAnimation();
-                        mPipRecentsOverlayManager.requestFocus(
-                                mTaskStackViewAdapter.getItemCount() > 0);
-                    } else {
-                        mRecentsFocusAnimationHolder.startFocusGainAnimation();
-                    }
+                    handlePipViewFocusChange(hasFocus);
                 }
             };
 
@@ -288,11 +280,10 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mRecentsFocusAnimationHolder = new FocusAnimationHolder(mRecentsView);
 
         mPipView = findViewById(R.id.pip);
         // Place mPipView at the PIP bounds for fine tuned focus handling.
-        Rect pipBounds = mPipManager.getPipBounds();
+        Rect pipBounds = mPipManager.getRecentsFocusedPipBounds();
         LayoutParams lp = (LayoutParams) mPipView.getLayoutParams();
         lp.width = pipBounds.width();
         lp.height = pipBounds.height();
@@ -513,11 +504,30 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if (mPipManager.isPipShown()) {
             mPipView.setVisibility(View.VISIBLE);
             mPipView.setOnFocusChangeListener(mPipViewFocusChangeListener);
-            mPipView.requestFocus();
+            if (mPipView.hasFocus()) {
+                // This can happen only if the activity is resumed. Ask for reset.
+                handlePipViewFocusChange(true);
+            } else {
+                mPipView.requestFocus();
+            }
         } else {
             mPipView.setVisibility(View.GONE);
             mPipRecentsOverlayManager.removePipRecentsOverlayView();
-            mRecentsFocusAnimationHolder.reset();
+        }
+    }
+
+    /**
+     * Handles the PIP view's focus change.
+     * This starts the relevant recents row animation
+     * and give focus to the recents overlay if needed.
+     */
+    private void handlePipViewFocusChange(boolean hasFocus) {
+        mRecentsView.startRecentsRowFocusAnimation(!hasFocus);
+        if (hasFocus) {
+            // When PIP view has focus, recents overlay view will takes the focus
+            // as if it's the part of the Recents UI.
+            mPipRecentsOverlayManager.requestFocus(
+                    mTaskStackViewAdapter.getItemCount() > 0);
         }
     }
 }

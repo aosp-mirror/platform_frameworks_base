@@ -131,9 +131,9 @@ public class PipRecentsOverlayManager {
      * Called when the PIP view in {@link com.android.systemui.recents.tv.RecentsTvActivity}
      * is focused.
      * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
-     * @param hasRecentsFocusable {@code true} if Recents can have focus. (i.e. Has a recent task)
+     * @param allowRecentsFocusable {@code true} if Recents can have focus. (i.e. Has a recent task)
      */
-    public void requestFocus(boolean hasRecentsFocusable) {
+    public void requestFocus(boolean allowRecentsFocusable) {
         if (!mIsRecentsShown || mIsPipFocusedInRecent) {
             return;
         }
@@ -143,7 +143,7 @@ public class PipRecentsOverlayManager {
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
         mPipControlsView.requestFocus();
         mPipControlsView.startFocusGainAnimation();
-        mRecentsView.setVisibility(hasRecentsFocusable ? View.VISIBLE : View.GONE);
+        mRecentsView.setVisibility(allowRecentsFocusable ? View.VISIBLE : View.GONE);
     }
 
     /**
