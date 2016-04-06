@@ -16,18 +16,15 @@
 
 package com.android.documentsui;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.WindowManager;
-
-import com.android.documentsui.State.ActionType;
-
-import static com.android.documentsui.State.ACTION_OPEN_TREE;
-
-import android.app.AlertDialog;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -45,10 +42,21 @@ public final class Shared {
             "com.android.documentsui.PICK_COPY_DESTINATION";
 
     /**
+     * Extra flag allowing app to be opened in productivity mode (less downloadsy).
+     * Useful developers and the likes. When set to true overrides the default
+     * config value of productivity_device.
+     */
+    public static final String EXTRA_PRODUCTIVITY_MODE = "com.android.documentsui.PRODUCTIVITY";
+
+    /**
      * Extra boolean flag for {@link ACTION_PICK_COPY_DESTINATION}, which
      * specifies if the destination directory needs to create new directory or not.
      */
     public static final String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
+
+    /**
+     * Extra flag used to store the current stack so user opens in right spot.
+     */
     public static final String EXTRA_STACK = "com.android.documentsui.STACK";
 
     /**
@@ -175,10 +183,33 @@ public final class Shared {
     }
 
     /*
-     * Indicates if the home directory should be hidden in the roots list.
+     * Returns true if app is running in "productivity mode".
      */
-    public static boolean isHomeRootHidden(Context context) {
-        return context.getResources().getBoolean(R.bool.home_root_hidden);
+    public static boolean productivityMode(Context context) {
+        return context.getResources().getBoolean(R.bool.productivity_device);
     }
 
+    /*
+     * Returns true if app is running in "productivity mode".
+     */
+    private static boolean isProductivityMode(Context context, Intent intent) {
+        return intent.getBooleanExtra(
+                Shared.EXTRA_PRODUCTIVITY_MODE,
+                context.getResources().getBoolean(R.bool.productivity_device));
+    }
+
+    /*
+     * Returns true if "Documents" root should be shown.
+     */
+    public static boolean shouldShowDocumentsRoot(Context context, Intent intent) {
+        return isProductivityMode(context, intent);
+    }
+
+    /*
+     * Returns true if device root should be shown.
+     */
+    public static boolean shouldShowDeviceRoot(Context context, Intent intent) {
+        return isProductivityMode(context, intent)
+                || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+    }
 }

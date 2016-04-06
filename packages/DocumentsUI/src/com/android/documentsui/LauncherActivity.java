@@ -87,9 +87,24 @@ public class LauncherActivity extends Activity {
         startActivity(intent);
     }
 
-    static final Intent createLaunchIntent(Context context) {
-        Intent intent = new Intent(context, FilesActivity.class);
+    static final Intent createLaunchIntent(Activity activity) {
+        Intent intent = new Intent(activity, FilesActivity.class);
         intent.setData(buildLaunchUri());
+
+        // Relay any config overrides bits present in the original intent.
+        Intent original = activity.getIntent();
+        if (original != null) {
+            if (original.hasExtra(Shared.EXTRA_PRODUCTIVITY_MODE)) {
+                intent.putExtra(
+                        Shared.EXTRA_PRODUCTIVITY_MODE,
+                        original.getBooleanExtra(Shared.EXTRA_PRODUCTIVITY_MODE, false));
+            }
+            if (original.hasExtra(Intent.EXTRA_TITLE)) {
+                intent.putExtra(
+                        Intent.EXTRA_TITLE,
+                        original.getStringExtra(Intent.EXTRA_TITLE));
+            }
+        }
         return intent;
     }
 
