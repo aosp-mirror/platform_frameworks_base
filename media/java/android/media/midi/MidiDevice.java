@@ -19,6 +19,7 @@ package android.media.midi;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -181,9 +182,16 @@ public final class MidiDevice implements Closeable {
         }
          try {
             IBinder token = new Binder();
-            mDeviceServer.connectPorts(token, pfd, outputPortNumber);
-            // close our copy of the file descriptor
-            IoUtils.closeQuietly(pfd);
+            int calleePid = mDeviceServer.connectPorts(token, pfd, outputPortNumber);
+            // If the service is a different Process then it will duplicate the pfd
+            // and we can safely close this one.
+            // But if the service is in the same Process then closing the pfd will
+            // kill the connection. So don't do that.
+            if (calleePid != Process.myPid()) {
+                // close our copy of the file descriptor
+                IoUtils.closeQuietly(pfd);
+            }
+
             return new MidiConnection(token, inputPort);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in connectPorts");
