@@ -233,8 +233,8 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"内容已隐藏（根据政策规定）"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"切换为“个人”"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"切换为“工作”"</string>
+    <string name="user_owner_label" msgid="1119010402169916617">"切换到“个人”"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"切换到“工作”"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"访问您的通讯录"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
@@ -1473,7 +1473,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理员安装"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，省电模式会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n省电模式会在设备充电时自动关闭。"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
