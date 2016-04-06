@@ -72,7 +72,7 @@ class MagnificationController {
      */
     private static final float MIN_PERSISTED_SCALE = 2.0f;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     /**
      * The current magnification spec. If an animation is running, this
@@ -97,12 +97,13 @@ class MagnificationController {
 
     private int mUserId;
 
-    public MagnificationController(Context context, AccessibilityManagerService ams) {
+    public MagnificationController(Context context, AccessibilityManagerService ams, Object lock) {
         mAms = ams;
         mContentResolver = context.getContentResolver();
         mScreenStateObserver = new ScreenStateObserver(context, this);
         mWindowStateObserver = new WindowStateObserver(context, this);
         mSpecAnimationBridge = new SpecAnimationBridge(context);
+        mLock = lock;
     }
 
     /**
