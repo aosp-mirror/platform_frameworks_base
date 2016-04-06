@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -60,6 +61,8 @@ public class WebViewUpdateService extends SystemService {
     private boolean mAnyWebViewInstalled = false;
 
     private int NUMBER_OF_RELROS_UNKNOWN = Integer.MAX_VALUE;
+
+    private int mMinimumVersionCode = -1;
 
     // The WebView package currently in use (or the one we are preparing).
     private PackageInfo mCurrentWebViewPackage = null;
@@ -435,12 +438,46 @@ public class WebViewUpdateService extends SystemService {
 
 
     /**
+     * Gets the minimum version code allowed for a valid provider. It is the minimum versionCode of
+     * all available-by-default and non-fallback WebView provider packages. If there is no such
+     * WebView provider package on the system, then return -1, which means all positive versionCode
+     * WebView packages are accepted.
+     */
+    private int getMinimumVersionCode() {
+        if (mMinimumVersionCode > 0) {
+            return mMinimumVersionCode;
+        }
+
+        for (WebViewProviderInfo provider : mSystemInterface.getWebViewPackages()) {
+            if (provider.availableByDefault && !provider.isFallback) {
+                try {
+                    int versionCode = mSystemInterface.getFactoryPackageVersion(provider.packageName);
+                    if (mMinimumVersionCode < 0 || versionCode < mMinimumVersionCode) {
+                        mMinimumVersionCode = versionCode;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Safe to ignore.
+                }
+            }
+        }
+
+        return mMinimumVersionCode;
+    }
+
+    /**
      * Returns whether this provider is valid for use as a WebView provider.
      */
-    public boolean isValidProvider(WebViewProviderInfo configInfo,
+    private boolean isValidProvider(WebViewProviderInfo configInfo,
             PackageInfo packageInfo) {
-        if (providerHasValidSignature(configInfo, packageInfo) &&
-                WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo) != null) {
+        if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
+                && packageInfo.versionCode < getMinimumVersionCode()
+                && !mSystemInterface.systemIsDebuggable()) {
+            // Non-system package webview providers may be downgraded arbitrarily low, prevent that
+            // by enforcing minimum version code. This check is only enforced for user builds.
+            return false;
+        }
+        if (providerHasValidSignature(configInfo, packageInfo)
+                && WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo) != null) {
             return true;
         }
         return false;
