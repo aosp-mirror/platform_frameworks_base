@@ -93,8 +93,12 @@ public abstract class Animation implements Cloneable {
      */
     public static final int ZORDER_BOTTOM = -1;
 
-    private static final boolean USE_CLOSEGUARD
-            = SystemProperties.getBoolean("log.closeguard.Animation", false);
+    // Use a preload holder to isolate static initialization into inner class, which allows
+    // Animation and its subclasses to be compile-time initialized.
+    private static class NoImagePreloadHolder {
+        public static final boolean USE_CLOSEGUARD
+                = SystemProperties.getBoolean("log.closeguard.Animation", false);
+    }
 
     /**
      * Set by {@link #getTransformation(long, Transformation)} when the animation ends.
@@ -859,7 +863,7 @@ public abstract class Animation implements Cloneable {
             if (!mStarted) {
                 fireAnimationStart();
                 mStarted = true;
-                if (USE_CLOSEGUARD) {
+                if (NoImagePreloadHolder.USE_CLOSEGUARD) {
                     guard.open("cancel or detach or getTransformation");
                 }
             }
