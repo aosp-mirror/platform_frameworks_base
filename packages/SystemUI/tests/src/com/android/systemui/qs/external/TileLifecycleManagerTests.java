@@ -198,7 +198,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
     }
 
     private void waitForCallback(String callback) {
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 50; i++) {
             if (mCallbacks.contains(callback)) {
                 mCallbacks.remove(callback);
                 return;
@@ -229,7 +229,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
                 }
             });
             try {
-                lock.wait(5000);
+                lock.wait(10000);
             } catch (InterruptedException e) {
             }
         }
