@@ -23,6 +23,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,6 +53,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.BitmapHelper;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
+import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.statusbar.phone.ActivityStarter;
@@ -101,6 +103,8 @@ public class UserSwitcherController {
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
     private boolean mPauseRefreshUsers;
+    private int mSecondaryUser = UserHandle.USER_NULL;
+    private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
@@ -120,6 +124,8 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 null /* permission */, null /* scheduler */);
+
+        mSecondaryUserServiceIntent = new Intent(context, SystemUISecondaryUserService.class);
 
         filter = new IntentFilter();
         filter.addAction(ACTION_REMOVE_GUEST);
@@ -476,6 +482,20 @@ public class UserSwitcherController {
                     }
                 }
                 notifyAdapters();
+
+                // Disconnect from the old secondary user's service
+                if (mSecondaryUser != UserHandle.USER_NULL) {
+                    context.stopServiceAsUser(mSecondaryUserServiceIntent,
+                            UserHandle.of(mSecondaryUser));
+                    mSecondaryUser = UserHandle.USER_NULL;
+                }
+                // Connect to the new secondary user's service (purely to ensure that a persistent
+                // SystemUI application is created for that user)
+                if (userInfo != null && !userInfo.isPrimary()) {
+                    context.startServiceAsUser(mSecondaryUserServiceIntent,
+                            UserHandle.of(userInfo.id));
+                    mSecondaryUser = userInfo.id;
+                }
 
                 if (UserManager.isSplitSystemUser() && userInfo != null && !userInfo.isGuest()
                         && userInfo.id != UserHandle.USER_SYSTEM) {
