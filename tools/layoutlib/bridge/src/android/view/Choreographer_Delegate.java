@@ -71,6 +71,7 @@ public class Choreographer_Delegate {
     public static void dispose() {
         try {
             Field threadInstanceField = Choreographer.class.getDeclaredField("sThreadInstance");
+            threadInstanceField.setAccessible(true);
             @SuppressWarnings("unchecked") ThreadLocal<Choreographer> threadInstance =
                     (ThreadLocal<Choreographer>) threadInstanceField.get(null);
             threadInstance.remove();
