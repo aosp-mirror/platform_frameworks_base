@@ -3058,7 +3058,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.d(TAG_WM, "Loading animation for app transition."
                     + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter, mCurConfiguration.uiMode,
                     mCurConfiguration.orientation, frame, displayFrame, insets, surfaceInsets,
                     isVoiceInteraction, freeform, atoken.mTask.mTaskId);
             if (a != null) {
