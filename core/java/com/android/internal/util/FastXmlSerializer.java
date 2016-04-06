@@ -28,6 +28,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
@@ -38,14 +39,14 @@ import java.nio.charset.UnsupportedCharsetException;
  */
 public class FastXmlSerializer implements XmlSerializer {
     private static final String ESCAPE_TABLE[] = new String[] {
-        null,     null,     null,     null,     null,     null,     null,     null,  // 0-7
-        null,     null,     null,     null,     null,     null,     null,     null,  // 8-15
-        null,     null,     null,     null,     null,     null,     null,     null,  // 16-23
-        null,     null,     null,     null,     null,     null,     null,     null,  // 24-31
-        null,     null,     "&quot;", null,     null,     null,     "&amp;",  null,  // 32-39
-        null,     null,     null,     null,     null,     null,     null,     null,  // 40-47
-        null,     null,     null,     null,     null,     null,     null,     null,  // 48-55
-        null,     null,     null,     null,     "&lt;",   null,     "&gt;",   null,  // 56-63
+        "&#0;",   "&#1;",   "&#2;",   "&#3;",  "&#4;",    "&#5;",   "&#6;",  "&#7;",  // 0-7
+        "&#8;",   "&#9;",   "&#10;",  "&#11;", "&#12;",   "&#13;",  "&#14;", "&#15;", // 8-15
+        "&#16;",  "&#17;",  "&#18;",  "&#19;", "&#20;",   "&#21;",  "&#22;", "&#23;", // 16-23
+        "&#24;",  "&#25;",  "&#26;",  "&#27;", "&#28;",   "&#29;",  "&#30;", "&#31;", // 24-31
+        null,     null,     "&quot;", null,     null,     null,     "&amp;",  null,   // 32-39
+        null,     null,     null,     null,     null,     null,     null,     null,   // 40-47
+        null,     null,     null,     null,     null,     null,     null,     null,   // 48-55
+        null,     null,     null,     null,     "&lt;",   null,     "&gt;",   null,   // 56-63
     };
 
     private static final int BUFFER_LEN = 8192;
@@ -310,7 +311,9 @@ public class FastXmlSerializer implements XmlSerializer {
             throw new IllegalArgumentException();
         if (true) {
             try {
-                mCharset = Charset.forName(encoding).newEncoder();
+                mCharset = Charset.forName(encoding).newEncoder()
+                        .onMalformedInput(CodingErrorAction.REPLACE)
+                        .onUnmappableCharacter(CodingErrorAction.REPLACE);
             } catch (IllegalCharsetNameException e) {
                 throw (UnsupportedEncodingException) (new UnsupportedEncodingException(
                         encoding).initCause(e));
