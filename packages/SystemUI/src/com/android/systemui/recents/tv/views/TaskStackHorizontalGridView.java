@@ -15,7 +15,11 @@
  */
 package com.android.systemui.recents.tv.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v17.leanback.widget.HorizontalGridView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -36,10 +40,19 @@ import java.util.List;
  * Horizontal Grid View Implementation to show the Task Stack for TV.
  */
 public class TaskStackHorizontalGridView extends HorizontalGridView implements TaskStackCallbacks {
-
+    private static final int ANIMATION_DELAY_MS = 50;
+    private static final int MSG_START_RECENT_ROW_FOCUS_ANIMATION = 100;
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_START_RECENT_ROW_FOCUS_ANIMATION) {
+                startRecentsRowFocusAnimation(msg.arg1 == 1);
+            }
+        }
+    };
     private TaskStack mStack;
-    private ArrayList<TaskCardView> mTaskViews = new ArrayList<>();
     private Task mFocusedTask;
+    private AnimatorSet mRecentsRowFocusAnimation;
 
     public TaskStackHorizontalGridView(Context context) {
         this(context, null);
@@ -62,10 +75,18 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
         super.onDetachedFromWindow();
         EventBus.getDefault().unregister(this);
     }
+
     /**
      * Resets this view for reuse.
      */
     public void reset() {
+        for (int i = 0; i < getChildCount(); i++) {
+            ((TaskCardView) getChildAt(i)).getRecentsRowFocusAnimationHolder().reset();
+        }
+        if (mRecentsRowFocusAnimation != null && mRecentsRowFocusAnimation.isStarted()) {
+            mRecentsRowFocusAnimation.cancel();
+        }
+        mHandler.removeCallbacksAndMessages(null);
         requestLayout();
     }
 
@@ -119,10 +140,8 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
      * @return Child view for given task
      */
     public TaskCardView getChildViewForTask(Task task) {
-        List<TaskCardView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
-        for (int i = 0; i < taskViewCount; i++) {
-            TaskCardView tv = taskViews.get(i);
+        for (int i = 0; i < getChildCount(); i++) {
+            TaskCardView tv = (TaskCardView) getChildAt(i);
             if (tv.getTask() == task) {
                 return tv;
             }
@@ -130,12 +149,36 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
         return null;
     }
 
-    public List<TaskCardView> getTaskViews() {
-        return mTaskViews;
+    /**
+     * Starts the focus change animation.
+     */
+    public void startRecentsRowFocusAnimation(final boolean hasFocus) {
+        if (getChildCount() == 0) {
+            // Animation request may happen before view is attached.
+            // Post again with small dealy so animation can be run again later.
+            if (getAdapter().getItemCount() > 0) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                        MSG_START_RECENT_ROW_FOCUS_ANIMATION, hasFocus ? 1 : 0),
+                        ANIMATION_DELAY_MS);
+            }
+            return;
+        }
+        if (mRecentsRowFocusAnimation != null && mRecentsRowFocusAnimation.isStarted()) {
+            mRecentsRowFocusAnimation.cancel();
+        }
+        Animator animator = ((TaskCardView) getChildAt(0)).getRecentsRowFocusAnimationHolder()
+                .getFocusChangeAnimator(hasFocus);
+        mRecentsRowFocusAnimation = new AnimatorSet();
+        AnimatorSet.Builder builder = mRecentsRowFocusAnimation.play(animator);
+        for (int i = 1; i < getChildCount(); i++) {
+            builder.with(((TaskCardView) getChildAt(i)).getRecentsRowFocusAnimationHolder()
+                    .getFocusChangeAnimator(hasFocus));
+        }
+        mRecentsRowFocusAnimation.start();
     }
 
     @Override
-    public void onStackTaskAdded(TaskStack stack, Task newTask){
+    public void onStackTaskAdded(TaskStack stack, Task newTask) {
         getAdapter().notifyItemInserted(stack.getStackTasks().indexOf(newTask));
     }
 
