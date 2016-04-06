@@ -76,6 +76,8 @@ public class NavigationBarView extends LinearLayout {
     private Drawable mHomeDefaultIcon, mHomeCarModeIcon;
     private Drawable mRecentIcon;
     private Drawable mDockedIcon;
+    private Drawable mImeIcon;
+    private Drawable mMenuIcon;
 
     private NavigationBarGestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -270,7 +272,8 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
-        if (oldConfig.orientation != newConfig.orientation) {
+        if (oldConfig.orientation != newConfig.orientation
+                || oldConfig.densityDpi != newConfig.densityDpi) {
             mDockedIcon = ctx.getDrawable(R.drawable.ic_sysbar_docked);
         }
         if (oldConfig.densityDpi != newConfig.densityDpi) {
@@ -280,8 +283,10 @@ public class NavigationBarView extends LinearLayout {
             mBackAltLandIcon = mBackAltIcon;
 
             mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
-
             mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
+            mMenuIcon = ctx.getDrawable(R.drawable.ic_sysbar_menu);
+            mImeIcon = ctx.getDrawable(R.drawable.ic_ime_switcher_default);
+
             updateCarModeIcons(ctx);
         }
     }
@@ -348,9 +353,11 @@ public class NavigationBarView extends LinearLayout {
 
         final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
+        getImeSwitchButton().setImageDrawable(mImeIcon);
 
         // Update menu button in case the IME state has changed.
         setMenuVisibility(mShowMenu, true);
+        getMenuButton().setImageDrawable(mMenuIcon);
 
         setDisabledFlags(mDisabledFlags, true);
     }
@@ -598,14 +605,12 @@ public class NavigationBarView extends LinearLayout {
         super.onConfigurationChanged(newConfig);
         boolean uiCarModeChanged = updateCarMode(newConfig);
         updateTaskSwitchHelper();
-        if (uiCarModeChanged) {
-            // uiMode changed either from carmode or to carmode.
-            // replace the nav bar button icons based on which mode
-            // we are switching to.
-            setNavigationIconHints(mNavigationIconHints, true);
-        }
         updateIcons(getContext(), mConfiguration, newConfig);
         updateRecentsIcon();
+        if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi) {
+            // If car mode or density changes, we need to reset the icons.
+            setNavigationIconHints(mNavigationIconHints, true);
+        }
         mConfiguration.updateFrom(newConfig);
     }
 

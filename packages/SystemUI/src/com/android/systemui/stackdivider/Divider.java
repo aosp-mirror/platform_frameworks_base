@@ -34,8 +34,6 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  * Controls the docked stack divider.
  */
 public class Divider extends SystemUI {
-    private static final String TAG = "Divider";
-    private int mDividerWindowWidth;
     private DividerWindowManager mWindowManager;
     private DividerView mView;
     private DockDividerVisibilityListener mDockDividerVisibilityListener;
@@ -46,8 +44,6 @@ public class Divider extends SystemUI {
     @Override
     public void start() {
         mWindowManager = new DividerWindowManager(mContext);
-        mDividerWindowWidth = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_thickness);
         update(mContext.getResources().getConfiguration());
         putComponent(Divider.class, this);
         mDockDividerVisibilityListener = new DockDividerVisibilityListener();
@@ -70,9 +66,11 @@ public class Divider extends SystemUI {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
+        final int size = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_thickness);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
-        final int width = landscape ? mDividerWindowWidth : MATCH_PARENT;
-        final int height = landscape ? MATCH_PARENT : mDividerWindowWidth;
+        final int width = landscape ? size : MATCH_PARENT;
+        final int height = landscape ? MATCH_PARENT : size;
         mWindowManager.add(mView, width, height);
         mView.setWindowManager(mWindowManager);
     }
