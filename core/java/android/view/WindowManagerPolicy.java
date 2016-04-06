@@ -1397,4 +1397,9 @@ public interface WindowManagerPolicy {
      *         is allowed, so for example, if DOCKED_RIGHT is not allowed, DOCKED_LEFT is allowed.
      */
     public boolean isDockSideAllowed(int dockSide);
+
+    /**
+     * Called when the configuration has changed, and it's safe to load new values from resources.
+     */
+    public void onConfigurationChanged();
 }
