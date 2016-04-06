@@ -17,6 +17,7 @@
 package android.widget.espresso;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
@@ -24,6 +25,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 
@@ -34,8 +36,6 @@ import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.action.ViewActions;
-import android.support.test.espresso.matcher.ViewMatchers;
 import android.view.View;
 
 import com.android.internal.widget.FloatingToolbar;
@@ -90,7 +90,7 @@ public class FloatingToolbarEspressoUtils {
         final int id = com.android.internal.R.id.overflow;
         onView(allOf(withId(id), isDisplayed()))
                 .inRoot(withDecorView(hasDescendant(withId(id))))
-                .perform(ViewActions.click());
+                .perform(click());
         onView(isRoot()).perform(SLEEP);
     }
 
@@ -106,7 +106,7 @@ public class FloatingToolbarEspressoUtils {
      */
     public static void assertFloatingToolbarContainsItem(String itemLabel) {
         try{
-            onFloatingToolBar().check(matches(hasDescendant(ViewMatchers.withText(itemLabel))));
+            onFloatingToolBar().check(matches(hasDescendant(withText(itemLabel))));
         } catch (AssertionError e) {
             try{
                 toggleOverflow();
@@ -115,7 +115,7 @@ public class FloatingToolbarEspressoUtils {
                 throw e;
             }
             try{
-                onFloatingToolBar().check(matches(hasDescendant(ViewMatchers.withText(itemLabel))));
+                onFloatingToolBar().check(matches(hasDescendant(withText(itemLabel))));
             } finally {
                 toggleOverflow();
             }
@@ -135,6 +135,21 @@ public class FloatingToolbarEspressoUtils {
             return;
         }
         throw new AssertionError("Floating toolbar contains " + itemLabel);
+    }
+
+    /**
+     * Click specified item on the floating tool bar.
+     *
+     * @param itemLabel label of the item.
+     */
+    public static void clickFloatingToolbarItem(String itemLabel) {
+        try{
+            onFloatingToolBarItem(withText(itemLabel)).check(matches(isDisplayed()));
+        } catch (AssertionError e) {
+            // Try to find the item in the overflow menu.
+            toggleOverflow();
+        }
+        onFloatingToolBarItem(withText(itemLabel)).perform(click());
     }
 
     /**
