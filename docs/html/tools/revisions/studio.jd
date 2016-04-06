@@ -19,11 +19,21 @@ page.title=Android Studio Release Notes
 everything you need to begin developing Android apps:</p>
 
 <ul>
-<li>IntelliJ IDE + Android Studio plugin</li>
-<li>Android SDK Tools</li>
-<li>Android Platform-tools</li>
-<li>A version of the Android platform</li>
-<li>A version of the Android system image for the emulator</li>
+  <li>IntelliJ IDE + Android Studio plugin
+  </li>
+
+  <li>Android SDK Tools
+  </li>
+
+  <li>Android Platform-tools
+  </li>
+
+  <li>A version of the Android platform
+  </li>
+
+  <li>Android Emulator with an Android system image including Google Play
+  Services
+  </li>
 </ul>
 
 <p>For an introduction to Android Studio, read the
@@ -39,9 +49,256 @@ select <strong>Android Studio > Check for updates</strong>).</p>
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
-<div class="toggle-content opened">
+<div class="toggle-content open">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Studio v2.0.0</a> <em>(March 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p class="note">
+      <strong>Note:</strong> If you are developing for the N Developer Preview, you
+      should use Android Studio 2.1 Preview. Android Studio 2.0 does not support
+      all the features required to target the N Preview. To learn more, read about
+      how to properly <a href="{@docRoot}preview/setup-sdk.html">set up your
+      developer environment</a> for the N Preview.
+    </p>
+
+    <p>
+      <strong>Instant Run</strong>:
+    </p>
+
+    <ul>
+      <li>Android Studio now deploys clean builds faster than ever before.
+      Additionally, pushing incremental code changes to the emulator or a physical
+      device is now almost instantaneous. Review your updates without redeploying a
+      new debug build or, in many cases, without restarting the app.
+      </li>
+
+      <li>Instant Run supports pushing the following changes to a running app:
+        <ul>
+          <li>Changes to the implementation of an existing instance method or
+          static method
+          </li>
+
+          <li>Changes to an existing app resource
+          </li>
+
+          <li>Changes to structural code, such as a method signature or a static
+          field (requires a target device running API level 21 or higher).
+          </li>
+        </ul>
+      </li>
+
+      <li>Read the documentation to learn more <a href=
+      "{@docRoot}tools/building/building-studio.html#instant-run">about Instant
+      Run</a>.
+        <p class="note">
+          <strong>Note:</strong> Instant Run is supported only when you deploy the
+          debug build variant, use <a href=
+          "{@docRoot}tools/revisions/gradle-plugin.html#revisions">Android Plugin for
+          Gradle version 2.0.0</a> or higher, and configure your app's module-level
+          <code>build.gradle</code> file for <code>minSdkVersion 15</code> or higher.
+          For the best performance, configure your app for <code>minSdkVersion
+          21</code> or higher.
+        </p>
+      </li>
+    </ul>
+
+    <p>
+      <strong>Android Emulator 2.0</strong>:
+    </p>
+      <ul>
+        <li>Performance improvements:
+        </li>
+          <ul>
+            <li>Emulator now uses CPU acceleration on x86 emulator system images by
+            default.
+            </li>
+
+            <li>Added <a href="{@docRoot}training/articles/smp.html">SMP</a> support
+            to take advantage of host multi-core architecture when emulating Android
+            6.0 (API level 23) or higher, resulting in much better performance and
+            speed than the physical counterpart. Also with SMP support, you can test
+            apps that specifically target multi-core Android devices.
+            </li>
+
+            <li>Improved data and APK push-pull protocol between the the <a href=
+            "{@docRoot}tools/help/adb.html">Android Debug Bridge</a> and devices
+            running Android 5.0 (API level 21) or higher. See speed improvements up
+            to five times faster than using a physical device.
+            </li>
+          </ul>
+
+        <li>Extended UI controls and a floating toolbar provide easy access to features
+        previously available only through the command line, such as taking screen
+        captures, adjusting the battery level, rotating the screen, and managing
+        virtual calls.
+        </li>
+
+        <li>Upload KML and GPX files to play back a set of custom location points.
+        </li>
+
+        <li>Dynamically resize the emulator by dragging a corner or zoom into the
+        emulator window.
+        </li>
+
+        <li>Install APKs or add media files to the emulator’s internal SD card by
+        dragging and dropping files into the emulator window.
+        </li>
+
+        <li>Simulate multi-touch input. While interacting with the emulator screen,
+        enter multi-touch mode by holding down the <strong>Ctrl</strong> key on
+        Windown/Linux, or <strong>Command</strong> key on Mac OSX.
+        </li>
+
+        <li>Improvements to the <a href=
+        "{@docRoot}tools/devices/managing-avds.html">Android Virtual Device
+        Manager</a>:
+          <ul>
+            <li>System images are now categorized under the following tabs:
+            <em>Recommended</em>, <em>x86</em>, and <em>Other</em>.
+            </li>
+
+            <li>Under advanced settings, you can enable multi-core support and
+            specify the number of cores the emulator can use.
+            </li>
+
+            <li>Under advanced settings, you can determine how graphics are rendered
+            on the emulator by selecting one of the following options:
+              <ul>
+                <li>
+                  <strong>Hardware:</strong> use you computer's graphics card for
+                  faster rendering.
+                </li>
+
+                <li>
+                  <strong>Software:</strong> use software-based rendering.
+                </li>
+
+                <li>
+                  <strong>Auto:</strong> let the emulator decide the best option. This
+                  is the default setting.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li>Read the documentation to find out more about <a href=
+        "{@docRoot}tools/devices/emulator.html">using the Android Emulator</a>.
+        </li>
+
+      </ul>
+
+<p><strong>New additions to Lint:</strong></p>
+  <ul>
+    <li>Inspection of {@code switch} statements using {@link
+    android.support.annotation.IntDef @IntDef} annotated integers to make sure
+    all constants are handled. To quickly add any missing statements, use the the
+    intention action drop-down menu and select <b>Add Missing @IntDef
+    Constants</b>.
+    </li>
+
+    <li>Flags for incorrect attempts to use string interpolation to insert
+    version numbers in the {@code build.gradle} file.
+    </li>
+
+    <li>Flags for anonymous classes that extend the {@link android.app.Fragment
+    Fragment} class.
+    </li>
+
+    <li>Flags for native code in unsafe locations, such as the {@code res/} and {@code
+    asset/} folders. This flag encourages storing native code in the {@code libs/}
+    folder, which is then securely packaged into the application’s {@code
+    data/app-lib/} folder at install time. <a class="external-link" href=
+    "https://android-review.googlesource.com/#/c/169950/">AOSP: #169950</a>
+    </li>
+
+    <li>Flags for unsafe calls to {@link java.lang.Runtime#load(java.lang.String)
+    Runtime.load()} and {@link java.lang.System#load(java.lang.String)
+    System.load()} calls. <a class="external-link" href=
+    "https://android-review.googlesource.com/#/c/179980/">AOSP: #179980</a>
+    </li>
+
+    <li>Find and remove any unused resources by selecting <b>Refactor &gt; Remove
+    Unused Resources</b> from the menu bar. Unused resource detection now
+    supports resources only referenced by unused resources, references in raw
+    files such as {@code .html} image references, and {@code tools:keep} and
+    {@code tools:discard} attributes used by the Gradle resource shrinker, while
+    considering inactive source sets (such as resources used in other build
+    flavors) and properly handling static field imports.
+    </li>
+
+    <li>Checks that implicit API references are supported on all platforms
+    targeted by {@code minSdkVersion}.
+    </li>
+
+    <li>Flags improper usage of {@link android.support.v7.widget.RecyclerView}
+    and {@link android.os.Parcelable}.
+    </li>
+
+    <li>{@link android.support.annotation.IntDef @IntDef}, {@link
+    android.support.annotation.IntRange @IntRange}, and {@link
+    android.support.annotation.Size @Size} inspections are now also checked for
+    {@code int} arrays and varargs.
+    </li>
+  </ul>
+
+<p><strong>Additional Improvements</strong>:</p>
+    <ul>
+      <li>Improved AAPT packaging times by specifying deploy target before the app
+      is built. This allows Android Studio to efficiently package only the
+      resources required by the specified device.
+      </li>
+
+      <li>Added Cloud Test Lab integration to provide on-demand app testing with
+      the convenience and scalability of a cloud service. Learn more about how you
+      can <a href="{@docRoot}training/testing/start/index.html#run-ctl">use Cloud
+      Test Lab with Android Studio</a>.
+      </li>
+
+      <li>Added a preview of the new <a class="external-link" href=
+      "//tools.android.com/tech-docs/gpu-profiler">GPU Debugger</a>. For graphics
+      intensive applications, you can now visually step through your OpenGL ES code
+      to optimize your app or game.
+      </li>
+
+      <li>Added support for Google App Indexing integration and testing. Add deep
+      links, app indexing, and search functionality to your apps to help drive more
+      traffic to your app, discover which app content is used most, and attract new
+      users. Test and validate your URL links in your app all within Android
+      Studio. Learn more about implementing and testing <a href=
+      "{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing
+      APIs</a>.
+      </li>
+
+      <li>Upgrades from the latest IntelliJ 15 release, including improved code
+      analysis and performance. See <a class="external-link" href=
+      "https://www.jetbrains.com/idea/whatsnew">What's New in IntelliJ</a> for a
+      complete description of the new features and enhancements.
+      </li>
+
+      <li>XML editor auto-complete now adds quotations marks when completing
+      attributes. To check if this option is enabled, open the <b>Setting</b> or
+      <b>Preferences</b> dialogue, navigate to <b>Editor &gt; General &gt; Smart
+      Keys</b>, and check the box next to <b>Add quotes for attribute value on
+      attribute completion</b>. <a class="external-link" href=
+      "//b.android.com/195113">Issue: 195113</a>
+      </li>
+
+      <li>The XML editor now supports code completion for <a href=
+      "{@docRoot}tools/data-binding/guide.html#layout_details">data binding</a>
+      expressions.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.5.1</a> <em>(December 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
