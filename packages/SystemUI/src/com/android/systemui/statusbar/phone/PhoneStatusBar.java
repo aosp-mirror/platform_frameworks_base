@@ -4197,6 +4197,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
+    public void onLockedNotificationImportanceChange(OnDismissAction dismissAction) {
+        mLeaveOpenOnKeyguardHide = true;
+        dismissKeyguardThenExecute(dismissAction, true /* afterKeyguardGone */);
+    }
+
+    @Override
     protected void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
         mLeaveOpenOnKeyguardHide = true;
         showBouncer();
