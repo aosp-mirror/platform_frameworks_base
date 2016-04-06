@@ -979,6 +979,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 usageRestrictions.put(usage, r);
             }
         }
+        notifyWatchersOfChange(code);
     }
 
     @Override
@@ -2284,6 +2285,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             pruneUserRestrictionsForToken(token, userHandle);
         }
 
+        notifyWatchersOfChange(code);
+    }
+
+    private void notifyWatchersOfChange(int code) {
         final ArrayList<Callback> clonedCallbacks;
         synchronized (this) {
             ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
