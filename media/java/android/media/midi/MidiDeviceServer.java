@@ -254,7 +254,7 @@ public final class MidiDeviceServer implements Closeable {
         }
 
         @Override
-        public void connectPorts(IBinder token, ParcelFileDescriptor pfd,
+        public int connectPorts(IBinder token, ParcelFileDescriptor pfd,
                 int outputPortNumber) {
             MidiInputPort inputPort = new MidiInputPort(pfd, outputPortNumber);
             MidiDispatcher dispatcher = mOutputPortDispatchers[outputPortNumber];
@@ -270,6 +270,7 @@ public final class MidiDeviceServer implements Closeable {
             synchronized (mPortClients) {
                 mPortClients.put(token, client);
             }
+            return Process.myPid(); // for caller to detect same process ID
         }
 
         @Override
