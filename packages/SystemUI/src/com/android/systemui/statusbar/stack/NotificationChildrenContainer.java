@@ -640,7 +640,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 firstChild = false;
             }
             ExpandableNotificationRow child = mChildren.get(i);
-            minExpandHeight += child.getMinHeight();
+            minExpandHeight += child.getSingleLineView().getHeight();
             visibleChildren++;
         }
         minExpandHeight += mCollapsedBottompadding;
