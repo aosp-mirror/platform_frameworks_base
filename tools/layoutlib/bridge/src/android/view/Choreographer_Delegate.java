@@ -15,8 +15,11 @@
  */
 package android.view;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -63,5 +66,18 @@ public class Choreographer_Delegate {
         thisChoreographer.doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
 
         thisChoreographer.doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
+    }
+
+    public static void dispose() {
+        try {
+            Field threadInstanceField = Choreographer.class.getDeclaredField("sThreadInstance");
+            @SuppressWarnings("unchecked") ThreadLocal<Choreographer> threadInstance =
+                    (ThreadLocal<Choreographer>) threadInstanceField.get(null);
+            threadInstance.remove();
+        } catch (ReflectiveOperationException e) {
+            assert false;
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    "Unable to clear Choreographer memory.", e, null);
+        }
     }
 }

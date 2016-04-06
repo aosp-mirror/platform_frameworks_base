@@ -1434,6 +1434,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         if (createdLooper) {
             Bridge.cleanupThread();
+            Choreographer_Delegate.dispose();
         }
     }
 }
