@@ -277,6 +277,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -10964,7 +10965,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 null /*originatingUri*/, null /*referrer*/, -1 /*originatingUid*/, callingUid);
         final InstallParams params = new InstallParams(origin, null /*moveInfo*/, observer,
                 installFlags, installerPackageName, null /*volumeUuid*/, verificationInfo, user,
-                null /*packageAbiOverride*/, null /*grantedPermissions*/);
+                null /*packageAbiOverride*/, null /*grantedPermissions*/,
+                null /*certificates*/);
         params.setTraceMethod("installAsUser").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -10978,7 +10980,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     void installStage(String packageName, File stagedDir, String stagedCid,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
-            String installerPackageName, int installerUid, UserHandle user) {
+            String installerPackageName, int installerUid, UserHandle user,
+            Certificate[][] certificates) {
         if (DEBUG_EPHEMERAL) {
             if ((sessionParams.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
                 Slog.d(TAG, "Ephemeral install of " + packageName);
@@ -10999,7 +11002,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final InstallParams params = new InstallParams(origin, null, observer,
                 sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
                 verificationInfo, user, sessionParams.abiOverride,
-                sessionParams.grantedRuntimePermissions);
+                sessionParams.grantedRuntimePermissions, certificates);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -12094,11 +12097,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
         final VerificationInfo verificationInfo;
+        final Certificate[][] certificates;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions) {
+                String[] grantedPermissions, Certificate[][] certificates) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -12109,6 +12113,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
             this.grantedRuntimePermissions = grantedPermissions;
+            this.certificates = certificates;
         }
 
         @Override
@@ -12577,6 +12582,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** If non-null, drop an async trace when the install completes */
         final String traceMethod;
         final int traceCookie;
+        final Certificate[][] certificates;
 
         // The list of instruction sets supported by this app. This is currently
         // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -12587,7 +12593,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int installFlags, String installerPackageName, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
-                String traceMethod, int traceCookie) {
+                String traceMethod, int traceCookie, Certificate[][] certificates) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -12600,6 +12606,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.installGrantPermissions = installGrantPermissions;
             this.traceMethod = traceMethod;
             this.traceCookie = traceCookie;
+            this.certificates = certificates;
         }
 
         abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
@@ -12692,9 +12699,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         FileInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid,
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
+                    params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie);
+                    params.traceMethod, params.traceCookie, params.certificates);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
             }
@@ -12703,7 +12710,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
-                    null, null, null, 0);
+                    null, null, null, 0, null /*certificates*/);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
@@ -12928,15 +12935,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie);
+                    params.traceMethod, params.traceCookie, params.certificates);
         }
 
         /** Existing install */
         AsecInstallArgs(String fullCodePath, String[] instructionSets,
                         boolean isExternal, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isExternal ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
-                    instructionSets, null, null, null, 0);
+              | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
+                    instructionSets, null, null, null, 0, null /*certificates*/);
             // Hackily pretend we're still looking at a full code path
             if (!fullCodePath.endsWith(RES_FILE_NAME)) {
                 fullCodePath = new File(fullCodePath, RES_FILE_NAME).getAbsolutePath();
@@ -12952,8 +12959,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
-                    instructionSets, null, null, null, 0);
+              | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
+                    instructionSets, null, null, null, 0, null /*certificates*/);
             this.cid = cid;
             setMountPath(PackageHelper.getSdDir(cid));
         }
@@ -13222,7 +13229,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie);
+                    params.traceMethod, params.traceCookie, params.certificates);
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) {
@@ -14261,7 +14268,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         try {
-            PackageParser.collectCertificates(pkg, parseFlags);
+            // either use what we've been given or parse directly from the APK
+            if (args.certificates != null) {
+                try {
+                    PackageParser.populateCertificates(pkg, args.certificates);
+                } catch (PackageParserException e) {
+                    // there was something wrong with the certificates we were given;
+                    // try to pull them from the APK
+                    PackageParser.collectCertificates(pkg, parseFlags);
+                }
+            } else {
+                PackageParser.collectCertificates(pkg, parseFlags);
+            }
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
             return;
@@ -19146,7 +19164,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
                 installerPackageName, volumeUuid, null /*verificationInfo*/, user,
-                packageAbiOverride, null);
+                packageAbiOverride, null /*grantedPermissions*/, null /*certificates*/);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 

@@ -385,6 +385,7 @@ public class PackageParser {
         public final int installLocation;
         public final VerifierInfo[] verifiers;
         public final Signature[] signatures;
+        public final Certificate[][] certificates;
         public final boolean coreApp;
         public final boolean multiArch;
         public final boolean use32bitAbi;
@@ -392,8 +393,8 @@ public class PackageParser {
 
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-                Signature[] signatures, boolean coreApp, boolean multiArch, boolean use32bitAbi,
-                boolean extractNativeLibs) {
+                Signature[] signatures, Certificate[][] certificates, boolean coreApp,
+                boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -402,6 +403,7 @@ public class PackageParser {
             this.installLocation = installLocation;
             this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
             this.signatures = signatures;
+            this.certificates = certificates;
             this.coreApp = coreApp;
             this.multiArch = multiArch;
             this.use32bitAbi = use32bitAbi;
@@ -1074,6 +1076,43 @@ public class PackageParser {
     }
 
     /**
+     * Populates the correct packages fields with the given certificates.
+     * <p>
+     * This is useful when we've already processed the certificates [such as during package
+     * installation through an installer session]. We don't re-process the archive and
+     * simply populate the correct fields.
+     */
+    public static void populateCertificates(Package pkg, Certificate[][] certificates)
+            throws PackageParserException {
+        pkg.mCertificates = null;
+        pkg.mSignatures = null;
+        pkg.mSigningKeys = null;
+
+        pkg.mCertificates = certificates;
+        try {
+            pkg.mSignatures = convertToSignatures(certificates);
+        } catch (CertificateEncodingException e) {
+            // certificates weren't encoded properly; something went wrong
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                    "Failed to collect certificates from " + pkg.baseCodePath, e);
+        }
+        pkg.mSigningKeys = new ArraySet<>(certificates.length);
+        for (int i = 0; i < certificates.length; i++) {
+            Certificate[] signerCerts = certificates[i];
+            Certificate signerCert = signerCerts[0];
+            pkg.mSigningKeys.add(signerCert.getPublicKey());
+        }
+        // add signatures to child packages
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            Package childPkg = pkg.childPackages.get(i);
+            childPkg.mCertificates = pkg.mCertificates;
+            childPkg.mSignatures = pkg.mSignatures;
+            childPkg.mSigningKeys = pkg.mSigningKeys;
+        }
+    }
+
+    /**
      * Collect certificates from all the APKs described in the given package,
      * populating {@link Package#mSignatures}. Also asserts that all APK
      * contents are signed correctly and consistently.
@@ -1304,6 +1343,7 @@ public class PackageParser {
             parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
             final Signature[] signatures;
+            final Certificate[][] certificates;
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
                 // TODO: factor signature related items out of Package object
                 final Package tempPkg = new Package(null);
@@ -1314,12 +1354,14 @@ public class PackageParser {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
                 signatures = tempPkg.mSignatures;
+                certificates = tempPkg.mCertificates;
             } else {
                 signatures = null;
+                certificates = null;
             }
 
             final AttributeSet attrs = parser;
-            return parseApkLite(apkPath, res, parser, attrs, flags, signatures);
+            return parseApkLite(apkPath, res, parser, attrs, flags, signatures, certificates);
 
         } catch (XmlPullParserException | IOException | RuntimeException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
@@ -1405,8 +1447,8 @@ public class PackageParser {
     }
 
     private static ApkLite parseApkLite(String codePath, Resources res, XmlPullParser parser,
-            AttributeSet attrs, int flags, Signature[] signatures) throws IOException,
-            XmlPullParserException, PackageParserException {
+            AttributeSet attrs, int flags, Signature[] signatures, Certificate[][] certificates)
+                    throws IOException, XmlPullParserException, PackageParserException {
         final Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs);
 
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
@@ -1466,8 +1508,8 @@ public class PackageParser {
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
-                revisionCode, installLocation, verifiers, signatures, coreApp, multiArch,
-                use32bitAbi, extractNativeLibs);
+                revisionCode, installLocation, verifiers, signatures, certificates, coreApp,
+                multiArch, use32bitAbi, extractNativeLibs);
     }
 
     /**
