@@ -69,6 +69,12 @@ import java.util.List;
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
  *     &lt;/intent-filter>
  * &lt;/service></pre>
+ *
+ * <p>The service should wait for the {@link #onListenerConnected()} event
+ * before performing any operations. The {@link #requestRebind(ComponentName)}
+ * method is the <i>only</i> one that is safe to call before {@link #onListenerConnected()}
+ * or after {@link #onListenerDisconnected()}.
+ * </p>
  */
 public abstract class NotificationListenerService extends Service {
     // TAG = "NotificationListenerService[MySubclass]"
@@ -164,6 +170,7 @@ public abstract class NotificationListenerService extends Service {
 
     /** @hide */
     protected NotificationListenerWrapper mWrapper = null;
+    private boolean isConnected = false;
 
     @GuardedBy("mLock")
     private RankingMap mRankingMap;
@@ -222,10 +229,10 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to learn when notifications are removed.
-     * <P>
+     * <p>
      * This might occur because the user has dismissed the notification using system UI (or another
      * notification listener) or because the app has withdrawn the notification.
-     * <P>
+     * <p>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
      * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
      * fields such as {@link android.app.Notification#contentView} and
@@ -243,10 +250,10 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to learn when notifications are removed.
-     * <P>
+     * <p>
      * This might occur because the user has dismissed the notification using system UI (or another
      * notification listener) or because the app has withdrawn the notification.
-     * <P>
+     * <p>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
      * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
      * fields such as {@link android.app.Notification#contentView} and
@@ -271,6 +278,15 @@ public abstract class NotificationListenerService extends Service {
      * at this time.
      */
     public void onListenerConnected() {
+        // optional
+    }
+
+    /**
+     * Implement this method to learn about when the listener is disconnected from the
+     * notification manager.You will not receive any events after this call, and may only
+     * call {@link #requestRebind(ComponentName)} at this time.
+     */
+    public void onListenerDisconnected() {
         // optional
     }
 
@@ -322,11 +338,14 @@ public abstract class NotificationListenerService extends Service {
      * It should be called after the user dismisses a single notification using your UI;
      * upon being informed, the notification manager will actually remove the notification
      * and you will get an {@link #onNotificationRemoved(StatusBarNotification)} callback.
-     * <P>
+     * <p>
      * <b>Note:</b> If your listener allows the user to fire a notification's
      * {@link android.app.Notification#contentIntent} by tapping/clicking/etc., you should call
      * this method at that time <i>if</i> the Notification in question has the
      * {@link android.app.Notification#FLAG_AUTO_CANCEL} flag set.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
      *
      * @param pkg Package of the notifying app.
      * @param tag Tag of the notification as specified by the notifying app in
@@ -357,12 +376,16 @@ public abstract class NotificationListenerService extends Service {
      * It should be called after the user dismisses a single notification using your UI;
      * upon being informed, the notification manager will actually remove the notification
      * and you will get an {@link #onNotificationRemoved(StatusBarNotification)} callback.
-     * <P>
+     * <p>
      * <b>Note:</b> If your listener allows the user to fire a notification's
      * {@link android.app.Notification#contentIntent} by tapping/clicking/etc., you should call
      * this method at that time <i>if</i> the Notification in question has the
      * {@link android.app.Notification#FLAG_AUTO_CANCEL} flag set.
      * <p>
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @param key Notification to dismiss from {@link StatusBarNotification#getKey()}.
      */
     public final void cancelNotification(String key) {
@@ -384,6 +407,9 @@ public abstract class NotificationListenerService extends Service {
      * upon being informed, the notification manager will actually remove all active notifications
      * and you will get multiple {@link #onNotificationRemoved(StatusBarNotification)} callbacks.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * {@see #cancelNotification(String, String, int)}
      */
     public final void cancelAllNotifications() {
@@ -395,6 +421,9 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Use this if your listener has a user interface that allows the user to dismiss
      * multiple notifications at once.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
      *
      * @param keys Notifications to dismiss, or {@code null} to dismiss all.
      *
@@ -414,6 +443,10 @@ public abstract class NotificationListenerService extends Service {
      * user. This should only be called when there is sufficient confidence that the user is
      * looking at the notifications, such as when the notifications appear on the screen due to
      * an explicit user interaction.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @param keys Notifications to mark as seen.
      */
     public final void setNotificationsShown(String[] keys) {
@@ -436,6 +469,9 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Set to {@link #TRIM_FULL} initially.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @hide
      *
      * @param trim trim of the notifications to be passed via {@link #onNotificationPosted}.
@@ -454,6 +490,9 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request the list of outstanding notifications (that is, those that are visible to the
      * current user). Useful when you don't know what's already been posted.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
      *
      * @return An array of active notifications, sorted in natural order.
      */
@@ -479,6 +518,9 @@ public abstract class NotificationListenerService extends Service {
      * Request one or more notifications by key. Useful if you have been keeping track of
      * notifications but didn't want to retain the bits, and now need to go back and extract
      * more data out of those notifications.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
      *
      * @param keys the keys of the notifications to request
      * @return An array of notifications corresponding to the requested keys, in the
@@ -545,6 +587,9 @@ public abstract class NotificationListenerService extends Service {
      * shared across all listeners or a feature the notification host does not support or refuses
      * to grant.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @return Zero or more of the HINT_ constants.
      */
     public final int getCurrentListenerHints() {
@@ -572,6 +617,9 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
      * unavailable.
      */
@@ -594,6 +642,9 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Listen for updates using {@link #onListenerHintsChanged(int)}.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @param hints One or more of the HINT_ constants.
      */
     public final void requestListenerHints(int hints) {
@@ -613,6 +664,9 @@ public abstract class NotificationListenerService extends Service {
      * interruption filter depending on other listener requests or other global state.
      * <p>
      * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
      *
      * @param interruptionFilter One of the INTERRUPTION_FILTER_ constants.
      */
@@ -640,6 +694,9 @@ public abstract class NotificationListenerService extends Service {
      * such events, for example to retrieve the RankingMap right after
      * initialization.
      *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
      * @return A {@link RankingMap} object providing access to ranking information
      */
     public RankingMap getCurrentRanking() {
@@ -648,6 +705,12 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /**
+     * This is not the lifecycle event you are looking for.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing any operations.
+     */
     @Override
     public IBinder onBind(Intent intent) {
         if (mWrapper == null) {
@@ -663,6 +726,12 @@ public abstract class NotificationListenerService extends Service {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        onListenerDisconnected();
+        super.onDestroy();
     }
 
     /**
@@ -693,7 +762,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Directly unregister this service from the Notification Manager.
      *
-     * <P>This method will fail for listeners that were not registered
+     * <p>This method will fail for listeners that were not registered
      * with (@link registerAsService).
      * @hide
      */
@@ -708,11 +777,8 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request that the listener be rebound, after a previous call to (@link requestUnbind).
      *
-     * <P>This method will fail for listeners that have
+     * <p>This method will fail for listeners that have
      * not been granted the permission by the user.
-     *
-     * <P>The service should wait for the {@link #onListenerConnected()} event
-     * before performing any operations.
      */
     public static void requestRebind(ComponentName componentName)
             throws RemoteException {
@@ -724,14 +790,19 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request that the service be unbound.
      *
-     * <P>This will no longer receive updates until
+     * <p>This will no longer receive updates until
      * {@link #requestRebind(ComponentName)} is called.
      * The service will likely be kiled by the system after this call.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation. I know it's tempting, but you must wait.
      */
     public final void requestUnbind() throws RemoteException {
         if (mWrapper != null) {
             INotificationManager noMan = getNotificationInterface();
             noMan.requestUnbindListener(mWrapper);
+            // Disable future messages.
+            isConnected = false;
         }
     }
 
@@ -842,6 +913,7 @@ public abstract class NotificationListenerService extends Service {
             synchronized (mLock) {
                 applyUpdateLocked(update);
             }
+            isConnected = true;
             mHandler.obtainMessage(MyHandler.MSG_ON_LISTENER_CONNECTED).sendToTarget();
         }
 
@@ -1303,6 +1375,9 @@ public abstract class NotificationListenerService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
+            if (!isConnected) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_ON_NOTIFICATION_POSTED: {
                     SomeArgs args = (SomeArgs) msg.obj;
