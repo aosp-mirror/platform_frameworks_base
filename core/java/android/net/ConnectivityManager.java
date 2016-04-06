@@ -3021,7 +3021,6 @@ public class ConnectivityManager {
      *
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
      *                        system default network changes.
-     * @hide
      */
     public void registerDefaultNetworkCallback(NetworkCallback networkCallback) {
         // This works because if the NetworkCapabilities are null,
