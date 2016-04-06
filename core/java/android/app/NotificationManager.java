@@ -153,25 +153,31 @@ public class NotificationManager
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
-     *     Normal interruption filter.
+     *     Normal interruption filter - no notifications are suppressed.
      */
     public static final int INTERRUPTION_FILTER_ALL = 1;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
-     *     Priority interruption filter.
+     *     Priority interruption filter - all notifications are suppressed except those that match
+     *     the priority criteria. Some audio streams are muted. See
+     *     {@link Policy#priorityCallSenders}, {@link Policy#priorityCategories},
+     *     {@link Policy#priorityMessageSenders} to define or query this criteria. Users can
+     *     additionally specify packages that can bypass this interruption filter.
      */
     public static final int INTERRUPTION_FILTER_PRIORITY = 2;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
-     *     No interruptions filter.
+     *     No interruptions filter - all notifications are suppressed and all audio streams (except
+     *     those used for phone calls) and vibrations are muted.
      */
     public static final int INTERRUPTION_FILTER_NONE = 3;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
-     *     Alarms only interruption filter.
+     *     Alarms only interruption filter - all notifications except those of category
+     *     {@link Notification#CATEGORY_ALARM} are suppressed. Some audio streams are muted.
      */
     public static final int INTERRUPTION_FILTER_ALARMS = 4;
 
