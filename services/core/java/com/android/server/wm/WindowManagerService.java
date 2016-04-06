@@ -7615,6 +7615,11 @@ public class WindowManagerService extends IWindowManager.Stub
                    + " milliseconds before attempting to detect safe mode.");
         }
 
+        if (Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.SAFE_BOOT_DISALLOWED, 0) != 0) {
+            return false;
+        }
+
         int menuState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
                 KeyEvent.KEYCODE_MENU);
         int sState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY, KeyEvent.KEYCODE_S);
