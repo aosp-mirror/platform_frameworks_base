@@ -115,9 +115,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onFinishedGoingToSleep(int reason) {
+        public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
             checkPermission();
-            mKeyguardViewMediator.onFinishedGoingToSleep(reason);
+            mKeyguardViewMediator.onFinishedGoingToSleep(reason, cameraGestureTriggered);
         }
 
         @Override // Binder interface

@@ -34,6 +34,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
 
@@ -251,7 +252,8 @@ public class GestureLauncherService extends SystemService {
         return isCameraLaunchEnabled(resources) || isCameraDoubleTapPowerEnabled(resources);
     }
 
-    public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive) {
+    public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
+            MutableBoolean outLaunched) {
         boolean launched = false;
         boolean intercept = false;
         long doubleTapInterval;
@@ -276,6 +278,7 @@ public class GestureLauncherService extends SystemService {
             }
         }
         MetricsLogger.histogram(mContext, "power_double_tap_interval", (int) doubleTapInterval);
+        outLaunched.value = launched;
         return intercept && launched;
     }
 
