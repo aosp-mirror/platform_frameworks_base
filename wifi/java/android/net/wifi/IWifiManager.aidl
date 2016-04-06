@@ -149,7 +149,7 @@ interface IWifiManager
     void setAllowScansWithTraffic(int enabled);
     int getAllowScansWithTraffic();
 
-    boolean enableAutoJoinWhenAssociated(boolean enabled);
+    boolean setEnableAutoJoinWhenAssociated(boolean enabled);
     boolean getEnableAutoJoinWhenAssociated();
 
     void enableWifiConnectivityManager(boolean enabled);
