@@ -16,28 +16,35 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.INotificationManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.tuner.TunerService;
 
 /**
@@ -45,6 +52,8 @@ import com.android.systemui.tuner.TunerService;
  */
 public class NotificationGuts extends LinearLayout implements TunerService.Tunable {
     public static final String SHOW_SLIDER = "show_importance_slider";
+
+    private static final long CLOSE_GUTS_DELAY = 8000;
 
     private Drawable mBackground;
     private int mClipTopAmount;
@@ -59,10 +68,35 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private RadioButton mSilent;
     private RadioButton mReset;
 
+    private Handler mHandler;
+    private Runnable mFalsingCheck;
+    private boolean mNeedsFalsingProtection;
+    private OnGutsClosedListener mListener;
+
+    public interface OnGutsClosedListener {
+        public void onGutsClosed(NotificationGuts guts);
+    }
+
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
         TunerService.get(mContext).addTunable(this, SHOW_SLIDER);
+        mHandler = new Handler();
+        mFalsingCheck = new Runnable() {
+            @Override
+            public void run() {
+                if (mNeedsFalsingProtection && mExposed) {
+                    closeControls(-1 /* x */, -1 /* y */, true /* notify */);
+                }
+            }
+        };
+    }
+
+    public void resetFalsingCheck() {
+        mHandler.removeCallbacks(mFalsingCheck);
+        if (mNeedsFalsingProtection && mExposed) {
+            mHandler.postDelayed(mFalsingCheck, CLOSE_GUTS_DELAY);
+        }
     }
 
     @Override
@@ -172,6 +206,13 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     private void bindToggles(final View importanceButtons, final int importance,
             final boolean systemApp) {
+        ((RadioGroup) importanceButtons).setOnCheckedChangeListener(
+                new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        resetFalsingCheck();
+                    }
+                });
         mBlock = (RadioButton) importanceButtons.findViewById(R.id.block_importance);
         mSilent = (RadioButton) importanceButtons.findViewById(R.id.silent_importance);
         mReset = (RadioButton) importanceButtons.findViewById(R.id.reset_importance);
@@ -205,6 +246,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                resetFalsingCheck();
                 if (progress < minProgress) {
                     seekBar.setProgress(minProgress);
                     progress = minProgress;
@@ -217,7 +259,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // no-op
+                resetFalsingCheck();
             }
 
             @Override
@@ -263,6 +305,38 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mSeekBar.setProgress(mStartingImportance);
     }
 
+    public void closeControls(int x, int y, boolean notify) {
+        if (getWindowToken() == null) {
+            if (notify && mListener != null) {
+                mListener.onGutsClosed(this);
+            }
+            return;
+        }
+        if (x == -1 || y == -1) {
+            x = (getLeft() + getRight()) / 2;
+            y = (getTop() + getHeight() / 2);
+        }
+        final double horz = Math.max(getWidth() - x, x);
+        final double vert = Math.max(getHeight() - y, y);
+        final float r = (float) Math.hypot(horz, vert);
+        final Animator a = ViewAnimationUtils.createCircularReveal(this,
+                x, y, r, 0);
+        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        a.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                setVisibility(View.GONE);
+            }
+        });
+        a.start();
+        setExposed(false, mNeedsFalsingProtection);
+        if (notify && mListener != null) {
+            mListener.onGutsClosed(this);
+        }
+    }
+
     public void setActualHeight(int actualHeight) {
         mActualHeight = actualHeight;
         invalidate();
@@ -284,8 +358,18 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         return false;
     }
 
-    public void setExposed(boolean exposed) {
+    public void setClosedListener(OnGutsClosedListener listener) {
+        mListener = listener;
+    }
+
+    public void setExposed(boolean exposed, boolean needsFalsingProtection) {
         mExposed = exposed;
+        mNeedsFalsingProtection = needsFalsingProtection;
+        if (mExposed && mNeedsFalsingProtection) {
+            resetFalsingCheck();
+        } else {
+            mHandler.removeCallbacks(mFalsingCheck);
+        }
     }
 
     public boolean areGutsExposed() {
