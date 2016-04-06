@@ -228,9 +228,9 @@ interface IDevicePolicyManager {
     boolean getBluetoothContactSharingDisabledForUser(int userId);
 
     void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
-            in PersistableBundle args);
+            in PersistableBundle args, boolean parent);
     List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,
-            in ComponentName agent, int userId);
+            in ComponentName agent, int userId, boolean parent);
 
     boolean addCrossProfileWidgetProvider(in ComponentName admin, String packageName);
     boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
