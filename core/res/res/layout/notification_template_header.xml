@@ -42,7 +42,7 @@
         android:singleLine="true"
         />
     <TextView
-        android:id="@+id/sub_text_divider"
+        android:id="@+id/header_text_divider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
@@ -51,26 +51,7 @@
         android:text="@string/notification_header_divider_symbol"
         android:visibility="gone"/>
     <TextView
-        android:id="@+id/header_sub_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:visibility="gone"
-        android:singleLine="true"/>
-    <TextView
-        android:id="@+id/content_info_divider"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:text="@string/notification_header_divider_symbol"
-        android:singleLine="true"
-        android:visibility="gone"/>
-    <TextView
-        android:id="@+id/header_content_info"
+        android:id="@+id/header_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"

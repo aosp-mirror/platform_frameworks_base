@@ -206,6 +206,8 @@ public class Notification implements Parcelable
      * {@link Notification.Builder} has displayed the number in the expanded notification view.
      *
      * If the number is 0 or negative, it is never shown.
+     *
+     * @deprecated this number is not shown anymore
      */
     public int number;
 
@@ -2304,9 +2306,22 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the third line of text in the platform notification template.
-         * Don't use if you're also using {@link #setProgress(int, int, boolean)}; they occupy the
-         * same location in the standard template.
+         * This provides some additional information that is displayed in the notification. No
+         * guarantees are given where exactly it is displayed.
+         *
+         * <p>This information should only be provided if it provides an essential
+         * benefit to the understanding of the notification. The more text you provide the
+         * less readable it becomes. For example, an email client should only provide the account
+         * name here if more than one email account has been added.</p>
+         *
+         * <p>As of {@link android.os.Build.VERSION_CODES#N} this information is displayed in the
+         * notification header area.
+         *
+         * On Android versions before {@link android.os.Build.VERSION_CODES#N}
+         * this will be shown in the third line of text in the platform notification template.
+         * You should not be using {@link #setProgress(int, int, boolean)} at the
+         * same time on those versions; they occupy the same place.
+         * </p>
          */
         public Builder setSubText(CharSequence text) {
             mN.extras.putCharSequence(EXTRA_SUB_TEXT, safeCharSequence(text));
@@ -2345,6 +2360,8 @@ public class Notification implements Parcelable
          * Set the large number at the right-hand side of the notification.  This is
          * equivalent to setContentInfo, although it might show the number in a different
          * font size for readability.
+         *
+         * @deprecated this number is not shown anywhere anymore
          */
         public Builder setNumber(int number) {
             mN.number = number;
@@ -2356,6 +2373,10 @@ public class Notification implements Parcelable
          *
          * The platform template will draw this on the last line of the notification, at the far
          * right (to the right of a smallIcon if it has been placed there).
+         *
+         * @deprecated use {@link #setSubText(CharSequence)} instead to set a text in the header.
+         * For legacy apps targeting a version below {@link android.os.Build.VERSION_CODES#N} this
+         * field will still show up, but the subtext will take precedence.
          */
         public Builder setContentInfo(CharSequence info) {
             mN.extras.putCharSequence(EXTRA_INFO_TEXT, safeCharSequence(info));
@@ -3009,10 +3030,8 @@ public class Notification implements Parcelable
             contentView.setBoolean(R.id.notification_header, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
-            contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
-            contentView.setViewVisibility(R.id.header_content_info, View.GONE);
-            contentView.setViewVisibility(R.id.sub_text_divider, View.GONE);
-            contentView.setViewVisibility(R.id.content_info_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_text, View.GONE);
+            contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
             contentView.setViewVisibility(R.id.profile_badge, View.GONE);
@@ -3112,37 +3131,10 @@ public class Notification implements Parcelable
         private void bindNotificationHeader(RemoteViews contentView) {
             bindSmallIcon(contentView);
             bindHeaderAppName(contentView);
-            bindHeaderSubText(contentView);
-            bindContentInfo(contentView);
+            bindHeaderText(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
             bindProfileBadge(contentView);
-        }
-
-        private void bindContentInfo(RemoteViews contentView) {
-            boolean visible = false;
-            if (mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
-                contentView.setTextViewText(R.id.header_content_info,
-                        processLegacyText(mN.extras.getCharSequence(EXTRA_INFO_TEXT)));
-                contentView.setViewVisibility(R.id.header_content_info, View.VISIBLE);
-                visible = true;
-            } else if (mN.number > 0) {
-                final int tooBig = mContext.getResources().getInteger(
-                        R.integer.status_bar_notification_info_maxnum);
-                if (mN.number > tooBig) {
-                    contentView.setTextViewText(R.id.header_content_info, processLegacyText(
-                            mContext.getResources().getString(
-                                    R.string.status_bar_notification_info_overflow)));
-                } else {
-                    contentView.setTextViewText(R.id.header_content_info,
-                            processLegacyText(String.valueOf(mN.number)));
-                }
-                contentView.setViewVisibility(R.id.header_content_info, View.VISIBLE);
-                visible = true;
-            }
-            if (visible) {
-                contentView.setViewVisibility(R.id.content_info_divider, View.VISIBLE);
-            }
         }
 
         private void bindExpandButton(RemoteViews contentView) {
@@ -3169,17 +3161,22 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindHeaderSubText(RemoteViews contentView) {
-            CharSequence subText = mN.extras.getCharSequence(EXTRA_SUB_TEXT);
-            if (subText == null && mStyle != null && mStyle.mSummaryTextSet
+        private void bindHeaderText(RemoteViews contentView) {
+            CharSequence headerText = mN.extras.getCharSequence(EXTRA_SUB_TEXT);
+            if (headerText == null && mStyle != null && mStyle.mSummaryTextSet
                     && mStyle.hasSummaryInHeader()) {
-                subText = mStyle.mSummaryText;
+                headerText = mStyle.mSummaryText;
             }
-            if (subText != null) {
+            if (headerText == null
+                    && mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
+                    && mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
+                headerText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
+            }
+            if (headerText != null) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
-                contentView.setTextViewText(R.id.header_sub_text, processLegacyText(subText));
-                contentView.setViewVisibility(R.id.header_sub_text, View.VISIBLE);
-                contentView.setViewVisibility(R.id.sub_text_divider, View.VISIBLE);
+                contentView.setTextViewText(R.id.header_text, processLegacyText(headerText));
+                contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
+                contentView.setViewVisibility(R.id.header_text_divider, View.VISIBLE);
             }
         }
 
