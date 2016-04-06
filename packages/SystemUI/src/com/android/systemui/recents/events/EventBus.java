@@ -30,6 +30,7 @@ import android.util.MutableBoolean;
 
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -652,19 +653,43 @@ public class EventBus extends BroadcastReceiver {
     /**
      * @return a dump of the current state of the EventBus
      */
-    public String dump() {
+    public void dump(String prefix, PrintWriter writer) {
+        writer.println(dumpInternal(prefix));
+    }
+
+    public String dumpInternal(String prefix) {
+        String innerPrefix = prefix + "  ";
+        String innerInnerPrefix = innerPrefix + "  ";
         StringBuilder output = new StringBuilder();
+        output.append(prefix);
         output.append("Registered class types:");
         output.append("\n");
-        for (Class<?> clz : mSubscriberTypeMap.keySet()) {
-            output.append("\t");
+        ArrayList<Class<?>> subsciberTypes = new ArrayList<>(mSubscriberTypeMap.keySet());
+        Collections.sort(subsciberTypes, new Comparator<Class<?>>() {
+            @Override
+            public int compare(Class<?> o1, Class<?> o2) {
+                return o1.getSimpleName().compareTo(o2.getSimpleName());
+            }
+        });
+        for (int i = 0; i < subsciberTypes.size(); i++) {
+            Class<?> clz = subsciberTypes.get(i);
+            output.append(innerPrefix);
             output.append(clz.getSimpleName());
             output.append("\n");
         }
+        output.append(prefix);
         output.append("Event map:");
         output.append("\n");
-        for (Class<?> clz : mEventTypeMap.keySet()) {
-            output.append("\t");
+        ArrayList<Class<?>> classes = new ArrayList<>(mEventTypeMap.keySet());
+        Collections.sort(classes, new Comparator<Class<?>>() {
+            @Override
+            public int compare(Class<?> o1, Class<?> o2) {
+                return o1.getSimpleName().compareTo(o2.getSimpleName());
+            }
+        });
+        for (int i = 0; i < classes.size(); i++) {
+            Class<?> clz = classes.get(i);
+            output.append(innerPrefix);
             output.append(clz.getSimpleName());
             output.append(" -> ");
             output.append("\n");
@@ -673,7 +698,7 @@ public class EventBus extends BroadcastReceiver {
                 Object subscriber = handler.subscriber.getReference();
                 if (subscriber != null) {
                     String id = Integer.toHexString(System.identityHashCode(subscriber));
-                    output.append("\t\t");
+                    output.append(innerInnerPrefix);
                     output.append(subscriber.getClass().getSimpleName());
                     output.append(" [0x" + id + ", #" + handler.priority + "]");
                     output.append("\n");

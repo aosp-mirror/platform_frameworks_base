@@ -29,6 +29,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -37,6 +38,9 @@ import java.util.Objects;
  * A task represents the top most task in the system's task stack.
  */
 public class Task {
+
+    public static final String TAG = "Task";
+
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
@@ -100,7 +104,8 @@ public class Task {
 
         @Override
         public String toString() {
-            return "t" + id + ", s" + stackId + ", u" + userId;
+            return "id=" + id + " stackId=" + stackId + " user=" + userId + " lastActiveTime=" +
+                    lastActiveTime;
         }
 
         private void updateHashCode() {
@@ -305,5 +310,14 @@ public class Task {
     @Override
     public String toString() {
         return "[" + key.toString() + "] " + title;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        writer.print(prefix); writer.print(key);
+        if (affiliationTaskId != key.id) {
+            writer.print(" "); writer.print("affTaskId=" + affiliationTaskId);
+        }
+        writer.print(" "); writer.print(title);
+        writer.println();
     }
 }

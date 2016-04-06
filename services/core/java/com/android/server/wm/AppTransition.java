@@ -881,7 +881,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            Bitmap thumbnailHeader, final int taskId, int orientation) {
+            Bitmap thumbnailHeader, final int taskId, int uiMode, int orientation) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -896,7 +896,7 @@ public class AppTransition implements Dump {
         final float toY;
         final float pivotX;
         final float pivotY;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (isTvUiMode(uiMode) || orientation == Configuration.ORIENTATION_PORTRAIT) {
             fromX = mTmpRect.left;
             fromY = mTmpRect.top;
 
@@ -1028,7 +1028,7 @@ public class AppTransition implements Dump {
      * activity that is leaving, and the activity that is entering.
      */
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
-            int orientation, int transit, Rect containingFrame, Rect contentInsets,
+            int uiMode, int orientation, int transit, Rect containingFrame, Rect contentInsets,
             @Nullable Rect surfaceInsets, boolean freeform, int taskId) {
         Animation a;
         final int appWidth = containingFrame.width();
@@ -1067,8 +1067,7 @@ public class AppTransition implements Dump {
                     mTmpFromClipRect.inset(contentInsets);
                     mNextAppTransitionInsets.set(contentInsets);
 
-                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        // We scale the width and clip to the top/left square
+                    if (isTvUiMode(uiMode) || orientation == Configuration.ORIENTATION_PORTRAIT) {
                         // We scale the width and clip to the top/left square
                         float scale = thumbWidth /
                                 (appWidth - contentInsets.left - contentInsets.right);
@@ -1401,7 +1400,7 @@ public class AppTransition implements Dump {
      *                      to the recents thumbnail and hence need to account for the surface being
      *                      bigger.
      */
-    Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
+    Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter, int uiMode,
             int orientation, Rect frame, Rect displayFrame, Rect insets,
             @Nullable Rect surfaceInsets, boolean isVoiceInteraction, boolean freeform,
             int taskId) {
@@ -1481,7 +1480,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
-                    getThumbnailTransitionState(enter), orientation, transit, frame,
+                    getThumbnailTransitionState(enter), uiMode, orientation, transit, frame,
                     insets, surfaceInsets, freeform, taskId);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
@@ -1921,5 +1920,12 @@ public class AppTransition implements Dump {
             mService.mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
         }
         return prepared;
+    }
+
+    /**
+     * @return whether the specified {@param uiMode} is the TV mode.
+     */
+    private boolean isTvUiMode(int uiMode) {
+        return (uiMode & Configuration.UI_MODE_TYPE_TELEVISION) > 0;
     }
 }
