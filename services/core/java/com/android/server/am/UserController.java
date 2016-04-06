@@ -260,6 +260,9 @@ final class UserController {
                 mUserManager.onBeforeUnlockUser(userId);
                 progress.setProgress(20);
 
+                // Dispatch unlocked to system services
+                mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
+
                 // Send PRE_BOOT broadcasts if fingerprint changed
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
@@ -301,9 +304,6 @@ final class UserController {
             if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
                 // Remember that we logged in
                 mUserManager.onUserLoggedIn(userId);
-
-                // Dispatch unlocked to system services
-                mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
 
                 // Dispatch unlocked to external apps
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
