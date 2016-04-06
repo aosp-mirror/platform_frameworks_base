@@ -18,7 +18,10 @@ package com.android.systemui.recents.tv.views;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
@@ -32,15 +35,15 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.tv.animations.RecentsRowFocusAnimationHolder;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
  * Top level layout of recents for TV. This will show the TaskStacks using a HorizontalGridView.
@@ -58,7 +61,7 @@ public class RecentsTvView extends FrameLayout {
     private Rect mSystemInsets = new Rect();
     private RecentsTvTransitionHelper mTransitionHelper;
     private Handler mHandler;
-
+    private OnScrollListener mScrollListener;
     public RecentsTvView(Context context) {
         this(context, null);
     }
@@ -111,8 +114,7 @@ public class RecentsTvView extends FrameLayout {
         if (mTaskStackHorizontalView != null) {
             Task task = mTaskStackHorizontalView.getFocusedTask();
             if (task != null) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+                launchTaskFomRecents(task);
                 return true;
             }
         }
@@ -125,25 +127,53 @@ public class RecentsTvView extends FrameLayout {
             TaskStack stack = mTaskStackHorizontalView.getStack();
             Task task = stack.getLaunchTarget();
             if (task != null) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+                launchTaskFomRecents(task);
                 return true;
             }
         }
         return false;
     }
 
-    /** Launches a given task. */
-    public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
-        if (mTaskStackHorizontalView != null) {
-            // Iterate the stack views and try and find the given task.
-            if (mTaskStackHorizontalView.getChildViewForTask(task) != null) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
-                return true;
+    /**
+     * Launch the given task from recents with animation. If the task is not focused, this will
+     * attempt to scroll to focus the task before launching.
+     * @param task
+     */
+    private void launchTaskFomRecents(final Task task) {
+        if(task != mTaskStackHorizontalView.getFocusedTask()) {
+            if(mScrollListener != null) {
+                mTaskStackHorizontalView.removeOnScrollListener(mScrollListener);
             }
+            mScrollListener = new OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        TaskCardView cardView = mTaskStackHorizontalView.getChildViewForTask(task);
+                        if(cardView != null) {
+                            mTransitionHelper.launchTaskFromRecents(mStack, task,
+                                    mTaskStackHorizontalView, cardView, null, INVALID_STACK_ID);
+                        } else {
+                            // This should not happen normally. If this happens then the data in
+                            // the grid view was altered during the scroll. Log error and launch
+                            // task with no animation.
+                            Log.e(TAG, "Card view for task : " + task + ", returned null.");
+                            SystemServicesProxy ssp = Recents.getSystemServices();
+                            ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+                        }
+                        mTaskStackHorizontalView.removeOnScrollListener(mScrollListener);
+                    }
+                }
+            };
+            mTaskStackHorizontalView.addOnScrollListener(mScrollListener);
+            mTaskStackHorizontalView.setSelectedPositionSmooth(
+                    ((TaskStackHorizontalViewAdapter) mTaskStackHorizontalView.getAdapter())
+                            .getPositionOfTask(task));
+        } else {
+            mTransitionHelper.launchTaskFromRecents(mStack, task, mTaskStackHorizontalView,
+                    mTaskStackHorizontalView.getChildViewForTask(task), null,
+                    INVALID_STACK_ID);
         }
-        return false;
     }
 
     /**

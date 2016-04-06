@@ -131,4 +131,9 @@ public class TaskStackHorizontalViewAdapter extends
         mTaskList.remove(position);
         notifyItemRemoved(position);
     }
+
+    public int getPositionOfTask(Task task) {
+        int position = mTaskList.indexOf(task);
+        return (position >= 0) ? position : 0;
+    }
 }
