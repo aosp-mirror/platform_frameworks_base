@@ -64,7 +64,7 @@ public class ViewGroup_Delegate {
     private static void drawShadow(ViewGroup parent, Canvas canvas, View child,
             Outline outline) {
         float elevation = getElevation(child, parent);
-        if(outline.mRect != null) {
+        if(outline.mMode == Outline.MODE_ROUND_RECT && outline.mRect != null) {
             RectShadowPainter.paintShadow(outline, elevation, canvas);
             return;
         }
