@@ -87,6 +87,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.google.android.collect.Lists;
@@ -553,12 +554,27 @@ public class AccountManagerService
                     CeDatabaseHelper.create(mContext, userId);
                     accounts.openHelper.attachCeDatabase();
                 }
-                // TODO Synchronize accounts by removing CE account not available in DE
+                syncDeCeAccountsLocked(accounts);
             }
             if (validateAccounts) {
                 validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
             }
             return accounts;
+        }
+    }
+
+    private void syncDeCeAccountsLocked(UserAccounts accounts) {
+        Preconditions.checkState(Thread.holdsLock(mUsers), "mUsers lock must be held");
+        final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
+        List<Account> accountsToRemove = CeDatabaseHelper.findCeAccountsNotInDe(db);
+        if (!accountsToRemove.isEmpty()) {
+            Slog.i(TAG, "Accounts " + accountsToRemove + " were previously deleted while user "
+                    + accounts.userId + " was locked. Removing accounts from CE tables");
+            logRecord(accounts, DebugDbHelper.ACTION_SYNC_DE_CE_ACCOUNTS, TABLE_ACCOUNTS);
+
+            for (Account account : accountsToRemove) {
+                removeAccountInternal(accounts, account, Process.myUid());
+            }
         }
     }
 
@@ -799,7 +815,7 @@ public class AccountManagerService
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAuthenticatorTypes: "
                     + "for user id " + userId
-                    + "caller's uid " + callingUid
+                    + " caller's uid " + callingUid
                     + ", pid " + Binder.getCallingPid());
         }
         // Only allow the system process to read accounts of other users
@@ -1543,21 +1559,35 @@ public class AccountManagerService
     }
 
     private boolean removeAccountInternal(UserAccounts accounts, Account account, int callingUid) {
-        // For now user is required to be unlocked. TODO: Handle both cases in the future
         int deleted;
+        boolean userUnlocked = isUserUnlocked(accounts.userId);
+        if (!userUnlocked) {
+            Slog.i(TAG, "Removing account " + account + " while user "+ accounts.userId
+                    + " is still locked. CE data will be removed later");
+        }
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
+            final SQLiteDatabase db = userUnlocked
+                    ? accounts.openHelper.getWritableDatabaseUserIsUnlocked()
+                    : accounts.openHelper.getWritableDatabase();
             final long accountId = getAccountIdLocked(db, account);
-            deleted = db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
-                    + "=?",
-                    new String[]{account.name, account.type});
-            // Delete from CE table
-            db.delete(CE_TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE + "=?",
-                    new String[]{account.name, account.type});
+            db.beginTransaction();
+            try {
+                deleted = db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
+                                + "=?", new String[]{account.name, account.type});
+                if (userUnlocked) {
+                    // Delete from CE table
+                    deleted = db.delete(CE_TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
+                            + "=?", new String[]{account.name, account.type});
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
             removeAccountFromCacheLocked(accounts, account);
             sendAccountsChangedBroadcast(accounts.userId);
-
-            logRecord(db, DebugDbHelper.ACTION_ACCOUNT_REMOVE, TABLE_ACCOUNTS, accountId, accounts);
+            String action = userUnlocked ? DebugDbHelper.ACTION_ACCOUNT_REMOVE
+                    : DebugDbHelper.ACTION_ACCOUNT_REMOVE_DE;
+            logRecord(db, action, TABLE_ACCOUNTS, accountId, accounts);
         }
         long id = Binder.clearCallingIdentity();
         try {
@@ -4073,6 +4103,7 @@ public class AccountManagerService
         private static String ACTION_CLEAR_PASSWORD = "action_clear_password";
         private static String ACTION_ACCOUNT_ADD = "action_account_add";
         private static String ACTION_ACCOUNT_REMOVE = "action_account_remove";
+        private static String ACTION_ACCOUNT_REMOVE_DE = "action_account_remove_de";
         private static String ACTION_AUTHENTICATOR_REMOVE = "action_authenticator_remove";
         private static String ACTION_ACCOUNT_RENAME = "action_account_rename";
 
@@ -4083,6 +4114,7 @@ public class AccountManagerService
         // who called.
         private static String ACTION_CALLED_ACCOUNT_ADD = "action_called_account_add";
         private static String ACTION_CALLED_ACCOUNT_REMOVE = "action_called_account_remove";
+        private static String ACTION_SYNC_DE_CE_ACCOUNTS = "action_sync_de_ce_accounts";
 
         //This action doesn't add account to accountdb. Account is only
         // added in finishSession which may be in a different user profile.
@@ -4576,6 +4608,28 @@ public class AccountManagerService
                     return cursor.getString(0);
                 }
                 return null;
+            } finally {
+                cursor.close();
+            }
+        }
+
+        static List<Account> findCeAccountsNotInDe(SQLiteDatabase db) {
+            // Select accounts from CE that do not exist in DE
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE
+                            + " FROM " + CE_TABLE_ACCOUNTS
+                            + " WHERE NOT EXISTS "
+                            + " (SELECT " + ACCOUNTS_ID + " FROM " + TABLE_ACCOUNTS
+                            + " WHERE " + ACCOUNTS_ID + "=" + CE_TABLE_ACCOUNTS + "." + ACCOUNTS_ID
+                            + " )", null);
+            try {
+                List<Account> accounts = new ArrayList<>(cursor.getCount());
+                while (cursor.moveToNext()) {
+                    String accountName = cursor.getString(0);
+                    String accountType = cursor.getString(1);
+                    accounts.add(new Account(accountName, accountType));
+                }
+                return accounts;
             } finally {
                 cursor.close();
             }
