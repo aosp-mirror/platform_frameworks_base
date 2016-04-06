@@ -22,8 +22,10 @@ import static com.android.documentsui.StubProvider.ROOT_1_ID;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.provider.DocumentsContract;
 import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiObject;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -69,11 +71,10 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
                 ROOT_1_ID);
 
         // Separate logic for "Documents" root, which presence depends on the config setting
-        boolean homeRootHidden = context.getResources().getBoolean(R.bool.home_root_hidden);
-        if (homeRootHidden) {
-            bots.roots.assertRootsAbsent("Documents");
-        } else {
+        if (Shared.shouldShowDocumentsRoot(context, new Intent(DocumentsContract.ACTION_BROWSE))) {
             bots.roots.assertRootsPresent("Documents");
+        } else {
+            bots.roots.assertRootsAbsent("Documents");
         }
     }
 

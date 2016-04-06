@@ -20,13 +20,15 @@
 
     <!-- Intentionally unset. Vendors should set this in an overlay. -->
     <string name="trusted_quick_viewer_package" translatable="false"></string>
+
+    <!-- overridden for RTL langs -->
     <bool name="list_divider_inset_left">true</bool>
-    <!-- Indicates if the home directory should be hidden in the roots list, that is presented
-         in the drawer/left side panel ) -->
-    <bool name="home_root_hidden">true</bool>
-    <!-- Indicates if the advanced roots like internal storage should be shown in the roots list.
-         When enabled there is no menu option to toggle internal storage visibility. -->
-    <bool name="advanced_roots_shown">false</bool>
+
+    <!-- Flags setup as productivity oriented in which case Downloads app will be presented
+             as Files app. Including showing of the Documents and "advanced" roots. -->
+    <bool name="productivity_device">false</bool>
+
     <!-- Indicates if search view is taking the whole toolbar space -->
     <bool name="full_bar_search_view">true</bool>
+
 </resources>

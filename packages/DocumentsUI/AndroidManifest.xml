@@ -43,9 +43,9 @@
 
         <activity
             android:name=".LauncherActivity"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:icon="@mipmap/ic_launcher_download"
-            android:label="@string/downloads_label">
+            android:label="@string/downloads_label"
+            android:icon="@mipmap/ic_launcher_downloads"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -54,21 +54,21 @@
 
         <activity
             android:name=".FilesActivity"
-            android:theme="@style/DocumentsTheme"
-            android:icon="@mipmap/ic_launcher_download"
             android:label="@string/downloads_label"
-            android:documentLaunchMode="intoExisting">
+            android:icon="@mipmap/ic_launcher_downloads"
+            android:documentLaunchMode="intoExisting"
+            android:theme="@style/DocumentsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW_DOWNLOADS" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.provider.action.BROWSE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_DOWNLOADS" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
