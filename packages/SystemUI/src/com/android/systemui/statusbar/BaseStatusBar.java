@@ -1051,22 +1051,40 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                guts.saveImportance(sbn);
-
-                int[] rowLocation = new int[2];
-                int[] doneLocation = new int[2];
-                row.getLocationOnScreen(rowLocation);
-                v.getLocationOnScreen(doneLocation);
-
-                final int centerX = v.getWidth() / 2;
-                final int centerY = v.getHeight() / 2;
-                final int x = doneLocation[0] - rowLocation[0] + centerX;
-                final int y = doneLocation[1] - rowLocation[1] + centerY;
-                dismissPopups(x, y);
+                // If the user has security enabled, show challenge if the setting is changed.
+                if (guts.hasImportanceChanged() && isLockscreenPublicMode() &&
+                        (mState == StatusBarState.KEYGUARD
+                        || mState == StatusBarState.SHADE_LOCKED)) {
+                    OnDismissAction dismissAction = new OnDismissAction() {
+                        @Override
+                        public boolean onDismiss() {
+                            saveImportanceCloseControls(sbn, row, guts, v);
+                            return true;
+                        }
+                    };
+                    onLockedNotificationImportanceChange(dismissAction);
+                } else {
+                    saveImportanceCloseControls(sbn, row, guts, v);
+                }
             }
         });
-
         guts.bindImportance(pmUser, sbn, row, mNotificationData.getImportance(sbn.getKey()));
+    }
+
+    private void saveImportanceCloseControls(StatusBarNotification sbn,
+            ExpandableNotificationRow row, NotificationGuts guts, View done) {
+        guts.saveImportance(sbn);
+
+        int[] rowLocation = new int[2];
+        int[] doneLocation = new int[2];
+        row.getLocationOnScreen(rowLocation);
+        done.getLocationOnScreen(doneLocation);
+
+        final int centerX = done.getWidth() / 2;
+        final int centerY = done.getHeight() / 2;
+        final int x = doneLocation[0] - rowLocation[0] + centerX;
+        final int y = doneLocation[1] - rowLocation[1] + centerY;
+        dismissPopups(x, y);
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -1453,6 +1471,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     }
+
+    protected void onLockedNotificationImportanceChange(OnDismissAction dismissAction) {}
 
     protected void onLockedRemoteInput(ExpandableNotificationRow row, View clickedView) {}
 
