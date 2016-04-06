@@ -531,30 +531,18 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Početak"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedavni ekrani"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nazad"</string>
-    <!-- no translation found for keyboard_shortcut_group_system_notifications (8366964080041773224) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_shortcuts_helper (4892255911160332762) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_switch_input (2334164096341310324) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (9129465955073449206) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_assist (9095441910537146013) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6465985474000766533) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2064197111278436375) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (6257036897441939004) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_im (1892749399083161405) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (4775559515850922780) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_youtube (6555453761294723317) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (9043614299194991263) -->
-    <skip />
+    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Obavještenja"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Skracenice tastature"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Promijeni način unosa"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplikacije"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Pomoć"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Preglednik"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakti"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-pošta"</string>
+    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"IM"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Muzika"</string>
+    <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendar"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Prikazati sa kontrolama jačine zvuka"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne ometaj"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Prečica za dugmad za Jačinu zvuka"</string>

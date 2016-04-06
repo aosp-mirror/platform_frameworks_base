@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"电池电量偏低"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>。节电助手已开启。"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>。省电模式已开启。"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"不支持USB充电功能。\n只能使用随附的充电器充电。"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支持USB充电。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"仅限使用设备随附的充电器。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"设置"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要开启节电助手吗？"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要开启省电模式吗？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"开启"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"开启节电助手"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"开启省电模式"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"自动旋转屏幕"</string>
@@ -373,9 +373,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"是否移除用户？"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"此用户的所有应用和数据均将被删除。"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"移除"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"省电模式已开启"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低性能并限制后台流量"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"关闭节电助手"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"关闭省电模式"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将开始截取您的屏幕上显示的所有内容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不再显示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
@@ -497,8 +497,8 @@
     <string name="color_revert_title" msgid="4746666545480534663">"确认设置"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"部分颜色设置可能会导致此设备无法使用。请点击“确定”确认这些颜色设置，否则，系统将在 10 秒后重置这些设置。"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"电池使用情况"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充电过程中无法使用节电助手"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"节电助手"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充电过程中无法使用省电模式"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"省电模式"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"降低性能并限制后台流量"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g>按钮"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -530,30 +530,18 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"主屏幕"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"返回"</string>
-    <!-- no translation found for keyboard_shortcut_group_system_notifications (8366964080041773224) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_shortcuts_helper (4892255911160332762) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_switch_input (2334164096341310324) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (9129465955073449206) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_assist (9095441910537146013) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6465985474000766533) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2064197111278436375) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (6257036897441939004) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_im (1892749399083161405) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (4775559515850922780) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_youtube (6555453761294723317) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (9043614299194991263) -->
-    <skip />
+    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"通知"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"键盘快捷键"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切换输入法"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"应用"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"辅助应用"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"浏览器"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"通讯录"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"电子邮件"</string>
+    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"即时通讯"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"音乐"</string>
+    <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"日历"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"与音量控件一起显示"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"请勿打扰"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"音量按钮快捷键"</string>
