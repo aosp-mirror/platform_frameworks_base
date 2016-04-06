@@ -119,7 +119,13 @@ class ActivityStartInterceptor {
         if (!mUserManager.isQuietModeEnabled(UserHandle.of(mUserId))) {
             return false;
         }
-        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId);
+        IIntentSender target = mService.getIntentSenderLocked(
+                INTENT_SENDER_ACTIVITY, mCallingPackage, mCallingUid, mUserId, null, null, 0,
+                new Intent[] {mIntent}, new String[] {mResolvedType},
+                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT, null);
+
+        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId,
+                new IntentSender(target));
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
