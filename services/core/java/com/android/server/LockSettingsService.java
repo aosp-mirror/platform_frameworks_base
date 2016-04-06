@@ -254,7 +254,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         com.android.internal.R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(message)
-                .setContentInfo(detail)
+                .setSubText(detail)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(intent)
                 .build();

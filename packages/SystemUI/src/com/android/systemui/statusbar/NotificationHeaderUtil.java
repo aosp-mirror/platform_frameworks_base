@@ -131,11 +131,8 @@ public class NotificationHeaderUtil {
         mComparators.add(HeaderProcessor.forTextView(mRow,
                 com.android.internal.R.id.app_name_text));
         mComparators.add(HeaderProcessor.forTextView(mRow,
-                com.android.internal.R.id.header_sub_text));
-        mComparators.add(HeaderProcessor.forTextView(mRow,
-                com.android.internal.R.id.header_content_info));
-        mDividers.add(com.android.internal.R.id.sub_text_divider);
-        mDividers.add(com.android.internal.R.id.content_info_divider);
+                com.android.internal.R.id.header_text));
+        mDividers.add(com.android.internal.R.id.header_text_divider);
         mDividers.add(com.android.internal.R.id.time_divider);
     }
 
