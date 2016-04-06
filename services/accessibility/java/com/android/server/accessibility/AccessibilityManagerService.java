@@ -1795,9 +1795,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 userState.mSoftKeyboardShowMode = 0;
                 userState.mServiceChangingSoftKeyboardMode = null;
+                notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
             }
-
-            notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
         }
     }
 
@@ -4355,6 +4354,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 } else if (mAccessibilitySoftKeyboardModeUri.equals(uri)) {
                     if (readSoftKeyboardShowModeChangedLocked(userState)) {
+                        notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
                         onUserStateChangedLocked(userState);
                     }
                 }
