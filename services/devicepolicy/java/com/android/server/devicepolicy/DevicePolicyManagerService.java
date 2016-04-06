@@ -4357,6 +4357,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * @return {@code true} if the package is installed and set as always-on, {@code false} if it is
+     * not installed and therefore not available.
+     *
+     * @throws SecurityException if the caller is not a profile or device owner.
+     * @throws UnsupportedException if the package does not support being set as always-on.
+     */
     @Override
     public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage)
             throws SecurityException {
@@ -4366,13 +4373,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         final long token = mInjector.binderClearCallingIdentity();
-        try{
+        try {
+            if (vpnPackage != null && !isPackageInstalledForUser(vpnPackage, userId)) {
+                return false;
+            }
             ConnectivityManager connectivityManager = (ConnectivityManager)
                     mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            return connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage);
+            if (!connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage)) {
+                throw new UnsupportedOperationException();
+            }
         } finally {
             mInjector.binderRestoreCallingIdentity(token);
         }
+        return true;
     }
 
     @Override
