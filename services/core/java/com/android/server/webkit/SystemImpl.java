@@ -184,15 +184,18 @@ public class SystemImpl implements SystemInterface {
 
     @Override
     public void uninstallAndDisablePackageForAllUsers(Context context, String packageName) {
-        context.getPackageManager().deletePackage(packageName,
-                new IPackageDeleteObserver.Stub() {
-            public void packageDeleted(String packageName, int returnCode) {
-                // Ignore returnCode since the deletion could fail, e.g. we might be trying
-                // to delete a non-updated system-package (and we should still disable the
-                // package)
-                enablePackageForAllUsers(context, packageName, false);
+        enablePackageForAllUsers(context, packageName, false);
+        try {
+            PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+            if (pm.getApplicationInfo(packageName, 0).isUpdatedSystemApp()) {
+                pm.deletePackage(packageName, new IPackageDeleteObserver.Stub() {
+                        public void packageDeleted(String packageName, int returnCode) {
+                            enablePackageForAllUsers(context, packageName, false);
+                        }
+                    }, PackageManager.DELETE_SYSTEM_APP | PackageManager.DELETE_ALL_USERS);
             }
-        }, PackageManager.DELETE_SYSTEM_APP | PackageManager.DELETE_ALL_USERS);
+        } catch (NameNotFoundException e) {
+        }
     }
 
     @Override
