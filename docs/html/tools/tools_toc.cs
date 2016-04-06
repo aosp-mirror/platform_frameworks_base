@@ -97,7 +97,7 @@
             <li><a href="<?cs var:toroot ?>tools/debugging/annotations.html">
               <span class="en">Improving Code Inspection with Annotations</span></a></li>
             <li><a href="<?cs var:toroot ?>tools/help/app-link-indexing.html">
-              <span class="en">Deep Link and App Indexing API Support</span></a></li>
+              <span class="en">Supporting URLs and App Indexing in Android Studio</span></a></li>
           </ul>
       </li>
 
