@@ -463,7 +463,6 @@ public class BugreportProgressService extends Service {
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
-                .setContentInfo(percentageText)
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true)
                 .setContentIntent(infoPendingIntent)
@@ -958,7 +957,7 @@ public class BugreportProgressService extends Service {
                 .setDeleteIntent(newCancelIntent(context, info));
 
         if (!TextUtils.isEmpty(info.name)) {
-            builder.setContentInfo(info.name);
+            builder.setSubText(info.name);
         }
 
         Log.v(TAG, "Sending 'Share' notification for ID " + info.id + ": " + title);
