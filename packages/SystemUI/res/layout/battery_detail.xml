@@ -26,9 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="72dp"
-        android:paddingBottom="@dimen/battery_detail_graph_space_top"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="?android:attr/colorAccent" />
+
+    <com.android.systemui.ResizingSpace
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/battery_detail_graph_space_top" />
 
     <com.android.settingslib.graph.UsageView
         android:id="@+id/battery_usage"
@@ -40,11 +43,14 @@
         android:colorAccent="?android:attr/colorAccent"
         systemui:textColor="#66FFFFFF" />
 
+    <com.android.systemui.ResizingSpace
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/battery_detail_graph_space_bottom" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
-        android:layout_marginTop="@dimen/battery_detail_graph_space_bottom"
         android:layout_marginBottom="8dp" />
 
     <RelativeLayout

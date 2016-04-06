@@ -172,6 +172,7 @@
 
     <dimen name="qs_tile_height">88dp</dimen>
     <dimen name="qs_tile_margin">16dp</dimen>
+    <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_date_anim_translation">32dp</dimen>
@@ -201,10 +202,12 @@
     <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
     <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
     <dimen name="qs_detail_empty_text_size">14sp</dimen>
+    <dimen name="qs_detail_margin_top">28dp</dimen>
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
     <dimen name="qs_expand_margin">0dp</dimen>
     <dimen name="qs_battery_padding">2dp</dimen>
+    <dimen name="qs_detail_items_padding_top">4dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>

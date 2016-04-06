@@ -100,7 +100,13 @@ public class QSContainer extends FrameLayout {
         // Since we control our own bottom, be whatever size we want.
         // Otherwise the QSPanel ends up with 0 height when the window is only the
         // size of the status bar.
-        super.onMeasure(widthMeasureSpec, MeasureSpec.UNSPECIFIED);
+        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED));
+        int width = mQSPanel.getMeasuredWidth();
+        int height = ((LayoutParams) mQSPanel.getLayoutParams()).topMargin
+                + mQSPanel.getMeasuredHeight();
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
         // QSCustomizer is always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QSContainer.
