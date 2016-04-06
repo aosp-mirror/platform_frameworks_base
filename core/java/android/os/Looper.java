@@ -72,6 +72,7 @@ public final class Looper {
     final Thread mThread;
 
     private Printer mLogging;
+    private long mTraceTag;
 
      /** Initialize the current thread as a looper.
       * This gives you a chance to create handlers that then reference
@@ -139,13 +140,23 @@ public final class Looper {
             }
 
             // This must be in a local variable, in case a UI event sets the logger
-            Printer logging = me.mLogging;
+            final Printer logging = me.mLogging;
             if (logging != null) {
                 logging.println(">>>>> Dispatching to " + msg.target + " " +
                         msg.callback + ": " + msg.what);
             }
 
-            msg.target.dispatchMessage(msg);
+            final long traceTag = me.mTraceTag;
+            if (traceTag != 0) {
+                Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
+            }
+            try {
+                msg.target.dispatchMessage(msg);
+            } finally {
+                if (traceTag != 0) {
+                    Trace.traceEnd(traceTag);
+                }
+            }
 
             if (logging != null) {
                 logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
@@ -206,6 +217,11 @@ public final class Looper {
      */
     public void setMessageLogging(@Nullable Printer printer) {
         mLogging = printer;
+    }
+
+    /** {@hide} */
+    public void setTraceTag(long traceTag) {
+        mTraceTag = traceTag;
     }
 
     /**
