@@ -1131,9 +1131,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 String tagDAM = parser.getName();
                 if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tagDAM)) {
-                    PersistableBundle bundle = new PersistableBundle();
-                    bundle.restoreFromXml(parser);
-                    result.options = bundle;
+                    result.options = PersistableBundle.restoreFromXml(parser);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
                 }
@@ -6408,17 +6406,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setTrustAgentConfiguration(ComponentName admin, ComponentName agent,
-            PersistableBundle args) {
+            PersistableBundle args, boolean parent) {
         if (!mHasFeature) {
             return;
         }
         Preconditions.checkNotNull(admin, "admin is null");
         Preconditions.checkNotNull(agent, "agent is null");
         final int userHandle = UserHandle.getCallingUserId();
-        enforceNotManagedProfile(userHandle, "set trust agent configuration");
         synchronized (this) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
-                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
+                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
             ap.trustAgentInfos.put(agent.flattenToString(), new TrustAgentInfo(args));
             saveSettingsLocked(userHandle);
         }
@@ -6426,7 +6423,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
-            ComponentName agent, int userHandle) {
+            ComponentName agent, int userHandle, boolean parent) {
         if (!mHasFeature) {
             return null;
         }
@@ -6436,46 +6433,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             final String componentName = agent.flattenToString();
             if (admin != null) {
-                final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle);
+                final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle, parent);
                 if (ap == null) return null;
                 TrustAgentInfo trustAgentInfo = ap.trustAgentInfos.get(componentName);
                 if (trustAgentInfo == null || trustAgentInfo.options == null) return null;
-                List<PersistableBundle> result = new ArrayList<PersistableBundle>();
+                List<PersistableBundle> result = new ArrayList<>();
                 result.add(trustAgentInfo.options);
                 return result;
             }
 
             // Return strictest policy for this user and profiles that are visible from this user.
-            final List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             List<PersistableBundle> result = null;
-
             // Search through all admins that use KEYGUARD_DISABLE_TRUST_AGENTS and keep track
             // of the options. If any admin doesn't have options, discard options for the rest
             // and return null.
+            List<ActiveAdmin> admins =
+                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
             boolean allAdminsHaveOptions = true;
-            for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
-                final int N = policy.mAdminList.size();
-                for (int i=0; i < N; i++) {
-                    final ActiveAdmin active = policy.mAdminList.get(i);
-                    final boolean disablesTrust = (active.disabledKeyguardFeatures
-                            & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
-                    final TrustAgentInfo info = active.trustAgentInfos.get(componentName);
-                    if (info != null && info.options != null && !info.options.isEmpty()) {
-                        if (disablesTrust) {
-                            if (result == null) {
-                                result = new ArrayList<PersistableBundle>();
-                            }
-                            result.add(info.options);
-                        } else {
-                            Log.w(LOG_TAG, "Ignoring admin " + active.info
-                                    + " because it has trust options but doesn't declare "
-                                    + "KEYGUARD_DISABLE_TRUST_AGENTS");
+            final int N = admins.size();
+            for (int i = 0; i < N; i++) {
+                final ActiveAdmin active = admins.get(i);
+
+                final boolean disablesTrust = (active.disabledKeyguardFeatures
+                        & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
+                final TrustAgentInfo info = active.trustAgentInfos.get(componentName);
+                if (info != null && info.options != null && !info.options.isEmpty()) {
+                    if (disablesTrust) {
+                        if (result == null) {
+                            result = new ArrayList<>();
                         }
-                    } else if (disablesTrust) {
-                        allAdminsHaveOptions = false;
-                        break;
+                        result.add(info.options);
+                    } else {
+                        Log.w(LOG_TAG, "Ignoring admin " + active.info
+                                + " because it has trust options but doesn't declare "
+                                + "KEYGUARD_DISABLE_TRUST_AGENTS");
                     }
+                } else if (disablesTrust) {
+                    allAdminsHaveOptions = false;
+                    break;
                 }
             }
             return allAdminsHaveOptions ? result : null;
