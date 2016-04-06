@@ -2017,7 +2017,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowStateAnimator winAnimator = win.mWinAnimator;
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
-            prepareWindowReplacementTransition(atoken);
+            // Check if we need to prepare a transition for replacing window first.
+            if (atoken != null && !prepareWindowReplacementTransition(atoken)) {
+                // If not, check if need to set up a dummy transition during display freeze
+                // so that the unfreeze wait for the apps to draw. This might be needed if
+                // the app is relaunching.
+                prepareNoneTransitionForRelaunching(atoken);
+            }
 
             if (displayContent.isDefaultDisplay) {
                 if (mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
@@ -2077,10 +2083,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return res;
     }
 
-    private void prepareWindowReplacementTransition(AppWindowToken atoken) {
-        if (atoken == null) {
-            return;
-        }
+    /**
+     * Returns true if we're done setting up any transitions.
+     */
+    private boolean prepareWindowReplacementTransition(AppWindowToken atoken) {
         atoken.allDrawn = false;
         WindowState replacedWindow = null;
         for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
@@ -2093,7 +2099,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (replacedWindow == null) {
             // We expect to already receive a request to remove the old window. If it did not
             // happen, let's just simply add a window.
-            return;
+            return false;
         }
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
@@ -2105,6 +2111,19 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
         executeAppTransition();
+        return true;
+    }
+
+    private void prepareNoneTransitionForRelaunching(AppWindowToken atoken) {
+        // Set up a none-transition and add the app to opening apps, so that the display
+        // unfreeze wait for the apps to be drawn.
+        // Note that if the display unfroze already because app unfreeze timed out,
+        // we don't set up the transition anymore and just let it go.
+        if (mDisplayFrozen && !mOpeningApps.contains(atoken) && atoken.isRelaunching()) {
+            mOpeningApps.add(atoken);
+            prepareAppTransition(AppTransition.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT);
+            executeAppTransition();
+        }
     }
 
     /**
@@ -9391,6 +9410,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
+                "startFreezingDisplayLocked: inTransaction=" + inTransaction
+                + " exitAnim=" + exitAnim + " enterAnim=" + enterAnim
+                + " called by " + Debug.getCallers(8));
         mScreenFrozenLock.acquire();
 
         mDisplayFrozen = true;
@@ -9460,6 +9483,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", mOpeningApps.size()=" + mOpeningApps.size());
             return;
         }
+
+        if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
+                "stopFreezingDisplayLocked: Unfreezing now");
 
         mDisplayFrozen = false;
         mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
