@@ -117,7 +117,7 @@ public:
 
     void debugDumpLayers(const char* prefix);
 
-    ANDROID_API void setStagingDisplayList(DisplayList* newData);
+    ANDROID_API void setStagingDisplayList(DisplayList* newData, TreeObserver* observer);
 
     void computeOrdering();
 

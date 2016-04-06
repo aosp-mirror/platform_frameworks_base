@@ -146,7 +146,7 @@ public:
         if (setup) {
             TestCanvas canvas(props.getWidth(), props.getHeight());
             setup(props, canvas);
-            node->setStagingDisplayList(canvas.finishRecording());
+            node->setStagingDisplayList(canvas.finishRecording(), nullptr);
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
@@ -157,7 +157,7 @@ public:
        TestCanvas canvas(node.stagingProperties().getWidth(),
                node.stagingProperties().getHeight());
        contentCallback(canvas);
-       node.setStagingDisplayList(canvas.finishRecording());
+       node.setStagingDisplayList(canvas.finishRecording(), nullptr);
     }
 
     /**
