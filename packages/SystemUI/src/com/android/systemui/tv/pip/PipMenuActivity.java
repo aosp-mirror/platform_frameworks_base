@@ -30,6 +30,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private final PipManager mPipManager = PipManager.getInstance();
 
     private PipControlsView mPipControlsView;
+    private boolean mRestorePipSizeWhenClose;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -38,12 +39,21 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mPipManager.addListener(this);
 
         mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
+        mRestorePipSizeWhenClose = true;
+    }
+
+    private void restorePipAndFinish() {
+        if (mRestorePipSizeWhenClose) {
+            // When PIP menu activity is closed, restore to the default position.
+            mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
+        }
+        finish();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        finish();
+        restorePipAndFinish();
     }
 
     @Override
@@ -52,6 +62,11 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mPipManager.removeListener(this);
         mPipManager.resumePipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+    }
+
+    @Override
+    public void onBackPressed() {
+        restorePipAndFinish();
     }
 
     @Override
@@ -67,6 +82,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onMoveToFullscreen() {
+        // Moving PIP to fullscreen is implemented by resizing PINNED_STACK with null bounds.
+        // This conflicts with restoring PIP position, so disable it.
+        mRestorePipSizeWhenClose = false;
         finish();
     }
 
