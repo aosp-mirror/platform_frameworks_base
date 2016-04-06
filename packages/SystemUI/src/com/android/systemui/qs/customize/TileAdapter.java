@@ -105,7 +105,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     public void saveSpecs(QSTileHost host) {
         List<String> newSpecs = new ArrayList<>();
-        for (int i = 0; mTiles.get(i) != null; i++) {
+        for (int i = 0; i < mTiles.size() && mTiles.get(i) != null; i++) {
             newSpecs.add(mTiles.get(i).spec);
         }
         host.changeTiles(mCurrentSpecs, newSpecs);
