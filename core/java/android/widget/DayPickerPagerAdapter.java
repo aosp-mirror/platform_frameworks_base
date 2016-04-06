@@ -148,18 +148,22 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     void setCalendarTextColor(ColorStateList calendarTextColor) {
         mCalendarTextColor = calendarTextColor;
+        notifyDataSetChanged();
     }
 
     void setDaySelectorColor(ColorStateList selectorColor) {
         mDaySelectorColor = selectorColor;
+        notifyDataSetChanged();
     }
 
     void setMonthTextAppearance(int resId) {
         mMonthTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     void setDayOfWeekTextAppearance(int resId) {
         mDayOfWeekTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     int getDayOfWeekTextAppearance() {
@@ -168,6 +172,7 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     void setDayTextAppearance(int resId) {
         mDayTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     int getDayTextAppearance() {
