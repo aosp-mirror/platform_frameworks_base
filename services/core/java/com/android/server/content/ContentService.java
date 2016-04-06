@@ -73,7 +73,8 @@ import java.util.List;
  * {@hide}
  */
 public final class ContentService extends IContentService.Stub {
-    private static final String TAG = "ContentService";
+    static final String TAG = "ContentService";
+    static final boolean DEBUG = false;
 
     public static class Lifecycle extends SystemService {
         private ContentService mContentService;
@@ -339,12 +340,10 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public void notifyChange(Uri uri, IContentObserver observer,
-                             boolean observerWantsSelfNotifications, boolean syncToNetwork,
+                             boolean observerWantsSelfNotifications, int flags,
                              int userHandle) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Notifying update of " + uri + " for user " + userHandle
-                    + " from observer " + observer + ", syncToNetwork " + syncToNetwork);
-        }
+        if (DEBUG) Slog.d(TAG, "Notifying update of " + uri + " for user " + userHandle
+                + " from observer " + observer + ", flags " + Integer.toHexString(flags));
 
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -373,16 +372,15 @@ public final class ContentService extends IContentService.Stub {
             ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
             synchronized (mRootNode) {
                 mRootNode.collectObserversLocked(uri, 0, observer, observerWantsSelfNotifications,
-                        userHandle, calls);
+                        flags, userHandle, calls);
             }
             final int numCalls = calls.size();
             for (int i=0; i<numCalls; i++) {
                 ObserverCall oc = calls.get(i);
                 try {
                     oc.mObserver.onChange(oc.mSelfChange, uri, userHandle);
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "Notified " + oc.mObserver + " of " + "update at " + uri);
-                    }
+                    if (DEBUG) Slog.d(TAG, "Notified " + oc.mObserver + " of " + "update at "
+                            + uri);
                 } catch (RemoteException ex) {
                     synchronized (mRootNode) {
                         Log.w(TAG, "Found dead observer, removing");
@@ -401,7 +399,7 @@ public final class ContentService extends IContentService.Stub {
                     }
                 }
             }
-            if (syncToNetwork) {
+            if ((flags&ContentResolver.NOTIFY_SYNC_TO_NETWORK) != 0) {
                 SyncManager syncManager = getSyncManager();
                 if (syncManager != null) {
                     syncManager.scheduleLocalSync(null /* all accounts */, callingUserHandle, uid,
@@ -420,7 +418,8 @@ public final class ContentService extends IContentService.Stub {
 
     public void notifyChange(Uri uri, IContentObserver observer,
                              boolean observerWantsSelfNotifications, boolean syncToNetwork) {
-        notifyChange(uri, observer, observerWantsSelfNotifications, syncToNetwork,
+        notifyChange(uri, observer, observerWantsSelfNotifications,
+                syncToNetwork ? ContentResolver.NOTIFY_SYNC_TO_NETWORK : 0,
                 UserHandle.getCallingUserId());
     }
 
@@ -1064,14 +1063,14 @@ public final class ContentService extends IContentService.Stub {
             for (int i = 0; i < packageCache.size();) {
                 final Pair<String, Uri> key = packageCache.keyAt(i);
                 if (key.second != null && key.second.toString().startsWith(uri.toString())) {
-                    Slog.d(TAG, "Invalidating cache for key " + key);
+                    if (DEBUG) Slog.d(TAG, "Invalidating cache for key " + key);
                     packageCache.removeAt(i);
                 } else {
                     i++;
                 }
             }
         } else {
-            Slog.d(TAG, "Invalidating cache for package " + providerPackageName);
+            if (DEBUG) Slog.d(TAG, "Invalidating cache for package " + providerPackageName);
             packageCache.clear();
         }
     }
@@ -1310,8 +1309,8 @@ public final class ContentService extends IContentService.Stub {
         }
 
         private void collectMyObserversLocked(boolean leaf, IContentObserver observer,
-                                              boolean observerWantsSelfNotifications, int targetUserHandle,
-                                              ArrayList<ObserverCall> calls) {
+                                              boolean observerWantsSelfNotifications, int flags,
+                                              int targetUserHandle, ArrayList<ObserverCall> calls) {
             int N = mObservers.size();
             IBinder observerBinder = observer == null ? null : observer.asBinder();
             for (int i = 0; i < N; i++) {
@@ -1329,9 +1328,29 @@ public final class ContentService extends IContentService.Stub {
                         || entry.userHandle == UserHandle.USER_ALL
                         || targetUserHandle == entry.userHandle) {
                     // Make sure the observer is interested in the notification
-                    if (leaf || (!leaf && entry.notifyForDescendants)) {
-                        calls.add(new ObserverCall(this, entry.observer, selfChange));
+                    if (leaf) {
+                        // If we are at the leaf: we always report, unless the sender has asked
+                        // to skip observers that are notifying for descendants (since they will
+                        // be sending another more specific URI for them).
+                        if ((flags&ContentResolver.NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS) != 0
+                                && entry.notifyForDescendants) {
+                            if (DEBUG) Slog.d(TAG, "Skipping " + entry.observer
+                                    + ": skip notify for descendants");
+                            continue;
+                        }
+                    } else {
+                        // If we are not at the leaf: we report if the observer says it wants
+                        // to be notified for all descendants.
+                        if (!entry.notifyForDescendants) {
+                            if (DEBUG) Slog.d(TAG, "Skipping " + entry.observer
+                                    + ": not monitor descendants");
+                            continue;
+                        }
                     }
+                    if (DEBUG) Slog.d(TAG, "Reporting to " + entry.observer + ": leaf=" + leaf
+                            + " flags=" + Integer.toHexString(flags)
+                            + " desc=" + entry.notifyForDescendants);
+                    calls.add(new ObserverCall(this, entry.observer, selfChange));
                 }
             }
         }
@@ -1340,19 +1359,22 @@ public final class ContentService extends IContentService.Stub {
          * targetUserHandle is either a hard user handle or is USER_ALL
          */
         public void collectObserversLocked(Uri uri, int index, IContentObserver observer,
-                                           boolean observerWantsSelfNotifications, int targetUserHandle,
-                                           ArrayList<ObserverCall> calls) {
+                                           boolean observerWantsSelfNotifications, int flags,
+                                           int targetUserHandle, ArrayList<ObserverCall> calls) {
             String segment = null;
             int segmentCount = countUriSegments(uri);
             if (index >= segmentCount) {
                 // This is the leaf node, notify all observers
+                if (DEBUG) Slog.d(TAG, "Collecting leaf observers @ #" + index + ", node " + mName);
                 collectMyObserversLocked(true, observer, observerWantsSelfNotifications,
-                        targetUserHandle, calls);
+                        flags, targetUserHandle, calls);
             } else if (index < segmentCount){
                 segment = getUriSegment(uri, index);
+                if (DEBUG) Slog.d(TAG, "Collecting non-leaf observers @ #" + index + " / "
+                        + segment);
                 // Notify any observers at this level who are interested in descendants
                 collectMyObserversLocked(false, observer, observerWantsSelfNotifications,
-                        targetUserHandle, calls);
+                        flags, targetUserHandle, calls);
             }
 
             int N = mChildren.size();
@@ -1360,8 +1382,8 @@ public final class ContentService extends IContentService.Stub {
                 ObserverNode node = mChildren.get(i);
                 if (segment == null || node.mName.equals(segment)) {
                     // We found the child,
-                    node.collectObserversLocked(uri, index + 1,
-                            observer, observerWantsSelfNotifications, targetUserHandle, calls);
+                    node.collectObserversLocked(uri, index + 1, observer,
+                            observerWantsSelfNotifications, flags, targetUserHandle, calls);
                     if (segment != null) {
                         break;
                     }

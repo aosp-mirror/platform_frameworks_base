@@ -74,7 +74,7 @@ public class TimeController extends StateController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus job, JobStatus lastJob) {
         if (job.hasTimingDelayConstraint() || job.hasDeadlineConstraint()) {
-            maybeStopTrackingJobLocked(job, false);
+            maybeStopTrackingJobLocked(job, null, false);
             boolean isInsert = false;
             ListIterator<JobStatus> it = mTrackedJobs.listIterator(mTrackedJobs.size());
             while (it.hasPrevious()) {
@@ -101,7 +101,7 @@ public class TimeController extends StateController {
      * Really an == comparison should be enough, but why play with fate? We'll do <=.
      */
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus job, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus job, JobStatus incomingJob, boolean forUpdate) {
         if (mTrackedJobs.remove(job)) {
             checkExpiredDelaysAndResetAlarm();
             checkExpiredDeadlinesAndResetAlarm();
