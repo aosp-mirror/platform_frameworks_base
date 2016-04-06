@@ -2977,17 +2977,21 @@ public class DevicePolicyManager {
      * @return {@code true} if the package is set as always-on VPN controller; {@code false}
      *         otherwise.
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     * @throws NameNotFoundException if {@code vpnPackage} is not installed.
+     * @throws UnsupportedOperationException if {@code vpnPackage} exists but does not support being
+     *         set as always-on, or if always-on VPN is not available.
      */
-    public boolean setAlwaysOnVpnPackage(@NonNull ComponentName admin,
-            @Nullable String vpnPackage) {
+    public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
+            throws NameNotFoundException, UnsupportedOperationException {
         if (mService != null) {
             try {
-                return mService.setAlwaysOnVpnPackage(admin, vpnPackage);
+                if (!mService.setAlwaysOnVpnPackage(admin, vpnPackage)) {
+                    throw new NameNotFoundException(vpnPackage);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return false;
     }
 
     /**
