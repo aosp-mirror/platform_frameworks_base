@@ -595,6 +595,12 @@ class Task implements DimLayer.DimLayerUser {
                 if (win.mHasSurface && !resizingWindows.contains(win)) {
                     if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + win);
                     resizingWindows.add(win);
+
+                    // If we are not drag resizing, force recreating of a new surface so updating
+                    // the content and positioning that surface will be in sync.
+                    if (!win.computeDragResizing()) {
+                        win.mResizedWhileNotDragResizing = true;
+                    }
                 }
                 if (win.isGoneForLayoutLw()) {
                     win.mResizedWhileGone = true;

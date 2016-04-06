@@ -2935,8 +2935,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // If we're starting a drag-resize, we'll be changing the surface size as well as
         // notifying the client to render to with an offset from the surface's top-left.
-        if (win.isDragResizeChanged()) {
+        if (win.isDragResizeChanged() || win.mResizedWhileNotDragResizing) {
             win.setDragResizing();
+            win.mResizedWhileNotDragResizing = false;
             // We can only change top level windows to the full-screen surface when
             // resizing (as we only have one full-screen surface). So there is no need
             // to preserve and destroy windows which are attached to another, they
@@ -9021,7 +9022,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     || winAnimator.mSurfaceResized
                     || w.mOutsetsChanged
                     || configChanged
-                    || dragResizingChanged) {
+                    || dragResizingChanged
+                    || w.mResizedWhileNotDragResizing) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slog.v(TAG_WM, "Resize reasons for w=" + w + ": "
                             + " contentInsetsChanged=" + w.mContentInsetsChanged
@@ -9055,7 +9057,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // the display until this window has been redrawn; to do that,
                 // we need to go through the process of getting informed by the
                 // application when it has finished drawing.
-                if (w.mOrientationChanging || dragResizingChanged) {
+                if (w.mOrientationChanging || dragResizingChanged
+                        || w.mResizedWhileNotDragResizing) {
                     if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                         Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                                 + ", mDrawState=DRAW_PENDING in " + w
