@@ -1870,6 +1870,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return keyCode == KeyEvent.KEYCODE_META_LEFT || keyCode == KeyEvent.KEYCODE_META_RIGHT;
     }
 
+    /** @hide */
+    public static final boolean isAltKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT;
+    }
+
     /** {@inheritDoc} */
     @Override
     public final int getDeviceId() {
