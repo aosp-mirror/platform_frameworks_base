@@ -2353,6 +2353,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDragResizing;
     }
 
+    boolean isDockedResizing() {
+        return mDragResizing && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+    }
+
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         final TaskStack stack = getStack();
         pw.print(prefix); pw.print("mDisplayId="); pw.print(getDisplayId());
