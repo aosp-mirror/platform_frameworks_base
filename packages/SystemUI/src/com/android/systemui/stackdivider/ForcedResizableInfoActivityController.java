@@ -20,12 +20,14 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.widget.Toast;
 
+import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
-import com.android.systemui.recents.events.activity.ForcedResizableEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.stackdivider.events.StartedDragingEvent;
 import com.android.systemui.stackdivider.events.StoppedDragingEvent;
 
@@ -53,20 +55,24 @@ public class ForcedResizableInfoActivityController {
     public ForcedResizableInfoActivityController(Context context) {
         mContext = context;
         EventBus.getDefault().register(this);
+        SystemServicesProxy.getInstance(context).registerTaskStackListener(
+                new TaskStackListener() {
+                    @Override
+                    public void onActivityForcedResizable(String packageName, int taskId) {
+                        activityForcedResizable(packageName, taskId);
+                    }
+
+                    @Override
+                    public void onActivityDismissingDockedStack() {
+                        activityDismissingDockedStack();
+                    }
+                });
     }
 
     public void notifyDockedStackExistsChanged(boolean exists) {
         if (!exists) {
             mPackagesShownInSession.clear();
         }
-    }
-
-    public final void onBusEvent(ForcedResizableEvent forcedResizableEvent) {
-        if (debounce(forcedResizableEvent.packageName)) {
-            return;
-        }
-        mPendingTaskIds.add(forcedResizableEvent.taskId);
-        postTimeout();
     }
 
     public final void onBusEvent(AppTransitionFinishedEvent event) {
@@ -83,6 +89,20 @@ public class ForcedResizableInfoActivityController {
     public final void onBusEvent(StoppedDragingEvent event) {
         mDividerDraging = false;
         showPending();
+    }
+
+    private void activityForcedResizable(String packageName, int taskId) {
+        if (debounce(packageName)) {
+            return;
+        }
+        mPendingTaskIds.add(taskId);
+        postTimeout();
+    }
+
+    private void activityDismissingDockedStack() {
+        Toast toast = Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
+                Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private void showPending() {

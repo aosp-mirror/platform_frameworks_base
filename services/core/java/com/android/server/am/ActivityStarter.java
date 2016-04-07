@@ -986,7 +986,7 @@ class ActivityStarter {
             }
             top.deliverNewIntentLocked(
                     mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
-            mSupervisor.showNonResizeableDockToastIfNeeded(mStartActivity.task,
+            mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.task,
                     preferredLaunchStackId, topStack.mStackId);
             return START_DELIVERED_TO_TOP;
         }
@@ -1074,7 +1074,7 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        mSupervisor.showNonResizeableDockToastIfNeeded(
+        mSupervisor.handleNonResizableTaskIfNeeded(
                 mStartActivity.task, preferredLaunchStackId, mTargetStack.mStackId);
 
         return START_SUCCESS;
@@ -1381,6 +1381,9 @@ class ActivityStarter {
                     + " from " + intentActivity);
             mTargetStack.moveToFront("intentActivityFound");
         }
+
+        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.task, INVALID_STACK_ID,
+                mTargetStack.mStackId);
 
         // If the caller has requested that the target task be reset, then do so.
         if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
