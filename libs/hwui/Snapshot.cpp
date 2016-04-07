@@ -242,6 +242,33 @@ void Snapshot::setProjectionPathMask(LinearAllocator& allocator, const SkPath* p
 #endif
 }
 
+static Snapshot* getClipRoot(Snapshot* target) {
+    while (target->previous && target->previous->previous) {
+        target = target->previous;
+    }
+    return target;
+}
+
+const ClipBase* Snapshot::serializeIntersectedClip(LinearAllocator& allocator,
+        const ClipBase* recordedClip, const Matrix4& recordedClipTransform) {
+    auto target = this;
+    if (CC_UNLIKELY(recordedClip && recordedClip->intersectWithRoot)) {
+        // Clip must be intersected with root, instead of current clip.
+        target = getClipRoot(this);
+    }
+
+    return target->mClipArea->serializeIntersectedClip(allocator,
+            recordedClip, recordedClipTransform);
+}
+
+void Snapshot::applyClip(const ClipBase* recordedClip, const Matrix4& transform) {
+    if (CC_UNLIKELY(recordedClip && recordedClip->intersectWithRoot)) {
+        // current clip is being replaced, but must intersect with clip root
+        *mClipArea = *(getClipRoot(this)->mClipArea);
+    }
+    mClipArea->applyClip(recordedClip, transform);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Queries
 ///////////////////////////////////////////////////////////////////////////////
