@@ -45,6 +45,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -226,7 +227,8 @@ public class DirectoryFragment extends Fragment
         mStateKey = buildStateKey(mRoot, mDocument);
         mQuery = args.getString(Shared.EXTRA_QUERY);
         mType = args.getInt(Shared.EXTRA_TYPE);
-        mSelection = args.getParcelable(Shared.EXTRA_SELECTION);
+        final Selection selection = args.getParcelable(Shared.EXTRA_SELECTION);
+        mSelection = selection != null ? selection : new Selection();
         mSearchMode = args.getBoolean(Shared.EXTRA_SEARCH_MODE);
 
         mIconHelper = new IconHelper(context, MODE_GRID);
@@ -290,14 +292,25 @@ public class DirectoryFragment extends Fragment
         outState.putParcelable(Shared.EXTRA_ROOT, mRoot);
         outState.putParcelable(Shared.EXTRA_DOC, mDocument);
         outState.putString(Shared.EXTRA_QUERY, mQuery);
-        outState.putParcelable(Shared.EXTRA_SELECTION, mSelection);
-        outState.putBoolean(Shared.EXTRA_SEARCH_MODE, mSearchMode);
 
+        // Workaround. To avoid crash, write only up to 512 KB of selection.
+        // If more files are selected, then the selection will be lost.
+        final Parcel parcel = Parcel.obtain();
+        try {
+            mSelection.writeToParcel(parcel, 0);
+            if (parcel.dataSize() <= 512 * 1024) {
+                outState.putParcelable(Shared.EXTRA_SELECTION, mSelection);
+            }
+        } finally {
+            parcel.recycle();
+        }
+
+        outState.putBoolean(Shared.EXTRA_SEARCH_MODE, mSearchMode);
     }
 
     @Override
     public void onActivityResult(@RequestCode int requestCode, int resultCode, Intent data) {
-        switch(requestCode) {
+        switch (requestCode) {
             case REQUEST_COPY_DESTINATION:
                 handleCopyResult(resultCode, data);
                 break;
