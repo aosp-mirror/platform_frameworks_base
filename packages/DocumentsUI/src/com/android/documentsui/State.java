@@ -123,9 +123,6 @@ public class State implements android.os.Parcelable {
     /** Instance state for every shown directory */
     public HashMap<String, SparseArray<Parcelable>> dirState = new HashMap<>();
 
-    /** UI selection */
-    public Selection selectedDocuments = new Selection();
-
     /** Currently copying file */
     public List<DocumentInfo> selectedDocumentsForCopy = new ArrayList<>();
 
@@ -202,7 +199,6 @@ public class State implements android.os.Parcelable {
         out.writeInt(external ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
         out.writeMap(dirState);
-        out.writeParcelable(selectedDocuments, 0);
         out.writeList(selectedDocumentsForCopy);
         out.writeList(excludedAuthorities);
         out.writeInt(openableOnly ? 1 : 0);
@@ -233,7 +229,6 @@ public class State implements android.os.Parcelable {
             state.external = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             in.readMap(state.dirState, loader);
-            state.selectedDocuments = in.readParcelable(loader);
             in.readList(state.selectedDocumentsForCopy, loader);
             in.readList(state.excludedAuthorities, loader);
             state.openableOnly = in.readInt() != 0;
