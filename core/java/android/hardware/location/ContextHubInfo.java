@@ -345,6 +345,24 @@ public class ContextHubInfo {
         mMemoryRegions = Arrays.copyOf(memoryRegions, memoryRegions.length);
     }
 
+    @Override
+    public String toString() {
+      String retVal = "";
+      retVal += "Id : " + mId;
+      retVal += ", Name : " + mName;
+      retVal += "\n\tVendor : " + mVendor;
+      retVal += ", ToolChain : " + mToolchain;
+      retVal += "\n\tPlatformVersion : " + mPlatformVersion;
+      retVal += ", StaticSwVersion : " + mStaticSwVersion;
+      retVal += "\n\tPeakMips : " + mPeakMips;
+      retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
+      retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
+      retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
+      retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
+
+      return retVal;
+    }
+
     private ContextHubInfo(Parcel in) {
         mId = in.readInt();
         mName = in.readString();

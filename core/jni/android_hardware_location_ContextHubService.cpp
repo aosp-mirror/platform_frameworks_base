@@ -382,6 +382,9 @@ int handle_os_message(uint32_t msgType, uint32_t hubHandle,
                       char *msg, int msgLen) {
     int retVal;
 
+    //ALOGD("Rcd OS message from hubHandle %" PRIu32 " type %" PRIu32 " length %d",
+    //      hubHandle, msgType, msgLen);
+
     switch(msgType) {
         case CONTEXT_HUB_APPS_ENABLE:
             retVal = 0;
@@ -633,7 +636,7 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
 
 
     if (numHeaderElements >= MSG_HEADER_SIZE) {
-        int setAddressSuccess;
+        bool setAddressSuccess;
         int hubId;
         hub_message_t msg;
 
@@ -654,7 +657,7 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
           ALOGD("Could not find app instance %d on hubHandle %d, setAddress %d",
                 header[HEADER_FIELD_APP_INSTANCE],
                 header[HEADER_FIELD_HUB_HANDLE],
-                setAddressSuccess);
+                (int)setAddressSuccess);
         }
     } else {
         ALOGD("Malformed header len");
