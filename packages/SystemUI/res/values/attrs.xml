@@ -97,5 +97,9 @@
     <declare-styleable name="DensityContainer">
         <attr name="android:layout" />
     </declare-styleable>
+
+    <declare-styleable name="AutoSizingList">
+        <attr name="itemHeight" format="dimension" />
+    </declare-styleable>
 </resources>
 
