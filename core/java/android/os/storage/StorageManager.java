@@ -83,6 +83,8 @@ public class StorageManager {
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
     /** {@hide} */
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
+    /** {@hide} */
+    public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -93,6 +95,10 @@ public class StorageManager {
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
     /** {@hide} */
     public static final int DEBUG_EMULATE_FBE = 1 << 1;
+    /** {@hide} */
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
+    /** {@hide} */
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
 
     // NOTE: keep in sync with installd
     /** {@hide} */
