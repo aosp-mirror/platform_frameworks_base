@@ -44,6 +44,7 @@ import com.android.internal.net.VpnProfile;
 interface IConnectivityManager
 {
     Network getActiveNetwork();
+    Network getActiveNetworkForUid(int uid);
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);

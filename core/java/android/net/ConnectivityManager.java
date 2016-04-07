@@ -767,6 +767,28 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns a {@link Network} object corresponding to the currently active
+     * default data network for a specific UID.  In the event that the default data
+     * network disconnects, the returned {@code Network} object will no longer
+     * be usable.  This will return {@code null} when there is no default
+     * network for the UID.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
+     *
+     * @return a {@link Network} object for the current default network for the
+     *         given UID or {@code null} if no default network is currently active
+     *
+     * @hide
+     */
+    public Network getActiveNetworkForUid(int uid) {
+        try {
+            return mService.getActiveNetworkForUid(uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Configures an always-on VPN connection through a specific application.
      * This connection is automatically granted and persisted after a reboot.
      *
