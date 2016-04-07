@@ -132,7 +132,7 @@ distributionUrl = https\://services.gradle.org/distributions/gradle-2.10-all.zip
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
-      alt=""/>Android Plugin for Gradle, Revision 2.0.0</a> <em>(March 2016)</em>
+      alt=""/>Android Plugin for Gradle, Revision 2.0.0</a> <em>(April 2016)</em>
   </p>
 
   <div class="toggle-content-toggleme">
