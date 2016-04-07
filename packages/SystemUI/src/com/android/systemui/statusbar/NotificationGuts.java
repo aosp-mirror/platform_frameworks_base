@@ -22,12 +22,14 @@ import android.app.INotificationManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
@@ -60,10 +62,18 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private int mActualHeight;
     private boolean mExposed;
     private INotificationManager mINotificationManager;
-    private int mStartingImportance;
+    private int mStartingUserImportance;
+    private int mNotificationImportance;
     private boolean mShowSlider;
 
     private SeekBar mSeekBar;
+    private ImageView mAutoButton;
+    private ColorStateList mActiveSliderTint;
+    private ColorStateList mInactiveSliderTint;
+    private TextView mImportanceSummary;
+    private TextView mImportanceTitle;
+    private boolean mAuto;
+
     private RadioButton mBlock;
     private RadioButton mSilent;
     private RadioButton mReset;
@@ -145,9 +155,14 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     void bindImportance(final PackageManager pm, final StatusBarNotification sbn,
             final ExpandableNotificationRow row, final int importance) {
-        mStartingImportance = importance;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mStartingUserImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+        try {
+            mStartingUserImportance =
+                    mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
+        } catch (RemoteException e) {}
+        mNotificationImportance = importance;
         boolean systemApp = false;
         try {
             final PackageInfo info =
@@ -160,29 +175,25 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         final View importanceSlider = row.findViewById(R.id.importance_slider);
         final View importanceButtons = row.findViewById(R.id.importance_buttons);
         if (mShowSlider) {
-            bindSlider(importanceSlider, sbn, systemApp);
+            bindSlider(importanceSlider, systemApp);
             importanceSlider.setVisibility(View.VISIBLE);
             importanceButtons.setVisibility(View.GONE);
         } else {
-            mStartingImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-            try {
-                mStartingImportance =
-                        mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
-            } catch (RemoteException e) {}
-            bindToggles(importanceButtons, mStartingImportance, systemApp);
+
+            bindToggles(importanceButtons, mStartingUserImportance, systemApp);
             importanceButtons.setVisibility(View.VISIBLE);
             importanceSlider.setVisibility(View.GONE);
         }
     }
 
     public boolean hasImportanceChanged() {
-        return mStartingImportance != getSelectedImportance();
+        return mStartingUserImportance != getSelectedImportance();
     }
 
     void saveImportance(final StatusBarNotification sbn) {
         int progress = getSelectedImportance();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
-                progress - mStartingImportance);
+                progress - mStartingUserImportance);
         try {
             mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
         } catch (RemoteException e) {
@@ -192,14 +203,18 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     private int getSelectedImportance() {
         if (mSeekBar!= null && mSeekBar.isShown()) {
-            return mSeekBar.getProgress();
+            if (mSeekBar.isEnabled()) {
+                return mSeekBar.getProgress();
+            } else {
+                return Ranking.IMPORTANCE_UNSPECIFIED;
+            }
         } else {
             if (mBlock.isChecked()) {
-                return NotificationListenerService.Ranking.IMPORTANCE_NONE;
+                return Ranking.IMPORTANCE_NONE;
             } else if (mSilent.isChecked()) {
-                return NotificationListenerService.Ranking.IMPORTANCE_LOW;
+                return Ranking.IMPORTANCE_LOW;
             } else {
-                return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+                return Ranking.IMPORTANCE_UNSPECIFIED;
             }
         }
     }
@@ -229,16 +244,14 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
     }
 
-    private void bindSlider(final View importanceSlider, final StatusBarNotification sbn,
-            final boolean systemApp) {
-        final TextView importanceSummary = ((TextView) importanceSlider.findViewById(R.id.summary));
-        final TextView importanceTitle = ((TextView) importanceSlider.findViewById(R.id.title));
+    private void bindSlider(final View importanceSlider, final boolean systemApp) {
+        mActiveSliderTint = loadColorStateList(R.color.notification_guts_slider_color);
+        mInactiveSliderTint = loadColorStateList(R.color.notification_guts_disabled_slider_color);
+
+        mImportanceSummary = ((TextView) importanceSlider.findViewById(R.id.summary));
+        mImportanceTitle = ((TextView) importanceSlider.findViewById(R.id.title));
         mSeekBar = (SeekBar) importanceSlider.findViewById(R.id.seekbar);
 
-        if (systemApp) {
-            ((ImageView) importanceSlider.findViewById(R.id.low_importance)).getDrawable().setTint(
-                    mContext.getColor(R.color.notification_guts_disabled_icon_tint));
-        }
         final int minProgress = systemApp ?
                 NotificationListenerService.Ranking.IMPORTANCE_MIN
                 : NotificationListenerService.Ranking.IMPORTANCE_NONE;
@@ -267,42 +280,80 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                 // no-op
             }
 
-            private void updateTitleAndSummary(int progress) {
-                switch (progress) {
-                    case NotificationListenerService.Ranking.IMPORTANCE_NONE:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_blocked));
-                        importanceTitle.setText(mContext.getString(R.string.blocked_importance));
-                        break;
-                    case NotificationListenerService.Ranking.IMPORTANCE_MIN:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_min));
-                        importanceTitle.setText(mContext.getString(R.string.min_importance));
-                        break;
-                    case NotificationListenerService.Ranking.IMPORTANCE_LOW:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_low));
-                        importanceTitle.setText(mContext.getString(R.string.low_importance));
-                        break;
-                    case NotificationListenerService.Ranking.IMPORTANCE_DEFAULT:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_default));
-                        importanceTitle.setText(mContext.getString(R.string.default_importance));
-                        break;
-                    case NotificationListenerService.Ranking.IMPORTANCE_HIGH:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_high));
-                        importanceTitle.setText(mContext.getString(R.string.high_importance));
-                        break;
-                    case NotificationListenerService.Ranking.IMPORTANCE_MAX:
-                        importanceSummary.setText(mContext.getString(
-                                R.string.notification_importance_max));
-                        importanceTitle.setText(mContext.getString(R.string.max_importance));
-                        break;
-                }
+
+        });
+        mSeekBar.setProgress(mNotificationImportance);
+
+        mAutoButton = (ImageView) importanceSlider.findViewById(R.id.auto_importance);
+        mAutoButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAuto = !mAuto;
+                applyAuto();
             }
         });
-        mSeekBar.setProgress(mStartingImportance);
+        mAuto = mStartingUserImportance == Ranking.IMPORTANCE_UNSPECIFIED;
+        applyAuto();
+    }
+
+    private void applyAuto() {
+        mSeekBar.setEnabled(!mAuto);
+
+        final ColorStateList tint = mAuto ? mInactiveSliderTint : mActiveSliderTint;
+        Drawable icon = mAutoButton.getDrawable().mutate();
+        icon.setTintList(tint);
+        mAutoButton.setImageDrawable(icon);
+        mSeekBar.setProgressTintList(tint);
+        mSeekBar.setThumbTintList(tint);
+
+        if (mAuto) {
+            mSeekBar.setProgress(mNotificationImportance);
+            mImportanceSummary.setText(mContext.getString(
+                    R.string.notification_importance_user_unspecified));
+            mImportanceTitle.setText(mContext.getString(
+                    R.string.user_unspecified_importance));
+        } else {
+            updateTitleAndSummary(mSeekBar.getProgress());
+        }
+    }
+
+    private void updateTitleAndSummary(int progress) {
+        switch (progress) {
+            case Ranking.IMPORTANCE_NONE:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_blocked));
+                mImportanceTitle.setText(mContext.getString(R.string.blocked_importance));
+                break;
+            case Ranking.IMPORTANCE_MIN:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_min));
+                mImportanceTitle.setText(mContext.getString(R.string.min_importance));
+                break;
+            case Ranking.IMPORTANCE_LOW:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_low));
+                mImportanceTitle.setText(mContext.getString(R.string.low_importance));
+                break;
+            case Ranking.IMPORTANCE_DEFAULT:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_default));
+                mImportanceTitle.setText(mContext.getString(R.string.default_importance));
+                break;
+            case Ranking.IMPORTANCE_HIGH:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_high));
+                mImportanceTitle.setText(mContext.getString(R.string.high_importance));
+                break;
+            case Ranking.IMPORTANCE_MAX:
+                mImportanceSummary.setText(mContext.getString(
+                        R.string.notification_importance_max));
+                mImportanceTitle.setText(mContext.getString(R.string.max_importance));
+                break;
+        }
+    }
+
+    private ColorStateList loadColorStateList(int colorResId) {
+        return ColorStateList.valueOf(mContext.getColor(colorResId));
     }
 
     public void closeControls(int x, int y, boolean notify) {
@@ -353,7 +404,6 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     @Override
     public boolean hasOverlappingRendering() {
-
         // Prevents this view from creating a layer when alpha is animating.
         return false;
     }

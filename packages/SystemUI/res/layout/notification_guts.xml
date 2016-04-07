@@ -32,7 +32,7 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="14dp"
+            android:paddingTop="15dp"
             android:paddingEnd="8dp"
             android:id="@+id/notification_guts_header"
             android:orientation="horizontal"
@@ -99,6 +99,7 @@
             android:clickable="false"
             android:focusable="false"
             android:paddingEnd="8dp"
+            android:paddingTop="4dp"
             android:visibility="gone">
         <TextView
                 android:id="@+id/title"
@@ -123,21 +124,20 @@
 
         <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:paddingTop="8dp" >
 
             <ImageView
-                    android:id="@+id/low_importance"
-                    android:src="@*android:drawable/ic_notification_block"
+                    android:id="@+id/auto_importance"
+                    android:src="@drawable/notification_auto_importance"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:tint="@color/notification_guts_icon_tint"/>
+                    android:layout_width="48dp"
+                    android:layout_height="48dp" />
 
             <SeekBar
                     android:id="@+id/seekbar"
                     android:layout_marginStart="56dp"
-                    android:layout_marginEnd="56dp"
+                    android:layout_marginEnd="32dp"
                     android:layout_gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
@@ -148,14 +148,6 @@
                     android:progressTint="@color/notification_guts_slider_color"
                     style="@android:style/Widget.Material.SeekBar.Discrete"
                     android:tickMarkTint="@android:color/black" />
-
-            <ImageView
-                    android:id="@+id/max_importance"
-                    android:src="@*android:drawable/ic_notification_alert"
-                    android:layout_gravity="center_vertical|end"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:tint="@color/notification_guts_icon_tint" />
 
         </FrameLayout>
     </LinearLayout>
