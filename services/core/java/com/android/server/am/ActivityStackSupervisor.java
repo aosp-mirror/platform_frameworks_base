@@ -2270,7 +2270,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityRecord r = task.getTopActivity();
         final ActivityStack prevStack = task.stack;
         final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
-        final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
+        final boolean wasResumed = prevStack.mResumedActivity == r;
         // In some cases the focused stack isn't the front stack. E.g. pinned stack.
         // Whenever we are moving the top activity from the front stack we want to make sure to move
         // the stack to the front.
