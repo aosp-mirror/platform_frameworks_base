@@ -154,6 +154,8 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_BLUETOOTH_SERVICE_CLASS =
             "com.google.android.clockwork.bluetooth.WearBluetoothService";
+    private static final String WEAR_TIME_SERVICE_CLASS =
+            "com.google.android.clockwork.time.WearTimeService";
     private static final String ACCOUNT_SERVICE_CLASS =
             "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
@@ -1158,6 +1160,9 @@ public final class SystemServer {
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
             mSystemServiceManager.startService(WEAR_BLUETOOTH_SERVICE_CLASS);
+          if (!disableNonCoreServices) {
+              mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
+          }
         }
 
         // Before things start rolling, be sure we have decided whether
