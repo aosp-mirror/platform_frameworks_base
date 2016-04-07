@@ -71,6 +71,7 @@ public class ClipDescription implements Parcelable {
      * and {@link ComponentName#flattenToString()} to convert the extra value
      * to/from {@link ComponentName}.
      * </p>
+     * @hide
      */
     public static final String EXTRA_TARGET_COMPONENT_NAME =
             "android.content.extra.TARGET_COMPONENT_NAME";
@@ -81,6 +82,7 @@ public class ClipDescription implements Parcelable {
      * <p>
      * Type: long
      * </p>
+     * @hide
      */
     public static final String EXTRA_USER_SERIAL_NUMBER =
             "android.content.extra.USER_SERIAL_NUMBER";
