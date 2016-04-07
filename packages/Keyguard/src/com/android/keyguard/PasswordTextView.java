@@ -148,8 +148,9 @@ public class PasswordTextView extends View {
     protected void onDraw(Canvas canvas) {
         float totalDrawingWidth = getDrawingWidth();
         float currentDrawPosition;
-        if ((mGravity & Gravity.START) != 0) {
-            if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+        if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.LEFT) {
+            if ((mGravity & Gravity.RELATIVE_LAYOUT_DIRECTION) != 0
+                    && getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 currentDrawPosition = getWidth() - getPaddingRight() - totalDrawingWidth;
             } else {
                 currentDrawPosition = getPaddingLeft();
@@ -163,7 +164,7 @@ public class PasswordTextView extends View {
         float yPosition =
                 (getHeight() - getPaddingBottom() - getPaddingTop()) / 2 + getPaddingTop();
         canvas.clipRect(getPaddingLeft(), getPaddingTop(),
-                getWidth()-getPaddingRight(), getHeight()-getPaddingBottom());
+                getWidth() - getPaddingRight(), getHeight() - getPaddingBottom());
         float charLength = bounds.right - bounds.left;
         for (int i = 0; i < length; i++) {
             CharState charState = mTextChars.get(i);
