@@ -146,6 +146,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
+    private ObjectAnimator mDimAnimator;
+    private ObjectAnimator mOutlineAnimator;
     private final TaskViewTransform mTargetAnimationTransform = new TaskViewTransform();
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
@@ -308,14 +310,14 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         } else {
             // Both the progress and the update are a function of the bounds movement of the task
             if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
-                ObjectAnimator anim = ObjectAnimator.ofFloat(this, DIM_ALPHA, getDimAlpha(),
+                mDimAnimator = ObjectAnimator.ofFloat(this, DIM_ALPHA, getDimAlpha(),
                         toTransform.dimAlpha);
-                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, mDimAnimator));
             }
             if (Float.compare(mViewBounds.getAlpha(), toTransform.viewOutlineAlpha) != 0) {
-                ObjectAnimator anim = ObjectAnimator.ofFloat(this, VIEW_OUTLINE_ALPHA,
+                mOutlineAnimator = ObjectAnimator.ofFloat(this, VIEW_OUTLINE_ALPHA,
                         mViewBounds.getAlpha(), toTransform.viewOutlineAlpha);
-                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, mOutlineAnimator));
             }
             if (updateCallback != null) {
                 ValueAnimator updateCallbackAnim = ValueAnimator.ofInt(0, 1);
@@ -358,6 +360,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      */
     public void cancelTransformAnimation() {
         Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+        Utilities.cancelAnimationWithoutCallbacks(mOutlineAnimator);
     }
 
     /** Enables/disables handling touch on this task view. */
@@ -537,13 +541,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetEnterAnimation(TaskViewTransform transform, int duration,
             boolean screenPinningEnabled, ReferenceCountedTrigger postAnimationTrigger) {
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+
         // Dim the view after the app window transitions down into recents
         postAnimationTrigger.increment();
         AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
-        Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+        mDimAnimator = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
                 DIM_ALPHA_WITHOUT_HEADER, getDimAlpha(), transform.dimAlpha));
-        anim.addListener(postAnimationTrigger.decrementOnAnimationEnd());
-        anim.start();
+        mDimAnimator.addListener(postAnimationTrigger.decrementOnAnimationEnd());
+        mDimAnimator.start();
 
         if (screenPinningEnabled) {
             showActionButton(true /* fadeIn */, duration /* fadeInDuration */);
@@ -553,11 +559,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetLaunchAnimation(int duration, boolean screenPinningRequested,
             ReferenceCountedTrigger postAnimationTrigger) {
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+
         // Un-dim the view before/while launching the target
         AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
-        Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+        mDimAnimator = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
                 DIM_ALPHA, getDimAlpha(), 0));
-        anim.start();
+        mDimAnimator.start();
 
         postAnimationTrigger.increment();
         hideActionButton(true /* fadeOut */, duration,
