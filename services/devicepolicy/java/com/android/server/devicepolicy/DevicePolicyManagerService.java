@@ -215,7 +215,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
             = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
 
-    private static final int MONITORING_CERT_NOTIFICATION_ID = R.string.ssl_ca_cert_warning;
+    private static final int MONITORING_CERT_NOTIFICATION_ID = R.plurals.ssl_ca_cert_warning;
     private static final int PROFILE_WIPED_NOTIFICATION_ID = 1001;
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
@@ -2703,23 +2703,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Build and show a warning notification
             int smallIconId;
             String contentText;
-            // TODO Why does it use the DO name?  The cert APIs are all for PO. b/25772443
-            final String ownerName = getDeviceOwnerName();
-            if (isManagedProfile(userHandle.getIdentifier())) {
-                contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_administrator);
+            if (getProfileOwner(userHandle.getIdentifier()) != null) {
+                contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
+                        getProfileOwnerName(userHandle.getIdentifier()));
                 smallIconId = R.drawable.stat_sys_certificate_info;
-            } else if (ownerName != null) {
-                contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed, ownerName);
+            } else if (getDeviceOwnerUserId() == userHandle.getIdentifier()) {
+                contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
+                        getDeviceOwnerName());
                 smallIconId = R.drawable.stat_sys_certificate_info;
             } else {
                 contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_unknown);
                 smallIconId = android.R.drawable.stat_sys_warning;
             }
 
+            final int numberOfCertificates = pendingCertificates.size();
             Intent dialogIntent = new Intent(Settings.ACTION_MONITORING_CERT_INFO);
             dialogIntent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             dialogIntent.setPackage("com.android.settings");
+            dialogIntent.putExtra(Settings.EXTRA_NUMBER_OF_CERTIFICATES, numberOfCertificates);
             PendingIntent notifyIntent = PendingIntent.getActivityAsUser(mContext, 0,
                     dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT, null, userHandle);
 
@@ -2733,7 +2735,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             final Notification noti = new Notification.Builder(userContext)
                 .setSmallIcon(smallIconId)
-                .setContentTitle(mContext.getString(R.string.ssl_ca_cert_warning))
+                .setContentTitle(mContext.getResources().getQuantityText(
+                        R.plurals.ssl_ca_cert_warning, numberOfCertificates))
                 .setContentText(contentText)
                 .setContentIntent(notifyIntent)
                 .setPriority(Notification.PRIORITY_HIGH)

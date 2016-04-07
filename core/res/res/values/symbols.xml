@@ -1108,7 +1108,6 @@
   <java-symbol type="string" name="ssl_ca_cert_noti_by_unknown" />
   <java-symbol type="string" name="ssl_ca_cert_noti_by_administrator" />
   <java-symbol type="string" name="ssl_ca_cert_noti_managed" />
-  <java-symbol type="string" name="ssl_ca_cert_warning" />
   <java-symbol type="string" name="work_profile_deleted" />
   <java-symbol type="string" name="work_profile_deleted_description" />
   <java-symbol type="string" name="work_profile_deleted_details" />
@@ -1128,6 +1127,7 @@
   <java-symbol type="plurals" name="matches_found" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
   <java-symbol type="plurals" name="pinpuk_attempts" />
+  <java-symbol type="plurals" name="ssl_ca_cert_warning" />
 
   <java-symbol type="array" name="carrier_properties" />
   <java-symbol type="array" name="config_data_usage_network_types" />
