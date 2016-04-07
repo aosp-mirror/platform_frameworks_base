@@ -1,6 +1,8 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -199,11 +201,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         @Override
         public boolean updateResources() {
-            if (super.updateResources()) {
-                mMaxRows = mColumns != 3 ? 2 : 3;
-                return true;
+            final int rows = getRows();
+            boolean changed = rows != mMaxRows;
+            if (changed) {
+                mMaxRows = rows;
+                requestLayout();
             }
-            return false;
+            return super.updateResources() || changed;
+        }
+
+        private int getRows() {
+            final Resources res = getContext().getResources();
+            if (res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                // Always have 3 rows in portrait.
+                return 3;
+            }
+            return Math.max(1, res.getInteger(R.integer.quick_settings_num_rows));
         }
 
         public void setMaxRows(int maxRows) {

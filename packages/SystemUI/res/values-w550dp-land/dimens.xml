@@ -20,7 +20,4 @@
     <dimen name="notification_panel_width">544dp</dimen>
 
     <dimen name="qs_expand_margin">32dp</dimen>
-
-    <dimen name="battery_detail_graph_space_top">9dp</dimen>
-    <dimen name="battery_detail_graph_space_bottom">9dp</dimen>
 </resources>
