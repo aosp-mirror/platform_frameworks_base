@@ -47,17 +47,16 @@ interface ILauncherApps {
     ApplicationInfo getApplicationInfo(String packageName, int flags, in UserHandle user);
 
     ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
-            in ComponentName componentName, int flags, in UserHandle user);
-    ParceledListSlice getShortcutInfo(String callingPackage, String packageName, in List<String> ids,
-            in UserHandle user);
+            in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
     boolean startShortcut(String callingPackage, String packageName, String id,
-            in Rect sourceBounds, in Bundle startActivityOptions, in UserHandle user);
+            in Rect sourceBounds, in Bundle startActivityOptions, int userId);
 
-    int getShortcutIconResId(String callingPackage, in ShortcutInfo shortcut, in UserHandle user);
-    ParcelFileDescriptor getShortcutIconFd(String callingPackage, in ShortcutInfo shortcut,
-            in UserHandle user);
+    int getShortcutIconResId(String callingPackage, String packageName, String id,
+            int userId);
+    ParcelFileDescriptor getShortcutIconFd(String callingPackage, String packageName, String id,
+            int userId);
 
     boolean hasShortcutHostPermission(String callingPackage);
 }

@@ -213,8 +213,11 @@ public class LauncherAppsService extends SystemService {
          * Checks if the caller is in the same group as the userToCheck.
          */
         private void ensureInUserProfiles(UserHandle userToCheck, String message) {
+            ensureInUserProfiles(userToCheck.getIdentifier(), message);
+        }
+
+        private void ensureInUserProfiles(int targetUserId, String message) {
             final int callingUserId = injectCallingUserId();
-            final int targetUserId = userToCheck.getIdentifier();
 
             if (targetUserId == callingUserId) return;
 
@@ -253,9 +256,13 @@ public class LauncherAppsService extends SystemService {
          * Checks if the user is enabled.
          */
         private boolean isUserEnabled(UserHandle user) {
+            return isUserEnabled(user.getIdentifier());
+        }
+
+        private boolean isUserEnabled(int userId) {
             long ident = injectClearCallingIdentity();
             try {
-                UserInfo targetUserInfo = mUm.getUserInfo(user.getIdentifier());
+                UserInfo targetUserInfo = mUm.getUserInfo(userId);
                 return targetUserInfo != null && targetUserInfo.isEnabled();
             } finally {
                 injectRestoreCallingIdentity(ident);
@@ -346,8 +353,12 @@ public class LauncherAppsService extends SystemService {
         }
 
         private void ensureShortcutPermission(@NonNull String callingPackage, UserHandle user) {
+            ensureShortcutPermission(callingPackage, user.getIdentifier());
+        }
+
+        private void ensureShortcutPermission(@NonNull String callingPackage, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+            ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
 
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage)) {
@@ -357,29 +368,21 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
-                String packageName, ComponentName componentName, int flags, UserHandle user) {
+                String packageName, List shortcutIds, ComponentName componentName, int flags,
+                UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
             if (!isUserEnabled(user)) {
                 return new ParceledListSlice<>(new ArrayList(0));
+            }
+            if (shortcutIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by shortcut ID, package name must also be set");
             }
 
             return new ParceledListSlice<>(
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
-                            callingPackage, changedSince, packageName,
+                            callingPackage, changedSince, packageName, shortcutIds,
                             componentName, flags, user.getIdentifier()));
-        }
-
-        @Override
-        public ParceledListSlice getShortcutInfo(String callingPackage, String packageName,
-                List<String> ids, UserHandle user) {
-            ensureShortcutPermission(callingPackage, user);
-            if (!isUserEnabled(user)) {
-                return new ParceledListSlice<>(new ArrayList(0));
-            }
-
-            return new ParceledListSlice<>(
-                    mShortcutServiceInternal.getShortcutInfo(getCallingUserId(),
-                            callingPackage, packageName, ids, user.getIdentifier()));
         }
 
         @Override
@@ -396,27 +399,27 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public int getShortcutIconResId(String callingPackage, ShortcutInfo shortcut,
-                UserHandle user) {
-            ensureShortcutPermission(callingPackage, user);
-            if (!isUserEnabled(user)) {
+        public int getShortcutIconResId(String callingPackage, String packageName, String id,
+                int userId) {
+            ensureShortcutPermission(callingPackage, userId);
+            if (!isUserEnabled(userId)) {
                 return 0;
             }
 
             return mShortcutServiceInternal.getShortcutIconResId(getCallingUserId(),
-                    callingPackage, shortcut, user.getIdentifier());
+                    callingPackage, packageName, id, userId);
         }
 
         @Override
-        public ParcelFileDescriptor getShortcutIconFd(String callingPackage, ShortcutInfo shortcut,
-                UserHandle user) {
-            ensureShortcutPermission(callingPackage, user);
-            if (!isUserEnabled(user)) {
+        public ParcelFileDescriptor getShortcutIconFd(String callingPackage,
+                String packageName, String id, int userId) {
+            ensureShortcutPermission(callingPackage, userId);
+            if (!isUserEnabled(userId)) {
                 return null;
             }
 
             return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
-                    callingPackage, shortcut, user.getIdentifier());
+                    callingPackage, packageName, id, userId);
         }
 
         @Override
@@ -428,23 +431,23 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
-                Rect sourceBounds, Bundle startActivityOptions, UserHandle user) {
+                Rect sourceBounds, Bundle startActivityOptions, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+            ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
 
-            if (!isUserEnabled(user)) {
+            if (!isUserEnabled(userId)) {
                 throw new IllegalStateException("Cannot start a shortcut for disabled profile "
-                        + user);
+                        + userId);
             }
 
             // Even without the permission, pinned shortcuts are always launchable.
             if (!mShortcutServiceInternal.isPinnedByCaller(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, user.getIdentifier())) {
-                ensureShortcutPermission(callingPackage, user);
+                    callingPackage, packageName, shortcutId, userId)) {
+                ensureShortcutPermission(callingPackage, userId);
             }
 
             final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, user.getIdentifier());
+                    callingPackage, packageName, shortcutId, userId);
             if (intent == null) {
                 return false;
             }
@@ -455,7 +458,7 @@ public class LauncherAppsService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                mContext.startActivityAsUser(intent, startActivityOptions, user);
+                mContext.startActivityAsUser(intent, startActivityOptions, UserHandle.of(userId));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -768,7 +771,8 @@ public class LauncherAppsService extends SystemService {
                     final List<ShortcutInfo> list =
                             mShortcutServiceInternal.getShortcuts(launcherUserId,
                                     cookie.packageName,
-                                    /* changedSince= */ 0, packageName, /* component= */ null,
+                                    /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
+                                    /* component= */ null,
                                     ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
                                     | ShortcutQuery.FLAG_GET_PINNED
                                     | ShortcutQuery.FLAG_GET_DYNAMIC
