@@ -48,6 +48,9 @@ public class FeatureInfo implements Parcelable {
      * <p>
      * If this object represents a feature requested by an app, this is the
      * minimum version of the feature required by the app.
+     * <p>
+     * When a feature version is undefined by a device, it's assumed to be
+     * version 0.
      */
     public int version;
 
