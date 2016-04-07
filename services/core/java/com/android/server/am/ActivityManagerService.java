@@ -15657,8 +15657,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.println(totalPss - cachedPss);
                 }
             }
-            long lostRAM = memInfo.getTotalSizeKb()
-                    - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+            long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
+                    - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
             if (!isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
