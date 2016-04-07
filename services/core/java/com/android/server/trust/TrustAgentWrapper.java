@@ -375,7 +375,7 @@ public class TrustAgentWrapper {
                 } else {
                     mTrustAgentService.onConfigure(Collections.EMPTY_LIST, null);
                 }
-                final long maxTimeToLock = dpm.getMaximumTimeToLock(null);
+                final long maxTimeToLock = dpm.getMaximumTimeToLockForUserAndProfiles(mUserId);
                 if (maxTimeToLock != mMaximumTimeToLock) {
                     // If the timeout changes, cancel the alarm and send a timeout event to have
                     // the agent re-evaluate trust.

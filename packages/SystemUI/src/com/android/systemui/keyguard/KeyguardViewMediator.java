@@ -804,7 +804,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
-                .getMaximumTimeToLock(null, userId);
+                .getMaximumTimeToLockForUserAndProfiles(userId);
 
         long timeout;
 
