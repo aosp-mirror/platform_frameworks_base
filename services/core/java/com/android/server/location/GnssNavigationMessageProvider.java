@@ -16,7 +16,7 @@
 
 package com.android.server.location;
 
-import android.location.GnssNavigationMessageEvent;
+import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -37,7 +37,7 @@ public abstract class GnssNavigationMessageProvider
         super(handler, TAG);
     }
 
-    public void onNavigationMessageAvailable(final GnssNavigationMessageEvent event) {
+    public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
         ListenerOperation<IGnssNavigationMessageListener> operation =
                 new ListenerOperation<IGnssNavigationMessageListener>() {
                     @Override
@@ -65,16 +65,15 @@ public abstract class GnssNavigationMessageProvider
         int status;
         switch (result) {
             case RESULT_SUCCESS:
-                status = GnssNavigationMessageEvent.STATUS_READY;
+                status = GnssNavigationMessage.Callback.STATUS_READY;
                 break;
             case RESULT_NOT_AVAILABLE:
             case RESULT_NOT_SUPPORTED:
             case RESULT_INTERNAL_ERROR:
-                status = GnssNavigationMessageEvent.STATUS_NOT_SUPPORTED;
+                status = GnssNavigationMessage.Callback.STATUS_NOT_SUPPORTED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssNavigationMessageEvent
-                        .STATUS_GNSS_LOCATION_DISABLED;
+                status = GnssNavigationMessage.Callback.STATUS_LOCATION_DISABLED;
                 break;
             case RESULT_UNKNOWN:
                 return null;

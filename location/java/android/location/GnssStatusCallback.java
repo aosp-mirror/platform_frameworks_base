@@ -18,6 +18,7 @@ package android.location;
 
 /**
  * Used for receiving notifications when GNSS events happen.
+ * @removed
  */
 public abstract class GnssStatusCallback {
     /**

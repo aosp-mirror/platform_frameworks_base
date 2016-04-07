@@ -34,7 +34,7 @@ public final class GnssNavigationMessage implements Parcelable {
     private static final byte[] EMPTY_ARRAY = new byte[0];
 
     /**
-     * The type of the GPS Clock.
+     * The type of the GNSS Navigation Message
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -80,6 +80,51 @@ public final class GnssNavigationMessage implements Parcelable {
      * able to correct those words.
      */
     public static final int STATUS_PARITY_REBUILT = (1<<1);
+
+    /**
+     * Used for receiving GNSS satellite Navigation Messages from the GNSS engine.
+     *
+     * <p>You can implement this interface and call
+     * {@link LocationManager#registerGnssNavigationMessageCallback}.
+     */
+    public static abstract class Callback {
+        /**
+         * The status of GNSS measurements event.
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED})
+        public @interface GnssNavigationMessageStatus {}
+
+        /**
+         * The system does not support tracking of GNSS Navigation Messages.
+         *
+         * This status will not change in the future.
+         */
+        public static final int STATUS_NOT_SUPPORTED = 0;
+
+        /**
+         * GNSS Navigation Messages are successfully being tracked, it will receive updates once
+         * they are available.
+         */
+        public static final int STATUS_READY = 1;
+
+        /**
+         * GNSS provider or Location is disabled, updated will not be received until they are
+         * enabled.
+         */
+        public static final int STATUS_LOCATION_DISABLED = 2;
+
+        /**
+         * Returns the latest collected GNSS Navigation Message.
+         */
+        public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {}
+
+        /**
+         * Returns the latest status of the GNSS Navigation Messages sub-system.
+         */
+        public void onStatusChanged(@GnssNavigationMessageStatus int status) {}
+    }
 
     // End enumerations in sync with gps.h
 
@@ -170,15 +215,16 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     /**
-     * Gets the Pseudo-random number.
-     * Range: [1, 32].
+     * Gets the satellite ID.
+     *
+     * <p>Range varies by constellation.  See definition at {@code GnssStatus#getSvid(int)}
      */
     public int getSvid() {
         return mSvid;
     }
 
     /**
-     * Sets the Pseud-random number.
+     * Sets the satellite ID.
      * @hide
      */
     @TestApi
@@ -187,10 +233,25 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     /**
-     * Gets the Message Identifier.
-     * It provides an index so the complete Navigation Message can be assembled. i.e. for L1 C/A
-     * subframe 4 and 5, this value corresponds to the 'frame id' of the navigation message.
-     * Subframe 1, 2, 3 does not contain a 'frame id' and this might be reported as -1.
+     * Gets the Message identifier.
+     *
+     * <p>This provides an index to help with complete Navigation Message assembly. Similar
+     * identifiers within the data bits themselves often supplement this information, in ways even
+     * more specific to each message type; see the relevant satellite constellation ICDs for
+     * details.
+     *
+     * <ul>
+     * <li> For GPS L1 C/A subframe 4 and 5, this value corresponds to the 'frame id' of the
+     * navigation message, in the range of 1-25 (Subframe 1, 2, 3 does not contain a 'frame id' and
+     * this value can be set to -1.)</li>
+     * <li> For Glonass L1 C/A, this refers to the frame ID, in the range of 1-5.</li>
+     * <li> For BeiDou D1, this refers to the frame number in the range of 1-24</li>
+     * <li> For Beidou D2, this refers to the frame number, in the range of 1-120</li>
+     * <li> For Galileo F/NAV nominal frame structure, this refers to the subframe number, in the
+     * range of 1-12</li>
+     * <li> For Galileo I/NAV nominal frame structure, this refers to the subframe number in the
+     * range of 1-24</li>
+     * </ul>
      */
     public int getMessageId() {
         return mMessageId;
@@ -206,10 +267,18 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     /**
-     * Gets the Sub-message Identifier.
-     * If required by {@link #getType()}, this value contains a sub-index within the current message
-     * (or frame) that is being transmitted. i.e. for L1 C/A the sub-message identifier corresponds
-     * to the sub-frame Id of the navigation message.
+     * Gets the sub-message identifier, relevant to the {@link #getType()} of the message.
+     *
+     * <ul>
+     * <li> For GPS L1 C/A, BeiDou D1 &amp; BeiDou D2, the submessage id corresponds to the subframe
+     * number of the navigation message, in the range of 1-5.</li>
+     * <li>For Glonass L1 C/A, this refers to the String number, in the range from 1-15</li>
+     * <li>For Galileo F/NAV, this refers to the page type in the range 1-6</li>
+     * <li>For Galileo I/NAV, this refers to the word type in the range 1-10+</li>
+     * <li>For Galileo in particular, the type information embedded within the data bits may be even
+     * more useful in interpretation, than the nominal page and word types provided in this
+     * field.</li>
+     * </ul>
      */
     public int getSubmessageId() {
         return mSubmessageId;
@@ -225,8 +294,25 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     /**
-     * Gets the data associated with the Navigation Message.
-     * The bytes (or words) specified using big endian format (MSB first).
+     * Gets the data of the reported GPS message.
+     *
+     * <p>The bytes (or words) specified using big endian format (MSB first).
+     *
+     * <ul>
+     * <li>For GPS L1 C/A, Beidou D1 &amp; Beidou D2, each subframe contains 10 30-bit words. Each
+     * word (30 bits) should be fit into the last 30 bits in a 4-byte word (skip B31 and B32), with
+     * MSB first, for a total of 40 bytes, covering a time period of 6, 6, and 0.6 seconds,
+     * respectively.</li>
+     * <li>For Glonass L1 C/A, each string contains 85 data bits, including the checksum.  These
+     * bits should be fit into 11 bytes, with MSB first (skip B86-B88), covering a time period of 2
+     * seconds.</li>
+     * <li>For Galileo F/NAV, each word consists of 238-bit (sync &amp; tail symbols excluded). Each
+     * word should be fit into 30-bytes, with MSB first (skip B239, B240), covering a time period of
+     * 10 seconds.</li>
+     * <li>For Galileo I/NAV, each page contains 2 page parts, even and odd, with a total of 2x114 =
+     * 228 bits, (sync &amp; tail excluded) that should be fit into 29 bytes, with MSB first (skip
+     * B229-B232).</li>
+     * </ul>
      */
     @NonNull
     public byte[] getData() {

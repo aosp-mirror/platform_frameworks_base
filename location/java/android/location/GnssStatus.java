@@ -23,9 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class represents the current state of the GNSS engine.
- * This class is used in conjunction with the {@link GnssStatusCallback}.
+ * This class is used in conjunction with the {@link GnssStatus.Callback}.
  */
 public final class GnssStatus {
+    // these must match the definitions in gps.h
+
     /** Unknown constellation type. */
     public static final int CONSTELLATION_UNKNOWN = 0;
     /** Constellation type constant for GPS. */
@@ -41,16 +43,6 @@ public final class GnssStatus {
     /** Constellation type constant for Galileo. */
     public static final int CONSTELLATION_GALILEO = 6;
 
-    /**
-     * Constellation type.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
-            CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
-    public @interface ConstellationType {}
-
-    // these must match the definitions in gps.h
     /** @hide */
     public static final int GNSS_SV_FLAGS_NONE = 0;
     /** @hide */
@@ -66,6 +58,42 @@ public final class GnssStatus {
     public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 3;
     /** @hide */
     public static final int CONSTELLATION_TYPE_MASK = 0xf;
+
+    /**
+     * Used for receiving notifications when GNSS events happen.
+     */
+    public static abstract class Callback {
+        /**
+         * Called when GNSS system has started.
+         */
+        public void onStarted() {}
+
+        /**
+         * Called when GNSS system has stopped.
+         */
+        public void onStopped() {}
+
+        /**
+         * Called when the GNSS system has received its first fix since starting.
+         * @param ttffMillis the time from start to first fix in milliseconds.
+         */
+        public void onFirstFix(int ttffMillis) {}
+
+        /**
+         * Called periodically to report GNSS satellite status.
+         * @param status the current status of all satellites.
+         */
+        public void onSatelliteStatusChanged(GnssStatus status) {}
+    }
+
+    /**
+     * Constellation type.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
+            CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
+    public @interface ConstellationType {}
 
     /* These package private values are modified by the LocationManager class */
     /* package */ int[] mSvidWithFlags;
@@ -83,15 +111,21 @@ public final class GnssStatus {
         mAzimuths = azimuths;
     }
 
+    /** @removed */
+    public int getNumSatellites() {
+        return getSatelliteCount();
+    }
+
     /**
      * Gets the total number of satellites in satellite list.
      */
-    public int getNumSatellites() {
+    public int getSatelliteCount() {
         return mSvCount;
     }
 
     /**
-     * Retrieves the constellation type of the satellite at the specified position.
+     * Retrieves the constellation type of the satellite at the specified index.
+     *
      * @param satIndex the index of the satellite in the list.
      */
     @ConstellationType
@@ -101,7 +135,30 @@ public final class GnssStatus {
     }
 
     /**
-     * Retrieves the pseudo-random number of the satellite at the specified position.
+     * Gets the identification number for the satellite at the specific index.
+     *
+     * <p>This svid is pseudo-random number for most constellations. It is FCN &amp; OSN number for
+     * Glonass.
+     *
+     * <p>The distinction is made by looking at constellation field
+     * {@link #getConstellationType(int)} Expected values are in the range of:
+     *
+     * <ul>
+     * <li>GPS: 1-32</li>
+     * <li>SBAS: 120-151, 183-192</li>
+     * <li>GLONASS:
+     * <ul>
+     *   <li>The least significant 8 bits, signed, are the orbital slot number (OSN) in the range
+     *   from 1-24, if known, or -127 if unknown</li>
+     *   <li>The next least signficant 8 bits, signed, are the frequency channel number (FCN) in the
+     *   range from -7 to +6, if known, and -127, if unknown</li>
+     *   <li>At least one of the two (FCN &amp; OSN) shall be set to a known value</li>
+     * </ul></li>
+     * <li>QZSS: 193-200</li>
+     * <li>Galileo: 1-36</li>
+     * <li>Beidou: 1-37</li>
+     * </ul>
+     *
      * @param satIndex the index of the satellite in the list.
      */
     public int getSvid(int satIndex) {
@@ -109,7 +166,9 @@ public final class GnssStatus {
     }
 
     /**
-     * Retrieves the signal-noise ration of the satellite at the specified position.
+     * Retrieves the carrier-to-noise density at the antenna of the satellite at the specified index
+     * in dB-Hz.
+     *
      * @param satIndex the index of the satellite in the list.
      */
     public float getCn0DbHz(int satIndex) {
@@ -117,7 +176,8 @@ public final class GnssStatus {
     }
 
     /**
-     * Retrieves the elevation of the satellite at the specified position.
+     * Retrieves the elevation of the satellite at the specified index.
+     *
      * @param satIndex the index of the satellite in the list.
      */
     public float getElevationDegrees(int satIndex) {
@@ -125,31 +185,46 @@ public final class GnssStatus {
     }
 
     /**
-     * Retrieves the azimuth the satellite at the specified position.
+     * Retrieves the azimuth the satellite at the specified index.
+     *
      * @param satIndex the index of the satellite in the list.
      */
     public float getAzimuthDegrees(int satIndex) {
         return mAzimuths[satIndex];
     }
 
-    /**
-     * Detects whether the satellite at the specified position has ephemeris data.
-     * @param satIndex the index of the satellite in the list.
-     */
+    /** @removed */
     public boolean hasEphemeris(int satIndex) {
-        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+        return hasEphemerisData(satIndex);
     }
 
     /**
-     * Detects whether the satellite at the specified position has almanac data.
+     * Reports whether the satellite at the specified index has ephemeris data.
+     *
      * @param satIndex the index of the satellite in the list.
      */
+    public boolean hasEphemerisData(int satIndex) {
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+    }
+
+    /** @removed */
     public boolean hasAlmanac(int satIndex) {
+        return hasAlmanacData(satIndex);
+    }
+
+    /**
+     * Reports whether the satellite at the specified index has almanac data.
+     *
+     * @param satIndex the index of the satellite in the list.
+     */
+    public boolean hasAlmanacData(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
     }
 
     /**
-     * Detects whether the satellite at the specified position is used in fix.
+     * Reports whether the satellite at the specified index was used in the calculation of the most
+     * recent position fix.
+     *
      * @param satIndex the index of the satellite in the list.
      */
     public boolean usedInFix(int satIndex) {
