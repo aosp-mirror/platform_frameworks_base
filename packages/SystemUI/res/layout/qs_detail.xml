@@ -25,13 +25,15 @@
     android:visibility="invisible"
     android:orientation="vertical">
 
+    <com.android.systemui.ResizingSpace
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_detail_margin_top" />
+
     <include
         android:id="@+id/qs_detail_header"
         layout="@layout/qs_detail_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        />
+        android:layout_height="wrap_content" />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"

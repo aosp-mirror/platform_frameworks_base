@@ -24,6 +24,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mCellMargin;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+    private int mCellMarginTop;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -60,9 +61,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMargin = res.getDimensionPixelSize(R.dimen.qs_tile_margin);
+        mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         if (mColumns != columns) {
             mColumns = columns;
-            postInvalidate();
+            requestLayout();
             return true;
         }
         return false;
@@ -81,7 +83,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             record.tileView.measure(exactly(mCellWidth), exactly(mCellHeight));
             previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
-        setMeasuredDimension(width, (mCellHeight + mCellMargin) * rows);
+        setMeasuredDimension(width,
+                (mCellHeight + mCellMargin) * rows + (mCellMarginTop - mCellMargin));
     }
 
     private static int exactly(int size) {
@@ -114,7 +117,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     private int getRowTop(int row) {
-        return row * (mCellHeight + mCellMargin) + mCellMargin;
+        return row * (mCellHeight + mCellMargin) + mCellMarginTop;
     }
 
     private int getColumnStart(int column) {
