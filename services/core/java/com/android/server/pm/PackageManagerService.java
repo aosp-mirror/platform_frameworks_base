@@ -76,7 +76,6 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.PARSE_IS_PRIVILEGED;
 import static android.content.pm.PackageParser.isApkFile;
-import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -117,7 +116,6 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentFilter.AuthorityEntry;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
@@ -150,7 +148,6 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
-import android.content.pm.PackageParser.IntentInfo;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageStats;
@@ -1066,8 +1063,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
     final @Nullable String mRequiredVerifierPackage;
-    final @Nullable String mRequiredInstallerPackage;
+    final @NonNull String mRequiredInstallerPackage;
     final @Nullable String mSetupWizardPackage;
+    final @NonNull String mServicesSystemSharedLibraryPackageName;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
 
@@ -2591,11 +2589,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
                 mIntentFilterVerifier = new IntentVerifierProxy(mContext,
                         mIntentFilterVerifierComponent);
+                mServicesSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
+                        PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES);
+                getRequiredSharedLibraryLPr(
+                        PackageManager.SYSTEM_SHARED_LIBRARY_SHARED);
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
                 mIntentFilterVerifierComponent = null;
                 mIntentFilterVerifier = null;
+                mServicesSystemSharedLibraryPackageName = null;
             }
 
             mInstallerService = new PackageInstallerService(context, this);
@@ -2675,6 +2678,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private @NonNull String getRequiredSharedLibraryLPr(String libraryName) {
+        synchronized (mPackages) {
+            SharedLibraryEntry libraryEntry = mSharedLibraries.get(libraryName);
+            if (libraryEntry == null) {
+                throw new IllegalStateException("Missing required shared library:" + libraryName);
+            }
+            return libraryEntry.apk;
+        }
+    }
+
     private @NonNull String getRequiredInstallerLPr() {
         final Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
@@ -2684,6 +2697,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
+            ResolveInfo resolveInfo = matches.get(0);
+            if (!resolveInfo.activityInfo.applicationInfo.isPrivilegedApp()) {
+                throw new RuntimeException("The installer must be a privileged app");
+            }
             return matches.get(0).getComponentInfo().packageName;
         } else {
             throw new RuntimeException("There must be exactly one installer; found " + matches);
@@ -3566,15 +3583,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public @Nullable String getServicesSystemSharedLibraryPackageName() {
+    public @NonNull String getServicesSystemSharedLibraryPackageName() {
         synchronized (mPackages) {
-            SharedLibraryEntry libraryEntry = mSharedLibraries.get(
-                    PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES);
-            if (libraryEntry != null) {
-                return libraryEntry.apk;
-            }
+            return mServicesSystemSharedLibraryPackageName;
         }
-        return null;
     }
 
     @Override
