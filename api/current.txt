@@ -55097,6 +55097,14 @@ package java.util {
     method public static int hashCode(float[]);
     method public static int hashCode(double[]);
     method public static int hashCode(java.lang.Object[]);
+    method public static void parallelPrefix(T[], java.util.function.BinaryOperator<T>);
+    method public static void parallelPrefix(T[], int, int, java.util.function.BinaryOperator<T>);
+    method public static void parallelPrefix(long[], java.util.function.LongBinaryOperator);
+    method public static void parallelPrefix(long[], int, int, java.util.function.LongBinaryOperator);
+    method public static void parallelPrefix(double[], java.util.function.DoubleBinaryOperator);
+    method public static void parallelPrefix(double[], int, int, java.util.function.DoubleBinaryOperator);
+    method public static void parallelPrefix(int[], java.util.function.IntBinaryOperator);
+    method public static void parallelPrefix(int[], int, int, java.util.function.IntBinaryOperator);
     method public static void parallelSetAll(T[], java.util.function.IntFunction<? extends T>);
     method public static void parallelSetAll(int[], java.util.function.IntUnaryOperator);
     method public static void parallelSetAll(long[], java.util.function.IntToLongFunction);
