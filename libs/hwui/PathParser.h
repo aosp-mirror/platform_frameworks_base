@@ -44,6 +44,7 @@ public:
     ANDROID_API static void getPathDataFromString(PathData* outData, ParseResult* result,
             const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
+    static bool isVerbValid(char verb);
 };
 
 }; // namespace uirenderer

@@ -15,6 +15,7 @@
  */
 
 #include "jni.h"
+#include "GraphicsJNI.h"
 
 #include <PathParser.h>
 #include <SkPath.h>
@@ -27,7 +28,7 @@ namespace android {
 
 using namespace uirenderer;
 
-static bool parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring inputPathStr,
+static void parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring inputPathStr,
         jint strLength) {
     const char* pathString = env->GetStringUTFChars(inputPathStr, NULL);
     SkPath* skPath = reinterpret_cast<SkPath*>(skPathHandle);
@@ -36,9 +37,8 @@ static bool parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring
     PathParser::parseStringForSkPath(skPath, &result, pathString, strLength);
     env->ReleaseStringUTFChars(inputPathStr, pathString);
     if (result.failureOccurred) {
-        ALOGE(result.failureMessage.c_str());
+        doThrowIAE(env, result.failureMessage.c_str());
     }
-    return !result.failureOccurred;
 }
 
 static long createEmptyPathData(JNIEnv*, jobject) {
@@ -62,7 +62,7 @@ static long createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr,
         return reinterpret_cast<jlong>(pathData);
     } else {
         delete pathData;
-        ALOGE(result.failureMessage.c_str());
+        doThrowIAE(env, result.failureMessage.c_str());
         return NULL;
     }
 }
@@ -100,7 +100,7 @@ static void setSkPathFromPathData(JNIEnv*, jobject, jlong outPathPtr, jlong path
 }
 
 static const JNINativeMethod gMethods[] = {
-    {"nParseStringForPath", "(JLjava/lang/String;I)Z", (void*)parseStringForPath},
+    {"nParseStringForPath", "(JLjava/lang/String;I)V", (void*)parseStringForPath},
     {"nCreateEmptyPathData", "!()J", (void*)createEmptyPathData},
     {"nCreatePathData", "!(J)J", (void*)createPathData},
     {"nCreatePathDataFromString", "(Ljava/lang/String;I)J", (void*)createPathDataFromStringPath},
