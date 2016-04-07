@@ -17,10 +17,12 @@ page.title=Android Studio Code Tools
       by allowing you to more clearly define method parameter requirements.
     </dd>
 
-  <dt><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing</a></dt>
-    <dd>These features help you add deep links, app indexing, and search functionality to your
-      apps. These features can make it easier to find content in an installed app, drive more
-      traffic to your app, discover which app content users view the most, and attract new users.
+  <dt><a href="{@docRoot}tools/help/app-link-indexing.html">URL and App Indexing
+  Support</a></dt>
+    <dd>Android Studio helps you add support for URLs, app indexing, and search
+    functionality to your apps. These features can help to drive more traffic
+    to your app, discover which app content is used most, make it easier for
+    users to find content in an installed app, and attract new users.
     </dd>
 
 </dl>
