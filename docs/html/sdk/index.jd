@@ -486,8 +486,9 @@ Android Auto.</p>
 <ul>
 <li>Microsoft&reg;  Windows&reg;  7/8/10 (32 or 64-bit)</li>
 <li>2 GB RAM minimum, 8 GB RAM recommended</li>
-<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
-Android SDK and emulator system image). 4 GB Recommended.</li>
+<li>2 GB of available disk space minimum,<br>4 GB Recommended
+(500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image)</li>
 <li>1280 x 800  minimum screen resolution</li>
 <li>Java Development Kit (JDK) 8</li>
 <li>Optional for accelerated emulator: Intel® processor with support for Intel®
@@ -500,8 +501,9 @@ VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality</li
 <ul>
 <li>Mac&reg;  OS X&reg;  10.8.5 or higher, up to 10.11.4 (El Capitan)</li>
 <li>2 GB RAM minimum, 8 GB RAM recommended</li>
-<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
-Android SDK and emulator system image). 4 GB Recommended.</li>
+<li>2 GB of available disk space minimum,<br>4 GB Recommended
+(500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image)</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Java Development Kit (JDK) 6</li>
 </ul>
@@ -515,8 +517,9 @@ Android SDK and emulator system image). 4 GB Recommended.</li>
 capable of running 32-bit applications)</i></li>
 <li>GNU C Library (glibc) 2.11 or later</li>
 <li>2 GB RAM minimum, 8 GB RAM recommended</li>
-<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
-Android SDK and emulator system image). 4 GB Recommended.</li>
+<li>2 GB of available disk space minimum,<br>4 GB Recommended
+(500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image)</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Java Development Kit (JDK) 8</li>
 </ul>
