@@ -845,15 +845,19 @@ public abstract class PanelView extends FrameLayout {
     };
 
     public void cancelPeek() {
+        boolean cancelled = mPeekPending;
         if (mPeekAnimator != null) {
+            cancelled = true;
             mPeekAnimator.cancel();
         }
         removeCallbacks(mPeekRunnable);
         mPeekPending = false;
 
-        // When peeking, we already tell mBar that we expanded ourselves. Make sure that we also
-        // notify mBar that we might have closed ourselves.
-        notifyBarPanelExpansionChanged();
+        if (cancelled) {
+            // When peeking, we already tell mBar that we expanded ourselves. Make sure that we also
+            // notify mBar that we might have closed ourselves.
+            notifyBarPanelExpansionChanged();
+        }
     }
 
     public void expand(final boolean animate) {
