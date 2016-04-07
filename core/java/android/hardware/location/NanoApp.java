@@ -284,4 +284,14 @@ public class NanoApp {
             return new NanoApp[size];
         }
     };
+
+    @Override
+    public String toString() {
+        String retVal = "Id : " + mAppId;
+        retVal += ", Version : " + mAppVersion;
+        retVal += ", Name : " + mName;
+        retVal += ", Publisher : " + mPublisher;
+
+        return retVal;
+    }
 }
