@@ -618,6 +618,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mOnKeyguard;
     }
 
+    public void removeAllChildren() {
+        List<ExpandableNotificationRow> notificationChildren
+                = mChildrenContainer.getNotificationChildren();
+        ArrayList<ExpandableNotificationRow> clonedList = new ArrayList<>(notificationChildren);
+        for (int i = 0; i < clonedList.size(); i++) {
+            ExpandableNotificationRow row = clonedList.get(i);
+            mChildrenContainer.removeNotification(row);
+            mHeaderUtil.restoreNotificationHeader(row);
+            row.setIsChildInGroup(false, null);
+        }
+        onChildrenCountChanged();
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
