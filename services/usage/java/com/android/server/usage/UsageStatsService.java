@@ -144,6 +144,7 @@ public class UsageStatsService extends SystemService implements
     private long mLastAppIdleParoledTime;
 
     private volatile boolean mPendingOneTimeCheckIdleStates;
+    private boolean mSystemServicesReady = false;
 
     @GuardedBy("mLock")
     private AppIdleHistory mAppIdleHistory;
@@ -232,6 +233,8 @@ public class UsageStatsService extends SystemService implements
             if (mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
+
+            mSystemServicesReady = true;
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setAppIdleParoled(getContext().getSystemService(BatteryManager.class).isCharging());
         }
@@ -810,28 +813,30 @@ public class UsageStatsService extends SystemService implements
             // retain this for safety).
             return false;
         }
-        try {
-            // We allow all whitelisted apps, including those that don't want to be whitelisted
-            // for idle mode, because app idle (aka app standby) is really not as big an issue
-            // for controlling who participates vs. doze mode.
-            if (mDeviceIdleController.isPowerSaveWhitelistExceptIdleApp(packageName)) {
+        if (mSystemServicesReady) {
+            try {
+                // We allow all whitelisted apps, including those that don't want to be whitelisted
+                // for idle mode, because app idle (aka app standby) is really not as big an issue
+                // for controlling who participates vs. doze mode.
+                if (mDeviceIdleController.isPowerSaveWhitelistExceptIdleApp(packageName)) {
+                    return false;
+                }
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+
+            if (isActiveDeviceAdmin(packageName, userId)) {
                 return false;
             }
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
 
-        if (isActiveDeviceAdmin(packageName, userId)) {
-            return false;
-        }
+            if (isActiveNetworkScorer(packageName)) {
+                return false;
+            }
 
-        if (isActiveNetworkScorer(packageName)) {
-            return false;
-        }
-
-        if (mAppWidgetManager != null
-                && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
-            return false;
+            if (mAppWidgetManager != null
+                    && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
+                return false;
+            }
         }
 
         if (!isAppIdleUnfiltered(packageName, userId, elapsedRealtime)) {
