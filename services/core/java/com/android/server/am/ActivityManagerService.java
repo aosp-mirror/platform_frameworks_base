@@ -10590,14 +10590,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean requestTargetProviderPermissionsReviewIfNeededLocked(ProviderInfo cpi,
             ProcessRecord r, final int userId) {
         if (getPackageManagerInternalLocked().isPermissionsReviewRequired(
-                cpi.packageName, r.userId)) {
+                cpi.packageName, userId)) {
 
-            final boolean callerForeground = r != null ? r.setSchedGroup
-                    != ProcessList.SCHED_GROUP_BACKGROUND : true;
+            final boolean callerForeground = r == null || r.setSchedGroup
+                    != ProcessList.SCHED_GROUP_BACKGROUND;
 
             // Show a permission review UI only for starting from a foreground app
             if (!callerForeground) {
-                Slog.w(TAG, "u" + r.userId + " Instantiating a provider in package"
+                Slog.w(TAG, "u" + userId + " Instantiating a provider in package"
                         + cpi.packageName + " requires a permissions review");
                 return false;
             }
@@ -10608,7 +10608,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, cpi.packageName);
 
             if (DEBUG_PERMISSIONS_REVIEW) {
-                Slog.i(TAG, "u" + r.userId + " Launching permission review "
+                Slog.i(TAG, "u" + userId + " Launching permission review "
                         + "for package " + cpi.packageName);
             }
 
