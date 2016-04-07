@@ -20,7 +20,6 @@ import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoord
 import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.onFloatingToolBarItem;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
 import static android.widget.espresso.TextViewActions.doubleClickOnTextAtIndex;
@@ -32,9 +31,10 @@ import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIn
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsNotDisplayed;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarDoesNotContainItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.clickFloatingToolbarItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
@@ -69,7 +69,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         getActivity();
     }
 
@@ -260,7 +261,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView("test"));
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(1));
-        onFloatingToolBarItem(withText(com.android.internal.R.string.cut)).perform(click());
+        clickFloatingToolbarItem(
+                getActivity().getString(com.android.internal.R.string.cut));
         onView(withId(R.id.textview)).perform(longClick());
         sleepForFloatingToolbarPopup();
 
