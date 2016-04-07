@@ -98,7 +98,7 @@ public class FilesActivity extends BaseActivity {
             assert(uri == null || uri.getAuthority() == null ||
                     LauncherActivity.isLaunchUri(uri));
             refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
-        } else if (intent.getAction() == Intent.ACTION_VIEW) {
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             assert(uri != null);
             new OpenUriForViewTask(this).executeOnExecutor(
                     ProviderExecutor.forAuthority(uri.getAuthority()), uri);
@@ -274,18 +274,6 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public void onDocumentPicked(DocumentInfo doc, Model model) {
-        if (doc.isContainer()) {
-            openContainerDocument(doc);
-        } else {
-            openDocument(doc, model);
-        }
-    }
-
-    /**
-     * Launches an intent to view the specified document.
-     */
-    private void openDocument(DocumentInfo doc, Model model) {
-
         // Anything on downloads goes through the back through downloads manager
         // (that's the MANAGE_DOCUMENT bit).
         // This is done for two reasons:
@@ -295,7 +283,13 @@ public class FilesActivity extends BaseActivity {
         //    like origin URL.
         // All other files not on downloads, event APKs, would get no benefit from this
         // treatment, thusly the "isDownloads" check.
-        if (getCurrentRoot().isDownloads()) {
+
+        // Launch MANAGE_DOCUMENTS only for the root level files, so it's not called for
+        // files in archives. Also, if the activity is already browsing a ZIP from downloads,
+        // then skip MANAGE_DOCUMENTS.
+        final boolean isViewing = Intent.ACTION_VIEW.equals(getIntent().getAction());
+        final boolean isInArchive = mState.stack.size() > 1;
+        if (getCurrentRoot().isDownloads() && !isInArchive && !isViewing) {
             // First try managing the document; we expect manager to filter
             // based on authority, so we don't grant.
             final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
@@ -309,6 +303,17 @@ public class FilesActivity extends BaseActivity {
             }
         }
 
+        if (doc.isContainer()) {
+            openContainerDocument(doc);
+        } else {
+            openDocument(doc, model);
+        }
+    }
+
+    /**
+     * Launches an intent to view the specified document.
+     */
+    private void openDocument(DocumentInfo doc, Model model) {
         Intent intent = new QuickViewIntentBuilder(
                 getPackageManager(), getResources(), doc, model).build();
 
