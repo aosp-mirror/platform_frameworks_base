@@ -3350,7 +3350,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShadowColor = color;
 
         // Will change text clip region
-        if (mEditor != null) mEditor.invalidateTextDisplayList();
+        if (mEditor != null) {
+            mEditor.invalidateTextDisplayList();
+            mEditor.invalidateHandlesAndActionMode();
+        }
         invalidate();
     }
 
@@ -8306,6 +8309,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEditor != null) {
                 if (oldStart >= 0) mEditor.invalidateTextDisplayList(mLayout, oldStart, oldEnd);
                 if (newStart >= 0) mEditor.invalidateTextDisplayList(mLayout, newStart, newEnd);
+                mEditor.invalidateHandlesAndActionMode();
             }
         }
 
