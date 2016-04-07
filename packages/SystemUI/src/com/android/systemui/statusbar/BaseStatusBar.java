@@ -287,9 +287,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     private final ContentObserver mLockscreenSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
-            // so we just dump our cache ...
+            // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS or
+            // LOCK_SCREEN_SHOW_NOTIFICATIONS, so we just dump our cache ...
             mUsersAllowingPrivateNotifications.clear();
+            mUsersAllowingNotifications.clear();
             // ... and refresh all the notifications
             updateNotifications();
         }
