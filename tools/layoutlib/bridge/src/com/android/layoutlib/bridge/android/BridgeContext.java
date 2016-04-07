@@ -639,7 +639,8 @@ public final class BridgeContext extends Context {
         }
         // Add value to defaultPropsMap if needed
         if (typeArrayAndPropertiesPair.getSecond() != null) {
-            Object key = getCurrentParser().getViewCookie();
+            BridgeXmlBlockParser parser = getCurrentParser();
+            Object key = parser != null ? parser.getViewCookie() : null;
             if (key != null) {
                 PropertiesMap defaultPropMap = mDefaultPropMaps.get(key);
                 if (defaultPropMap == null) {
