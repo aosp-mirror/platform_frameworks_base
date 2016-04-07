@@ -52,7 +52,7 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content open">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
-      alt=""/>Android Studio v2.0.0</a> <em>(March 2016)</em>
+      alt=""/>Android Studio v2.0.0</a> <em>(April 2016)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -105,92 +105,6 @@ Android Studio, as denoted by revision number. </p>
         </p>
       </li>
     </ul>
-
-    <p>
-      <strong>Android Emulator 2.0</strong>:
-    </p>
-      <ul>
-        <li>Performance improvements:
-        </li>
-          <ul>
-            <li>Emulator now uses CPU acceleration on x86 emulator system images by
-            default.
-            </li>
-
-            <li>Added <a href="{@docRoot}training/articles/smp.html">SMP</a> support
-            to take advantage of host multi-core architecture when emulating Android
-            6.0 (API level 23) or higher, resulting in much better performance and
-            speed than the physical counterpart. Also with SMP support, you can test
-            apps that specifically target multi-core Android devices.
-            </li>
-
-            <li>Improved data and APK push-pull protocol between the the <a href=
-            "{@docRoot}tools/help/adb.html">Android Debug Bridge</a> and devices
-            running Android 5.0 (API level 21) or higher. See speed improvements up
-            to five times faster than using a physical device.
-            </li>
-          </ul>
-
-        <li>Extended UI controls and a floating toolbar provide easy access to features
-        previously available only through the command line, such as taking screen
-        captures, adjusting the battery level, rotating the screen, and managing
-        virtual calls.
-        </li>
-
-        <li>Upload KML and GPX files to play back a set of custom location points.
-        </li>
-
-        <li>Dynamically resize the emulator by dragging a corner or zoom into the
-        emulator window.
-        </li>
-
-        <li>Install APKs or add media files to the emulator’s internal SD card by
-        dragging and dropping files into the emulator window.
-        </li>
-
-        <li>Simulate multi-touch input. While interacting with the emulator screen,
-        enter multi-touch mode by holding down the <strong>Ctrl</strong> key on
-        Windown/Linux, or <strong>Command</strong> key on Mac OSX.
-        </li>
-
-        <li>Improvements to the <a href=
-        "{@docRoot}tools/devices/managing-avds.html">Android Virtual Device
-        Manager</a>:
-          <ul>
-            <li>System images are now categorized under the following tabs:
-            <em>Recommended</em>, <em>x86</em>, and <em>Other</em>.
-            </li>
-
-            <li>Under advanced settings, you can enable multi-core support and
-            specify the number of cores the emulator can use.
-            </li>
-
-            <li>Under advanced settings, you can determine how graphics are rendered
-            on the emulator by selecting one of the following options:
-              <ul>
-                <li>
-                  <strong>Hardware:</strong> use you computer's graphics card for
-                  faster rendering.
-                </li>
-
-                <li>
-                  <strong>Software:</strong> use software-based rendering.
-                </li>
-
-                <li>
-                  <strong>Auto:</strong> let the emulator decide the best option. This
-                  is the default setting.
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-
-        <li>Read the documentation to find out more about <a href=
-        "{@docRoot}tools/devices/emulator.html">using the Android Emulator</a>.
-        </li>
-
-      </ul>
 
 <p><strong>New additions to Lint:</strong></p>
   <ul>
@@ -248,6 +162,45 @@ Android Studio, as denoted by revision number. </p>
 
 <p><strong>Additional Improvements</strong>:</p>
     <ul>
+      <li>Optimized for Android Emulator 2.0, which is faster than ever before,
+      supports a wider range of virtual devices, and features a drastically
+      improved UI. To learn more about the new emulator, read the <a href=
+      "{@docRoot}tools/sdk/tools-notes.html#notes">SDK Tools release notes</a>.
+      </li>
+
+      <li>Improvements to the <a href=
+      "{@docRoot}tools/devices/managing-avds.html">Android Virtual Device
+      Manager</a>:
+        <ul>
+          <li>System images are now categorized under the following tabs:
+          <em>Recommended</em>, <em>x86</em>, and <em>Other</em>.
+          </li>
+
+          <li>Under advanced settings, you can enable multi-core support and
+          specify the number of cores the emulator can use.
+          </li>
+
+          <li>Under advanced settings, you can determine how graphics are rendered
+          on the emulator by selecting one of the following options:
+            <ul>
+              <li>
+                <strong>Hardware:</strong> use you computer's graphics card for
+                faster rendering.
+              </li>
+
+              <li>
+                <strong>Software:</strong> use software-based rendering.
+              </li>
+
+              <li>
+                <strong>Auto:</strong> let the emulator decide the best option. This
+                is the default setting.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
       <li>Improved AAPT packaging times by specifying deploy target before the app
       is built. This allows Android Studio to efficiently package only the
       resources required by the specified device.
