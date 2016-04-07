@@ -1403,10 +1403,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final void setElevation(float elevation) {
         mElevation = elevation;
+        final WindowManager.LayoutParams attrs = getAttributes();
         if (mDecor != null) {
             mDecor.setElevation(elevation);
+            attrs.setSurfaceInsets(mDecor, true /*manual*/, false /*preservePrevious*/);
         }
-        dispatchWindowAttributesChanged(getAttributes());
+        dispatchWindowAttributesChanged(attrs);
     }
 
     @Override
