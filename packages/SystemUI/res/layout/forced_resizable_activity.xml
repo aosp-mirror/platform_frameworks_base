@@ -22,6 +22,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/forced_resizable_info_text"
+        android:text="@string/dock_forced_resizable"
         android:textColor="#ffffff"/>
 </FrameLayout>
