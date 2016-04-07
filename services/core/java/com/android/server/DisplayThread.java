@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.os.Handler;
+import android.os.Trace;
 
 /**
  * Shared singleton foreground thread for the system.  This is a thread for
@@ -36,6 +37,7 @@ public final class DisplayThread extends ServiceThread {
         if (sInstance == null) {
             sInstance = new DisplayThread();
             sInstance.start();
+            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
