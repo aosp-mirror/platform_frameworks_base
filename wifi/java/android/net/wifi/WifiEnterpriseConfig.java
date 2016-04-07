@@ -750,7 +750,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Get CA certificates.
      */
     @Nullable public X509Certificate[] getCaCertificates() {
-        if (mCaCerts != null || mCaCerts.length > 0) {
+        if (mCaCerts != null && mCaCerts.length > 0) {
             return mCaCerts;
         } else {
             return null;
