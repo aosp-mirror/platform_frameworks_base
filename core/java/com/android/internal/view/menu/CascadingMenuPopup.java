@@ -346,7 +346,15 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private void showMenu(@NonNull MenuBuilder menu) {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly);
-        adapter.setForceShowIcon(mForceShowIcon);
+
+        // Apply "force show icon" setting; if the menu being shown is the top level menu, apply the
+        // setting set on this CascadingMenuPopup by its creating code. If it's a submenu, or if no
+        // "force" setting was explicitly set, determine the setting by examining the items.
+        if (!isShowing() && mForceShowIcon) {
+            adapter.setForceShowIcon(mForceShowIcon);
+        } else {
+            adapter.setForceShowIcon(MenuPopup.shouldPreserveIconSpacing(menu));
+        }
 
         final int menuWidth = measureIndividualMenuWidth(adapter, null, mContext, mMenuMaxWidth);
         final MenuPopupWindow popupWindow = createPopupWindow();
