@@ -2397,8 +2397,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
             pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
             if (mAppToken != null) {
-                pw.print(prefix); pw.print("mAppToken="); pw.print(mAppToken);
-                pw.print(" isAnimatingWithSavedSurface()=");
+                pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+                pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
                 pw.print(isAnimatingWithSavedSurface());
                 pw.print(" mAppDied=");pw.println(mAppDied);
             }
@@ -2483,6 +2483,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" content="); mContentInsets.printShortString(pw);
                     pw.print(" visible="); mVisibleInsets.printShortString(pw);
                     pw.print(" stable="); mStableInsets.printShortString(pw);
+                    pw.print(" surface="); mAttrs.surfaceInsets.printShortString(pw);
                     pw.print(" outsets="); mOutsets.printShortString(pw);
                     pw.println();
             pw.print(prefix); pw.print("Lst insets: overscan=");
