@@ -399,6 +399,9 @@ public final class LocalBluetoothProfileManager {
         // Copy previous profile list into removedProfiles
         removedProfiles.clear();
         removedProfiles.addAll(profiles);
+        if (DEBUG) {
+            Log.d(TAG,"Current Profiles" + profiles.toString());
+        }
         profiles.clear();
 
         if (uuids == null) {
@@ -415,6 +418,13 @@ public final class LocalBluetoothProfileManager {
             }
         }
 
+        if ((mHfpClientProfile != null) &&
+                BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Handsfree_AG) &&
+                BluetoothUuid.isUuidPresent(localUuids, BluetoothUuid.Handsfree)) {
+            profiles.add(mHfpClientProfile);
+            removedProfiles.remove(mHfpClientProfile);
+        }
+
         if (BluetoothUuid.containsAnyUuid(uuids, A2dpProfile.SINK_UUIDS) &&
             mA2dpProfile != null) {
             profiles.add(mA2dpProfile);
@@ -425,7 +435,7 @@ public final class LocalBluetoothProfileManager {
                 mA2dpSinkProfile != null) {
                 profiles.add(mA2dpSinkProfile);
                 removedProfiles.remove(mA2dpSinkProfile);
-            }
+        }
 
         if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.ObexObjectPush) &&
             mOppProfile != null) {
@@ -460,6 +470,10 @@ public final class LocalBluetoothProfileManager {
             removedProfiles.remove(mPbapClientProfile);
             profiles.remove(mPbapProfile);
             removedProfiles.add(mPbapProfile);
+        }
+
+        if (DEBUG) {
+            Log.d(TAG,"New Profiles" + profiles.toString());
         }
     }
 }
