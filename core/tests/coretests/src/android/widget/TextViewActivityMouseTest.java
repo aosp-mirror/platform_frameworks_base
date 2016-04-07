@@ -16,6 +16,10 @@
 
 package android.widget;
 
+
+import static android.widget.espresso.ContextMenuUtils.assertContextMenuContainsItemDisabled;
+import static android.widget.espresso.ContextMenuUtils.assertContextMenuContainsItemEnabled;
+import static android.widget.espresso.ContextMenuUtils.assertContextMenuIsNotDisplayed;
 import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.TextViewActions.mouseClickOnTextAtIndex;
@@ -41,11 +45,9 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 import com.android.frameworks.coretests.R;
 
-import android.support.test.espresso.Espresso;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.MotionEvent;
-import android.widget.espresso.ContextMenuUtils;
 
 /**
  * Tests mouse interaction of the TextView widget from an Activity
@@ -57,7 +59,8 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
     }
 
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         getActivity();
     }
 
@@ -102,28 +105,28 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
 
-        ContextMenuUtils.assertContextMenuIsNotDisplayed();
+        assertContextMenuIsNotDisplayed();
 
         onView(withId(R.id.textview)).perform(
                 mouseClickOnTextAtIndex(text.indexOf("d"), MotionEvent.BUTTON_SECONDARY));
 
-        ContextMenuUtils.assertContextMenuContainsItemDisabled(
+        assertContextMenuContainsItemDisabled(
                 getActivity().getString(com.android.internal.R.string.copy));
-        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+        assertContextMenuContainsItemEnabled(
                 getActivity().getString(com.android.internal.R.string.undo));
 
         // Hide context menu.
         pressBack();
-        ContextMenuUtils.assertContextMenuIsNotDisplayed();
+        assertContextMenuIsNotDisplayed();
 
         onView(withId(R.id.textview)).perform(
                 mouseDragOnText(text.indexOf("c"), text.indexOf("h")));
         onView(withId(R.id.textview)).perform(
                 mouseClickOnTextAtIndex(text.indexOf("d"), MotionEvent.BUTTON_SECONDARY));
 
-        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+        assertContextMenuContainsItemEnabled(
                 getActivity().getString(com.android.internal.R.string.copy));
-        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+        assertContextMenuContainsItemEnabled(
                 getActivity().getString(com.android.internal.R.string.undo));
 
         // Hide context menu.
@@ -133,9 +136,9 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
         onView(withId(R.id.textview)).perform(
                 mouseClickOnTextAtIndex(text.indexOf("i"), MotionEvent.BUTTON_SECONDARY));
-        ContextMenuUtils.assertContextMenuContainsItemDisabled(
+        assertContextMenuContainsItemDisabled(
                 getActivity().getString(com.android.internal.R.string.copy));
-        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+        assertContextMenuContainsItemEnabled(
                 getActivity().getString(com.android.internal.R.string.undo));
 
         // Hide context menu.
