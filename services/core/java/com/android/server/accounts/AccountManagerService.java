@@ -2884,7 +2884,6 @@ public class AccountManagerService
         }
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
-        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
