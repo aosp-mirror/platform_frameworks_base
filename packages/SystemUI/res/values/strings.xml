@@ -1557,9 +1557,6 @@
     <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_move_right">Move right</string>
 
-    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity and that things might crash/not work properly [CHAR LIMIT=NONE] -->
-    <string name="forced_resizable_info_text">App may not work with multi-window</string>
-
     <!-- Accessibility description of a QS tile while editing positions [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_label">Position <xliff:g id="position" example="2">%1$d</xliff:g>, <xliff:g id="tile_name" example="Wi-Fi">%2$s</xliff:g>. Double tap to edit.</string>
 
@@ -1586,5 +1583,11 @@
 
     <!-- Accessibility label for window when QS editing is happening [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings_edit">Quick settings editor.</string>
+
+    <!-- Multi-Window strings -->
+    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity and that things might crash/not work properly [CHAR LIMIT=NONE] -->
+    <string name="dock_forced_resizable">App may not work with split-screen.</string>
+    <!-- Warning message when we try to dock a non-resizeble tasks and launch it in fullscreen instead. -->
+    <string name="dock_non_resizeble_failed_to_dock_text">App does not support split-screen.</string>
 
 </resources>

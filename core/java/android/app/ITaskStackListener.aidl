@@ -40,4 +40,9 @@ oneway interface ITaskStackListener {
      * Called when we launched an activity that we forced to be resizable.
      */
     void onActivityForcedResizable(String packageName, int taskId);
+
+    /**
+     * Callen when we launched an activity that is dismissed the docked stack.
+     */
+    void onActivityDismissingDockedStack();
 }

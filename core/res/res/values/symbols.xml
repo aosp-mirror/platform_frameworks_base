@@ -613,8 +613,6 @@
   <java-symbol type="string" name="display_manager_overlay_display_name" />
   <java-symbol type="string" name="display_manager_overlay_display_secure_suffix" />
   <java-symbol type="string" name="display_manager_overlay_display_title" />
-  <java-symbol type="string" name="dock_forced_resizable" />
-  <java-symbol type="string" name="dock_non_resizeble_failed_to_dock_text" />
   <java-symbol type="string" name="double_tap_toast" />
   <java-symbol type="string" name="durationDays" />
   <java-symbol type="string" name="durationDayHours" />

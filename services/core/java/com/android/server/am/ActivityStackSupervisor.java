@@ -152,6 +152,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityManagerService.NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG;
 import static com.android.server.am.ActivityManagerService.NOTIFY_FORCED_RESIZABLE_MSG;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -1810,7 +1811,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
 
-        showNonResizeableDockToastIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId);
+        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId);
     }
 
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
@@ -2395,7 +2396,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             resumeFocusedStackTopActivityLocked();
         }
 
-        showNonResizeableDockToastIfNeeded(task, preferredLaunchStackId, stackId);
+        handleNonResizableTaskIfNeeded(task, preferredLaunchStackId, stackId);
 
         return (preferredLaunchStackId == stackId);
     }
@@ -3366,15 +3367,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void showNonResizeableDockToastIfNeeded(
+    void handleNonResizableTaskIfNeeded(
             TaskRecord task, int preferredStackId, int actualStackId) {
-        if (!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID) {
+        if ((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
+                || task.isHomeTask()) {
             return;
         }
 
         if (!task.canGoInDockedStack()) {
             // Display a warning toast that we tried to put a non-dockable task in the docked stack.
-            mWindowManager.scheduleShowNonResizeableDockToast(task.taskId);
+            mService.mHandler.sendEmptyMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+
+            // Dismiss docked stack.
+            mService.moveTasksToFullscreenStack(DOCKED_STACK_ID, false);
         } else if (task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
             String packageName = task.getTopActivity() != null
                     ? task.getTopActivity().appInfo.packageName : null;

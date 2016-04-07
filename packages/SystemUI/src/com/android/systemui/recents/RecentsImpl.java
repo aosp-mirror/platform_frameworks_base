@@ -45,7 +45,6 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
-import com.android.systemui.recents.events.activity.ForcedResizableEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
@@ -124,13 +123,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 launchOpts.onlyLoadPausedActivities = true;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
-        }
-
-        @Override
-        public void onActivityForcedResizable(String packageName, int taskId) {
-            EventBus.getDefault().sendOntoMainThread(
-                    new ForcedResizableEvent(packageName, taskId));
-
         }
     }
 

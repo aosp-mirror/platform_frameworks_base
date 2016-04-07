@@ -4937,17 +4937,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void scheduleShowNonResizeableDockToast(int taskId) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM, "scheduleShowToast: could not find taskId=" + taskId);
-                return;
-            }
-            task.setShowNonResizeableDockToast();
-        }
-    }
-
     @Override
     public void getStackBounds(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
@@ -7767,7 +7756,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESIZE_TASK = 43;
 
         public static final int TWO_FINGER_SCROLL_START = 44;
-        public static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = 45;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
@@ -8333,16 +8321,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     } catch (RemoteException e) {
                         // This will not happen since we are in the same process.
                     }
-                }
-                break;
-                case SHOW_NON_RESIZEABLE_DOCK_TOAST: {
-                    final Toast toast = Toast.makeText(
-                            mContext, (String) msg.obj, Toast.LENGTH_SHORT);
-                    final int gravity = toast.getGravity();
-                    final int xOffset = toast.getXOffset() + msg.arg1;
-                    final int yOffset = toast.getYOffset() + msg.arg2;
-                    toast.setGravity(gravity, xOffset, yOffset);
-                    toast.show();
                 }
                 break;
                 case WINDOW_REPLACEMENT_TIMEOUT: {

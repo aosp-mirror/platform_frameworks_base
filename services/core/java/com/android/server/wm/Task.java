@@ -16,24 +16,17 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
-import static com.android.server.wm.WindowManagerService.H.SHOW_NON_RESIZEABLE_DOCK_TOAST;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
 
 import android.app.ActivityManager.StackId;
 import android.content.pm.ActivityInfo;
@@ -44,7 +37,6 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import com.android.internal.R;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -94,11 +86,6 @@ class Task implements DimLayer.DimLayerUser {
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     private int mResizeMode;
 
-    // Whether we need to show toast about the app being non-resizeable when it becomes visible.
-    // This flag is set when a non-resizeable task is docked (or side-by-side). It's cleared
-    // after we show the toast.
-    private boolean mShowNonResizeableDockToast;
-
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -116,30 +103,6 @@ class Task implements DimLayer.DimLayerUser {
 
     DisplayContent getDisplayContent() {
         return mStack.getDisplayContent();
-    }
-
-    void setShowNonResizeableDockToast() {
-        mShowNonResizeableDockToast = true;
-    }
-
-    void scheduleShowNonResizeableDockToastIfNeeded() {
-        if (!mShowNonResizeableDockToast) {
-            return;
-        }
-        final DisplayContent displayContent = mStack.getDisplayContent();
-        // If docked stack is not yet visible, we don't want to show the toast yet,
-        // since we need the visible rect of the docked task to position the toast.
-        if (displayContent == null || displayContent.getDockedStackLocked() == null) {
-            return;
-        }
-
-        mShowNonResizeableDockToast = false;
-
-        if (mResizeMode == RESIZE_MODE_UNRESIZEABLE) {
-            final String text =
-                    mService.mContext.getString(R.string.dock_non_resizeble_failed_to_dock_text);
-            mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST, 0, 0, text).sendToTarget();
-        }
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {

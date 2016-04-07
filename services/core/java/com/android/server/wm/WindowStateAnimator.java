@@ -1478,11 +1478,6 @@ class WindowStateAnimator {
                 }
             }
             w.mToken.hasVisible = true;
-
-            final Task task = w.getTask();
-            if (task != null) {
-                task.scheduleShowNonResizeableDockToastIfNeeded();
-            }
         }
     }
 
