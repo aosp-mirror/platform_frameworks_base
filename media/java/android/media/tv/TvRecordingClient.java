@@ -158,7 +158,7 @@ public class TvRecordingClient {
      * <p>The application may supply the URI for a TV program for filling in program specific data
      * fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
      * A non-null {@code programHint} implies the started recording should be of that specific
-     * program, whereas null {@code programHint} does not impose such a requirement and the
+     * program, whereas null {@code programUri} does not impose such a requirement and the
      * recording can span across multiple TV programs. In either case, the application must call
      * {@link TvRecordingClient#stopRecording()} to stop the recording.
      *
