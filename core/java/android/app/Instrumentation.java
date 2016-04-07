@@ -206,7 +206,7 @@ public class Instrumentation {
             }
             results.putAll(mPerfMetrics);
         }
-        if (mUiAutomation != null) {
+        if ((mUiAutomation != null) && !mUiAutomation.isDestroyed()) {
             mUiAutomation.disconnect();
             mUiAutomation = null;
         }
@@ -1834,7 +1834,7 @@ public class Instrumentation {
     }
 
     /**
-     * Gets the {@link UiAutomation} instance.
+     * Gets the {@link UiAutomation} instance with no flags set.
      * <p>
      * <strong>Note:</strong> The APIs exposed via the returned {@link UiAutomation}
      * work across application boundaries while the APIs exposed by the instrumentation
@@ -1848,25 +1848,21 @@ public class Instrumentation {
      * {@link Instrumentation} APIs. Using both APIs at the same time is not
      * a mistake by itself but a client has to be aware of the APIs limitations.
      * </p>
-     * @return The UI automation instance. If none exists, a new one is created with no flags set.
+     * <p>
+     * Equivalent to {@code getUiAutomation(0)}. If a {@link UiAutomation} exists with different
+     * flags, the flags on that instance will be changed, and then it will be returned.
+     * </p>
+     * @return The UI automation instance.
      *
      * @see UiAutomation
      */
     public UiAutomation getUiAutomation() {
-        if ((mUiAutomation == null) || (mUiAutomation.isDestroyed())) {
-            return getUiAutomation(0);
-        }
-        return mUiAutomation;
+        return getUiAutomation(0);
     }
 
     /**
      * Gets the {@link UiAutomation} instance with flags set.
      * <p>
-     * <strong>Note:</strong> Only one UiAutomation can be obtained. Calling this method
-     * twice with different flags will fail unless the UiAutomation obtained in the first call
-     * is released with {@link UiAutomation#destroy()}.
-     * </p>
-     * <p>
      * <strong>Note:</strong> The APIs exposed via the returned {@link UiAutomation}
      * work across application boundaries while the APIs exposed by the instrumentation
      * do not. For example, {@link Instrumentation#sendPointerSync(MotionEvent)} will
@@ -1878,6 +1874,10 @@ public class Instrumentation {
      * A typical test case should be using either the {@link UiAutomation} or
      * {@link Instrumentation} APIs. Using both APIs at the same time is not
      * a mistake by itself but a client has to be aware of the APIs limitations.
+     * </p>
+     * <p>
+     * If a {@link UiAutomation} exists with different flags, the flags on that instance will be
+     * changed, and then it will be returned.
      * </p>
      *
      * @param flags The flags to be passed to the UiAutomation, for example
@@ -1888,17 +1888,19 @@ public class Instrumentation {
      * @see UiAutomation
      */
     public UiAutomation getUiAutomation(@UiAutomationFlags int flags) {
+        boolean mustCreateNewAutomation = (mUiAutomation == null) || (mUiAutomation.isDestroyed());
+
         if (mUiAutomationConnection != null) {
-            if ((mUiAutomation == null) || (mUiAutomation.isDestroyed())) {
+            if (!mustCreateNewAutomation && (mUiAutomation.getFlags() == flags)) {
+                return mUiAutomation;
+            }
+            if (mustCreateNewAutomation) {
                 mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
                         mUiAutomationConnection);
-                mUiAutomation.connect(flags);
             } else {
-                if (mUiAutomation.getFlags() != flags) {
-                    throw new RuntimeException(
-                            "Cannot get a UiAutomation with different flags from the existing one");
-                }
+                mUiAutomation.disconnect();
             }
+            mUiAutomation.connect(flags);
             return mUiAutomation;
         }
         return null;
