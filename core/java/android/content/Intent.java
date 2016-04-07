@@ -3730,6 +3730,31 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_ALTERNATE_INTENTS = "android.intent.extra.ALTERNATE_INTENTS";
 
     /**
+     * A {@link ComponentName ComponentName[]} describing components that should be filtered out
+     * and omitted from a list of components presented to the user.
+     *
+     * <p>When used with {@link #ACTION_CHOOSER}, the chooser will omit any of the components
+     * in this array if it otherwise would have shown them. Useful for omitting specific targets
+     * from your own package or other apps from your organization if the idea of sending to those
+     * targets would be redundant with other app functionality. Filtered components will not
+     * be able to present targets from an associated <code>ChooserTargetService</code>.</p>
+     */
+    public static final String EXTRA_EXCLUDE_COMPONENTS
+            = "android.intent.extra.EXCLUDE_COMPONENTS";
+
+    /**
+     * A {@link android.service.chooser.ChooserTarget ChooserTarget[]} for {@link #ACTION_CHOOSER}
+     * describing additional high-priority deep-link targets for the chooser to present to the user.
+     *
+     * <p>Targets provided in this way will be presented inline with all other targets provided
+     * by services from other apps. They will be prioritized before other service targets, but
+     * after those targets provided by sources that the user has manually pinned to the front.</p>
+     *
+     * @see #ACTION_CHOOSER
+     */
+    public static final String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
+
+    /**
      * An {@link IntentSender} for an Activity that will be invoked when the user makes a selection
      * from the chooser activity presented by {@link #ACTION_CHOOSER}.
      *
