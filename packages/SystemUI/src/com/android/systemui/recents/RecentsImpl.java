@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.view.View.MeasureSpec;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -36,7 +37,6 @@ import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
@@ -608,23 +608,25 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
 
             Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
-            int taskViewWidth = taskViewBounds.width();
-            synchronized (mHeaderBarLock) {
-                if (mHeaderBar.getMeasuredWidth() != taskViewWidth ||
-                        mHeaderBar.getMeasuredHeight() != mTaskBarHeight) {
-                    mHeaderBar.measure(
-                        View.MeasureSpec.makeMeasureSpec(taskViewWidth, View.MeasureSpec.EXACTLY),
-                        View.MeasureSpec.makeMeasureSpec(mTaskBarHeight, View.MeasureSpec.EXACTLY));
+            if (!taskViewBounds.isEmpty()) {
+                int taskViewWidth = taskViewBounds.width();
+                synchronized (mHeaderBarLock) {
+                    if (mHeaderBar.getMeasuredWidth() != taskViewWidth ||
+                            mHeaderBar.getMeasuredHeight() != mTaskBarHeight) {
+                        mHeaderBar.measure(
+                                MeasureSpec.makeMeasureSpec(taskViewWidth, MeasureSpec.EXACTLY),
+                                MeasureSpec.makeMeasureSpec(mTaskBarHeight, MeasureSpec.EXACTLY));
+                    }
+                    mHeaderBar.layout(0, 0, taskViewWidth, mTaskBarHeight);
                 }
-                mHeaderBar.layout(0, 0, taskViewWidth, mTaskBarHeight);
-            }
 
-            // Update the transition bitmap to match the new header bar height
-            if (mThumbTransitionBitmapCache == null ||
-                    (mThumbTransitionBitmapCache.getWidth() != taskViewWidth) ||
-                    (mThumbTransitionBitmapCache.getHeight() != mTaskBarHeight)) {
-                mThumbTransitionBitmapCache = Bitmap.createBitmap(taskViewWidth,
-                        mTaskBarHeight, Bitmap.Config.ARGB_8888);
+                // Update the transition bitmap to match the new header bar height
+                if (mThumbTransitionBitmapCache == null ||
+                        (mThumbTransitionBitmapCache.getWidth() != taskViewWidth) ||
+                        (mThumbTransitionBitmapCache.getHeight() != mTaskBarHeight)) {
+                    mThumbTransitionBitmapCache = Bitmap.createBitmap(taskViewWidth,
+                            mTaskBarHeight, Bitmap.Config.ARGB_8888);
+                }
             }
         }
     }
