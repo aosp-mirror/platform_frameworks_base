@@ -36,6 +36,8 @@ interface ILockSettings {
     boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);
+    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, String managedUserPassword);
+    boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
     void unregisterStrongAuthTracker(in IStrongAuthTracker tracker);
     void requireStrongAuth(int strongAuthReason, int userId);

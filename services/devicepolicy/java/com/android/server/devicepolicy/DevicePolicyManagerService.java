@@ -3890,9 +3890,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            if (isManagedProfile(userHandle)) {
-                mLockPatternUtils.setSeparateProfileChallengeEnabled(userHandle, true);
-            }
             if (!TextUtils.isEmpty(password)) {
                 mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
             } else {
