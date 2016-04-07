@@ -41,7 +41,9 @@ public class PhoneStatusBarView extends PanelBar {
     private Runnable mHideExpandedRunnable = new Runnable() {
         @Override
         public void run() {
-            mBar.makeExpandedInvisible();
+            if (mPanelFraction == 0.0f) {
+                mBar.makeExpandedInvisible();
+            }
         }
     };
 
@@ -135,6 +137,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.onTrackingStarted();
         mBar.onTrackingStarted();
         mScrimController.onTrackingStarted();
+        removePendingHideExpandedRunnables();
     }
 
     @Override
