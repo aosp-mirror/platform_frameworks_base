@@ -947,10 +947,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
                 return;
             }
-
-            // Group ID is arbitrarily set to parent profile user ID. It just represents
-            // the default fingerprints for the user.
-            final int effectiveGroupId = getEffectiveUserId(groupId);
             final int realUserId = Binder.getCallingUid();
 
             final boolean restricted = isRestricted();
@@ -958,7 +954,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 @Override
                 public void run() {
                     MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
-                    startAuthentication(token, opId, realUserId, effectiveGroupId, receiver,
+                    startAuthentication(token, opId, realUserId, groupId, receiver,
                             flags, restricted, opPackageName);
                 }
             });
@@ -993,14 +989,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 final IFingerprintServiceReceiver receiver) {
             checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
             final boolean restricted = isRestricted();
-
-            // Group ID is arbitrarily set to parent profile user ID. It just represents
-            // the default fingerprints for the user.
-            final int effectiveGroupId = getEffectiveUserId(groupId);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startRemove(token, fingerId, effectiveGroupId, receiver, restricted);
+                    startRemove(token, fingerId, groupId, receiver, restricted);
                 }
             });
 
