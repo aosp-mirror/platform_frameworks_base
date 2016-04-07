@@ -33,10 +33,15 @@ void OpDumper::dump(const RecordedOp& op, std::ostream& output, int level) {
     op.localMatrix.mapRect(localBounds);
     output << sOpNameLut[op.opId] << " " << localBounds;
 
-    if (op.localClip && !op.localClip->rect.contains(localBounds)) {
+    if (op.localClip
+            && (!op.localClip->rect.contains(localBounds) || op.localClip->intersectWithRoot)) {
         output << std::fixed << std::setprecision(0)
              << " clip=" << op.localClip->rect
              << " mode=" << (int)op.localClip->mode;
+
+        if (op.localClip->intersectWithRoot) {
+             output << " iwr";
+        }
     }
 }
 

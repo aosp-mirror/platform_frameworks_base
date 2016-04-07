@@ -217,6 +217,7 @@ void ClipArea::setClip(float left, float top, float right, float bottom) {
 
 void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
         SkRegion::Op op) {
+    if (op == SkRegion::kReplace_Op) mReplaceOpObserved = true;
     if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     switch (mMode) {
@@ -233,6 +234,7 @@ void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
 }
 
 void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
+    if (op == SkRegion::kReplace_Op) mReplaceOpObserved = true;
     if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     enterRegionMode();
@@ -242,6 +244,7 @@ void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
 
 void ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
         SkRegion::Op op) {
+    if (op == SkRegion::kReplace_Op) mReplaceOpObserved = true;
     if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     SkMatrix skTransform;
@@ -379,6 +382,7 @@ const ClipBase* ClipArea::serializeClip(LinearAllocator& allocator) {
             serialization->rect.set(mClipRegion.getBounds());
             break;
         }
+        serialization->intersectWithRoot = mReplaceOpObserved;
         // TODO: this is only done for draw time, should eventually avoid for record time
         serialization->rect.snapToPixelBoundaries();
         mLastSerialization = serialization;

@@ -569,6 +569,19 @@ TEST(RecordingCanvas, firstClipWillReplace) {
     EXPECT_CLIP_RECT(Rect(-100, -100, 300, 300), dl->getOps()[0]->localClip);
 }
 
+TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.clipRect(-10, -10, 110, 110, SkRegion::kReplace_Op);
+        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.restore();
+    });
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must have one op";
+    // first clip must be preserved, even if it extends beyond canvas bounds
+    EXPECT_CLIP_RECT(Rect(-10, -10, 110, 110), dl->getOps()[0]->localClip);
+    EXPECT_TRUE(dl->getOps()[0]->localClip->intersectWithRoot);
+}
+
 TEST(RecordingCanvas, insertReorderBarrier) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());

@@ -1946,5 +1946,28 @@ RENDERTHREAD_TEST(FrameBuilder, renderPropSaveLayerAlphaScale) {
     EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
 }
 
+RENDERTHREAD_TEST(FrameBuilder, clip_replace) {
+    class ClipReplaceTestRenderer : public TestRendererBase {
+    public:
+        void onColorOp(const ColorOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_TRUE(op.localClip->intersectWithRoot);
+            EXPECT_EQ(Rect(20, 10, 30, 40), state.computedState.clipState->rect)
+                    << "Expect resolved clip to be intersection of viewport clip and clip op";
+        }
+    };
+    auto node = TestUtils::createNode(20, 20, 30, 30,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.clipRect(0, -20, 10, 30, SkRegion::kReplace_Op);
+        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeLTRB(10, 10, 40, 40), 50, 50,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
+    ClipReplaceTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex());
+}
+
 } // namespace uirenderer
 } // namespace android

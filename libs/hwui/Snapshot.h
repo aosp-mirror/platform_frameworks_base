@@ -170,6 +170,10 @@ public:
     const ClipArea& getClipArea() const { return *mClipArea; }
     ClipArea& mutateClipArea() { return *mClipArea; }
 
+    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
+            const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
+    void applyClip(const ClipBase* clip, const Matrix4& transform);
+
     /**
      * Resets the clip to the specified rect.
      */
