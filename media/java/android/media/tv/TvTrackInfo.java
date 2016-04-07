@@ -20,8 +20,11 @@ import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Encapsulates the format of tracks played in {@link TvInputService}.
@@ -243,6 +246,37 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeFloat(mVideoPixelAspectRatio);
         dest.writeByte(mVideoActiveFormatDescription);
         dest.writeBundle(mExtra);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+          return true;
+        }
+
+        if (!(o instanceof TvTrackInfo)) {
+          return false;
+        }
+
+        TvTrackInfo obj = (TvTrackInfo) o;
+        return TextUtils.equals(mId, obj.mId)
+                && mType == obj.mType
+                && TextUtils.equals(mLanguage, obj.mLanguage)
+                && TextUtils.equals(mDescription, obj.mDescription)
+                && Objects.equals(mExtra, obj.mExtra)
+                && (mType == TYPE_AUDIO
+                        ? mAudioChannelCount == obj.mAudioChannelCount
+                        && mAudioSampleRate == obj.mAudioSampleRate
+                        : (mType == TYPE_VIDEO
+                                ? mVideoWidth == obj.mVideoWidth
+                                && mVideoHeight == obj.mVideoHeight
+                                && mVideoFrameRate == obj.mVideoFrameRate
+                                && mVideoPixelAspectRatio == obj.mVideoPixelAspectRatio : true));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mId);
     }
 
     public static final Parcelable.Creator<TvTrackInfo> CREATOR =
