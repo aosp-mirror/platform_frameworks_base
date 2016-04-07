@@ -485,12 +485,22 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Stops any rendering into the surface. Use this if it is unclear whether
+     * Halts any current rendering into the surface. Use this if it is unclear whether
      * or not the surface used by the HardwareRenderer will be changing. It
-     * Suspends any rendering into the surface, but will not do any destruction
+     * Suspends any rendering into the surface, but will not do any destruction.
+     *
+     * Any subsequent draws will override the pause, resuming normal operation.
      */
     boolean pauseSurface(Surface surface) {
         return nPauseSurface(mNativeProxy, surface);
+    }
+
+    /**
+     * Hard stops or resumes rendering into the surface. This flag is used to
+     * determine whether or not it is safe to use the given surface *at all*
+     */
+    void setStopped(boolean stopped) {
+        nSetStopped(mNativeProxy, stopped);
     }
 
     /**
@@ -989,6 +999,7 @@ public final class ThreadedRenderer {
     private static native void nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
+    private static native void nSetStopped(long nativeProxy, boolean stopped);
     private static native void nSetup(long nativeProxy, int width, int height,
             float lightRadius, int ambientShadowAlpha, int spotShadowAlpha);
     private static native void nSetLightCenter(long nativeProxy,

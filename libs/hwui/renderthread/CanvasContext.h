@@ -82,13 +82,14 @@ public:
     void initialize(Surface* surface);
     void updateSurface(Surface* surface);
     bool pauseSurface(Surface* surface);
+    void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
 
     void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
-    void makeCurrent();
+    bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
     void draw();
@@ -172,7 +173,6 @@ private:
     friend class android::uirenderer::RenderState;
 
     void setSurface(Surface* window);
-    void requireSurface();
 
     void freePrefetechedLayers();
 
@@ -185,6 +185,7 @@ private:
     EglManager& mEglManager;
     sp<Surface> mNativeSurface;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
+    bool mStopped = false;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;
     struct SwapHistory {
