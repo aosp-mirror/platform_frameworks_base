@@ -2555,7 +2555,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void repositionChild(Session session, IWindow client,
             int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
+            long frameNumber, Rect outFrame) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
         long origId = Binder.clearCallingIdentity();
 
@@ -2591,10 +2591,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         win.mWinAnimator.setSurfaceBoundariesLocked(false);
 
-                        if (deferTransactionUntilFrame > 0) {
-                            win.mWinAnimator.mSurfaceController.deferTransactionUntil(
-                                    win.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
-                                    deferTransactionUntilFrame);
+                        if (frameNumber > 0) {
+                            win.mWinAnimator.deferTransactionUntilParentFrame(frameNumber);
                         }
 
                     } finally {
