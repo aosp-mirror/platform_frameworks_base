@@ -1984,6 +1984,28 @@ class MountService extends IMountService.Stub
                 mHandler.obtainMessage(H_RESET).sendToTarget();
             }
         }
+
+        if ((mask & (StorageManager.DEBUG_SDCARDFS_FORCE_ON
+                | StorageManager.DEBUG_SDCARDFS_FORCE_OFF)) != 0) {
+            final String value;
+            if ((flags & StorageManager.DEBUG_SDCARDFS_FORCE_ON) != 0) {
+                value = "force_on";
+            } else if ((flags & StorageManager.DEBUG_SDCARDFS_FORCE_OFF) != 0) {
+                value = "force_off";
+            } else {
+                value = "";
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(StorageManager.PROP_SDCARDFS, value);
+
+                // Reset storage to kick new setting into place
+                mHandler.obtainMessage(H_RESET).sendToTarget();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     @Override
