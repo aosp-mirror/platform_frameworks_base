@@ -734,8 +734,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             layoutYDiff = !mInsetFrame.isEmpty() ? mInsetFrame.top - mContainingFrame.top : 0;
             layoutContainingFrame = !mInsetFrame.isEmpty() ? mInsetFrame : mContainingFrame;
             subtractInsets(mDisplayFrame, layoutContainingFrame, df);
-            subtractInsets(mContainingFrame, layoutContainingFrame, pf);
-            subtractInsets(mInsetFrame, layoutContainingFrame, pf);
+            if (!layoutInParentFrame()) {
+                subtractInsets(mContainingFrame, layoutContainingFrame, pf);
+                subtractInsets(mInsetFrame, layoutContainingFrame, pf);
+            }
             layoutDisplayFrame = df;
             layoutDisplayFrame.intersect(layoutContainingFrame);
         }
