@@ -2288,6 +2288,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns maximum time to lock that applied by all profiles in this user. We do this because we
+     * do not have a separate timeout to lock for work challenge only.
+     *
+     * @hide
+     */
+    public long getMaximumTimeToLockForUserAndProfiles(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getMaximumTimeToLockForUserAndProfiles(userHandle);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Make the device lock immediately, as if the lock screen timeout has expired at the point of
      * this call.
      * <p>
