@@ -137,8 +137,6 @@ public class LockPatternUtils {
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
-    private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
-
     // Maximum allowed number of repeated or ordered characters in a sequence before we'll
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
@@ -785,6 +783,7 @@ public class LockPatternUtils {
             }
 
             getLockSettings().setLockPassword(password, savedPassword, userHandle);
+            getLockSettings().setSeparateProfileChallengeEnabled(userHandle, true, null);
             int computedQuality = computePasswordQuality(password);
 
             // Update the device encryption password.
@@ -919,11 +918,23 @@ public class LockPatternUtils {
     /**
      * Enables/disables the Separate Profile Challenge for this {@param userHandle}. This is a no-op
      * for user handles that do not belong to a managed profile.
+     *
+     * @param userHandle Managed profile user id
+     * @param enabled True if separate challenge is enabled
+     * @param managedUserPassword Managed profile previous password. Null when {@param enabled} is
+     *            true
      */
-    public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled) {
+    public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
+            String managedUserPassword) {
         UserInfo info = getUserManager().getUserInfo(userHandle);
         if (info.isManagedProfile()) {
-            setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userHandle);
+            try {
+                getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
+                        managedUserPassword);
+                onAfterChangingPassword(userHandle);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't update work profile challenge enabled");
+            }
         }
     }
 
@@ -935,7 +946,13 @@ public class LockPatternUtils {
         if (info == null || !info.isManagedProfile()) {
             return false;
         }
-        return getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userHandle);
+        try {
+            return getLockSettings().getSeparateProfileChallengeEnabled(userHandle);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't get separate profile challenge enabled");
+            // Default value is false
+            return false;
+        }
     }
 
     /**
