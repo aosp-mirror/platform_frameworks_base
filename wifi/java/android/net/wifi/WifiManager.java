@@ -2719,4 +2719,16 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Enable/disable WifiConnectivityManager
+     * @hide
+     */
+    public void enableWifiConnectivityManager(boolean enabled) {
+        try {
+            mService.enableWifiConnectivityManager(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
