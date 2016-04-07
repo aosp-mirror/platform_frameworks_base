@@ -18,9 +18,12 @@ package android.hardware.location;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,13 +31,12 @@ import java.util.HashMap;
  * @hide
  */
 public class ContextHubService extends IContextHubService.Stub {
-
     public static final String CONTEXTHUB_SERVICE = "contexthub_service";
 
     private static final String TAG = "ContextHubService";
     private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
     private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
-            + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
+        + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
 
     public static final int ANY_HUB             = -1;
@@ -78,8 +80,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
-        synchronized(this) {
-          mCallback = callback;
+        synchronized (this) {
+            mCallback = callback;
         }
         return 0;
     }
@@ -87,10 +89,10 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int[] getContextHubHandles() throws RemoteException {
         checkPermissions();
-        int [] returnArray = new int[mContextHubInfo.length];
+        int[] returnArray = new int[mContextHubInfo.length];
 
         for (int i = 0; i < returnArray.length; ++i) {
-            returnArray[i] = i + 1; //valid handles from 1...n
+            returnArray[i] = i;
             Log.d(TAG, String.format("Hub %s is mapped to %d",
                                      mContextHubInfo[i].getName(), returnArray[i]));
         }
@@ -101,7 +103,6 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public ContextHubInfo getContextHubInfo(int contextHubHandle) throws RemoteException {
         checkPermissions();
-        contextHubHandle -= 1;
         if (!(contextHubHandle >= 0 && contextHubHandle < mContextHubInfo.length)) {
             return null; // null means fail
         }
@@ -112,13 +113,12 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp app) throws RemoteException {
         checkPermissions();
-        contextHubHandle -= 1;
 
         if (!(contextHubHandle >= 0 && contextHubHandle < mContextHubInfo.length)) {
-            return -1; // negative handle are invalid, means failed
+            Log.e(TAG, "Invalid contextHubhandle " + contextHubHandle);
+            return -1;
         }
 
-        // Call Native interface here
         int[] msgHeader = new int[MSG_HEADER_SIZE];
         msgHeader[MSG_FIELD_HUB_HANDLE] = contextHubHandle;
         msgHeader[MSG_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
@@ -147,7 +147,7 @@ public class ContextHubService extends IContextHubService.Stub {
         msgHeader[MSG_FIELD_VERSION] = 0;
         msgHeader[MSG_FIELD_TYPE] = MSG_UNLOAD_NANO_APP;
 
-        if(nativeSendMessage(msgHeader, null) != 0) {
+        if (nativeSendMessage(msgHeader, null) != 0) {
             return -1;
         }
 
@@ -157,7 +157,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     @Override
     public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppInstanceHandle)
-            throws RemoteException {
+                                                      throws RemoteException {
         checkPermissions();
         // This assumes that all the nanoAppInfo is current. This is reasonable
         // for the use cases for tightly controlled nanoApps.
@@ -173,10 +173,10 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
         ArrayList<Integer> foundInstances = new ArrayList<Integer>();
 
-        for(Integer nanoAppInstance : mNanoAppHash.keySet()) {
+        for (Integer nanoAppInstance: mNanoAppHash.keySet()) {
             NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstance);
 
-            if (filter.testMatch(info)){
+            if (filter.testMatch(info)) {
                 foundInstances.add(nanoAppInstance);
             }
         }
@@ -191,7 +191,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     @Override
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage msg)
-            throws RemoteException {
+                           throws RemoteException {
         checkPermissions();
 
         int[] msgHeader = new int[MSG_HEADER_SIZE];
@@ -203,6 +203,32 @@ public class ContextHubService extends IContextHubService.Stub {
         return nativeSendMessage(msgHeader, msg.getData());
     }
 
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
+            != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump contexthub_service");
+            return;
+        }
+
+        pw.println("Dumping ContextHub Service");
+
+        pw.println("");
+        // dump ContextHubInfo
+        pw.println("=================== CONTEXT HUBS ====================");
+        for (int i = 0; i < mContextHubInfo.length; i++) {
+            pw.println("Handle " + i + " : " + mContextHubInfo[i].toString());
+        }
+        pw.println("");
+        pw.println("=================== NANOAPPS ====================");
+        // Dump nanoAppHash
+        for (Integer nanoAppInstance: mNanoAppHash.keySet()) {
+            pw.println(nanoAppInstance + " : " + mNanoAppHash.get(nanoAppInstance).toString());
+        }
+
+        // dump eventLog
+    }
+
     private void checkPermissions() {
         mContext.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
     }
@@ -212,16 +238,16 @@ public class ContextHubService extends IContextHubService.Stub {
             return  -1;
         }
 
-        synchronized(this) {
+        synchronized (this) {
             if (mCallback != null) {
                 ContextHubMessage msg = new ContextHubMessage(header[MSG_FIELD_TYPE],
-                        header[MSG_FIELD_VERSION],
-                        data);
+                                                              header[MSG_FIELD_VERSION],
+                                                              data);
 
                 try {
                     mCallback.onMessageReceipt(header[MSG_FIELD_HUB_HANDLE],
-                            header[MSG_FIELD_APP_INSTANCE],
-                            msg);
+                                               header[MSG_FIELD_APP_INSTANCE],
+                                               msg);
                 } catch (Exception e) {
                     Log.w(TAG, "Exception " + e + " when calling remote callback");
                     return -1;
