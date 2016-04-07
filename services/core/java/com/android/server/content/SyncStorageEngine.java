@@ -826,35 +826,6 @@ public class SyncStorageEngine extends Handler {
         return true;
     }
 
-    /**
-     * STOPSHIP This is a temporary workaround and should be removed before shipping: b/28052438
-     */
-    void restorePeriodicSyncsIfNeededForUser(int userHandle, List<SyncOperation> periodicSyncs) {
-        if (mPeriodicSyncAddedListener == null) {
-            return;
-        }
-        synchronized (mAuthorities) {
-            for (int i = 0; i < mAuthorities.size(); i++) {
-                AuthorityInfo authority = mAuthorities.valueAt(i);
-                if (authority.target.userId == userHandle && authority.enabled) {
-                    boolean periodicSyncAlreadyExists = false;
-                    for (SyncOperation sync : periodicSyncs) {
-                        if (authority.target.matchesSpec(sync.target)) {
-                            periodicSyncAlreadyExists = true;
-                            break;
-                        }
-                    }
-                    // The periodic sync must have been lost due to previous bug.
-                    if (!periodicSyncAlreadyExists) {
-                        mPeriodicSyncAddedListener.onPeriodicSyncAdded(authority.target,
-                                new Bundle(), DEFAULT_POLL_FREQUENCY_SECONDS,
-                                calculateDefaultFlexTime(DEFAULT_POLL_FREQUENCY_SECONDS));
-                    }
-                }
-            }
-        }
-    }
-
     public void setMasterSyncAutomatically(boolean flag, int userId) {
         synchronized (mAuthorities) {
             Boolean auto = mMasterSyncAutomatically.get(userId);

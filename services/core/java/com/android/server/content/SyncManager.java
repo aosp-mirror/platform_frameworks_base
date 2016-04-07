@@ -1402,23 +1402,11 @@ public class SyncManager {
         }
     }
 
-    private void restoreLostPeriodicSyncsIfNeeded(int userId) {
-        List<SyncOperation> periodicSyncs = new ArrayList<SyncOperation>();
-        for (SyncOperation sync : getAllPendingSyncs()) {
-            if (sync.isPeriodic && sync.target.userId == userId) {
-                periodicSyncs.add(sync);
-            }
-        }
-        mSyncStorageEngine.restorePeriodicSyncsIfNeededForUser(userId, periodicSyncs);
-    }
-
     private void onUserUnlocked(int userId) {
         // Make sure that accounts we're about to use are valid.
         AccountManagerService.getSingleton().validateAccounts(userId);
 
         mSyncAdapters.invalidateCache(userId);
-
-        restoreLostPeriodicSyncsIfNeeded(userId);
 
         EndPoint target = new EndPoint(null, null, userId);
         updateRunningAccounts(target);
