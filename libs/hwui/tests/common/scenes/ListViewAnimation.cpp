@@ -76,7 +76,7 @@ public:
             // draw it to parent DisplayList
             canvas.drawRenderNode(cards[ci].get());
         }
-        listView->setStagingDisplayList(canvas.finishRecording());
+        listView->setStagingDisplayList(canvas.finishRecording(), nullptr);
     }
 private:
     SkBitmap createRandomCharIcon() {

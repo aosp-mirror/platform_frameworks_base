@@ -81,14 +81,14 @@ RenderNode::~RenderNode() {
 #endif
 }
 
-void RenderNode::setStagingDisplayList(DisplayList* displayList) {
+void RenderNode::setStagingDisplayList(DisplayList* displayList, TreeObserver* observer) {
     mNeedsDisplayListSync = true;
     delete mStagingDisplayList;
     mStagingDisplayList = displayList;
     // If mParentCount == 0 we are the sole reference to this RenderNode,
     // so immediately free the old display list
     if (!mParentCount && !mStagingDisplayList) {
-        deleteDisplayList(nullptr);
+        deleteDisplayList(observer);
     }
 }
 

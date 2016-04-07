@@ -92,17 +92,17 @@ public:
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
     void draw();
-    void destroy();
+    void destroy(TreeObserver* observer);
 
     // IFrameCallback, Choreographer-driven frame callback entry point
     virtual void doFrame() override;
     void prepareAndDraw(RenderNode* node);
 
-    void buildLayer(RenderNode* node);
+    void buildLayer(RenderNode* node, TreeObserver* observer);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
-    void destroyHardwareResources();
+    void destroyHardwareResources(TreeObserver* observer);
     static void trimMemory(RenderThread& thread, int level);
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
@@ -174,7 +174,7 @@ private:
     void setSurface(Surface* window);
     void requireSurface();
 
-    void freePrefetechedLayers();
+    void freePrefetchedLayers(TreeObserver* observer);
 
     void waitOnFences();
 
@@ -218,7 +218,7 @@ private:
     FrameInfoVisualizer mProfiler;
     std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
 
-    std::set<RenderNode*> mPrefetechedLayers;
+    std::set<RenderNode*> mPrefetchedLayers;
 
     // Stores the bounds of the main content.
     Rect mContentDrawBounds;
