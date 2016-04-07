@@ -59,6 +59,6 @@ public:
                     0, 100 * (i + 2), kBidi_Force_LTR, paint, nullptr);
         }
 
-        container->setStagingDisplayList(canvas.finishRecording());
+        container->setStagingDisplayList(canvas.finishRecording(), nullptr);
     }
 };

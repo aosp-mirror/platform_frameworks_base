@@ -76,15 +76,15 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
 }
 
 CanvasContext::~CanvasContext() {
-    destroy();
+    destroy(nullptr);
     mRenderThread.renderState().unregisterCanvasContext(this);
 }
 
-void CanvasContext::destroy() {
+void CanvasContext::destroy(TreeObserver* observer) {
     stopDrawing();
     setSurface(nullptr);
-    freePrefetechedLayers();
-    destroyHardwareResources();
+    freePrefetchedLayers(observer);
+    destroyHardwareResources(observer);
     mAnimationContext->destroy();
 #if !HWUI_NEW_OPS
     if (mCanvas) {
@@ -222,7 +222,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     mAnimationContext->runRemainingAnimations(info);
     GL_CHECKPOINT(MODERATE);
 
-    freePrefetechedLayers();
+    freePrefetchedLayers(info.observer);
     GL_CHECKPOINT(MODERATE);
 
     if (CC_UNLIKELY(!mNativeSurface.get())) {
@@ -569,25 +569,24 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
 }
 
 void CanvasContext::markLayerInUse(RenderNode* node) {
-    if (mPrefetechedLayers.erase(node)) {
+    if (mPrefetchedLayers.erase(node)) {
         node->decStrong(nullptr);
     }
 }
 
-static void destroyPrefetechedNode(RenderNode* node) {
-    ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...", node->getName());
-    node->destroyHardwareResources(nullptr);
-    node->decStrong(nullptr);
-}
-
-void CanvasContext::freePrefetechedLayers() {
-    if (mPrefetechedLayers.size()) {
-        std::for_each(mPrefetechedLayers.begin(), mPrefetechedLayers.end(), destroyPrefetechedNode);
-        mPrefetechedLayers.clear();
+void CanvasContext::freePrefetchedLayers(TreeObserver* observer) {
+    if (mPrefetchedLayers.size()) {
+        for (auto& node : mPrefetchedLayers) {
+            ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...",
+                    node->getName());
+            node->destroyHardwareResources(observer);
+            node->decStrong(observer);
+        }
+        mPrefetchedLayers.clear();
     }
 }
 
-void CanvasContext::buildLayer(RenderNode* node) {
+void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     ATRACE_CALL();
     if (!mEglManager.hasEglContext()) return;
 #if !HWUI_NEW_OPS
@@ -599,6 +598,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
 
     TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
+    info.observer = observer;
 #if HWUI_NEW_OPS
     info.layerUpdateQueue = &mLayerUpdateQueue;
 #else
@@ -628,7 +628,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
 #endif
 
     node->incStrong(nullptr);
-    mPrefetechedLayers.insert(node);
+    mPrefetchedLayers.insert(node);
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
@@ -636,12 +636,12 @@ bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap)
     return LayerRenderer::copyLayer(mRenderThread.renderState(), layer->backingLayer(), bitmap);
 }
 
-void CanvasContext::destroyHardwareResources() {
+void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
     stopDrawing();
     if (mEglManager.hasEglContext()) {
-        freePrefetechedLayers();
+        freePrefetchedLayers(observer);
         for (const sp<RenderNode>& node : mRenderNodes) {
-            node->destroyHardwareResources(nullptr);
+            node->destroyHardwareResources(observer);
         }
         Caches& caches = Caches::getInstance();
         // Make sure to release all the textures we were owning as there won't

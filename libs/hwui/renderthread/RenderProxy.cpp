@@ -222,18 +222,19 @@ int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
 }
 
-int RenderProxy::syncAndDrawFrame() {
-    return mDrawFrameTask.drawFrame();
+int RenderProxy::syncAndDrawFrame(TreeObserver* observer) {
+    return mDrawFrameTask.drawFrame(observer);
 }
 
-CREATE_BRIDGE1(destroy, CanvasContext* context) {
-    args->context->destroy();
+CREATE_BRIDGE2(destroy, CanvasContext* context, TreeObserver* observer) {
+    args->context->destroy(args->observer);
     return nullptr;
 }
 
-void RenderProxy::destroy() {
+void RenderProxy::destroy(TreeObserver* observer) {
     SETUP_TASK(destroy);
     args->context = mContext;
+    args->observer = observer;
     // destroyCanvasAndSurface() needs a fence as when it returns the
     // underlying BufferQueue is going to be released from under
     // the render thread.
@@ -287,15 +288,16 @@ DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     return layer;
 }
 
-CREATE_BRIDGE2(buildLayer, CanvasContext* context, RenderNode* node) {
-    args->context->buildLayer(args->node);
+CREATE_BRIDGE3(buildLayer, CanvasContext* context, RenderNode* node, TreeObserver* observer) {
+    args->context->buildLayer(args->node, args->observer);
     return nullptr;
 }
 
-void RenderProxy::buildLayer(RenderNode* node) {
+void RenderProxy::buildLayer(RenderNode* node, TreeObserver* observer) {
     SETUP_TASK(buildLayer);
     args->context = mContext;
     args->node = node;
+    args->observer = observer;
     postAndWait(task);
 }
 
@@ -332,15 +334,16 @@ void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE1(destroyHardwareResources, CanvasContext* context) {
-    args->context->destroyHardwareResources();
+CREATE_BRIDGE2(destroyHardwareResources, CanvasContext* context, TreeObserver* observer) {
+    args->context->destroyHardwareResources(args->observer);
     return nullptr;
 }
 
-void RenderProxy::destroyHardwareResources() {
+void RenderProxy::destroyHardwareResources(TreeObserver* observer) {
     SETUP_TASK(destroyHardwareResources);
     args->context = mContext;
-    post(task);
+    args->observer = observer;
+    postAndWait(task);
 }
 
 CREATE_BRIDGE2(trimMemory, RenderThread* thread, int level) {

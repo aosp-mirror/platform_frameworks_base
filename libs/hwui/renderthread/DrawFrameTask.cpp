@@ -65,11 +65,12 @@ void DrawFrameTask::removeLayerUpdate(DeferredLayerUpdater* layer) {
     }
 }
 
-int DrawFrameTask::drawFrame() {
+int DrawFrameTask::drawFrame(TreeObserver* observer) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     mSyncResult = kSync_OK;
     mSyncQueued = systemTime(CLOCK_MONOTONIC);
+    mObserver = observer;
     postAndWait();
 
     return mSyncResult;
@@ -88,6 +89,7 @@ void DrawFrameTask::run() {
     bool canDrawThisFrame;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
+        info.observer = mObserver;
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
     }

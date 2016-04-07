@@ -42,6 +42,7 @@ class RenderNode;
 class DisplayList;
 class Layer;
 class Rect;
+class TreeObserver;
 
 namespace renderthread {
 
@@ -75,21 +76,21 @@ public:
     ANDROID_API void setLightCenter(const Vector3& lightCenter);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API int64_t* frameInfo();
-    ANDROID_API int syncAndDrawFrame();
-    ANDROID_API void destroy();
+    ANDROID_API int syncAndDrawFrame(TreeObserver* observer);
+    ANDROID_API void destroy(TreeObserver* observer);
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
 
     ANDROID_API void runWithGlContext(RenderTask* task);
 
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
-    ANDROID_API void buildLayer(RenderNode* node);
+    ANDROID_API void buildLayer(RenderNode* node, TreeObserver* observer);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);
     ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
-    ANDROID_API void destroyHardwareResources();
+    ANDROID_API void destroyHardwareResources(TreeObserver* observer);
     ANDROID_API static void trimMemory(int level);
     ANDROID_API static void overrideProperty(const char* name, const char* value);
 

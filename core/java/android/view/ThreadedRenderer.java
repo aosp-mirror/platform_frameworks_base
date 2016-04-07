@@ -794,8 +794,7 @@ public final class ThreadedRenderer {
         }
 
         final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
-        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length,
-                mRootNode.mNativeRenderNode);
+        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
             attachInfo.mViewRootImpl.mSurface.release();
@@ -994,8 +993,7 @@ public final class ThreadedRenderer {
     private static native void nSetLightCenter(long nativeProxy,
             float lightX, float lightY, float lightZ);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size,
-            long rootRenderNode);
+    private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy, long rootRenderNode);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
