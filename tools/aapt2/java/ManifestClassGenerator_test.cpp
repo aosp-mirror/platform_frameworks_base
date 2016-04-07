@@ -104,28 +104,34 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
     std::string actual;
     ASSERT_TRUE(getManifestClassText(context.get(), manifest.get(), &actual));
 
-    EXPECT_NE(std::string::npos, actual.find(
+    const char* expectedAccessInternet =
 R"EOF(    /**
      * Required to access the internet.
      * Added in API 1.
      */
-    public static final String ACCESS_INTERNET="android.permission.ACCESS_INTERNET";)EOF"));
+    public static final String ACCESS_INTERNET="android.permission.ACCESS_INTERNET";)EOF";
 
-    EXPECT_NE(std::string::npos, actual.find(
+    EXPECT_NE(std::string::npos, actual.find(expectedAccessInternet));
+
+    const char* expectedPlayOutside =
 R"EOF(    /**
      * @deprecated This permission is for playing outside.
      */
     @Deprecated
-    public static final String PLAY_OUTSIDE="android.permission.PLAY_OUTSIDE";)EOF"));
+    public static final String PLAY_OUTSIDE="android.permission.PLAY_OUTSIDE";)EOF";
 
-    EXPECT_NE(std::string::npos, actual.find(
+    EXPECT_NE(std::string::npos, actual.find(expectedPlayOutside));
+
+    const char* expectedSecret =
 R"EOF(    /**
      * This is a private permission for system only!
      * @hide
      * @SystemApi
      */
     @android.annotation.SystemApi
-    public static final String SECRET="android.permission.SECRET";)EOF"));
+    public static final String SECRET="android.permission.SECRET";)EOF";
+
+    EXPECT_NE(std::string::npos, actual.find(expectedSecret));
 }
 
 } // namespace aapt

@@ -228,20 +228,24 @@ static void copyAttributes(Element* el, android::ResXMLParser* parser) {
 
 std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
                                      const Source& source) {
+    // We import the android namespace because on Windows NO_ERROR is a macro, not an enum, which
+    // causes errors when qualifying it with android::
+    using namespace android;
+
     std::unique_ptr<Node> root;
     std::stack<Node*> nodeStack;
 
-    android::ResXMLTree tree;
-    if (tree.setTo(data, dataLen) != android::NO_ERROR) {
+    ResXMLTree tree;
+    if (tree.setTo(data, dataLen) != NO_ERROR) {
         return {};
     }
 
-    android::ResXMLParser::event_code_t code;
-    while ((code = tree.next()) != android::ResXMLParser::BAD_DOCUMENT &&
-            code != android::ResXMLParser::END_DOCUMENT) {
+    ResXMLParser::event_code_t code;
+    while ((code = tree.next()) != ResXMLParser::BAD_DOCUMENT &&
+            code != ResXMLParser::END_DOCUMENT) {
         std::unique_ptr<Node> newNode;
         switch (code) {
-            case android::ResXMLParser::START_NAMESPACE: {
+            case ResXMLParser::START_NAMESPACE: {
                 std::unique_ptr<Namespace> node = util::make_unique<Namespace>();
                 size_t len;
                 const char16_t* str16 = tree.getNamespacePrefix(&len);
@@ -257,7 +261,7 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 break;
             }
 
-            case android::ResXMLParser::START_TAG: {
+            case ResXMLParser::START_TAG: {
                 std::unique_ptr<Element> node = util::make_unique<Element>();
                 size_t len;
                 const char16_t* str16 = tree.getElementNamespace(&len);
@@ -276,7 +280,7 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 break;
             }
 
-            case android::ResXMLParser::TEXT: {
+            case ResXMLParser::TEXT: {
                 std::unique_ptr<Text> node = util::make_unique<Text>();
                 size_t len;
                 const char16_t* str16 = tree.getText(&len);
@@ -287,8 +291,8 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 break;
             }
 
-            case android::ResXMLParser::END_NAMESPACE:
-            case android::ResXMLParser::END_TAG:
+            case ResXMLParser::END_NAMESPACE:
+            case ResXMLParser::END_TAG:
                 assert(!nodeStack.empty());
                 nodeStack.pop();
                 break;

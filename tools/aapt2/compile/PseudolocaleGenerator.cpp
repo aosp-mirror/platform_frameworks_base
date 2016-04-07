@@ -20,6 +20,8 @@
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/Pseudolocalizer.h"
 
+#include <algorithm>
+
 namespace aapt {
 
 std::unique_ptr<StyledString> pseudolocalizeStyledString(StyledString* string,

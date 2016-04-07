@@ -24,6 +24,7 @@
 #include "util/BigBuffer.h"
 
 #include <android-base/macros.h>
+#include <algorithm>
 #include <type_traits>
 #include <numeric>
 
