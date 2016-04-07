@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -69,10 +70,32 @@ public final class CarrierAppUtils {
                 systemCarrierAppsDisabledUntilUsed);
     }
 
+    /**
+     * Like {@link #disableCarrierAppsUntilPrivileged(String, IPackageManager, TelephonyManager,
+     * int)}, but assumes that no carrier apps have carrier privileges.
+     *
+     * This prevents a potential race condition on first boot - since the app's default state is
+     * enabled, we will initially disable it when the telephony stack is first initialized as it has
+     * not yet read the carrier privilege rules. However, since telephony is initialized later on
+     * late in boot, the app being disabled may have already been started in response to certain
+     * broadcasts. The app will continue to run (briefly) after being disabled, before the Package
+     * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
+     */
+    public synchronized static void disableCarrierAppsUntilPrivileged(String callingPackage,
+            IPackageManager packageManager, int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "disableCarrierAppsUntilPrivileged");
+        }
+        String[] systemCarrierAppsDisabledUntilUsed = Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_disabledUntilUsedPreinstalledCarrierApps);
+        disableCarrierAppsUntilPrivileged(callingPackage, packageManager,
+                null /* telephonyManager */, userId, systemCarrierAppsDisabledUntilUsed);
+    }
+
     // Must be public b/c framework unit tests can't access package-private methods.
     @VisibleForTesting
     public static void disableCarrierAppsUntilPrivileged(String callingPackage,
-            IPackageManager packageManager, TelephonyManager telephonyManager, int userId,
+            IPackageManager packageManager, @Nullable TelephonyManager telephonyManager, int userId,
             String[] systemCarrierAppsDisabledUntilUsed) {
         List<ApplicationInfo> candidates = getDefaultCarrierAppCandidatesHelper(packageManager,
                 userId, systemCarrierAppsDisabledUntilUsed);
@@ -85,7 +108,7 @@ public final class CarrierAppUtils {
         try {
             for (ApplicationInfo ai : candidates) {
                 String packageName = ai.packageName;
-                boolean hasPrivileges =
+                boolean hasPrivileges = telephonyManager != null &&
                         telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName) ==
                                 TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
