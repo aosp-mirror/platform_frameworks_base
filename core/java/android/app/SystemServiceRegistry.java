@@ -532,7 +532,8 @@ final class SystemServiceRegistry {
             public WifiScanner createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_SCANNING_SERVICE);
                 IWifiScanner service = IWifiScanner.Stub.asInterface(b);
-                return new WifiScanner(ctx.getOuterContext(), service);
+                return new WifiScanner(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.WIFI_RTT_SERVICE, RttManager.class,
