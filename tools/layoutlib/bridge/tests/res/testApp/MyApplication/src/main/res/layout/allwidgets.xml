@@ -197,6 +197,14 @@
         android:inputType="numberPassword"
         android:text="numeric password" />
 
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/editText4"
+        android:layout_toEndOf="@id/editText4"
+        android:text="New ToggleButton" />
+
     <EditText
         android:id="@id/editText5"
         android:layout_width="wrap_content"
