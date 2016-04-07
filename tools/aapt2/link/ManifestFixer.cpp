@@ -168,6 +168,8 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
         return true;
     });
 
+    manifestAction[u"eat-comment"];
+    manifestAction[u"protected-broadcast"];
     manifestAction[u"uses-permission"];
     manifestAction[u"permission"];
     manifestAction[u"permission-tree"];
