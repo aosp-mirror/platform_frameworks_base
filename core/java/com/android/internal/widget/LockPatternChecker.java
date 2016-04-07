@@ -145,6 +145,43 @@ public final class LockPatternChecker {
     }
 
     /**
+     * Verify a password asynchronously.
+     *
+     * @param utils The LockPatternUtils instance to use.
+     * @param password The password to check.
+     * @param challenge The challenge to verify against the pattern.
+     * @param userId The user to check against the pattern.
+     * @param callback The callback to be invoked with the verification result.
+     */
+    public static AsyncTask<?, ?, ?> verifyTiedProfileChallenge(final LockPatternUtils utils,
+            final String password,
+            final boolean isPattern,
+            final long challenge,
+            final int userId,
+            final OnVerifyCallback callback) {
+        AsyncTask<Void, Void, byte[]> task = new AsyncTask<Void, Void, byte[]>() {
+            private int mThrottleTimeout;
+
+            @Override
+            protected byte[] doInBackground(Void... args) {
+                try {
+                    return utils.verifyTiedProfileChallenge(password, isPattern, challenge, userId);
+                } catch (RequestThrottledException ex) {
+                    mThrottleTimeout = ex.getTimeoutMs();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(byte[] result) {
+                callback.onVerified(result, mThrottleTimeout);
+            }
+        };
+        task.execute();
+        return task;
+    }
+
+    /**
      * Checks a password asynchronously.
      *
      * @param utils The LockPatternUtils instance to use.

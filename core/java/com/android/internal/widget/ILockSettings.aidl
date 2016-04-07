@@ -33,6 +33,7 @@ interface ILockSettings {
     void setLockPassword(in String password, in String savedPassword, int userId);
     VerifyCredentialResponse checkPassword(in String password, int userId);
     VerifyCredentialResponse verifyPassword(in String password, long challenge, int userId);
+    VerifyCredentialResponse verifyTiedProfileChallenge(String password, boolean isPattern, long challenge, int userId);
     boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);

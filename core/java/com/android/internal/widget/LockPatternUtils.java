@@ -375,6 +375,36 @@ public class LockPatternUtils {
         }
     }
 
+
+    /**
+     * Check to see if a password matches the saved password.
+     * If password matches, return an opaque attestation that the challenge
+     * was verified.
+     *
+     * @param password The password to check.
+     * @param challenge The challenge to verify against the password
+     * @return the attestation that the challenge was verified, or null.
+     */
+    public byte[] verifyTiedProfileChallenge(String password, boolean isPattern, long challenge,
+            int userId) throws RequestThrottledException {
+        throwIfCalledOnMainThread();
+        try {
+            VerifyCredentialResponse response =
+                    getLockSettings().verifyTiedProfileChallenge(password, isPattern, challenge,
+                            userId);
+
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return response.getPayload();
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return null;
+            }
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
     /**
      * Check to see if a password matches the saved password.  If no password exists,
      * always returns true.

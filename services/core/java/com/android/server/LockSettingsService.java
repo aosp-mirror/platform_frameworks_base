@@ -1110,6 +1110,37 @@ public class LockSettingsService extends ILockSettings.Stub {
         return doVerifyPassword(password, true, challenge, userId);
     }
 
+    @Override
+    public VerifyCredentialResponse verifyTiedProfileChallenge(String password, boolean isPattern,
+            long challenge, int userId) throws RemoteException {
+        checkPasswordReadPermission(userId);
+        if (!isManagedProfileWithUnifiedLock(userId)) {
+            throw new RemoteException("User id must be managed profile with unified lock");
+        }
+        final int parentProfileId = mUserManager.getProfileParent(userId).id;
+        // Unlock parent by using parent's challenge
+        final VerifyCredentialResponse parentResponse = isPattern
+                ? doVerifyPattern(password, true, challenge, parentProfileId)
+                : doVerifyPassword(password, true, challenge, parentProfileId);
+        if (parentResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+            // Failed, just return parent's response
+            return parentResponse;
+        }
+
+        try {
+            // Unlock work profile, and work profile with unified lock must use password only
+            return doVerifyPassword(getDecryptedPasswordForTiedProfile(userId), true,
+                    challenge,
+                    userId);
+        } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
+                | NoSuchAlgorithmException | NoSuchPaddingException
+                | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                | BadPaddingException | CertificateException | IOException e) {
+            Slog.e(TAG, "Failed to decrypt child profile key", e);
+            throw new RemoteException("Unable to get tied profile token");
+        }
+    }
+
     private VerifyCredentialResponse doVerifyPassword(String password, boolean hasChallenge,
             long challenge, int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
