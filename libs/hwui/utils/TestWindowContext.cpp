@@ -104,8 +104,8 @@ public:
     }
 
     void finishDrawing() {
-        mRootNode->setStagingDisplayList(mCanvas->finishRecording());
-        mProxy->syncAndDrawFrame();
+        mRootNode->setStagingDisplayList(mCanvas->finishRecording(), nullptr);
+        mProxy->syncAndDrawFrame(nullptr);
         // Surprisingly, calling mProxy->fence() here appears to make no difference to
         // the timings we record.
     }

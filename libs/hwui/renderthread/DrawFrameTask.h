@@ -62,7 +62,7 @@ public:
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
 
-    int drawFrame();
+    int drawFrame(TreeObserver* observer);
 
     int64_t* frameInfo() { return mFrameInfo; }
 
@@ -87,6 +87,7 @@ private:
 
     int mSyncResult;
     int64_t mSyncQueued;
+    TreeObserver* mObserver;
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 };

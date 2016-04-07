@@ -72,6 +72,31 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
+// TODO: Clean this up, it's a bit odd to need to call over to
+// rendernode's jni layer. Probably means RootRenderNode should be pulled
+// into HWUI with appropriate callbacks for the various JNI hooks so
+// that RenderNode's JNI layer can handle its own thing
+void onRenderNodeRemoved(JNIEnv* env, RenderNode* node);
+
+class ScopedRemovedRenderNodeObserver : public TreeObserver {
+public:
+    ScopedRemovedRenderNodeObserver(JNIEnv* env) : mEnv(env) {}
+    ~ScopedRemovedRenderNodeObserver() {
+        for (auto& node : mMaybeRemovedNodes) {
+            if (node->hasParents()) continue;
+            onRenderNodeRemoved(mEnv, node.get());
+        }
+    }
+
+    virtual void onMaybeRemovedFromTree(RenderNode* node) override {
+        mMaybeRemovedNodes.insert(sp<RenderNode>(node));
+    }
+
+private:
+    JNIEnv* mEnv;
+    std::set< sp<RenderNode> > mMaybeRemovedNodes;
+};
+
 class OnFinishedEvent {
 public:
     OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
@@ -120,13 +145,7 @@ private:
     std::string mMessage;
 };
 
-// TODO: Clean this up, it's a bit odd to need to call over to
-// rendernode's jni layer. Probably means RootRenderNode should be pulled
-// into HWUI with appropriate callbacks for the various JNI hooks so
-// that RenderNode's JNI layer can handle its own thing
-void onRenderNodeRemoved(JNIEnv* env, RenderNode* node);
-
-class RootRenderNode : public RenderNode, ErrorHandler, TreeObserver {
+class RootRenderNode : public RenderNode, ErrorHandler {
 public:
     RootRenderNode(JNIEnv* env) : RenderNode() {
         mLooper = Looper::getForThread();
@@ -143,9 +162,6 @@ public:
 
     virtual void prepareTree(TreeInfo& info) override {
         info.errorHandler = this;
-        if (info.mode == TreeInfo::MODE_FULL) {
-            info.observer = this;
-        }
         // TODO: This is hacky
         info.windowInsetLeft = -stagingProperties().getLeft();
         info.windowInsetTop = -stagingProperties().getTop();
@@ -155,7 +171,6 @@ public:
         info.windowInsetLeft = 0;
         info.windowInsetTop = 0;
         info.errorHandler = nullptr;
-        info.observer = nullptr;
     }
 
     void sendMessage(const sp<MessageHandler>& handler) {
@@ -181,27 +196,10 @@ public:
         mPendingAnimatingRenderNodes.clear();
     }
 
-    virtual void onMaybeRemovedFromTree(RenderNode* node) override {
-        mMaybeRemovedNodes.insert(sp<RenderNode>(node));
-    }
-
-    void processMaybeRemovedNodes(JNIEnv* env) {
-        // We can safely access mMaybeRemovedNodes here because
-        // we will only modify it in prepareTree calls that are
-        // MODE_FULL
-
-        for (auto& node : mMaybeRemovedNodes) {
-            if (node->hasParents()) continue;
-            onRenderNodeRemoved(env, node.get());
-        }
-        mMaybeRemovedNodes.clear();
-    }
-
 private:
     sp<Looper> mLooper;
     JavaVM* mVm;
     std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
-    std::set< sp<RenderNode> > mMaybeRemovedNodes;
 };
 
 class AnimationContextBridge : public AnimationContext {
@@ -499,24 +497,23 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize, jlong rootNodePtr) {
+        jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
     LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
             "Mismatched size expectations, given %d expected %d",
             frameInfoSize, UI_THREAD_FRAME_INFO_SIZE);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
+    ScopedRemovedRenderNodeObserver observer(env);
     env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
-    int ret = proxy->syncAndDrawFrame();
-    rootRenderNode->processMaybeRemovedNodes(env);
-    return ret;
+    return proxy->syncAndDrawFrame(&observer);
 }
 
 static void android_view_ThreadedRenderer_destroy(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong rootNodePtr) {
+    ScopedRemovedRenderNodeObserver observer(env);
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
     rootRenderNode->destroy();
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroy();
+    proxy->destroy(&observer);
 }
 
 static void android_view_ThreadedRenderer_registerAnimatingRenderNode(JNIEnv* env, jobject clazz,
@@ -541,9 +538,10 @@ static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobje
 
 static void android_view_ThreadedRenderer_buildLayer(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong nodePtr) {
+    ScopedRemovedRenderNodeObserver observer(env);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     RenderNode* node = reinterpret_cast<RenderNode*>(nodePtr);
-    proxy->buildLayer(node);
+    proxy->buildLayer(node, &observer);
 }
 
 static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
@@ -578,8 +576,9 @@ static void android_view_ThreadedRenderer_detachSurfaceTexture(JNIEnv* env, jobj
 
 static void android_view_ThreadedRenderer_destroyHardwareResources(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
+    ScopedRemovedRenderNodeObserver observer(env);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroyHardwareResources();
+    proxy->destroyHardwareResources(&observer);
 }
 
 static void android_view_ThreadedRenderer_trimMemory(JNIEnv* env, jobject clazz,
@@ -735,7 +734,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetup", "(JIIFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
-    { "nSyncAndDrawFrame", "(J[JIJ)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
+    { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(JJ)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },

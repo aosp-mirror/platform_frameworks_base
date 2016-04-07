@@ -128,9 +128,22 @@ static void android_view_RenderNode_destroyRenderNode(JNIEnv* env,
 
 static void android_view_RenderNode_setDisplayList(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jlong displayListPtr) {
+    class RemovedObserver : public TreeObserver {
+    public:
+        virtual void onMaybeRemovedFromTree(RenderNode* node) override {
+            maybeRemovedNodes.insert(sp<RenderNode>(node));
+        }
+        std::set< sp<RenderNode> > maybeRemovedNodes;
+    };
+
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     DisplayList* newData = reinterpret_cast<DisplayList*>(displayListPtr);
-    renderNode->setStagingDisplayList(newData);
+    RemovedObserver observer;
+    renderNode->setStagingDisplayList(newData, &observer);
+    for (auto& node : observer.maybeRemovedNodes) {
+        if (node->hasParents()) continue;
+        onRenderNodeRemoved(env, node.get());
+    }
 }
 
 // ----------------------------------------------------------------------------
