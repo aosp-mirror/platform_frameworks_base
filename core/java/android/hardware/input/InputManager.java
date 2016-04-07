@@ -16,9 +16,7 @@
 
 package android.hardware.input;
 
-import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.ArrayUtils;
 
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
