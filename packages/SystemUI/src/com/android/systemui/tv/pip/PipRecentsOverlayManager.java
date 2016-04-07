@@ -16,8 +16,6 @@
 
 package com.android.systemui.tv.pip;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.Log;
