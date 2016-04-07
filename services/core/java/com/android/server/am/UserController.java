@@ -237,7 +237,13 @@ final class UserController {
                         AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
             }
 
-            maybeUnlockUser(userId);
+            // We only attempt to unlock real users here; we delay unlocking
+            // profiles until after the parent user is unlocked.
+            if (getUserManager().isManagedProfile(userId)) {
+                Slog.d(TAG, "User " + userId + " is managed profile; delaying unlock attempt");
+            } else {
+                maybeUnlockUser(userId);
+            }
         }
     }
 
@@ -903,6 +909,20 @@ final class UserController {
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
             finishUserUnlocking(uss, progress);
+        }
+
+        // We just unlocked a user, so let's now attempt to unlock any managed
+        // profiles under that user.
+        synchronized (mService) {
+            for (int i = 0; i < mStartedUsers.size(); i++) {
+                final int testUserId = mStartedUsers.keyAt(i);
+                final UserInfo parent = getUserManager().getProfileParent(testUserId);
+                if (parent != null && parent.id == userId && testUserId != userId) {
+                    Slog.d(TAG, "Found user " + testUserId + " with parent " + userId
+                            + "; attempting unlock");
+                    maybeUnlockUser(testUserId);
+                }
+            }
         }
 
         return true;
