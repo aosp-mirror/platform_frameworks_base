@@ -138,7 +138,7 @@ public class CustomTile extends QSTile<QSTile.State> {
         mListening = listening;
         try {
             if (listening) {
-                if (mServiceManager.getType() == TileService.TILE_MODE_PASSIVE) {
+                if (!mServiceManager.isActiveTile()) {
                     mServiceManager.setBindRequested(true);
                     mService.onStartListening();
                 }
@@ -209,7 +209,7 @@ public class CustomTile extends QSTile<QSTile.State> {
         } catch (RemoteException e) {
         }
         try {
-            if (mServiceManager.getType() == TileService.TILE_MODE_ACTIVE) {
+            if (mServiceManager.isActiveTile()) {
                 mServiceManager.setBindRequested(true);
                 mService.onStartListening();
             }
