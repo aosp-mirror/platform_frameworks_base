@@ -4427,9 +4427,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         teardownUnneededNetwork(oldNetwork);
     }
 
-    private void makeDefault(NetworkAgentInfo newNetwork) {
+    private void makeDefault(NetworkAgentInfo newNetwork, NetworkAgentInfo prevNetwork) {
+        int prevNetId = (prevNetwork == null) ? NETID_UNSET : prevNetwork.network.netId;
         if (DBG) log("Switching to new default network: " + newNetwork);
-        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId);
         setupDataActivityTracking(newNetwork);
         try {
             mNetd.setDefaultNetId(newNetwork.network.netId);
@@ -4440,6 +4440,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId, prevNetId,
+                newNetwork.networkCapabilities.getTransportTypes());
     }
 
     // Handles a network appearing or improving its score.
@@ -4590,7 +4592,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (isNewDefault) {
             // Notify system services that this network is up.
-            makeDefault(newNetwork);
+            makeDefault(newNetwork, oldDefaultNetwork);
             synchronized (ConnectivityService.this) {
                 // have a new default network, release the transition wakelock in
                 // a second if it's held.  The second pause is to allow apps
