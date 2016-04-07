@@ -32,8 +32,10 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.statusbar.tv.TvStatusBar;
 
@@ -117,12 +119,15 @@ public class RecentsTvImpl extends RecentsImpl{
      */
     private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
             ActivityManager.RunningTaskInfo topTask) {
-        Bitmap thumbnail = mThumbTransitionBitmapCache;
         Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext);
-        if (thumbnail != null) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ThumbnailData thumbnailData = ssp.getTaskThumbnail(topTask.id);
+        if (thumbnailData.thumbnail != null) {
+            Bitmap thumbnail = Bitmap.createScaledBitmap(thumbnailData.thumbnail, rect.width(),
+                    rect.height(), false);
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    null, (int) rect.left, (int) rect.top,
-                    (int) rect.width(), (int) rect.height(), mHandler, null);
+                    thumbnail, (int) rect.left, (int) rect.top, (int) rect.width(),
+                    (int) rect.height(), mHandler, null);
         }
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
         return getUnknownTransitionActivityOptions();

@@ -92,13 +92,6 @@ public class TaskCardView extends LinearLayout {
     public Rect getFocusedThumbnailRect() {
         Rect r = new Rect();
         mThumbnailView.getGlobalVisibleRect(r);
-        TypedValue out = new TypedValue();
-        getContext().getResources().getValue(R.integer.selected_scale, out, true);
-        float deltaScale = (out.getFloat() - 1.0f) / 2;
-        r.set((int) (r.left - r.left * deltaScale),
-                (int) (r.top - r.top * deltaScale),
-                (int) (r.right + r.right * deltaScale),
-                (int) (r.bottom + r.bottom * deltaScale));
         return r;
     }
 
