@@ -18,6 +18,7 @@ package android.hardware.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /** A class describing nano apps.
  * A nano app is a piece of executable code that can be
@@ -31,10 +32,15 @@ import android.os.Parcelable;
  */
 @SystemApi
 public class NanoApp {
+    private final String TAG = "NanoApp";
+
+    private final String UNKNOWN = "Unknown";
+
     private String mPublisher;
     private String mName;
 
     private int mAppId;
+    private boolean mAppIdSet;
     private int mAppVersion;
 
     private int mNeededReadMemBytes;
@@ -45,7 +51,48 @@ public class NanoApp {
     private int[] mOutputEvents;
     private byte[] mAppBinary;
 
+    /**
+     * If this version of the constructor is used, the methods
+     * {@link #setAppBinary(byte[])} and {@link #setAppId(int)} must be called
+     * prior to passing this object to any managers.
+     *
+     * @see #NanoApp(int, byte[])
+     */
     public NanoApp() {
+        this(0, null);
+        mAppIdSet = false;
+    }
+
+    /**
+     * Initialize a NanoApp with the given id and binary.
+     *
+     * While this sets defaults for other fields, users will want to provide
+     * other values for those fields in most cases.
+     *
+     * @see #setPublisher(String)
+     * @see #setName(String)
+     * @see #setAppVersion(int)
+     * @see #setNeededReadMemBytes(int)
+     * @see #setNeededWriteMemBytes(int)
+     * @see #setNeededExecMemBytes(int)
+     * @see #setNeededSensors(int[])
+     * @see #setOutputEvents(int[])
+     */
+    public NanoApp(int appId, byte[] appBinary) {
+        mPublisher = UNKNOWN;
+        mName = UNKNOWN;
+
+        mAppId = appId;
+        mAppIdSet = true;
+        mAppVersion = 0;
+
+        mNeededReadMemBytes = 0;
+        mNeededWriteMemBytes = 0;
+        mNeededExecMemBytes = 0;
+
+        mNeededSensors = new int[0];
+        mOutputEvents = new int[0];
+        mAppBinary = appBinary;
     }
 
     /**
@@ -73,6 +120,7 @@ public class NanoApp {
      */
     public void setAppId(int appId) {
         mAppId = appId;
+        mAppIdSet = true;
     }
 
     /**
@@ -256,6 +304,13 @@ public class NanoApp {
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        if (mAppBinary == null) {
+            throw new IllegalStateException("Must set non-null AppBinary for nanoapp " + mName);
+        }
+        if (!mAppIdSet) {
+            throw new IllegalStateException("Must set AppId for nanoapp " + mName);
+        }
+
         out.writeString(mPublisher);
         out.writeString(mName);
         out.writeInt(mAppId);
