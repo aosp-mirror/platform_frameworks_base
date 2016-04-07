@@ -50,7 +50,7 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     }
 
     // resolvedClipRect = intersect(parentMatrix * localClip, parentClip)
-    clipState = snapshot.mutateClipArea().serializeIntersectedClip(allocator,
+    clipState = snapshot.serializeIntersectedClip(allocator,
             recordedOp.localClip, *(snapshot.transform));
     LOG_ALWAYS_FATAL_IF(!clipState, "must clip!");
 
@@ -85,8 +85,7 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
         const Matrix4& localTransform, const ClipBase* localClip) {
     transform.loadMultiply(*snapshot.transform, localTransform);
-    clipState = snapshot.mutateClipArea().serializeIntersectedClip(allocator,
-            localClip, *(snapshot.transform));
+    clipState = snapshot.serializeIntersectedClip(allocator, localClip, *(snapshot.transform));
     clippedBounds = clipState->rect;
     clipSideFlags = OpClipSideFlags::Full;
     localProjectionPathMask = nullptr;

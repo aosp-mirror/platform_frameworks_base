@@ -248,16 +248,17 @@ LOCAL_SRC_FILES += \
     tests/unit/FatVectorTests.cpp \
     tests/unit/GlopBuilderTests.cpp \
     tests/unit/GpuMemoryTrackerTests.cpp \
+    tests/unit/GradientCacheTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/MatrixTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/RenderNodeTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
+    tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
-    tests/unit/VectorDrawableTests.cpp \
-    tests/unit/GradientCacheTests.cpp
+    tests/unit/VectorDrawableTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \

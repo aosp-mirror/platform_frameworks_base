@@ -132,8 +132,7 @@ TEST(ClipArea, serializeClip) {
         auto serializedClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::Rectangle, serializedClip->mode);
-        auto clipRect = reinterpret_cast<const ClipRect*>(serializedClip);
-        EXPECT_EQ(Rect(200, 200), clipRect->rect);
+        EXPECT_EQ(Rect(200, 200), serializedClip->rect);
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
@@ -192,8 +191,7 @@ TEST(ClipArea, serializeIntersectedClip) {
         auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, translateScale);
         ASSERT_NE(nullptr, resolvedClip);
         ASSERT_EQ(ClipMode::Rectangle, resolvedClip->mode);
-        EXPECT_EQ(Rect(100, 100, 200, 200),
-                reinterpret_cast<const ClipRect*>(resolvedClip)->rect);
+        EXPECT_EQ(Rect(100, 100, 200, 200), resolvedClip->rect);
 
         EXPECT_EQ(resolvedClip, area.serializeIntersectedClip(allocator, &recordedClip, translateScale))
                 << "Must return previous serialization, since input is same";
