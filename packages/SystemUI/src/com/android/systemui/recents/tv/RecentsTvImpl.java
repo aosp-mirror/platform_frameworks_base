@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.UserHandle;
 
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -34,6 +35,7 @@ import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.tv.views.TaskCardView;
+import com.android.systemui.statusbar.tv.TvStatusBar;
 
 public class RecentsTvImpl extends RecentsImpl{
     public final static String RECENTS_TV_ACTIVITY =
@@ -81,16 +83,7 @@ public class RecentsTvImpl extends RecentsImpl{
         }
 
         if (!useThumbnailTransition) {
-            // If there is no thumbnail transition, but is launching from home into recents, then
-            // use a quick home transition and do the animation from home
-            if (hasRecentTasks) {
-                ActivityOptions opts = getHomeTransitionActivityOptions();
-                startRecentsActivity(topTask, opts, true /* fromHome */, false /* fromThumbnail */);
-            } else {
-                // Otherwise we do the normal fade from an unknown source
-                ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startRecentsActivity(topTask, opts, true /* fromHome */, false /* fromThumbnail */);
-            }
+            startRecentsActivity(topTask, null, true /* fromHome */, false /* fromThumbnail */);
         }
         mLastToggleTime = SystemClock.elapsedRealtime();
     }
@@ -133,5 +126,14 @@ public class RecentsTvImpl extends RecentsImpl{
         }
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
         return getUnknownTransitionActivityOptions();
+    }
+
+    @Override
+    public void onVisibilityChanged(Context context, boolean visible) {
+        SystemUIApplication app = (SystemUIApplication) context;
+        TvStatusBar statusBar = app.getComponent(TvStatusBar.class);
+        if (statusBar != null) {
+            statusBar.updateRecentsVisibility(visible);
+        }
     }
 }
