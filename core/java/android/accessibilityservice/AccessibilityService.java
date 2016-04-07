@@ -600,11 +600,16 @@ public abstract class AccessibilityService extends Service {
      * Dispatch a gesture to the touch screen. Any gestures currently in progress, whether from
      * the user, this service, or another service, will be cancelled.
      * <p>
+     * The gesture will be dispatched as if it were performed directly on the screen by a user, so
+     * the events may be affected by features such as magnification and explore by touch.
+     * </p>
+     * <p>
      * <strong>Note:</strong> In order to dispatch gestures, your service
      * must declare the capability by setting the
      * {@link android.R.styleable#AccessibilityService_canPerformGestures}
      * property in its meta-data. For more information, see
      * {@link #SERVICE_META_DATA}.
+     * </p>
      *
      * @param gesture The gesture to dispatch
      * @param callback The object to call back when the status of the gesture is known. If
