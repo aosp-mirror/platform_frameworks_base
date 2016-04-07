@@ -152,6 +152,8 @@ interface IWifiManager
     boolean enableAutoJoinWhenAssociated(boolean enabled);
     boolean getEnableAutoJoinWhenAssociated();
 
+    void enableWifiConnectivityManager(boolean enabled);
+
     WifiConnectionStatistics getConnectionStatistics();
 
     void disableEphemeralNetwork(String SSID);
