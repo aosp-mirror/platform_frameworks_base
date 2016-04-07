@@ -1256,15 +1256,6 @@
         <service android:name="android.os.BinderThreadPriorityService"
                 android:process=":BinderThreadPriorityService" />
 
-        <!-- Used by ApplyOverrideConfigurationTest -->
-        <activity android:name="android.app.activity.ApplyOverrideConfigurationActivity"
-                  android:configChanges="orientation|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
-            </intent-filter>
-        </activity>
-
         <!-- Application components used for search manager tests -->
 
         <activity android:name="android.app.activity.SearchableActivity"
