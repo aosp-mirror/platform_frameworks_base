@@ -43,7 +43,6 @@ namespace aapt {
  *  /\*
  *   * This is meant to be hidden because
  *   * It is system api. Also it is @deprecated
- *   * @SystemApi
  *   *\/
  *
  * Output Annotations:
@@ -79,7 +78,7 @@ private:
     bool mHasComments = false;
     uint32_t mAnnotationBitMask = 0;
 
-    void appendCommentLine(const std::string& line);
+    void appendCommentLine(std::string& line);
 };
 
 } // namespace aapt
