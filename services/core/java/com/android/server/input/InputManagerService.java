@@ -200,6 +200,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native int nativeInjectInputEvent(long ptr, InputEvent event, int displayId,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
+    private static native void nativeToggleCapsLock(long ptr, int deviceId);
     private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
@@ -2278,6 +2279,11 @@ public class InputManagerService extends IInputManager.Stub
             someArgs.arg2 = subtype;
             mHandler.obtainMessage(MSG_INPUT_METHOD_SUBTYPE_CHANGED, userId, 0, someArgs)
                     .sendToTarget();
+        }
+
+        @Override
+        public void toggleCapsLock(int deviceId) {
+            nativeToggleCapsLock(mPtr, deviceId);
         }
     }
 }

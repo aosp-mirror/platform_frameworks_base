@@ -1312,6 +1312,12 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
     }
 }
 
+static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
+         jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getReader()->toggleCapsLockState(deviceId);
+}
+
 static void nativeSetInputWindows(JNIEnv* env, jclass /* clazz */,
         jlong ptr, jobjectArray windowHandleObjArray) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1508,6 +1514,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputFilterEnabled },
     { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIIII)I",
             (void*) nativeInjectInputEvent },
+    { "nativeToggleCapsLock", "(JI)V",
+            (void*) nativeToggleCapsLock },
     { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;)V",
             (void*) nativeSetInputWindows },
     { "nativeSetFocusedApplication", "(JLcom/android/server/input/InputApplicationHandle;)V",
