@@ -299,7 +299,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             setDimAmount((Float) animation.getAnimatedValue());
         }
     };
-    private ViewGroup mQsContainer;
+    protected ViewGroup mQsContainer;
     private boolean mContinuousShadowUpdate;
     private ViewTreeObserver.OnPreDrawListener mShadowUpdater
             = new ViewTreeObserver.OnPreDrawListener() {

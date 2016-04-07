@@ -47,10 +47,10 @@ public class QSContainer extends FrameLayout {
     private final Rect mQsBounds = new Rect();
 
     private int mHeightOverride = -1;
-    private QSPanel mQSPanel;
+    protected QSPanel mQSPanel;
     private QSDetail mQSDetail;
     protected BaseStatusBarHeader mHeader;
-    private float mQsExpansion;
+    protected float mQsExpansion;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mKeyguardShowing;
@@ -162,12 +162,16 @@ public class QSContainer extends FrameLayout {
     }
 
     private void updateBottom() {
-        int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
-        int height = mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
-                : (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
-                + mHeader.getCollapsedHeight();
+        int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
+    }
+
+    protected int calculateContainerHeight() {
+        int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
+        return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
+                : (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
+                + mHeader.getCollapsedHeight();
     }
 
     private void updateQsState() {
@@ -302,4 +306,8 @@ public class QSContainer extends FrameLayout {
             updateQsState();
         }
     };
+
+    public int getQsMinExpansionHeight() {
+        return mHeader.getHeight();
+    }
 }
