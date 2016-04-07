@@ -122,5 +122,5 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
         }
     }
 
-    proxy->dumpProfileInfo(STDOUT_FILENO, 0);
+    proxy->dumpProfileInfo(STDOUT_FILENO, DumpFlags::JankStats);
 }

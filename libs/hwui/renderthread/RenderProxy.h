@@ -49,6 +49,14 @@ class ErrorChannel;
 class RenderThread;
 class RenderProxyBridge;
 
+namespace DumpFlags {
+    enum {
+        FrameStats = 1 << 0,
+        Reset      = 1 << 1,
+        JankStats  = 1 << 2,
+    };
+};
+
 /*
  * RenderProxy is strictly single threaded. All methods must be invoked on the owning
  * thread. It is important to note that RenderProxy may be deleted while it has
