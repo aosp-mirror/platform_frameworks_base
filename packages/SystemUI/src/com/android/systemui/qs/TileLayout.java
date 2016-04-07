@@ -19,9 +19,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private static final String TAG = "TileLayout";
 
     protected int mColumns;
-    private int mCellWidth;
-    private int mCellHeight;
-    private int mCellMargin;
+    protected int mCellWidth;
+    protected int mCellHeight;
+    protected int mCellMargin;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;

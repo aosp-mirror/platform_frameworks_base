@@ -45,7 +45,7 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener {
+        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -54,7 +54,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private ActivityStarter mActivityStarter;
     private NextAlarmController mNextAlarmController;
     private SettingsButton mSettingsButton;
-    private View mSettingsContainer;
+    protected View mSettingsContainer;
 
     private TextView mAlarmStatus;
     private TextView mAlarmStatusCollapsed;
@@ -75,19 +75,19 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private QuickQSPanel mHeaderQsPanel;
     private boolean mShowEmergencyCallsOnly;
-    private MultiUserSwitch mMultiUserSwitch;
+    protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
 
     private float mDateTimeTranslation;
     private float mDateTimeAlarmTranslation;
     private float mDateScaleFactor;
-    private float mGearTranslation;
+    protected float mGearTranslation;
 
     private TouchAnimator mSecondHalfAnimator;
     private TouchAnimator mFirstHalfAnimator;
     private TouchAnimator mDateSizeAnimator;
     private TouchAnimator mAlarmTranslation;
-    private TouchAnimator mSettingsAlpha;
+    protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
     private QSTileHost mHost;
 
@@ -172,6 +172,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 .addFloat(mDateTimeGroup, "scaleY", 1, mDateScaleFactor)
                 .setStartDelay(.36f)
                 .build();
+
+        updateSettingsAnimator();
+    }
+
+    protected void updateSettingsAnimator() {
         mSettingsAlpha = new TouchAnimator.Builder()
                 .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
                 .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
@@ -241,7 +246,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     protected void onDetachedFromWindow() {
         setListening(false);
-        mHost.getUserInfoController().remListener(mUserListener);
+        mHost.getUserInfoController().remListener(this);
         mHost.getNetworkController().removeEmergencyListener(this);
         super.onDetachedFromWindow();
     }
@@ -275,7 +280,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateVisibilities();
     }
 
-    private void updateVisibilities() {
+    protected void updateVisibilities() {
         updateAlarmVisibilities();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
@@ -365,7 +370,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(mUserListener);
+        userInfoController.addListener(this);
     }
 
     @Override
@@ -379,10 +384,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         }
     }
 
-    private final OnUserInfoChangedListener mUserListener = new OnUserInfoChangedListener() {
-        @Override
-        public void onUserInfoChanged(String name, Drawable picture) {
-            mMultiUserAvatar.setImageDrawable(picture);
-        }
-    };
+    @Override
+    public void onUserInfoChanged(String name, Drawable picture) {
+        mMultiUserAvatar.setImageDrawable(picture);
+    }
 }

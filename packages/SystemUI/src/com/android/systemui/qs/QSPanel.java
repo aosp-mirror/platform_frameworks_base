@@ -85,20 +85,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
                 R.layout.quick_settings_brightness_dialog, this, false);
         addView(mBrightnessView);
 
-        mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
-                R.layout.qs_paged_tile_layout, this, false);
-        addView((View) mTileLayout);
-        findViewById(android.R.id.edit).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                mHost.startRunnableDismissingKeyguard(new Runnable() {
-                    @Override
-                    public void run() {
-                        showEdit(v);
-                    }
-                });
-            }
-        });
+        setupTileLayout();
 
         mFooter = new QSFooter(this, context);
         addView(mFooter.getView());
@@ -109,6 +96,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
 
+    }
+
+    protected void setupTileLayout() {
+        mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
+                R.layout.qs_paged_tile_layout, this, false);
+        addView((View) mTileLayout);
+        findViewById(android.R.id.edit).setOnClickListener(view ->
+                mHost.startRunnableDismissingKeyguard(() -> showEdit(view)));
     }
 
     public boolean isShowingCustomize() {
