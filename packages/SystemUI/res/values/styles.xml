@@ -180,6 +180,11 @@
         <item name="android:textColor">@color/data_usage_secondary</item>
     </style>
 
+    <style name="TextAppearance.QS.TileLabel">
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
