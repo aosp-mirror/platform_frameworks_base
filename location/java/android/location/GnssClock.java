@@ -22,7 +22,8 @@ import android.os.Parcelable;
 
 /**
  * A class containing a GPS clock timestamp.
- * It represents a measurement of the GPS receiver's clock.
+ *
+ * <p>It represents a measurement of the GPS receiver's clock.
  */
 public final class GnssClock implements Parcelable {
     // The following enumerations must be in sync with the values declared in gps.h
@@ -85,7 +86,7 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getLeapSecond()} is available, false otherwise.
+     * Returns {@code true} if {@link #getLeapSecond()} is available, {@code false} otherwise.
      */
     public boolean hasLeapSecond() {
         return isFlagSet(HAS_LEAP_SECOND);
@@ -93,10 +94,12 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Gets the leap second associated with the clock's time.
-     * The sign of the value is defined by the following equation:
-     *      utc_time_ns = time_ns + (full_bias_ns + bias_ns) - leap_second * 1,000,000,000
      *
-     * The value is only available if {@link #hasLeapSecond()} is true.
+     * <p>The sign of the value is defined by the following equation:
+     * <pre>
+     *     UtcTimeNanos = TimeNanos + (FullBiasNanos + BiasNanos) - LeapSecond * 1,000,000,000</pre>
+     *
+     * <p>The value is only available if {@link #hasLeapSecond()} is {@code true}.
      */
     public int getLeapSecond() {
         return mLeapSecond;
@@ -123,18 +126,15 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Gets the GNSS receiver internal clock value in nanoseconds.
+     * Gets the GNSS receiver internal hardware clock value in nanoseconds.
      *
-     * For 'local hardware clock' this value is expected to be monotonically increasing during the
-     * reporting session. The real GPS time can be derived by compensating
-     * {@link #getFullBiasNanos()} (when it is available) from this value.
+     * <p>This value is expected to be monotonically increasing while the hardware clock remains
+     * powered on. For the case of a hardware clock that is not continuously on, see the
+     * {@link #getHardwareClockDiscontinuityCount} field. The GPS time can be derived by adding
+     * {@link #getFullBiasNanos()} and {@link #getBiasNanos()} (when they are available) to this
+     * value. Sub-nanosecond accuracy can be provided by means of {@link #getBiasNanos()}.
      *
-     * For 'GPS time' this value is expected to be the best estimation of current GPS time that GPS
-     * receiver can achieve. {@link #getTimeUncertaintyNanos()} should be available when GPS time is
-     * specified.
-     *
-     * Sub-nanosecond accuracy can be provided by means of {@link #getBiasNanos()}.
-     * The reported time includes {@link #getTimeUncertaintyNanos()}.
+     * <p>The error estimate for this value (if applicable) is {@link #getTimeUncertaintyNanos()}.
      */
     public long getTimeNanos() {
         return mTimeNanos;
@@ -150,7 +150,8 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getTimeUncertaintyNanos()} is available, false otherwise.
+     * Returns {@code true} if {@link #getTimeUncertaintyNanos()} is available, {@code false}
+     * otherwise.
      */
     public boolean hasTimeUncertaintyNanos() {
         return isFlagSet(HAS_TIME_UNCERTAINTY);
@@ -158,9 +159,13 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Gets the clock's time Uncertainty (1-Sigma) in nanoseconds.
-     * The uncertainty is represented as an absolute (single sided) value.
      *
-     * The value is only available if {@link #hasTimeUncertaintyNanos()} is true.
+     * <p>The uncertainty is represented as an absolute (single sided) value.
+     *
+     * <p>The value is only available if {@link #hasTimeUncertaintyNanos()} is {@code true}.
+     *
+     * <p>This value is often effectively zero (it is the reference clock by which all other times
+     * and time uncertainties are measured), and thus this field may often be 0, or not provided.
      */
     public double getTimeUncertaintyNanos() {
         return mTimeUncertaintyNanos;
@@ -187,7 +192,7 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getFullBiasNanos()} is available, false otherwise.
+     * Returns {@code true} if {@link #getFullBiasNanos()} is available, {@code false} otherwise.
      */
     public boolean hasFullBiasNanos() {
         return isFlagSet(HAS_FULL_BIAS);
@@ -197,14 +202,18 @@ public final class GnssClock implements Parcelable {
      * Gets the difference between hardware clock ({@link #getTimeNanos()}) inside GPS receiver and
      * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
      *
-     * This value is available if the receiver has estimated GPS time. If the computed time is for a
-     * non-GPS constellation, the time offset of that constellation to GPS has to be applied to fill
-     * this value. The value contains the 'bias uncertainty' {@link #getBiasUncertaintyNanos()} in
-     * it, and it should be used for quality check. The value is only available if
-     * {@link #hasFullBiasNanos()} is true.
+     * <p>This value is available if the receiver has estimated GPS time. If the computed time is
+     * for a non-GPS constellation, the time offset of that constellation to GPS has to be applied
+     * to fill this value. The value is only available if {@link #hasFullBiasNanos()} is
+     * {@code true}.
      *
-     * The sign of the value is defined by the following equation:
-     *      local estimate of GPS time = time_ns + (full_bias_ns + bias_ns)
+     * <p>The error estimate for the sum of this field and {@link #getBiasNanos} is
+     * {@link #getBiasUncertaintyNanos()}.
+     *
+     * <p>The sign of the value is defined by the following equation:
+     *
+     * <pre>
+     *     local estimate of GPS time = TimeNanos + (FullBiasNanos + BiasNanos)</pre>
      */
     public long getFullBiasNanos() {
         return mFullBiasNanos;
@@ -231,7 +240,7 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getBiasNanos()} is available, false otherwise.
+     * Returns {@code true} if {@link #getBiasNanos()} is available, {@code false} otherwise.
      */
     public boolean hasBiasNanos() {
         return isFlagSet(HAS_BIAS);
@@ -239,9 +248,14 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Gets the clock's sub-nanosecond bias.
-     * The reported bias includes {@link #getBiasUncertaintyNanos()}.
      *
-     * The value is only available if {@link #hasBiasNanos()} is true.
+     * <p>See the description of how this field is part of converting from hardware clock time, to
+     * GPS time, in {@link #getFullBiasNanos()}.
+     *
+     * <p>The error estimate for the sum of this field and {@link #getFullBiasNanos} is
+     * {@link #getBiasUncertaintyNanos()}.
+     *
+     * <p>The value is only available if {@link #hasBiasNanos()} is {@code true}.
      */
     public double getBiasNanos() {
         return mBiasNanos;
@@ -268,7 +282,8 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getBiasUncertaintyNanos()} is available, false otherwise.
+     * Returns {@code true} if {@link #getBiasUncertaintyNanos()} is available, {@code false}
+     * otherwise.
      */
     public boolean hasBiasUncertaintyNanos() {
         return isFlagSet(HAS_BIAS_UNCERTAINTY);
@@ -277,7 +292,10 @@ public final class GnssClock implements Parcelable {
     /**
      * Gets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      *
-     * The value is only available if {@link #hasBiasUncertaintyNanos()} is true.
+     * <p>See the description of how this field provides the error estimate in the conversion from
+     * hardware clock time, to GPS time, in {@link #getFullBiasNanos()}.
+     *
+     * <p>The value is only available if {@link #hasBiasUncertaintyNanos()} is {@code true}.
      */
     public double getBiasUncertaintyNanos() {
         return mBiasUncertaintyNanos;
@@ -304,7 +322,8 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getDriftNanosPerSecond()} is available, false otherwise.
+     * Returns {@code true} if {@link #getDriftNanosPerSecond()} is available, {@code false}
+     * otherwise.
      */
     public boolean hasDriftNanosPerSecond() {
         return isFlagSet(HAS_DRIFT);
@@ -312,10 +331,12 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Gets the clock's Drift in nanoseconds per second.
-     * A positive value indicates that the frequency is higher than the nominal frequency.
-     * The reported drift includes {@link #getDriftUncertaintyNanosPerSecond()}.
      *
-     * The value is only available if {@link #hasDriftNanosPerSecond()} is true.
+     * <p>A positive value indicates that the frequency is higher than the nominal (e.g. GPS master
+     * clock) frequency. The error estimate for this reported drift is
+     * {@link #getDriftUncertaintyNanosPerSecond()}.
+     *
+     * <p>The value is only available if {@link #hasDriftNanosPerSecond()} is {@code true}.
      */
     public double getDriftNanosPerSecond() {
         return mDriftNanosPerSecond;
@@ -342,7 +363,8 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getDriftUncertaintyNanosPerSecond()} is available, false otherwise.
+     * Returns {@code true} if {@link #getDriftUncertaintyNanosPerSecond()} is available,
+     * {@code false} otherwise.
      */
     public boolean hasDriftUncertaintyNanosPerSecond() {
         return isFlagSet(HAS_DRIFT_UNCERTAINTY);
@@ -351,7 +373,8 @@ public final class GnssClock implements Parcelable {
     /**
      * Gets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      *
-     * The value is only available if {@link #hasDriftUncertaintyNanosPerSecond()} is true.
+     * <p>The value is only available if {@link #hasDriftUncertaintyNanosPerSecond()} is
+     * {@code true}.
      */
     public double getDriftUncertaintyNanosPerSecond() {
         return mDriftUncertaintyNanosPerSecond;
@@ -368,7 +391,29 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Gets count of last hardware clock discontinuity.
+     * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+     * @hide
+     */
+    @TestApi
+    public void resetDriftUncertaintyNanosPerSecond() {
+        resetFlag(HAS_DRIFT_UNCERTAINTY);
+        mDriftUncertaintyNanosPerSecond = Double.NaN;
+    }
+
+    /**
+     * Gets count of hardware clock discontinuities.
+     *
+     * <p>When this value stays the same, vs. a value in a previously reported {@link GnssClock}, it
+     * can be safely assumed that the {@code TimeNanos} value has been derived from a clock that has
+     * been running continuously - e.g. a single continuously powered crystal oscillator, and thus
+     * the {@code (FullBiasNanos + BiasNanos)} offset can be modelled with traditional clock bias
+     * &amp; drift models.
+     *
+     * <p>Each time this value changes, vs. the value in a previously reported {@link GnssClock},
+     * that suggests the hardware clock may have experienced a discontinuity (e.g. a power cycle or
+     * other anomaly), so that any assumptions about modelling a smoothly changing
+     * {@code (FullBiasNanos + BiasNanos)} offset, and a smoothly growing {@code (TimeNanos)}
+     * between this and the previously reported {@code GnssClock}, should be reset.
      */
     public int getHardwareClockDiscontinuityCount() {
         return mHardwareClockDiscontinuityCount;
@@ -381,16 +426,6 @@ public final class GnssClock implements Parcelable {
     @TestApi
     public void setHardwareClockDiscontinuityCount(int value) {
         mHardwareClockDiscontinuityCount = value;
-    }
-
-    /**
-     * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
-     * @hide
-     */
-    @TestApi
-    public void resetDriftUncertaintyNanosPerSecond() {
-        resetFlag(HAS_DRIFT_UNCERTAINTY);
-        mDriftUncertaintyNanosPerSecond = Double.NaN;
     }
 
     public static final Creator<GnssClock> CREATOR = new Creator<GnssClock>() {

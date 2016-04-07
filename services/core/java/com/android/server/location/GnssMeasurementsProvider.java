@@ -64,15 +64,15 @@ public abstract class GnssMeasurementsProvider
         int status;
         switch (result) {
             case RESULT_SUCCESS:
-                status = GnssMeasurementsEvent.STATUS_READY;
+                status = GnssMeasurementsEvent.Callback.STATUS_READY;
                 break;
             case RESULT_NOT_AVAILABLE:
             case RESULT_NOT_SUPPORTED:
             case RESULT_INTERNAL_ERROR:
-                status = GnssMeasurementsEvent.STATUS_NOT_SUPPORTED;
+                status = GnssMeasurementsEvent.Callback.STATUS_NOT_SUPPORTED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssMeasurementsEvent.STATUS_GNSS_LOCATION_DISABLED;
+                status = GnssMeasurementsEvent.Callback.STATUS_LOCATION_DISABLED;
                 break;
             case RESULT_UNKNOWN:
                 return null;
