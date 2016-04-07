@@ -363,12 +363,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private void enableFeatures() {
         resetStreamState();
 
-        if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
-            mMotionEventInjector = new MotionEventInjector(mContext.getMainLooper());
-            addFirstEventHandler(mMotionEventInjector);
-            mAms.setMotionEventInjector(mMotionEventInjector);
-        }
-
         if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
             mAutoclickController = new AutoclickController(mContext, mUserId);
             addFirstEventHandler(mAutoclickController);
@@ -382,6 +376,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
             mMagnificationGestureHandler = new MagnificationGestureHandler(mContext, mAms);
             addFirstEventHandler(mMagnificationGestureHandler);
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
+            mMotionEventInjector = new MotionEventInjector(mContext.getMainLooper());
+            addFirstEventHandler(mMotionEventInjector);
+            mAms.setMotionEventInjector(mMotionEventInjector);
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
