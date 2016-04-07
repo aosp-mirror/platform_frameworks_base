@@ -468,6 +468,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean mResizedWhileGone = false;
 
+    /**
+     * Indicates whether we got resized but drag resizing flag was false. In this case, we also
+     * need to recreate the surface and defer surface bound updates in order to make sure the
+     * buffer contents and the positioning/size stay in sync.
+     */
+    boolean mResizedWhileNotDragResizing;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
