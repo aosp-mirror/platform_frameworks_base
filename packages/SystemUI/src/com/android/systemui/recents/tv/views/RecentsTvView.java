@@ -218,9 +218,15 @@ public class RecentsTvView extends FrameLayout {
         }
     }
 
-    public void setTaskStackViewAdapter(TaskStackHorizontalViewAdapter taskStackViewAdapter) {
+    public TaskStackHorizontalGridView setTaskStackViewAdapter(
+            TaskStackHorizontalViewAdapter taskStackViewAdapter) {
         if(mTaskStackHorizontalView != null) {
             mTaskStackHorizontalView.setAdapter(taskStackViewAdapter);
         }
+        return mTaskStackHorizontalView;
+    }
+
+    public TaskStackHorizontalGridView getGridView() {
+        return mTaskStackHorizontalView;
     }
 }

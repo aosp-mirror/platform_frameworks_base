@@ -64,6 +64,7 @@ public class TaskCardView extends LinearLayout {
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mThumbnailView = (ImageView) findViewById(R.id.card_view_thumbnail);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);

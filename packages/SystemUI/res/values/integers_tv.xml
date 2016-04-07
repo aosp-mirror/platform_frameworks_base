@@ -17,5 +17,11 @@
     <integer name="item_scale_anim_duration">150</integer>
     <integer name="dismiss_short_duration">200</integer>
     <integer name="dismiss_long_duration">400</integer>
+
     <integer name="recents_tv_pip_focus_anim_duration">200</integer>
+
+    <!-- Duration for how long it takes cards to slide in or out when going to and from recents. -->
+    <integer name="recents_home_duration">400</integer>
+    <!-- Delay between the start of slide in animation for each card. -->
+    <integer name="recents_home_delay">40</integer>
 </resources>
