@@ -372,29 +372,35 @@ public class SparseMappingTable {
          * Throw an exception if one of a variety of internal consistency checks fails.
          */
         private void assertConsistency() {
-            // Assert that our sequewnce number has been initialized. If it hasn't
-            // that means someone tried to read or write data without allocating it
-            // since we were created or reset.
-            if (mSequence == UNINITIALIZED_SEQUENCE) {
-                logOrThrow("mSequence == UNINITIALIZED_SEQUENCE in"
-                        + " SparseMappingTable.Table.  -- "
-                        + dumpInternalState());
-                return;
-            }
+            // Something with this checking isn't working and is triggering
+            // more problems than it's helping to debug.
+            //   Original bug: b/27045736
+            //   New bug: b/27960286
+            if (false) {
+                // Assert that our sequence number has been initialized. If it hasn't
+                // that means someone tried to read or write data without allocating it
+                // since we were created or reset.
+                if (mSequence == UNINITIALIZED_SEQUENCE) {
+                    logOrThrow("mSequence == UNINITIALIZED_SEQUENCE in"
+                            + " SparseMappingTable.Table.  -- "
+                            + dumpInternalState());
+                    return;
+                }
 
-            // Assert that our sequence number matches mParent's.  If it isn't that means
-            // we have been reset and our
-            if (mSequence != mParent.mSequence) {
-                if (mSequence < mParent.mSequence) {
-                    logOrThrow("Sequence mismatch. SparseMappingTable.resetTable()"
-                            + " called but not Table.resetTable() -- "
-                            + dumpInternalState());
-                    return;
-                } else if (mSequence > mParent.mSequence) {
-                    logOrThrow("Sequence mismatch. Table.resetTable()"
-                            + " called but not SparseMappingTable.resetTable() -- "
-                            + dumpInternalState());
-                    return;
+                // Assert that our sequence number matches mParent's.  If it isn't that means
+                // we have been reset and our
+                if (mSequence != mParent.mSequence) {
+                    if (mSequence < mParent.mSequence) {
+                        logOrThrow("Sequence mismatch. SparseMappingTable.resetTable()"
+                                + " called but not Table.resetTable() -- "
+                                + dumpInternalState());
+                        return;
+                    } else if (mSequence > mParent.mSequence) {
+                        logOrThrow("Sequence mismatch. Table.resetTable()"
+                                + " called but not SparseMappingTable.resetTable() -- "
+                                + dumpInternalState());
+                        return;
+                    }
                 }
             }
         }
