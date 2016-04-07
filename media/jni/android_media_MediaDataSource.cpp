@@ -155,4 +155,8 @@ uint32_t JMediaDataSource::getFlags() {
     return 0;
 }
 
+String8 JMediaDataSource::toString() {
+    return String8::format("JMediaDataSource(pid %d, uid %d)", getpid(), getuid());
+}
+
 }  // namespace android
