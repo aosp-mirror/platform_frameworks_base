@@ -237,10 +237,19 @@ final class UserController {
                         AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
             }
 
-            // We only attempt to unlock real users here; we delay unlocking
-            // profiles until after the parent user is unlocked.
+            // We need to delay unlocking managed profiles until the parent user
+            // is also unlocked.
             if (getUserManager().isManagedProfile(userId)) {
-                Slog.d(TAG, "User " + userId + " is managed profile; delaying unlock attempt");
+                final UserInfo parent = getUserManager().getProfileParent(userId);
+                if (parent != null
+                        && isUserRunningLocked(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {
+                    Slog.d(TAG, "User " + userId + " (parent " + parent.id
+                            + "): attempting unlock because parent is unlocked");
+                    maybeUnlockUser(userId);
+                } else {
+                    Slog.d(TAG, "User " + userId + " (parent " + parent.id
+                            + "): delaying unlock because parent is locked");
+                }
             } else {
                 maybeUnlockUser(userId);
             }
@@ -909,17 +918,15 @@ final class UserController {
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
             finishUserUnlocking(uss, progress);
-        }
 
-        // We just unlocked a user, so let's now attempt to unlock any managed
-        // profiles under that user.
-        synchronized (mService) {
+            // We just unlocked a user, so let's now attempt to unlock any
+            // managed profiles under that user.
             for (int i = 0; i < mStartedUsers.size(); i++) {
                 final int testUserId = mStartedUsers.keyAt(i);
                 final UserInfo parent = getUserManager().getProfileParent(testUserId);
                 if (parent != null && parent.id == userId && testUserId != userId) {
-                    Slog.d(TAG, "Found user " + testUserId + " with parent " + userId
-                            + "; attempting unlock");
+                    Slog.d(TAG, "User " + testUserId + " (parent " + parent.id
+                            + "): attempting unlock because parent was just unlocked");
                     maybeUnlockUser(testUserId);
                 }
             }
