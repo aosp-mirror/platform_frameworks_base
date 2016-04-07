@@ -182,7 +182,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     private void inflateButtons(String[] buttons, ViewGroup parent, boolean landscape) {
         for (int i = 0; i < buttons.length; i++) {
-            inflateButton(buttons[i], parent, landscape);
+            inflateButton(buttons[i], parent, landscape, i);
         }
     }
 
@@ -195,7 +195,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     @Nullable
-    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape) {
+    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape,
+            int indexInParent) {
         LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
         float size = extractSize(buttonSpec);
         String button = extractButton(buttonSpec);
