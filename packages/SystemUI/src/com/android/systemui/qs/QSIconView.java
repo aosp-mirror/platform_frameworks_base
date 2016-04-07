@@ -30,9 +30,9 @@ import java.util.Objects;
 
 public class QSIconView extends ViewGroup {
 
-    private final View mIcon;
-    private final int mIconSizePx;
-    private final int mTilePaddingBelowIconPx;
+    protected final View mIcon;
+    protected final int mIconSizePx;
+    protected final int mTilePaddingBelowIconPx;
     private boolean mAnimationEnabled = true;
 
     public QSIconView(Context context) {
@@ -48,6 +48,10 @@ public class QSIconView extends ViewGroup {
 
     public void disableAnimation() {
         mAnimationEnabled = false;
+    }
+
+    public View getIconView() {
+        return mIcon;
     }
 
     @Override
@@ -109,11 +113,11 @@ public class QSIconView extends ViewGroup {
         return icon;
     }
 
-    protected static int exactly(int size) {
+    protected final int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
     }
 
-    protected static void layout(View child, int left, int top) {
+    protected final void layout(View child, int left, int top) {
         child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
     }
 }

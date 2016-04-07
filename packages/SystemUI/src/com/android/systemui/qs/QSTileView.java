@@ -33,7 +33,6 @@ import libcore.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
     protected final Context mContext;
-    private QSIconView mIconView;
     private final int mTileSpacingPx;
     private int mTilePaddingTopPx;
 
@@ -44,7 +43,6 @@ public class QSTileView extends QSTileBaseView {
         super(context, icon);
 
         mContext = context;
-        mIconView = icon;
         final Resources res = context.getResources();
         mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
 
@@ -82,13 +80,13 @@ public class QSTileView extends QSTileBaseView {
     }
 
     protected void createLabel() {
-        final Resources res = mContext.getResources();
         View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
         mLabel = (TextView) view.findViewById(R.id.tile_label);
         mPadLock = (ImageView) view.findViewById(R.id.restricted_padlock);
         addView(view);
     }
 
+    @Override
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         if (!Objects.equal(mLabel.getText(), state.label)) {
