@@ -492,6 +492,21 @@ struct ImpliedFeature {
     SortedVector<String8> reasons;
 };
 
+struct Feature {
+    Feature() : required(false), version(-1) {}
+    Feature(bool required, int32_t version = -1) : required(required), version(version) {}
+
+    /**
+     * Whether the feature is required.
+     */
+    bool required;
+
+    /**
+     * What version of the feature is requested.
+     */
+    int32_t version;
+};
+
 /**
  * Represents a <feature-group> tag in the AndroidManifest.xml
  */
@@ -506,7 +521,7 @@ struct FeatureGroup {
     /**
      * Explicit features defined in the group
      */
-    KeyedVector<String8, bool> features;
+    KeyedVector<String8, Feature> features;
 
     /**
      * OpenGL ES version required
@@ -541,11 +556,18 @@ static void printFeatureGroupImpl(const FeatureGroup& grp,
 
     const size_t numFeatures = grp.features.size();
     for (size_t i = 0; i < numFeatures; i++) {
-        const bool required = grp.features[i];
+        const Feature& feature = grp.features[i];
+        const bool required = feature.required;
+        const int32_t version = feature.version;
 
         const String8& featureName = grp.features.keyAt(i);
-        printf("  uses-feature%s: name='%s'\n", (required ? "" : "-not-required"),
+        printf("  uses-feature%s: name='%s'", (required ? "" : "-not-required"),
                 ResTable::normalizeForOutput(featureName.string()).string());
+
+        if (version > 0) {
+            printf(" version='%d'", version);
+        }
+        printf("\n");
     }
 
     const size_t numImpliedFeatures =
@@ -590,15 +612,15 @@ static void printDefaultFeatureGroup(const FeatureGroup& grp,
 static void addParentFeatures(FeatureGroup* grp, const String8& name) {
     if (name == "android.hardware.camera.autofocus" ||
             name == "android.hardware.camera.flash") {
-        grp->features.add(String8("android.hardware.camera"), true);
+        grp->features.add(String8("android.hardware.camera"), Feature(true));
     } else if (name == "android.hardware.location.gps" ||
             name == "android.hardware.location.network") {
-        grp->features.add(String8("android.hardware.location"), true);
+        grp->features.add(String8("android.hardware.location"), Feature(true));
     } else if (name == "android.hardware.touchscreen.multitouch") {
-        grp->features.add(String8("android.hardware.touchscreen"), true);
+        grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
     } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
-        grp->features.add(String8("android.hardware.touchscreen.multitouch"), true);
-        grp->features.add(String8("android.hardware.touchscreen"), true);
+        grp->features.add(String8("android.hardware.touchscreen.multitouch"), Feature(true));
+        grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
     } else if (name == "android.hardware.opengles.aep") {
         const int openGLESVersion31 = 0x00030001;
         if (openGLESVersion31 > grp->openGLESVersion) {
@@ -726,6 +748,9 @@ int doDump(Bundle* bundle)
         fprintf(stderr, "ERROR: dump failed because the resource table is invalid/corrupt.\n");
         return 1;
     }
+
+    // Source for AndroidManifest.xml
+    const String8 manifestFile = String8::format("%s@AndroidManifest.xml", filename);
 
     // The dynamicRefTable can be null if there are no resources for this asset cookie.
     // This fine.
@@ -1424,10 +1449,28 @@ int doDump(Bundle* bundle)
                     } else if (tag == "uses-feature") {
                         String8 name = AaptXml::getAttribute(tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            int req = AaptXml::getIntegerAttribute(tree,
-                                    REQUIRED_ATTR, 1);
+                            const char* androidSchema =
+                                    "http://schemas.android.com/apk/res/android";
 
-                            commonFeatures.features.add(name, req);
+                            int32_t req = AaptXml::getIntegerAttribute(tree, REQUIRED_ATTR, 1,
+                                                                       &error);
+                            if (error != "") {
+                                SourcePos(manifestFile, tree.getLineNumber()).error(
+                                        "failed to read attribute 'android:required': %s",
+                                        error.string());
+                                goto bail;
+                            }
+
+                            int32_t version = AaptXml::getIntegerAttribute(tree, androidSchema,
+                                                                           "version", 0, &error);
+                            if (error != "") {
+                                SourcePos(manifestFile, tree.getLineNumber()).error(
+                                        "failed to read attribute 'android:version': %s",
+                                        error.string());
+                                goto bail;
+                            }
+
+                            commonFeatures.features.add(name, Feature(req != 0, version));
                             if (req) {
                                 addParentFeatures(&commonFeatures, name);
                             }
@@ -1751,12 +1794,27 @@ int doDump(Bundle* bundle)
                             }
                         }
                     } else if (withinFeatureGroup && tag == "uses-feature") {
+                        const String8 androidSchema("http://schemas.android.com/apk/res/android");
                         FeatureGroup& top = featureGroups.editTop();
 
                         String8 name = AaptXml::getResolvedAttribute(res, tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            top.features.add(name, true);
+                            Feature feature(true);
+
+                            int32_t featureVers = AaptXml::getIntegerAttribute(
+                                    tree, androidSchema.string(), "version", 0, &error);
+                            if (error == "") {
+                                feature.version = featureVers;
+                            } else {
+                                SourcePos(manifestFile, tree.getLineNumber()).error(
+                                        "failed to read attribute 'android:version': %s",
+                                        error.string());
+                                goto bail;
+                            }
+
+                            top.features.add(name, feature);
                             addParentFeatures(&top, name);
+
                         } else {
                             int vers = AaptXml::getIntegerAttribute(tree, GL_ES_VERSION_ATTR,
                                     &error);
