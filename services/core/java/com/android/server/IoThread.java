@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.os.Handler;
+import android.os.Trace;
 
 /**
  * Shared singleton I/O thread for the system.  This is a thread for non-background
@@ -35,6 +36,7 @@ public final class IoThread extends ServiceThread {
         if (sInstance == null) {
             sInstance = new IoThread();
             sInstance.start();
+            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
