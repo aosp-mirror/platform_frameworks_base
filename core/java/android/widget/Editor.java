@@ -3474,7 +3474,6 @@ public class Editor {
                 popupBackground.getPadding(mTempRect);
                 width += mTempRect.left + mTempRect.right;
             }
-            mSuggestionListView.getLayoutParams().width = width;
             mPopupWindow.setWidth(width);
         }
 
