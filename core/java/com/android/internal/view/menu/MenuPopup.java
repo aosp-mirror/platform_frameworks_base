@@ -183,4 +183,25 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
         }
         return (MenuAdapter) adapter;
     }
+
+    /**
+     * Returns whether icon spacing needs to be preserved for the given menu, based on whether any
+     * of its items contains an icon.
+     * @param menu
+     * @return Whether to preserve icon spacing.
+     */
+    protected static boolean shouldPreserveIconSpacing(MenuBuilder menu) {
+      boolean preserveIconSpacing = false;
+      final int count = menu.size();
+
+      for (int i = 0; i < count; i++) {
+          MenuItem childItem = menu.getItem(i);
+          if (childItem.isVisible() && childItem.getIcon() != null) {
+              preserveIconSpacing = true;
+              break;
+          }
+      }
+
+      return preserveIconSpacing;
+    }
 }
