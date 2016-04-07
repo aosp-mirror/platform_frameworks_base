@@ -81,6 +81,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,6 +152,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private String mPackageName;
     private int mVersionCode;
     private Signature[] mSignatures;
+    private Certificate[][] mCertificates;
 
     /**
      * Path to the validated base APK for this session, which may point at an
@@ -633,7 +635,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
         mPm.installStage(mPackageName, stageDir, stageCid, localObserver, params,
-                installerPackageName, installerUid, user);
+                installerPackageName, installerUid, user, mCertificates);
     }
 
     /**
@@ -695,6 +697,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             if (mSignatures == null) {
                 mSignatures = apk.signatures;
+                mCertificates = apk.certificates;
             }
 
             assertApkConsistent(String.valueOf(addedFile), apk);
