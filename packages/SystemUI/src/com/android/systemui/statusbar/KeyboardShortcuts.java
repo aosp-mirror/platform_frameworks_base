@@ -58,176 +58,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
  */
 public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
-    private static final SparseArray<String> SPECIAL_CHARACTER_NAMES = new SparseArray<>();
-    private static final SparseArray<Drawable> SPECIAL_CHARACTER_DRAWABLES = new SparseArray<>();
-    private static final SparseArray<String> MODIFIER_NAMES = new SparseArray<>();
-    private static final SparseArray<Drawable> MODIFIER_DRAWABLES = new SparseArray<>();
-    private static boolean resourcesLoaded = false;
 
-    private static void loadResources(Context context) {
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_HOME, context.getString(R.string.keyboard_key_home));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_BACK, context.getString(R.string.keyboard_key_back));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DPAD_UP, context.getString(R.string.keyboard_key_dpad_up));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DPAD_DOWN, context.getString(R.string.keyboard_key_dpad_down));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DPAD_LEFT, context.getString(R.string.keyboard_key_dpad_left));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DPAD_RIGHT, context.getString(R.string.keyboard_key_dpad_right));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DPAD_CENTER, context.getString(R.string.keyboard_key_dpad_center));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_PERIOD, ".");
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_TAB, context.getString(R.string.keyboard_key_tab));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_SPACE, context.getString(R.string.keyboard_key_space));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_ENTER, context.getString(R.string.keyboard_key_enter));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_DEL, context.getString(R.string.keyboard_key_backspace));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                context.getString(R.string.keyboard_key_media_play_pause));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_MEDIA_STOP, context.getString(R.string.keyboard_key_media_stop));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_MEDIA_NEXT, context.getString(R.string.keyboard_key_media_next));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_PREVIOUS,
-                context.getString(R.string.keyboard_key_media_previous));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_REWIND,
-                context.getString(R.string.keyboard_key_media_rewind));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
-                context.getString(R.string.keyboard_key_media_fast_forward));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_PAGE_UP, context.getString(R.string.keyboard_key_page_up));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_PAGE_DOWN, context.getString(R.string.keyboard_key_page_down));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_A,
-                context.getString(R.string.keyboard_key_button_template, "A"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_B,
-                context.getString(R.string.keyboard_key_button_template, "B"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_C,
-                context.getString(R.string.keyboard_key_button_template, "C"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_X,
-                context.getString(R.string.keyboard_key_button_template, "X"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_Y,
-                context.getString(R.string.keyboard_key_button_template, "Y"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_Z,
-                context.getString(R.string.keyboard_key_button_template, "Z"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_L1,
-                context.getString(R.string.keyboard_key_button_template, "L1"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_R1,
-                context.getString(R.string.keyboard_key_button_template, "R1"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_L2,
-                context.getString(R.string.keyboard_key_button_template, "L2"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_R2,
-                context.getString(R.string.keyboard_key_button_template, "R2"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_START,
-                context.getString(R.string.keyboard_key_button_template, "Start"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_SELECT,
-                context.getString(R.string.keyboard_key_button_template, "Select"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_MODE,
-                context.getString(R.string.keyboard_key_button_template, "Mode"));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_FORWARD_DEL, context.getString(R.string.keyboard_key_forward_del));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_ESCAPE, "Esc");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_SYSRQ, "SysRq");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BREAK, "Break");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_SCROLL_LOCK, "Scroll Lock");
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_MOVE_HOME, context.getString(R.string.keyboard_key_move_home));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_MOVE_END, context.getString(R.string.keyboard_key_move_end));
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_INSERT, context.getString(R.string.keyboard_key_insert));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F1, "F1");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F2, "F2");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F3, "F3");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F4, "F4");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F5, "F5");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F6, "F6");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F7, "F7");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F8, "F8");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F9, "F9");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F10, "F10");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F11, "F11");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F12, "F12");
-        SPECIAL_CHARACTER_NAMES.put(
-                KeyEvent.KEYCODE_NUM_LOCK, context.getString(R.string.keyboard_key_num_lock));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_0,
-                context.getString(R.string.keyboard_key_numpad_template, "0"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_1,
-                context.getString(R.string.keyboard_key_numpad_template, "1"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_2,
-                context.getString(R.string.keyboard_key_numpad_template, "2"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_3,
-                context.getString(R.string.keyboard_key_numpad_template, "3"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_4,
-                context.getString(R.string.keyboard_key_numpad_template, "4"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_5,
-                context.getString(R.string.keyboard_key_numpad_template, "5"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_6,
-                context.getString(R.string.keyboard_key_numpad_template, "6"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_7,
-                context.getString(R.string.keyboard_key_numpad_template, "7"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_8,
-                context.getString(R.string.keyboard_key_numpad_template, "8"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_9,
-                context.getString(R.string.keyboard_key_numpad_template, "9"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_DIVIDE,
-                context.getString(R.string.keyboard_key_numpad_template, "/"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_MULTIPLY,
-                context.getString(R.string.keyboard_key_numpad_template, "*"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_SUBTRACT,
-                context.getString(R.string.keyboard_key_numpad_template, "-"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_ADD,
-                context.getString(R.string.keyboard_key_numpad_template, "+"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_DOT,
-                context.getString(R.string.keyboard_key_numpad_template, "."));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_COMMA,
-                context.getString(R.string.keyboard_key_numpad_template, ","));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_ENTER,
-                context.getString(R.string.keyboard_key_numpad_template,
-                        context.getString(R.string.keyboard_key_enter)));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_EQUALS,
-                context.getString(R.string.keyboard_key_numpad_template, "="));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN,
-                context.getString(R.string.keyboard_key_numpad_template, "("));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN,
-                context.getString(R.string.keyboard_key_numpad_template, ")"));
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_ZENKAKU_HANKAKU, "半角/全角");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_EISU, "英数");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MUHENKAN, "無変換");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_HENKAN, "変換");
-        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
-
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
-        SPECIAL_CHARACTER_DRAWABLES.put(
-                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
-
-        MODIFIER_NAMES.put(KeyEvent.META_META_ON, "Meta");
-        MODIFIER_NAMES.put(KeyEvent.META_CTRL_ON, "Ctrl");
-        MODIFIER_NAMES.put(KeyEvent.META_ALT_ON, "Alt");
-        MODIFIER_NAMES.put(KeyEvent.META_SHIFT_ON, "Shift");
-        MODIFIER_NAMES.put(KeyEvent.META_SYM_ON, "Sym");
-        MODIFIER_NAMES.put(KeyEvent.META_FUNCTION_ON, "Fn");
-
-        MODIFIER_DRAWABLES.put(
-                KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
-
-        resourcesLoaded = true;
-    }
+    private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
+    private final SparseArray<String> mModifierNames = new SparseArray<>();
+    private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
+    private final SparseArray<Drawable> mModifierDrawables = new SparseArray<>();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
@@ -242,9 +77,170 @@ public final class KeyboardShortcuts {
 
     public KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
-        if (!resourcesLoaded) {
-            loadResources(context);
-        }
+        loadResources(context);
+    }
+
+    private void loadResources(Context context) {
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_HOME, context.getString(R.string.keyboard_key_home));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_BACK, context.getString(R.string.keyboard_key_back));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DPAD_UP, context.getString(R.string.keyboard_key_dpad_up));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DPAD_DOWN, context.getString(R.string.keyboard_key_dpad_down));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DPAD_LEFT, context.getString(R.string.keyboard_key_dpad_left));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DPAD_RIGHT, context.getString(R.string.keyboard_key_dpad_right));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DPAD_CENTER, context.getString(R.string.keyboard_key_dpad_center));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_PERIOD, ".");
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_TAB, context.getString(R.string.keyboard_key_tab));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_SPACE, context.getString(R.string.keyboard_key_space));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_ENTER, context.getString(R.string.keyboard_key_enter));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_DEL, context.getString(R.string.keyboard_key_backspace));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                context.getString(R.string.keyboard_key_media_play_pause));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_MEDIA_STOP, context.getString(R.string.keyboard_key_media_stop));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_MEDIA_NEXT, context.getString(R.string.keyboard_key_media_next));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+                context.getString(R.string.keyboard_key_media_previous));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_MEDIA_REWIND,
+                context.getString(R.string.keyboard_key_media_rewind));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
+                context.getString(R.string.keyboard_key_media_fast_forward));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_PAGE_UP, context.getString(R.string.keyboard_key_page_up));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_PAGE_DOWN, context.getString(R.string.keyboard_key_page_down));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_A,
+                context.getString(R.string.keyboard_key_button_template, "A"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_B,
+                context.getString(R.string.keyboard_key_button_template, "B"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_C,
+                context.getString(R.string.keyboard_key_button_template, "C"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_X,
+                context.getString(R.string.keyboard_key_button_template, "X"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_Y,
+                context.getString(R.string.keyboard_key_button_template, "Y"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_Z,
+                context.getString(R.string.keyboard_key_button_template, "Z"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_L1,
+                context.getString(R.string.keyboard_key_button_template, "L1"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_R1,
+                context.getString(R.string.keyboard_key_button_template, "R1"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_L2,
+                context.getString(R.string.keyboard_key_button_template, "L2"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_R2,
+                context.getString(R.string.keyboard_key_button_template, "R2"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_START,
+                context.getString(R.string.keyboard_key_button_template, "Start"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_SELECT,
+                context.getString(R.string.keyboard_key_button_template, "Select"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BUTTON_MODE,
+                context.getString(R.string.keyboard_key_button_template, "Mode"));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_FORWARD_DEL, context.getString(R.string.keyboard_key_forward_del));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_ESCAPE, "Esc");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_SYSRQ, "SysRq");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_BREAK, "Break");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_SCROLL_LOCK, "Scroll Lock");
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_MOVE_HOME, context.getString(R.string.keyboard_key_move_home));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_MOVE_END, context.getString(R.string.keyboard_key_move_end));
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_INSERT, context.getString(R.string.keyboard_key_insert));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F1, "F1");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F2, "F2");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F3, "F3");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F4, "F4");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F5, "F5");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F6, "F6");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F7, "F7");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F8, "F8");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F9, "F9");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F10, "F10");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F11, "F11");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_F12, "F12");
+        mSpecialCharacterNames.put(
+                KeyEvent.KEYCODE_NUM_LOCK, context.getString(R.string.keyboard_key_num_lock));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_0,
+                context.getString(R.string.keyboard_key_numpad_template, "0"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_1,
+                context.getString(R.string.keyboard_key_numpad_template, "1"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_2,
+                context.getString(R.string.keyboard_key_numpad_template, "2"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_3,
+                context.getString(R.string.keyboard_key_numpad_template, "3"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_4,
+                context.getString(R.string.keyboard_key_numpad_template, "4"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_5,
+                context.getString(R.string.keyboard_key_numpad_template, "5"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_6,
+                context.getString(R.string.keyboard_key_numpad_template, "6"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_7,
+                context.getString(R.string.keyboard_key_numpad_template, "7"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_8,
+                context.getString(R.string.keyboard_key_numpad_template, "8"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_9,
+                context.getString(R.string.keyboard_key_numpad_template, "9"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_DIVIDE,
+                context.getString(R.string.keyboard_key_numpad_template, "/"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_MULTIPLY,
+                context.getString(R.string.keyboard_key_numpad_template, "*"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_SUBTRACT,
+                context.getString(R.string.keyboard_key_numpad_template, "-"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_ADD,
+                context.getString(R.string.keyboard_key_numpad_template, "+"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_DOT,
+                context.getString(R.string.keyboard_key_numpad_template, "."));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_COMMA,
+                context.getString(R.string.keyboard_key_numpad_template, ","));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_ENTER,
+                context.getString(R.string.keyboard_key_numpad_template,
+                        context.getString(R.string.keyboard_key_enter)));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_EQUALS,
+                context.getString(R.string.keyboard_key_numpad_template, "="));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN,
+                context.getString(R.string.keyboard_key_numpad_template, "("));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN,
+                context.getString(R.string.keyboard_key_numpad_template, ")"));
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_ZENKAKU_HANKAKU, "半角/全角");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_EISU, "英数");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_MUHENKAN, "無変換");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_HENKAN, "変換");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
+
+        mModifierNames.put(KeyEvent.META_META_ON, "Meta");
+        mModifierNames.put(KeyEvent.META_CTRL_ON, "Ctrl");
+        mModifierNames.put(KeyEvent.META_ALT_ON, "Alt");
+        mModifierNames.put(KeyEvent.META_SHIFT_ON, "Shift");
+        mModifierNames.put(KeyEvent.META_SYM_ON, "Sym");
+        mModifierNames.put(KeyEvent.META_FUNCTION_ON, "Fn");
+
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
+        mSpecialCharacterDrawables.put(
+                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
+
+        mModifierDrawables.put(
+                KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
     }
 
     public void toggleKeyboardShortcuts(int deviceId) {
@@ -458,10 +454,10 @@ public final class KeyboardShortcuts {
         Drawable displayLabelDrawable = null;
         if (info.getBaseCharacter() > Character.MIN_VALUE) {
             displayLabelString = String.valueOf(info.getBaseCharacter());
-        } else if (SPECIAL_CHARACTER_DRAWABLES.get(info.getKeycode()) != null) {
-            displayLabelDrawable = SPECIAL_CHARACTER_DRAWABLES.get(info.getKeycode());
-        } else if (SPECIAL_CHARACTER_NAMES.get(info.getKeycode()) != null) {
-            displayLabelString = SPECIAL_CHARACTER_NAMES.get(info.getKeycode());
+        } else if (mSpecialCharacterDrawables.get(info.getKeycode()) != null) {
+            displayLabelDrawable = mSpecialCharacterDrawables.get(info.getKeycode());
+        } else if (mSpecialCharacterNames.get(info.getKeycode()) != null) {
+            displayLabelString = mSpecialCharacterNames.get(info.getKeycode());
         } else {
             // Special case for shortcuts with no base key or keycode.
             if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
@@ -491,15 +487,15 @@ public final class KeyboardShortcuts {
         if (modifiers == 0) {
             return shortcutKeys;
         }
-        for(int i = 0; i < MODIFIER_NAMES.size(); ++i) {
-            final int supportedModifier = MODIFIER_NAMES.keyAt(i);
+        for(int i = 0; i < mModifierNames.size(); ++i) {
+            final int supportedModifier = mModifierNames.keyAt(i);
             if ((modifiers & supportedModifier) != 0) {
-                if (MODIFIER_DRAWABLES.get(supportedModifier) != null) {
+                if (mModifierDrawables.get(supportedModifier) != null) {
                     shortcutKeys.add(new StringOrDrawable(
-                            MODIFIER_DRAWABLES.get(supportedModifier)));
+                            mModifierDrawables.get(supportedModifier)));
                 } else {
                     shortcutKeys.add(new StringOrDrawable(
-                            MODIFIER_NAMES.get(supportedModifier).toUpperCase()));
+                            mModifierNames.get(supportedModifier).toUpperCase()));
                 }
                 modifiers &= ~supportedModifier;
             }
