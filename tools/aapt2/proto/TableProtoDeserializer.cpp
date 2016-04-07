@@ -388,6 +388,10 @@ private:
 std::unique_ptr<ResourceTable> deserializeTableFromPb(const pb::ResourceTable& pbTable,
                                                       const Source& source,
                                                       IDiagnostics* diag) {
+    // We import the android namespace because on Windows NO_ERROR is a macro, not an enum, which
+    // causes errors when qualifying it with android::
+    using namespace android;
+
     std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
 
     if (!pbTable.has_string_pool()) {
@@ -395,29 +399,29 @@ std::unique_ptr<ResourceTable> deserializeTableFromPb(const pb::ResourceTable& p
         return {};
     }
 
-    android::ResStringPool valuePool;
-    android::status_t result = valuePool.setTo(pbTable.string_pool().data().data(),
-                                               pbTable.string_pool().data().size());
-    if (result != android::NO_ERROR) {
+    ResStringPool valuePool;
+    status_t result = valuePool.setTo(pbTable.string_pool().data().data(),
+                                      pbTable.string_pool().data().size());
+    if (result != NO_ERROR) {
         diag->error(DiagMessage(source) << "invalid string pool");
         return {};
     }
 
-    android::ResStringPool sourcePool;
+    ResStringPool sourcePool;
     if (pbTable.has_source_pool()) {
         result = sourcePool.setTo(pbTable.source_pool().data().data(),
                                   pbTable.source_pool().data().size());
-        if (result != android::NO_ERROR) {
+        if (result != NO_ERROR) {
             diag->error(DiagMessage(source) << "invalid source pool");
             return {};
         }
     }
 
-    android::ResStringPool symbolPool;
+    ResStringPool symbolPool;
     if (pbTable.has_symbol_pool()) {
         result = symbolPool.setTo(pbTable.symbol_pool().data().data(),
                                   pbTable.symbol_pool().data().size());
-        if (result != android::NO_ERROR) {
+        if (result != NO_ERROR) {
             diag->error(DiagMessage(source) << "invalid symbol pool");
             return {};
         }

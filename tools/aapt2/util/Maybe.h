@@ -17,6 +17,8 @@
 #ifndef AAPT_MAYBE_H
 #define AAPT_MAYBE_H
 
+#include "util/TypeTraits.h"
+
 #include <cassert>
 #include <type_traits>
 #include <utility>
@@ -276,13 +278,15 @@ inline Maybe<T> make_nothing() {
 }
 
 /**
- * Define the == operator between Maybe<T> and Maybe<U> if the operator T == U is defined.
- * Otherwise this won't be defined and the compiler will yell at the callsite instead of inside
- * Maybe.h.
+ * Define the == operator between Maybe<T> and Maybe<U> only if the operator T == U is defined.
+ * That way the compiler will show an error at the callsite when comparing two Maybe<> objects
+ * whose inner types can't be compared.
  */
 template <typename T, typename U>
-auto operator==(const Maybe<T>& a, const Maybe<U>& b)
--> decltype(std::declval<T> == std::declval<U>) {
+typename std::enable_if<
+        has_eq_op<T, U>::value,
+        bool
+>::type operator==(const Maybe<T>& a, const Maybe<U>& b) {
     if (a && b) {
         return a.value() == b.value();
     } else if (!a && !b) {
@@ -295,8 +299,10 @@ auto operator==(const Maybe<T>& a, const Maybe<U>& b)
  * Same as operator== but negated.
  */
 template <typename T, typename U>
-auto operator!=(const Maybe<T>& a, const Maybe<U>& b)
--> decltype(std::declval<T> == std::declval<U>) {
+typename std::enable_if<
+        has_eq_op<T, U>::value,
+        bool
+>::type operator!=(const Maybe<T>& a, const Maybe<U>& b) {
     return !(a == b);
 }
 

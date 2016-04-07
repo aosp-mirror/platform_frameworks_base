@@ -17,6 +17,7 @@
 #include "util/Files.h"
 #include "util/Util.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <dirent.h>

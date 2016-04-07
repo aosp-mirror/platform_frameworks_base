@@ -46,6 +46,8 @@ public:
 
     ::testing::AssertionResult flatten(xml::XmlResource* doc, android::ResXMLTree* outTree,
                                        XmlFlattenerOptions options = {}) {
+        using namespace android; // For NO_ERROR on windows because it is a macro.
+
         BigBuffer buffer(1024);
         XmlFlattener flattener(&buffer, options);
         if (!flattener.consume(mContext.get(), doc)) {
@@ -53,7 +55,7 @@ public:
         }
 
         std::unique_ptr<uint8_t[]> data = util::copy(buffer);
-        if (outTree->setTo(data.get(), buffer.size(), true) != android::NO_ERROR) {
+        if (outTree->setTo(data.get(), buffer.size(), true) != NO_ERROR) {
             return ::testing::AssertionFailure() << "flattened XML is corrupt";
         }
         return ::testing::AssertionSuccess();
