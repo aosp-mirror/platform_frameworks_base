@@ -39,7 +39,9 @@ import android.location.LocationRequest;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.net.INetworkPolicyManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -114,6 +116,7 @@ public class DeviceIdleController extends SystemService
     private IBatteryStats mBatteryStats;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
+    private ConnectivityService mConnectivityService;
     private AlarmManagerService.LocalService mLocalAlarmManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private DisplayManager mDisplayManager;
@@ -128,6 +131,7 @@ public class DeviceIdleController extends SystemService
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
     private boolean mForceIdle;
+    private boolean mNetworkConnected;
     private boolean mScreenOn;
     private boolean mCharging;
     private boolean mNotMoving;
@@ -173,16 +177,20 @@ public class DeviceIdleController extends SystemService
     private static final int LIGHT_STATE_PRE_IDLE = 3;
     /** Device is in the light idle state, trying to stay asleep as much as possible. */
     private static final int LIGHT_STATE_IDLE = 4;
+    /** Device is in the light idle state, we want to go in to idle maintenance but are
+     * waiting for network connectivity before doing so. */
+    private static final int LIGHT_STATE_WAITING_FOR_NETWORK = 5;
     /** Device is in the light idle state, but temporarily out of idle to do regular maintenance. */
-    private static final int LIGHT_STATE_IDLE_MAINTENANCE = 5;
+    private static final int LIGHT_STATE_IDLE_MAINTENANCE = 6;
     /** Device light idle state is overriden, now applying deep doze state. */
-    private static final int LIGHT_STATE_OVERRIDE = 6;
+    private static final int LIGHT_STATE_OVERRIDE = 7;
     private static String lightStateToString(int state) {
         switch (state) {
             case LIGHT_STATE_ACTIVE: return "ACTIVE";
             case LIGHT_STATE_INACTIVE: return "INACTIVE";
             case LIGHT_STATE_PRE_IDLE: return "PRE_IDLE";
             case LIGHT_STATE_IDLE: return "IDLE";
+            case LIGHT_STATE_WAITING_FOR_NETWORK: return "WAITING_FOR_NETWORK";
             case LIGHT_STATE_IDLE_MAINTENANCE: return "IDLE_MAINTENANCE";
             case LIGHT_STATE_OVERRIDE: return "OVERRIDE";
             default: return Integer.toString(state);
@@ -315,17 +323,27 @@ public class DeviceIdleController extends SystemService
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                int plugged = intent.getIntExtra("plugged", 0);
-                updateChargingLocked(plugged != 0);
-            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    Uri data = intent.getData();
-                    String ssp;
-                    if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        removePowerSaveWhitelistAppInternal(ssp);
+            switch (intent.getAction()) {
+                case ConnectivityManager.CONNECTIVITY_ACTION: {
+                    synchronized (DeviceIdleController.this) {
+                        updateConnectivityStateLocked(intent);
                     }
-                }
+                } break;
+                case Intent.ACTION_BATTERY_CHANGED: {
+                    synchronized (DeviceIdleController.this) {
+                        int plugged = intent.getIntExtra("plugged", 0);
+                        updateChargingLocked(plugged != 0);
+                    }
+                } break;
+                case Intent.ACTION_PACKAGE_REMOVED: {
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        Uri data = intent.getData();
+                        String ssp;
+                        if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
+                            removePowerSaveWhitelistAppInternal(ssp);
+                        }
+                    }
+                } break;
             }
         }
     };
@@ -1318,6 +1336,7 @@ public class DeviceIdleController extends SystemService
             readConfigFileLocked();
             updateWhitelistAppIdsLocked();
 
+            mNetworkConnected = true;
             mScreenOn = true;
             // Start out assuming we are charging.  If we aren't, we will at least get
             // a battery update the next time the level drops.
@@ -1343,6 +1362,8 @@ public class DeviceIdleController extends SystemService
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deviceidle_maint");
                 mActiveIdleWakeLock.setReferenceCounted(false);
+                mConnectivityService = (ConnectivityService)ServiceManager.getService(
+                        Context.CONNECTIVITY_SERVICE);
                 mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
@@ -1395,11 +1416,14 @@ public class DeviceIdleController extends SystemService
                 filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
+                filter = new IntentFilter();
+                filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 getContext().registerReceiver(mReceiver, filter);
 
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
+                updateConnectivityStateLocked(null);
                 updateDisplayLocked();
             }
         }
@@ -1680,6 +1704,35 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    void updateConnectivityStateLocked(Intent connIntent) {
+        if (mConnectivityService != null) {
+            NetworkInfo ni = mConnectivityService.getActiveNetworkInfo();
+            boolean conn;
+            if (ni == null) {
+                conn = false;
+            } else {
+                if (connIntent == null) {
+                    conn = ni.isConnected();
+                } else {
+                    final int networkType =
+                            connIntent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE,
+                                    ConnectivityManager.TYPE_NONE);
+                    if (ni.getType() != networkType) {
+                        return;
+                    }
+                    conn = !connIntent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,
+                            false);
+                }
+            }
+            if (conn != mNetworkConnected) {
+                mNetworkConnected = conn;
+                if (conn && mLightState == LIGHT_STATE_WAITING_FOR_NETWORK) {
+                    stepLightIdleStateLocked("network");
+                }
+            }
+        }
+    }
+
     void updateDisplayLocked() {
         mCurDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         // We consider any situation where the display is showing something to be it on,
@@ -1778,7 +1831,7 @@ public class DeviceIdleController extends SystemService
         if (mForceIdle) {
             mForceIdle = false;
             if (mScreenOn || mCharging) {
-                becomeActiveLocked("exit-force-idle", Process.myUid());
+                becomeActiveLocked("exit-force", Process.myUid());
             }
         }
     }
@@ -1834,22 +1887,33 @@ public class DeviceIdleController extends SystemService
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
                 break;
             case LIGHT_STATE_IDLE:
-                // We have been idling long enough, now it is time to do some work.
-                mActiveIdleOpCount = 1;
-                mActiveIdleWakeLock.acquire();
-                mMaintenanceStartTime = SystemClock.elapsedRealtime();
-                if (mCurIdleBudget < mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET) {
-                    mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
-                } else if (mCurIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
-                    mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
+            case LIGHT_STATE_WAITING_FOR_NETWORK:
+                if (mNetworkConnected || mLightState == LIGHT_STATE_WAITING_FOR_NETWORK) {
+                    // We have been idling long enough, now it is time to do some work.
+                    mActiveIdleOpCount = 1;
+                    mActiveIdleWakeLock.acquire();
+                    mMaintenanceStartTime = SystemClock.elapsedRealtime();
+                    if (mCurIdleBudget < mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET) {
+                        mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
+                    } else if (mCurIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
+                        mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
+                    }
+                    scheduleLightAlarmLocked(mCurIdleBudget);
+                    if (DEBUG) Slog.d(TAG,
+                            "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
+                    mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
+                    EventLogTags.writeDeviceIdleLight(mLightState, reason);
+                    addEvent(EVENT_LIGHT_MAINTENANCE);
+                    mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
+                } else {
+                    // We'd like to do maintenance, but currently don't have network
+                    // connectivity...  let's try to wait until the network comes back.
+                    // We'll only wait for another full idle period, however, and then give up.
+                    scheduleLightAlarmLocked(mNextLightIdleDelay);
+                    if (DEBUG) Slog.d(TAG, "Moved to LIGHT_WAITING_FOR_NETWORK.");
+                    mLightState = LIGHT_STATE_WAITING_FOR_NETWORK;
+                    EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 }
-                scheduleLightAlarmLocked(mCurIdleBudget);
-                if (DEBUG) Slog.d(TAG,
-                        "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
-                mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
-                EventLogTags.writeDeviceIdleLight(mLightState, reason);
-                addEvent(EVENT_LIGHT_MAINTENANCE);
-                mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;
         }
     }
@@ -2209,13 +2273,6 @@ public class DeviceIdleController extends SystemService
 
     void scheduleLightAlarmLocked(long delay) {
         if (DEBUG) Slog.d(TAG, "scheduleLightAlarmLocked(" + delay + ")");
-        if (mMotionSensor == null) {
-            // If there is no motion sensor on this device, then we won't schedule
-            // alarms, because we can't determine if the device is not moving.  This effectively
-            // turns off normal execution of device idling, although it is still possible to
-            // manually poke it by pretending like the alarm is going off.
-            return;
-        }
         mNextLightAlarmTime = SystemClock.elapsedRealtime() + delay;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 mNextLightAlarmTime, "DeviceIdleController.light", mLightAlarmListener, mHandler);
@@ -2430,9 +2487,14 @@ public class DeviceIdleController extends SystemService
         pw.println("    Print this help text.");
         pw.println("  step [light|deep]");
         pw.println("    Immediately step to next state, without waiting for alarm.");
-        pw.println("  force-idle");
+        pw.println("  force-idle [light|deep]");
         pw.println("    Force directly into idle mode, regardless of other device state.");
-        pw.println("    Use \"step\" to get out.");
+        pw.println("  force-inactive");
+        pw.println("    Force to be inactive, ready to freely step idle states.");
+        pw.println("  unforce");
+        pw.println("    Resume normal functioning after force-idle or force-inactive.");
+        pw.println("  get [light|deep|force|screen|charging|network]");
+        pw.println("    Retrieve the current given state.");
         pw.println("  disable [light|deep|all]");
         pw.println("    Completely disable device idle mode.");
         pw.println("  enable [light|deep|all]");
@@ -2472,12 +2534,10 @@ public class DeviceIdleController extends SystemService
                 String arg = shell.getNextArg();
                 try {
                     if (arg == null || "deep".equals(arg)) {
-                        exitForceIdleLocked();
                         stepIdleStateLocked("s:shell");
                         pw.print("Stepped to deep: ");
                         pw.println(stateToString(mState));
                     } else if ("light".equals(arg)) {
-                        exitForceIdleLocked();
                         stepLightIdleStateLocked("s:shell");
                         pw.print("Stepped to light: "); pw.println(lightStateToString(mLightState));
                     } else {
@@ -2492,27 +2552,102 @@ public class DeviceIdleController extends SystemService
                     null);
             synchronized (this) {
                 long token = Binder.clearCallingIdentity();
+                String arg = shell.getNextArg();
                 try {
-                    if (!mDeepEnabled) {
-                        pw.println("Unable to go idle; not enabled");
-                        return -1;
-                    }
-                    mForceIdle = true;
-                    becomeInactiveIfAppropriateLocked();
-                    int curState = mState;
-                    while (curState != STATE_IDLE) {
-                        stepIdleStateLocked("s:shell");
-                        if (curState == mState) {
-                            pw.print("Unable to go idle; stopped at ");
-                            pw.println(stateToString(mState));
-                            exitForceIdleLocked();
+                    if (arg == null || "deep".equals(arg)) {
+                        if (!mDeepEnabled) {
+                            pw.println("Unable to go deep idle; not enabled");
                             return -1;
                         }
-                        curState = mState;
+                        mForceIdle = true;
+                        becomeInactiveIfAppropriateLocked();
+                        int curState = mState;
+                        while (curState != STATE_IDLE) {
+                            stepIdleStateLocked("s:shell");
+                            if (curState == mState) {
+                                pw.print("Unable to go deep idle; stopped at ");
+                                pw.println(stateToString(mState));
+                                exitForceIdleLocked();
+                                return -1;
+                            }
+                            curState = mState;
+                        }
+                        pw.println("Now forced in to deep idle mode");
+                    } else if ("light".equals(arg)) {
+                        mForceIdle = true;
+                        becomeInactiveIfAppropriateLocked();
+                        int curLightState = mLightState;
+                        while (curLightState != LIGHT_STATE_IDLE) {
+                            stepIdleStateLocked("s:shell");
+                            if (curLightState == mLightState) {
+                                pw.print("Unable to go light idle; stopped at ");
+                                pw.println(lightStateToString(mLightState));
+                                exitForceIdleLocked();
+                                return -1;
+                            }
+                            curLightState = mLightState;
+                        }
+                        pw.println("Now forced in to light idle mode");
+                    } else {
+                        pw.println("Unknown idle mode: " + arg);
                     }
-                    pw.println("Now forced in to idle mode");
                 } finally {
                     Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else if ("force-inactive".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (this) {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mForceIdle = true;
+                    becomeInactiveIfAppropriateLocked();
+                    pw.print("Light state: ");
+                    pw.print(lightStateToString(mLightState));
+                    pw.print(", deep state: ");
+                    pw.println(stateToString(mState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else if ("unforce".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (this) {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    exitForceIdleLocked();
+                    pw.print("Light state: ");
+                    pw.print(lightStateToString(mLightState));
+                    pw.print(", deep state: ");
+                    pw.println(stateToString(mState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else if ("get".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (this) {
+                String arg = shell.getNextArg();
+                if (arg != null) {
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        switch (arg) {
+                            case "light": pw.println(lightStateToString(mLightState)); break;
+                            case "deep": pw.println(stateToString(mState)); break;
+                            case "force": pw.println(mForceIdle); break;
+                            case "screen": pw.println(mScreenOn); break;
+                            case "charging": pw.println(mCharging); break;
+                            case "network": pw.println(mNetworkConnected); break;
+                            default: pw.println("Unknown get option: " + arg); break;
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                } else {
+                    pw.println("Argument required");
                 }
             }
         } else if ("disable".equals(cmd)) {
@@ -2829,6 +2964,7 @@ public class DeviceIdleController extends SystemService
             pw.print("  mMotionSensor="); pw.println(mMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
             pw.print("  mScreenOn="); pw.println(mScreenOn);
+            pw.print("  mNetworkConnected="); pw.println(mNetworkConnected);
             pw.print("  mCharging="); pw.println(mCharging);
             pw.print("  mMotionActive="); pw.println(mMotionListener.active);
             pw.print("  mNotMoving="); pw.println(mNotMoving);

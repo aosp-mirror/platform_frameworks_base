@@ -77,8 +77,10 @@ public class ConnectivityController extends StateController implements
         if (cs != null) {
             if (cs.getActiveNetworkInfo() != null) {
                 mNetworkConnected = cs.getActiveNetworkInfo().isConnected();
+                mNetworkUnmetered = mNetworkConnected && !cs.isActiveNetworkMetered();
+            } else {
+                mNetworkConnected = mNetworkUnmetered = false;
             }
-            mNetworkUnmetered = mNetworkConnected && !cs.isActiveNetworkMetered();
         }
     }
 
