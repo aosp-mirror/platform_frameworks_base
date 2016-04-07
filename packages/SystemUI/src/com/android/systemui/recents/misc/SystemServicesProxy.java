@@ -144,6 +144,7 @@ public class SystemServicesProxy {
         public void onPinnedActivityRestartAttempt() { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId) { }
+        public void onActivityDismissingDockedStack() { }
     }
 
     /**
@@ -181,6 +182,11 @@ public class SystemServicesProxy {
                 throws RemoteException {
             mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, 0, packageName)
                     .sendToTarget();
+        }
+
+        @Override
+        public void onActivityDismissingDockedStack() throws RemoteException {
+            mHandler.sendEmptyMessage(H.ON_ACTIVITY_DISMISSING_DOCKED_STACK);
         }
     };
 
@@ -1091,6 +1097,7 @@ public class SystemServicesProxy {
         private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 3;
         private static final int ON_PINNED_STACK_ANIMATION_ENDED = 4;
         private static final int ON_ACTIVITY_FORCED_RESIZABLE = 5;
+        private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 6;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1123,6 +1130,12 @@ public class SystemServicesProxy {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onActivityForcedResizable(
                                 (String) msg.obj, msg.arg1);
+                    }
+                    break;
+                }
+                case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onActivityDismissingDockedStack();
                     }
                     break;
                 }
