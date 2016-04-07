@@ -462,7 +462,7 @@ void FrameBuilder::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     int count = mCanvasState.save(SaveFlags::MatrixClip);
 
     // apply state from RecordedOp (clip first, since op's clip is transformed by current matrix)
-    mCanvasState.writableSnapshot()->mutateClipArea().applyClip(op.localClip,
+    mCanvasState.writableSnapshot()->applyClip(op.localClip,
             *mCanvasState.currentSnapshot()->transform);
     mCanvasState.concatMatrix(op.localMatrix);
 

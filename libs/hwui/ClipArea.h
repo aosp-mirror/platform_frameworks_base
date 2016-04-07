@@ -103,6 +103,7 @@ struct ClipBase {
             : mode(ClipMode::Rectangle)
             , rect(rect) {}
     const ClipMode mode;
+    bool intersectWithRoot = false;
     // Bounds of the clipping area, used to define the scissor, and define which
     // portion of the stencil is updated/used
     Rect rect;
@@ -173,8 +174,8 @@ public:
         return mMode == ClipMode::RectangleList;
     }
 
-    const ClipBase* serializeClip(LinearAllocator& allocator);
-    const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
+    WARN_UNUSED_RESULT const ClipBase* serializeClip(LinearAllocator& allocator);
+    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
             const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
     void applyClip(const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
 
@@ -214,6 +215,7 @@ private:
 
     ClipMode mMode;
     bool mPostViewportClipObserved = false;
+    bool mReplaceOpObserved = false;
 
     /**
      * If mLastSerialization is non-null, it represents an already serialized copy
