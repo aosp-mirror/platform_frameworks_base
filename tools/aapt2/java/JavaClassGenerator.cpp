@@ -318,7 +318,7 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
         }
 
         std::unique_ptr<IntMember> indexMember = util::make_unique<IntMember>(
-                sortedAttributes[i].fieldName, i);
+                sortedAttributes[i].fieldName, static_cast<uint32_t>(i));
 
         AnnotationProcessor* attrProcessor = indexMember->getCommentBuilder();
 

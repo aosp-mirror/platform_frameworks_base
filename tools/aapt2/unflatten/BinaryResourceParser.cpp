@@ -26,7 +26,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
 #include <android-base/macros.h>
-
+#include <algorithm>
 #include <map>
 #include <string>
 

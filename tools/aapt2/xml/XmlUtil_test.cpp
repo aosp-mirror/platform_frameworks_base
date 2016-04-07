@@ -33,22 +33,22 @@ TEST(XmlUtilTest, ExtractPackageFromNamespace) {
             xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res/a");
     AAPT_ASSERT_TRUE(p);
     EXPECT_EQ(std::u16string(u"a"), p.value().package);
-    EXPECT_EQ(false, p.value().privateNamespace);
+    EXPECT_FALSE(p.value().privateNamespace);
 
     p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/prv/res/android");
     AAPT_ASSERT_TRUE(p);
     EXPECT_EQ(std::u16string(u"android"), p.value().package);
-    EXPECT_EQ(true, p.value().privateNamespace);
+    EXPECT_TRUE(p.value().privateNamespace);
 
     p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/prv/res/com.test");
     AAPT_ASSERT_TRUE(p);
     EXPECT_EQ(std::u16string(u"com.test"), p.value().package);
-    EXPECT_EQ(true, p.value().privateNamespace);
+    EXPECT_TRUE(p.value().privateNamespace);
 
     p = xml::extractPackageFromNamespace(u"http://schemas.android.com/apk/res-auto");
     AAPT_ASSERT_TRUE(p);
     EXPECT_EQ(std::u16string(), p.value().package);
-    EXPECT_EQ(true, p.value().privateNamespace);
+    EXPECT_TRUE(p.value().privateNamespace);
 }
 
 } // namespace aapt

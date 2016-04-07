@@ -131,33 +131,40 @@ hostStaticLibs := \
 	libbase \
 	libprotobuf-cpp-lite_static
 
-# Do not add any shared libraries. AAPT2 is built to run on many
-# environments that may not have the required dependencies.
-hostSharedLibs :=
 
-ifneq ($(strip $(USE_MINGW)),)
-	hostStaticLibs += libz
-else
-	hostLdLibs += -lz
-endif
+# Statically link libz for MinGW (Win SDK under Linux),
+# and dynamically link for all others.
+hostStaticLibs_windows := libz
+hostLdLibs_linux := -lz
+hostLdLibs_darwin := -lz
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
-cppFlags := -std=c++14 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
+cFlags_darwin := -D_DARWIN_UNLIMITED_STREAMS
+cFlags_windows := -Wno-maybe-uninitialized # Incorrectly marking use of Maybe.value() as error.
+cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
 protoIncludes := $(call generated-sources-dir-for,STATIC_LIBRARIES,libaapt2,HOST)
+
+# ==========================================================
+# NOTE: Do not add any shared libraries.
+# AAPT2 is built to run on many environments
+# that may not have the required dependencies.
+# ==========================================================
 
 # ==========================================================
 # Build the host static library: libaapt2
 # ==========================================================
 include $(CLEAR_VARS)
-LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 LOCAL_MODULE := libaapt2
-
+LOCAL_MODULE_CLASS := STATIC_LIBRARIES
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := $(cFlags)
+LOCAL_CFLAGS_darwin := $(cFlags_darwin)
+LOCAL_CFLAGS_windows := $(cFlags_windows)
+LOCAL_CPPFLAGS := $(cppFlags)
+LOCAL_C_INCLUDES := $(protoIncludes)
 LOCAL_SRC_FILES := $(sources)
-LOCAL_STATIC_LIBRARIES += $(hostStaticLibs)
-LOCAL_CFLAGS += $(cFlags)
-LOCAL_CPPFLAGS += $(cppFlags)
-LOCAL_C_INCLUDES += $(protoIncludes)
-
+LOCAL_STATIC_LIBRARIES := $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 # ==========================================================
@@ -166,16 +173,18 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libaapt2_tests
 LOCAL_MODULE_TAGS := tests
-
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := $(cFlags)
+LOCAL_CFLAGS_darwin := $(cFlags_darwin)
+LOCAL_CFLAGS_windows := $(cFlags_windows)
+LOCAL_CPPFLAGS := $(cppFlags)
+LOCAL_C_INCLUDES := $(protoIncludes)
 LOCAL_SRC_FILES := $(testSources)
-
-LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
-LOCAL_SHARED_LIBRARIES += $(hostSharedLibs)
-LOCAL_LDLIBS += $(hostLdLibs)
-LOCAL_CFLAGS += $(cFlags)
-LOCAL_CPPFLAGS += $(cppFlags)
-LOCAL_C_INCLUDES += $(protoIncludes)
-
+LOCAL_STATIC_LIBRARIES := libaapt2 $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
+LOCAL_LDLIBS := $(hostLdLibs)
+LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
 include $(BUILD_HOST_NATIVE_TEST)
 
 # ==========================================================
@@ -183,16 +192,18 @@ include $(BUILD_HOST_NATIVE_TEST)
 # ==========================================================
 include $(CLEAR_VARS)
 LOCAL_MODULE := aapt2
-
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := $(cFlags)
+LOCAL_CFLAGS_darwin := $(cFlags_darwin)
+LOCAL_CFLAGS_windows := $(cFlags_windows)
+LOCAL_CPPFLAGS := $(cppFlags)
+LOCAL_C_INCLUDES := $(protoIncludes)
 LOCAL_SRC_FILES := $(main) $(toolSources)
-
-LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
-LOCAL_SHARED_LIBRARIES += $(hostSharedLibs)
-LOCAL_LDLIBS += $(hostLdLibs)
-LOCAL_CFLAGS += $(cFlags)
-LOCAL_CPPFLAGS += $(cppFlags)
-LOCAL_C_INCLUDES += $(protoIncludes)
-
+LOCAL_STATIC_LIBRARIES := libaapt2 $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
+LOCAL_LDLIBS := $(hostLdLibs)
+LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
+LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
 include $(BUILD_HOST_EXECUTABLE)
 
 ifeq ($(ONE_SHOT_MAKEFILE),)
