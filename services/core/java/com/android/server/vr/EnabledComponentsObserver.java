@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -213,18 +212,7 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         if (userManager == null) {
             return null;
         }
-        int currentUserId = ActivityManager.getCurrentUser();
-        List<UserInfo> profiles = userManager.getProfiles(currentUserId);
-        if (profiles == null) {
-            return null;
-        }
-        final int s = profiles.size();
-        int[] userIds = new int[s];
-        int ctr = 0;
-        for (UserInfo info : profiles) {
-            userIds[ctr++] = info.id;
-        }
-        return userIds;
+        return userManager.getProfileIdsWithDisabled(ActivityManager.getCurrentUser());
     }
 
     public static ArraySet<ComponentName> loadComponentNames(PackageManager pm, int userId,

@@ -66,7 +66,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1050,12 +1049,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateCurrentProfileIds() {
-        List<UserInfo> profiles = mUserManager.getProfiles(mSettings.getCurrentUserId());
-        int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
-        for (int i = 0; i < currentProfileIds.length; i++) {
-            currentProfileIds[i] = profiles.get(i).id;
-        }
-        mSettings.setCurrentProfileIds(currentProfileIds);
+        mSettings.setCurrentProfileIds(
+                mUserManager.getProfileIdsWithDisabled(mSettings.getCurrentUserId()));
     }
 
     @Override

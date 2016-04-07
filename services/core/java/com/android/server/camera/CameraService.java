@@ -15,32 +15,28 @@
  */
 package com.android.server.camera;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.UserInfo;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
 import android.nfc.INfcAdapter;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Binder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.os.SystemProperties;
-import android.util.Slog;
+import android.os.UserManager;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -225,11 +221,11 @@ public class CameraService extends SystemService
     }
 
     private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
-        List<UserInfo> userProfiles = mUserManager.getEnabledProfiles(currentUserHandle);
-        Set<Integer> handles = new HashSet<>(userProfiles.size());
+        int[] userProfiles = mUserManager.getEnabledProfileIds(currentUserHandle);
+        Set<Integer> handles = new ArraySet<>(userProfiles.length);
 
-        for (UserInfo i : userProfiles) {
-            handles.add(i.id);
+        for (int id : userProfiles) {
+            handles.add(id);
         }
 
         return handles;

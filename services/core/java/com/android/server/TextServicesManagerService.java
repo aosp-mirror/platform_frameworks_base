@@ -43,7 +43,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -195,12 +194,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     void updateCurrentProfileIds() {
-        final List<UserInfo> profiles = mUserManager.getProfiles(mSettings.getCurrentUserId());
-        int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
-        for (int i = 0; i < currentProfileIds.length; i++) {
-            currentProfileIds[i] = profiles.get(i).id;
-        }
-        mSettings.setCurrentProfileIds(currentProfileIds);
+        mSettings.setCurrentProfileIds(
+                mUserManager.getProfileIdsWithDisabled(mSettings.getCurrentUserId()));
     }
 
     private class TextServicesMonitor extends PackageMonitor {
