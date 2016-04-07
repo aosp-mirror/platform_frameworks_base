@@ -765,6 +765,19 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.action.APPLICATION_PREFERENCES";
 
     /**
+     * Activity Action: Launch an activity showing the app information.
+     * For applications which install other applications (such as app stores), it is recommended
+     * to handle this action for providing the app information to the user.
+     *
+     * <p>Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose information needs
+     * to be displayed.
+     * <p>Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_APP_INFO
+            = "android.intent.action.SHOW_APP_INFO";
+
+    /**
      * Represents a shortcut/live folder icon resource.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT
@@ -1673,9 +1686,7 @@ public class Intent implements Parcelable, Cloneable {
      * Type: String
      * </p>
      *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
