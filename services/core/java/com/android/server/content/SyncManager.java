@@ -1402,11 +1402,23 @@ public class SyncManager {
         }
     }
 
+    private void restoreLostPeriodicSyncsIfNeeded(int userId) {
+        List<SyncOperation> periodicSyncs = new ArrayList<SyncOperation>();
+        for (SyncOperation sync : getAllPendingSyncs()) {
+            if (sync.isPeriodic && sync.target.userId == userId) {
+                periodicSyncs.add(sync);
+            }
+        }
+        mSyncStorageEngine.restorePeriodicSyncsIfNeededForUser(userId, periodicSyncs);
+    }
+
     private void onUserUnlocked(int userId) {
         // Make sure that accounts we're about to use are valid.
         AccountManagerService.getSingleton().validateAccounts(userId);
 
         mSyncAdapters.invalidateCache(userId);
+
+        restoreLostPeriodicSyncsIfNeeded(userId);
 
         EndPoint target = new EndPoint(null, null, userId);
         updateRunningAccounts(target);
@@ -2578,9 +2590,11 @@ public class SyncManager {
                 }
             }
 
+            // Cancel all jobs from non-existent accounts.
+            AccountAndUser[] allAccounts = AccountManagerService.getSingleton().getAllAccounts();
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
-                if (!containsAccountAndUser(accounts, op.target.account, op.target.userId)) {
+                if (!containsAccountAndUser(allAccounts, op.target.account, op.target.userId)) {
                     getJobScheduler().cancel(op.jobId);
                 }
             }
