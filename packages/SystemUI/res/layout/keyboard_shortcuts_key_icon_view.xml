@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2016 The Android Open Source Project
   ~
@@ -14,12 +15,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:padding="@dimen/ksh_item_padding"
-          android:layout_marginStart="@dimen/ksh_item_margin_start"
-          android:background="@color/ksh_key_item_background"
-          android:textColor="@color/ksh_key_item_color"
-          android:singleLine="true"
-          android:textSize="@dimen/ksh_item_text_size"/>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/ksh_item_padding"
+        android:layout_marginStart="@dimen/ksh_item_margin_start"
+        android:scaleType="fitXY"
+        android:background="@color/ksh_key_item_background"/>

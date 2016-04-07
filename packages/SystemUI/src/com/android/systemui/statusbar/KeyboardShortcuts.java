@@ -21,6 +21,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,6 +40,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -52,13 +56,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 /**
  * Contains functionality for handling keyboard shortcuts.
  */
-public class KeyboardShortcuts {
+public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
-
     private static final SparseArray<String> SPECIAL_CHARACTER_NAMES = new SparseArray<>();
+    private static final SparseArray<Drawable> SPECIAL_CHARACTER_DRAWABLES = new SparseArray<>();
     private static final SparseArray<String> MODIFIER_NAMES = new SparseArray<>();
+    private static final SparseArray<Drawable> MODIFIER_DRAWABLES = new SparseArray<>();
+    private static boolean resourcesLoaded = false;
 
-    private static void loadSpecialCharacterNames(Context context) {
+    private static void loadResources(Context context) {
         SPECIAL_CHARACTER_NAMES.put(
                 KeyEvent.KEYCODE_HOME, context.getString(R.string.keyboard_key_home));
         SPECIAL_CHARACTER_NAMES.put(
@@ -197,12 +203,30 @@ public class KeyboardShortcuts {
         SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_HENKAN, "変換");
         SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
 
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
+        SPECIAL_CHARACTER_DRAWABLES.put(
+                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
+
         MODIFIER_NAMES.put(KeyEvent.META_META_ON, "Meta");
         MODIFIER_NAMES.put(KeyEvent.META_CTRL_ON, "Ctrl");
         MODIFIER_NAMES.put(KeyEvent.META_ALT_ON, "Alt");
         MODIFIER_NAMES.put(KeyEvent.META_SHIFT_ON, "Shift");
         MODIFIER_NAMES.put(KeyEvent.META_SYM_ON, "Sym");
         MODIFIER_NAMES.put(KeyEvent.META_FUNCTION_ON, "Fn");
+
+        MODIFIER_DRAWABLES.put(
+                KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
+
+        resourcesLoaded = true;
     }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -218,8 +242,8 @@ public class KeyboardShortcuts {
 
     public KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
-        if (SPECIAL_CHARACTER_NAMES.size() == 0) {
-            loadSpecialCharacterNames(context);
+        if (!resourcesLoaded) {
+            loadResources(context);
         }
     }
 
@@ -343,6 +367,8 @@ public class KeyboardShortcuts {
             List<KeyboardShortcutGroup> keyboardShortcutGroups) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         final int keyboardShortcutGroupsSize = keyboardShortcutGroups.size();
+        // Needed to be able to scale the image items to the same height as the text items.
+        final int shortcutTextItemHeight = getShortcutTextItemHeight(inflater);
         for (int i = 0; i < keyboardShortcutGroupsSize; i++) {
             KeyboardShortcutGroup group = keyboardShortcutGroups.get(i);
             TextView categoryTitle = (TextView) inflater.inflate(
@@ -364,7 +390,7 @@ public class KeyboardShortcuts {
                     Log.w(TAG, "Keyboard Shortcut contains key not on device, skipping.");
                     continue;
                 }
-                List<String> shortcutKeys = getHumanReadableShortcutKeys(info);
+                List<StringOrDrawable> shortcutKeys = getHumanReadableShortcutKeys(info);
                 if (shortcutKeys == null) {
                     // Ignore shortcuts we can't display keys for.
                     Log.w(TAG, "Keyboard Shortcut contains unsupported keys, skipping.");
@@ -380,11 +406,26 @@ public class KeyboardShortcuts {
                         .findViewById(R.id.keyboard_shortcuts_item_container);
                 final int shortcutKeysSize = shortcutKeys.size();
                 for (int k = 0; k < shortcutKeysSize; k++) {
-                    String shortcutKey = shortcutKeys.get(k);
-                    TextView shortcutKeyView = (TextView) inflater.inflate(
-                            R.layout.keyboard_shortcuts_key_view, shortcutItemsContainer, false);
-                    shortcutKeyView.setText(shortcutKey);
-                    shortcutItemsContainer.addView(shortcutKeyView);
+                    StringOrDrawable shortcutRepresentation = shortcutKeys.get(k);
+                    if (shortcutRepresentation.drawable != null) {
+                        ImageView shortcutKeyIconView = (ImageView) inflater.inflate(
+                                R.layout.keyboard_shortcuts_key_icon_view, shortcutItemsContainer,
+                                false);
+                        Bitmap bitmap = Bitmap.createBitmap(shortcutTextItemHeight,
+                                shortcutTextItemHeight, Bitmap.Config.ARGB_8888);
+                        Canvas canvas = new Canvas(bitmap);
+                        shortcutRepresentation.drawable.setBounds(0, 0, canvas.getWidth(),
+                                canvas.getHeight());
+                        shortcutRepresentation.drawable.draw(canvas);
+                        shortcutKeyIconView.setImageBitmap(bitmap);
+                        shortcutItemsContainer.addView(shortcutKeyIconView);
+                    } else if (shortcutRepresentation.string != null) {
+                        TextView shortcutKeyTextView = (TextView) inflater.inflate(
+                                R.layout.keyboard_shortcuts_key_view, shortcutItemsContainer,
+                                false);
+                        shortcutKeyTextView.setText(shortcutRepresentation.string);
+                        shortcutItemsContainer.addView(shortcutKeyTextView);
+                    }
                 }
                 shortcutContainer.addView(shortcutView);
             }
@@ -398,14 +439,27 @@ public class KeyboardShortcuts {
         }
     }
 
-    private List<String> getHumanReadableShortcutKeys(KeyboardShortcutInfo info) {
-        List<String> shortcutKeys = getHumanReadableModifiers(info);
+    private int getShortcutTextItemHeight(LayoutInflater inflater) {
+        TextView shortcutKeyTextView = (TextView) inflater.inflate(
+                R.layout.keyboard_shortcuts_key_view, null, false);
+        shortcutKeyTextView.measure(
+                View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        return shortcutKeyTextView.getMeasuredHeight()
+                - shortcutKeyTextView.getPaddingTop()
+                - shortcutKeyTextView.getPaddingBottom();
+    }
+
+    private List<StringOrDrawable> getHumanReadableShortcutKeys(KeyboardShortcutInfo info) {
+        List<StringOrDrawable> shortcutKeys = getHumanReadableModifiers(info);
         if (shortcutKeys == null) {
             return null;
         }
-        String displayLabelString;
+        String displayLabelString = null;
+        Drawable displayLabelDrawable = null;
         if (info.getBaseCharacter() > Character.MIN_VALUE) {
             displayLabelString = String.valueOf(info.getBaseCharacter());
+        } else if (SPECIAL_CHARACTER_DRAWABLES.get(info.getKeycode()) != null) {
+            displayLabelDrawable = SPECIAL_CHARACTER_DRAWABLES.get(info.getKeycode());
         } else if (SPECIAL_CHARACTER_NAMES.get(info.getKeycode()) != null) {
             displayLabelString = SPECIAL_CHARACTER_NAMES.get(info.getKeycode());
         } else {
@@ -422,12 +476,17 @@ public class KeyboardShortcuts {
                 return null;
             }
         }
-        shortcutKeys.add(displayLabelString.toUpperCase());
+
+        if (displayLabelDrawable != null) {
+            shortcutKeys.add(new StringOrDrawable(displayLabelDrawable));
+        } else if (displayLabelString != null) {
+            shortcutKeys.add(new StringOrDrawable(displayLabelString.toUpperCase()));
+        }
         return shortcutKeys;
     }
 
-    private List<String> getHumanReadableModifiers(KeyboardShortcutInfo info) {
-        final List<String> shortcutKeys = new ArrayList<>();
+    private List<StringOrDrawable> getHumanReadableModifiers(KeyboardShortcutInfo info) {
+        final List<StringOrDrawable> shortcutKeys = new ArrayList<>();
         int modifiers = info.getModifiers();
         if (modifiers == 0) {
             return shortcutKeys;
@@ -435,7 +494,13 @@ public class KeyboardShortcuts {
         for(int i = 0; i < MODIFIER_NAMES.size(); ++i) {
             final int supportedModifier = MODIFIER_NAMES.keyAt(i);
             if ((modifiers & supportedModifier) != 0) {
-                shortcutKeys.add(MODIFIER_NAMES.get(supportedModifier).toUpperCase());
+                if (MODIFIER_DRAWABLES.get(supportedModifier) != null) {
+                    shortcutKeys.add(new StringOrDrawable(
+                            MODIFIER_DRAWABLES.get(supportedModifier)));
+                } else {
+                    shortcutKeys.add(new StringOrDrawable(
+                            MODIFIER_NAMES.get(supportedModifier).toUpperCase()));
+                }
                 modifiers &= ~supportedModifier;
             }
         }
@@ -444,5 +509,18 @@ public class KeyboardShortcuts {
             return null;
         }
         return shortcutKeys;
+    }
+
+    private static final class StringOrDrawable {
+        public String string;
+        public Drawable drawable;
+
+        public StringOrDrawable(String string) {
+            this.string = string;
+        }
+
+        public StringOrDrawable(Drawable drawable) {
+            this.drawable = drawable;
+        }
     }
 }

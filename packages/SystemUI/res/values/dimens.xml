@@ -561,6 +561,9 @@
 
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">@dimen/match_parent</dimen>
+    <dimen name="ksh_item_text_size">14sp</dimen>
+    <dimen name="ksh_item_padding">4dp</dimen>
+    <dimen name="ksh_item_margin_start">4dp</dimen>
 
 <!-- Recents Layout -->
 
