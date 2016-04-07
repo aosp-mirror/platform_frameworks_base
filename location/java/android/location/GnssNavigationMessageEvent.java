@@ -28,10 +28,11 @@ import java.security.InvalidParameterException;
 /**
  * A class implementing a container for data associated with a navigation message event.
  * Events are delivered to registered instances of {@link Callback}.
+ * @removed
  */
 public final class GnssNavigationMessageEvent implements Parcelable {
     /**
-     * The status of GPS measurements event.
+     * The status of GNSS measurements event.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -39,38 +40,40 @@ public final class GnssNavigationMessageEvent implements Parcelable {
     public @interface GnssNavigationMessageStatus {}
 
     /**
-     * The system does not support tracking of GPS Navigation Messages. This status will not change
-     * in the future.
+     * The system does not support tracking of GNSS Navigation Messages.
+     *
+     * This status will not change in the future.
      */
     public static final int STATUS_NOT_SUPPORTED = 0;
 
     /**
-     * GPS Navigation Messages are successfully being tracked, it will receive updates once they are
-     * available.
+     * GNSS Navigation Messages are successfully being tracked, it will receive updates once they
+     * are available.
      */
     public static final int STATUS_READY = 1;
 
     /**
-     * GPS provider or Location is disabled, updated will not be received until they are enabled.
+     * GNSS provider or Location is disabled, updated will not be received until they are enabled.
      */
     public static final int STATUS_GNSS_LOCATION_DISABLED = 2;
 
     private final GnssNavigationMessage mNavigationMessage;
 
     /**
-     * Used for receiving GPS satellite Navigation Messages from the GPS engine.
-     * You can implement this interface and call
+     * Used for receiving GNSS satellite Navigation Messages from the GNSS engine.
+     *
+     * <p>You can implement this interface and call
      * {@link LocationManager#registerGnssNavigationMessageCallback}.
      */
     public static abstract class Callback {
 
         /**
-         * Returns the latest collected GPS Navigation Message.
+         * Returns the latest collected GNSS Navigation Message.
          */
         public void onGnssNavigationMessageReceived(GnssNavigationMessageEvent event) {}
 
         /**
-         * Returns the latest status of the GPS Navigation Messages sub-system.
+         * Returns the latest status of the GNSS Navigation Messages sub-system.
          */
         public void onStatusChanged(@GnssNavigationMessageStatus int status) {}
     }

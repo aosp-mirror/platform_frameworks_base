@@ -20,12 +20,12 @@ import android.content.Context;
 import android.os.RemoteException;
 
 /**
- * A handler class to manage transport callback for {@link GnssNavigationMessageEvent.Callback}.
+ * A handler class to manage transport callback for {@link GnssNavigationMessage.Callback}.
  *
  * @hide
  */
 class GnssNavigationMessageCallbackTransport
-        extends LocalListenerHelper<GnssNavigationMessageEvent.Callback> {
+        extends LocalListenerHelper<GnssNavigationMessage.Callback> {
     private final ILocationManager mLocationManager;
 
     private final IGnssNavigationMessageListener mListenerTransport = new ListenerTransport();
@@ -51,11 +51,11 @@ class GnssNavigationMessageCallbackTransport
 
     private class ListenerTransport extends IGnssNavigationMessageListener.Stub {
         @Override
-        public void onGnssNavigationMessageReceived(final GnssNavigationMessageEvent event) {
-            ListenerOperation<GnssNavigationMessageEvent.Callback> operation =
-                    new ListenerOperation<GnssNavigationMessageEvent.Callback>() {
+        public void onGnssNavigationMessageReceived(final GnssNavigationMessage event) {
+            ListenerOperation<GnssNavigationMessage.Callback> operation =
+                    new ListenerOperation<GnssNavigationMessage.Callback>() {
                 @Override
-                public void execute(GnssNavigationMessageEvent.Callback callback)
+                public void execute(GnssNavigationMessage.Callback callback)
                         throws RemoteException {
                     callback.onGnssNavigationMessageReceived(event);
                 }
@@ -65,10 +65,10 @@ class GnssNavigationMessageCallbackTransport
 
         @Override
         public void onStatusChanged(final int status) {
-            ListenerOperation<GnssNavigationMessageEvent.Callback> operation =
-                    new ListenerOperation<GnssNavigationMessageEvent.Callback>() {
+            ListenerOperation<GnssNavigationMessage.Callback> operation =
+                    new ListenerOperation<GnssNavigationMessage.Callback>() {
                 @Override
-                public void execute(GnssNavigationMessageEvent.Callback callback)
+                public void execute(GnssNavigationMessage.Callback callback)
                         throws RemoteException {
                     callback.onStatusChanged(status);
                 }

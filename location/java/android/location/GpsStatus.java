@@ -24,8 +24,12 @@ import java.util.NoSuchElementException;
 
 /**
  * This class represents the current state of the GPS engine.
- * This class is used in conjunction with the {@link Listener} interface.
+ *
+ * <p>This class is used in conjunction with the {@link Listener} interface.
+ *
+ * @deprecated use {@link GnssStatus} and {@link GnssStatus.Callback}.
  */
+@Deprecated
 public final class GpsStatus {
     private static final int NUM_SATELLITES = 255;
 
@@ -102,7 +106,9 @@ public final class GpsStatus {
 
     /**
      * Used for receiving notifications when GPS status has changed.
+     * @deprecated use {@link GnssStatus.Callback} instead.
      */
+    @Deprecated
     public interface Listener {
         /**
          * Called to report changes in the GPS status.
@@ -130,7 +136,9 @@ public final class GpsStatus {
      * See <a href="http://en.wikipedia.org/wiki/NMEA_0183">NMEA 0183</a> for more details.
      * You can implement this interface and call {@link LocationManager#addNmeaListener}
      * to receive NMEA data from the GPS engine.
+     * @deprecated use {@link OnNmeaMessageListener} instead.
      */
+    @Deprecated
     public interface NmeaListener {
         void onNmeaReceived(long timestamp, String nmea);
     }

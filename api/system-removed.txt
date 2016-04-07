@@ -82,6 +82,67 @@ package android.graphics {
 
 }
 
+package android.location {
+
+  public final class GnssMeasurement implements android.os.Parcelable {
+    field public static final int MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
+  }
+
+  public final class GnssMeasurementsEvent implements android.os.Parcelable {
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssNavigationMessageEvent implements android.os.Parcelable {
+    ctor public GnssNavigationMessageEvent(android.location.GnssNavigationMessage);
+    method public int describeContents();
+    method public android.location.GnssNavigationMessage getNavigationMessage();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessageEvent> CREATOR;
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public static abstract class GnssNavigationMessageEvent.Callback {
+    ctor public GnssNavigationMessageEvent.Callback();
+    method public void onGnssNavigationMessageReceived(android.location.GnssNavigationMessageEvent);
+    method public void onStatusChanged(int);
+  }
+
+  public abstract interface GnssNmeaListener {
+    method public abstract void onNmeaReceived(long, java.lang.String);
+  }
+
+  public final class GnssStatus {
+    method public int getNumSatellites();
+    method public boolean hasAlmanac(int);
+    method public boolean hasEphemeris(int);
+  }
+
+  public abstract class GnssStatusCallback {
+    ctor public GnssStatusCallback();
+    method public void onFirstFix(int);
+    method public void onSatelliteStatusChanged(android.location.GnssStatus);
+    method public void onStarted();
+    method public void onStopped();
+  }
+
+  public class LocationManager {
+    method public boolean addNmeaListener(android.location.GnssNmeaListener);
+    method public boolean addNmeaListener(android.location.GnssNmeaListener, android.os.Handler);
+    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
+    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback, android.os.Handler);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback, android.os.Handler);
+    method public void removeNmeaListener(android.location.GnssNmeaListener);
+    method public void unregisterGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
+    method public void unregisterGnssStatusCallback(android.location.GnssStatusCallback);
+  }
+
+}
+
 package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {

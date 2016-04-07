@@ -67,18 +67,21 @@ public final class GnssMeasurement implements Parcelable {
     public @interface MultipathIndicator {}
 
     /**
-     * The indicator is not available or it is unknown.
+     * The indicator is not available or the presence or absence of multipath is unknown.
      */
     public static final int MULTIPATH_INDICATOR_UNKNOWN = 0;
 
     /**
-     * The measurement has been indicated to use multi-path.
+     * The measurement shows signs of multi-path.
      */
     public static final int MULTIPATH_INDICATOR_DETECTED = 1;
 
     /**
-     * The measurement has been indicated not tu use multi-path.
+     * The measurement shows no signs of multi-path.
      */
+    public static final int MULTIPATH_INDICATOR_NOT_DETECTED = 2;
+
+    /** @removed */
     public static final int MULTIPATH_INDICATOR_NOT_USED = 2;
 
     /** This GNSS measurement's tracking state is invalid or unknown. */
@@ -192,15 +195,17 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the Pseudo-random number (PRN).
-     * Range: [1, 32]
+     * Gets the satellite ID.
+     *
+     * <p>Interpretation depends on {@link #getConstellationType()}.
+     * See {@link GnssStatus#getSvid(int)}.
      */
     public int getSvid() {
         return mSvid;
     }
 
     /**
-     * Sets the Pseud-random number (PRN).
+     * Sets the Satellite ID.
      * @hide
      */
     @TestApi
@@ -209,7 +214,10 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Getst the constellation type.
+     * Gets the constellation type.
+     *
+     * <p>The return value is one of those constants with {@code CONSTELLATION_} prefix in
+     * {@link GnssStatus}.
      */
     @GnssStatus.ConstellationType
     public int getConstellationType() {
@@ -228,13 +236,14 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the time offset at which the measurement was taken in nanoseconds.
      *
-     * The reference receiver's time from which this is offset is specified by
+     * <p>The reference receiver's time from which this is offset is specified by
      * {@link GnssClock#getTimeNanos()}.
      *
-     * The sign of this value is given by the following equation:
-     *      measurement time = time_ns + time_offset_ns
+     * <p>The sign of this value is given by the following equation:
+     * <pre>
+     *      measurement time = TimeNanos + TimeOffsetNanos</pre>
      *
-     * The value provides an individual time-stamp for the measurement, and allows sub-nanosecond
+     * <p>The value provides an individual time-stamp for the measurement, and allows sub-nanosecond
      * accuracy.
      */
     public double getTimeOffsetNanos() {
@@ -252,9 +261,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets per-satellite sync state.
-     * It represents the current sync state for the associated satellite.
      *
-     * This value helps interpret {@link #getReceivedSvTimeNanos()}.
+     * <p>It represents the current sync state for the associated satellite.
+     *
+     * <p>This value helps interpret {@link #getReceivedSvTimeNanos()}.
      */
     public int getState() {
         return mState;
@@ -271,7 +281,8 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets a string representation of the 'sync state'.
-     * For internal and logging use only.
+     *
+     * <p>For internal and logging use only.
      */
     private String getStateString() {
         if (mState == STATE_UNKNOWN) {
@@ -335,66 +346,79 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the received GNSS satellite time, at the measurement time, in nanoseconds.
      *
-     * For GPS &amp; QZSS, this is:
-     *   Received GPS Time-of-Week at the measurement time, in nanoseconds.
-     *   The value is relative to the beginning of the current GPS week.
+     * <p>For GPS &amp; QZSS, this is:
+     * <ul>
+     * <li>Received GPS Time-of-Week at the measurement time, in nanoseconds.</li>
+     * <li>The value is relative to the beginning of the current GPS week.</li>
+     * </ul>
      *
-     *   Given the highest sync state that can be achieved, per each satellite, valid range
-     *   for this field can be:
+     * <p>Given the highest sync state that can be achieved, per each satellite, valid range
+     * for this field can be:
+     * <pre>
      *     Searching       : [ 0       ]   : STATE_UNKNOWN
      *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
      *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
      *     Subframe sync   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set</pre>
      *
-     *   Note well: if there is any ambiguity in integer millisecond,
-     *   STATE_MSEC_AMBIGUOUS should be set accordingly, in the 'state' field.
+     * <p>Note well: if there is any ambiguity in integer millisecond, {@code STATE_MSEC_AMBIGUOUS}
+     * should be set accordingly, in the 'state' field.
      *
-     *   This value must be populated if 'state' != STATE_UNKNOWN.
+     * <p>This value must be populated if 'state' != {@code STATE_UNKNOWN}.
      *
-     * For Glonass, this is:
-     *   Received Glonass time of day, at the measurement time in nanoseconds.
+     * <p>For Glonass, this is:
+     * <ul>
+     * <li>Received Glonass time of day, at the measurement time in nanoseconds.</li>
+     * </ul>
      *
-     *   Given the highest sync state that can be achieved, per each satellite, valid range for
-     *   this field can be:
+     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
+     * this field can be:
+     * <pre>
      *     Searching       : [ 0       ]   : STATE_UNKNOWN
      *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *    Symbol sync    : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
-     *    Bit sync       : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     String sync     : [ 0    2s ]   :  STATE_GLO_STRING_SYNC is set
-     *    Time of day      : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set
+     *     Symbol sync     : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
+     *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     String sync     : [ 0    2s ]   : STATE_GLO_STRING_SYNC is set
+     *     Time of day     : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set</pre>
      *
-     * For Beidou, this is:
-     *   Received Beidou time of week, at the measurement time in nanoseconds.
+     * <p>For Beidou, this is:
+     * <ul>
+     * <li>Received Beidou time of week, at the measurement time in nanoseconds.</li>
+     * </ul>
      *
-     *   Given the highest sync state that can be achieved, per each satellite, valid range for
-     *   this field can be:
+     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
+     * this field can be:
+     * <pre>
      *     Searching       : [ 0       ]   : STATE_UNKNOWN
      *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
      *     Bit sync (D2)   : [ 0   2ms ]   : STATE_BDS_D2_BIT_SYNC is set
      *     Bit sync (D1)   : [ 0  20ms ]   : STATE_BIT_SYNC is set
      *     Subframe (D2)   : [ 0  0.6s ]   : STATE_BDS_D2_SUBFRAME_SYNC is set
      *     Subframe (D1)   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     Time of week    : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *     Time of week    : [ 0 1week ]   : STATE_TOW_DECODED is set</pre>
      *
-     * For Galileo, this is:
-     *   Received Galileo time of week, at the measurement time in nanoseconds.
+     * <p>For Galileo, this is:
+     * <ul>
+     * <li>Received Galileo time of week, at the measurement time in nanoseconds.</li>
+     * </ul>
+     * <pre>
+     *     E1BC code lock   : [ 0   4ms ]  : STATE_GAL_E1BC_CODE_LOCK is set
+     *     E1C 2nd code lock: [ 0 100ms ]  : STATE_GAL_E1C_2ND_CODE_LOCK is set
+     *     E1B page         : [ 0    2s ]  : STATE_GAL_E1B_PAGE_SYNC is set
+     *     Time of week     : [ 0 1week ]  : STATE_GAL_TOW_DECODED is set</pre>
      *
-     *     E1BC code lock  : [ 0   4ms ]   : STATE_GAL_E1BC_CODE_LOCK is set
-     *     E1C 2nd code lock : [ 0   100ms ]   : STATE_GAL_E1C_2ND_CODE_LOCK is set
+     * <p>For SBAS, this is:
+     * <ul>
+     * <li>Received SBAS time, at the measurement time in nanoseconds.</li>
+     * </ul>
      *
-     *     E1B page        : [ 0    2s ]   : STATE_GAL_E1B_PAGE_SYNC is set
-     *     Time of week    : [ 0 1week ]   : STATE_GAL_TOW_DECODED is set
-     *
-     *   For SBAS, this is:
-     *     Received SBAS time, at the measurement time in nanoseconds.
-     *
-     *   Given the highest sync state that can be achieved, per each satellite, valid range for
-     *   this field can be:
+     * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
+     * this field can be:
+     * <pre>
      *     Searching       : [ 0       ]   : STATE_UNKNOWN
      *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
      *     Symbol sync     : [ 0   2ms ]   : STATE_SYMBOL_SYNC is set
-     *     Message         : [ 0    1s ]   : STATE_SBAS_SYNC is set
+     *     Message         : [ 0    1s ]   : STATE_SBAS_SYNC is set</pre>
      */
     public long getReceivedSvTimeNanos() {
         return mReceivedSvTimeNanos;
@@ -410,7 +434,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the received GNSS time uncertainty (1-Sigma) in nanoseconds.
+     * Gets the error estimate (1-sigma) for the received GNSS time, in nanoseconds.
      */
     public long getReceivedSvTimeUncertaintyNanos() {
         return mReceivedSvTimeUncertaintyNanos;
@@ -427,9 +451,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the Carrier-to-noise density in dB-Hz.
-     * Range: [0, 63].
      *
-     * The value contains the measured C/N0 for the signal at the antenna input.
+     * <p>Typical range: 10-50 db-Hz.
+     *
+     * <p>The value contains the measured C/N0 for the signal at the antenna input.
      */
     public double getCn0DbHz() {
         return mCn0DbHz;
@@ -447,16 +472,18 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the Pseudorange rate at the timestamp in m/s.
      *
-     * The reported value includes {@link #getPseudorangeRateUncertaintyMetersPerSecond()}.
+     * <p>The error estimate for this value is
+     * {@link #getPseudorangeRateUncertaintyMetersPerSecond()}.
      *
-     * The value is uncorrected, hence corrections for receiver and satellite clock frequency errors
-     * should not be included.
+     * <p>The value is uncorrected, i.e. corrections for receiver and satellite clock frequency
+     * errors are not included.
      *
-     * A positive 'uncorrected' value indicates that the SV is moving away from the receiver. The
+     * <p>A positive 'uncorrected' value indicates that the SV is moving away from the receiver. The
      * sign of the 'uncorrected' 'pseudorange rate' and its relation to the sign of 'doppler shift'
      * is given by the equation:
      *
-     *      pseudorange rate = -k * doppler shift   (where k is a constant)
+     * <pre>
+     *      pseudorange rate = -k * doppler shift   (where k is a constant)</pre>
      */
     public double getPseudorangeRateMetersPerSecond() {
         return mPseudorangeRateMetersPerSecond;
@@ -473,7 +500,8 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the pseudorange's rate uncertainty (1-Sigma) in m/s.
-     * The uncertainty is represented as an absolute (single sided) value.
+     *
+     * <p>The uncertainty is represented as an absolute (single sided) value.
      */
     public double getPseudorangeRateUncertaintyMetersPerSecond() {
         return mPseudorangeRateUncertaintyMetersPerSecond;
@@ -490,7 +518,8 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets 'Accumulated Delta Range' state.
-     * It indicates whether {@link #getAccumulatedDeltaRangeMeters()} is reset or there is a
+     *
+     * <p>It indicates whether {@link #getAccumulatedDeltaRangeMeters()} is reset or there is a
      * cycle slip (indicating 'loss of lock').
      */
     public int getAccumulatedDeltaRangeState() {
@@ -508,7 +537,8 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets a string representation of the 'Accumulated Delta Range state'.
-     * For internal and logging use only.
+     *
+     * <p>For internal and logging use only.
      */
     private String getAccumulatedDeltaRangeStateString() {
         if (mAccumulatedDeltaRangeState == ADR_STATE_UNKNOWN) {
@@ -536,14 +566,17 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the accumulated delta range since the last channel reset, in meters.
-     * The reported value includes {@link #getAccumulatedDeltaRangeUncertaintyMeters()}.
      *
-     * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     * <p>The error estimate for this value is {@link #getAccumulatedDeltaRangeUncertaintyMeters()}.
      *
-     * A positive value indicates that the SV is moving away from the receiver.
+     * <p>The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     *
+     * <p>A positive value indicates that the SV is moving away from the receiver.
      * The sign of {@link #getAccumulatedDeltaRangeMeters()} and its relation to the sign of
      * {@link #getCarrierPhase()} is given by the equation:
-     *          accumulated delta range = -k * carrier phase    (where k is a constant)
+     *
+     * <pre>
+     *          accumulated delta range = -k * carrier phase    (where k is a constant)</pre>
      */
     public double getAccumulatedDeltaRangeMeters() {
         return mAccumulatedDeltaRangeMeters;
@@ -560,9 +593,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the accumulated delta range's uncertainty (1-Sigma) in meters.
-     * The uncertainty is represented as an absolute (single sided) value.
      *
-     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     * <p>The uncertainty is represented as an absolute (single sided) value.
+     *
+     * <p>The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public double getAccumulatedDeltaRangeUncertaintyMeters() {
         return mAccumulatedDeltaRangeUncertaintyMeters;
@@ -571,7 +605,7 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Sets the accumulated delta range's uncertainty (1-sigma) in meters.
      *
-     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     * <p>The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      *
      * @hide
      */
@@ -581,17 +615,20 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getCarrierFrequencyHz()} is available, false otherwise.
+     * Returns {@code true} if {@link #getCarrierFrequencyHz()} is available, {@code false}
+     * otherwise.
      */
     public boolean hasCarrierFrequencyHz() {
         return isFlagSet(HAS_CARRIER_FREQUENCY);
     }
 
     /**
-     * Gets the carrier frequency at which codes and messages are modulated, it can be L1 or L2.
-     * If the field is not set, the carrier frequency corresponds to L1.
+     * Gets the carrier frequency at which codes and messages are modulated.
      *
-     * The value is only available if {@link #hasCarrierFrequencyHz()} is true.
+     * <p>For GPS, e.g., it can be L1 or L2.  If the field is not set, it is the primary common use
+     * frequency, e.g. L1 for GPS.
+     *
+     * <p>The value is only available if {@link #hasCarrierFrequencyHz()} is {@code true}.
      */
     public float getCarrierFrequencyHz() {
         return mCarrierFrequencyHz;
@@ -618,7 +655,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getCarrierCycles()} is available, false otherwise.
+     * Returns {@code true} if {@link #getCarrierCycles()} is available, {@code false} otherwise.
      */
     public boolean hasCarrierCycles() {
         return isFlagSet(HAS_CARRIER_CYCLES);
@@ -626,9 +663,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * The number of full carrier cycles between the satellite and the receiver.
-     * The reference frequency is given by the value of {@link #getCarrierFrequencyHz()}.
      *
-     * The value is only available if {@link #hasCarrierCycles()} is true.
+     * <p>The reference frequency is given by the value of {@link #getCarrierFrequencyHz()}.
+     *
+     * <p>The value is only available if {@link #hasCarrierCycles()} is {@code true}.
      */
     public long getCarrierCycles() {
         return mCarrierCycles;
@@ -655,7 +693,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getCarrierPhase()} is available, false otherwise.
+     * Returns {@code true} if {@link #getCarrierPhase()} is available, {@code false} otherwise.
      */
     public boolean hasCarrierPhase() {
         return isFlagSet(HAS_CARRIER_PHASE);
@@ -663,13 +701,16 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the RF phase detected by the receiver.
-     * Range: [0.0, 1.0].
-     * This is usually the fractional part of the complete carrier phase measurement.
      *
-     * The reference frequency is given by the value of {@link #getCarrierFrequencyHz()}.
-     * The reported carrier-phase includes {@link #getCarrierPhaseUncertainty()}.
+     * <p>Range: [0.0, 1.0].
      *
-     * The value is only available if {@link #hasCarrierPhase()} is true.
+     * <p>This is the fractional part of the complete carrier phase measurement.
+     *
+     * <p>The reference frequency is given by the value of {@link #getCarrierFrequencyHz()}.
+     *
+     * <p>The error estimate for this value is {@link #getCarrierPhaseUncertainty()}.
+     *
+     * <p>The value is only available if {@link #hasCarrierPhase()} is {@code true}.
      */
     public double getCarrierPhase() {
         return mCarrierPhase;
@@ -696,7 +737,8 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getCarrierPhaseUncertainty()} is available, false otherwise.
+     * Returns {@code true} if {@link #getCarrierPhaseUncertainty()} is available, {@code false}
+     * otherwise.
      */
     public boolean hasCarrierPhaseUncertainty() {
         return isFlagSet(HAS_CARRIER_PHASE_UNCERTAINTY);
@@ -704,9 +746,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the carrier-phase's uncertainty (1-Sigma).
-     * The uncertainty is represented as an absolute (single sided) value.
      *
-     * The value is only available if {@link #hasCarrierPhaseUncertainty()} is true.
+     * <p>The uncertainty is represented as an absolute (single sided) value.
+     *
+     * <p>The value is only available if {@link #hasCarrierPhaseUncertainty()} is {@code true}.
      */
     public double getCarrierPhaseUncertainty() {
         return mCarrierPhaseUncertainty;
@@ -751,7 +794,8 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets a string representation of the 'multi-path indicator'.
-     * For internal and logging use only.
+     *
+     * <p>For internal and logging use only.
      */
     private String getMultipathIndicatorString() {
         switch(mMultipathIndicator) {
@@ -767,7 +811,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getSnrInDb()} is available, false otherwise.
+     * Returns {@code true} if {@link #getSnrInDb()} is available, {@code false} otherwise.
      */
     public boolean hasSnrInDb() {
         return isFlagSet(HAS_SNR);
@@ -776,7 +820,7 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the Signal-to-Noise ratio (SNR) in dB.
      *
-     * The value is only available if {@link #hasSnrInDb()} is true.
+     * <p>The value is only available if {@link #hasSnrInDb()} is {@code true}.
      */
     public double getSnrInDb() {
         return mSnrInDb;
