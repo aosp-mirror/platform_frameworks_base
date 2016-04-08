@@ -1942,7 +1942,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 126;
+            private static final int SETTINGS_VERSION = 127;
 
             private final int mUserId;
 
@@ -2165,6 +2165,36 @@ public class SettingsProvider extends ContentProvider {
 
                     }
                     currentVersion = 126;
+                }
+
+                if (currentVersion == 126) {
+                    // Version 126: copy the primary values of LOCK_SCREEN_SHOW_NOTIFICATIONS and
+                    // LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS into managed profile.
+                    if (mUserManager.isManagedProfile(userId)) {
+                        final SettingsState systemSecureSettings =
+                                getSecureSettingsLocked(UserHandle.USER_SYSTEM);
+
+                        final Setting showNotifications = systemSecureSettings.getSettingLocked(
+                                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                        if (showNotifications != null) {
+                            final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                            secureSettings.insertSettingLocked(
+                                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                                    showNotifications.getValue(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+
+                        final Setting allowPrivate = systemSecureSettings.getSettingLocked(
+                                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+                        if (allowPrivate != null) {
+                            final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                            secureSettings.insertSettingLocked(
+                                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+                                    allowPrivate.getValue(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 127;
                 }
 
                 // vXXX: Add new settings above this point.
