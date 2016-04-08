@@ -126,7 +126,6 @@ R"EOF(    /**
 R"EOF(    /**
      * This is a private permission for system only!
      * @hide
-     * @SystemApi
      */
     @android.annotation.SystemApi
     public static final String SECRET="android.permission.SECRET";)EOF";

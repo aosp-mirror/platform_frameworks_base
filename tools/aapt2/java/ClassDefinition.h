@@ -125,7 +125,7 @@ public:
     void writeToStream(const StringPiece& prefix, bool final, std::ostream* out) const override {
         ClassMember::writeToStream(prefix, final, out);
 
-        *out << "public static final int[] " << mName << "={";
+        *out << prefix << "public static final int[] " << mName << "={";
 
         const auto begin = mElements.begin();
         const auto end = mElements.end();
