@@ -17,8 +17,12 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
+import android.util.Log;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.List;
 
 /**
@@ -27,6 +31,9 @@ import java.util.List;
  * @hide
  */
 public class FontFamily {
+
+    private static String TAG = "FontFamily";
+
     /**
      * @hide
      */
@@ -62,7 +69,15 @@ public class FontFamily {
     }
 
     public boolean addFont(String path, int ttcIndex) {
-        return nAddFont(mNativePtr, path, ttcIndex);
+        try (FileInputStream file = new FileInputStream(path)) {
+            FileChannel fileChannel = file.getChannel();
+            long fontSize = fileChannel.size();
+            ByteBuffer fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
+            return nAddFont(mNativePtr, fontBuffer, ttcIndex);
+        } catch (IOException e) {
+            Log.e(TAG, "Error mapping font file " + path);
+            return false;
+        }
     }
 
     public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, List<FontListParser.Axis> axes,
@@ -76,7 +91,7 @@ public class FontFamily {
 
     private static native long nCreateFamily(String lang, int variant);
     private static native void nUnrefFamily(long nativePtr);
-    private static native boolean nAddFont(long nativeFamily, String path, int ttcIndex);
+    private static native boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex);
     private static native boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
             int ttcIndex, List<FontListParser.Axis> listOfAxis,
             int weight, boolean isItalic);
