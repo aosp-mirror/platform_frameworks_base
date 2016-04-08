@@ -97,7 +97,7 @@ public final class GnssClock implements Parcelable {
      *
      * <p>The sign of the value is defined by the following equation:
      * <pre>
-     *     UtcTimeNanos = TimeNanos + (FullBiasNanos + BiasNanos) - LeapSecond * 1,000,000,000</pre>
+     *     UtcTimeNanos = TimeNanos - (FullBiasNanos + BiasNanos) - LeapSecond * 1,000,000,000</pre>
      *
      * <p>The value is only available if {@link #hasLeapSecond()} is {@code true}.
      */
@@ -130,9 +130,9 @@ public final class GnssClock implements Parcelable {
      *
      * <p>This value is expected to be monotonically increasing while the hardware clock remains
      * powered on. For the case of a hardware clock that is not continuously on, see the
-     * {@link #getHardwareClockDiscontinuityCount} field. The GPS time can be derived by adding
-     * {@link #getFullBiasNanos()} and {@link #getBiasNanos()} (when they are available) to this
-     * value. Sub-nanosecond accuracy can be provided by means of {@link #getBiasNanos()}.
+     * {@link #getHardwareClockDiscontinuityCount} field. The GPS time can be derived by subtracting
+     * the sum of {@link #getFullBiasNanos()} and {@link #getBiasNanos()} (when they are available)
+     * from this value. Sub-nanosecond accuracy can be provided by means of {@link #getBiasNanos()}.
      *
      * <p>The error estimate for this value (if applicable) is {@link #getTimeUncertaintyNanos()}.
      */
@@ -213,7 +213,7 @@ public final class GnssClock implements Parcelable {
      * <p>The sign of the value is defined by the following equation:
      *
      * <pre>
-     *     local estimate of GPS time = TimeNanos + (FullBiasNanos + BiasNanos)</pre>
+     *     local estimate of GPS time = TimeNanos - (FullBiasNanos + BiasNanos)</pre>
      */
     public long getFullBiasNanos() {
         return mFullBiasNanos;
