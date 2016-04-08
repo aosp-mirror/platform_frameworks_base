@@ -1458,6 +1458,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             st.menu.close();
         }
 
+        releaseThreadedRenderer();
+
         if (mWindowResizeCallbacksAdded) {
             getViewRootImpl().removeWindowCallbacks(this);
             mWindowResizeCallbacksAdded = false;
