@@ -2411,8 +2411,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int requestType = data.readInt();
             IResultReceiver receiver = IResultReceiver.Stub.asInterface(data.readStrongBinder());
+            Bundle receiverExtras = data.readBundle();
             IBinder activityToken = data.readStrongBinder();
-            boolean res = requestAssistContextExtras(requestType, receiver, activityToken);
+            boolean focused = data.readInt() == 1;
+            boolean res = requestAssistContextExtras(requestType, receiver, receiverExtras,
+                    activityToken, focused);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -6080,13 +6083,16 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
-            IBinder activityToken) throws RemoteException {
+            Bundle receiverExtras,
+            IBinder activityToken, boolean focused) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(requestType);
         data.writeStrongBinder(receiver.asBinder());
+        data.writeBundle(receiverExtras);
         data.writeStrongBinder(activityToken);
+        data.writeInt(focused ? 1 : 0);
         mRemote.transact(REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;

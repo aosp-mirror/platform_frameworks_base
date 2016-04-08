@@ -23,6 +23,8 @@ import android.service.voice.IVoiceInteractionSession;
 
 import com.android.internal.app.IVoiceInteractor;
 
+import java.util.List;
+
 /**
  * Activity manager local system service interface.
  *
@@ -125,4 +127,10 @@ public abstract class ActivityManagerInternal {
      * Callback for window manager to let activity manager know that the app transition is finished.
      */
     public abstract void notifyAppTransitionFinished();
+
+    /**
+     * Returns the top activity from each of the currently visible stacks. The first entry will be
+     * the focused activity.
+     */
+    public abstract List<IBinder> getTopVisibleActivities();
 }
