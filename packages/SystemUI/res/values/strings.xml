@@ -1082,6 +1082,10 @@
     <string name="volume_stream_limited_dnd" translatable="false">%s — Priority only</string>
     <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
 
+    <string name="volume_stream_content_description_unmute">%1$s. Tap to unmute.</string>
+    <string name="volume_stream_content_description_vibrate">%1$s. Tap to set to vibrate. Accessibility services may be muted.</string>
+    <string name="volume_stream_content_description_mute">%1$s. Tap to mute. Accessibility services may be muted.</string>
+
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
 
