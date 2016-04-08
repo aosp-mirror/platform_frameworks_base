@@ -8036,7 +8036,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             }
-            return null;
+            // We're not specifying the device admin because there isn't one.
+            return intent;
         }
     }
 
