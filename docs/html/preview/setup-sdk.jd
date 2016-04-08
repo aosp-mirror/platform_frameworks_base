@@ -15,7 +15,7 @@ page.image=images/cards/card-n-sdk_2x.png
       <li><a href="#docs-dl">Reference documentation</a>
     </ol>
   </li>
-  <li><a href="#java8">Get the Java 8 JDK and JRE</a></li>
+  <li><a href="#java8">Get the Java 8 JDK</a></li>
   <li><a href="#create-update">Update or Create a Project</a></li>
   <li><a href="#next">Next Steps</a></li>
 </ol>
@@ -150,13 +150,11 @@ Android N Preview SDK in Android Studio as follows:</p>
 
 
 
-<h2 id="java8">Get the Java 8 JDK and JRE</h2>
+<h2 id="java8">Get the Java 8 JDK</h2>
 
-<p>To compile your app against the Android N platform, you need to use
-the Java 8 Developer Kit (JDK 8), and in order to use some tools with Android
-Studio 2.1, you need to install the Java 8 Runtime Environment (JRE 8). So, if
-you don't have the latest version of each already, download JDK 8 and JRE 8
-now.</p>
+<p>To compile your app against the Android N platform and use some tools with
+Android Studio 2.1, you need to install the Java 8 Developer Kit (JDK 8). So, if
+you don't already have the latest version, download JDK 8 now.</p>
 
 <p>Then set the JDK version in Android Studio as follows:</p>
 
