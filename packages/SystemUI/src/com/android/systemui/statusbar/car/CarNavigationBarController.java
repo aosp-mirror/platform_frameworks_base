@@ -15,14 +15,19 @@
  */
 package com.android.systemui.statusbar.car;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.v4.util.SimpleArrayMap;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -42,6 +47,8 @@ import java.util.List;
  * the navigation buttons by updating arrays_car.xml appropriately in an overlay.
  */
 class CarNavigationBarController {
+    private static final String TAG = "CarNavBarController";
+
     private static final String EXTRA_FACET_CATEGORIES = "categories";
     private static final String EXTRA_FACET_PACKAGES = "packages";
     private static final String EXTRA_FACET_ID = "filter_id";
@@ -53,7 +60,7 @@ class CarNavigationBarController {
 
     private Context mContext;
     private CarNavigationBarView mNavBar;
-    private ActivityStarter mActivityStarter;
+    private CarStatusBar mStatusBar;
 
     // Set of categories each facet will filter on.
     private List<String[]> mFacetCategories = new ArrayList<String[]>();
@@ -73,13 +80,29 @@ class CarNavigationBarController {
     private int mCurrentFacetIndex;
     private SparseBooleanArray mFacetHasMultipleAppsCache = new SparseBooleanArray();
 
+    private Intent mPersistentTaskIntent;
+
     public CarNavigationBarController(Context context,
                                       CarNavigationBarView navBar,
-                                      ActivityStarter activityStarter) {
+                                      CarStatusBar activityStarter) {
         mContext = context;
         mNavBar = navBar;
-        mActivityStarter = activityStarter;
+        mStatusBar = activityStarter;
         bind();
+
+        if (context.getResources().getBoolean(R.bool.config_enablePersistentDockedActivity)) {
+            setupPersistentDockedTask(context);
+        }
+    }
+
+    private void setupPersistentDockedTask(Context context) {
+        try {
+            mPersistentTaskIntent = Intent.parseUri(
+                    mContext.getString(R.string.config_persistentDockedActivityIntentUri),
+                    Intent.URI_INTENT_SCHEME);
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Malformed persistent task intent.");
+        }
     }
 
     public void taskChanged(String packageName) {
@@ -282,9 +305,9 @@ class CarNavigationBarController {
         return button;
     }
 
-    private void startActivity(Intent intent) {
-        if (mActivityStarter != null && intent != null) {
-            mActivityStarter.startActivity(intent, false);
+    private void startActivity(Intent intent, ActivityStarter.Callback callback) {
+        if (mStatusBar != null && intent != null) {
+            mStatusBar.startActivity(intent, false, callback);
         }
     }
 
@@ -306,13 +329,25 @@ class CarNavigationBarController {
         // rather than the "preferred/last run" app.
         intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, index == mCurrentFacetIndex);
 
+        int stackId = StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+        if (intent.getCategories().contains(Intent.CATEGORY_HOME)) {
+            stackId = StackId.HOME_STACK_ID;
+        }
+
+        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
+                && stackId != StackId.HOME_STACK_ID) {
+            mStatusBar.startActivityOnStack(mPersistentTaskIntent, StackId.DOCKED_STACK_ID);
+        }
+
         setCurrentFacet(index);
-        startActivity(intent);
+        mStatusBar.startActivityOnStack(intent, stackId);
+
     }
 
     private void onFacetLongClicked(int index) {
         setCurrentFacet(index);
-        startActivity(mLongPressIntents.get(index));
+        mStatusBar.startActivityOnStack(mLongPressIntents.get(index),
+                StackId.FULLSCREEN_WORKSPACE_STACK_ID);
     }
 
     private List<Intent> createEmptyIntentList(int size) {

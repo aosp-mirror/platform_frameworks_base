@@ -17,14 +17,19 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
@@ -36,11 +41,15 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
 public class CarStatusBar extends PhoneStatusBar {
+    private static final String TAG = "CarStatusBar";
+
+    private SystemServicesProxy mSystemServicesProxy;
     private TaskStackListenerImpl mTaskStackListener;
 
     private CarNavigationBarView mCarNavigationBar;
@@ -110,6 +119,10 @@ public class CarStatusBar extends PhoneStatusBar {
         // set at the bottom.
     }
 
+    public boolean hasDockedTask() {
+        return Recents.getSystemServices().hasDockedTask();
+    }
+
     /**
      * An implementation of TaskStackListener, that listens for changes in the system task
      * stack and notifies the navigation bar.
@@ -119,7 +132,9 @@ public class CarStatusBar extends PhoneStatusBar {
         public void onTaskStackChanged() {
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getTopMostTask();
-            mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
+            if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
+                mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
+            }
         }
     }
 
@@ -151,5 +166,32 @@ public class CarStatusBar extends PhoneStatusBar {
                 mFullscreenUserSwitcher.hide();
             }
         }
+    }
+
+    private int startActivityWithOptions(Intent intent, Bundle options) {
+        int result = ActivityManager.START_CANCELED;
+        try {
+            result = ActivityManagerNative.getDefault().startActivityAsUser(null /* caller */,
+                    mContext.getBasePackageName(),
+                    intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    null /* resultTo*/,
+                    null /* resultWho*/,
+                    0 /* requestCode*/,
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP,
+                    null /* profilerInfo*/,
+                    options,
+                    UserHandle.CURRENT.getIdentifier());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to start activity", e);
+        }
+
+        return result;
+    }
+
+    public int startActivityOnStack(Intent intent, int stackId) {
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchStackId(stackId);
+        return startActivityWithOptions(intent, options.toBundle());
     }
 }
