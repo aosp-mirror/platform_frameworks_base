@@ -490,8 +490,15 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private void revokeNotificationPolicyAccess(String pkg) {
         NotificationManager nm = mContext.getSystemService(NotificationManager.class);
         if (mPreviousNotificationPolicyAccessPackage != null) {
-            nm.setNotificationPolicyAccessGranted(mPreviousNotificationPolicyAccessPackage, false);
-            mPreviousNotificationPolicyAccessPackage = null;
+            if (mPreviousNotificationPolicyAccessPackage.equals(pkg)) {
+                // Remove any DND zen rules possibly created by the package.
+                nm.removeAutomaticZenRules(mPreviousNotificationPolicyAccessPackage);
+                // Remove Notification Policy Access.
+                nm.setNotificationPolicyAccessGranted(mPreviousNotificationPolicyAccessPackage, false);
+                mPreviousNotificationPolicyAccessPackage = null;
+            } else {
+                Slog.e(TAG, "Couldn't remove Notification Policy Access for package: " + pkg);
+            }
         }
     }
 
