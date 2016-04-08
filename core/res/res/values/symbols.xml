@@ -1727,7 +1727,7 @@
   <java-symbol type="id" name="replace_app_icon" />
   <java-symbol type="id" name="replace_message" />
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
-  <java-symbol type="fraction" name="config_displayFractionForDefaultMinimalSizeOfResizeableTask" />
+  <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="fraction" name="config_autoBrightnessAdjustmentMaxGamma" />
   <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>

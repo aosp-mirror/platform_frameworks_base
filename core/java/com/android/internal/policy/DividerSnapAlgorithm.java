@@ -17,9 +17,13 @@
 package com.android.internal.policy;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.util.Log;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import java.util.ArrayList;
 
@@ -57,6 +61,7 @@ public class DividerSnapAlgorithm {
     private final ArrayList<SnapTarget> mTargets = new ArrayList<>();
     private final Rect mInsets = new Rect();
     private final int mSnapMode;
+    private final int mMinimalSizeResizableTask;
     private final float mFixedRatio;
     private boolean mIsHorizontalDivision;
 
@@ -69,6 +74,22 @@ public class DividerSnapAlgorithm {
     private final SnapTarget mDismissStartTarget;
     private final SnapTarget mDismissEndTarget;
     private final SnapTarget mMiddleTarget;
+
+    public static DividerSnapAlgorithm create(Context ctx, Rect insets) {
+        DisplayInfo displayInfo = new DisplayInfo();
+        ctx.getSystemService(DisplayManager.class).getDisplay(
+                Display.DEFAULT_DISPLAY).getDisplayInfo(displayInfo);
+        int dividerWindowWidth = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_thickness);
+        int dividerInsets = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_insets);
+        return new DividerSnapAlgorithm(ctx.getResources(),
+                displayInfo.logicalWidth, displayInfo.logicalHeight,
+                dividerWindowWidth - 2 * dividerInsets,
+                ctx.getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_PORTRAIT,
+                insets);
+    }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
             boolean isHorizontalDivision, Rect insets) {
@@ -85,12 +106,28 @@ public class DividerSnapAlgorithm {
                 com.android.internal.R.integer.config_dockedStackDividerSnapMode);
         mFixedRatio = res.getFraction(
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
+        mMinimalSizeResizableTask = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_minimal_size_resizable_task);
         calculateTargets(isHorizontalDivision);
         mFirstSplitTarget = mTargets.get(1);
         mLastSplitTarget = mTargets.get(mTargets.size() - 2);
         mDismissStartTarget = mTargets.get(0);
         mDismissEndTarget = mTargets.get(mTargets.size() - 1);
         mMiddleTarget = mTargets.get(mTargets.size() / 2);
+    }
+
+    /**
+     * @return whether it's feasible to enable split screen in the current configuration, i.e. when
+     *         snapping in the middle both tasks are larger than the minimal task size.
+     */
+    public boolean isSplitScreenFeasible() {
+        int statusBarSize = mInsets.top;
+        int navBarSize = mIsHorizontalDivision ? mInsets.bottom : mInsets.right;
+        int size = mIsHorizontalDivision
+                ? mDisplayHeight
+                : mDisplayWidth;
+        int availableSpace = size - navBarSize - statusBarSize - mDividerSize;
+        return availableSpace / 2 >= mMinimalSizeResizableTask;
     }
 
     public SnapTarget calculateSnapTarget(int position, float velocity) {
@@ -212,10 +249,10 @@ public class DividerSnapAlgorithm {
         mTargets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START, 0.35f));
         switch (mSnapMode) {
             case SNAP_MODE_16_9:
-                addRatio16_9Targets(isHorizontalDivision);
+                addRatio16_9Targets(isHorizontalDivision, dividerMax);
                 break;
             case SNAP_FIXED_RATIO:
-                addFixedDivisionTargets(isHorizontalDivision);
+                addFixedDivisionTargets(isHorizontalDivision, dividerMax);
                 break;
             case SNAP_ONLY_1_1:
                 addMiddleTarget(isHorizontalDivision);
@@ -225,19 +262,24 @@ public class DividerSnapAlgorithm {
         mTargets.add(new SnapTarget(dividerMax - navBarSize, SnapTarget.FLAG_DISMISS_END, 0.35f));
     }
 
-    private void addFixedDivisionTargets(boolean isHorizontalDivision) {
+    private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
+            int bottomPosition, int dividerMax) {
+        maybeAddTarget(topPosition, topPosition - mInsets.top);
+        addMiddleTarget(isHorizontalDivision);
+        maybeAddTarget(bottomPosition, dividerMax - mInsets.bottom
+                - (bottomPosition + mDividerSize));
+    }
+    private void addFixedDivisionTargets(boolean isHorizontalDivision, int dividerMax) {
         int start = isHorizontalDivision ? mInsets.top : mInsets.left;
         int end = isHorizontalDivision
                 ? mDisplayHeight - mInsets.bottom
                 : mDisplayWidth - mInsets.right;
-        mTargets.add(new SnapTarget((int) (start + mFixedRatio * (end - start)) - mDividerSize / 2,
-                SnapTarget.FLAG_NONE));
-        addMiddleTarget(isHorizontalDivision);
-        mTargets.add(new SnapTarget((int) (start + (1 - mFixedRatio) * (end - start))
-                - mDividerSize / 2, SnapTarget.FLAG_NONE));
+        int topPosition = (int) (start + mFixedRatio * (end - start)) - mDividerSize / 2;
+        int bottomPosition = (int) (start + (1 - mFixedRatio) * (end - start)) - mDividerSize / 2;
+        addNonDismissingTargets(isHorizontalDivision, topPosition, bottomPosition, dividerMax);
     }
 
-    private void addRatio16_9Targets(boolean isHorizontalDivision) {
+    private void addRatio16_9Targets(boolean isHorizontalDivision, int dividerMax) {
         int start = isHorizontalDivision ? mInsets.top : mInsets.left;
         int end = isHorizontalDivision
                 ? mDisplayHeight - mInsets.bottom
@@ -248,9 +290,19 @@ public class DividerSnapAlgorithm {
                 : mDisplayHeight - mInsets.bottom;
         float size = 9.0f / 16.0f * (endOther - startOther);
         int sizeInt = (int) Math.floor(size);
-        mTargets.add(new SnapTarget(start + sizeInt, SnapTarget.FLAG_NONE));
-        addMiddleTarget(isHorizontalDivision);
-        mTargets.add(new SnapTarget(end - sizeInt - mDividerSize, SnapTarget.FLAG_NONE));
+        int topPosition = start + sizeInt;
+        int bottomPosition = end - sizeInt - mDividerSize;
+        addNonDismissingTargets(isHorizontalDivision, topPosition, bottomPosition, dividerMax);
+    }
+
+    /**
+     * Adds a target at {@param position} but only if the area with size of {@param smallerSize}
+     * meets the minimal size requirement.
+     */
+    private void maybeAddTarget(int position, int smallerSize) {
+        if (smallerSize >= mMinimalSizeResizableTask) {
+            mTargets.add(new SnapTarget(position, SnapTarget.FLAG_NONE));
+        }
     }
 
     private void addMiddleTarget(boolean isHorizontalDivision) {
