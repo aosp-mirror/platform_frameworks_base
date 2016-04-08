@@ -188,8 +188,8 @@ bool JavaClassGenerator::skipSymbol(SymbolState state) {
 
 struct StyleableAttr {
     const Reference* attrRef;
-    std::shared_ptr<Attribute> attribute;
     std::string fieldName;
+    std::unique_ptr<SymbolTable::Symbol> symbol;
 };
 
 static bool lessStyleableAttr(const StyleableAttr& lhs, const StyleableAttr& rhs) {
@@ -245,8 +245,9 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
         // legal values for this attribute.
         const SymbolTable::Symbol* symbol = mContext->getExternalSymbols()->findByReference(
                 mangledReference);
-        if (symbol) {
-            styleableAttr.attribute = symbol->attribute;
+        if (symbol && symbol->attribute) {
+            // Copy the symbol data structure because the returned instance can be destroyed.
+            styleableAttr.symbol = util::make_unique<SymbolTable::Symbol>(*symbol);
         }
         sortedAttributes.push_back(std::move(styleableAttr));
     }
@@ -273,6 +274,16 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
                 "<tr><th>Attribute</th><th>Description</th></tr>\n";
 
         for (const StyleableAttr& entry : sortedAttributes) {
+            if (!entry.symbol) {
+                continue;
+            }
+
+            if (mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
+                    !entry.symbol->isPublic) {
+                // Don't write entries for non-public attributes.
+                continue;
+            }
+
             const ResourceName& attrName = entry.attrRef->name.value();
             styleableComment << "<tr><td>";
             styleableComment << "<code>{@link #"
@@ -284,14 +295,30 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
             styleableComment << "</td>";
 
             styleableComment << "<td>";
-            if (entry.attribute) {
-                styleableComment << entry.attribute->getComment();
+
+            // Only use the comment up until the first '.'. This is to stay compatible with
+            // the way old AAPT did it (presumably to keep it short and to avoid including
+            // annotations like @hide which would affect this Styleable).
+            StringPiece16 attrCommentLine = entry.symbol->attribute->getComment();
+            auto iter = std::find(attrCommentLine.begin(), attrCommentLine.end(), u'.');
+            if (iter != attrCommentLine.end()) {
+                attrCommentLine = attrCommentLine.substr(
+                        0, (iter - attrCommentLine.begin()) + 1);
             }
-            styleableComment << "</td></tr>\n";
+            styleableComment << attrCommentLine << "</td></tr>\n";
         }
         styleableComment << "</table>\n";
 
         for (const StyleableAttr& entry : sortedAttributes) {
+            if (!entry.symbol) {
+                continue;
+            }
+
+            if (mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
+                    !entry.symbol->isPublic) {
+                // Don't write entries for non-public attributes.
+                continue;
+            }
             styleableComment << "@see #" << entry.fieldName << "\n";
         }
 
@@ -310,6 +337,17 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
     // Now we emit the indices into the array.
     for (size_t i = 0; i < attrCount; i++) {
         const StyleableAttr& styleableAttr = sortedAttributes[i];
+
+        if (!styleableAttr.symbol) {
+            continue;
+        }
+
+        if (mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
+                !styleableAttr.symbol->isPublic) {
+            // Don't write entries for non-public attributes.
+            continue;
+        }
+
         const ResourceName& attrName = styleableAttr.attrRef->name.value();
 
         StringPiece16 packageName = attrName.package;
@@ -323,8 +361,8 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
         AnnotationProcessor* attrProcessor = indexMember->getCommentBuilder();
 
         StringPiece16 comment = styleableAttr.attrRef->getComment();
-        if (styleableAttr.attribute && comment.empty()) {
-            comment = styleableAttr.attribute->getComment();
+        if (styleableAttr.symbol->attribute && comment.empty()) {
+            comment = styleableAttr.symbol->attribute->getComment();
         }
 
         if (!comment.empty()) {
@@ -342,10 +380,8 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
 
         attrProcessor->appendNewLine();
 
-        if (styleableAttr.attribute) {
-            addAttributeFormatDoc(attrProcessor, styleableAttr.attribute.get());
-            attrProcessor->appendNewLine();
-        }
+        addAttributeFormatDoc(attrProcessor, styleableAttr.symbol->attribute.get());
+        attrProcessor->appendNewLine();
 
         std::stringstream doclavaName;
         doclavaName << "@attr name " << packageName << ":" << attrName.entry;;

@@ -43,7 +43,8 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId(u"android", 0x01)
             .addSimple(u"@android:id/hey-man", ResourceId(0x01020000))
-            .addSimple(u"@android:attr/cool.attr", ResourceId(0x01010000))
+            .addValue(u"@android:attr/cool.attr", ResourceId(0x01010000),
+                      test::AttributeBuilder(false).build())
             .addValue(u"@android:styleable/hey.dude", ResourceId(0x01030000),
                       test::StyleableBuilder()
                               .addItem(u"@android:attr/cool.attr", ResourceId(0x01010000))
@@ -199,8 +200,10 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
                 .setPackageId(u"android", 0x01)
                 .setPackageId(u"com.lib", 0x02)
-                .addSimple(u"@android:attr/bar", ResourceId(0x01010000))
-                .addSimple(u"@com.lib:attr/bar", ResourceId(0x02010000))
+                .addValue(u"@android:attr/bar", ResourceId(0x01010000),
+                          test::AttributeBuilder(false).build())
+                .addValue(u"@com.lib:attr/bar", ResourceId(0x02010000),
+                           test::AttributeBuilder(false).build())
                 .addValue(u"@android:styleable/foo", ResourceId(0x01030000),
                           test::StyleableBuilder()
                                   .addItem(u"@android:attr/bar", ResourceId(0x01010000))
