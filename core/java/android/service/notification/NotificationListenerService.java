@@ -117,6 +117,16 @@ public abstract class NotificationListenerService extends Service {
      * This does not change the interruption filter, only the effects. **/
     public static final int HINT_HOST_DISABLE_EFFECTS = 1;
 
+    /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
+     * should disable notification sound, but not phone calls.
+     * This does not change the interruption filter, only the effects. **/
+    public static final int HINT_HOST_DISABLE_NOTIFICATION_EFFECTS = 1 << 1;
+
+    /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
+     * should disable phone call sounds, buyt not notification sound.
+     * This does not change the interruption filter, only the effects. **/
+    public static final int HINT_HOST_DISABLE_CALL_EFFECTS = 1 << 2;
+
     /**
      * Whether notification suppressed by DND should not interruption visually when the screen is
      * off.
