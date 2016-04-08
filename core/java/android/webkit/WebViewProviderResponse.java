@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class WebViewProviderResponse implements Parcelable {
+public final class WebViewProviderResponse implements Parcelable {
 
     public WebViewProviderResponse(PackageInfo packageInfo, int status) {
         this.packageInfo = packageInfo;
@@ -56,6 +56,6 @@ public class WebViewProviderResponse implements Parcelable {
         out.writeInt(status);
     }
 
-    PackageInfo packageInfo;
-    int status;
+    public final PackageInfo packageInfo;
+    public final int status;
 }
