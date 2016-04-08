@@ -231,11 +231,12 @@ struct StringPath {
 };
 
 const StringPath sStringPaths[] = {
-    {"3e...3", false},
-    {"L.M.F.A.O", false},
-    {"m 1 1", true},
-    {"z", true},
-    {"1-2e34567", false}
+    {"3e...3", false}, // Not starting with a verb and ill-formatted float
+    {"L.M.F.A.O", false}, // No floats following verbs
+    {"m 1 1", true}, // Valid path data
+    {"z", true}, // Valid path data
+    {"1-2e34567", false}, // Not starting with a verb and ill-formatted float
+    {"f 4 5", false} // Invalid verb
 };
 
 
