@@ -499,7 +499,7 @@ class AppWindowToken extends WindowToken {
                 + " with replacing child windows.");
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState w = allAppWindows.get(i);
-            if (w.isChildWindow()) {
+            if (w.shouldBeReplacedWithChildren()) {
                 w.setReplacing(false /* animate */);
             }
         }

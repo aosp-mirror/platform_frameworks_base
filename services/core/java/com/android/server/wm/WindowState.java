@@ -82,6 +82,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -2703,5 +2704,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             winY *= mGlobalScale;
         }
         return winY;
+    }
+
+    // During activity relaunch due to resize, we sometimes use window replacement
+    // for only child windows (as the main window is handled by window preservation)
+    // and the big surface.
+    //
+    // Though windows of TYPE_APPLICATION (as opposed to TYPE_BASE_APPLICATION)
+    // are not children in the sense of an attached window, we also want to replace
+    // them at such phases, as they won't be covered by window preservation,
+    // and in general we expect them to return following relaunch.
+    boolean shouldBeReplacedWithChildren() {
+        return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
     }
 }
