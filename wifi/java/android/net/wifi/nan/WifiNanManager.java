@@ -25,6 +25,10 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.lang.ref.WeakReference;
+
 /**
  * This class provides the primary API for managing Wi-Fi NAN operation:
  * including discovery and data-links. Get an instance of this class by calling
@@ -45,9 +49,31 @@ public class WifiNanManager {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
+    private final IWifiNanManager mService;
+
+    /*
+     * State transitions:
+     * UNCONNECTED -- (connect()) --> CONNECTING -- (onConnectSuccess()) --> CONNECTED
+     * UNCONNECTED -- (connect()) --> CONNECTING -- (onConnectFail()) --> UNCONNECTED
+     * CONNECTED||CONNECTING -- (disconnect()) --> UNCONNECTED
+     * CONNECTED||CONNECTING -- onNanDown() --> UNCONNECTED
+     */
+    private static final int STATE_UNCONNECTED = 0;
+    private static final int STATE_CONNECTING = 1;
+    private static final int STATE_CONNECTED = 2;
+
+    private Object mLock = new Object(); // lock access to the following vars
+
+    @GuardedBy("mLock")
+    private int mState = STATE_UNCONNECTED;
+
+    @GuardedBy("mLock")
     private IBinder mBinder;
-    private int mClientId = -1;
-    private IWifiNanManager mService;
+
+    @GuardedBy("mLock")
+    private int mClientId;
+
+    @GuardedBy("mLock")
     private Looper mLooper;
 
     /**
@@ -58,7 +84,7 @@ public class WifiNanManager {
     }
 
     /**
-     * Re-connect to the Wi-Fi NAN service - enabling the application to execute
+     * Connect to the Wi-Fi NAN service - enabling the application to execute
      * {@link WifiNanManager} APIs.
      *
      * @param looper The Looper on which to execute all callbacks related to the
@@ -67,25 +93,45 @@ public class WifiNanManager {
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
     public void connect(Looper looper, WifiNanEventCallback callback) {
-        if (VDBG) Log.v(TAG, "connect()");
+        connect(looper, callback, null);
+    }
 
-        if (callback == null) {
-            throw new IllegalArgumentException("Invalid callback - must not be null");
+    /**
+     * Connect to the Wi-Fi NAN service - enabling the application to execute
+     * {@link WifiNanManager} APIs. Allows requesting a specific configuration
+     * using {@link ConfigRequest} structure. Limited to privileged access.
+     *
+     * @param looper The Looper on which to execute all callbacks related to the
+     *            connection - including all sessions opened as part of this
+     *            connection.
+     * @param callback A callback extended from {@link WifiNanEventCallback}.
+     * @param configRequest The requested NAN configuration.
+     */
+    public void connect(Looper looper, WifiNanEventCallback callback, ConfigRequest configRequest) {
+        if (VDBG) {
+            Log.v(TAG, "connect(): looper=" + looper + ", callback=" + callback + ", configRequest="
+                    + configRequest);
         }
 
-        if (mClientId != -1) {
-            Log.e(TAG, "connect(): mClientId=" + mClientId
-                    + ": seems to calling connect() without disconnecting() first!");
-            throw new IllegalStateException("Calling connect() without disconnecting() first!");
-        }
+        synchronized (mLock) {
+            if (mState != STATE_UNCONNECTED) {
+                Log.e(TAG, "connect(): Calling connect() when state != UNCONNECTED!");
+                return;
+            }
 
-        mLooper = looper;
-        mBinder = new Binder();
+            mLooper = looper;
+            mBinder = new Binder();
+            mState = STATE_CONNECTING;
 
-        try {
-            mClientId = mService.connect(mBinder, new WifiNanEventCallbackProxy(mLooper, callback));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            try {
+                mClientId = mService.connect(mBinder,
+                        new WifiNanEventCallbackProxy(this, looper, callback), configRequest);
+            } catch (RemoteException e) {
+                mLooper = null;
+                mBinder = null;
+                mState = STATE_UNCONNECTED;
+                e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -99,58 +145,36 @@ public class WifiNanManager {
      * {@link WifiNanManager#connect(Looper, WifiNanEventCallback)} .
      */
     public void disconnect() {
-        if (mClientId == -1) {
-            /*
-             * Warning only since could be called multiple times as cleaning-up
-             * (and no damage done).
-             */
-            Log.w(TAG, "disconnect(): called without calling connect() first - or called "
-                    + "multiple times.");
-            return;
-        }
-        try {
-            if (VDBG) Log.v(TAG, "disconnect()");
-            mService.disconnect(mClientId, mBinder);
+        if (VDBG) Log.v(TAG, "disconnect()");
+
+        IBinder binder;
+        int clientId;
+        synchronized (mLock) {
+            if (mState == STATE_UNCONNECTED) {
+                Log.e(TAG, "disconnect(): called while UNCONNECTED - ignored");
+                return;
+            }
+
+            binder = mBinder;
+            clientId = mClientId;
+
+            mState = STATE_UNCONNECTED;
             mBinder = null;
-            mClientId = -1;
+            mLooper = null;
+            mClientId = 0;
+        }
+
+        try {
+            mService.disconnect(clientId, binder);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (mBinder != null) {
-            if (DBG) Log.d(TAG, "finalize: disconnect() not called - executing now");
+        if (mState != STATE_UNCONNECTED) {
             disconnect();
-        }
-    }
-
-    /**
-     * Requests a NAN configuration, specified by {@link ConfigRequest}. Note
-     * that NAN is a shared resource and the device can only be a member of a
-     * single cluster. Thus the service may merge configuration requests from
-     * multiple applications and configure NAN differently from individual
-     * requests.
-     * <p>
-     * The {@link WifiNanEventCallback#onConfigCompleted(ConfigRequest)} will be
-     * called when configuration is completed (if a callback is registered for
-     * this specific event).
-     *
-     * @param configRequest The requested NAN configuration.
-     */
-    public void requestConfig(ConfigRequest configRequest) {
-        if (VDBG) Log.v(TAG, "requestConfig(): configRequest=" + configRequest);
-
-        if (mClientId == -1) {
-            Log.e(TAG, "requestConfig(): called without an initial connect()!");
-            throw new IllegalStateException("Calling requestConfig() without a connect() first!");
-        }
-
-        try {
-            mService.requestConfig(mClientId, configRequest);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -170,30 +194,22 @@ public class WifiNanManager {
     public void publish(PublishConfig publishConfig, WifiNanSessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
-        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
-                && publishConfig.mRxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
-                    + "publishes (active) can't have an Rx filter");
-        }
-        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED
-                && publishConfig.mTxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
-                    + "publishes (passive) can't have a Tx filter");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("Invalid callback - must not be null");
-        }
+        int clientId;
+        Looper looper;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "publish(): called when not CONNECTED!");
+                return;
+            }
 
-        if (mClientId == -1) {
-            Log.e(TAG, "publish(): called without an initial connect()!");
-            throw new IllegalStateException("Calling publish() without a connect() first!");
+            clientId = mClientId;
+            looper = mLooper;
         }
-
         try {
-            mService.publish(mClientId, publishConfig,
-                    new WifiNanSessionCallbackProxy(mLooper, true, callback));
+            mService.publish(clientId, publishConfig,
+                    new WifiNanSessionCallbackProxy(this, looper, true, callback));
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -203,21 +219,19 @@ public class WifiNanManager {
     public void updatePublish(int sessionId, PublishConfig publishConfig) {
         if (VDBG) Log.v(TAG, "updatePublish(): config=" + publishConfig);
 
-        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
-                && publishConfig.mRxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
-                    + "publishes (active) can't have an Rx filter");
-        }
-        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED
-                && publishConfig.mTxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
-                    + "publishes (passive) can't have a Tx filter");
-        }
+        int clientId;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "updatePublish(): called when not CONNECTED)!");
+                return;
+            }
 
+            clientId = mClientId;
+        }
         try {
-            mService.updatePublish(mClientId, sessionId, publishConfig);
+            mService.updatePublish(clientId, sessionId, publishConfig);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -239,27 +253,23 @@ public class WifiNanManager {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
 
-        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE
-                && subscribeConfig.mRxFilterLength != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
-        }
-        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE
-                && subscribeConfig.mTxFilterLength != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
-        }
+        int clientId;
+        Looper looper;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "subscribe(): called when not CONNECTED!");
+                return;
+            }
 
-        if (mClientId == -1) {
-            Log.e(TAG, "subscribe(): called without an initial connect()!");
-            throw new IllegalStateException("Calling subscribe() without a connect() first!");
+            clientId = mClientId;
+            looper = mLooper;
         }
 
         try {
-            mService.subscribe(mClientId, subscribeConfig,
-                    new WifiNanSessionCallbackProxy(mLooper, false, callback));
+            mService.subscribe(clientId, subscribeConfig,
+                    new WifiNanSessionCallbackProxy(this, looper, false, callback));
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -271,21 +281,20 @@ public class WifiNanManager {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
 
-        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE
-                && subscribeConfig.mRxFilterLength != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
-        }
-        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE
-                && subscribeConfig.mTxFilterLength != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
+        int clientId;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "updateSubscribe(): called when not CONNECTED!");
+                return;
+            }
+
+            clientId = mClientId;
         }
 
         try {
-            mService.updateSubscribe(mClientId, sessionId, subscribeConfig);
+            mService.updateSubscribe(clientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -295,10 +304,20 @@ public class WifiNanManager {
     public void terminateSession(int sessionId) {
         if (DBG) Log.d(TAG, "Terminate NAN session #" + sessionId);
 
+        int clientId;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "terminateSession(): called when not CONNECTED!");
+                return;
+            }
+
+            clientId = mClientId;
+        }
+
         try {
-            mService.terminateSession(mClientId, sessionId);
+            mService.terminateSession(clientId, sessionId);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -307,24 +326,34 @@ public class WifiNanManager {
      */
     public void sendMessage(int sessionId, int peerId, byte[] message, int messageLength,
             int messageId) {
-        try {
-            if (VDBG) {
-                Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
-                        + ", messageLength=" + messageLength + ", messageId=" + messageId);
+        if (VDBG) {
+            Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
+                    + ", messageLength=" + messageLength + ", messageId=" + messageId);
+        }
+
+        int clientId;
+        synchronized (mLock) {
+            if (mState != STATE_CONNECTED) {
+                Log.e(TAG, "sendMessage(): called when not CONNECTED!");
+                return;
             }
-            mService.sendMessage(mClientId, sessionId, peerId, message, messageLength, messageId);
+
+            clientId = mClientId;
+        }
+
+        try {
+            mService.sendMessage(clientId, sessionId, peerId, message, messageLength, messageId);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            e.rethrowFromSystemServer();
         }
     }
 
     private static class WifiNanEventCallbackProxy extends IWifiNanEventCallback.Stub {
-        private static final int CALLBACK_CONFIG_COMPLETED = 0;
-        private static final int CALLBACK_CONFIG_FAILED = 1;
+        private static final int CALLBACK_CONNECT_SUCCESS = 0;
+        private static final int CALLBACK_CONNECT_FAIL = 1;
         private static final int CALLBACK_NAN_DOWN = 2;
         private static final int CALLBACK_IDENTITY_CHANGED = 3;
 
-        private final WifiNanEventCallback mOriginalCallback;
         private final Handler mHandler;
 
         /**
@@ -333,26 +362,64 @@ public class WifiNanManager {
          *
          * @param looper The looper on which to execute the callbacks.
          */
-        WifiNanEventCallbackProxy(Looper looper, WifiNanEventCallback originalCallback) {
-            mOriginalCallback = originalCallback;
+        WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper,
+                final WifiNanEventCallback originalCallback) {
+            final WeakReference<WifiNanManager> nanManager = new WeakReference<WifiNanManager>(mgr);
 
             if (VDBG) Log.v(TAG, "WifiNanEventCallbackProxy ctor: looper=" + looper);
             mHandler = new Handler(looper) {
                 @Override
                 public void handleMessage(Message msg) {
-                    if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
+                    if (DBG) {
+                        Log.d(TAG, "WifiNanEventCallbackProxy: What=" + msg.what + ", msg=" + msg);
+                    }
+
+                    WifiNanManager mgr = nanManager.get();
+                    if (mgr == null) {
+                        Log.w(TAG, "WifiNanEventCallbackProxy: handleMessage post GC");
+                        return;
+                    }
+
                     switch (msg.what) {
-                        case CALLBACK_CONFIG_COMPLETED:
-                            mOriginalCallback.onConfigCompleted((ConfigRequest) msg.obj);
+                        case CALLBACK_CONNECT_SUCCESS:
+                            synchronized (mgr.mLock) {
+                                if (mgr.mState != STATE_CONNECTING) {
+                                    Log.w(TAG, "onConnectSuccess indication received but not in "
+                                            + "CONNECTING state. Ignoring.");
+                                    return;
+                                }
+                                mgr.mState = STATE_CONNECTED;
+                            }
+                            originalCallback.onConnectSuccess();
                             break;
-                        case CALLBACK_CONFIG_FAILED:
-                            mOriginalCallback.onConfigFailed((ConfigRequest) msg.obj, msg.arg1);
+                        case CALLBACK_CONNECT_FAIL:
+                            synchronized (mgr.mLock) {
+                                if (mgr.mState != STATE_CONNECTING) {
+                                    Log.w(TAG, "onConnectFail indication received but not in "
+                                            + "CONNECTING state. Ignoring.");
+                                    return;
+                                }
+
+                                mgr.mState = STATE_UNCONNECTED;
+                                mgr.mBinder = null;
+                                mgr.mLooper = null;
+                                mgr.mClientId = 0;
+                            }
+                            nanManager.clear();
+                            originalCallback.onConnectFail(msg.arg1);
                             break;
                         case CALLBACK_NAN_DOWN:
-                            mOriginalCallback.onNanDown(msg.arg1);
+                            synchronized (mgr.mLock) {
+                                mgr.mState = STATE_UNCONNECTED;
+                                mgr.mBinder = null;
+                                mgr.mLooper = null;
+                                mgr.mClientId = 0;
+                            }
+                            nanManager.clear();
+                            originalCallback.onNanDown(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
-                            mOriginalCallback.onIdentityChanged();
+                            originalCallback.onIdentityChanged();
                             break;
                     }
                 }
@@ -360,24 +427,19 @@ public class WifiNanManager {
         }
 
         @Override
-        public void onConfigCompleted(ConfigRequest completedConfig) {
-            if (VDBG) Log.v(TAG, "onConfigCompleted: configRequest=" + completedConfig);
+        public void onConnectSuccess() {
+            if (VDBG) Log.v(TAG, "onConnectSuccess");
 
-            Message msg = mHandler.obtainMessage(CALLBACK_CONFIG_COMPLETED);
-            msg.obj = completedConfig;
+            Message msg = mHandler.obtainMessage(CALLBACK_CONNECT_SUCCESS);
             mHandler.sendMessage(msg);
         }
 
         @Override
-        public void onConfigFailed(ConfigRequest failedConfig, int reason) {
-            if (VDBG) {
-                Log.v(TAG,
-                        "onConfigFailed: failedConfig=" + failedConfig + ", reason=" + reason);
-            }
+        public void onConnectFail(int reason) {
+            if (VDBG) Log.v(TAG, "onConfigFailed: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(CALLBACK_CONFIG_FAILED);
+            Message msg = mHandler.obtainMessage(CALLBACK_CONNECT_FAIL);
             msg.arg1 = reason;
-            msg.obj = failedConfig;
             mHandler.sendMessage(msg);
         }
 
@@ -399,27 +461,30 @@ public class WifiNanManager {
         }
     }
 
-    private class WifiNanSessionCallbackProxy extends IWifiNanSessionCallback.Stub {
+    private static class WifiNanSessionCallbackProxy extends IWifiNanSessionCallback.Stub {
         private static final int CALLBACK_SESSION_STARTED = 0;
-        private static final int CALLBACK_SESSION_CONFIG_FAIL = 1;
-        private static final int CALLBACK_SESSION_TERMINATED = 2;
-        private static final int CALLBACK_MATCH = 3;
-        private static final int CALLBACK_MESSAGE_SEND_SUCCESS = 4;
-        private static final int CALLBACK_MESSAGE_SEND_FAIL = 5;
-        private static final int CALLBACK_MESSAGE_RECEIVED = 6;
+        private static final int CALLBACK_SESSION_CONFIG_SUCCESS = 1;
+        private static final int CALLBACK_SESSION_CONFIG_FAIL = 2;
+        private static final int CALLBACK_SESSION_TERMINATED = 3;
+        private static final int CALLBACK_MATCH = 4;
+        private static final int CALLBACK_MESSAGE_SEND_SUCCESS = 5;
+        private static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
+        private static final int CALLBACK_MESSAGE_RECEIVED = 7;
 
         private static final String MESSAGE_BUNDLE_KEY_PEER_ID = "peer_id";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
 
+        private final WeakReference<WifiNanManager> mNanManager;
         private final boolean mIsPublish;
         private final WifiNanSessionCallback mOriginalCallback;
 
         private final Handler mHandler;
         private WifiNanSession mSession;
 
-        WifiNanSessionCallbackProxy(Looper looper, boolean isPublish,
+        WifiNanSessionCallbackProxy(WifiNanManager mgr, Looper looper, boolean isPublish,
                 WifiNanSessionCallback originalCallback) {
+            mNanManager = new WeakReference<>(mgr);
             mIsPublish = isPublish;
             mOriginalCallback = originalCallback;
 
@@ -429,12 +494,28 @@ public class WifiNanManager {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
+
+                    if (mNanManager.get() == null) {
+                        Log.w(TAG, "WifiNanSessionCallbackProxy: handleMessage post GC");
+                        return;
+                    }
+
                     switch (msg.what) {
                         case CALLBACK_SESSION_STARTED:
                             onProxySessionStarted(msg.arg1);
                             break;
+                        case CALLBACK_SESSION_CONFIG_SUCCESS:
+                            mOriginalCallback.onSessionConfigSuccess();
+                            break;
                         case CALLBACK_SESSION_CONFIG_FAIL:
-                            onProxySessionConfigFail(msg.arg1);
+                            mOriginalCallback.onSessionConfigFail(msg.arg1);
+                            if (mSession == null) {
+                                /*
+                                 * creation failed (as opposed to update
+                                 * failing)
+                                 */
+                                mNanManager.clear();
+                            }
                             break;
                         case CALLBACK_SESSION_TERMINATED:
                             onProxySessionTerminated(msg.arg1);
@@ -469,6 +550,14 @@ public class WifiNanManager {
 
             Message msg = mHandler.obtainMessage(CALLBACK_SESSION_STARTED);
             msg.arg1 = sessionId;
+            mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onSessionConfigSuccess() {
+            if (VDBG) Log.v(TAG, "onSessionConfigSuccess");
+
+            Message msg = mHandler.obtainMessage(CALLBACK_SESSION_CONFIG_SUCCESS);
             mHandler.sendMessage(msg);
         }
 
@@ -554,32 +643,34 @@ public class WifiNanManager {
                 throw new IllegalStateException(
                         "onSessionStarted: sessionId=" + sessionId + ": session already created!?");
             }
+
+            WifiNanManager mgr = mNanManager.get();
+            if (mgr == null) {
+                Log.w(TAG, "onProxySessionStarted: mgr GC'd");
+                return;
+            }
+
             if (mIsPublish) {
-                WifiNanPublishSession session = new WifiNanPublishSession(WifiNanManager.this,
-                        sessionId, mOriginalCallback);
+                WifiNanPublishSession session = new WifiNanPublishSession(mgr, sessionId);
                 mSession = session;
                 mOriginalCallback.onPublishStarted(session);
             } else {
-                WifiNanSubscribeSession session = new WifiNanSubscribeSession(WifiNanManager.this,
-                        sessionId, mOriginalCallback);
+                WifiNanSubscribeSession session = new WifiNanSubscribeSession(mgr, sessionId);
                 mSession = session;
                 mOriginalCallback.onSubscribeStarted(session);
             }
         }
 
-        public void onProxySessionConfigFail(int reason) {
-            if (VDBG) Log.v(TAG, "Proxy: onSessionConfigFail: reason=" + reason);
-            mOriginalCallback.onSessionConfigFail(reason);
-        }
-
         public void onProxySessionTerminated(int reason) {
             if (VDBG) Log.v(TAG, "Proxy: onSessionTerminated: reason=" + reason);
-            mOriginalCallback.onSessionTerminated(reason);
             if (mSession != null) {
-                mSession.terminate();
+                mSession.setTerminated();
+                mSession = null;
             } else {
                 Log.w(TAG, "Proxy: onSessionTerminated called but mSession is null!?");
             }
+            mNanManager.clear();
+            mOriginalCallback.onSessionTerminated(reason);
         }
     }
 }
