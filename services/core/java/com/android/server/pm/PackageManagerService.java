@@ -8605,7 +8605,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (abi32 >= 0) {
                     final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
                     if (abi64 >= 0) {
-                        if (cpuAbiOverride == null && pkg.use32bitAbi) {
+                        if (pkg.use32bitAbi) {
                             pkg.applicationInfo.secondaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
                             pkg.applicationInfo.primaryCpuAbi = abi;
                         } else {
