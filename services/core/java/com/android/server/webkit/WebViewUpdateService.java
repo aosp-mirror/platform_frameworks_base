@@ -55,7 +55,7 @@ public class WebViewUpdateService extends SystemService {
 
     public WebViewUpdateService(Context context) {
         super(context);
-        mImpl = new WebViewUpdateServiceImpl(context, new SystemImpl());
+        mImpl = new WebViewUpdateServiceImpl(context, SystemImpl.getInstance());
     }
 
     @Override
