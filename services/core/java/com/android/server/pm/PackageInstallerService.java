@@ -905,7 +905,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, TAG);
 
         synchronized (mSessions) {
-            mSessions.get(sessionId).setPermissionsResult(accepted);
+            PackageInstallerSession session = mSessions.get(sessionId);
+            if (session != null) {
+                session.setPermissionsResult(accepted);
+            }
         }
     }
 
