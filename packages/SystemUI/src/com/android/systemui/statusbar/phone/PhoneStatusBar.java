@@ -1525,6 +1525,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 // we are only transfering this notification to its parent, don't generate an animation
                 mStackScroller.setChildTransferInProgress(true);
             }
+            if (remove.isSummaryWithChildren()) {
+                remove.removeAllChildren();
+            }
             mStackScroller.removeView(remove);
             mStackScroller.setChildTransferInProgress(false);
         }
