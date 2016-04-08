@@ -2135,6 +2135,9 @@ message MetricsEvent {
     // Suggestion -> Overflow -> Remove.
     ACTION_SETTINGS_DISMISS_SUGGESTION = 387;
 
+    // Settings > Apps > Gear > Special Access > Premium SMS access
+    PREMIUM_SMS_ACCESS = 388;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
