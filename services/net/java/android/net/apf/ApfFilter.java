@@ -252,15 +252,22 @@ public class ApfFilter {
         long mLastSeen;
 
         // For debugging only. Offsets into the packet where PIOs are.
-        private final ArrayList<Integer> mPrefixOptionOffsets;
+        private final ArrayList<Integer> mPrefixOptionOffsets = new ArrayList<>();
+
+        // For debugging only. Offsets into the packet where RDNSS options are.
+        private final ArrayList<Integer> mRdnssOptionOffsets = new ArrayList<>();
+
         // For debugging only. How many times this RA was seen.
         int seenCount = 0;
 
         // For debugging only. Returns the hex representation of the last matching packet.
         String getLastMatchingPacket() {
-            return HexDump.toHexString(mPacket.array(), 0, mPacket.capacity(), false /* lowercase */);
+            return HexDump.toHexString(mPacket.array(), 0, mPacket.capacity(),
+                    false /* lowercase */);
         }
 
+        // For debugging only. Returns the string representation of the IPv6 address starting at
+        // position pos in the packet.
         private String IPv6AddresstoString(int pos) {
             try {
                 byte[] array = mPacket.array();
@@ -295,19 +302,37 @@ public class ApfFilter {
             return s & 0xffffffff;
         }
 
+        private void prefixOptionToString(StringBuffer sb, int offset) {
+            String prefix = IPv6AddresstoString(offset + 16);
+            int length = uint8(mPacket.get(offset + 2));
+            long valid = mPacket.getInt(offset + 4);
+            long preferred = mPacket.getInt(offset + 8);
+            sb.append(String.format("%s/%d %ds/%ds ", prefix, length, valid, preferred));
+        }
+
+        private void rdnssOptionToString(StringBuffer sb, int offset) {
+            int optLen = uint8(mPacket.get(offset + 1)) * 8;
+            if (optLen < 24) return;  // Malformed or empty.
+            long lifetime = uint32(mPacket.getInt(offset + 4));
+            int numServers = (optLen - 8) / 16;
+            sb.append("DNS ").append(lifetime).append("s");
+            for (int server = 0; server < numServers; server++) {
+                sb.append(" ").append(IPv6AddresstoString(offset + 8 + 16 * server));
+            }
+        }
+
         public String toString() {
             try {
                 StringBuffer sb = new StringBuffer();
-                sb.append(String.format("RA %s -> %s %d ",
+                sb.append(String.format("RA %s -> %s %ds ",
                         IPv6AddresstoString(IPV6_SRC_ADDR_OFFSET),
                         IPv6AddresstoString(IPV6_DEST_ADDR_OFFSET),
                         uint16(mPacket.getShort(ICMP6_RA_ROUTER_LIFETIME_OFFSET))));
                 for (int i: mPrefixOptionOffsets) {
-                    String prefix = IPv6AddresstoString(i + 16);
-                    int length = uint8(mPacket.get(i + 2));
-                    long valid = mPacket.getInt(i + 4);
-                    long preferred = mPacket.getInt(i + 8);
-                    sb.append(String.format("%s/%d %d/%d ", prefix, length, valid, preferred));
+                    prefixOptionToString(sb, i);
+                }
+                for (int i: mRdnssOptionOffsets) {
+                    rdnssOptionToString(sb, i);
                 }
                 return sb.toString();
             } catch (BufferUnderflowException | IndexOutOfBoundsException e) {
@@ -352,8 +377,7 @@ public class ApfFilter {
                     ICMP6_RA_ROUTER_LIFETIME_OFFSET,
                     ICMP6_RA_ROUTER_LIFETIME_LEN);
 
-            // Parse ICMPv6 options
-            mPrefixOptionOffsets = new ArrayList<>();
+            // Ensures that the RA is not truncated.
             mPacket.position(ICMP6_RA_OPTION_OFFSET);
             while (mPacket.hasRemaining()) {
                 int optionType = ((int)mPacket.get(mPacket.position())) & 0xff;
@@ -372,8 +396,10 @@ public class ApfFilter {
                         break;
                     // These three options have the same lifetime offset and size, so process
                     // together:
-                    case ICMP6_ROUTE_INFO_OPTION_TYPE:
                     case ICMP6_RDNSS_OPTION_TYPE:
+                        mRdnssOptionOffsets.add(mPacket.position());
+                        // Fall through.
+                    case ICMP6_ROUTE_INFO_OPTION_TYPE:
                     case ICMP6_DNSSL_OPTION_TYPE:
                         // Parse lifetime
                         lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
@@ -519,6 +545,10 @@ public class ApfFilter {
     // For debugging only. The last program installed.
     @GuardedBy("this")
     private byte[] mLastInstalledProgram;
+
+    // For debugging only. How many times the program was updated since we started.
+    @GuardedBy("this")
+    private int mNumProgramUpdates;
 
     /**
      * Generate filter code to process ARP packets. Execution of this code ends in either the
@@ -724,6 +754,8 @@ public class ApfFilter {
         mLastTimeInstalledProgram = curTime();
         mLastInstalledProgramMinLifetime = programMinLifetime;
         mLastInstalledProgram = program;
+        mNumProgramUpdates++;
+
         if (VDBG) {
             hexDump("Installing filter: ", program, program.length);
         }
@@ -865,19 +897,20 @@ public class ApfFilter {
     }
 
     public synchronized void dump(IndentingPrintWriter pw) {
-        pw.println("APF caps: " + mApfCapabilities);
+        pw.println("Capabilities: " + mApfCapabilities);
         pw.println("Receive thread: " + (mReceiveThread != null ? "RUNNING" : "STOPPED"));
-        pw.println("Multicast filtering: " + mMulticastFilter);
+        pw.println("Multicast: " + (mMulticastFilter ? "DROP" : "ALLOW"));
         try {
-            pw.println("IPv4 address: " + InetAddress.getByAddress(mIPv4Address));
+            pw.println("IPv4 address: " + InetAddress.getByAddress(mIPv4Address).getHostAddress());
         } catch (UnknownHostException|NullPointerException e) {}
+
         if (mLastTimeInstalledProgram == 0) {
             pw.println("No program installed.");
             return;
         }
-
+        pw.println("Program updates: " + mNumProgramUpdates);
         pw.println(String.format(
-                "Last program length %d, installed %ds ago, lifetime %d",
+                "Last program length %d, installed %ds ago, lifetime %ds",
                 mLastInstalledProgram.length, curTime() - mLastTimeInstalledProgram,
                 mLastInstalledProgramMinLifetime));
 
@@ -896,6 +929,7 @@ public class ApfFilter {
             }
             pw.decreaseIndent();
         }
+        pw.decreaseIndent();
 
         if (DBG) {
             pw.println("Last program:");
@@ -903,7 +937,5 @@ public class ApfFilter {
             pw.println(HexDump.toHexString(mLastInstalledProgram, false /* lowercase */));
             pw.decreaseIndent();
         }
-
-        pw.decreaseIndent();
     }
 }
