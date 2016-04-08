@@ -15,8 +15,6 @@
  */
 package com.android.systemui.qs.external;
 
-import libcore.util.Objects;
-
 import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -25,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Handler;
@@ -34,9 +33,11 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
+import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
+import libcore.util.Objects;
 
 import java.util.Set;
 
@@ -95,6 +96,17 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public boolean hasPendingClick() {
         synchronized (mQueuedMessages) {
             return mQueuedMessages.contains(MSG_ON_CLICK);
+        }
+    }
+
+    public boolean isActiveTile() {
+        try {
+            ServiceInfo info = mContext.getPackageManager().getServiceInfo(mIntent.getComponent(),
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
+            return info.metaData != null
+                    && info.metaData.getBoolean(TileService.META_DATA_ACTIVE_TILE, false);
+        } catch (NameNotFoundException e) {
+            return false;
         }
     }
 
