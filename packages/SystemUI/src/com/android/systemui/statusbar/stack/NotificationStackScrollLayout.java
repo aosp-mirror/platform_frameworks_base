@@ -54,6 +54,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
@@ -141,7 +142,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * The algorithm which calculates the properties for our children
      */
-    private final StackScrollAlgorithm mStackScrollAlgorithm;
+    protected final StackScrollAlgorithm mStackScrollAlgorithm;
 
     /**
      * The current State this Layout is in
@@ -352,7 +353,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mExpandHelper.setScrollAdapter(this);
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setLongPressListener(mLongPressListener);
-        mStackScrollAlgorithm = new StackScrollAlgorithm(context);
+        mStackScrollAlgorithm = SystemUIFactory.getInstance().createStackScrollAlgorithm(context);
         initView(context);
         setWillNotDraw(false);
         if (DEBUG) {
@@ -1053,7 +1054,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 boolean isBeingDragged = !mScroller.isFinished();
                 setIsBeingDragged(isBeingDragged);
-
                 /*
                  * If being flinged and user touches, stop the fling. isFinished
                  * will be false if being flinged.
@@ -1138,7 +1138,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                             }
                         }
                     }
-
                     mActivePointerId = INVALID_POINTER;
                     endDrag();
                 }
@@ -1320,7 +1319,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean isTouchEvent) {
 
         int newScrollY = scrollY + deltaY;
-
         final int top = -maxOverScrollY;
         final int bottom = maxOverScrollY + scrollRangeY;
 
