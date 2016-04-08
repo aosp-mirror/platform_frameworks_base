@@ -541,6 +541,7 @@ class AppWindowToken extends WindowToken {
             if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
                     candidate.getWindowTag().equals(w.getWindowTag().toString())) {
                 candidate.mReplacingWindow = w;
+                w.mSkipEnterAnimationForSeamlessReplacement = !candidate.mAnimateReplacingWindow;
 
                 // if we got a replacement window, reset the timeout to give drawing more time
                 service.mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
@@ -575,6 +576,9 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
             candidate.mWillReplaceWindow = false;
+            if (candidate.mReplacingWindow != null) {
+                candidate.mReplacingWindow.mSkipEnterAnimationForSeamlessReplacement = false;
+            }
             // Since the window already timed out, remove it immediately now.
             // Use removeWindowInnerLocked() instead of removeWindowLocked(), as the latter
             // delays removal on certain conditions, which will leave the stale window in the

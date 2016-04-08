@@ -445,6 +445,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow = null;
+    // For the new window in the replacement transition, if we have
+    // requested to replace without animation, then we should
+    // make sure we also don't apply an enter animation for
+    // the new window.
+    boolean mSkipEnterAnimationForSeamlessReplacement = false;
     // Whether this window is being moved via the resize API
     boolean mMovedByResize;
 
@@ -1574,6 +1579,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
                 win.mReplacingWindow = null;
+                mSkipEnterAnimationForSeamlessReplacement = false;
                 if (win.mAnimatingExit) {
                     mService.removeWindowInnerLocked(win);
                 }
