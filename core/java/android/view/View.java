@@ -8877,7 +8877,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void clearAccessibilityFocus() {
-        clearAccessibilityFocusNoCallbacks();
+        clearAccessibilityFocusNoCallbacks(0);
 
         // Clear the global reference of accessibility focus if this view or
         // any of its descendants had accessibility focus. This will NOT send
@@ -8920,14 +8920,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Clears accessibility focus without calling any callback methods
      * normally invoked in {@link #clearAccessibilityFocus()}. This method
-     * is used for clearing accessibility focus when giving this focus to
-     * another view.
+     * is used separately from that one for clearing accessibility focus when
+     * giving this focus to another view.
+     *
+     * @param action The action, if any, that led to focus being cleared. Set to
+     * AccessibilityNodeInfo#ACTION_ACCESSIBILITY_FOCUS to specify that focus is moving within
+     * the window.
      */
-    void clearAccessibilityFocusNoCallbacks() {
+    void clearAccessibilityFocusNoCallbacks(int action) {
         if ((mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_FOCUSED;
             invalidate();
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+                event.setAction(action);
+                if (mAccessibilityDelegate != null) {
+                    mAccessibilityDelegate.sendAccessibilityEventUnchecked(this, event);
+                } else {
+                    sendAccessibilityEventUnchecked(event);
+                }
+            }
         }
     }
 
