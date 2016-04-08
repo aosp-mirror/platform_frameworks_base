@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -44,7 +45,7 @@ public class WifiNanSubscribeSession extends WifiNanSession {
      * @param subscribeConfig The configuration ({@link SubscribeConfig}) of the
      *            subscribe session.
      */
-    public void updateSubscribe(SubscribeConfig subscribeConfig) {
+    public void updateSubscribe(@NonNull SubscribeConfig subscribeConfig) {
         if (mTerminated) {
             Log.w(TAG, "updateSubscribe: called on terminated session");
             return;
