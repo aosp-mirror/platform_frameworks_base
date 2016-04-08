@@ -439,7 +439,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
                 mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(event.getWindowId(),
-                        event.getSourceNodeId(), event.getEventType());
+                        event.getSourceNodeId(), event.getEventType(), event.getAction());
                 mSecurityPolicy.updateEventSourceLocked(event);
                 notifyAccessibilityServicesDelayedLocked(event, false);
                 notifyAccessibilityServicesDelayedLocked(event, true);
@@ -3829,7 +3829,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void updateActiveAndAccessibilityFocusedWindowLocked(int windowId, long nodeId,
-                int eventType) {
+                int eventType, int eventAction) {
             // The active window is either the window that has input focus or
             // the window that the user is currently touching. If the user is
             // touching a window that does not have input focus as soon as the
@@ -3882,8 +3882,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         if (mAccessibilityFocusNodeId == nodeId) {
                             mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
                         }
-                        if (mAccessibilityFocusNodeId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID
-                                && mAccessibilityFocusedWindowId == windowId) {
+                        // Clear the window with focus if it no longer has focus and we aren't
+                        // just moving focus from one view to the other in the same window
+                        if ((mAccessibilityFocusNodeId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)
+                                && (mAccessibilityFocusedWindowId == windowId)
+                                && (eventAction != AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)
+                                ) {
                             mAccessibilityFocusedWindowId = INVALID_WINDOW_ID;
                         }
                     }

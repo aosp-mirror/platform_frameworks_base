@@ -3071,7 +3071,8 @@ public final class ViewRootImpl implements ViewParent,
 
             // Clear accessibility focus on the host after clearing state since
             // this method may be reentrant.
-            focusHost.clearAccessibilityFocusNoCallbacks();
+            focusHost.clearAccessibilityFocusNoCallbacks(
+                    AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
 
             AccessibilityNodeProvider provider = focusHost.getAccessibilityNodeProvider();
             if (provider != null) {
@@ -3088,7 +3089,8 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mAccessibilityFocusedHost != null) {
             // Clear accessibility focus in the view.
-            mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks();
+            mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks(
+                    AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
         }
 
         // Set the new focus host and node.
@@ -6623,7 +6625,7 @@ public final class ViewRootImpl implements ViewParent,
             // Error state: virtual view with no provider. Clear focus.
             mAccessibilityFocusedHost = null;
             mAccessibilityFocusedVirtualView = null;
-            focusedHost.clearAccessibilityFocusNoCallbacks();
+            focusedHost.clearAccessibilityFocusNoCallbacks(0);
             return;
         }
 
@@ -6673,7 +6675,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mAccessibilityFocusedVirtualView == null) {
             // Error state: The node no longer exists. Clear focus.
             mAccessibilityFocusedHost = null;
-            focusedHost.clearAccessibilityFocusNoCallbacks();
+            focusedHost.clearAccessibilityFocusNoCallbacks(0);
 
             // This will probably fail, but try to keep the provider's internal
             // state consistent by clearing focus.
