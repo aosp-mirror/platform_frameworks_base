@@ -1650,6 +1650,13 @@ final class ActivityStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.finishing) {
+                    // Normally the screenshot will be taken in makeInvisible(). When an activity
+                    // is finishing, we no longer change its visibility, but we still need to take
+                    // the screenshots if startPausingLocked decided it should be taken.
+                    if (r.mUpdateTaskThumbnailWhenHidden) {
+                        r.updateThumbnailLocked(screenshotActivitiesLocked(r), null);
+                        r.mUpdateTaskThumbnailWhenHidden = false;
+                    }
                     continue;
                 }
                 final boolean isTop = r == top;
