@@ -5,7 +5,6 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -18,8 +17,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-
-import java.util.concurrent.CountDownLatch;
 
 /** @hide */
 @SystemApi
@@ -298,7 +295,7 @@ public class RttManager {
     }
 
     public RttCapabilities getRttCapabilities() {
-        synchronized (sCapabilitiesLock) {
+        synchronized (mCapabilitiesLock) {
             if (mRttCapabilities == null) {
                 try {
                     mRttCapabilities = mService.getRttCapabilities();
@@ -919,13 +916,13 @@ public class RttManager {
         validateChannel();
         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
         Log.i(TAG, "Send RTT request to RTT Service");
-        sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
+        mAsyncChannel.sendMessage(CMD_OP_START_RANGING,
                 0, putListener(listener), parcelableParams);
     }
 
     public void stopRanging(RttListener listener) {
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
     }
 
     /**
@@ -962,7 +959,7 @@ public class RttManager {
         }
         validateChannel();
         int key = putListenerIfAbsent(callback);
-        sAsyncChannel.sendMessage(CMD_OP_ENABLE_RESPONDER, 0, key);
+        mAsyncChannel.sendMessage(CMD_OP_ENABLE_RESPONDER, 0, key);
     }
 
     /**
@@ -985,7 +982,7 @@ public class RttManager {
             Log.e(TAG, "responder not enabled yet");
             return;
         }
-        sAsyncChannel.sendMessage(CMD_OP_DISABLE_RESPONDER, 0, key);
+        mAsyncChannel.sendMessage(CMD_OP_DISABLE_RESPONDER, 0, key);
     }
 
     /**
@@ -1097,23 +1094,17 @@ public class RttManager {
     public static final int
             CMD_OP_ENALBE_RESPONDER_FAILED              = BASE + 8;
 
-    private Context mContext;
-    private IRttManager mService;
-    private RttCapabilities mRttCapabilities;
-
     private static final int INVALID_KEY = 0;
-    private static int sListenerKey = 1;
 
-    private static final SparseArray sListenerMap = new SparseArray();
-    private static final Object sListenerMapLock = new Object();
-    private static final Object sCapabilitiesLock = new Object();
+    private final Context mContext;
+    private final IRttManager mService;
+    private final SparseArray mListenerMap = new SparseArray();
+    private final Object mListenerMapLock = new Object();
+    private final Object mCapabilitiesLock = new Object();
 
-    private static AsyncChannel sAsyncChannel;
-    private static CountDownLatch sConnected;
-
-    private static final Object sThreadRefLock = new Object();
-    private static int sThreadRefCount;
-    private static HandlerThread sHandlerThread;
+    private RttCapabilities mRttCapabilities;
+    private int mListenerKey = 1;
+    private AsyncChannel mAsyncChannel;
 
     /**
      * Create a new WifiScanner instance.
@@ -1122,122 +1113,107 @@ public class RttManager {
      * the standard {@link android.content.Context#WIFI_RTT_SERVICE Context.WIFI_RTT_SERVICE}.
      * @param context the application context
      * @param service the Binder interface
+     * @param looper Looper for running the callbacks.
+     *
      * @hide
      */
-
-    public RttManager(Context context, IRttManager service) {
+    public RttManager(Context context, IRttManager service, Looper looper) {
         mContext = context;
         mService = service;
-        init();
-    }
-
-    private void init() {
-        synchronized (sThreadRefLock) {
-            if (++sThreadRefCount == 1) {
-                Messenger messenger = null;
-                try {
-                    Log.d(TAG, "Get the messenger from " + mService);
-                    messenger = mService.getMessenger();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                } catch (SecurityException e) {
-                    /* do nothing */
-                }
-
-                if (messenger == null) {
-                    sAsyncChannel = null;
-                    return;
-                }
-
-                sHandlerThread = new HandlerThread("RttManager");
-                sAsyncChannel = new AsyncChannel();
-                sConnected = new CountDownLatch(1);
-
-                sHandlerThread.start();
-                Handler handler = new ServiceHandler(sHandlerThread.getLooper());
-                sAsyncChannel.connect(mContext, handler, messenger);
-                try {
-                    sConnected.await();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "interrupted wait at init");
-                }
-            }
+        Messenger messenger = null;
+        try {
+            Log.d(TAG, "Get the messenger from " + mService);
+            messenger = mService.getMessenger();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
+
+        if (messenger == null) {
+            throw new IllegalStateException("getMessenger() returned null!  This is invalid.");
+        }
+
+        mAsyncChannel = new AsyncChannel();
+
+        Handler handler = new ServiceHandler(looper);
+        mAsyncChannel.connectSync(mContext, handler, messenger);
+        // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
+        // synchronously, which causes RttService to receive the wrong replyTo value.
+        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
     }
 
     private void validateChannel() {
-        if (sAsyncChannel == null) throw new IllegalStateException(
+        if (mAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
     }
 
-    private static int putListener(Object listener) {
+    private int putListener(Object listener) {
         if (listener == null) return INVALID_KEY;
         int key;
-        synchronized (sListenerMapLock) {
+        synchronized (mListenerMapLock) {
             do {
-                key = sListenerKey++;
+                key = mListenerKey++;
             } while (key == INVALID_KEY);
-            sListenerMap.put(key, listener);
+            mListenerMap.put(key, listener);
         }
         return key;
     }
 
-    // Insert a listener if it doesn't exist in sListenerMap. Returns the key of the listener.
-    private static int putListenerIfAbsent(Object listener) {
+    // Insert a listener if it doesn't exist in mListenerMap. Returns the key of the listener.
+    private int putListenerIfAbsent(Object listener) {
         if (listener == null) return INVALID_KEY;
-        synchronized (sListenerMapLock) {
+        synchronized (mListenerMapLock) {
             int key = getListenerKey(listener);
             if (key != INVALID_KEY) {
                 return key;
             }
             do {
-                key = sListenerKey++;
+                key = mListenerKey++;
             } while (key == INVALID_KEY);
-            sListenerMap.put(key, listener);
+            mListenerMap.put(key, listener);
             return key;
         }
 
     }
 
-    private static Object getListener(int key) {
+    private Object getListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
             return listener;
         }
     }
 
-    private static int getListenerKey(Object listener) {
+    private int getListenerKey(Object listener) {
         if (listener == null) return INVALID_KEY;
-        synchronized (sListenerMapLock) {
-            int index = sListenerMap.indexOfValue(listener);
+        synchronized (mListenerMapLock) {
+            int index = mListenerMap.indexOfValue(listener);
             if (index == -1) {
                 return INVALID_KEY;
             } else {
-                return sListenerMap.keyAt(index);
+                return mListenerMap.keyAt(index);
             }
         }
     }
 
-    private static Object removeListener(int key) {
+    private Object removeListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
-            sListenerMap.remove(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
+            mListenerMap.remove(key);
             return listener;
         }
     }
 
-    private static int removeListener(Object listener) {
+    private int removeListener(Object listener) {
         int key = getListenerKey(listener);
         if (key == INVALID_KEY) return key;
-        synchronized (sListenerMapLock) {
-            sListenerMap.remove(key);
+        synchronized (mListenerMapLock) {
+            mListenerMap.remove(key);
             return key;
         }
     }
 
-    private static class ServiceHandler extends Handler {
+    private class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
         }
@@ -1245,24 +1221,13 @@ public class RttManager {
         public void handleMessage(Message msg) {
             Log.i(TAG, "RTT manager get message: " + msg.what);
             switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        sAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    } else {
-                        Log.e(TAG, "Failed to set up channel connection");
-                        // This will cause all further async API calls on the WifiManager
-                        // to fail and throw an exception
-                        sAsyncChannel = null;
-                    }
-                    return;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
-                    sConnected.countDown();
                     return;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                     Log.e(TAG, "Channel connection lost");
                     // This will cause all further async API calls on the WifiManager
                     // to fail and throw an exception
-                    sAsyncChannel = null;
+                    mAsyncChannel = null;
                     getLooper().quit();
                     return;
             }

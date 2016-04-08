@@ -541,7 +541,8 @@ final class SystemServiceRegistry {
             public RttManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_RTT_SERVICE);
                 IRttManager service = IRttManager.Stub.asInterface(b);
-                return new RttManager(ctx.getOuterContext(), service);
+                return new RttManager(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
