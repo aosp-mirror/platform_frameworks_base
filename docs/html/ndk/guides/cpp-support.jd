@@ -175,7 +175,7 @@ named {@code libgnustl_shared.so}.</p>
 shared library file is named {@code libc++_shared.so}.</p>
 
 <p>By default, this runtime compiles with {@code -std=c++11}. As with GNU {@code libstdc++}, you
-need to explicitly turns on exceptions or RTTI support. For information on how to do this, see
+need to explicitly turn on exceptions or RTTI support. For information on how to do this, see
 <a href="#xp">C++ Exceptions</a> and <a href="#rt">RTTI</a>.</p>
 
 <p>The NDK provides prebuilt static and shared libraries for {@code libc++} compiled by Clang 3.4,
