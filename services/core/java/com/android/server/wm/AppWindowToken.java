@@ -539,7 +539,7 @@ class AppWindowToken extends WindowToken {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState candidate = allAppWindows.get(i);
             if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
-                    candidate.getWindowTag().equals(w.getWindowTag().toString())) {
+                    candidate.getWindowTag().toString().equals(w.getWindowTag().toString())) {
                 candidate.mReplacingWindow = w;
                 w.mSkipEnterAnimationForSeamlessReplacement = !candidate.mAnimateReplacingWindow;
 
