@@ -395,4 +395,32 @@ public class TelephonyIntents {
      */
     public static final String ACTION_SET_RADIO_CAPABILITY_FAILED =
             "android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED";
+
+    /**
+     * <p>Broadcast Action: when data connections get redirected with validation failure.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>redirectUrl</li><dd>A string with the redirection url info.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data redirection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     */
+    public static final String ACTION_DATA_CONNECTION_REDIRECTED =
+            "android.intent.action.REDIRECTION_DETECTED";
+    /**
+     * <p>Broadcast Action: when data connections setup fails.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>apnType</li><dd>A string with the apn type.</dd>
+     *   <li>errorCode</li><dd>A integer with dataFailCause.</dd>
+     *   <li>subId</dt><li>Sub Id which associated the data redirection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     */
+    public static final String ACTION_REQUEST_NETWORK_FAILED =
+            "android.intent.action.REQUEST_NETWORK_FAILED";
 }
