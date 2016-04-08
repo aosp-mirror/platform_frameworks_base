@@ -52,10 +52,10 @@ public:
     typedef Pair<VertexBuffer*, VertexBuffer*> vertexBuffer_pair_t;
 
     struct Description {
-        DESCRIPTION_TYPE(Description);
-        enum Type {
-            kNone,
-            kRoundRect,
+        HASHABLE_TYPE(Description);
+        enum class Type {
+            None,
+            RoundRect,
         };
 
         Type type;
@@ -76,18 +76,16 @@ public:
 
         Description();
         Description(Type type, const Matrix4& transform, const SkPaint& paint);
-        hash_t hash() const;
         void setupMatrixAndPaint(Matrix4* matrix, SkPaint* paint) const;
     };
 
     struct ShadowDescription {
-        DESCRIPTION_TYPE(ShadowDescription);
-        const void* nodeKey;
+        HASHABLE_TYPE(ShadowDescription);
+        const SkPath* nodeKey;
         float matrixData[16];
 
         ShadowDescription();
-        ShadowDescription(const void* nodeKey, const Matrix4* drawTransform);
-        hash_t hash() const;
+        ShadowDescription(const SkPath* nodeKey, const Matrix4* drawTransform);
     };
 
     class ShadowTask : public Task<vertexBuffer_pair_t> {
