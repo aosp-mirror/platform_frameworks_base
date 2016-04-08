@@ -11,6 +11,9 @@ LOCAL_SRC_FILES := \
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := NotificationStressTests
 
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    ub-uiautomator
+
 include $(BUILD_PACKAGE)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
