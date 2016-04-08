@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.TestApi;
 import com.android.internal.R;
 import com.android.internal.view.menu.ShowableListMenu;
 
@@ -357,6 +358,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     public Drawable getPopupBackground() {
         return mPopup.getBackground();
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isPopupShowing() {
+        return (mPopup != null) && mPopup.isShowing();
     }
 
     /**
