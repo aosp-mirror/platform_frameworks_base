@@ -15,7 +15,7 @@ import android.net.ConnectivityManager;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.settingslib.drawable.UserIconDrawable;
 
 import java.text.NumberFormat;
 
@@ -73,21 +73,22 @@ public class Utils {
     /**
      * Returns a circular icon for a user.
      */
-    public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
+    public static UserIconDrawable getUserIcon(Context context, UserManager um, UserInfo user) {
+        final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
             // We use predefined values for managed profiles
             Bitmap b = BitmapFactory.decodeResource(context.getResources(),
                     com.android.internal.R.drawable.ic_corp_icon);
-            return CircleFramedDrawable.getInstance(context, b);
+            return new UserIconDrawable(iconSize).setIcon(b).bake();
         }
         if (user.iconPath != null) {
             Bitmap icon = um.getUserIcon(user.id);
             if (icon != null) {
-                return CircleFramedDrawable.getInstance(context, icon);
+                return new UserIconDrawable(iconSize).setIcon(icon).bake();
             }
         }
-        return CircleFramedDrawable.getInstance(context, UserIcons.convertToBitmap(
-                UserIcons.getDefaultUserIcon(user.id, /* light= */ false)));
+        return new UserIconDrawable(iconSize).setIconDrawable(
+                UserIcons.getDefaultUserIcon(user.id, /* light= */ false)).bake();
     }
 
     /** Formats the ratio of amount/total as a percentage. */

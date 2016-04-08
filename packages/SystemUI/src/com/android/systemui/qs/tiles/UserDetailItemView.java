@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.UserAvatarView;
@@ -87,25 +88,29 @@ public class UserDetailItemView extends LinearLayout {
         return (UserDetailItemView) convertView;
     }
 
-    public void bind(String name, Bitmap picture) {
+    public void bind(String name, Bitmap picture, int userId) {
         mName.setText(name);
-        mAvatar.setBitmap(picture);
+        mAvatar.setAvatarWithBadge(picture, userId);
     }
 
-    public void bind(String name, Drawable picture) {
+    public void bind(String name, Drawable picture, int userId) {
         mName.setText(name);
-        mAvatar.setDrawable(picture);
+        mAvatar.setDrawableWithBadge(picture, userId);
+    }
+
+    public void setAvatarEnabled(boolean enabled) {
+        mAvatar.setEnabled(enabled);
     }
 
     public void setDisabledByAdmin(boolean disabled) {
         mRestrictedPadlock.setVisibility(disabled ? View.VISIBLE : View.GONE);
         mName.setEnabled(!disabled);
-        mAvatar.setDisabled(disabled);
+        mAvatar.setEnabled(!disabled);
     }
 
     public void setEnabled(boolean enabled) {
         mName.setEnabled(enabled);
-        mAvatar.setDisabled(!enabled);
+        mAvatar.setEnabled(enabled);
     }
 
     @Override
