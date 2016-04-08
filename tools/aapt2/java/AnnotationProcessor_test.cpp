@@ -14,65 +14,37 @@
  * limitations under the License.
  */
 
-#include "ResourceParser.h"
-#include "ResourceTable.h"
-#include "ResourceValues.h"
 #include "java/AnnotationProcessor.h"
-#include "test/Builders.h"
-#include "test/Context.h"
-#include "xml/XmlPullParser.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
-struct AnnotationProcessorTest : public ::testing::Test {
-    std::unique_ptr<IAaptContext> mContext;
-    ResourceTable mTable;
-
-    void SetUp() override {
-        mContext = test::ContextBuilder().build();
-    }
-
-    ::testing::AssertionResult parse(const StringPiece& str) {
-        ResourceParserOptions options;
-        ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{}, ConfigDescription{},
-                              options);
-        std::stringstream in;
-        in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
-        xml::XmlPullParser xmlParser(in);
-        if (parser.parse(&xmlParser)) {
-            return ::testing::AssertionSuccess();
-        }
-        return ::testing::AssertionFailure();
-    }
-};
-
-TEST_F(AnnotationProcessorTest, EmitsDeprecated) {
-    const char* xmlInput = R"EOF(
-    <resources>
-      <declare-styleable name="foo">
-        <!-- Some comment, and it should contain
-             a marker word, something that marks
-             this resource as nor needed.
-             {@deprecated That's the marker! } -->
-        <attr name="autoText" format="boolean" />
-      </declare-styleable>
-    </resources>)EOF";
-
-    ASSERT_TRUE(parse(xmlInput));
-
-    Attribute* attr = test::getValue<Attribute>(&mTable, u"@attr/autoText");
-    ASSERT_NE(nullptr, attr);
+TEST(AnnotationProcessorTest, EmitsDeprecated) {
+    const char* comment = "Some comment, and it should contain a marker word, "
+                          "something that marks this resource as nor needed. "
+                          "{@deprecated That's the marker! }";
 
     AnnotationProcessor processor;
-    processor.appendComment(attr->getComment());
+    processor.appendComment(comment);
 
     std::stringstream result;
     processor.writeToStream(&result, "");
     std::string annotations = result.str();
 
     EXPECT_NE(std::string::npos, annotations.find("@Deprecated"));
+}
+
+TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
+    AnnotationProcessor processor;
+    processor.appendComment("@SystemApi This is a system API");
+
+    std::stringstream result;
+    processor.writeToStream(&result, "");
+    std::string annotations = result.str();
+
+    EXPECT_NE(std::string::npos, annotations.find("@android.annotation.SystemApi"));
+    EXPECT_EQ(std::string::npos, annotations.find("@SystemApi"));
+    EXPECT_NE(std::string::npos, annotations.find("This is a system API"));
 }
 
 } // namespace aapt

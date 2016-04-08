@@ -21,7 +21,7 @@
 
 namespace aapt {
 
-void AnnotationProcessor::appendCommentLine(const std::string& comment) {
+void AnnotationProcessor::appendCommentLine(std::string& comment) {
     static const std::string sDeprecated = "@deprecated";
     static const std::string sSystemApi = "@SystemApi";
 
@@ -29,8 +29,14 @@ void AnnotationProcessor::appendCommentLine(const std::string& comment) {
         mAnnotationBitMask |= kDeprecated;
     }
 
-    if (comment.find(sSystemApi) != std::string::npos) {
+    std::string::size_type idx = comment.find(sSystemApi);
+    if (idx != std::string::npos) {
         mAnnotationBitMask |= kSystemApi;
+        comment.erase(comment.begin() + idx, comment.begin() + idx + sSystemApi.size());
+    }
+
+    if (util::trimWhitespace(comment).empty()) {
+        return;
     }
 
     if (!mHasComments) {
@@ -46,7 +52,8 @@ void AnnotationProcessor::appendComment(const StringPiece16& comment) {
     for (StringPiece16 line : util::tokenize(comment, u'\n')) {
         line = util::trimWhitespace(line);
         if (!line.empty()) {
-            appendCommentLine(util::utf16ToUtf8(line));
+            std::string utf8Line = util::utf16ToUtf8(line);
+            appendCommentLine(utf8Line);
         }
     }
 }
@@ -55,7 +62,8 @@ void AnnotationProcessor::appendComment(const StringPiece& comment) {
     for (StringPiece line : util::tokenize(comment, '\n')) {
         line = util::trimWhitespace(line);
         if (!line.empty()) {
-            appendCommentLine(line.toString());
+            std::string utf8Line = line.toString();
+            appendCommentLine(utf8Line);
         }
     }
 }

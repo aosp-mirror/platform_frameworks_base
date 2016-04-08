@@ -51,9 +51,28 @@ class ISymbolSource;
 class SymbolTable {
 public:
     struct Symbol {
+        Symbol() : Symbol(Maybe<ResourceId>{}) {
+        }
+
+        Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {
+        }
+
+        Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr) :
+                Symbol(i, attr, false) {
+        }
+
+        Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr, bool pub) :
+                id(i), attribute(attr), isPublic(pub) {
+        }
+
+        Symbol(const Symbol&) = default;
+        Symbol(Symbol&&) = default;
+        Symbol& operator=(const Symbol&) = default;
+        Symbol& operator=(Symbol&&) = default;
+
         Maybe<ResourceId> id;
         std::shared_ptr<Attribute> attribute;
-        bool isPublic;
+        bool isPublic = false;
     };
 
     SymbolTable() : mCache(200), mIdCache(200) {
