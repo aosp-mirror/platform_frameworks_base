@@ -53,35 +53,13 @@ static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
     fontFamily->Unref();
 }
 
-static jboolean addSkTypeface(FontFamily* family, SkTypeface* face) {
-    MinikinFont* minikinFont = new MinikinFontSkia(face);
+static jboolean addSkTypeface(FontFamily* family, SkTypeface* face, const void* fontData,
+        size_t fontSize, int ttcIndex) {
+    MinikinFont* minikinFont = new MinikinFontSkia(face, fontData, fontSize, ttcIndex);
     bool result = family->addFont(minikinFont);
     minikinFont->Unref();
     return result;
 }
-
-static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jstring path,
-        jint ttcIndex) {
-    NPE_CHECK_RETURN_ZERO(env, path);
-    ScopedUtfChars str(env, path);
-    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str(), ttcIndex);
-    if (face == NULL) {
-        ALOGE("addFont failed to create font %s", str.c_str());
-        return false;
-    }
-    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face);
-}
-
-static struct {
-    jmethodID mGet;
-    jmethodID mSize;
-} gListClassInfo;
-
-static struct {
-    jfieldID mTag;
-    jfieldID mStyleValue;
-} gAxisClassInfo;
 
 static void release_global_ref(const void* /*data*/, void* context) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -105,6 +83,47 @@ static void release_global_ref(const void* /*data*/, void* context) {
        AndroidRuntime::getJavaVM()->DetachCurrentThread();
     }
 }
+
+static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jobject bytebuf,
+        jint ttcIndex) {
+    NPE_CHECK_RETURN_ZERO(env, bytebuf);
+    const void* fontPtr = env->GetDirectBufferAddress(bytebuf);
+    if (fontPtr == NULL) {
+        ALOGE("addFont failed to create font, buffer invalid");
+        return false;
+    }
+    jlong fontSize = env->GetDirectBufferCapacity(bytebuf);
+    if (fontSize < 0) {
+        ALOGE("addFont failed to create font, buffer size invalid");
+        return false;
+    }
+    jobject fontRef = MakeGlobalRefOrDie(env, bytebuf);
+    SkAutoTUnref<SkData> data(SkData::NewWithProc(fontPtr, fontSize,
+            release_global_ref, reinterpret_cast<void*>(fontRef)));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data));
+
+    SkFontMgr::FontParameters params;
+    params.setCollectionIndex(ttcIndex);
+
+    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
+    SkTypeface* face = fm->createFromStream(fontData.release(), params);
+    if (face == NULL) {
+        ALOGE("addFont failed to create font");
+        return false;
+    }
+    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    return addSkTypeface(fontFamily, face, fontPtr, (size_t)fontSize, ttcIndex);
+}
+
+static struct {
+    jmethodID mGet;
+    jmethodID mSize;
+} gListClassInfo;
+
+static struct {
+    jfieldID mTag;
+    jfieldID mStyleValue;
+} gAxisClassInfo;
 
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong familyPtr,
         jobject font, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
@@ -133,7 +152,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         }
     }
 
-    void* fontPtr = env->GetDirectBufferAddress(font);
+    const void* fontPtr = env->GetDirectBufferAddress(font);
     if (fontPtr == NULL) {
         ALOGE("addFont failed to create font, buffer invalid");
         return false;
@@ -159,7 +178,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         return false;
     }
     FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
-    MinikinFont* minikinFont = new MinikinFontSkia(face);
+    MinikinFont* minikinFont = new MinikinFontSkia(face, fontPtr, (size_t)fontSize, ttcIndex);
     fontFamily->addFont(minikinFont, FontStyle(weight / 100, isItalic));
     minikinFont->Unref();
     return true;
@@ -191,6 +210,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
         return false;
     }
 
+    size_t bufSize = asset->getLength();
     SkAutoTUnref<SkData> data(SkData::NewWithProc(buf, asset->getLength(), releaseAsset, asset));
     SkMemoryStream* stream = new SkMemoryStream(data.get());
     // CreateFromStream takes ownership of stream.
@@ -200,7 +220,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
         return false;
     }
     FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face);
+    return addSkTypeface(fontFamily, face, buf, bufSize, /* ttcIndex */ 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,7 +228,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
 static const JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
-    { "nAddFont",              "(JLjava/lang/String;I)Z", (void*)FontFamily_addFont },
+    { "nAddFont",              "(JLjava/nio/ByteBuffer;I)Z", (void*)FontFamily_addFont },
     { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;ILjava/util/List;IZ)Z",
             (void*)FontFamily_addFontWeightStyle },
     { "nAddFontFromAsset",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
