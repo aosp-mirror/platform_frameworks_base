@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -207,18 +208,21 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
                     }
                 }
             });
+            final TextView batterySaverTitle =
+                    (TextView) mCurrentView.findViewById(android.R.id.title);
+            final TextView batterySaverSummary =
+                    (TextView) mCurrentView.findViewById(android.R.id.summary);
             if (mCharging) {
-                ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
-                        R.string.battery_detail_charging_summary);
-                mCurrentView.findViewById(android.R.id.icon).setVisibility(View.INVISIBLE);
+                mCurrentView.findViewById(R.id.switch_container).setAlpha(.7f);
+                batterySaverTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                batterySaverTitle.setText(R.string.battery_detail_charging_summary);
                 mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.GONE);
                 mCurrentView.findViewById(R.id.switch_container).setClickable(false);
             } else {
-                ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
-                        R.string.battery_detail_switch_title);
-                ((TextView) mCurrentView.findViewById(android.R.id.summary)).setText(
-                        R.string.battery_detail_switch_summary);
-                mCurrentView.findViewById(android.R.id.icon).setVisibility(View.VISIBLE);
+                mCurrentView.findViewById(R.id.switch_container).setAlpha(1);
+                batterySaverTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                batterySaverTitle.setText(R.string.battery_detail_switch_title);
+                batterySaverSummary.setText(R.string.battery_detail_switch_summary);
                 mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.VISIBLE);
                 mCurrentView.findViewById(R.id.switch_container).setClickable(true);
                 mCurrentView.findViewById(R.id.switch_container).setOnClickListener(this);
@@ -227,7 +231,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
 
         private void bindBatteryInfo(BatteryInfo info) {
             SpannableStringBuilder builder = new SpannableStringBuilder();
-            builder.append(info.batteryPercentString, new RelativeSizeSpan(2),
+            builder.append(info.batteryPercentString, new RelativeSizeSpan(2.6f),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
             if (info.remainingLabel != null) {
                 if (mContext.getResources().getBoolean(R.bool.quick_settings_wide)) {
