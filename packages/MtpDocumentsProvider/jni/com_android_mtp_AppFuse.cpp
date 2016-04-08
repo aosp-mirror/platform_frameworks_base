@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
 #define LOG_TAG "AppFuseJNI"
 #include "utils/Log.h"
 
@@ -451,7 +450,7 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
     ScopedFd fd(static_cast<int>(jfd));
     AppFuse appfuse(env, self);
 
-    ALOGD("Start fuse loop.");
+    ALOGV("Start fuse loop.");
     while (true) {
         FuseRequest request;
 
