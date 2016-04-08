@@ -18,6 +18,7 @@ package android.os;
 
 import android.Manifest;
 import android.accounts.AccountManager;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -44,6 +45,8 @@ import android.view.WindowManager.LayoutParams;
 import com.android.internal.R;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +65,41 @@ public class UserManager {
     private static String TAG = "UserManager";
     private final IUserManager mService;
     private final Context mContext;
+
+    /**
+     * @hide
+     * No user restriction.
+     */
+    @SystemApi
+    public static final int RESTRICTION_NOT_SET = 0x0;
+
+    /**
+     * @hide
+     * User restriction set by system/user.
+     */
+    @SystemApi
+    public static final int RESTRICTION_SOURCE_SYSTEM = 0x1;
+
+    /**
+     * @hide
+     * User restriction set by a device owner.
+     */
+    @SystemApi
+    public static final int RESTRICTION_SOURCE_DEVICE_OWNER = 0x2;
+
+    /**
+     * @hide
+     * User restriction set by a profile owner.
+     */
+    @SystemApi
+    public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 0x4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag=true, value={RESTRICTION_NOT_SET, RESTRICTION_SOURCE_SYSTEM,
+            RESTRICTION_SOURCE_DEVICE_OWNER, RESTRICTION_SOURCE_PROFILE_OWNER})
+    @SystemApi
+    public @interface UserRestrictionSource {}
 
     /**
      * Specifies if a user is disallowed from adding and removing accounts, unless they are
@@ -1000,6 +1038,27 @@ public class UserManager {
     public UserInfo getUserInfo(@UserIdInt int userHandle) {
         try {
             return mService.getUserInfo(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Returns who set a user restriction on a user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param restrictionKey the string key representing the restriction
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     * @return The source of user restriction. Any combination of {@link #RESTRICTION_NOT_SET},
+     *         {@link #RESTRICTION_SOURCE_SYSTEM}, {@link #RESTRICTION_SOURCE_DEVICE_OWNER}
+     *         and {@link #RESTRICTION_SOURCE_PROFILE_OWNER}
+     */
+    @SystemApi
+    @UserRestrictionSource
+    public int getUserRestrictionSource(String restrictionKey, UserHandle userHandle) {
+        try {
+            return mService.getUserRestrictionSource(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
