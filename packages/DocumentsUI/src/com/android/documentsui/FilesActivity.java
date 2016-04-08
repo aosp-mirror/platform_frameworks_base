@@ -228,13 +228,12 @@ public class FilesActivity extends BaseActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-        Metrics.logMenuAction(this, item.getItemId());
         return true;
     }
 
     private void createNewWindow() {
-        Metrics.logMultiWindow(this);
+        Metrics.logUserAction(this, Metrics.USER_ACTION_NEW_WINDOW);
+
         Intent intent = LauncherActivity.createLaunchIntent(this);
         intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
 
@@ -352,21 +351,18 @@ public class FilesActivity extends BaseActivity {
             case KeyEvent.KEYCODE_A:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_SELECT_ALL);
                     dir.selectAllFiles();
                 }
                 return true;
             case KeyEvent.KEYCODE_C:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_COPY);
                     dir.copySelectedToClipboard();
                 }
                 return true;
             case KeyEvent.KEYCODE_V:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_PASTE);
                     dir.pasteFromClipboard();
                 }
                 return true;
