@@ -1290,7 +1290,7 @@ public class AudioService extends IAudioService.Stub {
             // Check if the ringer mode handles this adjustment. If it does we don't
             // need to adjust the volume further.
             final int result = checkForRingerModeChange(aliasIndex, direction, step,
-                    streamState.mIsMuted);
+                    streamState.mIsMuted, callingPackage, flags);
             adjustVolume = (result & FLAG_ADJUST_VOLUME) != 0;
             // If suppressing a volume adjustment in silent mode, display the UI hint
             if ((result & AudioManager.FLAG_SHOW_SILENT_HINT) != 0) {
@@ -1302,8 +1302,7 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         // If the ringermode is suppressing media, prevent changes
-        if (streamTypeAlias == AudioSystem.STREAM_MUSIC
-                && (mRingerModeMutedStreams & (1 << AudioSystem.STREAM_MUSIC)) != 0) {
+        if (!volumeAdjustmentAllowedByDnd(streamTypeAlias, flags)) {
             adjustVolume = false;
         }
         int oldIndex = mStreamStates[streamType].getIndex(device);
@@ -1551,6 +1550,10 @@ public class AudioService extends IAudioService.Stub {
             throw new SecurityException("Not allowed to change Do Not Disturb state");
         }
 
+        if (!volumeAdjustmentAllowedByDnd(streamTypeAlias, flags)) {
+            return;
+        }
+
         synchronized (mSafeMediaVolumeState) {
             // reset any pending volume command
             mPendingVolumeCommand = null;
@@ -1599,6 +1602,19 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
+    }
+
+    // No ringer affected streams can be changed in total silence mode except those that
+    // will cause the device to exit total silence mode.
+    private boolean volumeAdjustmentAllowedByDnd(int streamTypeAlias, int flags) {
+        if (mNm.getZenMode() == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
+                && isStreamMutedByRingerMode(streamTypeAlias)) {
+            if (!(((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                    (streamTypeAlias == getUiSoundsStreamType()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** @see AudioManager#forceVolumeControlStream(int) */
@@ -3366,7 +3382,8 @@ public class AudioService extends IAudioService.Stub {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted) {
+    private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted,
+            String caller, int flags) {
         final boolean isTv = mPlatformType == AudioSystem.PLATFORM_TELEVISION;
         int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerModeInternal();
@@ -3453,6 +3470,12 @@ public class AudioService extends IAudioService.Stub {
         default:
             Log.e(TAG, "checkForRingerModeChange() wrong ringer mode: "+ringerMode);
             break;
+        }
+
+        if (isAndroidNPlus(caller) && wouldToggleZenMode(ringerMode)
+                && !mNm.isNotificationPolicyAccessGrantedForPackage(caller)
+                && (flags & AudioManager.FLAG_FROM_KEY) == 0) {
+            throw new SecurityException("Not allowed to change Do Not Disturb state");
         }
 
         setRingerMode(ringerMode, TAG + ".checkForRingerModeChange", false /*external*/);
