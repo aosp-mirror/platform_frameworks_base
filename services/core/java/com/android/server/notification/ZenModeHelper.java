@@ -102,7 +102,12 @@ public class ZenModeHelper {
     private ZenModeConfig mConfig;
     private AudioManagerInternal mAudioManager;
     private PackageManager mPm;
-    private boolean mEffectsSuppressed;
+    private long mSuppressedEffects;
+
+    public static final long SUPPRESSED_EFFECT_NOTIFICATIONS = 1;
+    public static final long SUPPRESSED_EFFECT_CALLS = 1 << 1;
+    public static final long SUPPRESSED_EFFECT_ALL = SUPPRESSED_EFFECT_CALLS
+            | SUPPRESSED_EFFECT_NOTIFICATIONS;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
         mContext = context;
@@ -228,10 +233,14 @@ public class ZenModeHelper {
         }
     }
 
-    public void setEffectsSuppressed(boolean effectsSuppressed) {
-        if (mEffectsSuppressed == effectsSuppressed) return;
-        mEffectsSuppressed = effectsSuppressed;
+    public void setSuppressedEffects(long suppressedEffects) {
+        if (mSuppressedEffects == suppressedEffects) return;
+        mSuppressedEffects = suppressedEffects;
         applyRestrictions();
+    }
+
+    public long getSuppressedEffects() {
+        return mSuppressedEffects;
     }
 
     public int getZenMode() {
@@ -484,7 +493,8 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             dump(pw, prefix, "mConfig", mConfig);
         }
-        pw.print(prefix); pw.print("mEffectsSuppressed="); pw.println(mEffectsSuppressed);
+
+        pw.print(prefix); pw.print("mSuppressedEffects="); pw.println(mSuppressedEffects);
         mFiltering.dump(pw, prefix);
         mConditions.dump(pw, prefix);
     }
@@ -708,9 +718,11 @@ public class ZenModeHelper {
         final boolean zen = mZenMode != Global.ZEN_MODE_OFF;
 
         // notification restrictions
-        final boolean muteNotifications = mEffectsSuppressed;
+        final boolean muteNotifications =
+                (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
-        final boolean muteCalls = zen && !mConfig.allowCalls && !mConfig.allowRepeatCallers;
+        final boolean muteCalls = zen && !mConfig.allowCalls && !mConfig.allowRepeatCallers
+                || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // total silence restrictions
         final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
 
