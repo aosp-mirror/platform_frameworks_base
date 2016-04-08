@@ -16,57 +16,70 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are registered when a
  * publish or subscribe session is created using
  * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or
  * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} .
- * These are callbacks applying to a specific NAN session. Events corresponding
- * to the NAN link are delivered using {@link WifiNanEventCallback}.
+ * These are callbacks applying to a specific NAN session.
  * <p>
  * A single callback is registered at session creation - it cannot be replaced.
  *
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanSessionCallback {
-    /**
-     * Failure reason flag for {@link WifiNanEventCallback} and
-     * {@link WifiNanSessionCallback} callbacks. Indicates no resources to
-     * execute the requested operation.
-     */
-    public static final int FAIL_REASON_NO_RESOURCES = 0;
+    @IntDef({
+            REASON_NO_RESOURCES, REASON_INVALID_ARGS, REASON_NO_MATCH_SESSION,
+            REASON_TX_FAIL, REASON_OTHER })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SessionReasonCodes {
+    }
 
-    /**
-     * Failure reason flag for {@link WifiNanEventCallback} and
-     * {@link WifiNanSessionCallback} callbacks. Indicates invalid argument in
-     * the requested operation.
-     */
-    public static final int FAIL_REASON_INVALID_ARGS = 1;
-
-    /**
-     * Failure reason flag for {@link WifiNanEventCallback} and
-     * {@link WifiNanSessionCallback} callbacks. Indicates a message is
-     * transmitted without a match (i.e. a discovery) occurring first.
-     */
-    public static final int FAIL_REASON_NO_MATCH_SESSION = 2;
+    @IntDef({
+            TERMINATE_REASON_DONE, TERMINATE_REASON_FAIL })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SessionTerminateCodes {
+    }
 
     /**
      * Failure reason flag for {@link WifiNanSessionCallback} callbacks.
-     * Indicates that a command has been issued to a session which is
-     * terminated. Session termination may have been caused explicitly by the
-     * user using the {@code WifiNanSession#terminate()} or implicitly as a
-     * result of the original session reaching its lifetime or being terminated
-     * due to an error.
+     * Indicates no resources to execute the requested operation.
      */
-    public static final int FAIL_REASON_SESSION_TERMINATED = 3;
+    public static final int REASON_NO_RESOURCES = 0;
 
     /**
-     * Failure reason flag for {@link WifiNanEventCallback} and
-     * {@link WifiNanSessionCallback} callbacks. Indicates an unspecified error
-     * occurred during the operation.
+     * Failure reason flag for {@link WifiNanSessionCallback} callbacks.
+     * Indicates invalid argument in the requested operation.
      */
-    public static final int FAIL_REASON_OTHER = 4;
+    public static final int REASON_INVALID_ARGS = 1;
+
+    /**
+     * Failure reason flag for {@link WifiNanSessionCallback} callbacks.
+     * Indicates a message is transmitted without a match (i.e. a discovery)
+     * occurring first.
+     */
+    public static final int REASON_NO_MATCH_SESSION = 2;
+
+    /**
+     * Failure reason flag for
+     * {@link WifiNanSessionCallback#onMessageSendFail(int, int)} callback.
+     * Indicates transmission failure: this may be due to local transmission
+     * failure or to no ACK received - i.e. remote device didn't receive the
+     * sent message.
+     */
+    public static final int REASON_TX_FAIL = 3;
+
+    /**
+     * Failure reason flag for {@link WifiNanSessionCallback} callbacks.
+     * Indicates an unspecified error occurred during the operation.
+     */
+    public static final int REASON_OTHER = 4;
 
     /**
      * Failure reason flag for
@@ -75,7 +88,7 @@ public class WifiNanSessionCallback {
      * requested operations (per {@link PublishConfig} or
      * {@link SubscribeConfig}) have been executed.
      */
-    public static final int TERMINATE_REASON_DONE = 0;
+    public static final int TERMINATE_REASON_DONE = 100;
 
     /**
      * Failure reason flag for
@@ -83,7 +96,7 @@ public class WifiNanSessionCallback {
      * Indicates that publish or subscribe session is terminated due to a
      * failure.
      */
-    public static final int TERMINATE_REASON_FAIL = 1;
+    public static final int TERMINATE_REASON_FAIL = 101;
 
     /**
      * Called when a publish operation is started successfully.
@@ -105,15 +118,22 @@ public class WifiNanSessionCallback {
         /* empty */
     }
 
+    /**
+     * Called when a session update configuration (publish or subscribe update)
+     * succeeds.
+     */
+    public void onSessionConfigSuccess() {
+        /* empty */
+    }
 
     /**
      * Called when a session configuration (publish or subscribe setup or
      * update) fails.
      *
      * @param reason The failure reason using
-     *            {@code WifiNanSessionCallback.FAIL_*} codes.
+     *            {@code WifiNanSessionCallback.REASON_*} codes.
      */
-    public void onSessionConfigFail(int reason) {
+    public void onSessionConfigFail(@SessionReasonCodes int reason) {
         /* empty */
     }
 
@@ -123,7 +143,7 @@ public class WifiNanSessionCallback {
      * @param reason The termination reason using
      *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
      */
-    public void onSessionTerminated(int reason) {
+    public void onSessionTerminated(@SessionTerminateCodes int reason) {
         /* empty */
     }
 
@@ -171,9 +191,10 @@ public class WifiNanSessionCallback {
      * - never both
      *
      * @param reason The failure reason using
-     *            {@code WifiNanSessionCallback.FAIL_*} codes.
+     *            {@code WifiNanSessionCallback.REASON_*} codes.
      */
-    public void onMessageSendFail(@SuppressWarnings("unused") int messageId, int reason) {
+    public void onMessageSendFail(@SuppressWarnings("unused") int messageId,
+            @SessionReasonCodes int reason) {
         /* empty */
     }
 
