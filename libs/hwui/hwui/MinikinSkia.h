@@ -28,7 +28,8 @@ namespace android {
 class ANDROID_API MinikinFontSkia : public MinikinFont {
 public:
     // Note: this takes ownership of the reference (will unref on dtor)
-    explicit MinikinFontSkia(SkTypeface *typeface);
+    explicit MinikinFontSkia(SkTypeface *typeface, const void* fontData, size_t fontSize,
+        int ttcIndex);
 
     ~MinikinFontSkia();
 
@@ -38,12 +39,16 @@ public:
     void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint &paint) const;
 
-    // If buf is NULL, just update size
-    bool GetTable(uint32_t tag, uint8_t *buf, size_t *size);
+    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
     int32_t GetUniqueId() const;
 
     SkTypeface* GetSkTypeface() const;
+
+    // Access to underlying raw font bytes
+    const void* GetFontData() const;
+    size_t GetFontSize() const;
+    int GetFontIndex() const;
 
     static uint32_t packPaintFlags(const SkPaint* paint);
     static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
@@ -51,7 +56,13 @@ public:
     // set typeface and fake bold/italic parameters
     static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
 private:
-    SkTypeface *mTypeface;
+    SkTypeface* mTypeface;
+
+    // A raw pointer to the font data - it should be owned by some other object with
+    // lifetime at least as long as this object.
+    const void* mFontData;
+    size_t mFontSize;
+    int mTtcIndex;
 };
 
 }  // namespace android
