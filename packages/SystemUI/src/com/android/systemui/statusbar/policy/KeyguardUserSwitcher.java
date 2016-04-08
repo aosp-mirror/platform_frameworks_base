@@ -253,17 +253,13 @@ public class KeyguardUserSwitcher {
             UserDetailItemView v = (UserDetailItemView) convertView;
 
             String name = getName(mContext, item);
-            Drawable drawable;
             if (item.picture == null) {
-                drawable = getDrawable(mContext, item).mutate();
+                v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                drawable = new BitmapDrawable(mContext.getResources(), item.picture);
+                v.bind(name, item.picture, item.info.id);
             }
             // Disable the icon if switching is disabled
-            if (!item.isSwitchToEnabled) {
-                drawable.setTint(mContext.getColor(R.color.qs_tile_disabled_color));
-            }
-            v.bind(name, drawable);
+            v.setAvatarEnabled(item.isSwitchToEnabled);
             convertView.setActivated(item.isCurrent);
             convertView.setTag(item);
             return convertView;

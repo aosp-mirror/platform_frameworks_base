@@ -76,9 +76,9 @@ public class UserDetailView extends PseudoGridView {
             }
             String name = getName(mContext, item);
             if (item.picture == null) {
-                v.bind(name, getDrawable(mContext, item));
+                v.bind(name, getDrawable(mContext, item), item.resolveId());
             } else {
-                v.bind(name, item.picture);
+                v.bind(name, item.picture, item.info.id);
             }
             v.setActivated(item.isCurrent);
             v.setDisabledByAdmin(item.isDisabledByAdmin);

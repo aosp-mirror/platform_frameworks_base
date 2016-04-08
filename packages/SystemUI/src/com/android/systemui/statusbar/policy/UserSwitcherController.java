@@ -50,7 +50,6 @@ import android.widget.BaseAdapter;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
-import com.android.systemui.BitmapHelper;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
@@ -197,8 +196,6 @@ public class UserSwitcherController {
                 boolean canSwitchUsers = mUserManager.canSwitchUsers();
                 UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
-                int avatarSize = mContext.getResources()
-                        .getDimensionPixelSize(R.dimen.max_avatar_size);
 
                 for (UserInfo info : infos) {
                     boolean isCurrent = currentId == info.id;
@@ -219,8 +216,10 @@ public class UserSwitcherController {
                                 picture = mUserManager.getUserIcon(info.id);
 
                                 if (picture != null) {
-                                    picture = BitmapHelper.createCircularClip(
-                                            picture, avatarSize, avatarSize);
+                                    int avatarSize = mContext.getResources()
+                                            .getDimensionPixelSize(R.dimen.max_avatar_size);
+                                    picture = Bitmap.createScaledBitmap(
+                                            picture, avatarSize, avatarSize, true);
                                 }
                             }
                             int index = isCurrent ? 0 : records.size();
@@ -664,8 +663,7 @@ public class UserSwitcherController {
             if (item.isAddUser) {
                 return context.getDrawable(R.drawable.ic_add_circle_qs);
             }
-            return UserIcons.getDefaultUserIcon(item.isGuest ? UserHandle.USER_NULL : item.info.id,
-                    /* light= */ true);
+            return UserIcons.getDefaultUserIcon(item.resolveId(), /* light= */ true);
         }
 
         public void refresh() {
@@ -716,6 +714,13 @@ public class UserSwitcherController {
         public UserRecord copyWithIsCurrent(boolean _isCurrent) {
             return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted,
                     isSwitchToEnabled);
+        }
+
+        public int resolveId() {
+            if (isGuest || info == null) {
+                return UserHandle.USER_NULL;
+            }
+            return info.id;
         }
 
         public String toString() {

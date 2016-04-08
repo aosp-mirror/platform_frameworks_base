@@ -26,7 +26,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
@@ -37,7 +36,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.util.UserIcons;
-import com.android.systemui.BitmapHelper;
+import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -155,8 +154,8 @@ public final class UserInfoController {
                 Drawable avatar = null;
                 Bitmap rawAvatar = um.getUserIcon(userId);
                 if (rawAvatar != null) {
-                    avatar = new BitmapDrawable(mContext.getResources(),
-                            BitmapHelper.createCircularClip(rawAvatar, avatarSize, avatarSize));
+                    avatar = new UserIconDrawable(avatarSize)
+                            .setIcon(rawAvatar).setBadgeIfManagedUser(mContext, userId).bake();
                 } else {
                     avatar = UserIcons.getDefaultUserIcon(isGuest? UserHandle.USER_NULL : userId,
                             /* light= */ true);
