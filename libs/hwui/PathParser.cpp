@@ -156,6 +156,12 @@ static void getFloats(std::vector<float>* outPoints, PathParser::ParseResult* re
     return;
 }
 
+bool PathParser::isVerbValid(char verb) {
+    verb = tolower(verb);
+    return verb == 'a' || verb == 'c' || verb == 'h' || verb == 'l' || verb == 'm' || verb == 'q'
+            || verb == 's' || verb == 't' || verb == 'v' || verb == 'z';
+}
+
 void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
         const char* pathStr, size_t strLen) {
     if (pathStr == NULL) {
@@ -171,6 +177,12 @@ void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
         end = nextStart(pathStr, strLen, end);
         std::vector<float> points;
         getFloats(&points, result, pathStr, start, end);
+        if (!isVerbValid(pathStr[start])) {
+            result->failureOccurred = true;
+            result->failureMessage = "Invalid pathData. Failure occurred at position "
+                    + std::to_string(start) + " of path: " + pathStr;
+        }
+        // If either verb or points is not valid, return immediately.
         if (result->failureOccurred) {
             return;
         }
@@ -182,10 +194,15 @@ void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
     }
 
     if ((end - start) == 1 && start < strLen) {
+        if (!isVerbValid(pathStr[start])) {
+            result->failureOccurred = true;
+            result->failureMessage = "Invalid pathData. Failure occurred at position "
+                    + std::to_string(start) + " of path: " + pathStr;
+            return;
+        }
         data->verbs.push_back(pathStr[start]);
         data->verbSizes.push_back(0);
     }
-    return;
 }
 
 void PathParser::dump(const PathData& data) {
@@ -218,7 +235,8 @@ void PathParser::parseStringForSkPath(SkPath* skPath, ParseResult* result, const
     // Check if there is valid data coming out of parsing the string.
     if (pathData.verbs.size() == 0) {
         result->failureOccurred = true;
-        result->failureMessage = "No verbs found in the string for pathData";
+        result->failureMessage = "No verbs found in the string for pathData: ";
+        result->failureMessage += pathStr;
         return;
     }
     VectorDrawableUtils::verbsToPath(skPath, pathData);

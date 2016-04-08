@@ -31,12 +31,7 @@ public class PathParser {
             throw new IllegalArgumentException("Path string can not be null.");
         }
         Path path = new Path();
-        boolean hasValidPathData = nParseStringForPath(path.mNativePath, pathString,
-                pathString.length());
-        if (!hasValidPathData) {
-            throw new IllegalArgumentException("Path string: " + pathString +
-                    " does not contain valid path data");
-        }
+        nParseStringForPath(path.mNativePath, pathString, pathString.length());
         return path;
     }
 
@@ -104,7 +99,6 @@ public class PathParser {
             }
             super.finalize();
         }
-
     }
 
     /**
@@ -123,7 +117,7 @@ public class PathParser {
     }
 
     // Native functions are defined below.
-    private static native boolean nParseStringForPath(long pathPtr, String pathString,
+    private static native void nParseStringForPath(long pathPtr, String pathString,
             int stringLength);
     private static native void nCreatePathFromPathData(long outPathPtr, long pathData);
     private static native long nCreateEmptyPathData();
