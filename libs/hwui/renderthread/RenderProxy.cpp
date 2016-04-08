@@ -52,14 +52,6 @@ namespace renderthread {
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
 
-namespace DumpFlags {
-    enum {
-        FrameStats = 1 << 0,
-        Reset      = 1 << 1,
-        JankStats  = 1 << 2,
-    };
-};
-
 CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory) {
     return new CanvasContext(*args->thread, args->translucent,
@@ -424,6 +416,9 @@ CREATE_BRIDGE4(dumpProfileInfo, CanvasContext* context, RenderThread* thread,
     }
     if (args->dumpFlags & DumpFlags::Reset) {
         args->context->resetFrameStats();
+    }
+    if (args->dumpFlags & DumpFlags::JankStats) {
+        args->thread->jankTracker().dump(args->fd);
     }
     return nullptr;
 }
