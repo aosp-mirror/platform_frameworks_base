@@ -7624,7 +7624,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0
                 || volumeDownState > 0;
         try {
-            if (SystemProperties.getInt(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, 0) != 0) {
+            if (SystemProperties.getInt(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, 0) != 0
+                    || SystemProperties.getInt(ShutdownThread.RO_SAFEMODE_PROPERTY, 0) != 0) {
                 int auditSafeMode = SystemProperties.getInt(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, 0);
 
                 if (auditSafeMode == 0) {
@@ -7648,6 +7649,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mSafeMode) {
             Log.i(TAG_WM, "SAFE MODE ENABLED (menu=" + menuState + " s=" + sState
                     + " dpad=" + dpadState + " trackball=" + trackballState + ")");
+            SystemProperties.set(ShutdownThread.RO_SAFEMODE_PROPERTY, "1");
         } else {
             Log.i(TAG_WM, "SAFE MODE not enabled");
         }
