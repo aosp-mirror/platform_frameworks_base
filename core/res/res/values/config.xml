@@ -433,9 +433,6 @@
     <!-- Boolean indicating we re-try re-associating once upon disconnection and RSSI is high failure  -->
     <bool translatable="true" name="config_wifi_enable_disconnection_debounce">true</bool>
 
-    <!-- Boolean indicating autojoin will prefer 5GHz and choose 5GHz BSSIDs -->
-    <bool translatable="true" name="config_wifi_enable_5GHz_preference">true</bool>
-
     <!-- Boolean indicating whether or not to revert to default country code when cellular
          radio is unable to find any MCC information to infer wifi country code from -->
     <bool translatable="false" name="config_wifi_revert_country_code_on_cellular_loss">false</bool>
@@ -452,8 +449,6 @@
     <!-- Integer specifying the basic autojoin parameters -->
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">40</integer>
-    <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_high">16</integer>
-    <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_low">10</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_threshold">-75</integer>
     <integer translatable="false" name="config_wifi_framework_RSSI_SCORE_OFFSET">85</integer>
     <integer translatable="false" name="config_wifi_framework_RSSI_SCORE_SLOPE">4</integer>
@@ -508,14 +503,8 @@
     <!-- Integer indicating disconnect mode short scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_disconnected_short_scan_interval">15000</integer>
 
-    <!-- Integer indicating disconnect mode long scan interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_disconnected_long_scan_interval">120000</integer>
-
     <!-- Integer indicating associated partial scan short interval in milliseconds -->
     <integer translatable="false" name="config_wifi_associated_short_scan_interval">20000</integer>
-
-    <!-- Integer indicating associated partial scan long interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_associated_long_scan_interval">180000</integer>
 
     <!-- Integer indicating associated full scan backoff, representing a fraction: xx/8 -->
     <integer translatable="false" name="config_wifi_framework_associated_full_scan_backoff">12</integer>
@@ -528,18 +517,6 @@
 
     <!-- Integer indicating associated full scan max num active channels -->
     <integer translatable="false" name="config_wifi_framework_associated_partial_scan_max_num_active_channels">6</integer>
-
-    <!-- Integer indicating associated full scan max num passive channels -->
-    <integer translatable="false" name="config_wifi_framework_associated_partial_scan_max_num_passive_channels">3</integer>
-
-    <!-- Integer indicating number of association errors leading to blacklisting of the network -->
-    <integer translatable="false" name="config_wifi_framework_max_connection_errors_to_blacklist">4</integer>
-
-    <!-- Integer indicating number of authentication errors leading to blacklisting of the network -->
-    <integer translatable="false" name="config_wifi_framework_max_auth_errors_to_blacklist">4</integer>
-
-    <!-- Integer indicating minimum blacklisting delay of a wofo configuration due to connectin or auth errors -->
-    <integer translatable="false" name="config_wifi_framework_network_black_list_min_time_milli">120000</integer>
 
     <!-- Integer indicating RSSI boost given to current network -->
     <integer translatable="false" name="config_wifi_framework_current_network_boost">16</integer>
