@@ -17,16 +17,24 @@
 package com.android.systemui.statusbar;
 
 import android.app.AlertDialog;
+import android.app.AppGlobals;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Icon;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
@@ -42,8 +50,10 @@ import android.view.Window;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.internal.app.AssistUtils;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 
@@ -58,7 +68,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
  */
 public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
-
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
     private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
@@ -66,6 +75,7 @@ public final class KeyboardShortcuts {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
+    private final IPackageManager mPackageManager;
     private final OnClickListener dialogCloseListener =  new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int id) {
             dismissKeyboardShortcutsDialog();
@@ -77,6 +87,7 @@ public final class KeyboardShortcuts {
 
     public KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
+        this.mPackageManager = AppGlobals.getPackageManager();
         loadResources(context);
     }
 
@@ -254,68 +265,11 @@ public final class KeyboardShortcuts {
                     @Override
                     public void onKeyboardShortcutsReceived(
                             final List<KeyboardShortcutGroup> result) {
-                        KeyboardShortcutGroup systemGroup = new KeyboardShortcutGroup(
-                                mContext.getString(R.string.keyboard_shortcut_group_system), true);
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(R.string.keyboard_shortcut_group_system_home),
-                                KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON));
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(R.string.keyboard_shortcut_group_system_back),
-                                KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON));
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(R.string.keyboard_shortcut_group_system_recents),
-                                KeyEvent.KEYCODE_TAB, KeyEvent.META_ALT_ON));
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_system_notifications),
-                                KeyEvent.KEYCODE_N, KeyEvent.META_META_ON));
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_system_shortcuts_helper),
-                                KeyEvent.KEYCODE_SLASH, KeyEvent.META_META_ON));
-                        systemGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_system_switch_input),
-                                KeyEvent.KEYCODE_SPACE, KeyEvent.META_META_ON));
-                        result.add(systemGroup);
-
-                        KeyboardShortcutGroup applicationGroup = new KeyboardShortcutGroup(
-                                mContext.getString(R.string.keyboard_shortcut_group_applications),
-                                true);
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_assist),
-                                KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_browser),
-                                KeyEvent.KEYCODE_B, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_contacts),
-                                KeyEvent.KEYCODE_C, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_email),
-                                KeyEvent.KEYCODE_E, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_im),
-                                KeyEvent.KEYCODE_T, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_music),
-                                KeyEvent.KEYCODE_P, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_youtube),
-                                KeyEvent.KEYCODE_Y, KeyEvent.META_META_ON));
-                        applicationGroup.addItem(new KeyboardShortcutInfo(
-                                mContext.getString(
-                                        R.string.keyboard_shortcut_group_applications_calendar),
-                                KeyEvent.KEYCODE_L, KeyEvent.META_META_ON));
-                        result.add(applicationGroup);
-
+                        result.add(getSystemShortcuts());
+                        final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
+                        if (appShortcuts != null) {
+                            result.add(appShortcuts);
+                        }
                         showKeyboardShortcutsDialog(result);
                     }
                 }, deviceId);
@@ -328,6 +282,160 @@ public final class KeyboardShortcuts {
         if (mKeyboardShortcutsDialog != null) {
             mKeyboardShortcutsDialog.dismiss();
             mKeyboardShortcutsDialog = null;
+        }
+    }
+
+    private KeyboardShortcutGroup getSystemShortcuts() {
+        final KeyboardShortcutGroup systemGroup = new KeyboardShortcutGroup(
+                mContext.getString(R.string.keyboard_shortcut_group_system), true);
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(R.string.keyboard_shortcut_group_system_home),
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.META_META_ON));
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(R.string.keyboard_shortcut_group_system_back),
+                KeyEvent.KEYCODE_DEL,
+                KeyEvent.META_META_ON));
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(R.string.keyboard_shortcut_group_system_recents),
+                KeyEvent.KEYCODE_TAB,
+                KeyEvent.META_ALT_ON));
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(
+                        R.string.keyboard_shortcut_group_system_notifications),
+                KeyEvent.KEYCODE_N,
+                KeyEvent.META_META_ON));
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(
+                        R.string.keyboard_shortcut_group_system_shortcuts_helper),
+                KeyEvent.KEYCODE_SLASH,
+                KeyEvent.META_META_ON));
+        systemGroup.addItem(new KeyboardShortcutInfo(
+                mContext.getString(
+                        R.string.keyboard_shortcut_group_system_switch_input),
+                KeyEvent.KEYCODE_SPACE,
+                KeyEvent.META_META_ON));
+        return systemGroup;
+    }
+
+    private KeyboardShortcutGroup getDefaultApplicationShortcuts() {
+        final int userId = mContext.getUserId();
+        final KeyboardShortcutGroup applicationGroup = new KeyboardShortcutGroup(
+                mContext.getString(R.string.keyboard_shortcut_group_applications),
+                true);
+
+        // Assist.
+        final AssistUtils assistUtils = new AssistUtils(mContext);
+        final ComponentName assistComponent = assistUtils.getAssistComponentForUser(userId);
+        PackageInfo assistPackageInfo = null;
+        try {
+            assistPackageInfo = mPackageManager.getPackageInfo(
+                    assistComponent.getPackageName(), 0, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "PackageManagerService is dead");
+        }
+
+        if (assistPackageInfo != null) {
+            final Icon assistIcon = Icon.createWithResource(
+                    assistPackageInfo.applicationInfo.packageName,
+                    assistPackageInfo.applicationInfo.icon);
+
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_assist),
+                    assistIcon,
+                    KeyEvent.KEYCODE_UNKNOWN,
+                    KeyEvent.META_META_ON));
+        }
+
+        // Browser.
+        final Icon browserIcon = getIconForIntentCategory(Intent.CATEGORY_APP_BROWSER, userId);
+        if (browserIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_browser),
+                    browserIcon,
+                    KeyEvent.KEYCODE_B,
+                    KeyEvent.META_META_ON));
+        }
+
+
+        // Contacts.
+        final Icon contactsIcon = getIconForIntentCategory(Intent.CATEGORY_APP_CONTACTS, userId);
+        if (contactsIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_contacts),
+                    contactsIcon,
+                    KeyEvent.KEYCODE_C,
+                    KeyEvent.META_META_ON));
+        }
+
+        // Email.
+        final Icon emailIcon = getIconForIntentCategory(Intent.CATEGORY_APP_EMAIL, userId);
+        if (emailIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_email),
+                    emailIcon,
+                    KeyEvent.KEYCODE_E,
+                    KeyEvent.META_META_ON));
+        }
+
+        // Messaging.
+        final Icon messagingIcon = getIconForIntentCategory(Intent.CATEGORY_APP_MESSAGING, userId);
+        if (messagingIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_im),
+                    messagingIcon,
+                    KeyEvent.KEYCODE_T,
+                    KeyEvent.META_META_ON));
+        }
+
+        // Music.
+        final Icon musicIcon = getIconForIntentCategory(Intent.CATEGORY_APP_MUSIC, userId);
+        if (musicIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_music),
+                    musicIcon,
+                    KeyEvent.KEYCODE_P,
+                    KeyEvent.META_META_ON));
+        }
+
+        // Calendar.
+        final Icon calendarIcon = getIconForIntentCategory(Intent.CATEGORY_APP_CALENDAR, userId);
+        if (calendarIcon != null) {
+            applicationGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_calendar),
+                    calendarIcon,
+                    KeyEvent.KEYCODE_L,
+                    KeyEvent.META_META_ON));
+        }
+
+        return applicationGroup.getItems().size() == 0 ? null : applicationGroup;
+    }
+
+    private Icon getIconForIntentCategory(String intentCategory, int userId) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(intentCategory);
+
+        final PackageInfo packageInfo = getPackageInfoForIntent(intent, userId);
+        if (packageInfo != null && packageInfo.applicationInfo.icon != 0) {
+            return Icon.createWithResource(
+                    packageInfo.applicationInfo.packageName,
+                    packageInfo.applicationInfo.icon);
+        }
+        return null;
+    }
+
+    private PackageInfo getPackageInfoForIntent(Intent intent, int userId) {
+        try {
+            ResolveInfo handler;
+            handler = mPackageManager.resolveIntent(
+                    intent, intent.resolveTypeIfNeeded(mContext.getContentResolver()), 0, userId);
+            if (handler == null || handler.activityInfo == null) {
+                return null;
+            }
+            return mPackageManager.getPackageInfo(handler.activityInfo.packageName, 0, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "PackageManagerService is dead", e);
+            return null;
         }
     }
 
@@ -394,9 +502,23 @@ public final class KeyboardShortcuts {
                 }
                 View shortcutView = inflater.inflate(R.layout.keyboard_shortcut_app_item,
                         shortcutContainer, false);
-                TextView textView = (TextView) shortcutView
+
+                if (info.getIcon() != null) {
+                    ImageView shortcutIcon = (ImageView) shortcutView
+                            .findViewById(R.id.keyboard_shortcuts_icon);
+                    shortcutIcon.setImageIcon(info.getIcon());
+                    shortcutIcon.setVisibility(View.VISIBLE);
+                }
+
+                TextView shortcutKeyword = (TextView) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_keyword);
-                textView.setText(info.getLabel());
+                shortcutKeyword.setText(info.getLabel());
+                if (info.getIcon() != null) {
+                    RelativeLayout.LayoutParams lp =
+                            (RelativeLayout.LayoutParams) shortcutKeyword.getLayoutParams();
+                    lp.removeRule(RelativeLayout.ALIGN_PARENT_START);
+                    shortcutKeyword.setLayoutParams(lp);
+                }
 
                 ViewGroup shortcutItemsContainer = (ViewGroup) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_item_container);
