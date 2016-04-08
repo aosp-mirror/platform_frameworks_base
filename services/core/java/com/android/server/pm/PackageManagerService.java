@@ -11754,6 +11754,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Okay!
             targetPackageSetting.installerPackageName = installerPackageName;
+            if (installerPackageName != null) {
+                mSettings.mInstallerPackages.add(installerPackageName);
+            }
             scheduleWriteSettingsLocked();
         }
     }
@@ -14895,7 +14898,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  This method is an internal method that could be get invoked either
      *  to delete an installed package or to clean up a failed installation.
      *  After deleting an installed package, a broadcast is sent to notify any
-     *  listeners that the package has been installed. For cleaning up a failed
+     *  listeners that the package has been removed. For cleaning up a failed
      *  installation, the broadcast is not necessary since the package's
      *  installation wouldn't have sent the initial broadcast either
      *  The key steps in deleting a package are

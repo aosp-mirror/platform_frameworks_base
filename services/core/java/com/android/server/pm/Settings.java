@@ -247,6 +247,9 @@ final class Settings {
     /** Map from package name to settings */
     final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
 
+    /** List of packages that installed other packages */
+    final ArraySet<String> mInstallerPackages = new ArraySet<>();
+
     /** Map from package name to appId */
     private final ArrayMap<String, Integer> mKernelMapping = new ArrayMap<>();
 
@@ -506,6 +509,9 @@ final class Settings {
         PackageSetting p = mPackages.get(pkgName);
         if (p != null) {
             p.setInstallerPackageName(installerPkgName);
+            if (installerPkgName != null) {
+                mInstallerPackages.add(installerPkgName);
+            }
         }
     }
 
@@ -1062,6 +1068,7 @@ final class Settings {
         final PackageSetting p = mPackages.get(name);
         if (p != null) {
             mPackages.remove(name);
+            removeInstallerPackageStatus(name);
             if (p.sharedUser != null) {
                 p.sharedUser.removePackage(p);
                 if (p.sharedUser.packages.size() == 0) {
@@ -1075,6 +1082,26 @@ final class Settings {
             }
         }
         return -1;
+    }
+
+    /**
+     * Checks if {@param packageName} is an installer package and if so, clear the installer
+     * package name of the packages that are installed by this.
+     */
+    private void removeInstallerPackageStatus(String packageName) {
+        // Check if the package to be removed is an installer package.
+        if (!mInstallerPackages.contains(packageName)) {
+            return;
+        }
+        for (int i = 0; i < mPackages.size(); i++) {
+            final PackageSetting ps = mPackages.valueAt(i);
+            final String installerPackageName = ps.getInstallerPackageName();
+            if (installerPackageName != null
+                    && installerPackageName.equals(packageName)) {
+                ps.setInstallerPackageName(null);
+            }
+        }
+        mInstallerPackages.remove(packageName);
     }
 
     private void replacePackageLPw(String name, PackageSetting newp) {
@@ -2742,6 +2769,7 @@ final class Settings {
         mPendingPackages.clear();
         mPastSignatures.clear();
         mKeySetRefs.clear();
+        mInstallerPackages.clear();
 
         try {
             if (str == null) {
@@ -3704,6 +3732,10 @@ final class Settings {
                 }
             } else {
                 packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
+            }
+
+            if (installerPackageName != null) {
+                mInstallerPackages.add(installerPackageName);
             }
 
             final String installStatusStr = parser.getAttributeValue(null, "installStatus");
