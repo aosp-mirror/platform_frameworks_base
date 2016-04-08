@@ -491,7 +491,8 @@ Android Auto.</p>
 Android SDK and emulator system image)</li>
 <li>1280 x 800  minimum screen resolution</li>
 <li>Java Development Kit (JDK) 8</li>
-<li>Optional for accelerated emulator: Intel® processor with support for Intel®
+<li>For accelerated emulator: 64-bit operating system and
+Intel® processor with support for Intel®
 VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality</li>
 </ul>
 </div>
@@ -522,6 +523,10 @@ capable of running 32-bit applications)</i></li>
 Android SDK and emulator system image)</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Java Development Kit (JDK) 8</li>
+<li>For accelerated emulator: 64-bit operating system and
+Intel® processor with support for Intel®
+VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality,
+or AMD processor with support for AMD Virtualization™ (AMD-V™)</li>
 </ul>
 </div>
 
