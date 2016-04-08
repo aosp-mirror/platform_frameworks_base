@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -53,6 +54,7 @@ public class UnlaunchableAppActivity extends Activity
 
     private int mUserId;
     private int mReason;
+    private IntentSender mTarget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,7 @@ public class UnlaunchableAppActivity extends Activity
         Intent intent = getIntent();
         mReason = intent.getIntExtra(EXTRA_UNLAUNCHABLE_REASON, -1);
         mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT);
 
         if (mUserId == UserHandle.USER_NULL) {
             Log.wtf(TAG, "Invalid user id: " + mUserId + ". Stopping.");
@@ -105,6 +108,14 @@ public class UnlaunchableAppActivity extends Activity
     public void onClick(DialogInterface dialog, int which) {
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE && which == DialogInterface.BUTTON_POSITIVE) {
             UserManager.get(this).setQuietModeEnabled(mUserId, false);
+
+            if (mTarget != null) {
+                try {
+                    startIntentSenderForResult(mTarget, -1, null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException e) {
+                    /* ignore */
+                }
+            }
         }
     }
 
@@ -119,6 +130,12 @@ public class UnlaunchableAppActivity extends Activity
         Intent intent = createBaseIntent();
         intent.putExtra(EXTRA_UNLAUNCHABLE_REASON, UNLAUNCHABLE_REASON_QUIET_MODE);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        return intent;
+    }
+
+    public static Intent createInQuietModeDialogIntent(int userId, IntentSender target) {
+        Intent intent = createInQuietModeDialogIntent(userId);
+        intent.putExtra(Intent.EXTRA_INTENT, target);
         return intent;
     }
 }
