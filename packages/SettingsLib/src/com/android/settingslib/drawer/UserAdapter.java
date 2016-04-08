@@ -33,7 +33,7 @@ import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.settingslib.drawable.UserIconDrawable;
 
 import com.android.settingslib.R;
 
@@ -71,7 +71,8 @@ public class UserAdapter implements SpinnerAdapter, ListAdapter {
         }
 
         private static Drawable encircle(Context context, Drawable icon) {
-            return CircleFramedDrawable.getInstance(context, UserIcons.convertToBitmap(icon));
+            return new UserIconDrawable(UserIconDrawable.getSizeForList(context))
+                    .setIconDrawable(icon).bake();
         }
     }
     private ArrayList<UserDetails> data;

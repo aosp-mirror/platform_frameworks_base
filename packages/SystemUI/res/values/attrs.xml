@@ -53,10 +53,14 @@
         <enum name="vertical" value="1" />
     </attr>
     <declare-styleable name="UserAvatarView">
+        <attr name="avatarPadding" format="dimension" />
         <attr name="frameWidth" format="dimension" />
         <attr name="framePadding" format="dimension" />
+        <!-- {@deprecated Use a statelist in frameColor instead.} -->
         <attr name="activeFrameColor" format="color" />
-        <attr name="frameColor" />
+        <attr name="frameColor" format="color" />
+        <attr name="badgeDiameter" format="dimension" />
+        <attr name="badgeMargin" format="dimension" />
     </declare-styleable>
     <declare-styleable name="UserDetailItemView">
         <attr name="regularFontFamily" format="string" />
