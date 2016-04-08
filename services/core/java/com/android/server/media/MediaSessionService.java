@@ -962,6 +962,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mKeyEventReceiver.aquireWakeLockLocked();
                     }
                     Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
                     try {
                         if (user.mLastMediaButtonReceiver != null) {
@@ -986,6 +987,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                     // Fallback to legacy behavior
                     Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                    keyIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
                     if (needWakeLock) {
                         keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
