@@ -116,6 +116,7 @@ public class RecentsTransitionHelper {
                     // window transition
                     EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                    stackView.cancelAllTaskViewAnimations();
 
                     if (screenPinningRequested) {
                         // Request screen pinning after the animation runs
@@ -133,6 +134,7 @@ public class RecentsTransitionHelper {
                     // window transition
                     EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                    stackView.cancelAllTaskViewAnimations();
                 }
             };
         }
