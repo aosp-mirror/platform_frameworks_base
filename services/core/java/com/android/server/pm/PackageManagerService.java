@@ -3055,7 +3055,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (p == null) {
                 p = mPackages.get(packageName);
-                if (matchFactoryOnly && !isSystemApp(p)) {
+                if (matchFactoryOnly && p != null && !isSystemApp(p)) {
                     return null;
                 }
             }
