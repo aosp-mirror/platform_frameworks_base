@@ -270,12 +270,6 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
         // Ensure we always have a valid surface & context
         surface = mPBufferSurface;
     }
-    // TODO: Temporary to help diagnose b/27286867
-    if (mCurrentSurface == mPBufferSurface || surface == mPBufferSurface) {
-        ALOGD("Switching from surface %p%s to %p%s", mCurrentSurface,
-                mCurrentSurface == mPBufferSurface ? " (pbuffer)" : "",
-                        surface, surface == mPBufferSurface ? " (pbuffer)" : "");
-    }
     if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
         if (errOut) {
             *errOut = eglGetError();
