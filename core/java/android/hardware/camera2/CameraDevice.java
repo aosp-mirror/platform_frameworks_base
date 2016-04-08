@@ -438,7 +438,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #createCaptureSession
      * @see OutputConfiguration
      */
-    public abstract void createCaptureSessionByOutputConfiguration(
+    public abstract void createCaptureSessionByOutputConfigurations(
             List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
@@ -627,7 +627,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see OutputConfiguration
      *
      */
-    public abstract void createReprocessableCaptureSessionWithConfigurations(
+    public abstract void createReprocessableCaptureSessionByConfigurations(
             @NonNull InputConfiguration inputConfig,
             @NonNull List<OutputConfiguration> outputs,
             @NonNull CameraCaptureSession.StateCallback callback,
