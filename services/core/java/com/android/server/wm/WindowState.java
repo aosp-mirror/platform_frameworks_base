@@ -1573,7 +1573,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mAppToken.allAppWindows.get(i);
-            if (win.mWillReplaceWindow && win.mReplacingWindow == this) {
+            if (win.mWillReplaceWindow && win.mReplacingWindow == this && hasDrawnLw()) {
                 if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
                 win.mWillReplaceWindow = false;
                 win.mAnimateReplacingWindow = false;
