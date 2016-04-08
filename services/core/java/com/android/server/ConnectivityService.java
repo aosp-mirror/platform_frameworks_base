@@ -165,7 +165,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         implements PendingIntent.OnFinished {
     private static final String TAG = "ConnectivityService";
 
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
     private static final boolean LOGD_RULES = false;
@@ -450,9 +450,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private class LegacyTypeTracker {
 
-        private static final boolean DBG = false;
+        private static final boolean DBG = true;
         private static final boolean VDBG = false;
-        private static final String TAG = "CSLegacyTypeTracker";
 
         /**
          * Array of lists, one per legacy network type (e.g., TYPE_MOBILE_MMS).
@@ -605,12 +604,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.decreaseIndent();
             pw.println();
         }
-
-        // This class needs its own log method because it has a different TAG.
-        private void log(String s) {
-            Slog.d(TAG, s);
-        }
-
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
@@ -1523,7 +1516,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mInitialBroadcast = new Intent(intent);
             }
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            if (DBG) {
+            if (VDBG) {
                 log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
@@ -1651,7 +1644,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address()) == false) {
-            loge("Unexpected mtu value: " + mtu + ", " + iface);
+            if (mtu != 0) loge("Unexpected mtu value: " + mtu + ", " + iface);
             return;
         }
 
@@ -1662,7 +1655,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         try {
-            if (DBG) log("Setting MTU size: " + iface + ", " + mtu);
+            if (VDBG) log("Setting MTU size: " + iface + ", " + mtu);
             mNetd.setMtu(iface, mtu);
         } catch (Exception e) {
             Slog.e(TAG, "exception in setMtu()" + e);
@@ -1698,7 +1691,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (tcpBufferSizes.equals(mCurrentTcpBufferSizes)) return;
 
         try {
-            if (DBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
+            if (VDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
 
             final String prefix = "/sys/kernel/ipv4/tcp_";
             FileUtils.stringToFile(prefix + "rmem_min", values[0]);
@@ -2306,7 +2299,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (DBG) log("Attempt to release unowned NetworkRequest " + request);
                 return;
             }
-            if (DBG) log("releasing NetworkRequest " + request);
+            if (VDBG || (DBG && nri.isRequest())) log("releasing NetworkRequest " + request);
             nri.unlinkDeathRecipient();
             mNetworkRequests.remove(request);
             mNetworkRequestInfoLogs.log("RELEASE " + nri);
@@ -2319,7 +2312,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                     if (nai.networkRequests.get(nri.request.requestId) != null) {
                         nai.networkRequests.remove(nri.request.requestId);
-                        if (DBG) {
+                        if (VDBG) {
                             log(" Removing from current network " + nai.name() +
                                     ", leaving " + nai.networkRequests.size() +
                                     " requests.");
@@ -2430,14 +2423,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void scheduleUnvalidatedPrompt(NetworkAgentInfo nai) {
-        if (DBG) log("scheduleUnvalidatedPrompt " + nai.network);
+        if (VDBG) log("scheduleUnvalidatedPrompt " + nai.network);
         mHandler.sendMessageDelayed(
                 mHandler.obtainMessage(EVENT_PROMPT_UNVALIDATED, nai.network),
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
     private void handlePromptUnvalidated(Network network) {
-        if (DBG) log("handlePromptUnvalidated " + network);
+        if (VDBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
 
         // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
@@ -2480,11 +2473,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             break;
                         }
                     }
-                    if (msg.what == EVENT_EXPIRE_NET_TRANSITION_WAKELOCK) {
-                        log("Failed to find a new network - expiring NetTransition Wakelock");
-                    } else {
-                        log("NetTransition Wakelock (" + (causedBy == null ? "unknown" : causedBy) +
-                                " cleared because we found a replacement network");
+                    if (VDBG) {
+                        if (msg.what == EVENT_EXPIRE_NET_TRANSITION_WAKELOCK) {
+                            log("Failed to find a new network - expiring NetTransition Wakelock");
+                        } else {
+                            log("NetTransition Wakelock (" +
+                                    (causedBy == null ? "unknown" : causedBy) +
+                                    " cleared because we found a replacement network");
+                        }
                     }
                     break;
                 }
@@ -3338,10 +3334,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static enum NotificationType { SIGN_IN, NO_INTERNET; };
 
     private void setProvNotificationVisible(boolean visible, int networkType, String action) {
-        if (DBG) {
-            log("setProvNotificationVisible: E visible=" + visible + " networkType=" + networkType
-                + " action=" + action);
-        }
         Intent intent = new Intent(action);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
         // Concatenate the range of types onto the range of NetIDs.
@@ -3368,7 +3360,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void setProvNotificationVisibleIntent(boolean visible, int id,
             NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent,
             boolean highPriority) {
-        if (DBG) {
+        if (VDBG || (DBG && visible)) {
             log("setProvNotificationVisibleIntent " + notifyType + " visible=" + visible
                     + " networkType=" + getNetworkTypeName(networkType)
                     + " extraInfo=" + extraInfo + " highPriority=" + highPriority);
@@ -3811,8 +3803,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Bundle thresholds = new Bundle();
         thresholds.putIntegerArrayList("thresholds", thresholdsArray);
 
-        // TODO: Switch to VDBG.
-        if (DBG) {
+        if (VDBG || (DBG && !"CONNECT".equals(reason))) {
             String detail;
             if (request != null && request.networkCapabilities.hasSignalStrength()) {
                 detail = reason + " " + request.networkCapabilities.getSignalStrength();
@@ -3977,7 +3968,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
                 NetworkRequestType.LISTEN);
-        if (DBG) log("listenForNetwork for " + nri);
+        if (VDBG) log("listenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
         return networkRequest;
@@ -3995,7 +3986,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
                 NetworkRequestType.LISTEN);
-        if (DBG) log("pendingListenForNetwork for " + nri);
+        if (VDBG) log("pendingListenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
     }
@@ -4200,7 +4191,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // do this twice, adding non-nexthop routes first, then routes they are dependent on
         for (RouteInfo route : routeDiff.added) {
             if (route.hasGateway()) continue;
-            if (DBG) log("Adding Route [" + route + "] to network " + netId);
+            if (VDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
                 mNetd.addRoute(netId, route);
             } catch (Exception e) {
@@ -4211,7 +4202,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         for (RouteInfo route : routeDiff.added) {
             if (route.hasGateway() == false) continue;
-            if (DBG) log("Adding Route [" + route + "] to network " + netId);
+            if (VDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
                 mNetd.addRoute(netId, route);
             } catch (Exception e) {
@@ -4222,7 +4213,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         for (RouteInfo route : routeDiff.removed) {
-            if (DBG) log("Removing Route [" + route + "] from network " + netId);
+            if (VDBG) log("Removing Route [" + route + "] from network " + netId);
             try {
                 mNetd.removeRoute(netId, route);
             } catch (Exception e) {
@@ -4238,7 +4229,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         Collection<InetAddress> dnses = newLp.getDnsServers();
-        if (DBG) log("Setting Dns servers for network " + netId + " to " + dnses);
+        if (DBG) log("Setting DNS servers for network " + netId + " to " + dnses);
         try {
             mNetd.setDnsServersForNetwork(
                     netId, NetworkUtils.makeStrings(dnses), newLp.getDomains());
@@ -4506,14 +4497,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 if (currentNetwork == null ||
                         currentNetwork.getCurrentScore() < newNetwork.getCurrentScore()) {
-                    if (DBG) log("rematch for " + newNetwork.name());
+                    if (VDBG) log("rematch for " + newNetwork.name());
                     if (currentNetwork != null) {
-                        if (DBG) log("   accepting network in place of " + currentNetwork.name());
+                        if (VDBG) log("   accepting network in place of " + currentNetwork.name());
                         currentNetwork.networkRequests.remove(nri.request.requestId);
                         currentNetwork.networkLingered.add(nri.request);
                         affectedNetworks.add(currentNetwork);
                     } else {
-                        if (DBG) log("   accepting network in place of null");
+                        if (VDBG) log("   accepting network in place of null");
                     }
                     unlinger(newNetwork);
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
@@ -4843,7 +4834,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateNetworkScore(NetworkAgentInfo nai, int score) {
-        if (DBG) log("updateNetworkScore for " + nai.name() + " to " + score);
+        if (VDBG) log("updateNetworkScore for " + nai.name() + " to " + score);
         if (score < 0) {
             loge("updateNetworkScore for " + nai.name() + " got a negative score (" + score +
                     ").  Bumping score to min of 0");
@@ -4921,7 +4912,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType) {
-        if (DBG) log("notifyType " + notifyTypeToName(notifyType) + " for " + networkAgent.name());
+        if (VDBG) log("notifyType " + notifyTypeToName(notifyType) + " for " + networkAgent.name());
         for (int i = 0; i < networkAgent.networkRequests.size(); i++) {
             NetworkRequest nr = networkAgent.networkRequests.valueAt(i);
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
