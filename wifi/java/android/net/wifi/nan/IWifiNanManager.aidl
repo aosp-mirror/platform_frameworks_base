@@ -31,6 +31,11 @@ import android.net.wifi.nan.SubscribeConfig;
  */
 interface IWifiNanManager
 {
+    // NAN API
+    void enableUsage();
+    void disableUsage();
+    boolean isUsageEnabled();
+
     // client API
     int connect(in IBinder binder, in IWifiNanEventCallback callback,
             in ConfigRequest configRequest);
