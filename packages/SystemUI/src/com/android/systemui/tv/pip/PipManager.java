@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -61,6 +62,20 @@ public class PipManager {
     private static PipManager sPipManager;
 
     private static final int MAX_RUNNING_TASKS_COUNT = 10;
+
+    /**
+     * List of package and class name which are considered as Settings,
+     * so PIP location should be adjusted to the left of the side panel.
+     */
+    private static final List<Pair<String, String>> sSettingsPackageAndClassNamePairList;
+    static {
+        sSettingsPackageAndClassNamePairList = new ArrayList<>();
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.android.tv.settings", null));
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.google.android.leanbacklauncher",
+                "com.google.android.leanbacklauncher.settings.HomeScreenSettingsActivity"));
+    }
 
     /**
      * State when there's no PIP.
@@ -108,6 +123,7 @@ public class PipManager {
     private int mSuspendPipResizingReason;
 
     private Context mContext;
+    private SystemServicesProxy mSystemServiceProxy;
     private PipRecentsOverlayManager mPipRecentsOverlayManager;
     private IActivityManager mActivityManager;
     private MediaSessionManager mMediaSessionManager;
@@ -117,6 +133,8 @@ public class PipManager {
     private List<MediaListener> mMediaListeners = new ArrayList<>();
     private Rect mCurrentPipBounds;
     private Rect mPipBounds;
+    private Rect mDefaultPipBounds;
+    private Rect mSettingsPipBounds;
     private Rect mMenuModePipBounds;
     private Rect mRecentsPipBounds;
     private Rect mRecentsFocusedPipBounds;
@@ -176,8 +194,10 @@ public class PipManager {
         mInitialized = true;
         mContext = context;
         Resources res = context.getResources();
-        mPipBounds = Rect.unflattenFromString(res.getString(
+        mDefaultPipBounds = Rect.unflattenFromString(res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureBounds));
+        mSettingsPipBounds = Rect.unflattenFromString(res.getString(
+                R.string.pip_settings_bounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(
                 R.string.pip_menu_bounds));
         mRecentsPipBounds = Rect.unflattenFromString(res.getString(
@@ -186,9 +206,11 @@ public class PipManager {
                 R.string.pip_recents_focused_bounds));
         mRecentsFocusChangedAnimationDurationMs = res.getInteger(
                 R.integer.recents_tv_pip_focus_anim_duration);
+        mPipBounds = mDefaultPipBounds;
 
         mActivityManager = ActivityManagerNative.getDefault();
-        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
+        mSystemServiceProxy = SystemServicesProxy.getInstance(context);
+        mSystemServiceProxy.registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
@@ -522,10 +544,25 @@ public class PipManager {
         return PLAYBACK_STATE_UNAVAILABLE;
     }
 
+    private static boolean isSettingsShown(ComponentName topActivity) {
+        for (Pair<String, String> componentName : sSettingsPackageAndClassNamePairList) {
+            String packageName = componentName.first;
+            if (topActivity.getPackageName().equals(componentName.first)) {
+                String className = componentName.second;
+                if (className == null || topActivity.getClassName().equals(className)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
             if (mState != STATE_NO_PIP) {
+                boolean hasPip = false;
+
                 StackInfo stackInfo = null;
                 try {
                     stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
@@ -541,11 +578,32 @@ public class PipManager {
                 for (int i = stackInfo.taskIds.length - 1; i >= 0; --i) {
                     if (stackInfo.taskIds[i] == mPipTaskId) {
                         // PIP task is still alive.
-                        return;
+                        hasPip = true;
+                        break;
                     }
                 }
-                // PIP task doesn't exist anymore in PINNED_STACK.
-                closePipInternal(true);
+                if (!hasPip) {
+                    // PIP task doesn't exist anymore in PINNED_STACK.
+                    closePipInternal(true);
+                    return;
+                }
+            }
+            if (mState == STATE_PIP_OVERLAY) {
+                try {
+                    List<RunningTaskInfo> runningTasks = mActivityManager.getTasks(1, 0);
+                    if (runningTasks == null || runningTasks.size() == 0) {
+                        return;
+                    }
+                    RunningTaskInfo topTask = runningTasks.get(0);
+                    Rect bounds = isSettingsShown(topTask.topActivity)
+                          ? mSettingsPipBounds : mDefaultPipBounds;
+                    if (mPipBounds != bounds) {
+                        mPipBounds = bounds;
+                        resizePinnedStack(STATE_PIP_OVERLAY);
+                    }
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to detect top activity", e);
+                }
             }
         }
 
