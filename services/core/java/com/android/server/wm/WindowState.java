@@ -1554,7 +1554,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // If app died visible, apply a dim over the window to indicate that it's inactive
             mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && mDisplayContent != null && !mAnimatingExit && isDisplayedLw()) {
+                && mDisplayContent != null && !mAnimatingExit && isVisibleUnchecked()) {
             mDisplayContent.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
     }
@@ -1575,6 +1575,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final WindowState win = mAppToken.allAppWindows.get(i);
             if (win.mWillReplaceWindow && win.mReplacingWindow == this && hasDrawnLw()) {
                 if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
+                if (win.isDimming()) {
+                    win.transferDimToReplacement();
+                }
                 win.mWillReplaceWindow = false;
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
@@ -2710,6 +2713,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             winY *= mGlobalScale;
         }
         return winY;
+    }
+
+    void transferDimToReplacement() {
+        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
+        if (dimLayerUser != null && mDisplayContent != null) {
+            mDisplayContent.mDimLayerController.applyDim(dimLayerUser,
+                    mReplacingWindow.mWinAnimator,
+                    (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? true : false);
+        }
     }
 
     // During activity relaunch due to resize, we sometimes use window replacement

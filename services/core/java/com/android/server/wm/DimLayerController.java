@@ -169,6 +169,10 @@ class DimLayerController {
                 + " dimLayerUser=" + dimLayerUser.toShortString()
                 + " state.continueDimming=" + state.continueDimming
                 + " state.dimLayer.isDimming=" + state.dimLayer.isDimming());
+        if (state.animator != null && state.animator.mWin.mWillReplaceWindow) {
+            return;
+        }
+
         if (!state.continueDimming && state.dimLayer.isDimming()) {
             state.animator = null;
             dimLayerUser.getDimBounds(mTmpBounds);
@@ -303,7 +307,7 @@ class DimLayerController {
         applyDim(dimLayerUser, animator, true /* aboveApp */);
     }
 
-    private void applyDim(
+    void applyDim(
             DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator, boolean aboveApp) {
         if (dimLayerUser == null) {
             Slog.e(TAG, "Trying to apply dim layer for: " + this
