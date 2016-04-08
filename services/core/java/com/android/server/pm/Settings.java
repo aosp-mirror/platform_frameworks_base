@@ -363,7 +363,7 @@ final class Settings {
     // Packages that have been uninstalled and still need their external
     // storage data deleted.
     final ArrayList<PackageCleanItem> mPackagesToBeCleaned = new ArrayList<PackageCleanItem>();
-    
+
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
     // names.  The packages appear everwhere else under their original
@@ -578,7 +578,7 @@ final class Settings {
         }
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
-                p.secondaryCpuAbiString, p.secondaryCpuAbiString,
+                p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
                 p.parentPackageName, p.childPackageNames);
         mDisabledSysPackages.remove(name);
@@ -3756,7 +3756,7 @@ final class Settings {
                 }
 
                 String tagName = parser.getName();
-                // Legacy 
+                // Legacy
                 if (tagName.equals(TAG_DISABLED_COMPONENTS)) {
                     readDisabledComponentsLPw(packageSetting, parser, 0);
                 } else if (tagName.equals(TAG_ENABLED_COMPONENTS)) {
