@@ -22,13 +22,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import com.android.internal.os.SomeArgs;
+
+import java.util.List;
 
 /**
  * A service that helps the user manage notifications. This class is only used to
@@ -91,27 +96,8 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     /** Notification was canceled by the owning managed profile being turned off. */
     public static final int REASON_PROFILE_TURNED_OFF = 15;
 
-    public class Adjustment {
-        int mImportance;
-        CharSequence mExplanation;
-        Uri mReference;
-
-        /**
-         * Create a notification importance adjustment.
-         *
-         * @param importance The final importance of the notification.
-         * @param explanation A human-readable justification for the adjustment.
-         * @param reference A reference to an external object that augments the
-         *                  explanation, such as a
-         *                  {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI},
-         *                  or null.
-         */
-        public Adjustment(int importance, CharSequence explanation, Uri reference) {
-            mImportance = importance;
-            mExplanation = explanation;
-            mReference = reference;
-        }
-    }
+    /** Autobundled summary notification was canceled because its group was unbundled */
+    public static final int REASON_UNAUTOBUNDLED = 16;
 
     private Handler mHandler;
 
@@ -200,18 +186,32 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     }
 
     /**
-     * Change the importance of an existing notification.  N.B. this won’t cause
+     * Updates a notification.  N.B. this won’t cause
      * an existing notification to alert, but might allow a future update to
      * this notification to alert.
      *
-     * @param key the notification key
-     * @param adjustment the new importance with an explanation
+     * @param adjustment the adjustment with an explanation
      */
-    public final void adjustImportance(String key, Adjustment adjustment) {
+    public final void adjustNotification(Adjustment adjustment) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().setImportanceFromRankerService(mWrapper, key,
-                    adjustment.mImportance, adjustment.mExplanation);
+            getNotificationInterface().applyAdjustmentFromRankerService(mWrapper, adjustment);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Updates existing notifications. Re-ranking won't occur until all adjustments are applied.
+     * N.B. this won’t cause an existing notification to alert, but might allow a future update to
+     * these notifications to alert.
+     *
+     * @param adjustments a list of adjustments with explanations
+     */
+    public final void adjustNotifications(List<Adjustment> adjustments) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().applyAdjustmentsFromRankerService(mWrapper, adjustments);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -299,7 +299,7 @@ public abstract class NotificationRankerService extends NotificationListenerServ
                     args.recycle();
                     Adjustment adjustment = onNotificationEnqueued(sbn, importance, user);
                     if (adjustment != null) {
-                        adjustImportance(sbn.getKey(), adjustment);
+                        adjustNotification(adjustment);
                     }
                 } break;
 
