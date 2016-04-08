@@ -23,12 +23,14 @@ package android.mtp;
 public class MtpServer implements Runnable {
 
     private long mNativeContext; // accessed by native methods
+    private final MtpDatabase mDatabase;
 
     static {
         System.loadLibrary("media_jni");
     }
 
     public MtpServer(MtpDatabase database, boolean usePtp) {
+        mDatabase = database;
         native_setup(database, usePtp);
         database.setServer(this);
     }
@@ -42,6 +44,7 @@ public class MtpServer implements Runnable {
     public void run() {
         native_run();
         native_cleanup();
+        mDatabase.close();
     }
 
     public void sendObjectAdded(int handle) {
