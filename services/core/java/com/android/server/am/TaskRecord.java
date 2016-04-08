@@ -1447,7 +1447,8 @@ final class TaskRecord {
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-            mOverrideConfig = calculateOverrideConfig(mTmpRect, insetBounds);
+            mOverrideConfig = calculateOverrideConfig(mTmpRect, insetBounds,
+                    mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
 
         if (mFullscreen != oldFullscreen) {
@@ -1457,33 +1458,38 @@ final class TaskRecord {
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
     }
 
-    private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds) {
+    private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds,
+                                        boolean overrideWidth, boolean overrideHeight) {
         mTmpRect2.set(inInsetBounds);
         mService.mWindowManager.subtractNonDecorInsets(mTmpRect2);
         int leftInset = mTmpRect2.left - inInsetBounds.left;
         int topInset = mTmpRect2.top - inInsetBounds.top;
-        int rightInset = inInsetBounds.right - mTmpRect2.right;
-        int bottomInset = inInsetBounds.bottom - mTmpRect2.bottom;
+        int rightInset = overrideWidth ? 0 : inInsetBounds.right - mTmpRect2.right;
+        int bottomInset = overrideHeight ? 0 : inInsetBounds.bottom - mTmpRect2.bottom;
         inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
-    private void subtractStableInsets(Rect inOutBounds, Rect inInsetBounds) {
+    private void subtractStableInsets(Rect inOutBounds, Rect inInsetBounds,
+                                      boolean overrideWidth, boolean overrideHeight) {
         mTmpRect2.set(inInsetBounds);
         mService.mWindowManager.subtractStableInsets(mTmpRect2);
         int leftInset = mTmpRect2.left - inInsetBounds.left;
         int topInset = mTmpRect2.top - inInsetBounds.top;
-        int rightInset = inInsetBounds.right - mTmpRect2.right;
-        int bottomInset = inInsetBounds.bottom - mTmpRect2.bottom;
+        int rightInset = overrideWidth ? 0 : inInsetBounds.right - mTmpRect2.right;
+        int bottomInset = overrideHeight ? 0 : inInsetBounds.bottom - mTmpRect2.bottom;
         inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
-    private Configuration calculateOverrideConfig(Rect bounds, Rect insetBounds) {
+    private Configuration calculateOverrideConfig(Rect bounds, Rect insetBounds,
+                                                  boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
         subtractNonDecorInsets(
-                mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds);
+                mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds,
+                overrideWidth, overrideHeight);
         subtractStableInsets(
-                mTmpStableBounds, insetBounds != null ? insetBounds : bounds);
+                mTmpStableBounds, insetBounds != null ? insetBounds : bounds,
+                overrideWidth, overrideHeight);
 
         // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
         // i.e. the screen area without the system bars.
