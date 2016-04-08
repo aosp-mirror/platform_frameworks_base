@@ -16,6 +16,11 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Base class for NAN events callbacks. Should be extended by applications
  * wanting notifications. These are callbacks applying to the NAN connection as
@@ -25,25 +30,59 @@ package android.net.wifi.nan;
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanEventCallback {
+    @IntDef({
+            REASON_INVALID_ARGS, REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG, REASON_REQUESTED,
+            REASON_OTHER })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventReasonCodes {
+    }
+
     /**
-     * Called when NAN configuration is completed.
-     *
-     * @param completedConfig The actual configuration request which was
-     *            completed. Note that it may be different from that requested
-     *            by the application. The service combines configuration
-     *            requests from all applications.
+     * Failure reason flag for {@link WifiNanEventCallback} callbacks. Indicates
+     * invalid argument in the requested operation.
      */
-    public void onConfigCompleted(ConfigRequest completedConfig) {
+    public static final int REASON_INVALID_ARGS = 1000;
+
+    /**
+     * Failure reason flag for {@link WifiNanEventCallback} callbacks. Indicates
+     * that a {@link ConfigRequest} passed in
+     * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback, ConfigRequest)}
+     * couldn't be applied since other connections already exist with an
+     * incompatible configurations.
+     */
+    public static final int REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG = 1001;
+
+    /**
+     * Reason flag for {@link WifiNanEventCallback#onNanDown(int)} callback.
+     * Indicates NAN is shut-down per user request.
+     */
+    public static final int REASON_REQUESTED = 1002;
+
+    /**
+     * Failure reason flag for {@link WifiNanEventCallback} callbacks. Indicates
+     * an unspecified error occurred during the operation.
+     */
+    public static final int REASON_OTHER = 1003;
+
+    /**
+     * Called when NAN connect operation
+     * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)}
+     * is completed. Doesn't necessarily mean that have joined or started a NAN
+     * cluster. An indication is provided by {@link #onIdentityChanged()}.
+     */
+    public void onConnectSuccess() {
         /* empty */
     }
 
     /**
-     * Called when NAN configuration failed.
+     * Called when NAN connect operation
+     * {@code WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)}
+     * failed.
      *
      * @param reason Failure reason code, see
-     *            {@code WifiNanSessionCallback.FAIL_*}.
+     *            {@code WifiNanEventCallback.REASON_*}.
      */
-    public void onConfigFailed(@SuppressWarnings("unused") ConfigRequest failedConfig, int reason) {
+    public void onConnectFail(@EventReasonCodes int reason) {
         /* empty */
     }
 
@@ -51,9 +90,9 @@ public class WifiNanEventCallback {
      * Called when NAN cluster is down
      *
      * @param reason Reason code for event, see
-     *            {@code WifiNanSessionCallback.FAIL_*}.
+     *            {@code WifiNanEventCallback.REASON_*}.
      */
-    public void onNanDown(int reason) {
+    public void onNanDown(@EventReasonCodes int reason) {
         /* empty */
     }
 
