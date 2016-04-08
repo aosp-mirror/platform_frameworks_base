@@ -21,8 +21,8 @@
 
 #include <inttypes.h>
 #include <jni.h>
-#include <map>
 #include <queue>
+#include <unordered_map>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -105,7 +105,7 @@ struct contextHubServiceDb_s {
     context_hub_info_s hubInfo;
     jniInfo_s jniInfo;
     std::queue<int> freeIds;
-    std::map<int, app_instance_info_s *> appInstances;
+    std::unordered_map<int, app_instance_info_s> appInstances;
 };
 
 }  // unnamed namespace
@@ -137,7 +137,7 @@ static int set_os_app_as_destination(hub_message_t *msg, int hubHandle) {
     const context_hub_t *info = get_hub_info(hubHandle);
 
     if (info) {
-        msg->app = info->os_app_name;
+        msg->app_name = info->os_app_name;
         return 0;
     } else {
         ALOGD("%s: Hub information is null for hubHandle %d", __FUNCTION__, hubHandle);
@@ -154,23 +154,23 @@ static int get_hub_id_for_hub_handle(int hubHandle) {
 }
 
 static int get_hub_id_for_app_instance(int id) {
-    if (db.appInstances.find(id) == db.appInstances.end()) {
+    if (!db.appInstances.count(id)) {
         ALOGD("%s: Cannot find app for app instance %d", __FUNCTION__, id);
         return -1;
     }
 
-    int hubHandle = db.appInstances[id]->hubHandle;
+    int hubHandle = db.appInstances[id].hubHandle;
 
     return db.hubInfo.hubs[hubHandle].hub_id;
 }
 
 static int set_dest_app(hub_message_t *msg, int id) {
-    if (db.appInstances.find(id) == db.appInstances.end()) {
+    if (!db.appInstances.count(id)) {
         ALOGD("%s: Cannod find app for app instance %d", __FUNCTION__, id);
         return -1;
     }
 
-    msg->app = db.appInstances[id]->appInfo.name;
+    msg->app_name = db.appInstances[id].appInfo.app_name;
     return 0;
 }
 
@@ -210,76 +210,43 @@ static int generate_id(void) {
 
 int add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle, JNIEnv *env) {
     // Not checking if the apps are indeed distinct
-
-    app_instance_info_s *entry;
-    void *appName;
-    hub_app_name_t *name;
-
-    assert(appInfo && appInfo->name && appInfo->name->app_name);
-
-    entry = (app_instance_info_s *) malloc(sizeof(app_instance_info_s));
-    appName = malloc(appInfo->name->app_name_len);
-    name = (hub_app_name_t *) malloc(sizeof(hub_app_name_t));
-
+    app_instance_info_s entry;
     int appInstanceHandle = generate_id();
 
-    if (appInstanceHandle < 0 || !appName || !entry || !name) {
-        ALOGE("Cannot find resources to add app instance %d, %p, %p",
-            appInstanceHandle, appName, entry);
+    assert(appInfo);
 
-        free(appName);
-        free(entry);
-        free(name);
-
-        if (appInstanceHandle >= 0) {
-            return_id(appInstanceHandle);
-        }
-
+    if (appInstanceHandle < 0) {
+        ALOGE("Cannot find resources to add app instance %d",
+              appInstanceHandle);
         return -1;
     }
 
-    memcpy(&(entry->appInfo), appInfo, sizeof(entry->appInfo));
-    memcpy(appName, appInfo->name->app_name, appInfo->name->app_name_len);
-    name->app_name = appName;
-    name->app_name_len = appInfo->name->app_name_len;
-    entry->appInfo.name = name;
-    entry->truncName = 0;
-    memcpy(&(entry->truncName), name->app_name,
-           sizeof(entry->truncName) < name->app_name_len ?
-           sizeof(entry->truncName) : name->app_name_len);
-
-    // Not checking for sanity of hubId
-    entry->hubHandle = hubHandle;
-    entry->instanceId = appInstanceHandle;
+    entry.appInfo = *appInfo;
+    entry.instanceId = appInstanceHandle;
+    entry.truncName = appInfo->app_name.id;
+    entry.hubHandle = hubHandle;
     db.appInstances[appInstanceHandle] = entry;
 
     // Finally - let the service know of this app instance
     env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceAddAppInstance,
-                       hubHandle, entry->instanceId, entry->truncName,
-                       entry->appInfo.version);
+                       hubHandle, entry.instanceId, entry.truncName,
+                       entry.appInfo.version);
 
     ALOGW("Added App 0x%" PRIx64 " on hub Handle %" PRId32
-          " as appInstance %d, original name_length %" PRId32, entry->truncName,
-          entry->hubHandle, appInstanceHandle, name->app_name_len);
+          " as appInstance %d", entry.truncName,
+          entry.hubHandle, appInstanceHandle);
 
     return appInstanceHandle;
 }
 
 int delete_app_instance(int id) {
-    if (db.appInstances.find(id) == db.appInstances.end()) {
+    if (!db.appInstances.count(id)) {
         return -1;
     }
 
     return_id(id);
-
-    if (db.appInstances[id]) {
-        // Losing the const cast below. This is intentional.
-        free((void *)db.appInstances[id]->appInfo.name->app_name);
-        free((void *)db.appInstances[id]->appInfo.name);
-        free(db.appInstances[id]);
-        db.appInstances.erase(id);
-    }
+    db.appInstances.erase(id);
 
     return 0;
 }
@@ -353,26 +320,19 @@ static int onMessageReceipt(int *header, int headerLen, char *msg, int msgLen) {
 }
 
 int handle_query_apps_response(char *msg, int msgLen, uint32_t hubHandle) {
-    int i;
     JNIEnv *env;
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
             return -1;
     }
 
     int numApps = msgLen/sizeof(hub_app_info);
-    hub_app_info *info = (hub_app_info *)malloc(msgLen); // handle possible alignment
+    hub_app_info info;
+    hub_app_info *unalignedInfoAddr = (hub_app_info*)msg;
 
-    if (!info) {
-        return -1;
+    for (int i = 0; i < numApps; i++, unalignedInfoAddr++) {
+        memcpy(&info, unalignedInfoAddr, sizeof(info));
+        add_app_instance(&info, hubHandle, env);
     }
-
-    memcpy(info, msg, msgLen);
-    for (i = 0; i < numApps; i++) {
-        add_app_instance(info, hubHandle, env);
-        info++;
-    }
-
-    free(info);
 
     return 0;
 }
