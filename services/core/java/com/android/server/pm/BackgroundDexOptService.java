@@ -168,15 +168,18 @@ public class BackgroundDexOptService extends JobService {
                         // Skip previously failing package
                         continue;
                     }
+                    // Conservatively add package to the list of failing ones in case performDexOpt
+                    // never returns.
+                    sFailedPackageNames.add(pkg);
                     // Optimize package if needed. Note that there can be no race between
                     // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
-                    if (!pm.performDexOpt(pkg,
+                    if (pm.performDexOpt(pkg,
                             /* instruction set */ null,
                             /* checkProfiles */ true,
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
                             /* force */ false)) {
-                        // Dexopt failed, remember this so we do not keep retrying.
-                        sFailedPackageNames.add(pkg);
+                        // Dexopt succeeded, remove package from the list of failing ones.
+                        sFailedPackageNames.remove(pkg);
                     }
                 }
                 // Ran to completion, so we abandon our timeslice and do not reschedule.
