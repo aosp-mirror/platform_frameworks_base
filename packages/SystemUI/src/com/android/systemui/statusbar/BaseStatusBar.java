@@ -63,6 +63,8 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -262,9 +264,22 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected AssistManager mAssistManager;
 
+    protected boolean mVrMode;
+
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
+    }
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            mVrMode = enabled;
+        }
+    };
+
+    public boolean isDeviceInVrMode() {
+        return mVrMode;
     }
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
@@ -776,6 +791,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.registerReceiverAsUser(mAllUsersReceiver, UserHandle.ALL, allUsersFilter,
                 null, null);
         updateCurrentProfilesCache();
+
+        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+        try {
+            vrManager.registerListener(mVrStateCallbacks);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+        }
+
     }
 
     protected void notifyUserAboutHiddenNotifications() {
@@ -2353,6 +2376,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
+        if (isDeviceInVrMode()) {
+            return false;
+        }
+
         if (mNotificationData.shouldFilterOut(sbn)) {
             if (DEBUG) Log.d(TAG, "No peeking: filtered notification: " + sbn.getKey());
             return false;
