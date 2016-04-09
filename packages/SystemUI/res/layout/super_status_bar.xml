@@ -55,6 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/heads_up_scrim_height"
         android:background="@drawable/heads_up_scrim"
+        sysui:ignoreRightInset="true"
         android:importantForAccessibility="no"/>
 
     <include layout="@layout/status_bar"
