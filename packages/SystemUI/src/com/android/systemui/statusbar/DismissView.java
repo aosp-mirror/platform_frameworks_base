@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -49,6 +50,12 @@ public class DismissView extends StackScrollerDecorView {
                 || touchX > mContent.getX() + mContent.getWidth()
                 || touchY < mContent.getY()
                 || touchY > mContent.getY() + mContent.getHeight();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDismissButton.setText(R.string.clear_all_notifications_text);
     }
 
     public boolean isButtonVisible() {
