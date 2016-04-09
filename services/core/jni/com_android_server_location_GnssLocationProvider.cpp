@@ -1112,7 +1112,7 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
     JavaObject object(env, "android/location/GnssClock");
     GpsClockFlags flags = clock->flags;
 
-    SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND,
+    SET_IF(GPS_CLOCK_HAS_LEAP_SECOND,
            LeapSecond,
            static_cast<int32_t>(clock->leap_second));
 
@@ -1121,8 +1121,9 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
     // old GPS_CLOCK types (active only in a limited number of older devices),
     // the GPS time information is handled as an always discontinuous HW clock,
     // with the GPS time information put into the full_bias_ns instead - so that
-    // time_ns + full_bias_ns = local estimate of GPS time (as remains true, in
-    // the new GnssClock struct.)
+    // time_ns - full_bias_ns = local estimate of GPS time. Additionally, the
+    // sign of full_bias_ns and bias_ns has flipped between GpsClock &
+    // GnssClock, so that is also handled below.
     switch (clock->type) {
       case GPS_CLOCK_TYPE_UNKNOWN:
         // Clock type unsupported.
@@ -1133,7 +1134,7 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
         break;
       case GPS_CLOCK_TYPE_GPS_TIME:
         // GPS time, need to convert.
-        flags |= GNSS_CLOCK_HAS_FULL_BIAS;
+        flags |= GPS_CLOCK_HAS_FULL_BIAS;
         clock->full_bias_ns = clock->time_ns;
         clock->time_ns = 0;
         SET(HardwareClockDiscontinuityCount,
@@ -1142,16 +1143,20 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
     }
 
     SET(TimeNanos, clock->time_ns);
-    SET_IF(GNSS_CLOCK_HAS_TIME_UNCERTAINTY,
+    SET_IF(GPS_CLOCK_HAS_TIME_UNCERTAINTY,
            TimeUncertaintyNanos,
            clock->time_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_FULL_BIAS, FullBiasNanos, clock->full_bias_ns);
-    SET_IF(GNSS_CLOCK_HAS_BIAS, BiasNanos, clock->bias_ns);
-    SET_IF(GNSS_CLOCK_HAS_BIAS_UNCERTAINTY,
+
+    // Definition of sign for full_bias_ns & bias_ns has been changed since N,
+    // so flip signs here.
+    SET_IF(GPS_CLOCK_HAS_FULL_BIAS, FullBiasNanos, -(clock->full_bias_ns));
+    SET_IF(GPS_CLOCK_HAS_BIAS, BiasNanos, -(clock->bias_ns));
+
+    SET_IF(GPS_CLOCK_HAS_BIAS_UNCERTAINTY,
            BiasUncertaintyNanos,
            clock->bias_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_DRIFT, DriftNanosPerSecond, clock->drift_nsps);
-    SET_IF(GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY,
+    SET_IF(GPS_CLOCK_HAS_DRIFT, DriftNanosPerSecond, clock->drift_nsps);
+    SET_IF(GPS_CLOCK_HAS_DRIFT_UNCERTAINTY,
            DriftUncertaintyNanosPerSecond,
            clock->drift_uncertainty_nsps);
 
