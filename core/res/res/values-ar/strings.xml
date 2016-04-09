@@ -56,8 +56,8 @@
     <string name="badPin" msgid="9015277645546710014">"‏رمز PIN القديم الذي كتبته غير صحيح."</string>
     <string name="badPuk" msgid="5487257647081132201">"‏رمز PUK الذي كتبته غير صحيح."</string>
     <string name="mismatchPin" msgid="609379054496863419">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"اكتب رقم تعريف شخصيًا مكونًا من 4 إلى ثمانية أعداد."</string>
-    <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من 8 أرقام أو أكثر."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"ادخل رقم تعريف شخصي مكون من ٤ إلى ٨ أرقام."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من ٨ أرقام أو أكثر."</string>
     <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
@@ -904,7 +904,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ 250 ميغابايت وأعد التشغيل."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ۲۵۰ ميغابايت وأعد التشغيل."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"المس للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
     <string name="ok" msgid="5970060430562524910">"موافق"</string>
@@ -1343,8 +1343,8 @@
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"‏تأكيد رمز رمز PIN المراد"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"‏رمز PIN غير صحيح."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"‏اكتب رمز PIN المكون من 4 إلى 8 أرقام."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"‏يجب أن يتكون رمز PUK من 8 أرقام."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"‏يجب أن يتكون رمز PUK من ۸ أرقام."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل شريحة SIM نهائيًا."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"‏لا يتطابق رمزا رمز PIN"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"محاولات النقش كثيرة جدًا"</string>
@@ -1478,7 +1478,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"‏تأكيد رمز PIN الجديد"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏رمز PIN أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"رقم التعريف الشخصي أقصر مما يلزم، يجب ألا يقل عن ٤ أرقام. "</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="zero">حاول مرة أخرى خلال أقل من ثانية <xliff:g id="COUNT">%d</xliff:g></item>
       <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="COUNT">%d</xliff:g>)</item>
@@ -1508,8 +1508,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"التطبيق لا يتيح تقسيم الشاشة."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>

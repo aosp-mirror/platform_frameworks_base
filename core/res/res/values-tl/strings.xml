@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Humingi ng PIN bago mag-unpin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Humingi ng pattern sa pag-unlock bago mag-unpin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Humingi ng password bago mag-unpin"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"Maaaring hindi gumana ang app sa split-screen."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Hindi sinusuportahan ng app ang split-screen."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Na-install ng iyong administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Na-update ng iyong administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Na-delete ng iyong administrator"</string>

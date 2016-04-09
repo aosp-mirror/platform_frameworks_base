@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ფიქსაციის მოხსნამდე PIN-ის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"თქვენი ადმინისტრატორის მიერ დაყენებული"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>

@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"స్క్రీన్ విభజనతో అనువర్తనం పని చేయకపోవచ్చు."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>

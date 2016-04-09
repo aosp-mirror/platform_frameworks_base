@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಿನ್‌ ಕೇಳು"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳು"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"ವಿಭಜಿಸಿದ ಪರದೆಯಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>

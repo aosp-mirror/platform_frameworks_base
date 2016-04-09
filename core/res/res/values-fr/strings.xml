@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Application incompatible avec l\'écran partagé."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
