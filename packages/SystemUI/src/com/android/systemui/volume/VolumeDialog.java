@@ -761,7 +761,37 @@ public class VolumeDialog implements TunerService.Tunable {
                 : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes)
                         ? Events.ICON_STATE_UNMUTE
                 : Events.ICON_STATE_UNKNOWN;
-        row.icon.setContentDescription(ss.name);
+        if (iconEnabled) {
+            if (isRingStream) {
+                if (isRingVibrate) {
+                    row.icon.setContentDescription(mContext.getString(
+                            R.string.volume_stream_content_description_unmute,
+                            ss.name));
+                } else {
+                    if (mController.hasVibrator()) {
+                        row.icon.setContentDescription(mContext.getString(
+                                R.string.volume_stream_content_description_vibrate,
+                                ss.name));
+                    } else {
+                        row.icon.setContentDescription(mContext.getString(
+                                R.string.volume_stream_content_description_mute,
+                                ss.name));
+                    }
+                }
+            } else {
+                if (ss.muted || mAutomute && ss.level == 0) {
+                   row.icon.setContentDescription(mContext.getString(
+                           R.string.volume_stream_content_description_unmute,
+                           ss.name));
+                } else {
+                    row.icon.setContentDescription(mContext.getString(
+                            R.string.volume_stream_content_description_mute,
+                            ss.name));
+                }
+            }
+        } else {
+            row.icon.setContentDescription(ss.name);
+        }
 
         // update slider
         final boolean enableSlider = !zenMuted;
