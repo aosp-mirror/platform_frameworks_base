@@ -2435,6 +2435,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
         }
 
+        WindowManager.LayoutParams params = getAttributes();
+
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
         if (!mIsFloating && ActivityManager.isHighEndGfx()) {
@@ -2443,6 +2445,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     false)) {
                 setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
+            }
+            if (mDecor.mForceWindowDrawsStatusBarBackground) {
+                params.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
             }
         }
         if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
@@ -2458,8 +2463,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 setCloseOnTouchOutsideIfNotSet(true);
             }
         }
-
-        WindowManager.LayoutParams params = getAttributes();
 
         if (!hasSoftInputMode()) {
             params.softInputMode = a.getInt(

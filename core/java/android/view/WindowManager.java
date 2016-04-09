@@ -1240,6 +1240,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME = 0x00010000;
 
         /**
+         * Flag to indicate that this window is always drawing the status bar background, no matter
+         * what the other flags are.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND = 0x00020000;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
