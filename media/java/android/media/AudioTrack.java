@@ -28,7 +28,6 @@ import java.util.Collection;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,7 +40,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IAppOpsService;
 
 /**
  * The AudioTrack class manages and plays a single audio resource for Java applications.
@@ -78,7 +76,8 @@ import com.android.internal.app.IAppOpsService;
  *
  * AudioTrack is not final and thus permits subclasses, but such use is not recommended.
  */
-public class AudioTrack implements AudioRouting
+public class AudioTrack extends PlayerBase
+                        implements AudioRouting
 {
     //---------------------------------------------------------
     // Constants
@@ -271,7 +270,6 @@ public class AudioTrack implements AudioRouting
      */
     private int mStreamType = AudioManager.STREAM_MUSIC;
 
-    private final AudioAttributes mAttributes;
     /**
      * The way audio is consumed by the audio sink, one of MODE_STATIC or MODE_STREAM.
      */
@@ -297,10 +295,6 @@ public class AudioTrack implements AudioRouting
      * Audio session ID
      */
     private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
-    /**
-     * Reference to the app-ops service.
-     */
-    private final IAppOpsService mAppOps;
     /**
      * HW_AV_SYNC track AV Sync Header
      */
@@ -448,11 +442,9 @@ public class AudioTrack implements AudioRouting
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
+        super(attributes);
         // mState already == STATE_UNINITIALIZED
 
-        if (attributes == null) {
-            throw new IllegalArgumentException("Illegal null AudioAttributes");
-        }
         if (format == null) {
             throw new IllegalArgumentException("Illegal null AudioFormat");
         }
@@ -491,10 +483,6 @@ public class AudioTrack implements AudioRouting
         audioBuffSizeCheck(bufferSizeInBytes);
 
         mInitializationLooper = looper;
-        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-        mAppOps = IAppOpsService.Stub.asInterface(b);
-
-        mAttributes = new AudioAttributes.Builder(attributes).build();
 
         if (sessionId < 0) {
             throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
@@ -534,9 +522,8 @@ public class AudioTrack implements AudioRouting
      * OpenSLES interface is realized.
      */
     /*package*/ AudioTrack(long nativeTrackInJavaObj) {
+        super(new AudioAttributes.Builder().build());
         // "final"s
-        mAttributes = null;
-        mAppOps = null;
         mNativeTrackInJavaObj = 0;
         mJniData = 0;
 
@@ -961,12 +948,14 @@ public class AudioTrack implements AudioRouting
         } catch(IllegalStateException ise) {
             // don't raise an exception, we're releasing the resources.
         }
+        baseRelease();
         native_release();
         mState = STATE_UNINITIALIZED;
     }
 
     @Override
     protected void finalize() {
+        baseRelease();
         native_finalize();
     }
 
@@ -1492,19 +1481,20 @@ public class AudioTrack implements AudioRouting
      */
     @Deprecated
     public int setStereoVolume(float leftGain, float rightGain) {
-        if (isRestricted()) {
-            return SUCCESS;
-        }
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
 
-        leftGain = clampGainOrLevel(leftGain);
-        rightGain = clampGainOrLevel(rightGain);
-
-        native_setVolume(leftGain, rightGain);
-
+        baseSetVolume(leftGain, rightGain);
         return SUCCESS;
+    }
+
+    @Override
+    void playerSetVolume(float leftVolume, float rightVolume) {
+        leftVolume = clampGainOrLevel(leftVolume);
+        rightVolume = clampGainOrLevel(rightVolume);
+
+        native_setVolume(leftVolume, rightVolume);
     }
 
 
@@ -1728,26 +1718,10 @@ public class AudioTrack implements AudioRouting
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
-        if (isRestricted()) {
-            setVolume(0);
-        }
+        baseStart();
         synchronized(mPlayStateLock) {
             native_start();
             mPlayState = PLAYSTATE_PLAYING;
-        }
-    }
-
-    private boolean isRestricted() {
-        if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
-            return false;
-        }
-        try {
-            final int usage = AudioAttributes.usageForLegacyStreamType(mStreamType);
-            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO, usage,
-                    Process.myUid(), ActivityThread.currentPackageName());
-            return mode != AppOpsManager.MODE_ALLOWED;
-        } catch (RemoteException e) {
-            return false;
         }
     }
 
@@ -2375,12 +2349,14 @@ public class AudioTrack implements AudioRouting
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
      */
     public int setAuxEffectSendLevel(float level) {
-        if (isRestricted()) {
-            return SUCCESS;
-        }
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
+        return baseSetAuxEffectSendLevel(level);
+    }
+
+    @Override
+    int playerSetAuxEffectSendLevel(float level) {
         level = clampGainOrLevel(level);
         int err = native_setAuxEffectSendLevel(level);
         return err == 0 ? SUCCESS : ERROR;
