@@ -1125,13 +1125,21 @@ class WindowStateAnimator {
         final int top = w.mYOffset + w.mFrame.top;
 
         // Initialize the decor rect to the entire frame.
-        if (w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER) {
+        if (w.isDockedResizing() ||
+                (w.isChildWindow() && w.mAttachedWindow.isDockedResizing())) {
 
             // If we are resizing with the divider, the task bounds might be smaller than the
             // stack bounds. The system decor is used to clip to the task bounds, which we don't
             // want in this case in order to avoid holes.
+            //
+            // We take care to not shrink the width, for surfaces which are larger than
+            // the display region. Of course this area will not eventually be visible
+            // but if we truncate the width now, we will calculate incorrectly
+            // when adjusting to the stack bounds.
             final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
-            mSystemDecorRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+            mSystemDecorRect.set(0, 0,
+                    Math.max(width, displayInfo.logicalWidth),
+                    Math.max(height, displayInfo.logicalHeight));
         } else {
             mSystemDecorRect.set(0, 0, width, height);
         }
