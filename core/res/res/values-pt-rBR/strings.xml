@@ -254,7 +254,7 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acesse dados do sensor sobre seus sinais vitais"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar cont. da janela"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com que você está interagindo."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com a qual você está interagindo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar por toque"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Itens tocados serão falados em voz alta e a tela poderá ser explorada por meio de gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ativar acessibilidade na Web aprimorada"</string>
@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de liberar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir padrão de desbloqueio antes de liberar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir senha antes de liberar"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"É possível que o app não funcione com o recurso de divisão de tela."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"O app não é compatível com a divisão de tela."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado pelo seu administrador"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Excluído pelo seu administrador"</string>
