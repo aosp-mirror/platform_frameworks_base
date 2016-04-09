@@ -170,8 +170,7 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Удаление приложения <xliff:g id="APP">%s</xliff:g> из списка."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" удалено из списка."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Все недавние приложения закрыты."</string>
-    <!-- no translation found for accessibility_recents_item_open_app_info (5107479759905883540) -->
-    <skip />
+    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Открыть информацию о приложении \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Запуск приложения <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Уведомление закрыто"</string>
@@ -541,7 +540,7 @@
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Контакты"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Эл. почта"</string>
     <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"Чат"</string>
-    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Музыка."</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Календарь"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Показывать при нажатии кнопок регулировки громкости"</string>
@@ -598,7 +597,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Поднять"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Сдвинуть влево"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Сдвинуть вправо"</string>
-    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Приложение не поддерживает многооконный режим"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>, кнопка \"<xliff:g id="TILE_NAME">%2$s</xliff:g>\". Чтобы изменить, нажмите дважды."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"Кнопка \"<xliff:g id="TILE_NAME">%1$s</xliff:g>\". Чтобы добавить, нажмите дважды."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>. Чтобы выбрать, нажмите дважды."</string>
@@ -608,4 +606,6 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Кнопка \"<xliff:g id="TILE_NAME">%1$s</xliff:g>\" удалена"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Кнопка \"<xliff:g id="TILE_NAME">%1$s</xliff:g>\" теперь занимает позицию <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Редактор быстрых настроек."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Приложение не поддерживает разделение экрана."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Приложение не поддерживает разделение экрана."</string>
 </resources>
