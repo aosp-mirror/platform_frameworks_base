@@ -33,6 +33,8 @@ import static android.service.notification.NotificationRankerService.REASON_PROF
 import static android.service.notification.NotificationRankerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationRankerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
@@ -114,6 +116,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -246,8 +249,9 @@ public class NotificationManagerService extends SystemService {
     private String mSoundNotificationKey;
     private String mVibrateNotificationKey;
 
-    private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
-    private ComponentName mEffectsSuppressor;
+    private final SparseArray<ArraySet<ManagedServiceInfo>> mListenersDisablingEffects =
+            new SparseArray<ArraySet<ManagedServiceInfo>>();
+    private List<ComponentName> mEffectsSuppressors = new ArrayList<ComponentName>();
     private int mListenerHints;  // right now, all hints are global
     private int mInterruptionFilter = NotificationListenerService.INTERRUPTION_FILTER_UNKNOWN;
 
@@ -1112,21 +1116,110 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void updateListenerHintsLocked() {
-        final int hints = mListenersDisablingEffects.isEmpty() ? 0 : HINT_HOST_DISABLE_EFFECTS;
+        final int hints = calculateHints();
         if (hints == mListenerHints) return;
-        ZenLog.traceListenerHintsChanged(mListenerHints, hints, mListenersDisablingEffects.size());
+        ZenLog.traceListenerHintsChanged(mListenerHints, hints, mEffectsSuppressors.size());
         mListenerHints = hints;
         scheduleListenerHintsChanged(hints);
     }
 
     private void updateEffectsSuppressorLocked() {
-        final ComponentName suppressor = !mListenersDisablingEffects.isEmpty()
-                ? mListenersDisablingEffects.valueAt(0).component : null;
-        if (Objects.equals(suppressor, mEffectsSuppressor)) return;
-        ZenLog.traceEffectsSuppressorChanged(mEffectsSuppressor, suppressor);
-        mEffectsSuppressor = suppressor;
-        mZenModeHelper.setEffectsSuppressed(suppressor != null);
+        final long updatedSuppressedEffects = calculateSuppressedEffects();
+        if (updatedSuppressedEffects == mZenModeHelper.getSuppressedEffects()) return;
+        final List<ComponentName> suppressors = getSuppressors();
+        ZenLog.traceEffectsSuppressorChanged(mEffectsSuppressors, suppressors, updatedSuppressedEffects);
+        mEffectsSuppressors = suppressors;
+        mZenModeHelper.setSuppressedEffects(updatedSuppressedEffects);
         sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
+    }
+
+    private ArrayList<ComponentName> getSuppressors() {
+        ArrayList<ComponentName> names = new ArrayList<ComponentName>();
+        for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
+            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+
+            for (ManagedServiceInfo info : serviceInfoList) {
+                names.add(info.component);
+            }
+        }
+
+        return names;
+    }
+
+    private boolean removeDisabledHints(ManagedServiceInfo info) {
+        return removeDisabledHints(info, 0);
+    }
+
+    private boolean removeDisabledHints(ManagedServiceInfo info, int hints) {
+        boolean removed = false;
+
+        for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
+            final int hint = mListenersDisablingEffects.keyAt(i);
+            final ArraySet<ManagedServiceInfo> listeners =
+                    mListenersDisablingEffects.valueAt(i);
+
+            if (hints == 0 || (hint & hints) == hint) {
+                removed = removed || listeners.remove(info);
+            }
+        }
+
+        return removed;
+    }
+
+    private void addDisabledHints(ManagedServiceInfo info, int hints) {
+        if ((hints & HINT_HOST_DISABLE_EFFECTS) != 0) {
+            addDisabledHint(info, HINT_HOST_DISABLE_EFFECTS);
+        }
+
+        if ((hints & HINT_HOST_DISABLE_NOTIFICATION_EFFECTS) != 0) {
+            addDisabledHint(info, HINT_HOST_DISABLE_NOTIFICATION_EFFECTS);
+        }
+
+        if ((hints & HINT_HOST_DISABLE_CALL_EFFECTS) != 0) {
+            addDisabledHint(info, HINT_HOST_DISABLE_CALL_EFFECTS);
+        }
+    }
+
+    private void addDisabledHint(ManagedServiceInfo info, int hint) {
+        if (mListenersDisablingEffects.indexOfKey(hint) < 0) {
+            mListenersDisablingEffects.put(hint, new ArraySet<ManagedServiceInfo>());
+        }
+
+        ArraySet<ManagedServiceInfo> hintListeners = mListenersDisablingEffects.get(hint);
+        hintListeners.add(info);
+    }
+
+    private int calculateHints() {
+        int hints = 0;
+        for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
+            int hint = mListenersDisablingEffects.keyAt(i);
+            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+
+            if (!serviceInfoList.isEmpty()) {
+                hints |= hint;
+            }
+        }
+
+        return hints;
+    }
+
+    private long calculateSuppressedEffects() {
+        int hints = calculateHints();
+        long suppressedEffects = 0;
+
+        if ((hints & HINT_HOST_DISABLE_EFFECTS) != 0) {
+            suppressedEffects |= ZenModeHelper.SUPPRESSED_EFFECT_ALL;
+        }
+
+        if ((hints & HINT_HOST_DISABLE_NOTIFICATION_EFFECTS) != 0) {
+            suppressedEffects |= ZenModeHelper.SUPPRESSED_EFFECT_NOTIFICATIONS;
+        }
+
+        if ((hints & HINT_HOST_DISABLE_CALL_EFFECTS) != 0) {
+            suppressedEffects |= ZenModeHelper.SUPPRESSED_EFFECT_CALLS;
+        }
+
+        return suppressedEffects;
     }
 
     private void updateInterruptionFilterLocked() {
@@ -1651,11 +1744,14 @@ public class NotificationManagerService extends SystemService {
             try {
                 synchronized (mNotificationList) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    final boolean disableEffects = (hints & HINT_HOST_DISABLE_EFFECTS) != 0;
+                    final int disableEffectsMask = HINT_HOST_DISABLE_EFFECTS
+                            | HINT_HOST_DISABLE_NOTIFICATION_EFFECTS
+                            | HINT_HOST_DISABLE_CALL_EFFECTS;
+                    final boolean disableEffects = (hints & disableEffectsMask) != 0;
                     if (disableEffects) {
-                        mListenersDisablingEffects.add(info);
+                        addDisabledHints(info, hints);
                     } else {
-                        mListenersDisablingEffects.remove(info);
+                        removeDisabledHints(info, hints);
                     }
                     updateListenerHintsLocked();
                     updateEffectsSuppressorLocked();
@@ -1913,7 +2009,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ComponentName getEffectsSuppressor() {
             enforceSystemOrSystemUIOrVolume("INotificationManager.getEffectsSuppressor");
-            return mEffectsSuppressor;
+            return mEffectsSuppressors.get(0);
         }
 
         @Override
@@ -2273,9 +2369,19 @@ public class NotificationManagerService extends SystemService {
                 pw.print("    mListenersDisablingEffects: (");
                 N = mListenersDisablingEffects.size();
                 for (int i = 0; i < N; i++) {
-                    final ManagedServiceInfo listener = mListenersDisablingEffects.valueAt(i);
-                    if (i > 0) pw.print(',');
-                    pw.print(listener.component);
+                    final int hint = mListenersDisablingEffects.keyAt(i);
+                    if (i > 0) pw.print(';');
+                    pw.print("hint[" + hint + "]:");
+
+                    final ArraySet<ManagedServiceInfo> listeners =
+                            mListenersDisablingEffects.valueAt(i);
+                    final int listenerSize = listeners.size();
+
+                    for (int j = 0; j < listenerSize; j++) {
+                        if (i > 0) pw.print(',');
+                        final ManagedServiceInfo listener = listeners.valueAt(i);
+                        pw.print(listener.component);
+                    }
                 }
                 pw.println(')');
                 pw.println("\n  mRankerServicePackageName: " + mRankerServicePackageName);
@@ -3808,7 +3914,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
-            if (mListenersDisablingEffects.remove(removed)) {
+            if (removeDisabledHints(removed)) {
                 updateListenerHintsLocked();
                 updateEffectsSuppressorLocked();
             }
