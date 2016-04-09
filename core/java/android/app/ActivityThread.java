@@ -4727,8 +4727,16 @@ public final class ActivityThread {
         if (callbacks != null) {
             final int N = callbacks.size();
             for (int i=0; i<N; i++) {
-                performConfigurationChanged(callbacks.get(i), null, config, null,
-                        REPORT_TO_ACTIVITY);
+                ComponentCallbacks2 cb = callbacks.get(i);
+                if (cb instanceof Activity) {
+                    // If callback is an Activity - call corresponding method to consider override
+                    // config and avoid onConfigurationChanged if it hasn't changed.
+                    Activity a = (Activity) cb;
+                    performConfigurationChangedForActivity(mActivities.get(a.getActivityToken()),
+                            config, REPORT_TO_ACTIVITY);
+                } else {
+                    performConfigurationChanged(cb, null, config, null, REPORT_TO_ACTIVITY);
+                }
             }
         }
     }
