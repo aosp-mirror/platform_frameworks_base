@@ -6024,7 +6024,6 @@ public class WindowManagerService extends IWindowManager.Stub
             minLayer = Integer.MAX_VALUE;
         }
 
-        int retryCount = 0;
         WindowState appWin = null;
 
         boolean appIsImTarget;
@@ -6038,193 +6037,172 @@ public class WindowManagerService extends IWindowManager.Stub
         final int aboveAppLayer = (mPolicy.windowTypeToLayerLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
 
-        while (true) {
-            if (retryCount++ > 0) {
-                // Reset max/min layers on retries so we don't accidentally take a screenshot of a
-                // layer based on the previous try.
-                maxLayer = 0;
-                minLayer = Integer.MAX_VALUE;
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                }
-            }
-            synchronized(mWindowMap) {
-                // Figure out the part of the screen that is actually the app.
-                appWin = null;
-                final WindowList windows = displayContent.getWindowList();
-                for (int i = windows.size() - 1; i >= 0; i--) {
-                    WindowState ws = windows.get(i);
-                    if (!ws.mHasSurface) {
-                        continue;
-                    }
-                    if (ws.mLayer >= aboveAppLayer) {
-                        continue;
-                    }
-                    if (ws.mIsImWindow) {
-                        if (!appIsImTarget) {
-                            continue;
-                        }
-                    } else if (ws.mIsWallpaper) {
-                        if (appWin == null) {
-                            // We have not ran across the target window yet, so it is probably
-                            // behind the wallpaper. This can happen when the keyguard is up and
-                            // all windows are moved behind the wallpaper. We don't want to
-                            // include the wallpaper layer in the screenshot as it will coverup
-                            // the layer of the target window.
-                            continue;
-                        }
-                        // Fall through. The target window is in front of the wallpaper. For this
-                        // case we want to include the wallpaper layer in the screenshot because
-                        // the target window might have some transparent areas.
-                    } else if (appToken != null) {
-                        if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
-                            // This app window is of no interest if it is not associated with the
-                            // screenshot app.
-                            continue;
-                        }
-                        appWin = ws;
-                    }
-
-                    // Include this window.
-
-                    final WindowStateAnimator winAnim = ws.mWinAnimator;
-                    int layer = winAnim.mSurfaceController.getLayer();
-                    if (maxLayer < layer) {
-                        maxLayer = layer;
-                    }
-                    if (minLayer > layer) {
-                        minLayer = layer;
-                    }
-
-                    // Don't include wallpaper in bounds calculation
-                    if (!includeFullDisplay && !ws.mIsWallpaper) {
-                        final Rect wf = ws.mFrame;
-                        final Rect cr = ws.mContentInsets;
-                        int left = wf.left + cr.left;
-                        int top = wf.top + cr.top;
-                        int right = wf.right - cr.right;
-                        int bottom = wf.bottom - cr.bottom;
-                        frame.union(left, top, right, bottom);
-                        ws.getVisibleBounds(stackBounds);
-                        if (!Rect.intersects(frame, stackBounds)) {
-                            // Set frame empty if there's no intersection.
-                            frame.setEmpty();
-                        }
-                    }
-
-                    if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
-                            ws.isDisplayedLw() && winAnim.getShown()) {
-                        screenshotReady = true;
-                    }
-
-                    if (ws.isObscuringFullscreen(displayInfo)){
-                        break;
-                    }
-                }
-
-                if (appToken != null && appWin == null) {
-                    // Can't find a window to snapshot.
-                    if (DEBUG_SCREENSHOT) Slog.i(TAG_WM,
-                            "Screenshot: Couldn't find a surface matching " + appToken);
-                    return null;
-                }
-
-                if (!screenshotReady) {
-                    if (retryCount > MAX_SCREENSHOT_RETRIES) {
-                        Slog.i(TAG_WM, "Screenshot max retries " + retryCount + " of " + appToken +
-                                " appWin=" + (appWin == null ? "null" : (appWin + " drawState=" +
-                                appWin.mWinAnimator.mDrawState)));
-                        return null;
-                    }
-
-                    // Delay and hope that window gets drawn.
-                    if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot: No image ready for " + appToken
-                            + ", " + appWin + " drawState=" + appWin.mWinAnimator.mDrawState);
+        synchronized(mWindowMap) {
+            // Figure out the part of the screen that is actually the app.
+            appWin = null;
+            final WindowList windows = displayContent.getWindowList();
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                WindowState ws = windows.get(i);
+                if (!ws.mHasSurface) {
                     continue;
                 }
-
-                // Screenshot is ready to be taken. Everything from here below will continue
-                // through the bottom of the loop and return a value. We only stay in the loop
-                // because we don't want to release the mWindowMap lock until the screenshot is
-                // taken.
-
-                if (maxLayer == 0) {
-                    if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + appToken
-                            + ": returning null maxLayer=" + maxLayer);
-                    return null;
+                if (ws.mLayer >= aboveAppLayer) {
+                    continue;
+                }
+                if (ws.mIsImWindow) {
+                    if (!appIsImTarget) {
+                        continue;
+                    }
+                } else if (ws.mIsWallpaper) {
+                    if (appWin == null) {
+                        // We have not ran across the target window yet, so it is probably
+                        // behind the wallpaper. This can happen when the keyguard is up and
+                        // all windows are moved behind the wallpaper. We don't want to
+                        // include the wallpaper layer in the screenshot as it will coverup
+                        // the layer of the target window.
+                        continue;
+                    }
+                    // Fall through. The target window is in front of the wallpaper. For this
+                    // case we want to include the wallpaper layer in the screenshot because
+                    // the target window might have some transparent areas.
+                } else if (appToken != null) {
+                    if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
+                        // This app window is of no interest if it is not associated with the
+                        // screenshot app.
+                        continue;
+                    }
+                    appWin = ws;
                 }
 
-                if (!includeFullDisplay) {
-                    // Constrain frame to the screen size.
-                    if (!frame.intersect(0, 0, dw, dh)) {
+                // Include this window.
+
+                final WindowStateAnimator winAnim = ws.mWinAnimator;
+                int layer = winAnim.mSurfaceController.getLayer();
+                if (maxLayer < layer) {
+                    maxLayer = layer;
+                }
+                if (minLayer > layer) {
+                    minLayer = layer;
+                }
+
+                // Don't include wallpaper in bounds calculation
+                if (!includeFullDisplay && !ws.mIsWallpaper) {
+                    final Rect wf = ws.mFrame;
+                    final Rect cr = ws.mContentInsets;
+                    int left = wf.left + cr.left;
+                    int top = wf.top + cr.top;
+                    int right = wf.right - cr.right;
+                    int bottom = wf.bottom - cr.bottom;
+                    frame.union(left, top, right, bottom);
+                    ws.getVisibleBounds(stackBounds);
+                    if (!Rect.intersects(frame, stackBounds)) {
+                        // Set frame empty if there's no intersection.
                         frame.setEmpty();
                     }
-                } else {
-                    // Caller just wants entire display.
-                    frame.set(0, 0, dw, dh);
-                }
-                if (frame.isEmpty()) {
-                    return null;
                 }
 
-                if (width < 0) {
-                    width = (int) (frame.width() * frameScale);
-                }
-                if (height < 0) {
-                    height = (int) (frame.height() * frameScale);
+                if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
+                        ws.isDisplayedLw() && winAnim.getShown()) {
+                    screenshotReady = true;
                 }
 
-                // Tell surface flinger what part of the image to crop. Take the top
-                // right part of the application, and crop the larger dimension to fit.
-                Rect crop = new Rect(frame);
-                if (width / (float) frame.width() < height / (float) frame.height()) {
-                    int cropWidth = (int)((float)width / (float)height * frame.height());
-                    crop.right = crop.left + cropWidth;
-                } else {
-                    int cropHeight = (int)((float)height / (float)width * frame.width());
-                    crop.bottom = crop.top + cropHeight;
-                }
-
-                // The screenshot API does not apply the current screen rotation.
-                int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
-
-                if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                    rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
-                }
-
-                // Surfaceflinger is not aware of orientation, so convert our logical
-                // crop to surfaceflinger's portrait orientation.
-                convertCropForSurfaceFlinger(crop, rot, dw, dh);
-
-                if (DEBUG_SCREENSHOT) {
-                    Slog.i(TAG_WM, "Screenshot: " + dw + "x" + dh + " from " + minLayer + " to "
-                            + maxLayer + " appToken=" + appToken);
-                    for (int i = 0; i < windows.size(); i++) {
-                        WindowState win = windows.get(i);
-                        Slog.i(TAG_WM, win + ": " + win.mLayer
-                                + " animLayer=" + win.mWinAnimator.mAnimLayer
-                                + " surfaceLayer=" + win.mWinAnimator.mSurfaceController.getLayer());
-                    }
-                }
-
-                ScreenRotationAnimation screenRotationAnimation =
-                        mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
-                final boolean inRotation = screenRotationAnimation != null &&
-                        screenRotationAnimation.isAnimating();
-                if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM,
-                        "Taking screenshot while rotating");
-
-                bm = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
-                        inRotation, rot);
-                if (bm == null) {
-                    Slog.w(TAG_WM, "Screenshot failure taking screenshot for (" + dw + "x" + dh
-                            + ") to layer " + maxLayer);
-                    return null;
+                if (ws.isObscuringFullscreen(displayInfo)){
+                    break;
                 }
             }
 
-            break;
+            if (appToken != null && appWin == null) {
+                // Can't find a window to snapshot.
+                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM,
+                        "Screenshot: Couldn't find a surface matching " + appToken);
+                return null;
+            }
+
+            if (!screenshotReady) {
+                Slog.i(TAG_WM, "Failed to capture screenshot of " + appToken +
+                        " appWin=" + (appWin == null ? "null" : (appWin + " drawState=" +
+                        appWin.mWinAnimator.mDrawState)));
+                return null;
+            }
+
+            // Screenshot is ready to be taken. Everything from here below will continue
+            // through the bottom of the loop and return a value. We only stay in the loop
+            // because we don't want to release the mWindowMap lock until the screenshot is
+            // taken.
+
+            if (maxLayer == 0) {
+                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + appToken
+                        + ": returning null maxLayer=" + maxLayer);
+                return null;
+            }
+
+            if (!includeFullDisplay) {
+                // Constrain frame to the screen size.
+                if (!frame.intersect(0, 0, dw, dh)) {
+                    frame.setEmpty();
+                }
+            } else {
+                // Caller just wants entire display.
+                frame.set(0, 0, dw, dh);
+            }
+            if (frame.isEmpty()) {
+                return null;
+            }
+
+            if (width < 0) {
+                width = (int) (frame.width() * frameScale);
+            }
+            if (height < 0) {
+                height = (int) (frame.height() * frameScale);
+            }
+
+            // Tell surface flinger what part of the image to crop. Take the top
+            // right part of the application, and crop the larger dimension to fit.
+            Rect crop = new Rect(frame);
+            if (width / (float) frame.width() < height / (float) frame.height()) {
+                int cropWidth = (int)((float)width / (float)height * frame.height());
+                crop.right = crop.left + cropWidth;
+            } else {
+                int cropHeight = (int)((float)height / (float)width * frame.width());
+                crop.bottom = crop.top + cropHeight;
+            }
+
+            // The screenshot API does not apply the current screen rotation.
+            int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+
+            if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+                rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
+            }
+
+            // Surfaceflinger is not aware of orientation, so convert our logical
+            // crop to surfaceflinger's portrait orientation.
+            convertCropForSurfaceFlinger(crop, rot, dw, dh);
+
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Screenshot: " + dw + "x" + dh + " from " + minLayer + " to "
+                        + maxLayer + " appToken=" + appToken);
+                for (int i = 0; i < windows.size(); i++) {
+                    WindowState win = windows.get(i);
+                    Slog.i(TAG_WM, win + ": " + win.mLayer
+                            + " animLayer=" + win.mWinAnimator.mAnimLayer
+                            + " surfaceLayer=" + win.mWinAnimator.mSurfaceController.getLayer());
+                }
+            }
+
+            ScreenRotationAnimation screenRotationAnimation =
+                    mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+            final boolean inRotation = screenRotationAnimation != null &&
+                    screenRotationAnimation.isAnimating();
+            if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM,
+                    "Taking screenshot while rotating");
+
+            bm = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
+                    inRotation, rot);
+            if (bm == null) {
+                Slog.w(TAG_WM, "Screenshot failure taking screenshot for (" + dw + "x" + dh
+                        + ") to layer " + maxLayer);
+                return null;
+            }
         }
 
         if (DEBUG_SCREENSHOT) {
