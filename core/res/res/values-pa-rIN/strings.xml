@@ -1468,8 +1468,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ PIN ਮੰਗੋ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੈਟਰਨ ਅਨਲੌਕ ਕਰਨ ਲਈ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
