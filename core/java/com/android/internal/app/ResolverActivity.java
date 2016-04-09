@@ -105,6 +105,7 @@ public class ResolverActivity extends Activity {
     private final ArrayList<Intent> mIntents = new ArrayList<>();
     private ResolverComparator mResolverComparator;
     private PickTargetOptionRequest mPickOptionRequest;
+    private ComponentName[] mFilteredComponents;
 
     protected ResolverDrawerLayout mResolverDrawerLayout;
 
@@ -330,6 +331,24 @@ public class ResolverActivity extends Activity {
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
+    }
+
+    public final void setFilteredComponents(ComponentName[] components) {
+        mFilteredComponents = components;
+    }
+
+    public final boolean isComponentFiltered(ComponentInfo component) {
+        if (mFilteredComponents == null) {
+            return false;
+        }
+
+        final ComponentName checkName = component.getComponentName();
+        for (ComponentName name : mFilteredComponents) {
+            if (name.equals(checkName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1269,7 +1288,8 @@ public class ResolverActivity extends Activity {
                                 ai.applicationInfo.uid, ai.exported);
                         boolean suspended = (ai.applicationInfo.flags
                                 & ApplicationInfo.FLAG_SUSPENDED) != 0;
-                        if (granted != PackageManager.PERMISSION_GRANTED || suspended) {
+                        if (granted != PackageManager.PERMISSION_GRANTED || suspended
+                                || isComponentFiltered(ai)) {
                             // Access not allowed!
                             if (mOrigResolveList == currentResolveList) {
                                 mOrigResolveList = new ArrayList<>(mOrigResolveList);
