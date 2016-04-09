@@ -168,8 +168,7 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Hylätään <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> hylättiin."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Kaikki viimeisimmät sovellukset on hylätty."</string>
-    <!-- no translation found for accessibility_recents_item_open_app_info (5107479759905883540) -->
-    <skip />
+    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Avaa sovelluksen <xliff:g id="APP">%s</xliff:g> tiedot."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Käynnistetään <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Ilmoitus hylätty."</string>
@@ -421,6 +420,12 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> on äänenvoimakkuusvalinta."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Palauta alkuperäinen koskettamalla."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Käytät työprofiilia."</string>
+    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
+    <skip />
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Näytä akun varaus kuvakkeessa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Näyttää akun varausprosentin tilapalkin kuvakkeessa, kun laitetta ei ladata."</string>
@@ -596,7 +601,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Siirrä ylöspäin"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Siirrä vasemmalle"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Siirrä oikealle"</string>
-    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Sovellus ei ehkä toimi usean ikkunan tilassa."</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Paikka <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Muokkaa kaksoisnapauttamalla."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Lisää kaksoisnapauttamalla."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Paikka <xliff:g id="POSITION">%1$d</xliff:g>. Valitse kaksoisnapauttamalla."</string>
@@ -606,4 +610,6 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> poistettiin."</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> siirrettiin paikkaan <xliff:g id="POSITION">%2$d</xliff:g>."</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Pika-asetusten muokkausnäkymä"</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Sovellus ei ehkä toimi jaetulla näytöllä."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Sovellus ei tue jaetun näytön tilaa."</string>
 </resources>
