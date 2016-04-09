@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
@@ -45,6 +46,8 @@ public class ForcedResizableInfoActivity extends Activity implements OnTouchList
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forced_resizable_activity);
+        TextView tv = (TextView) findViewById(com.android.internal.R.id.message);
+        tv.setText(R.string.dock_forced_resizable);
         getWindow().getDecorView().setOnTouchListener(this);
     }
 
