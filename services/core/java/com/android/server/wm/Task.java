@@ -27,6 +27,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import android.app.ActivityManager.StackId;
 import android.content.pm.ActivityInfo;
@@ -574,7 +575,16 @@ class Task implements DimLayer.DimLayerUser {
 
                     // If we are not drag resizing, force recreating of a new surface so updating
                     // the content and positioning that surface will be in sync.
-                    if (!win.computeDragResizing()) {
+                    //
+                    // As we use this flag as a hint to freeze surface boundary updates,
+                    // we'd like to only apply this to TYPE_BASE_APPLICATION,
+                    // windows of TYPE_APPLICATION like dialogs, could appear
+                    // to not be drag resizing while they resize, but we'd
+                    // still like to manipulate their frame to update crop, etc...
+                    //
+                    // Anyway we don't need to synchronize position and content updates for these
+                    // windows since they aren't at the base layer and could be moved around anyway.
+                    if (!win.computeDragResizing() && win.mAttrs.type == TYPE_BASE_APPLICATION) {
                         win.mResizedWhileNotDragResizing = true;
                     }
                 }
