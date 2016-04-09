@@ -49,6 +49,9 @@
 
     <style name="Animation.ForcedResizable" parent="@android:style/Animation">
         <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
+
+        <!-- If the target stack doesn't have focus, we do a task to front animation. -->
+        <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
         <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
 
