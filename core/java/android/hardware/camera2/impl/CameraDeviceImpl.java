@@ -493,7 +493,7 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     @Override
-    public void createCaptureSessionByOutputConfiguration(
+    public void createCaptureSessionByOutputConfigurations(
             List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException {
@@ -532,7 +532,7 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     @Override
-    public void createReprocessableCaptureSessionWithConfigurations(InputConfiguration inputConfig,
+    public void createReprocessableCaptureSessionByConfigurations(InputConfiguration inputConfig,
             List<OutputConfiguration> outputs,
             android.hardware.camera2.CameraCaptureSession.StateCallback callback, Handler handler)
                     throws CameraAccessException {
