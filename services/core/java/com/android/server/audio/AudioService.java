@@ -3954,25 +3954,16 @@ public class AudioService extends IAudioService.Stub {
 
         public void applyAllVolumes() {
             synchronized (VolumeStreamState.class) {
-                // apply default volume first: by convention this will reset all
-                // devices volumes in audio policy manager to the supplied value
+                // apply device specific volumes first
                 int index;
-                if (mIsMuted) {
-                    index = 0;
-                } else {
-                    index = (getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)/10;
-                }
-                AudioSystem.setStreamVolumeIndex(mStreamType, index, AudioSystem.DEVICE_OUT_DEFAULT);
-                // then apply device specific volumes
                 for (int i = 0; i < mIndexMap.size(); i++) {
-                    int device = mIndexMap.keyAt(i);
+                    final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
                         if (mIsMuted) {
                             index = 0;
                         } else if (((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
                                 mAvrcpAbsVolSupported)
-                                    || ((device & mFullVolumeDevices) != 0))
-                        {
+                                    || ((device & mFullVolumeDevices) != 0)) {
                             index = (mIndexMax + 5)/10;
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
@@ -3980,6 +3971,15 @@ public class AudioService extends IAudioService.Stub {
                         AudioSystem.setStreamVolumeIndex(mStreamType, index, device);
                     }
                 }
+                // apply default volume last: by convention , default device volume will be used
+                // by audio policy manager if no explicit volume is present for a given device type
+                if (mIsMuted) {
+                    index = 0;
+                } else {
+                    index = (getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)/10;
+                }
+                AudioSystem.setStreamVolumeIndex(
+                        mStreamType, index, AudioSystem.DEVICE_OUT_DEFAULT);
             }
         }
 
