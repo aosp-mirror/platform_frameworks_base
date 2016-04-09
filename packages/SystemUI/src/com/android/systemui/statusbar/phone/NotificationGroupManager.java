@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * A class to handle notifications and their corresponding groups.
@@ -121,6 +122,15 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         }
     }
 
+    public void onEntryBundlingUpdated(final NotificationData.Entry updated,
+            final String overrideGroupKey) {
+        final StatusBarNotification oldSbn = updated.notification.clone();
+        if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
+            updated.notification.setOverrideGroupKey(overrideGroupKey);
+            onEntryUpdated(updated, oldSbn);
+        }
+    }
+
     private void updateSuppression(NotificationGroup group) {
         if (group == null) {
             return;
@@ -129,7 +139,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         group.suppressed = group.summary != null && !group.expanded
                 && (group.children.size() == 1
                 || (group.children.size() == 0
-                        && !group.summary.notification.getNotification().isGroupChild()
+                        && group.summary.notification.getNotification().isGroupSummary()
                         && hasIsolatedChildren(group)));
         if (prevSuppressed != group.suppressed) {
             mListener.onGroupsChanged();
@@ -173,7 +183,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     public boolean isOnlyChildInSuppressedGroup(StatusBarNotification sbn) {
         return isGroupSuppressed(sbn.getGroupKey())
-                && sbn.getNotification().isGroupChild()
+                && !sbn.getNotification().isGroupSummary()
                 && getTotalNumberOfChildren(sbn) == 1;
     }
 
@@ -278,11 +288,12 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         }
         return sbn.getNotification().isGroupSummary();
     }
+
     private boolean isGroupChild(StatusBarNotification sbn) {
         if (isIsolated(sbn)) {
             return false;
         }
-        return sbn.getNotification().isGroupChild();
+        return sbn.isGroup() && !sbn.getNotification().isGroupSummary();
     }
 
     private String getGroupKey(StatusBarNotification sbn) {
@@ -335,7 +346,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     private boolean shouldIsolate(StatusBarNotification sbn) {
         NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
-        return sbn.getNotification().isGroupChild()
+        return (sbn.isGroup() && !sbn.getNotification().isGroupSummary())
                 && (sbn.getNotification().fullScreenIntent != null
                         || notificationGroup == null
                         || !notificationGroup.expanded

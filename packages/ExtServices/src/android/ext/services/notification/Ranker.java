@@ -16,16 +16,36 @@
 
 package android.ext.services.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+
+import android.os.Bundle;
+import android.service.notification.Adjustment;
 import android.service.notification.NotificationRankerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.Slog;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+
+import android.ext.services.R;
 
 /**
  * Class that provides an updatable ranker module for the notification manager..
  */
 public final class Ranker extends NotificationRankerService {
     private static final String TAG = "RocketRanker";
-    private static final boolean DEBUG =  Log.isLoggable(TAG, Log.DEBUG);;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final int AUTOBUNDLE_AT_COUNT = 4;
+    private static final String AUTOBUNDLE_KEY = "ranker_bundle";
+
+    // Map of package : notification keys. Only contains notifications that are not bundled
+    // by the app (aka no group or sort key).
+    Map<String, LinkedHashSet<String>> mUnbundledNotifications;
 
     @Override
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn, int importance,
@@ -37,10 +57,146 @@ public final class Ranker extends NotificationRankerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (DEBUG) Log.i(TAG, "POSTED " + sbn.getKey());
+        try {
+            List<String> notificationsToBundle = new ArrayList<>();
+            if (!sbn.isGroup()) {
+                // Not grouped by the app, add to the list of notifications for the app;
+                // send bundling update if app exceeds the autobundling limit.
+                synchronized (mUnbundledNotifications) {
+                    LinkedHashSet<String> notificationsForPackage
+                            = mUnbundledNotifications.get(sbn.getPackageName());
+                    if (notificationsForPackage == null) {
+                        notificationsForPackage = new LinkedHashSet<>();
+                    }
+                    if (notificationsForPackage.contains(sbn.getKey())) {
+                        return;
+                    }
+                    notificationsForPackage.add(sbn.getKey());
+                    mUnbundledNotifications.put(sbn.getPackageName(), notificationsForPackage);
+
+                    if (notificationsForPackage.size() >= AUTOBUNDLE_AT_COUNT) {
+                        // Autobundle all but the most recently posted (not updated) notification.
+                        int count = 0;
+                        for (String key : notificationsForPackage) {
+                            if (count < notificationsForPackage.size() - 1) {
+                                notificationsToBundle.add(key);
+                            }
+                            count++;
+                        }
+                    }
+                }
+                if (notificationsToBundle.size() > 0) {
+                    adjustAutobundlingSummary(sbn.getPackageName(), notificationsToBundle.get(0),
+                            true);
+                    adjustNotificationBundling(sbn.getPackageName(), notificationsToBundle, true);
+                }
+            } else {
+                // Grouped, but not by us. Send updates to unautobundle, if we bundled it.
+                maybeUnbundle(sbn, false);
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Failure processing new notification", e);
+        }
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        try {
+            maybeUnbundle(sbn, true);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error processing canceled notification", e);
+        }
+    }
+
+    /**
+     * Un-autobundles notifications that are now grouped by the app. Additionally cancels
+     * autobundling if the status change of this notification resulted in the loose notification
+     * count being under the limit.
+     */
+    private void maybeUnbundle(StatusBarNotification sbn, boolean notificationGone) {
+        List<String> notificationsToUnAutobundle = new ArrayList<>();
+        boolean removeSummary = false;
+        synchronized (mUnbundledNotifications) {
+            LinkedHashSet<String> notificationsForPackage
+                    = mUnbundledNotifications.get(sbn.getPackageName());
+            if (notificationsForPackage == null || notificationsForPackage.size() == 0) {
+                return;
+            }
+            if (notificationsForPackage.remove(sbn.getKey())) {
+                if (!notificationGone) {
+                    // Add the current notification to the unbundling list if it still exists.
+                    notificationsToUnAutobundle.add(sbn.getKey());
+                }
+                // If the status change of this notification has brought the number of loose
+                // notifications back below the limit, remove the summary and un-autobundle.
+                if (notificationsForPackage.size() == AUTOBUNDLE_AT_COUNT - 1) {
+                    removeSummary = true;
+                    for (String key : notificationsForPackage) {
+                        notificationsToUnAutobundle.add(key);
+                    }
+                }
+            }
+        }
+        if (notificationsToUnAutobundle.size() > 0) {
+            if (removeSummary) {
+                adjustAutobundlingSummary(sbn.getPackageName(), null, false);
+            }
+            adjustNotificationBundling(sbn.getPackageName(), notificationsToUnAutobundle, false);
+        }
     }
 
     @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
+        mUnbundledNotifications = new HashMap<>();
+        for (StatusBarNotification sbn : getActiveNotifications()) {
+            onNotificationPosted(sbn);
+        }
     }
+
+    private void adjustAutobundlingSummary(String packageName, String key, boolean summaryNeeded) {
+        Bundle signals = new Bundle();
+        if (summaryNeeded) {
+            signals.putBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, true);
+            signals.putString(Adjustment.GROUP_KEY_OVERRIDE_KEY, AUTOBUNDLE_KEY);
+        } else {
+            signals.putBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false);
+        }
+        Adjustment adjustment = new Adjustment(packageName, key, IMPORTANCE_UNSPECIFIED, signals,
+                getContext().getString(R.string.notification_ranker_autobundle_explanation), null);
+        if (DEBUG) {
+            Log.i(TAG, "Summary update for: " + packageName + " "
+                    + (summaryNeeded ? "adding" : "removing"));
+        }
+        try {
+            adjustNotification(adjustment);
+        } catch (Exception e) {
+            Slog.e(TAG, "Adjustment failed", e);
+        }
+
+    }
+    private void adjustNotificationBundling(String packageName, List<String> keys, boolean bundle) {
+        List<Adjustment> adjustments = new ArrayList<>();
+        for (String key : keys) {
+            adjustments.add(createBundlingAdjustment(packageName, key, bundle));
+            if (DEBUG) Log.i(TAG, "Sending bundling adjustment for: " + key);
+        }
+        try {
+            adjustNotifications(adjustments);
+        } catch (Exception e) {
+            Slog.e(TAG, "Adjustments failed", e);
+        }
+    }
+
+    private Adjustment createBundlingAdjustment(String packageName, String key, boolean bundle) {
+        Bundle signals = new Bundle();
+        if (bundle) {
+            signals.putString(Adjustment.GROUP_KEY_OVERRIDE_KEY, AUTOBUNDLE_KEY);
+        } else {
+            signals.putString(Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
+        }
+        return new Adjustment(packageName, key, IMPORTANCE_UNSPECIFIED, signals,
+                getContext().getString(R.string.notification_ranker_autobundle_explanation), null);
+    }
+
 }

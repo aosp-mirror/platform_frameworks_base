@@ -1052,6 +1052,8 @@ public abstract class NotificationListenerService extends Service {
         private int mSuppressedVisualEffects;
         private @Importance int mImportance;
         private CharSequence mImportanceExplanation;
+        // System specified group key.
+        private String mOverrideGroupKey;
 
         public Ranking() {}
 
@@ -1130,9 +1132,17 @@ public abstract class NotificationListenerService extends Service {
             return mImportanceExplanation;
         }
 
+        /**
+         * If the system has overriden the group key, then this will be non-null, and this
+         * key should be used to bundle notifications.
+         */
+        public String getOverrideGroupKey() {
+            return mOverrideGroupKey;
+        }
+
         private void populate(String key, int rank, boolean matchesInterruptionFilter,
                 int visibilityOverride, int suppressedVisualEffects, int importance,
-                CharSequence explanation) {
+                CharSequence explanation, String overrideGroupKey) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < IMPORTANCE_LOW;
@@ -1141,6 +1151,7 @@ public abstract class NotificationListenerService extends Service {
             mSuppressedVisualEffects = suppressedVisualEffects;
             mImportance = importance;
             mImportanceExplanation = explanation;
+            mOverrideGroupKey = overrideGroupKey;
         }
 
         /**
@@ -1184,6 +1195,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Integer> mSuppressedVisualEffects;
         private ArrayMap<String, Integer> mImportance;
         private ArrayMap<String, String> mImportanceExplanation;
+        private ArrayMap<String, String> mOverrideGroupKeys;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1210,7 +1222,7 @@ public abstract class NotificationListenerService extends Service {
             int rank = getRank(key);
             outRanking.populate(key, rank, !isIntercepted(key),
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
-                    getImportance(key), getImportanceExplanation(key));
+                    getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key));
             return rank >= 0;
         }
 
@@ -1281,6 +1293,15 @@ public abstract class NotificationListenerService extends Service {
             return mImportanceExplanation.get(key);
         }
 
+        private String getOverrideGroupKey(String key) {
+            synchronized (this) {
+                if (mOverrideGroupKeys == null) {
+                    buildOverrideGroupKeys();
+                }
+            }
+            return mOverrideGroupKeys.get(key);
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1332,6 +1353,15 @@ public abstract class NotificationListenerService extends Service {
             mImportanceExplanation = new ArrayMap<>(explanationBundle.size());
             for (String key: explanationBundle.keySet()) {
                 mImportanceExplanation.put(key, explanationBundle.getString(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildOverrideGroupKeys() {
+            Bundle overrideGroupKeys = mRankingUpdate.getOverrideGroupKeys();
+            mOverrideGroupKeys = new ArrayMap<>(overrideGroupKeys.size());
+            for (String key: overrideGroupKeys.keySet()) {
+                mOverrideGroupKeys.put(key, overrideGroupKeys.getString(key));
             }
         }
 

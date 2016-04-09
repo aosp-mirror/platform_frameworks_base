@@ -33,7 +33,8 @@ public class StatusBarNotification implements Parcelable {
     private final int id;
     private final String tag;
     private final String key;
-    private final String groupKey;
+    private String groupKey;
+    private String overrideGroupKey;
 
     private final int uid;
     private final String opPkg;
@@ -49,6 +50,27 @@ public class StatusBarNotification implements Parcelable {
             int initialPid, int score, Notification notification, UserHandle user) {
         this(pkg, opPkg, id, tag, uid, initialPid, score, notification, user,
                 System.currentTimeMillis());
+    }
+
+    /** @hide */
+    public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
+            int initialPid, Notification notification, UserHandle user, String overrideGroupKey,
+            long postTime) {
+        if (pkg == null) throw new NullPointerException();
+        if (notification == null) throw new NullPointerException();
+
+        this.pkg = pkg;
+        this.opPkg = opPkg;
+        this.id = id;
+        this.tag = tag;
+        this.uid = uid;
+        this.initialPid = initialPid;
+        this.notification = notification;
+        this.user = user;
+        this.postTime = postTime;
+        this.overrideGroupKey = overrideGroupKey;
+        this.key = key();
+        this.groupKey = groupKey();
     }
 
     public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
@@ -84,15 +106,27 @@ public class StatusBarNotification implements Parcelable {
         this.notification = new Notification(in);
         this.user = UserHandle.readFromParcel(in);
         this.postTime = in.readLong();
+        if (in.readInt() != 0) {
+            this.overrideGroupKey = in.readString();
+        } else {
+            this.overrideGroupKey = null;
+        }
         this.key = key();
         this.groupKey = groupKey();
     }
 
     private String key() {
-        return user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
+        String sbnKey = user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
+        if (overrideGroupKey != null && getNotification().isGroupSummary()) {
+            sbnKey = sbnKey + "|" + overrideGroupKey;
+        }
+        return sbnKey;
     }
 
     private String groupKey() {
+        if (overrideGroupKey != null) {
+            return user.getIdentifier() + "|" + pkg + "|" + "g:" + overrideGroupKey;
+        }
         final String group = getNotification().getGroup();
         final String sortKey = getNotification().getSortKey();
         if (group == null && sortKey == null) {
@@ -103,6 +137,17 @@ public class StatusBarNotification implements Parcelable {
                 (group == null
                         ? "p:" + notification.priority
                         : "g:" + group);
+    }
+
+    /**
+     * Returns true if this notification is part of a group.
+     */
+    public boolean isGroup() {
+        if (overrideGroupKey != null || getNotification().getGroup() != null
+                || getNotification().getSortKey() != null) {
+            return true;
+        }
+        return false;
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -121,6 +166,12 @@ public class StatusBarNotification implements Parcelable {
         user.writeToParcel(out, flags);
 
         out.writeLong(this.postTime);
+        if (this.overrideGroupKey != null) {
+            out.writeInt(1);
+            out.writeString(this.overrideGroupKey);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     public int describeContents() {
@@ -149,22 +200,22 @@ public class StatusBarNotification implements Parcelable {
         this.notification.cloneInto(no, false); // light copy
         return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
-                0, no, this.user, this.postTime);
+                no, this.user, this.overrideGroupKey, this.postTime);
     }
 
     @Override
     public StatusBarNotification clone() {
         return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
-                0, this.notification.clone(), this.user, this.postTime);
+                this.notification.clone(), this.user, this.overrideGroupKey, this.postTime);
     }
 
     @Override
     public String toString() {
         return String.format(
-                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
+                "StatusBarNotification(pkg=%s user=%s id=%d tag=%s key=%s: %s)",
                 this.pkg, this.user, this.id, this.tag,
-                0, this.key, this.notification);
+                this.key, this.notification);
     }
 
     /** Convenience method to check the notification's flags for
@@ -255,6 +306,21 @@ public class StatusBarNotification implements Parcelable {
      */
     public String getGroupKey() {
         return groupKey;
+    }
+
+    /**
+     * Sets the override group key.
+     */
+    public void setOverrideGroupKey(String overrideGroupKey) {
+        this.overrideGroupKey = overrideGroupKey;
+        groupKey = groupKey();
+    }
+
+    /**
+     * Returns the override group key.
+     */
+    public String getOverrideGroupKey() {
+        return overrideGroupKey;
     }
 
     /**

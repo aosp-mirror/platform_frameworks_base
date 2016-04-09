@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.Bundle;
+import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
@@ -80,7 +81,8 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
-    void setImportanceFromRankerService(in INotificationListener token, String key, int importance, CharSequence explanation);
+    void applyAdjustmentFromRankerService(in INotificationListener token, in Adjustment adjustment);
+    void applyAdjustmentsFromRankerService(in INotificationListener token, in List<Adjustment> adjustments);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);

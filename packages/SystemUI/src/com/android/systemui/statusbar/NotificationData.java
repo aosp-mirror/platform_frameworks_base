@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -257,16 +258,21 @@ public class NotificationData {
     }
 
     public void add(Entry entry, RankingMap ranking) {
-        mEntries.put(entry.notification.getKey(), entry);
-        updateRankingAndSort(ranking);
+        synchronized (mEntries) {
+            mEntries.put(entry.notification.getKey(), entry);
+        }
         mGroupManager.onEntryAdded(entry);
+        updateRankingAndSort(ranking);
     }
 
     public Entry remove(String key, RankingMap ranking) {
-        Entry removed = mEntries.remove(key);
+        Entry removed = null;
+        synchronized (mEntries) {
+            removed = mEntries.remove(key);
+        }
         if (removed == null) return null;
-        updateRankingAndSort(ranking);
         mGroupManager.onEntryRemoved(removed);
+        updateRankingAndSort(ranking);
         return removed;
     }
 
@@ -316,9 +322,30 @@ public class NotificationData {
         return Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
+    public String getOverrideGroupKey(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getOverrideGroupKey();
+        }
+         return null;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
+            synchronized (mEntries) {
+                final int N = mEntries.size();
+                for (int i = 0; i < N; i++) {
+                    Entry entry = mEntries.valueAt(i);
+                    final StatusBarNotification oldSbn = entry.notification.clone();
+                    final String overrideGroupKey = getOverrideGroupKey(entry.key);
+                    if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
+                        entry.notification.setOverrideGroupKey(overrideGroupKey);
+                        mGroupManager.onEntryUpdated(entry, oldSbn);
+                    }
+                    //mGroupManager.onEntryBundlingUpdated(entry, getOverrideGroupKey(entry.key));
+                }
+            }
         }
         filterAndSort();
     }
@@ -328,16 +355,18 @@ public class NotificationData {
     public void filterAndSort() {
         mSortedAndFiltered.clear();
 
-        final int N = mEntries.size();
-        for (int i = 0; i < N; i++) {
-            Entry entry = mEntries.valueAt(i);
-            StatusBarNotification sbn = entry.notification;
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                StatusBarNotification sbn = entry.notification;
 
-            if (shouldFilterOut(sbn)) {
-                continue;
+                if (shouldFilterOut(sbn)) {
+                    continue;
+                }
+
+                mSortedAndFiltered.add(entry);
             }
-
-            mSortedAndFiltered.add(entry);
         }
 
         Collections.sort(mSortedAndFiltered, mRankingComparator);
@@ -398,16 +427,17 @@ public class NotificationData {
             NotificationData.Entry e = mSortedAndFiltered.get(active);
             dumpEntry(pw, indent, active, e);
         }
-
-        int M = mEntries.size();
-        pw.print(indent);
-        pw.println("inactive notifications: " + (M - active));
-        int inactiveCount = 0;
-        for (int i = 0; i < M; i++) {
-            Entry entry = mEntries.valueAt(i);
-            if (!mSortedAndFiltered.contains(entry)) {
-                dumpEntry(pw, indent, inactiveCount, entry);
-                inactiveCount++;
+        synchronized (mEntries) {
+            int M = mEntries.size();
+            pw.print(indent);
+            pw.println("inactive notifications: " + (M - active));
+            int inactiveCount = 0;
+            for (int i = 0; i < M; i++) {
+                Entry entry = mEntries.valueAt(i);
+                if (!mSortedAndFiltered.contains(entry)) {
+                    dumpEntry(pw, indent, inactiveCount, entry);
+                    inactiveCount++;
+                }
             }
         }
     }
