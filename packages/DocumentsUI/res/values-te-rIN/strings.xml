@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"పత్రాలు"</string>
-    <string name="files_label" msgid="6051402950202690279">"ఫైల్‌లు"</string>
     <string name="downloads_label" msgid="959113951084633612">"డౌన్‌లోడ్‌లు"</string>
     <string name="title_open" msgid="4353228937663917801">"ఇక్కడి నుండి తెరువు"</string>
     <string name="title_save" msgid="2433679664882857999">"ఇందులో సేవ్ చేయి"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఎంచుకోబడ్డాయి</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఎంచుకోబడింది</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> అంశాలు</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> అంశం</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\"ని తొలగించాలా?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" ఫోల్డర్‌ని మరియు అందులోని కంటెంట్‌లను తొలగించాలా?"</string>

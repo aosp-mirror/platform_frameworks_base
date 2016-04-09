@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Documentos"</string>
-    <string name="files_label" msgid="6051402950202690279">"Arquivos"</string>
     <string name="downloads_label" msgid="959113951084633612">"Downloads"</string>
     <string name="title_open" msgid="4353228937663917801">"Abrir de"</string>
     <string name="title_save" msgid="2433679664882857999">"Salvar em"</string>
@@ -111,7 +110,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Falha ao renomear documento"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Alguns arquivos foram convertidos"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Conceder ao <xliff:g id="APPNAME"><b>^1</b></xliff:g> acesso ao diretório <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> no <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
-    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Conceder acesso a <xliff:g id="APPNAME"><b>^1</b></xliff:g> ao diretório <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Conceder acesso ao diretório <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> para <xliff:g id="APPNAME"><b>^1</b></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Conceder a <xliff:g id="APPNAME"><b>^1</b></xliff:g> acesso aos seus dados, incluindo fotos e vídeos, no/na <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Não perguntar novamente"</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> itens</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> itens</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Excluir \" <xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Excluir pasta \"<xliff:g id="NAME">%1$s</xliff:g>\" e o respectivo conteúdo?"</string>
