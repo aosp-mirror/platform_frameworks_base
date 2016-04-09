@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Документи"</string>
-    <string name="files_label" msgid="6051402950202690279">"Датотеке"</string>
     <string name="downloads_label" msgid="959113951084633612">"Преузимања"</string>
     <string name="title_open" msgid="4353228937663917801">"Отвори са"</string>
     <string name="title_save" msgid="2433679664882857999">"Сачувај у"</string>
@@ -127,6 +126,11 @@
       <item quantity="one">Изабрана је <xliff:g id="COUNT_1">%1$d</xliff:g> ставка</item>
       <item quantity="few">Изабране су <xliff:g id="COUNT_1">%1$d</xliff:g> ставке</item>
       <item quantity="other">Изабрано је <xliff:g id="COUNT_1">%1$d</xliff:g> ставки</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ставка</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> ставке</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ставки</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Желите ли да избришете „<xliff:g id="NAME">%1$s</xliff:g>“?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Желите ли да избришете директоријум „<xliff:g id="NAME">%1$s</xliff:g>“ и његов садржај?"</string>

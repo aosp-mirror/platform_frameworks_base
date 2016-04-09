@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"مستندات"</string>
-    <string name="files_label" msgid="6051402950202690279">"الملفات"</string>
     <string name="downloads_label" msgid="959113951084633612">"التنزيلات"</string>
     <string name="title_open" msgid="4353228937663917801">"فتح من"</string>
     <string name="title_save" msgid="2433679664882857999">"حفظ في"</string>
@@ -151,6 +150,14 @@
       <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">تم تحديد <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="zero"><xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="two">عنصران (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="one">عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"هل تريد حذف \"<xliff:g id="NAME">%1$s</xliff:g>\"؟"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"هل تريد حذف المجلد \"<xliff:g id="NAME">%1$s</xliff:g>\" ومحتوياته؟"</string>

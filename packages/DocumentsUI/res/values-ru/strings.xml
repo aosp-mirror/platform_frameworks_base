@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Документы"</string>
-    <string name="files_label" msgid="6051402950202690279">"Файлы"</string>
     <string name="downloads_label" msgid="959113951084633612">"Загрузки"</string>
     <string name="title_open" msgid="4353228937663917801">"Открыть"</string>
     <string name="title_save" msgid="2433679664882857999">"Сохранить"</string>
@@ -135,6 +134,12 @@
       <item quantity="few">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="many">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> объект</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> объекта</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> объектов</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> объекта</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Удалить файл \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Удалить папку \"<xliff:g id="NAME">%1$s</xliff:g>\" со всем содержимым?"</string>

@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"ஆவணங்கள்"</string>
-    <string name="files_label" msgid="6051402950202690279">"கோப்புகள்"</string>
     <string name="downloads_label" msgid="959113951084633612">"இறக்கங்கள்"</string>
     <string name="title_open" msgid="4353228937663917801">"இதில் திற"</string>
     <string name="title_save" msgid="2433679664882857999">"இதில் சேமி"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டது</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> உருப்படிகள்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> உருப்படி</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\"ஐ நீக்கவா?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" கோப்புறையையும் அதன் உள்ளடக்கத்தையும் நீக்கவா?"</string>
