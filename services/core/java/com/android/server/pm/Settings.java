@@ -2699,7 +2699,7 @@ final class Settings {
 
     void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
             throws XmlPullParserException, java.io.IOException {
-        if (bp.type != BasePermission.TYPE_BUILTIN && bp.sourcePackage != null) {
+        if (bp.sourcePackage != null) {
             serializer.startTag(null, TAG_ITEM);
             serializer.attribute(null, ATTR_NAME, bp.name);
             serializer.attribute(null, "package", bp.sourcePackage);
