@@ -692,9 +692,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
 
-    private boolean mForceWindowDrawsStatusBarBackground;
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
-
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -1745,8 +1743,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
-        mForceWindowDrawsStatusBarBackground = mContext.getResources().getBoolean(
-                R.bool.config_forceWindowDrawsStatusBarBackground);
 
         mGlobalKeyManager = new GlobalKeyManager(mContext);
 
@@ -2217,9 +2213,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
                 attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             }
+            final boolean forceWindowDrawsStatusBarBackground =
+                    (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND)
+                            != 0;
             if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                    || (mForceWindowDrawsStatusBarBackground
-                            && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT)) {
+                    || forceWindowDrawsStatusBarBackground
+                            && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT) {
                 attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             }
         }
@@ -4274,6 +4273,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final int fl = PolicyControl.getWindowFlags(win, attrs);
+        final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
         final int sysUiFl = PolicyControl.getSystemUiVisibility(win, null);
 
@@ -4369,7 +4369,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0
                         && (fl & WindowManager.LayoutParams.
                                 FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
-                        && !mForceWindowDrawsStatusBarBackground) {
+                        && (pfl & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) == 0) {
                     // Ensure policy decor includes status bar
                     dcf.top = mStableTop;
                 }
@@ -7239,6 +7239,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return vis;
     }
 
+    private boolean drawsSystemBarBackground(WindowState win) {
+        return win == null || (win.getAttrs().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+    }
+
+    private boolean forcesDrawStatusBarBackground(WindowState win) {
+        return win == null || (win.getAttrs().privateFlags
+                & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+    }
+
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         final boolean dockedStackVisible = mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
         final boolean freeformStackVisible =
@@ -7252,11 +7261,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean forceOpaqueStatusBar = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags
-        WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
+        WindowState fullscreenTransWin = isStatusBarKeyguard() && !mHideLockScreen
                 ? mStatusBar
                 : mTopFullscreenOpaqueWindowState;
-        vis = mStatusBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
-        vis = mNavigationBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
+        vis = mStatusBarController.applyTranslucentFlagLw(fullscreenTransWin, vis, oldVis);
+        vis = mNavigationBarController.applyTranslucentFlagLw(fullscreenTransWin, vis, oldVis);
+        final int dockedVis = mStatusBarController.applyTranslucentFlagLw(
+                mTopDockedOpaqueWindowState, 0, 0);
+
+        final boolean fullscreenDrawsStatusBarBackground =
+                (drawsSystemBarBackground(mTopFullscreenOpaqueWindowState)
+                        && (vis & View.STATUS_BAR_TRANSLUCENT) == 0)
+                || forcesDrawStatusBarBackground(mTopFullscreenOpaqueWindowState);
+        final boolean dockedDrawsStatusBarBackground =
+                (drawsSystemBarBackground(mTopDockedOpaqueWindowState)
+                        && (dockedVis & View.STATUS_BAR_TRANSLUCENT) == 0)
+                || forcesDrawStatusBarBackground(mTopDockedOpaqueWindowState);
 
         // prevent status bar interaction from clearing certain flags
         int type = win.getAttrs().type;
@@ -7273,17 +7293,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vis = (vis & ~flags) | (oldVis & flags);
         }
 
-        if ((!areTranslucentBarsAllowed() && transWin != mStatusBar)
+        if (fullscreenDrawsStatusBarBackground && dockedDrawsStatusBarBackground) {
+            vis |= View.STATUS_BAR_TRANSPARENT;
+            vis &= ~View.STATUS_BAR_TRANSLUCENT;
+        } else if ((!areTranslucentBarsAllowed() && fullscreenTransWin != mStatusBar)
                 || forceOpaqueStatusBar) {
             vis &= ~(View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT);
         }
 
         vis = configureNavBarOpacity(vis, dockedStackVisible, freeformStackVisible, resizing);
-
-        if (mForceWindowDrawsStatusBarBackground) {
-            vis |= View.STATUS_BAR_TRANSPARENT;
-            vis &= ~View.STATUS_BAR_TRANSLUCENT;
-        }
 
         // update status bar
         boolean immersiveSticky =
