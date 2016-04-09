@@ -250,7 +250,6 @@ public class FalsingManager implements SensorEventListener {
             FalsingLog.i("onSucccessfulUnlock", "");
         }
         mDataCollector.onSucccessfulUnlock();
-        sessionExitpoint(true /* force */);
     }
 
     public void onBouncerShown() {
