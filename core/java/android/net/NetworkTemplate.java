@@ -19,6 +19,7 @@ package android.net;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_PROXY;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -30,9 +31,6 @@ import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_UNKNOWN;
 import static android.telephony.TelephonyManager.getNetworkClass;
 
-import static com.android.internal.util.ArrayUtils.contains;
-
-import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
@@ -70,16 +68,6 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_WIFI_WILDCARD = 7;
     public static final int MATCH_BLUETOOTH = 8;
     public static final int MATCH_PROXY = 9;
-
-    /**
-     * Set of {@link NetworkInfo#getType()} that reflect data usage.
-     */
-    private static final int[] DATA_USAGE_NETWORK_TYPES;
-
-    static {
-        DATA_USAGE_NETWORK_TYPES = Resources.getSystem().getIntArray(
-                com.android.internal.R.array.config_data_usage_network_types);
-    }
 
     private static boolean sForceAllNetworkTypes = false;
 
@@ -318,9 +306,8 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            final boolean matchesType = (sForceAllNetworkTypes
-                    || contains(DATA_USAGE_NETWORK_TYPES, ident.mType));
-            return matchesType && !ArrayUtils.isEmpty(mMatchSubscriberIds)
+            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
+                    && !ArrayUtils.isEmpty(mMatchSubscriberIds)
                     && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
         }
     }
@@ -389,7 +376,7 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType);
+            return sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered);
         }
     }
 

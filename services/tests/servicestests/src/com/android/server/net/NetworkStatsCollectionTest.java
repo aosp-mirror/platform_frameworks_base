@@ -162,7 +162,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         final NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                TEST_IMSI, null, false));
+                TEST_IMSI, null, false, true));
 
         int myUid = Process.myUid();
         int otherUidInSameUser = Process.myUid() + 1;

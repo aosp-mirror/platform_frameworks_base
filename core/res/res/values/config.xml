@@ -265,19 +265,6 @@
         <item>"0,1"</item>
     </string-array>
 
-    <!-- Set of NetworkInfo.getType() that reflect data usage. -->
-    <integer-array translatable="false" name="config_data_usage_network_types">
-        <item>0</item> <!-- TYPE_MOBILE -->
-        <item>2</item> <!-- TYPE_MOBILE_MMS -->
-        <item>3</item> <!-- TYPE_MOBILE_SUPL -->
-        <item>4</item> <!-- TYPE_MOBILE_DUN -->
-        <item>5</item> <!-- TYPE_MOBILE_HIPRI -->
-        <item>10</item> <!-- TYPE_MOBILE_FOTA -->
-        <item>11</item> <!-- TYPE_MOBILE_IMS -->
-        <item>12</item> <!-- TYPE_MOBILE_CBS -->
-        <item>14</item> <!-- TYPE_MOBILE_IA -->
-    </integer-array>
-
     <!-- The maximum duration (in milliseconds) we expect a network transition to take -->
     <integer name="config_networkTransitionTimeout">60000</integer>
 
