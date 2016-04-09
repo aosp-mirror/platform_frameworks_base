@@ -697,7 +697,8 @@ public class ExifInterface {
 
     /**
      * Reads Exif tags from the specified image file descriptor. Attribute mutation is supported
-     * for writable and seekable file descriptors only.
+     * for writable and seekable file descriptors only. This constructor will not rewind the offset
+     * of the given file descriptor. Developers should close the file descriptor after use.
      */
     public ExifInterface(FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
@@ -730,7 +731,8 @@ public class ExifInterface {
 
     /**
      * Reads Exif tags from the specified image input stream. Attribute mutation is not supported
-     * for input streams.
+     * for input streams. The given input stream will proceed its current position. Developers
+     * should close the input stream after use.
      */
     public ExifInterface(InputStream inputStream) throws IOException {
         if (inputStream == null) {
