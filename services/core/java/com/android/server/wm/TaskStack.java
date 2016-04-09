@@ -720,9 +720,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 }
             } else {
                 if (splitHorizontally) {
-                    outBounds.left = position - dockDividerWidth;
+                    outBounds.left = position + dockDividerWidth;
                 } else {
-                    outBounds.top = position - dockDividerWidth;
+                    outBounds.top = position + dockDividerWidth;
                 }
             }
             return;
