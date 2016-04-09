@@ -3249,13 +3249,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     private void calculateDefaultMinimalSizeOfResizeableTasks(ActivityDisplay display) {
-        if (display.mDisplayId != Display.DEFAULT_DISPLAY) {
-            return;
-        }
-        final float fraction = mService.mContext.getResources().getFraction(com.android.internal.R.
-                fraction.config_displayFractionForDefaultMinimalSizeOfResizeableTask, 1, 1);
-        mDefaultMinimalSizeOfResizeableTask = (int) (fraction * Math.min(
-                display.mDisplayInfo.logicalWidth, display.mDisplayInfo.logicalHeight));
+        mDefaultMinimalSizeOfResizeableTask =
+                mService.mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.default_minimal_size_resizable_task);
     }
 
     private void handleDisplayRemoved(int displayId) {

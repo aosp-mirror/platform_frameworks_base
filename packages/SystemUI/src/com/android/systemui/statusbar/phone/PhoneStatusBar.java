@@ -1167,7 +1167,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         @Override
         public boolean onLongClick(View v) {
-            if (mRecents == null || !ActivityManager.supportsMultiWindow()) {
+            if (mRecents == null || !ActivityManager.supportsMultiWindow()
+                    || !getComponent(Divider.class).getView().getSnapAlgorithm()
+                            .isSplitScreenFeasible()) {
                 return false;
             }
 
