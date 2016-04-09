@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -495,6 +496,15 @@ public class Notification implements Parcelable
      * support such rendering. Requires a group key also be set using {@link Builder#setGroup}.
      */
     public static final int FLAG_GROUP_SUMMARY      = 0x00000200;
+
+    /**
+     * Bit to be bitswise-ored into the {@link #flags} field that should be
+     * set if this notification is the group summary for an auto-group of notifications.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_AUTOGROUP_SUMMARY  = 0x00000400;
 
     public int flags;
 
@@ -1945,13 +1955,9 @@ public class Notification implements Parcelable
      * @hide
      */
     public static void addFieldsFromContext(Context context, Notification notification) {
-        if (notification.extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO) == null) {
-            notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO,
-                    context.getApplicationInfo());
-        }
-        if (!notification.extras.containsKey(EXTRA_ORIGINATING_USERID)) {
-            notification.extras.putInt(EXTRA_ORIGINATING_USERID, context.getUserId());
-        }
+        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                context.getApplicationInfo());
+        notification.extras.putInt(EXTRA_ORIGINATING_USERID, context.getUserId());
     }
 
     @Override
@@ -3020,12 +3026,13 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public void setFlag(int mask, boolean value) {
+        public Builder setFlag(int mask, boolean value) {
             if (value) {
                 mN.flags |= mask;
             } else {
                 mN.flags &= ~mask;
             }
+            return this;
         }
 
         /**
