@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Asiakirjat"</string>
-    <string name="files_label" msgid="6051402950202690279">"Tiedostot"</string>
     <string name="downloads_label" msgid="959113951084633612">"Lataukset"</string>
     <string name="title_open" msgid="4353228937663917801">"Avaa sijainnista"</string>
     <string name="title_save" msgid="2433679664882857999">"Tallenna kohteeseen"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valittu</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> valittu</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kohdetta</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kohde</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Poistetaanko <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Poistetaanko kansio <xliff:g id="NAME">%1$s</xliff:g> ja sen sisältö?"</string>

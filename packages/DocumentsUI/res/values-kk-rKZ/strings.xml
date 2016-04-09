@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Құжаттар"</string>
-    <string name="files_label" msgid="6051402950202690279">"Файлдар"</string>
     <string name="downloads_label" msgid="959113951084633612">"Жүктеулер"</string>
     <string name="title_open" msgid="4353228937663917801">"Мынадан ашу:"</string>
     <string name="title_save" msgid="2433679664882857999">"Сақталатын орны"</string>
@@ -111,7 +110,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Құжат қайта аталмады"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Кейбір файлдар түрлендірілді"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> қолданбасына <xliff:g id="STORAGE"><i>^3</i></xliff:g> қоймасындағы <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> каталогына өтуге рұқсат беру керек пе?"</string>
-    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> қолданбасына <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> каталогына қатынас беру керек пе?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> қолданбасына <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> каталогына кіруге рұқсат беру керек пе?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> <xliff:g id="STORAGE"><i>^2</i></xliff:g> қоймасындағы деректерге, соның ішінде фотосуреттерге және бейнелерге кіру мүмкіндігін беру керек пе?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Қайта сұралмасын"</string>
     <string name="allow" msgid="7225948811296386551">"Рұқсат беру"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> элемент</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> элемент</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\" жою керек пе?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" қалтасын және оның мазмұнын жою керек пе?"</string>
