@@ -419,6 +419,13 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
             "carrier_data_call_apn_delay_faster_long";
 
+    /**
+     * Default APN types that are metered by the carrier
+     * @hide
+     */
+    public static final String KEY_CARRIER_METERED_APN_TYPES_STRINGS =
+            "carrier_metered_apn_types_strings";
+
     /* The following 3 fields are related to carrier visual voicemail. */
 
     /**
@@ -699,6 +706,8 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
+        sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
+                new String[]{"default", "mms", "dun", "supl"});
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);

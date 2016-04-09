@@ -940,7 +940,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int subId : subIds) {
                 final String subscriberId = tele.getSubscriberId(subId);
                 final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false);
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
                 if (template.matches(probeIdent)) {
                     return true;
                 }
@@ -1333,7 +1333,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void ensureActiveMobilePolicyLocked(String subscriberId) {
         // Poke around to see if we already have a policy
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
