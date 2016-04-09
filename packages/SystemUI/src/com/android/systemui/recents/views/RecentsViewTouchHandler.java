@@ -19,15 +19,20 @@ package com.android.systemui.recents.views;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.widget.Toast;
 
+import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -81,12 +86,20 @@ public class RecentsViewTouchHandler {
     private float mDragSlop;
 
     private DropTarget mLastDropTarget;
+    private DividerSnapAlgorithm mDividerSnapAlgorithm;
     private ArrayList<DropTarget> mDropTargets = new ArrayList<>();
     private ArrayList<TaskStack.DockState> mVisibleDockStates = new ArrayList<>();
 
     public RecentsViewTouchHandler(RecentsView rv) {
         mRv = rv;
         mDragSlop = ViewConfiguration.get(rv.getContext()).getScaledTouchSlop();
+        updateSnapAlgorithm();
+    }
+
+    private void updateSnapAlgorithm() {
+        Rect insets = new Rect();
+        SystemServicesProxy.getInstance(mRv.getContext()).getStableInsets(insets);
+        mDividerSnapAlgorithm = DividerSnapAlgorithm.create(mRv.getContext(), insets);
     }
 
     /**
@@ -150,7 +163,8 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationY(y);
 
         mVisibleDockStates.clear();
-        if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()) {
+        if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()
+                && mDividerSnapAlgorithm.isSplitScreenFeasible()) {
             if (!event.task.isDockable) {
                 Toast.makeText(mRv.getContext(), R.string.recents_drag_non_dockable_task_message,
                         Toast.LENGTH_SHORT).show();
@@ -174,6 +188,10 @@ public class RecentsViewTouchHandler {
         mDragTask = null;
         mTaskView = null;
         mLastDropTarget = null;
+    }
+
+    public final void onBusEvent(ConfigurationChangedEvent event) {
+        updateSnapAlgorithm();
     }
 
     /**
