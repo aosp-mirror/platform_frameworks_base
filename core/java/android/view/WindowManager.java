@@ -1701,6 +1701,14 @@ public interface WindowManager extends ViewManager {
          */
         public int accessibilityIdOfAnchor = -1;
 
+        /**
+         * The window title isn't kept in sync with what is displayed in the title bar, so we
+         * separately track the currently shown title to provide to accessibility.
+         *
+         * @hide
+         */
+        public CharSequence accessibilityTitle;
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -1749,6 +1757,7 @@ public interface WindowManager extends ViewManager {
                 title = "";
 
             mTitle = TextUtils.stringOrSpannedString(title);
+            accessibilityTitle = mTitle;
         }
 
         public final CharSequence getTitle() {
@@ -1808,6 +1817,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
             out.writeInt(needsMenuKey);
             out.writeInt(accessibilityIdOfAnchor);
+            TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
         }
 
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1859,6 +1869,7 @@ public interface WindowManager extends ViewManager {
             hasManualSurfaceInsets = in.readInt() != 0;
             needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readInt();
+            accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1899,6 +1910,8 @@ public interface WindowManager extends ViewManager {
         public static final int PREFERRED_DISPLAY_MODE_ID = 1 << 23;
         /** {@hide} */
         public static final int ACCESSIBILITY_ANCHOR_CHANGED = 1 << 24;
+        /** {@hide} */
+        public static final int ACCESSIBILITY_TITLE_CHANGED = 1 << 25;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -2063,6 +2076,13 @@ public interface WindowManager extends ViewManager {
             if (accessibilityIdOfAnchor != o.accessibilityIdOfAnchor) {
                 accessibilityIdOfAnchor = o.accessibilityIdOfAnchor;
                 changes |= ACCESSIBILITY_ANCHOR_CHANGED;
+            }
+
+            if (!Objects.equals(accessibilityTitle, o.accessibilityTitle)
+                    && o.accessibilityTitle != null) {
+                // NOTE: accessibilityTitle only copied if the originator set one.
+                accessibilityTitle = o.accessibilityTitle;
+                changes |= ACCESSIBILITY_TITLE_CHANGED;
             }
 
             return changes;
