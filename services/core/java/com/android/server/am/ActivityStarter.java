@@ -986,8 +986,12 @@ class ActivityStarter {
             }
             top.deliverNewIntentLocked(
                     mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
-            mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.task,
-                    preferredLaunchStackId, topStack.mStackId);
+
+            // Don't use mStartActivity.task to show the toast. We're not starting a new activity
+            // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
+            mSupervisor.handleNonResizableTaskIfNeeded(
+                    top.task, preferredLaunchStackId, topStack.mStackId);
+
             return START_DELIVERED_TO_TOP;
         }
 
