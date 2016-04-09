@@ -169,8 +169,7 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Одбаците <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Апликација <xliff:g id="APP">%s</xliff:g> је одбачена."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Све недавно коришћене апликације су одбачене."</string>
-    <!-- no translation found for accessibility_recents_item_open_app_info (5107479759905883540) -->
-    <skip />
+    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Отворите информације о апликацији <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Покрећемо <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Обавештење је одбачено."</string>
@@ -422,6 +421,12 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> је дијалог за јачину звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Додирните да бисте вратили оригинал."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Користите профил за Work"</string>
+    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
+    <skip />
+    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
+    <skip />
     <string name="system_ui_tuner" msgid="708224127392452018">"Тјунер за кориснички интерфејс система"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Приказуј уграђени проценат батерије"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Приказивање нивоа напуњености батерије у процентима унутар иконе на статусној траци када се батерија не пуни"</string>
@@ -597,7 +602,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Помери нагоре"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Помери улево"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Помери удесно"</string>
-    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Апликација можда неће функционисати са више прозора"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>. позиција, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Двапут додирните да бисте изменили."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Двапут додирните да бисте додали."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g>. позиција. Двапут додирните да бисте изабрали."</string>
@@ -607,4 +611,6 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Плочица <xliff:g id="TILE_NAME">%1$s</xliff:g> је уклоњена"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Плочица <xliff:g id="TILE_NAME">%1$s</xliff:g> је премештена на <xliff:g id="POSITION">%2$d</xliff:g>. позицију"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Уређивач за Брза подешавања."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Апликација можда неће функционисати са подељеним екраном."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Апликација не подржава подељени екран."</string>
 </resources>
