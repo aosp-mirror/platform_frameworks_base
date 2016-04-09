@@ -111,20 +111,6 @@
         <group gid="media" />
     </permission>
 
-    <!-- These are permissions that were mapped to gids but we need
-         to keep them here until an upgrade from L to the current
-         version is to be supported. These permissions are built-in
-         and in L were not stored in packages.xml as a result if they
-         are not defined here while parsing packages.xml we would
-         ignore these permissions being granted to apps and not
-         propagate the granted state. From N we are storing the
-         built-in permissions in packages.xml as the saved storage
-         is negligible (one tag with the permission) compared to
-         the fragility as one can remove a built-in permission which
-         no longer needs to be mapped to gids and break grant propagation. -->
-    <permission name="android.permission.READ_EXTERNAL_STORAGE" />
-    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <!-- ================================================================== -->
     <!-- ================================================================== -->
     <!-- ================================================================== -->
