@@ -27,7 +27,9 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.views.AnimationProps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class TaskStackHorizontalViewAdapter extends
     //Full class name is 30 characters
     private static final String TAG = "TaskStackViewAdapter";
     private List<Task> mTaskList;
+    private TaskStackHorizontalGridView mGridView;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TaskCardView mTaskCardView;
@@ -62,7 +65,7 @@ public class TaskStackHorizontalViewAdapter extends
             try {
                 if (mTaskCardView.isInDismissState()) {
                     mTaskCardView.startDismissTaskAnimation(
-                            getRemoveAtListener(getAdapterPosition(), mTaskCardView));
+                            getRemoveAtListener(getAdapterPosition(), mTaskCardView.getTask()));
                 } else {
                     EventBus.getDefault().send(new LaunchTvTaskEvent(mTaskCardView, mTask,
                             null, INVALID_STACK_ID));
@@ -72,6 +75,28 @@ public class TaskStackHorizontalViewAdapter extends
                 Log.e(TAG, v.getContext()
                         .getString(R.string.recents_launch_error_message, mTask.title), e);
             }
+
+        }
+
+        private Animator.AnimatorListener getRemoveAtListener(final int position,
+                                                              final Task task) {
+            return new Animator.AnimatorListener() {
+
+                @Override
+                public void onAnimationStart(Animator animation) { }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    removeAt(position);
+                    EventBus.getDefault().send(new DeleteTaskDataEvent(task));
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) { }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) { }
+            };
 
         }
     }
@@ -101,39 +126,43 @@ public class TaskStackHorizontalViewAdapter extends
     }
 
     @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        holder.mTaskCardView.reset();
+    }
+
+    @Override
     public int getItemCount() {
         return mTaskList.size();
     }
 
-    private Animator.AnimatorListener getRemoveAtListener(final int position,
-                                                          final TaskCardView taskCardView) {
-        return new Animator.AnimatorListener() {
-
-            @Override
-            public void onAnimationStart(Animator animation) { }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                removeAt(position);
-                EventBus.getDefault().send(new DeleteTaskDataEvent(taskCardView.getTask()));
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) { }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
-        };
-
+    private void removeAt(int position) {
+        Task removedTask = mTaskList.remove(position);
+        if (mGridView != null) {
+            mGridView.getStack().removeTask(removedTask, AnimationProps.IMMEDIATE,
+                    false);
+        }
+        notifyItemRemoved(position);
     }
 
-    private void removeAt(int position) {
-        mTaskList.remove(position);
-        notifyItemRemoved(position);
+    public void removeTask(Task task) {
+        int position = mTaskList.indexOf(task);
+        if (position >= 0) {
+            mTaskList.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     public int getPositionOfTask(Task task) {
         int position = mTaskList.indexOf(task);
         return (position >= 0) ? position : 0;
+    }
+
+    public void setTaskStackHorizontalGridView(TaskStackHorizontalGridView gridView) {
+        mGridView = gridView;
+    }
+
+    public void addTaskAt(Task task, int position) {
+        mTaskList.add(position, task);
+        notifyItemInserted(position);
     }
 }
