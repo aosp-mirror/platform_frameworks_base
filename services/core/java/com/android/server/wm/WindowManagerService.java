@@ -4193,6 +4193,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     WindowManagerPolicy.TRANSIT_EXIT);
                         }
                     }
+                    win.mAnimatingExit = true;
                     changed = true;
                     win.setDisplayLayoutNeeded();
                 }
