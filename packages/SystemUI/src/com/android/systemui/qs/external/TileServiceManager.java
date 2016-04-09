@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -51,7 +50,6 @@ public class TileServiceManager {
     private int mPriority;
     private boolean mJustBound;
     private long mLastUpdate;
-    private int mType;
     private boolean mShowingDialog;
     // Whether we have a pending bind going out to the service without a response yet.
     // This defaults to true to ensure tiles start out unavailable.
@@ -69,25 +67,11 @@ public class TileServiceManager {
         mServices = tileServices;
         mHandler = handler;
         mStateManager = tileLifecycleManager;
-        mType = tileServices.getContext().getSharedPreferences(PREFS_FILE, 0)
-                .getInt(tileLifecycleManager.getComponent().flattenToString(),
-                        TileService.TILE_MODE_UNSET);
         mStateManager.setQSService(tileServices);
-        if (mType == TileService.TILE_MODE_UNSET) {
-            bindService();
-            mStateManager.onTileAdded();
-        }
     }
 
-    public int getType() {
-        return mType;
-    }
-
-    public void setType(int type) {
-        mServices.getContext().getSharedPreferences(PREFS_FILE, 0).edit()
-                .putInt(mStateManager.getComponent().flattenToString(), type).commit();
-        mType = type;
-        mServices.recalculateBindAllowance();
+    public boolean isActiveTile() {
+        return mStateManager.isActiveTile();
     }
 
     public void setShowingDialog(boolean dialog) {
@@ -114,7 +98,7 @@ public class TileServiceManager {
 
     public void setLastUpdate(long lastUpdate) {
         mLastUpdate = lastUpdate;
-        if (mBound && mType == TileService.TILE_MODE_ACTIVE) {
+        if (mBound && isActiveTile()) {
             mStateManager.onStopListening();
             setBindRequested(false);
         }

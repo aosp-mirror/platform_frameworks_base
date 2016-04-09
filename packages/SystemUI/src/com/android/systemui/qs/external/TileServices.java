@@ -153,24 +153,13 @@ public class TileServices extends IQSService.Stub {
                 return;
             }
             TileServiceManager service = mServices.get(customTile);
-            if (service.getType() != TileService.TILE_MODE_ACTIVE) {
+            if (!service.isActiveTile()) {
                 return;
             }
             service.setBindRequested(true);
             try {
                 service.getTileService().onStartListening();
             } catch (RemoteException e) {
-            }
-        }
-    }
-
-    @Override
-    public void setTileMode(ComponentName component, int mode) {
-        verifyCaller(component.getPackageName());
-        CustomTile customTile = getTileForComponent(component);
-        if (customTile != null) {
-            synchronized (mServices) {
-                mServices.get(customTile).setType(mode);
             }
         }
     }
