@@ -331,4 +331,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"খুব বড়"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"বৃহত্তম"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"কাস্টম (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <!-- no translation found for help_feedback_label (6815040660801785649) -->
+    <skip />
 </resources>
