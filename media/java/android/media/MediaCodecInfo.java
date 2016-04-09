@@ -700,12 +700,21 @@ public final class MediaCodecInfo {
                 CodecProfileLevel[] profLevs, int[] colFmts, boolean encoder, int flags,
                 MediaFormat defaultFormat, MediaFormat info) {
             final Map<String, Object> map = info.getMap();
-            profileLevels = profLevs;
             colorFormats = colFmts;
             mFlagsVerified = flags;
             mDefaultFormat = defaultFormat;
             mCapabilitiesInfo = info;
             mMime = mDefaultFormat.getString(MediaFormat.KEY_MIME);
+
+            /* VP9 introduced profiles around 2016, so some VP9 codecs may not advertise any
+               supported profiles. Determine the level for them using the info they provide. */
+            if (profLevs.length == 0 && mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)) {
+                CodecProfileLevel profLev = new CodecProfileLevel();
+                profLev.profile = CodecProfileLevel.VP9Profile0;
+                profLev.level = VideoCapabilities.equivalentVP9Level(info);
+                profLevs = new CodecProfileLevel[] { profLev };
+            }
+            profileLevels = profLevs;
 
             if (mMime.toLowerCase().startsWith("audio/")) {
                 mAudioCaps = AudioCapabilities.create(info, this);
@@ -1441,6 +1450,74 @@ public final class MediaCodecInfo {
             return ret;
         }
 
+        private static Pair<Range<Integer>, Range<Integer>> parseWidthHeightRanges(Object o) {
+            Pair<Size, Size> range = Utils.parseSizeRange(o);
+            if (range != null) {
+                try {
+                    return Pair.create(
+                            Range.create(range.first.getWidth(), range.second.getWidth()),
+                            Range.create(range.first.getHeight(), range.second.getHeight()));
+                } catch (IllegalArgumentException e) {
+                    Log.w(TAG, "could not parse size range '" + o + "'");
+                }
+            }
+            return null;
+        }
+
+        /** @hide */
+        public static int equivalentVP9Level(MediaFormat info) {
+            final Map<String, Object> map = info.getMap();
+
+            Size blockSize = Utils.parseSize(map.get("block-size"), new Size(8, 8));
+            int BS = blockSize.getWidth() * blockSize.getHeight();
+
+            Range<Integer> counts = Utils.parseIntRange(map.get("block-count-range"), null);
+            int FS = counts == null ? 0 : BS * counts.getUpper();
+
+            Range<Long> blockRates =
+                Utils.parseLongRange(map.get("blocks-per-second-range"), null);
+            long SR = blockRates == null ? 0 : BS * blockRates.getUpper();
+
+            Pair<Range<Integer>, Range<Integer>> dimensionRanges =
+                parseWidthHeightRanges(map.get("size-range"));
+            int D = dimensionRanges == null ? 0 : Math.max(
+                    dimensionRanges.first.getUpper(), dimensionRanges.second.getUpper());
+
+            Range<Integer> bitRates = Utils.parseIntRange(map.get("bitrate-range"), null);
+            int BR = bitRates == null ? 0 : Utils.divUp(bitRates.getUpper(), 1000);
+
+            if (SR <=      829440 && FS <=    36864 && BR <=    200 && D <=   512)
+                return CodecProfileLevel.VP9Level1;
+            if (SR <=     2764800 && FS <=    73728 && BR <=    800 && D <=   768)
+                return CodecProfileLevel.VP9Level11;
+            if (SR <=     4608000 && FS <=   122880 && BR <=   1800 && D <=   960)
+                return CodecProfileLevel.VP9Level2;
+            if (SR <=     9216000 && FS <=   245760 && BR <=   3600 && D <=  1344)
+                return CodecProfileLevel.VP9Level21;
+            if (SR <=    20736000 && FS <=   552960 && BR <=   7200 && D <=  2048)
+                return CodecProfileLevel.VP9Level3;
+            if (SR <=    36864000 && FS <=   983040 && BR <=  12000 && D <=  2752)
+                return CodecProfileLevel.VP9Level31;
+            if (SR <=    83558400 && FS <=  2228224 && BR <=  18000 && D <=  4160)
+                return CodecProfileLevel.VP9Level4;
+            if (SR <=   160432128 && FS <=  2228224 && BR <=  30000 && D <=  4160)
+                return CodecProfileLevel.VP9Level41;
+            if (SR <=   311951360 && FS <=  8912896 && BR <=  60000 && D <=  8384)
+                return CodecProfileLevel.VP9Level5;
+            if (SR <=   588251136 && FS <=  8912896 && BR <= 120000 && D <=  8384)
+                return CodecProfileLevel.VP9Level51;
+            if (SR <=  1176502272 && FS <=  8912896 && BR <= 180000 && D <=  8384)
+                return CodecProfileLevel.VP9Level52;
+            if (SR <=  1176502272 && FS <= 35651584 && BR <= 180000 && D <= 16832)
+                return CodecProfileLevel.VP9Level6;
+            if (SR <= 2353004544L && FS <= 35651584 && BR <= 240000 && D <= 16832)
+                return CodecProfileLevel.VP9Level61;
+            if (SR <= 4706009088L && FS <= 35651584 && BR <= 480000 && D <= 16832)
+                return CodecProfileLevel.VP9Level62;
+            // returning largest level
+            return CodecProfileLevel.VP9Level62;
+        }
+
         private void parseFromInfo(MediaFormat info) {
             final Map<String, Object> map = info.getMap();
             Size blockSize = new Size(mBlockWidth, mBlockHeight);
@@ -1456,23 +1533,11 @@ public final class MediaCodecInfo {
             blockRates =
                 Utils.parseLongRange(map.get("blocks-per-second-range"), null);
             mMeasuredFrameRates = getMeasuredFrameRates(map);
-            {
-                Object o = map.get("size-range");
-                Pair<Size, Size> sizeRange = Utils.parseSizeRange(o);
-                if (sizeRange != null) {
-                    try {
-                        widths = Range.create(
-                                sizeRange.first.getWidth(),
-                                sizeRange.second.getWidth());
-                        heights = Range.create(
-                                sizeRange.first.getHeight(),
-                                sizeRange.second.getHeight());
-                    } catch (IllegalArgumentException e) {
-                        Log.w(TAG, "could not parse size range '" + o + "'");
-                        widths = null;
-                        heights = null;
-                    }
-                }
+            Pair<Range<Integer>, Range<Integer>> sizeRanges =
+                parseWidthHeightRanges(map.get("size-range"));
+            if (sizeRanges != null) {
+                widths = sizeRanges.first;
+                heights = sizeRanges.second;
             }
             // for now this just means using the smaller max size as 2nd
             // upper limit.
@@ -2101,40 +2166,42 @@ public final class MediaCodecInfo {
                 maxBlocksPerSecond = 829440;
                 maxBlocks = 36864;
                 maxBps = 200000;
+                int maxDim = 512;
 
                 for (CodecProfileLevel profileLevel: profileLevels) {
-                    long SR = 0;
-                    int FS = 0;
-                    int BR = 0;
+                    long SR = 0; // luma sample rate
+                    int FS = 0;  // luma picture size
+                    int BR = 0;  // bit rate kbps
+                    int D = 0;   // luma dimension
                     switch (profileLevel.level) {
                         case CodecProfileLevel.VP9Level1:
-                            SR =      829440; FS =    36864; BR =    200; break;
+                            SR =      829440; FS =    36864; BR =    200; D =   512; break;
                         case CodecProfileLevel.VP9Level11:
-                            SR =     2764800; FS =    73728; BR =    800; break;
+                            SR =     2764800; FS =    73728; BR =    800; D =   768; break;
                         case CodecProfileLevel.VP9Level2:
-                            SR =     4608000; FS =   122880; BR =   1800; break;
+                            SR =     4608000; FS =   122880; BR =   1800; D =   960; break;
                         case CodecProfileLevel.VP9Level21:
-                            SR =     9216000; FS =   245760; BR =   3600; break;
+                            SR =     9216000; FS =   245760; BR =   3600; D =  1344; break;
                         case CodecProfileLevel.VP9Level3:
-                            SR =    20736000; FS =   552960; BR =   7200; break;
+                            SR =    20736000; FS =   552960; BR =   7200; D =  2048; break;
                         case CodecProfileLevel.VP9Level31:
-                            SR =    36864000; FS =   983040; BR =  12000; break;
+                            SR =    36864000; FS =   983040; BR =  12000; D =  2752; break;
                         case CodecProfileLevel.VP9Level4:
-                            SR =    83558400; FS =  2228224; BR =  18000; break;
+                            SR =    83558400; FS =  2228224; BR =  18000; D =  4160; break;
                         case CodecProfileLevel.VP9Level41:
-                            SR =   160432128; FS =  2228224; BR =  30000; break;
+                            SR =   160432128; FS =  2228224; BR =  30000; D =  4160; break;
                         case CodecProfileLevel.VP9Level5:
-                            SR =   311951360; FS =  8912896; BR =  60000; break;
+                            SR =   311951360; FS =  8912896; BR =  60000; D =  8384; break;
                         case CodecProfileLevel.VP9Level51:
-                            SR =   588251136; FS =  8912896; BR = 120000; break;
+                            SR =   588251136; FS =  8912896; BR = 120000; D =  8384; break;
                         case CodecProfileLevel.VP9Level52:
-                            SR =  1176502272; FS =  8912896; BR = 180000; break;
+                            SR =  1176502272; FS =  8912896; BR = 180000; D =  8384; break;
                         case CodecProfileLevel.VP9Level6:
-                            SR =  1176502272; FS = 35651584; BR = 180000; break;
+                            SR =  1176502272; FS = 35651584; BR = 180000; D = 16832; break;
                         case CodecProfileLevel.VP9Level61:
-                            SR = 2353004544L; FS = 35651584; BR = 240000; break;
+                            SR = 2353004544L; FS = 35651584; BR = 240000; D = 16832; break;
                         case CodecProfileLevel.VP9Level62:
-                            SR = 4706009088L; FS = 35651584; BR = 480000; break;
+                            SR = 4706009088L; FS = 35651584; BR = 480000; D = 16832; break;
                         default:
                             Log.w(TAG, "Unrecognized level "
                                     + profileLevel.level + " for " + mime);
@@ -2155,10 +2222,11 @@ public final class MediaCodecInfo {
                     maxBlocksPerSecond = Math.max(SR, maxBlocksPerSecond);
                     maxBlocks = Math.max(FS, maxBlocks);
                     maxBps = Math.max(BR * 1000, maxBps);
+                    maxDim = Math.max(D, maxDim);
                 }
 
                 final int blockSize = 8;
-                int maxLengthInBlocks = Utils.divUp(maxBlocks, blockSize);
+                int maxLengthInBlocks = Utils.divUp(maxDim, blockSize);
                 maxBlocks = Utils.divUp(maxBlocks, blockSize * blockSize);
                 maxBlocksPerSecond = Utils.divUp(maxBlocksPerSecond, blockSize * blockSize);
 
