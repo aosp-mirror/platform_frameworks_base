@@ -103,21 +103,7 @@ public class InstallerConnection {
         }
     }
 
-    public void execute(String cmd, Object... args) throws InstallerException {
-        final String resRaw = executeForResult(cmd, args);
-        int res = -1;
-        try {
-            res = Integer.parseInt(resRaw);
-        } catch (NumberFormatException ignored) {
-        }
-        if (res != 0) {
-            throw new InstallerException(
-                    "Failed to execute " + cmd + " " + Arrays.toString(args) + ": " + res);
-        }
-    }
-
-    public String executeForResult(String cmd, Object... args)
-            throws InstallerException {
+    public String[] execute(String cmd, Object... args) throws InstallerException {
         final StringBuilder builder = new StringBuilder(cmd);
         for (Object arg : args) {
             String escaped;
@@ -135,7 +121,17 @@ public class InstallerConnection {
             }
             builder.append(' ').append(escaped);
         }
-        return transact(builder.toString());
+        final String[] resRaw = transact(builder.toString()).split(" ");
+        int res = -1;
+        try {
+            res = Integer.parseInt(resRaw[0]);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
+        }
+        if (res != 0) {
+            throw new InstallerException(
+                    "Failed to execute " + cmd + " " + Arrays.toString(args) + ": " + res);
+        }
+        return resRaw;
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
@@ -160,19 +156,15 @@ public class InstallerConnection {
     }
 
     public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
-        String rawReply = executeForResult("merge_profiles", uid, pkgName);
-        if (rawReply == null) {
-            throw new IllegalStateException("Unexpected null reply");
-        }
-        final String res[] = rawReply.split(" ");
+        final String[] res = execute("merge_profiles", uid, pkgName);
 
         if ((res == null) || (res.length != 2)) {
-            throw new InstallerException("Invalid size result: " + rawReply);
+            throw new InstallerException("Invalid size result: " + Arrays.toString(res));
         }
 
         // Just as a sanity check. Anything != "true" will be interpreted as false by parseBoolean.
         if (!res[1].equals("true") && !res[1].equals("false")) {
-            throw new InstallerException("Invalid boolean result: " + rawReply);
+            throw new InstallerException("Invalid boolean result: " + Arrays.toString(res));
         }
 
         return Boolean.parseBoolean(res[1]);
