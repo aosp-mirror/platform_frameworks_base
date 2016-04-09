@@ -232,12 +232,13 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
-        boolean recents = cwd == null;
 
-        createDir.setVisible(picking && !recents && cwd.isCreateSupported());
+        createDir.setVisible(picking);
+        createDir.setEnabled(canCreateDirectory());
 
         // No display options in recent directories
-        if (picking && recents) {
+        boolean inRecents = cwd == null;
+        if (picking && inRecents) {
             grid.setVisible(false);
             list.setVisible(false);
         }
