@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Дакументы"</string>
-    <string name="files_label" msgid="6051402950202690279">"Файлы"</string>
     <string name="downloads_label" msgid="959113951084633612">"Спампоўкі"</string>
     <string name="title_open" msgid="4353228937663917801">"Адкрыць з"</string>
     <string name="title_save" msgid="2433679664882857999">"Захаваць у"</string>
@@ -125,7 +124,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Не атрымалася перайменаваць дакумент"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Некаторыя файлы былі сканвертаваныя"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Даць праграме <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да дырэкторыі <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> у <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
-    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Даць праграме <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да дырэкторыі <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Даць праграме <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да каталога <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Даць <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да вашых даных, у тым ліку фатаграфій і відэа, на <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Больш не пытацца"</string>
     <string name="allow" msgid="7225948811296386551">"Дазволіць"</string>
@@ -135,6 +134,12 @@
       <item quantity="few">Выбраны <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="many">Выбрана <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Выбрана <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> элемент</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> элементы</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> элементаў</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> элемента</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Выдаліць \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Выдаліць папку \"<xliff:g id="NAME">%1$s</xliff:g>\" і яе змесціва?"</string>

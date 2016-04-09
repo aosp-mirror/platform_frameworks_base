@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumenter"</string>
-    <string name="files_label" msgid="6051402950202690279">"Filer"</string>
     <string name="downloads_label" msgid="959113951084633612">"Downloads"</string>
     <string name="title_open" msgid="4353228937663917801">"Åbn fra"</string>
     <string name="title_save" msgid="2433679664882857999">"Gem i"</string>
@@ -119,6 +118,10 @@
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="one">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> element</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementer</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Vil du slette \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Vil du slette mappen \"<xliff:g id="NAME">%1$s</xliff:g>\" og dens indhold?"</string>
