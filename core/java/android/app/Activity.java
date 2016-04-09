@@ -1343,20 +1343,21 @@ public class Activity extends ContextThemeWrapper
      * {@link #getVoiceInteractor()}.
      */
     public void onLocalVoiceInteractionStarted() {
-        Log.i(TAG, "onLocalVoiceInteractionStarted! " + getVoiceInteractor());
     }
 
     /**
-     * Callback to indicate that the local voice interaction has stopped for some
-     * reason.
+     * Callback to indicate that the local voice interaction has stopped either
+     * because it was requested through a call to {@link #stopLocalVoiceInteraction()}
+     * or because it was canceled by the user. The previously acquired {@link VoiceInteractor}
+     * is no longer valid after this.
      */
     public void onLocalVoiceInteractionStopped() {
-        Log.i(TAG, "onLocalVoiceInteractionStopped :( " + getVoiceInteractor());
     }
 
     /**
      * Request to terminate the current voice interaction that was previously started
-     * using {@link #startLocalVoiceInteraction(Bundle)}.
+     * using {@link #startLocalVoiceInteraction(Bundle)}. When the interaction is
+     * terminated, {@link #onLocalVoiceInteractionStopped()} will be called.
      */
     public void stopLocalVoiceInteraction() {
         try {
