@@ -296,35 +296,26 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"លក្ខណៈ​នេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ការ​អនុវត្ត។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"នៅសល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_duration_only_short (5329694252258605547) -->
-    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"នៅសល់ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅ​សល់​ប្រហែល <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration_short (4192244429001842403) -->
-    <skip />
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូត​ដល់​ពេញ"</string>
-    <!-- no translation found for power_charging_duration_short (1098603958472207920) -->
-    <skip />
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូត​ដល់ពេញ​រចន្ត​ឆ្លាស់"</string>
-    <!-- no translation found for power_charging_duration_ac_short (7895864687218765582) -->
-    <skip />
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូត​ដល់​ពេញ​តាមយូអេសប៊ី"</string>
-    <!-- no translation found for power_charging_duration_usb_short (941854728040426399) -->
-    <skip />
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូត​ដល់​ពេញ​ពី​ឥតខ្សែ"</string>
-    <!-- no translation found for power_charging_duration_wireless_short (1642664799869599476) -->
-    <skip />
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"បញ្ចូលថ្មតាម AC"</string>
-    <!-- no translation found for battery_info_status_charging_ac_short (7431401092096415502) -->
-    <skip />
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"បញ្ចូលថ្មតាមយូអេសប៊ី"</string>
-    <!-- no translation found for battery_info_status_charging_usb_short (6733371990319101366) -->
-    <skip />
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"បញ្ចូលថ្មដោយ​​ឥតខ្សែ"</string>
-    <!-- no translation found for battery_info_status_charging_wireless_short (752569941028903610) -->
-    <skip />
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"មិន​បញ្ចូលថ្ម"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ពេញ"</string>
