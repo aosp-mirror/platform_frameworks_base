@@ -426,6 +426,13 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_METERED_APN_TYPES_STRINGS =
             "carrier_metered_apn_types_strings";
 
+    /**
+     * CDMA carrier ERI (Enhanced Roaming Indicator) file name
+     * @hide
+     */
+    public static final String KEY_CARRIER_ERI_FILE_NAME_STRING =
+            "carrier_eri_file_name_string";
+
     /* The following 3 fields are related to carrier visual voicemail. */
 
     /**
@@ -705,6 +712,7 @@ public class CarrierConfigManager {
                 "max_retries=3, 5000, 5000, 5000");
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
+        sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
