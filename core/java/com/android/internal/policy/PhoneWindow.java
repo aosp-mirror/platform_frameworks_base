@@ -516,8 +516,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mTitle = title;
         WindowManager.LayoutParams params = getAttributes();
-        if (!TextUtils.equals(title, params.getTitle())) {
-            params.setTitle(title);
+        if (!TextUtils.equals(title, params.accessibilityTitle)) {
+            params.accessibilityTitle = TextUtils.stringOrSpannedString(title);
             dispatchWindowAttributesChanged(getAttributes());
         }
     }
