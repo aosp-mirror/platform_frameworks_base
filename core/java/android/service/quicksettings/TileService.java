@@ -89,28 +89,24 @@ public class TileService extends Service {
     public static final String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
 
     /**
-     * The tile mode hasn't been set yet.
-     * @hide
-     */
-    public static final int TILE_MODE_UNSET = 0;
-
-    /**
-     * Constant to be returned by {@link #onTileAdded}.
-     * <p>
-     * Passive mode is the default mode for tiles.  The System will tell the tile
-     * when it is most important to update by putting it in the listening state.
-     */
-    public static final int TILE_MODE_PASSIVE = 1;
-
-    /**
-     * Constant to be returned by {@link #onTileAdded}.
+     * Meta-data for tile definition to set a tile into active mode.
      * <p>
      * Active mode is for tiles which already listen and keep track of their state in their
      * own process.  These tiles may request to send an update to the System while their process
      * is alive using {@link #requestListeningState}.  The System will only bind these tiles
      * on its own when a click needs to occur.
+     *
+     * To make a TileService an active tile, set this meta-data to true on the TileService's
+     * manifest declaration.
+     * <pre class="prettyprint">
+     * {@literal
+     * <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+     *      android:value="true" />
+     * }
+     * </pre>
      */
-    public static final int TILE_MODE_ACTIVE = 2;
+    public static final String META_DATA_ACTIVE_TILE
+            = "android.service.quicksettings.ACTIVE_TILE";
 
     /**
      * Used to notify SysUI that Listening has be requested.
@@ -147,12 +143,8 @@ public class TileService extends Service {
      * Note that this is not guaranteed to be called between {@link #onCreate()}
      * and {@link #onStartListening()}, it will only be called when the tile is added
      * and not on subsequent binds.
-     *
-     * @see #TILE_MODE_PASSIVE
-     * @see #TILE_MODE_ACTIVE
      */
-    public int onTileAdded() {
-        return TILE_MODE_PASSIVE;
+    public void onTileAdded() {
     }
 
     /**
@@ -386,15 +378,7 @@ public class TileService extends Service {
                     }
                     break;
                 case MSG_TILE_ADDED:
-                    int mode = TileService.this.onTileAdded();
-                    if (mService == null) {
-                        return;
-                    }
-                    try {
-                        mService.setTileMode(new ComponentName(TileService.this,
-                                TileService.this.getClass()), mode);
-                    } catch (RemoteException e) {
-                    }
+                    TileService.this.onTileAdded();
                     break;
                 case MSG_TILE_REMOVED:
                     if (mListening) {
@@ -431,8 +415,8 @@ public class TileService extends Service {
     /**
      * Requests that a tile be put in the listening state so it can send an update.
      *
-     * This method is only applicable to tiles that return {@link #TILE_MODE_ACTIVE} from
-     * {@link #onTileAdded()}, and will do nothing otherwise.
+     * This method is only applicable to tiles that have {@link #META_DATA_ACTIVE_TILE} defined
+     * as true on their TileService Manifest declaration, and will do nothing otherwise.
      */
     public static final void requestListeningState(Context context, ComponentName component) {
         Intent intent = new Intent(ACTION_REQUEST_LISTENING);
