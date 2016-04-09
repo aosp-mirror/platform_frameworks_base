@@ -4248,6 +4248,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Work Challenge is present) let startActivityInPackage handle the intercepting.
         if (!mService.mUserController.shouldConfirmCredentials(task.userId)
                 && task.getRootActivity() != null) {
+            mActivityMetricsLogger.notifyActivityLaunching();
             mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
 
             // If we are launching the task in the docked stack, put it into resizing mode so
