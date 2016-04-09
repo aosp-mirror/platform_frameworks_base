@@ -456,6 +456,11 @@ class Task implements DimLayer.DimLayerUser {
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
     @Override
     public void getDimBounds(Rect out) {
+        final DisplayContent displayContent = mStack.getDisplayContent();
+        // It doesn't matter if we in particular are part of the resize, since we couldn't have
+        // a DimLayer anyway if we weren't visible.
+        final boolean dockedResizing = displayContent != null ?
+                displayContent.mDividerControllerLocked.isResizing() : false;
         if (useCurrentBounds()) {
             if (inFreeformWorkspace() && getMaxVisibleBounds(out)) {
                 return;
@@ -464,8 +469,16 @@ class Task implements DimLayer.DimLayerUser {
             if (!mFullscreen) {
                 // When minimizing the docked stack when going home, we don't adjust the task bounds
                 // so we need to intersect the task bounds with the stack bounds here.
-                mStack.getBounds(mTmpRect);
-                mTmpRect.intersect(mBounds);
+                //
+                // If we are Docked Resizing with snap points, the task bounds could be smaller than the stack
+                // bounds and so we don't even want to use them. Even if the app should not be resized the Dim
+                // should keep up with the divider.
+                if (dockedResizing) {
+                    mStack.getBounds(out);
+                } else {
+                    mStack.getBounds(mTmpRect);
+                    mTmpRect.intersect(mBounds);
+                }
                 out.set(mTmpRect);
             } else {
                 out.set(mBounds);
@@ -476,7 +489,7 @@ class Task implements DimLayer.DimLayerUser {
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
         // system.
-        mStack.getDisplayContent().getLogicalDisplayRect(out);
+        displayContent.getLogicalDisplayRect(out);
     }
 
     void setDragResizing(boolean dragResizing, int dragResizeMode) {
