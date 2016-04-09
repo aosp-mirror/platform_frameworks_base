@@ -62,16 +62,13 @@ public final class Metrics {
     private static final String COUNT_GET_CONTENT_MIME = "docsui_get_content_mime";
     private static final String COUNT_BROWSE_ROOT = "docsui_browse_root";
     @Deprecated private static final String COUNT_MANAGE_ROOT = "docsui_manage_root";
-    private static final String COUNT_MULTI_WINDOW = "docsui_multi_window";
+    @Deprecated private static final String COUNT_MULTI_WINDOW = "docsui_multi_window";
     private static final String COUNT_FILEOP_SYSTEM = "docsui_fileop_system";
     private static final String COUNT_FILEOP_EXTERNAL = "docsui_fileop_external";
     private static final String COUNT_FILEOP_CANCELED = "docsui_fileop_canceled";
     private static final String COUNT_STARTUP_MS = "docsui_startup_ms";
     private static final String COUNT_DRAWER_OPENED = "docsui_drawer_opened";
-    private static final String COUNT_DRAG_N_DROP = "docsui_drag_n_drop";
-    private static final String COUNT_SEARCH = "docsui_search";
-    private static final String COUNT_MENU_ACTION = "docsui_menu_action";
-    private static final String COUNT_KEYBOARD_ACTION = "docsui_keyboard_action";
+    private static final String COUNT_USER_ACTION = "docsui_menu_action";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -215,54 +212,67 @@ public final class Metrics {
     public @interface Provider {}
 
 
-    // Codes representing different menu actions. These are used for bucketing stats in the
-    // COUNT_MENU_ACTION histogram.
-    // Both regular toolbar menu and action mode menu operations are included.
+    // Codes representing different user actions. These are used for bucketing stats in the
+    // COUNT_USER_ACTION histogram.
+    // The historgram includes action triggered from menu or invoked by keyboard shortcut.
     // Do not change or rearrange these values, that will break historical data. Only add to the
     // list.
     // Do not use negative numbers or zero; clearcut only handles positive integers.
-    private static final int ACTION_MENU_OTHER = 1;
-    private static final int ACTION_MENU_GRID = 2;
-    private static final int ACTION_MENU_LIST = 3;
-    private static final int ACTION_MENU_SORT = 4;
-    private static final int ACTION_MENU_SORT_NAME = 5;
-    private static final int ACTION_MENU_SORT_DATE = 6;
-    private static final int ACTION_MENU_SORT_SIZE = 7;
-    private static final int ACTION_MENU_SEARCH = 8;
-    private static final int ACTION_MENU_SHOW_SIZE = 9;
-    private static final int ACTION_MENU_SETTINGS = 10;
-    private static final int ACTION_MENU_COPY_TO = 11;
-    private static final int ACTION_MENU_MOVE_TO = 12;
-    private static final int ACTION_MENU_DELETE = 13;
-    private static final int ACTION_MENU_RENAME = 14;
-    private static final int ACTION_MENU_CREATE_DIR = 15;
-    private static final int ACTION_MENU_SELECT_ALL = 16;
-    private static final int ACTION_MENU_SHARE = 17;
-    private static final int ACTION_MENU_OPEN = 18;
-    private static final int ACTION_MENU_ADVANCED = 19;
+    public static final int USER_ACTION_OTHER = 1;
+    public static final int USER_ACTION_GRID = 2;
+    public static final int USER_ACTION_LIST = 3;
+    public static final int USER_ACTION_SORT_NAME = 4;
+    public static final int USER_ACTION_SORT_DATE = 5;
+    public static final int USER_ACTION_SORT_SIZE = 6;
+    public static final int USER_ACTION_SEARCH = 7;
+    public static final int USER_ACTION_SHOW_SIZE = 8;
+    public static final int USER_ACTION_HIDE_SIZE = 9;
+    public static final int USER_ACTION_SETTINGS = 10;
+    public static final int USER_ACTION_COPY_TO = 11;
+    public static final int USER_ACTION_MOVE_TO = 12;
+    public static final int USER_ACTION_DELETE = 13;
+    public static final int USER_ACTION_RENAME = 14;
+    public static final int USER_ACTION_CREATE_DIR = 15;
+    public static final int USER_ACTION_SELECT_ALL = 16;
+    public static final int USER_ACTION_SHARE = 17;
+    public static final int USER_ACTION_OPEN = 18;
+    public static final int USER_ACTION_SHOW_ADVANCED = 19;
+    public static final int USER_ACTION_HIDE_ADVANCED = 20;
+    public static final int USER_ACTION_NEW_WINDOW = 21;
+    public static final int USER_ACTION_PASTE_CLIPBOARD = 22;
+    public static final int USER_ACTION_COPY_CLIPBOARD = 23;
+    public static final int USER_ACTION_DRAG_N_DROP = 24;
+    public static final int USER_ACTION_DRAG_N_DROP_MULTI_WINDOW = 25;
 
     @IntDef(flag = false, value = {
-            ACTION_MENU_OTHER,
-            ACTION_MENU_GRID,
-            ACTION_MENU_LIST,
-            ACTION_MENU_SORT,
-            ACTION_MENU_SORT_NAME,
-            ACTION_MENU_SORT_DATE,
-            ACTION_MENU_SORT_SIZE,
-            ACTION_MENU_SHOW_SIZE,
-            ACTION_MENU_SETTINGS,
-            ACTION_MENU_COPY_TO,
-            ACTION_MENU_MOVE_TO,
-            ACTION_MENU_DELETE,
-            ACTION_MENU_RENAME,
-            ACTION_MENU_CREATE_DIR,
-            ACTION_MENU_SELECT_ALL,
-            ACTION_MENU_SHARE,
-            ACTION_MENU_OPEN,
-            ACTION_MENU_ADVANCED
+            USER_ACTION_OTHER,
+            USER_ACTION_GRID,
+            USER_ACTION_LIST,
+            USER_ACTION_SORT_NAME,
+            USER_ACTION_SORT_DATE,
+            USER_ACTION_SORT_SIZE,
+            USER_ACTION_SEARCH,
+            USER_ACTION_SHOW_SIZE,
+            USER_ACTION_HIDE_SIZE,
+            USER_ACTION_SETTINGS,
+            USER_ACTION_COPY_TO,
+            USER_ACTION_MOVE_TO,
+            USER_ACTION_DELETE,
+            USER_ACTION_RENAME,
+            USER_ACTION_CREATE_DIR,
+            USER_ACTION_SELECT_ALL,
+            USER_ACTION_SHARE,
+            USER_ACTION_OPEN,
+            USER_ACTION_SHOW_ADVANCED,
+            USER_ACTION_HIDE_ADVANCED,
+            USER_ACTION_NEW_WINDOW,
+            USER_ACTION_PASTE_CLIPBOARD,
+            USER_ACTION_COPY_CLIPBOARD,
+            USER_ACTION_DRAG_N_DROP,
+            USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface MenuAction {}
+    public @interface UserAction {}
 
     // Codes representing different menu actions. These are used for bucketing stats in the
     // COUNT_MENU_ACTION histogram.
@@ -290,31 +300,6 @@ public final class Metrics {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MetricsAction {}
-
-    // Codes representing different keyboard shortcut triggered actions. These are used for
-    // bucketing stats in the COUNT_KEYBOARD_ACTION histogram.
-    // Do not change or rearrange these values, that will break historical data. Only add to the
-    // list.
-    // Do not use negative numbers or zero; clearcut only handles positive integers.
-    public static final int ACTION_KEYBOARD_OTHER = 1;
-    public static final int ACTION_KEYBOARD_PASTE = 2;
-    public static final int ACTION_KEYBOARD_COPY = 3;
-    public static final int ACTION_KEYBOARD_DELETE = 4;
-    public static final int ACTION_KEYBOARD_SELECT_ALL = 5;
-    public static final int ACTION_KEYBOARD_BACK = 6;
-    public static final int ACTION_KEYBOARD_SWITCH_FOCUS = 7;
-
-    @IntDef(flag = false, value = {
-            ACTION_KEYBOARD_OTHER,
-            ACTION_KEYBOARD_PASTE,
-            ACTION_KEYBOARD_COPY,
-            ACTION_KEYBOARD_DELETE,
-            ACTION_KEYBOARD_SELECT_ALL,
-            ACTION_KEYBOARD_BACK,
-            ACTION_KEYBOARD_SWITCH_FOCUS
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface KeyboardAction {}
 
     // Codes representing different actions to open the drawer. They are used for bucketing stats in
     // the COUNT_DRAWER_OPENED histogram.
@@ -379,15 +364,6 @@ public final class Metrics {
      */
     public static void logAppVisited(Context context, ResolveInfo info) {
         logHistogram(context, COUNT_ROOT_VISITED, sanitizeRoot(info));
-    }
-
-    /**
-     * Logs a multi-window start. Call this when the user spawns a new DocumentsUI window.
-     *
-     * @param context
-     */
-    public static void logMultiWindow(Context context) {
-        logCount(context, COUNT_MULTI_WINDOW);
     }
 
     /**
@@ -496,7 +472,7 @@ public final class Metrics {
      * @param context
      */
     public static void logCreateDirError(Context context) {
-        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_CREATE_DIR);
+        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_CREATE_DIR_ERROR);
     }
 
     /**
@@ -520,41 +496,12 @@ public final class Metrics {
     }
 
     /**
-     * Logs keyboard shortcut actions. Since keyboard shortcuts have their corresponding menu items,
-     * they are identified by menu item resource id for convenience.
-     * @param context
-     * @param keyCode
-     */
-    public static void logKeyboardAction(Context context, @KeyboardAction int action) {
-        logHistogram(context, COUNT_KEYBOARD_ACTION, action);
-    }
-
-    /**
      * Logs startup time in milliseconds.
      * @param context
      * @param startupMs Startup time in milliseconds.
      */
     public static void logStartupMs(Context context, int startupMs) {
         logHistogram(context, COUNT_STARTUP_MS, startupMs);
-    }
-
-    /**
-     * Logs a drag and drop action. Call this when the user drops the content triggering copy.
-     * operation.
-     *
-     * @param context
-     */
-    public static void logDragNDrop(Context context) {
-        logCount(context, COUNT_DRAG_N_DROP);
-    }
-
-    /**
-     * Logs a search. Call this when the search operation is finished.
-     *
-     * @param context
-     */
-    public static void logSearch(Context context) {
-        logCount(context, COUNT_SEARCH);
     }
 
     private static void logInterProviderFileOps(
@@ -677,71 +624,12 @@ public final class Metrics {
     }
 
     /**
-     * Logs menu action that was selected by user.
+     * Logs the action that was started by user.
      * @param context
-     * @param id Resource id of the menu item.
+     * @param userAction
      */
-    public static void logMenuAction(Context context, int id) {
-        @MenuAction int menuAction = ACTION_MENU_OTHER;
-        switch (id) {
-            case R.id.menu_grid:
-                menuAction = ACTION_MENU_GRID;
-                break;
-            case R.id.menu_list:
-                menuAction = ACTION_MENU_LIST;
-                break;
-            case R.id.menu_sort:
-                menuAction = ACTION_MENU_SORT;
-                break;
-            case R.id.menu_sort_name:
-                menuAction = ACTION_MENU_SORT_NAME;
-                break;
-            case R.id.menu_sort_date:
-                menuAction = ACTION_MENU_SORT_DATE;
-                break;
-            case R.id.menu_sort_size:
-                menuAction = ACTION_MENU_SORT_SIZE;
-                break;
-            case R.id.menu_search:
-                menuAction = ACTION_MENU_SEARCH;
-                break;
-            case R.id.menu_file_size:
-                menuAction = ACTION_MENU_SHOW_SIZE;
-                break;
-            case R.id.menu_settings:
-                menuAction = ACTION_MENU_SETTINGS;
-                break;
-            case R.id.menu_copy_to:
-                menuAction = ACTION_MENU_COPY_TO;
-                break;
-            case R.id.menu_move_to:
-                menuAction = ACTION_MENU_MOVE_TO;
-                break;
-            case R.id.menu_delete:
-                menuAction = ACTION_MENU_DELETE;
-                break;
-            case R.id.menu_rename:
-                menuAction = ACTION_MENU_RENAME;
-                break;
-            case R.id.menu_create_dir:
-                menuAction = ACTION_MENU_CREATE_DIR;
-                break;
-            case R.id.menu_select_all:
-                menuAction = ACTION_MENU_SELECT_ALL;
-                break;
-            case R.id.menu_share:
-                menuAction = ACTION_MENU_SHARE;
-                break;
-            case R.id.menu_open:
-                menuAction = ACTION_MENU_OPEN;
-                break;
-            case R.id.menu_advanced:
-                menuAction = ACTION_MENU_ADVANCED;
-                break;
-            default:
-                break;
-        }
-        logHistogram(context, COUNT_MENU_ACTION, menuAction);
+    public static void logUserAction(Context context, @UserAction int userAction) {
+        logHistogram(context, COUNT_USER_ACTION, userAction);
     }
 
     /**

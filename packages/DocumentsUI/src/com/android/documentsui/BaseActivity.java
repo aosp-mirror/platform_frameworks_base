@@ -257,7 +257,6 @@ public abstract class BaseActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Metrics.logMenuAction(this, item.getItemId());
 
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -279,6 +278,7 @@ public abstract class BaseActivity extends Activity
             case R.id.menu_sort_date:
                 setUserSortOrder(State.SORT_ORDER_LAST_MODIFIED);
                 return true;
+
             case R.id.menu_sort_size:
                 setUserSortOrder(State.SORT_ORDER_SIZE);
                 return true;
@@ -307,6 +307,8 @@ public abstract class BaseActivity extends Activity
                 return true;
 
             case R.id.menu_settings:
+                Metrics.logUserAction(this, Metrics.USER_ACTION_SETTINGS);
+
                 final RootInfo root = getCurrentRoot();
                 final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
                 intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
@@ -323,6 +325,8 @@ public abstract class BaseActivity extends Activity
     }
 
     void showCreateDirectoryDialog() {
+        Metrics.logUserAction(this, Metrics.USER_ACTION_CREATE_DIR);
+
         CreateDirectoryFragment.show(getFragmentManager());
     }
 
@@ -469,13 +473,25 @@ public abstract class BaseActivity extends Activity
                         "com.android.providers.downloads.documents", "downloads");
     }
 
+    /**
+     * Set internal storage visible based on explicit user action.
+     */
     void setDisplayAdvancedDevices(boolean display) {
+        Metrics.logUserAction(this,
+                display ? Metrics.USER_ACTION_SHOW_ADVANCED : Metrics.USER_ACTION_HIDE_ADVANCED);
+
         mState.showAdvanced = display;
         RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
         invalidateOptionsMenu();
     }
 
+    /**
+     * Set file size visible based on explicit user action.
+     */
     void setDisplayFileSize(boolean display) {
+        Metrics.logUserAction(this,
+                display ? Metrics.USER_ACTION_SHOW_SIZE : Metrics.USER_ACTION_HIDE_SIZE);
+
         LocalPreferences.setDisplayFileSize(this, display);
         mState.showSize = display;
         DirectoryFragment dir = getDirectoryFragment();
@@ -489,6 +505,18 @@ public abstract class BaseActivity extends Activity
      * Set state sort order based on explicit user action.
      */
     void setUserSortOrder(int sortOrder) {
+        switch(sortOrder) {
+            case State.SORT_ORDER_DISPLAY_NAME:
+                Metrics.logUserAction(this, Metrics.USER_ACTION_SORT_NAME);
+                break;
+            case State.SORT_ORDER_LAST_MODIFIED:
+                Metrics.logUserAction(this, Metrics.USER_ACTION_SORT_DATE);
+                break;
+            case State.SORT_ORDER_SIZE:
+                Metrics.logUserAction(this, Metrics.USER_ACTION_SORT_SIZE);
+                break;
+        }
+
         mState.userSortOrder = sortOrder;
         DirectoryFragment dir = getDirectoryFragment();
         if (dir != null) {
@@ -500,6 +528,12 @@ public abstract class BaseActivity extends Activity
      * Set mode based on explicit user action.
      */
     void setViewMode(@ViewMode int mode) {
+        if (mode == State.MODE_GRID) {
+            Metrics.logUserAction(this, Metrics.USER_ACTION_GRID);
+        } else if (mode == State.MODE_LIST) {
+            Metrics.logUserAction(this, Metrics.USER_ACTION_LIST);
+        }
+
         LocalPreferences.setViewMode(this, getCurrentRoot(), mode);
         mState.derivedMode = mode;
 
@@ -621,12 +655,10 @@ public abstract class BaseActivity extends Activity
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_TAB) {
-            Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_SWITCH_FOCUS);
             // Tab toggles focus on the navigation drawer.
             toggleNavDrawerFocus();
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DEL) {
-            Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_BACK);
             popDir();
             return true;
         }

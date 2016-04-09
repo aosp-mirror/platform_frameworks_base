@@ -605,8 +605,6 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            Metrics.logMenuAction(getContext(), item.getItemId());
-
             Selection selection = mSelectionManager.getSelection(new Selection());
 
             switch (item.getItemId()) {
@@ -674,6 +672,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void openDocuments(final Selection selected) {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_OPEN);
+
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
@@ -684,6 +684,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void shareDocuments(final Selection selected) {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SHARE);
+
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
@@ -765,6 +767,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void deleteDocuments(final Selection selected) {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_DELETE);
+
         assert(!selected.isEmpty());
 
         final DocumentInfo srcParent = getDisplayState().stack.peek();
@@ -815,6 +819,12 @@ public class DirectoryFragment extends Fragment
     }
 
     private void transferDocuments(final Selection selected, final @OpType int mode) {
+        if(mode == FileOperationService.OPERATION_COPY) {
+            Metrics.logUserAction(getContext(), Metrics.USER_ACTION_COPY_TO);
+        } else if (mode == FileOperationService.OPERATION_MOVE) {
+            Metrics.logUserAction(getContext(), Metrics.USER_ACTION_MOVE_TO);
+        }
+
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
         final Intent intent = new Intent(
@@ -861,6 +871,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void renameDocuments(Selection selected) {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_RENAME);
+
         // Batch renaming not supported
         // Rename option is only available in menu when 1 document selected
         assert(selected.size() == 1);
@@ -1020,6 +1032,8 @@ public class DirectoryFragment extends Fragment
     }
 
     public void copySelectedToClipboard() {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_COPY_CLIPBOARD);
+
         Selection selection = mSelectionManager.getSelection(new Selection());
         if (!selection.isEmpty()) {
             copySelectionToClipboard(selection);
@@ -1043,6 +1057,8 @@ public class DirectoryFragment extends Fragment
     }
 
     public void pasteFromClipboard() {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_PASTE_CLIPBOARD);
+
         copyFromClipboard();
         getActivity().invalidateOptionsMenu();
     }
@@ -1073,6 +1089,8 @@ public class DirectoryFragment extends Fragment
     }
 
     public void selectAllFiles() {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SELECT_ALL);
+
         // Exclude disabled files
         List<String> enabled = new ArrayList<String>();
         for (String id : mAdapter.getModelIds()) {
@@ -1147,7 +1165,14 @@ public class DirectoryFragment extends Fragment
                     if (Objects.equals(src, dst)) {
                         return false;
                     }
-                    Metrics.logDragNDrop(getContext());
+                    // Recognize multi-window drag and drop based on the fact that localState is not
+                    // carried between processes. It will stop working when the localsState behavior
+                    // is changed. The info about window should be passed in the localState then.
+                    // The localState could also be null for copying from Recents in single window
+                    // mode, but Recents doesn't offer this functionality (no directories).
+                    Metrics.logUserAction(getContext(),
+                            src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
+                                    : Metrics.USER_ACTION_DRAG_N_DROP);
                     copyFromClipData(event.getClipData(), dst);
                     return true;
             }
@@ -1387,7 +1412,6 @@ public class DirectoryFragment extends Fragment
                     // This has to be handled here instead of in a keyboard shortcut, because
                     // keyboard shortcuts all have to be modified with the 'Ctrl' key.
                     if (mSelectionManager.hasSelection()) {
-                        Metrics.logKeyboardAction(getContext(), Metrics.ACTION_KEYBOARD_DELETE);
                         deleteDocuments(mSelectionManager.getSelection());
                     }
                     // Always handle the key, even if there was nothing to delete. This is a
@@ -1674,8 +1698,9 @@ public class DirectoryFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
         if (!isAdded()) return;
+
         if (mSearchMode) {
-            Metrics.logSearch(getContext());
+            Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SEARCH);
         }
 
         State state = getDisplayState();
