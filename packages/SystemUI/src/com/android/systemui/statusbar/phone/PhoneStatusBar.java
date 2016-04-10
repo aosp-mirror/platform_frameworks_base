@@ -953,6 +953,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     protected void reInflateViews() {
         super.reInflateViews();
+        mScrimController.reInflateViews();
+        mBrightnessMirrorController.reInflate();
         inflateDismissView();
         updateClearAll();
         inflateEmptyShadeView();
