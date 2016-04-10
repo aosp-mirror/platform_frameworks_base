@@ -2541,23 +2541,4 @@
   <java-symbol type="id" name="titleDividerNoCustom" />
 
   <java-symbol type="bool" name="config_sustainedPerformanceModeSupported" />
-
-  <!-- Wearable input extract edit view -->
-  <java-symbol type="drawable" name="ic_input_extract_action_go" />
-  <java-symbol type="drawable" name="ic_input_extract_action_search" />
-  <java-symbol type="drawable" name="ic_input_extract_action_send" />
-  <java-symbol type="drawable" name="ic_input_extract_action_next" />
-  <java-symbol type="drawable" name="ic_input_extract_action_done" />
-  <java-symbol type="drawable" name="ic_input_extract_action_previous" />
-  <java-symbol type="drawable" name="ic_input_extract_action_return" />
-
-  <java-symbol type="fraction" name="input_extract_layout_height" />
-  <java-symbol type="fraction" name="input_extract_layout_padding_left" />
-  <java-symbol type="fraction" name="input_extract_layout_padding_left_no_action" />
-  <java-symbol type="fraction" name="input_extract_layout_padding_right" />
-  <java-symbol type="fraction" name="input_extract_text_margin_bottom" />
-  <java-symbol type="fraction" name="input_extract_action_margin_bottom" />
-
-  <java-symbol type="dimen" name="input_extract_action_button_width" />
-  <java-symbol type="dimen" name="input_extract_action_button_height" />
 </resources>

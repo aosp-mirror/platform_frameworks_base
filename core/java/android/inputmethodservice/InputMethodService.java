@@ -68,10 +68,9 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -303,7 +302,7 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mExtractViewHidden;
     ExtractEditText mExtractEditText;
     ViewGroup mExtractAccessories;
-    View mExtractAction;
+    Button mExtractAction;
     ExtractedText mExtractedText;
     int mExtractedToken;
     
@@ -1345,7 +1344,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mExtractEditText = (ExtractEditText)view.findViewById(
                     com.android.internal.R.id.inputExtractEditText);
             mExtractEditText.setIME(this);
-            mExtractAction = view.findViewById(
+            mExtractAction = (Button)view.findViewById(
                     com.android.internal.R.id.inputExtractAction);
             if (mExtractAction != null) {
                 mExtractAccessories = (ViewGroup)view.findViewById(
@@ -2409,35 +2408,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 return getText(com.android.internal.R.string.ime_action_default);
         }
     }
-
-    /**
-     * Return a drawable resource id that can be used as a button icon for the given
-     * {@link EditorInfo#imeOptions EditorInfo.imeOptions}.
-     *
-     * @param imeOptions The value from @link EditorInfo#imeOptions EditorInfo.imeOptions}.
-     *
-     * @return Returns a drawable resource id to use.
-     */
-    @DrawableRes
-    private int getIconForImeAction(int imeOptions) {
-        switch (imeOptions&EditorInfo.IME_MASK_ACTION) {
-            case EditorInfo.IME_ACTION_GO:
-                return com.android.internal.R.drawable.ic_input_extract_action_go;
-            case EditorInfo.IME_ACTION_SEARCH:
-                return com.android.internal.R.drawable.ic_input_extract_action_search;
-            case EditorInfo.IME_ACTION_SEND:
-                return com.android.internal.R.drawable.ic_input_extract_action_send;
-            case EditorInfo.IME_ACTION_NEXT:
-                return com.android.internal.R.drawable.ic_input_extract_action_next;
-            case EditorInfo.IME_ACTION_DONE:
-                return com.android.internal.R.drawable.ic_input_extract_action_done;
-            case EditorInfo.IME_ACTION_PREVIOUS:
-                return com.android.internal.R.drawable.ic_input_extract_action_previous;
-            default:
-                return com.android.internal.R.drawable.ic_input_extract_action_return;
-        }
-    }
-
+    
     /**
      * Called when the fullscreen-mode extracting editor info has changed,
      * to determine whether the extracting (extract text and candidates) portion
@@ -2488,20 +2459,10 @@ public class InputMethodService extends AbstractInputMethodService {
         if (hasAction) {
             mExtractAccessories.setVisibility(View.VISIBLE);
             if (mExtractAction != null) {
-                if (mExtractAction instanceof ImageButton) {
-                    ((ImageButton) mExtractAction)
-                            .setImageResource(getIconForImeAction(ei.imeOptions));
-                    if (ei.actionLabel != null) {
-                        mExtractAction.setContentDescription(ei.actionLabel);
-                    } else {
-                        mExtractAction.setContentDescription(getTextForImeAction(ei.imeOptions));
-                    }
+                if (ei.actionLabel != null) {
+                    mExtractAction.setText(ei.actionLabel);
                 } else {
-                    if (ei.actionLabel != null) {
-                        ((TextView) mExtractAction).setText(ei.actionLabel);
-                    } else {
-                        ((TextView) mExtractAction).setText(getTextForImeAction(ei.imeOptions));
-                    }
+                    mExtractAction.setText(getTextForImeAction(ei.imeOptions));
                 }
                 mExtractAction.setOnClickListener(mActionClickListener);
             }
