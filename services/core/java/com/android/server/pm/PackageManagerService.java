@@ -247,6 +247,7 @@ import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
+import dalvik.system.CloseGuard;
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
@@ -298,14 +299,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Keep track of all those .apks everywhere.
+ * Keep track of all those APKs everywhere.
+ * <p>
+ * Internally there are two important locks:
+ * <ul>
+ * <li>{@link #mPackages} is used to guard all in-memory parsed package details
+ * and other related state. It is a fine-grained lock that should only be held
+ * momentarily, as it's one of the most contended locks in the system.
+ * <li>{@link #mInstallLock} is used to guard all {@code installd} access, whose
+ * operations typically involve heavy lifting of application data on disk. Since
+ * {@code installd} is single-threaded, and it's operations can often be slow,
+ * this lock should never be acquired while already holding {@link #mPackages}.
+ * Conversely, it's safe to acquire {@link #mPackages} momentarily while already
+ * holding {@link #mInstallLock}.
+ * </ul>
+ * Many internal methods rely on the caller to hold the appropriate locks, and
+ * this contract is expressed through method name suffixes:
+ * <ul>
+ * <li>fooLI(): the caller must hold {@link #mInstallLock}
+ * <li>fooLIF(): the caller must hold {@link #mInstallLock} and the package
+ * being modified must be frozen
+ * <li>fooLPr(): the caller must hold {@link #mPackages} for reading
+ * <li>fooLPw(): the caller must hold {@link #mPackages} for writing
+ * </ul>
+ * <p>
+ * Because this class is very central to the platform's security; please run all
+ * CTS and unit tests whenever making modifications:
  *
- * This is very central to the platform's security; please run the unit
- * tests whenever making modifications here:
- *
-runtest -c android.content.pm.PackageManagerTests frameworks-core
- *
- * {@hide}
+ * <pre>
+ * $ runtest -c android.content.pm.PackageManagerTests frameworks-core
+ * $ cts-tradefed run commandAndExit cts -m AppSecurityTests
+ * </pre>
  */
 public class PackageManagerService extends IPackageManager.Stub {
     static final String TAG = "PackageManager";
@@ -367,6 +391,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_INITIAL = 1<<14;
     static final int SCAN_CHECK_ONLY = 1<<15;
     static final int SCAN_DONT_KILL_APP = 1<<17;
+    static final int SCAN_IGNORE_FROZEN = 1<<18;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -570,7 +595,19 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     boolean mPromoteSystemApps;
 
+    @GuardedBy("mPackages")
     final Settings mSettings;
+
+    /**
+     * Set of package names that are currently "frozen", which means active
+     * surgery is being done on the code/data for that package. The platform
+     * will refuse to launch frozen packages to avoid race conditions.
+     *
+     * @see PackageFreezer
+     */
+    @GuardedBy("mPackages")
+    final ArraySet<String> mFrozenPackages = new ArraySet<>();
+
     boolean mRestoredSettings;
 
     // System configuration read by SystemConfig.
@@ -2352,7 +2389,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         psit.remove();
                         logCriticalInfo(Log.WARN, "System package " + ps.name
                                 + " no longer exists; wiping its data");
-                        removeDataDirsLI(null, ps.name);
+                        // No apps are running this early, so no need to freeze
+                        removeDataDirsLIF(null, ps.name);
                     } else {
                         final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
@@ -2364,11 +2402,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
-            //clean up list
-            for(int i = 0; i < deletePkgsList.size(); i++) {
-                //clean up here
-                cleanupInstallFailedPackage(deletePkgsList.get(i));
+            for (int i = 0; i < deletePkgsList.size(); i++) {
+                // No apps are running this early, so no need to freeze
+                cleanupInstallFailedPackageLIF(deletePkgsList.get(i));
             }
+
             //delete tmp files
             deleteTempPackageFiles();
 
@@ -2400,7 +2438,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (deletedPkg == null) {
                         msg = "Updated system package " + deletedAppName
                                 + " no longer exists; wiping its data";
-                        removeDataDirsLI(null, deletedAppName);
+                        // No apps are running this early, so no need to freeze
+                        removeDataDirsLIF(null, deletedAppName);
                     } else {
                         msg = "Updated system app + " + deletedAppName
                                 + " no longer present; removing system privileges for "
@@ -2556,7 +2595,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 for (int i = 0; i < mSettings.mPackages.size(); i++) {
                     final PackageSetting ps = mSettings.mPackages.valueAt(i);
                     if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.volumeUuid)) {
-                        deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
+                        // No apps are running this early, so no need to freeze
+                        deleteCodeCacheDirsLIF(ps.volumeUuid, ps.name);
                     }
                 }
                 ver.fingerprint = Build.FINGERPRINT;
@@ -2941,10 +2981,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void cleanupInstallFailedPackage(PackageSetting ps) {
+    void cleanupInstallFailedPackageLIF(PackageSetting ps) {
         logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + ps.name);
 
-        removeDataDirsLI(ps.volumeUuid, ps.name);
+        removeDataDirsLIF(ps.volumeUuid, ps.name);
         if (ps.codePath != null) {
             removeCodePathLI(ps.codePath);
         }
@@ -2954,7 +2994,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             ps.resourcePath.delete();
         }
-        mSettings.removePackageLPw(ps.name);
+        synchronized (mPackages) {
+            mSettings.removePackageLPw(ps.name);
+        }
     }
 
     static int[] appendInts(int[] cur, int[] add) {
@@ -3006,7 +3048,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new SecurityException("Package " + packageName + " not a system app!");
             }
 
-            if (ps.frozen) {
+            if (mFrozenPackages.contains(packageName)) {
                 throw new SecurityException("Package " + packageName + " is currently frozen!");
             }
 
@@ -4403,6 +4445,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * This method should typically only be used when granting or revoking
+     * permissions, since the app may immediately restart after this call.
+     * <p>
+     * If you're doing surgery on app code/data, use {@link PackageFreezer} to
+     * guard your work against the app being relaunched.
+     */
     private void killUid(int appId, int userId, String reason) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -6800,7 +6849,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     != PackageManager.SIGNATURE_MATCH) {
                 logCriticalInfo(Log.WARN, "Package " + ps.name + " appeared on system, but"
                         + " signatures don't match existing userdata copy; removing");
-                deletePackageLI(pkg.packageName, null, true, null, 0, null, false, null);
+                try (PackageFreezer freezer = freezePackage(pkg.packageName,
+                        "scanPackageInternalLI")) {
+                    deletePackageLIF(pkg.packageName, null, true, null, 0, null, false, null);
+                }
                 ps = null;
             } else {
                 /*
@@ -7269,15 +7321,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private boolean removeDataDirsLI(String volumeUuid, String packageName) {
+    private boolean removeDataDirsLIF(String volumeUuid, String packageName) {
         // TODO: triage flags as part of 26466827
         final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
 
         boolean res = true;
-        final int[] users = sUserManager.getUserIds();
-        for (int user : users) {
+        final int[] userIds = sUserManager.getUserIds();
+        for (int userId : userIds) {
             try {
-                mInstaller.destroyAppData(volumeUuid, packageName, user, flags);
+                mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to delete data directory", e);
                 res = false;
@@ -7299,10 +7351,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     void destroyAppDataLI(String volumeUuid, String packageName, int userId, int flags) {
-        try {
-            mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Failed to destroy app data", e);
+        try (PackageFreezer freezer = freezePackage(packageName, "destroyAppDataLI")) {
+            try {
+                mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to destroy app data", e);
+            }
         }
     }
 
@@ -7315,19 +7369,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void deleteProfilesLI(String packageName, boolean destroy) {
-        final PackageParser.Package pkg;
-        synchronized (mPackages) {
-            pkg = mPackages.get(packageName);
-        }
-        if (pkg == null) {
-            Slog.w(TAG, "Failed to delete profiles. No package: " + packageName);
-            return;
-        }
-        deleteProfilesLI(pkg, destroy);
-    }
-
-    private void deleteProfilesLI(PackageParser.Package pkg, boolean destroy) {
+    private void deleteProfilesLIF(PackageParser.Package pkg, boolean destroy) {
         try {
             if (destroy) {
                 mInstaller.destroyAppProfiles(pkg.packageName);
@@ -7339,7 +7381,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void deleteCodeCacheDirsLI(String volumeUuid, String packageName) {
+    private void deleteCodeCacheDirsLIF(String volumeUuid, String packageName) {
         final PackageParser.Package pkg;
         synchronized (mPackages) {
             pkg = mPackages.get(packageName);
@@ -7348,10 +7390,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Failed to delete code cache directory. No package: " + packageName);
             return;
         }
-        deleteCodeCacheDirsLI(pkg);
+        deleteCodeCacheDirsLIF(pkg);
     }
 
-    private void deleteCodeCacheDirsLI(PackageParser.Package pkg) {
+    private void deleteCodeCacheDirsLIF(PackageParser.Package pkg) {
         // TODO: triage flags as part of 26466827
         final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
 
@@ -7564,7 +7606,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return res;
         } finally {
             if (!success && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                removeDataDirsLI(pkg.volumeUuid, pkg.packageName);
+                // DELETE_DATA_ON_FAILURES is only used by frozen paths
+                removeDataDirsLIF(pkg.volumeUuid, pkg.packageName);
             }
         }
     }
@@ -8121,20 +8164,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        // Request the ActivityManager to kill the process(only for existing packages)
-        // so that we do not end up in a confused state while the user is still using the older
-        // version of the application while the new one gets installed.
-        final boolean isReplacing = (scanFlags & SCAN_REPLACING) != 0;
-        final boolean killApp = (scanFlags & SCAN_DONT_KILL_APP) == 0;
-        if (killApp) {
-            if (isReplacing) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "killApplication");
-
-                killApplication(pkg.applicationInfo.packageName,
-                            pkg.applicationInfo.uid, "replace pkg");
-
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
+        if ((scanFlags & SCAN_BOOTING) != 0) {
+            // No apps can run during boot scan, so they don't need to be frozen
+        } else if ((scanFlags & SCAN_DONT_KILL_APP) != 0) {
+            // Caller asked to not kill app, so it's probably not frozen
+        } else if ((scanFlags & SCAN_IGNORE_FROZEN) != 0) {
+            // Caller asked us to ignore frozen check for some reason; they
+            // probably didn't know the package name
+        } else {
+            // We're doing major surgery on this package, so it better be frozen
+            // right now to keep it from launching
+            checkPackageFrozen(pkgName);
         }
 
         // Also need to kill any apps that are dependent on the library.
@@ -9001,27 +9041,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void killPackage(PackageParser.Package pkg, String reason) {
-        // Kill the parent package
-        killApplication(pkg.packageName, pkg.applicationInfo.uid, reason);
-        // Kill the child packages
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-        for (int i = 0; i < childCount; i++) {
-            PackageParser.Package childPkg = pkg.childPackages.get(i);
-            killApplication(childPkg.packageName, childPkg.applicationInfo.uid, reason);
-        }
-    }
-
     private void killApplication(String pkgName, int appId, String reason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
-        IActivityManager am = ActivityManagerNative.getDefault();
-        if (am != null) {
-            try {
-                am.killApplicationWithAppId(pkgName, appId, reason);
-            } catch (RemoteException e) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            IActivityManager am = ActivityManagerNative.getDefault();
+            if (am != null) {
+                try {
+                    am.killApplicationWithAppId(pkgName, appId, reason);
+                } catch (RemoteException e) {
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -13330,7 +13364,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.d(TAG, "Cleaning up " + move.packageName + " on " + volumeUuid);
             synchronized (mInstallLock) {
                 // Clean up both app data and code
-                removeDataDirsLI(volumeUuid, move.packageName);
+                // All package moves are frozen until finished
+                removeDataDirsLIF(volumeUuid, move.packageName);
                 removeCodePathLI(codeFile);
             }
             return true;
@@ -13475,7 +13510,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Install a non-existing package.
      */
-    private void installNewPackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
+    private void installNewPackageLIF(PackageParser.Package pkg, int parseFlags, int scanFlags,
             UserHandle user, String installerPackageName, String volumeUuid,
             PackageInstalledInfo res) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installNewPackage");
@@ -13516,7 +13551,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 // Remove package from internal structures, but keep around any
                 // data that might have already existed
-                deletePackageLI(pkgName, UserHandle.ALL, false, null,
+                deletePackageLIF(pkgName, UserHandle.ALL, false, null,
                         PackageManager.DELETE_KEEP_DATA, res.removedInfo, true, null);
             }
         } catch (PackageManagerException e) {
@@ -13562,14 +13597,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
-    private void replacePackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
+    private void replacePackageLIF(PackageParser.Package pkg, int parseFlags, int scanFlags,
             UserHandle user, String installerPackageName, PackageInstalledInfo res) {
         final boolean isEphemeral = (parseFlags & PackageParser.PARSE_IS_EPHEMERAL) != 0;
 
         final PackageParser.Package oldPackage;
         final String pkgName = pkg.packageName;
         final int[] allUsers;
-        final boolean weFroze;
 
         // First find the old package info and check signatures
         synchronized(mPackages) {
@@ -13602,32 +13636,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // In case of rollback, remember per-user/profile install state
             allUsers = sUserManager.getUserIds();
-
-            // Mark the app as frozen to prevent launching during the upgrade
-            // process, and then kill all running instances
-            if (!ps.frozen) {
-                ps.frozen = true;
-                weFroze = true;
-            } else {
-                weFroze = false;
-            }
         }
 
-        try {
-            replacePackageDirtyLI(pkg, oldPackage, parseFlags, scanFlags, user, allUsers,
-                    installerPackageName, res);
-        } finally {
-            // Regardless of success or failure of upgrade steps above, always
-            // unfreeze the package if we froze it
-            if (weFroze) {
-                unfreezePackage(pkgName);
-            }
-        }
-    }
-
-    private void replacePackageDirtyLI(PackageParser.Package pkg, PackageParser.Package oldPackage,
-            int parseFlags, int scanFlags, UserHandle user, int[] allUsers,
-            String installerPackageName, PackageInstalledInfo res) {
         // Update what is removed
         res.removedInfo = new PackageRemovedInfo();
         res.removedInfo.uid = oldPackage.applicationInfo.uid;
@@ -13667,10 +13677,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+            replaceSystemPackageLIF(oldPackage, pkg, parseFlags, scanFlags,
                     user, allUsers, installerPackageName, res);
         } else {
-            replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+            replaceNonSystemPackageLIF(oldPackage, pkg, parseFlags, scanFlags,
                     user, allUsers, installerPackageName, res);
         }
     }
@@ -13684,7 +13694,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return result;
     }
 
-    private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
+    private void replaceNonSystemPackageLIF(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
             int[] allUsers, String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceNonSystemPackageLI: new=" + pkg + ", old="
@@ -13702,7 +13712,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ? ((PackageSetting)pkg.mExtras).lastUpdateTime : 0;
 
         // First delete the existing package while retaining the data directory
-        if (!deletePackageLI(pkgName, null, true, allUsers, deleteFlags,
+        if (!deletePackageLIF(pkgName, null, true, allUsers, deleteFlags,
                 res.removedInfo, true, pkg)) {
             // If the existing package wasn't successfully deleted
             res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE, "replaceNonSystemPackageLI");
@@ -13722,8 +13732,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
             }
 
-            deleteCodeCacheDirsLI(pkg);
-            deleteProfilesLI(pkg, /*destroy*/ false);
+            deleteCodeCacheDirsLIF(pkg);
+            deleteProfilesLIF(pkg, /*destroy*/ false);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
@@ -13762,7 +13772,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Revert all internal state mutations and added folders for the failed install
             if (addedPkg) {
-                deletePackageLI(pkgName, null, true, allUsers, deleteFlags,
+                deletePackageLIF(pkgName, null, true, allUsers, deleteFlags,
                         res.removedInfo, true, null);
             }
 
@@ -13822,7 +13832,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
+    private void replaceSystemPackageLIF(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
             int[] allUsers, String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
@@ -13836,9 +13846,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 != 0) {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
         }
-
-        // Kill package processes including services, providers, etc.
-        killPackage(deletedPackage, "replace sys pkg");
 
         // Remove existing system package
         removePackageLI(deletedPackage, true);
@@ -13857,8 +13864,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Successfully disabled the old package. Now proceed with re-installation
-        deleteCodeCacheDirsLI(pkg);
-        deleteProfilesLI(pkg, /*destroy*/ false);
+        deleteCodeCacheDirsLIF(pkg);
+        deleteProfilesLIF(pkg, /*destroy*/ false);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -13907,7 +13914,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (ps != null && res.removedInfo.removedChildPackages != null) {
                             PackageRemovedInfo removedChildRes = res.removedInfo
                                     .removedChildPackages.get(deletedChildPkg.packageName);
-                            removePackageDataLI(ps, allUsers, removedChildRes, 0, false);
+                            removePackageDataLIF(ps, allUsers, removedChildRes, 0, false);
                             removedChildRes.removedForAllUsers = mPackages.get(ps.name) == null;
                         }
                     }
@@ -14514,12 +14521,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
 
-        if (replace) {
-            replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
-                    installerPackageName, res);
-        } else {
-            installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
-                    args.user, installerPackageName, volumeUuid, res);
+        try (PackageFreezer freezer = freezePackageForInstall(pkgName, installFlags,
+                "installPackageLI")) {
+            if (replace) {
+                replacePackageLIF(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
+                        installerPackageName, res);
+            } else {
+                installNewPackageLIF(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
+                        args.user, installerPackageName, volumeUuid, res);
+            }
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
@@ -14767,13 +14777,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void deletePackage(final String packageName,
-            final IPackageDeleteObserver2 observer, final int userId, final int flags) {
+            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(observer);
         final int uid = Binder.getCallingUid();
-        final boolean deleteAllUsers = (flags & PackageManager.DELETE_ALL_USERS) != 0;
+        final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
         final int[] users = deleteAllUsers ? sUserManager.getUserIds() : new int[]{ userId };
         if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
             mContext.enforceCallingOrSelfPermission(
@@ -14809,15 +14819,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mHandler.removeCallbacks(this);
                 int returnCode;
                 if (!deleteAllUsers) {
-                    returnCode = deletePackageX(packageName, userId, flags);
+                    returnCode = deletePackageX(packageName, userId, deleteFlags);
                 } else {
                     int[] blockUninstallUserIds = getBlockUninstallForUsers(packageName, users);
                     // If nobody is blocking uninstall, proceed with delete for all users
                     if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
-                        returnCode = deletePackageX(packageName, userId, flags);
+                        returnCode = deletePackageX(packageName, userId, deleteFlags);
                     } else {
                         // Otherwise uninstall individually for users with blockUninstalls=false
-                        final int userFlags = flags & ~PackageManager.DELETE_ALL_USERS;
+                        final int userFlags = deleteFlags & ~PackageManager.DELETE_ALL_USERS;
                         for (int userId : users) {
                             if (!ArrayUtils.contains(blockUninstallUserIds, userId)) {
                                 returnCode = deletePackageX(packageName, userId, userFlags);
@@ -14908,11 +14918,11 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  persisting settings for later use
      *  sending a broadcast if necessary
      */
-    private int deletePackageX(String packageName, int userId, int flags) {
+    private int deletePackageX(String packageName, int userId, int deleteFlags) {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
-        final UserHandle removeForUser = (flags & PackageManager.DELETE_ALL_USERS) != 0
+        final UserHandle removeForUser = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0
                 ? UserHandle.ALL : new UserHandle(userId);
 
         if (isPackageDeviceAdmin(packageName, removeForUser.getIdentifier())) {
@@ -14937,8 +14947,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
-            res = deletePackageLI(packageName, removeForUser, true, allUsers,
-                    flags | REMOVE_CHATTY, info, true, null);
+            try (PackageFreezer freezer = freezePackageForDelete(packageName, deleteFlags,
+                    "deletePackageX")) {
+                res = deletePackageLIF(packageName, removeForUser, true, allUsers,
+                        deleteFlags | REMOVE_CHATTY, info, true, null);
+            }
             synchronized (mPackages) {
                 if (res) {
                     mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPs.pkg);
@@ -14947,7 +14960,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (res) {
-            final boolean killApp = (flags & PackageManager.INSTALL_DONT_KILL_APP) == 0;
+            final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp);
             info.sendSystemPackageUpdatedBroadcasts();
             info.sendSystemPackageAppearedBroadcasts();
@@ -15057,7 +15070,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
-    private void removePackageDataLI(PackageSetting ps, int[] allUserHandles,
+    private void removePackageDataLIF(PackageSetting ps, int[] allUserHandles,
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = ps.name;
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + ps);
@@ -15075,7 +15088,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
-            removeDataDirsLI(ps.volumeUuid, packageName);
+            removeDataDirsLIF(ps.volumeUuid, ps.name);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
@@ -15160,7 +15173,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Tries to delete system package.
      */
-    private boolean deleteSystemPackageLI(PackageParser.Package deletedPkg,
+    private boolean deleteSystemPackageLIF(PackageParser.Package deletedPkg,
             PackageSetting deletedPs, int[] allUserHandles, int flags, PackageRemovedInfo outInfo,
             boolean writeSettings) {
         if (deletedPs.parentPackageName != null) {
@@ -15225,7 +15238,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
 
-        boolean ret = deleteInstalledPackageLI(deletedPs, true, flags, allUserHandles,
+        boolean ret = deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles,
                 outInfo, writeSettings, disabledPs.pkg);
         if (!ret) {
             return false;
@@ -15293,7 +15306,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private boolean deleteInstalledPackageLI(PackageSetting ps,
+    private boolean deleteInstalledPackageLIF(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, int[] allUserHandles,
             PackageRemovedInfo outInfo, boolean writeSettings,
             PackageParser.Package replacingPackage) {
@@ -15321,7 +15334,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Delete package data from internal structures and also remove data if flag is set
-        removePackageDataLI(ps, allUserHandles, outInfo, flags, writeSettings);
+        removePackageDataLIF(ps, allUserHandles, outInfo, flags, writeSettings);
 
         // Delete the child packages data
         final int childCount = (ps.childPackageNames != null) ? ps.childPackageNames.size() : 0;
@@ -15338,7 +15351,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && (replacingPackage != null
                         && !replacingPackage.hasChildPackage(childPs.name))
                         ? flags & ~DELETE_KEEP_DATA : flags;
-                removePackageDataLI(childPs, allUserHandles, childOutInfo,
+                removePackageDataLIF(childPs, allUserHandles, childOutInfo,
                         deleteFlags, writeSettings);
             }
         }
@@ -15415,7 +15428,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * This method handles package deletion in general
      */
-    private boolean deletePackageLI(String packageName, UserHandle user,
+    private boolean deletePackageLIF(String packageName, UserHandle user,
             boolean deleteCodeAndResources, int[] allUserHandles, int flags,
             PackageRemovedInfo outInfo, boolean writeSettings,
             PackageParser.Package replacingPackage) {
@@ -15443,7 +15456,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 final int removedUserId = (user != null) ? user.getIdentifier()
                         : UserHandle.USER_ALL;
-                if (!clearPackageStateForUser(ps, removedUserId, outInfo)) {
+                if (!clearPackageStateForUserLIF(ps, removedUserId, outInfo)) {
                     return false;
                 }
                 markPackageUninstalledForUserLPw(ps, user);
@@ -15469,7 +15482,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    if (!clearPackageStateForUser(ps, user.getIdentifier(), outInfo)) {
+                    if (!clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo)) {
                         return false;
                     }
                     scheduleWritePackageRestrictionsLocked(user);
@@ -15486,7 +15499,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // we need to do is clear this user's data and save that
                 // it is uninstalled.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                if (!clearPackageStateForUser(ps, user.getIdentifier(), outInfo)) {
+                if (!clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo)) {
                     return false;
                 }
                 scheduleWritePackageRestrictionsLocked(user);
@@ -15518,15 +15531,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.name);
             // When an updated system application is deleted we delete the existing resources
             // as well and fall back to existing code in system partition
-            ret = deleteSystemPackageLI(ps.pkg, ps, allUserHandles, flags, outInfo, writeSettings);
+            ret = deleteSystemPackageLIF(ps.pkg, ps, allUserHandles, flags, outInfo, writeSettings);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
-            // Kill application pre-emptively especially for apps on sd.
-            final boolean killApp = (flags & PackageManager.DELETE_DONT_KILL_APP) == 0;
-            if (killApp) {
-                killApplication(packageName, ps.appId, "uninstall pkg");
-            }
-            ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, allUserHandles,
+            ret = deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings, replacingPackage);
         }
 
@@ -15594,7 +15602,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private boolean clearPackageStateForUser(PackageSetting ps, int userId,
+    private boolean clearPackageStateForUserLIF(PackageSetting ps, int userId,
             PackageRemovedInfo outInfo) {
         final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
                 : new int[] {userId};
@@ -15705,10 +15713,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void clearApplicationProfileData(String packageName) {
         enforceSystemOrRoot("Only the system can clear all profile data");
-        try {
-            mInstaller.clearAppProfiles(packageName);
-        } catch (InstallerException ex) {
-            Log.e(TAG, "Could not clear profile data of package " + packageName);
+        synchronized (mInstallLock) {
+            try (PackageFreezer freezer = freezePackage(packageName,
+                    "clearApplicationProfileData")) {
+                try {
+                    mInstaller.clearAppProfiles(packageName);
+                } catch (InstallerException ex) {
+                    Log.e(TAG, "Could not clear profile data of package " + packageName);
+                }
+            }
         }
     }
 
@@ -15732,7 +15745,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mHandler.removeCallbacks(this);
                 final boolean succeeded;
                 synchronized (mInstallLock) {
-                    succeeded = clearApplicationUserDataLI(packageName, userId);
+                    try (PackageFreezer freezer = freezePackage(packageName,
+                            "clearApplicationUserData")) {
+                        succeeded = clearApplicationUserDataLIF(packageName, userId);
+                    }
                 }
                 clearExternalStorageDataSync(packageName, userId, true);
                 if (succeeded) {
@@ -15754,7 +15770,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    private boolean clearApplicationUserDataLI(String packageName, int userId) {
+    private boolean clearApplicationUserDataLIF(String packageName, int userId) {
         if (packageName == null) {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
@@ -17446,6 +17462,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_INSTALLS = 1 << 16;
         public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 17;
         public static final int DUMP_DOMAIN_PREFERRED = 1 << 18;
+        public static final int DUMP_FROZEN = 1 << 19;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -17679,6 +17696,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_KEYSETS);
             } else if ("installs".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_INSTALLS);
+            } else if ("frozen".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_FROZEN);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -18017,6 +18036,25 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
             }
 
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
+                // XXX should handle packageName != null by dumping only install data that
+                // the given package is involved with.
+                if (dumpState.onTitlePrinted()) pw.println();
+
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Frozen packages:");
+                ipw.increaseIndent();
+                if (mFrozenPackages.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mFrozenPackages.size(); i++) {
+                        ipw.println(mFrozenPackages.valueAt(i));
+                    }
+                }
+                ipw.decreaseIndent();
+            }
+
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
@@ -18329,7 +18367,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 synchronized (mInstallLock) {
                     PackageParser.Package pkg = null;
                     try {
-                        pkg = scanPackageTracedLI(new File(codePath), parseFlags, 0, 0, null);
+                        // Sadly we don't know the package name yet to freeze it
+                        pkg = scanPackageTracedLI(new File(codePath), parseFlags,
+                                SCAN_IGNORE_FROZEN, 0, null);
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
                     }
@@ -18428,8 +18468,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // Delete package internally
             PackageRemovedInfo outInfo = new PackageRemovedInfo();
             synchronized (mInstallLock) {
-                boolean res = deletePackageLI(pkgName, null, false, null,
-                        PackageManager.DELETE_KEEP_DATA, outInfo, false, null);
+                final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
+                final boolean res;
+                try (PackageFreezer freezer = freezePackageForDelete(pkgName, deleteFlags,
+                        "unloadMediaPackages")) {
+                    res = deletePackageLIF(pkgName, null, false, null, deleteFlags, outInfo, false,
+                            null);
+                }
                 if (res) {
                     pkgList.add(pkgName);
                 } else {
@@ -18484,6 +18529,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return;
         }
 
+        final ArrayList<PackageFreezer> freezers = new ArrayList<>();
         final ArrayList<ApplicationInfo> loaded = new ArrayList<>();
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_EXTERNAL_STORAGE;
 
@@ -18494,9 +18540,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             packages = mSettings.getVolumePackagesLPr(volumeUuid);
         }
 
-        // TODO: introduce a new concept similar to "frozen" to prevent these
-        // apps from being launched until after data has been fully reconciled
         for (PackageSetting ps : packages) {
+            freezers.add(freezePackage(ps.name, "loadPrivatePackagesInner"));
             synchronized (mInstallLock) {
                 final PackageParser.Package pkg;
                 try {
@@ -18508,7 +18553,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
-                    deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
+                    deleteCodeCacheDirsLIF(ps.volumeUuid, ps.name);
                 }
             }
         }
@@ -18545,6 +18590,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             mSettings.writeLPr();
         }
 
+        for (PackageFreezer freezer : freezers) {
+            freezer.close();
+        }
+
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
         sendResourcesChangedBroadcast(true, false, loaded, null);
     }
@@ -18573,12 +18622,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if (ps.pkg == null) continue;
 
                 final ApplicationInfo info = ps.pkg.applicationInfo;
+                final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
                 final PackageRemovedInfo outInfo = new PackageRemovedInfo();
-                if (deletePackageLI(ps.name, null, false, null,
-                        PackageManager.DELETE_KEEP_DATA, outInfo, false, null)) {
-                    unloaded.add(info);
-                } else {
-                    Slog.w(TAG, "Failed to unload " + ps.codePath);
+
+                try (PackageFreezer freezer = freezePackageForDelete(ps.name, deleteFlags,
+                        "unloadPrivatePackagesInner")) {
+                    if (deletePackageLIF(ps.name, null, false, null, deleteFlags, outInfo,
+                            false, null)) {
+                        unloaded.add(info);
+                    } else {
+                        Slog.w(TAG, "Failed to unload " + ps.codePath);
+                    }
                 }
             }
 
@@ -18951,11 +19005,116 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
-    private void unfreezePackage(String packageName) {
+    public PackageFreezer freezePackage(String packageName, String killReason) {
+        return new PackageFreezer(packageName, killReason);
+    }
+
+    public PackageFreezer freezePackageForInstall(String packageName, int installFlags,
+            String killReason) {
+        if ((installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
+            return new PackageFreezer();
+        } else {
+            return freezePackage(packageName, killReason);
+        }
+    }
+
+    public PackageFreezer freezePackageForDelete(String packageName, int deleteFlags,
+            String killReason) {
+        if ((deleteFlags & PackageManager.DELETE_DONT_KILL_APP) != 0) {
+            return new PackageFreezer();
+        } else {
+            return freezePackage(packageName, killReason);
+        }
+    }
+
+    /**
+     * Class that freezes and kills the given package upon creation, and
+     * unfreezes it upon closing. This is typically used when doing surgery on
+     * app code/data to prevent the app from running while you're working.
+     */
+    private class PackageFreezer implements AutoCloseable {
+        private final String mPackageName;
+        private final PackageFreezer[] mChildren;
+
+        private final boolean mWeFroze;
+
+        private final AtomicBoolean mClosed = new AtomicBoolean();
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+
+        /**
+         * Create and return a stub freezer that doesn't actually do anything,
+         * typically used when someone requested
+         * {@link PackageManager#INSTALL_DONT_KILL_APP} or
+         * {@link PackageManager#DELETE_DONT_KILL_APP}.
+         */
+        public PackageFreezer() {
+            mPackageName = null;
+            mChildren = null;
+            mWeFroze = false;
+            mCloseGuard.open("close");
+        }
+
+        public PackageFreezer(String packageName, String killReason) {
+            synchronized (mPackages) {
+                mPackageName = packageName;
+                mWeFroze = mFrozenPackages.add(mPackageName);
+
+                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                if (ps != null) {
+                    killApplication(ps.name, ps.appId, killReason);
+                }
+
+                final PackageParser.Package p = mPackages.get(packageName);
+                if (p != null && p.childPackages != null) {
+                    final int N = p.childPackages.size();
+                    mChildren = new PackageFreezer[N];
+                    for (int i = 0; i < N; i++) {
+                        mChildren[i] = new PackageFreezer(p.childPackages.get(i).packageName,
+                                killReason);
+                    }
+                } else {
+                    mChildren = null;
+                }
+            }
+            mCloseGuard.open("close");
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                mCloseGuard.warnIfOpen();
+                close();
+            } finally {
+                super.finalize();
+            }
+        }
+
+        @Override
+        public void close() {
+            mCloseGuard.close();
+            if (mClosed.compareAndSet(false, true)) {
+                synchronized (mPackages) {
+                    if (mWeFroze) {
+                        mFrozenPackages.remove(mPackageName);
+                    }
+
+                    if (mChildren != null) {
+                        for (PackageFreezer freezer : mChildren) {
+                            freezer.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Verify that given package is currently frozen.
+     */
+    private void checkPackageFrozen(String packageName) {
         synchronized (mPackages) {
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps != null) {
-                ps.frozen = false;
+            if (!mFrozenPackages.contains(packageName)) {
+                Slog.wtf(TAG, "Expected " + packageName + " to be frozen!", new Throwable());
             }
         }
     }
@@ -18995,6 +19154,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final String seinfo;
         final String label;
         final int targetSdkVersion;
+        final PackageFreezer freezer;
 
         // reader
         synchronized (mPackages) {
@@ -19036,11 +19196,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         "Device admin cannot be moved");
             }
 
-            if (ps.frozen) {
+            if (mFrozenPackages.contains(packageName)) {
                 throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
                         "Failed to move already frozen package");
             }
-            ps.frozen = true;
 
             codeFile = new File(pkg.codePath);
             installerPackageName = ps.installerPackageName;
@@ -19049,14 +19208,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             seinfo = pkg.applicationInfo.seinfo;
             label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
             targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
-        }
-
-        // Now that we're guarded by frozen state, kill app during move
-        final long token = Binder.clearCallingIdentity();
-        try {
-            killApplication(packageName, appId, "move pkg");
-        } finally {
-            Binder.restoreCallingIdentity(token);
+            freezer = new PackageFreezer(packageName, "movePackageInternal");
         }
 
         final Bundle extras = new Bundle();
@@ -19080,7 +19232,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             final VolumeInfo volume = storage.findVolumeByUuid(volumeUuid);
             if (volume == null || volume.getType() != VolumeInfo.TYPE_PRIVATE
                     || !volume.isMountedWritable()) {
-                unfreezePackage(packageName);
+                freezer.close();
                 throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                         "Move location not mounted private volume");
             }
@@ -19095,7 +19247,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final PackageStats stats = new PackageStats(null, -1);
         synchronized (mInstaller) {
             if (!getPackageSizeInfoLI(packageName, -1, stats)) {
-                unfreezePackage(packageName);
+                freezer.close();
                 throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                         "Failed to measure package size");
             }
@@ -19113,7 +19265,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         if (sizeBytes > storage.getStorageBytesUntilLow(measurePath)) {
-            unfreezePackage(packageName);
+            freezer.close();
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Not enough free space to move");
         }
@@ -19134,10 +19286,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         + PackageManager.installStatusToString(returnCode, msg));
 
                 installedLatch.countDown();
-
-                // Regardless of success or failure of the move operation,
-                // always unfreeze the package
-                unfreezePackage(packageName);
+                freezer.close();
 
                 final int status = PackageManager.installStatusToPublicStatus(returnCode);
                 switch (status) {
