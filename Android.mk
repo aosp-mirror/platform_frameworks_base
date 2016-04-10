@@ -1041,17 +1041,20 @@ LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
 LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
 LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 # specify a second html input dir and an output path relative to OUT_DIR)
-LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl/intl /
+LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl /
 
 LOCAL_MODULE := ds
 
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-devsite \
+		-hdf devsite true \
 		-toroot / \
 		-hdf android.whichdoc online \
+		$(sample_groups) \
 		-useUpdatedTemplates \
-		-hdf devsite true
+		-hdf android.hasSamples true \
+		-samplesdir $(samples_dir)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
 
