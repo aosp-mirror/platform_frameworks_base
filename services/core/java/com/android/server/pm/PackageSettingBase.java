@@ -114,12 +114,6 @@ abstract class PackageSettingBase extends SettingBase {
     int installStatus = PKG_INSTALL_COMPLETE;
 
     /**
-     * Non-persisted value indicating this package has been temporarily frozen,
-     * usually during a critical section of the package update pipeline. The
-     * platform will refuse to launch packages in a frozen state.
-     */
-    boolean frozen = false;
-    /**
      * Non-persisted value. During an "upgrade without restart", we need the set
      * of all previous code paths so we can surgically add the new APKs to the
      * active classloader. If at any point an application is upgraded with a
