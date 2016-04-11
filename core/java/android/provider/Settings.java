@@ -6666,6 +6666,17 @@ public final class Settings {
        public static final String DEVICE_PROVISIONED = "device_provisioned";
 
        /**
+        * Whether mobile data should be allowed while the device is being provisioned.
+        * This allows the provisioning process to turn off mobile data before the user
+        * has an opportunity to set things up, preventing other processes from burning
+        * precious bytes before wifi is setup.
+        * (0 = false, 1 = true)
+        * @hide
+        */
+       public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED =
+               "device_provisioning_mobile_data";
+
+       /**
         * The saved value for WindowManagerService.setForcedDisplaySize().
         * Two integers separated by a comma.  If unset, then use the real display size.
         * @hide
