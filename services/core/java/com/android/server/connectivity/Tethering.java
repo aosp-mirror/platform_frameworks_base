@@ -57,12 +57,16 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.IState;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.MessageUtils;
+import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.IoThread;
@@ -94,6 +98,12 @@ public class Tethering extends BaseNetworkObserver {
     private final static String TAG = "Tethering";
     private final static boolean DBG = false;
     private final static boolean VDBG = false;
+
+    private static final Class[] messageClasses = {
+            Tethering.class, TetherMasterSM.class, TetherInterfaceSM.class
+    };
+    private static final SparseArray<String> sMagicDecoderRing =
+            MessageUtils.findMessageNames(messageClasses);
 
     // TODO - remove both of these - should be part of interface inspection/selection stuff
     private String[] mTetherableUsbRegexs;
@@ -235,6 +245,8 @@ public class Tethering extends BaseNetworkObserver {
 
     @Override
     public void interfaceStatusChanged(String iface, boolean up) {
+        // Never called directly: only called from interfaceLinkStateChanged.
+        // See NetlinkHandler.cpp:71.
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         boolean found = false;
         boolean usb = false;
@@ -274,7 +286,6 @@ public class Tethering extends BaseNetworkObserver {
 
     @Override
     public void interfaceLinkStateChanged(String iface, boolean up) {
-        if (VDBG) Log.d(TAG, "interfaceLinkStateChanged " + iface + ", " + up);
         interfaceStatusChanged(iface, up);
     }
 
@@ -660,8 +671,11 @@ public class Tethering extends BaseNetworkObserver {
                 erroredList);
         mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
         if (DBG) {
-            Log.d(TAG, "sendTetherStateChangedBroadcast " + availableList.size() + ", " +
-                    activeList.size() + ", " + erroredList.size());
+            Log.d(TAG, String.format(
+                    "sendTetherStateChangedBroadcast avail=[%s] active=[%s] error=[%s]",
+                    TextUtils.join(",", availableList),
+                    TextUtils.join(",", activeList),
+                    TextUtils.join(",", erroredList)));
         }
 
         if (usbTethered) {
@@ -989,31 +1003,39 @@ public class Tethering extends BaseNetworkObserver {
         return retVal;
     }
 
+    private void maybeLogMessage(State state, int what) {
+        if (DBG) {
+            Log.d(TAG, state.getName() + " got " +
+                    sMagicDecoderRing.get(what, Integer.toString(what)));
+        }
+    }
+
     class TetherInterfaceSM extends StateMachine {
+        private static final int BASE_IFACE              = Protocol.BASE_TETHERING + 100;
         // notification from the master SM that it's not in tether mode
-        static final int CMD_TETHER_MODE_DEAD            =  1;
+        static final int CMD_TETHER_MODE_DEAD            = BASE_IFACE + 1;
         // request from the user that it wants to tether
-        static final int CMD_TETHER_REQUESTED            =  2;
+        static final int CMD_TETHER_REQUESTED            = BASE_IFACE + 2;
         // request from the user that it wants to untether
-        static final int CMD_TETHER_UNREQUESTED          =  3;
+        static final int CMD_TETHER_UNREQUESTED          = BASE_IFACE + 3;
         // notification that this interface is down
-        static final int CMD_INTERFACE_DOWN              =  4;
+        static final int CMD_INTERFACE_DOWN              = BASE_IFACE + 4;
         // notification that this interface is up
-        static final int CMD_INTERFACE_UP                =  5;
+        static final int CMD_INTERFACE_UP                = BASE_IFACE + 5;
         // notification from the master SM that it had an error turning on cellular dun
-        static final int CMD_CELL_DUN_ERROR              =  6;
+        static final int CMD_CELL_DUN_ERROR              = BASE_IFACE + 6;
         // notification from the master SM that it had trouble enabling IP Forwarding
-        static final int CMD_IP_FORWARDING_ENABLE_ERROR  =  7;
+        static final int CMD_IP_FORWARDING_ENABLE_ERROR  = BASE_IFACE + 7;
         // notification from the master SM that it had trouble disabling IP Forwarding
-        static final int CMD_IP_FORWARDING_DISABLE_ERROR =  8;
+        static final int CMD_IP_FORWARDING_DISABLE_ERROR = BASE_IFACE + 8;
         // notification from the master SM that it had trouble starting tethering
-        static final int CMD_START_TETHERING_ERROR       =  9;
+        static final int CMD_START_TETHERING_ERROR       = BASE_IFACE + 9;
         // notification from the master SM that it had trouble stopping tethering
-        static final int CMD_STOP_TETHERING_ERROR        = 10;
+        static final int CMD_STOP_TETHERING_ERROR        = BASE_IFACE + 10;
         // notification from the master SM that it had trouble setting the DNS forwarders
-        static final int CMD_SET_DNS_FORWARDERS_ERROR    = 11;
+        static final int CMD_SET_DNS_FORWARDERS_ERROR    = BASE_IFACE + 11;
         // the upstream connection has changed
-        static final int CMD_TETHER_CONNECTION_CHANGED   = 12;
+        static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IFACE + 12;
 
         private State mDefaultState;
 
@@ -1124,7 +1146,7 @@ public class Tethering extends BaseNetworkObserver {
 
             @Override
             public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, "InitialState.processMessage what=" + message.what);
+                maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_REQUESTED:
@@ -1165,7 +1187,7 @@ public class Tethering extends BaseNetworkObserver {
             }
             @Override
             public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, "StartingState.processMessage what=" + message.what);
+                maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
                     // maybe a parent class?
@@ -1255,7 +1277,7 @@ public class Tethering extends BaseNetworkObserver {
 
             @Override
             public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, "TetheredState.processMessage what=" + message.what);
+                maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 boolean error = false;
                 switch (message.what) {
@@ -1480,18 +1502,19 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     class TetherMasterSM extends StateMachine {
+        private static final int BASE_MASTER                    = Protocol.BASE_TETHERING;
         // an interface SM has requested Tethering
-        static final int CMD_TETHER_MODE_REQUESTED              = 1;
+        static final int CMD_TETHER_MODE_REQUESTED              = BASE_MASTER + 1;
         // an interface SM has unrequested Tethering
-        static final int CMD_TETHER_MODE_UNREQUESTED            = 2;
+        static final int CMD_TETHER_MODE_UNREQUESTED            = BASE_MASTER + 2;
         // upstream connection change - do the right thing
-        static final int CMD_UPSTREAM_CHANGED                   = 3;
+        static final int CMD_UPSTREAM_CHANGED                   = BASE_MASTER + 3;
         // we don't have a valid upstream conn, check again after a delay
-        static final int CMD_RETRY_UPSTREAM                     = 4;
+        static final int CMD_RETRY_UPSTREAM                     = BASE_MASTER + 4;
         // Events from NetworkCallbacks that we process on the master state
         // machine thread on behalf of the UpstreamNetworkMonitor.
-        static final int EVENT_UPSTREAM_LINKPROPERTIES_CHANGED  = 5;
-        static final int EVENT_UPSTREAM_LOST                    = 6;
+        static final int EVENT_UPSTREAM_LINKPROPERTIES_CHANGED  = BASE_MASTER + 5;
+        static final int EVENT_UPSTREAM_LOST                    = BASE_MASTER + 6;
 
         // This indicates what a timeout event relates to.  A state that
         // sends itself a delayed timeout event and handles incoming timeout events
@@ -1748,7 +1771,7 @@ public class Tethering extends BaseNetworkObserver {
             }
 
             protected void notifyTetheredOfNewUpstreamIface(String ifaceName) {
-                if (DBG) Log.d(TAG, "notifying tethered with iface =" + ifaceName);
+                if (DBG) Log.d(TAG, "Notifying tethered with upstream=" + ifaceName);
                 mCurrentUpstreamIface = ifaceName;
                 for (TetherInterfaceSM sm : mNotifyList) {
                     sm.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
@@ -1862,7 +1885,7 @@ public class Tethering extends BaseNetworkObserver {
             }
             @Override
             public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, "MasterInitialState.processMessage what=" + message.what);
+                maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
@@ -1910,7 +1933,7 @@ public class Tethering extends BaseNetworkObserver {
             }
             @Override
             public boolean processMessage(Message message) {
-                if (DBG) Log.d(TAG, "TetherModeAliveState.processMessage what=" + message.what);
+                maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
