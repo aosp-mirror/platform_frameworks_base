@@ -35,13 +35,14 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 TessellationCache::Description::Description()
-        : type(kNone)
+        : type(Type::None)
         , scaleX(1.0f)
         , scaleY(1.0f)
         , aa(false)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
         , strokeWidth(1.0f) {
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -52,11 +53,30 @@ TessellationCache::Description::Description(Type type, const Matrix4& transform,
         , style(paint.getStyle())
         , strokeWidth(paint.getStrokeWidth()) {
     PathTessellator::extractTessellationScales(transform, &scaleX, &scaleY);
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
+bool TessellationCache::Description::operator==(const TessellationCache::Description& rhs) const {
+    if (type != rhs.type) return false;
+    if (scaleX != rhs.scaleX) return false;
+    if (scaleY != rhs.scaleY) return false;
+    if (aa != rhs.aa) return false;
+    if (cap != rhs.cap) return false;
+    if (style != rhs.style) return false;
+    if (strokeWidth != rhs.strokeWidth) return false;
+    if (type == Type::None) return true;
+    const Shape::RoundRect& lRect = shape.roundRect;
+    const Shape::RoundRect& rRect = rhs.shape.roundRect;
+
+    if (lRect.width != rRect.width) return false;
+    if (lRect.height != rRect.height) return false;
+    if (lRect.rx != rRect.rx) return false;
+    return lRect.ry == rRect.ry;
+}
+
 hash_t TessellationCache::Description::hash() const {
-    uint32_t hash = JenkinsHashMix(0, type);
+    uint32_t hash = JenkinsHashMix(0, static_cast<int>(type));
     hash = JenkinsHashMix(hash, aa);
     hash = JenkinsHashMix(hash, cap);
     hash = JenkinsHashMix(hash, style);
@@ -77,17 +97,23 @@ void TessellationCache::Description::setupMatrixAndPaint(Matrix4* matrix, SkPain
 
 TessellationCache::ShadowDescription::ShadowDescription()
         : nodeKey(nullptr) {
-    memset(&matrixData, 0, 16 * sizeof(float));
+    memset(&matrixData, 0, sizeof(matrixData));
 }
 
-TessellationCache::ShadowDescription::ShadowDescription(const void* nodeKey, const Matrix4* drawTransform)
+TessellationCache::ShadowDescription::ShadowDescription(const SkPath* nodeKey, const Matrix4* drawTransform)
         : nodeKey(nodeKey) {
-    memcpy(&matrixData, drawTransform->data, 16 * sizeof(float));
+    memcpy(&matrixData, drawTransform->data, sizeof(matrixData));
+}
+
+bool TessellationCache::ShadowDescription::operator==(
+        const TessellationCache::ShadowDescription& rhs) const {
+    return nodeKey == rhs.nodeKey
+            && memcmp(&matrixData, &rhs.matrixData, sizeof(matrixData)) == 0;
 }
 
 hash_t TessellationCache::ShadowDescription::hash() const {
     uint32_t hash = JenkinsHashMixBytes(0, (uint8_t*) &nodeKey, sizeof(const void*));
-    hash = JenkinsHashMixBytes(hash, (uint8_t*) &matrixData, 16 * sizeof(float));
+    hash = JenkinsHashMixBytes(hash, (uint8_t*) &matrixData, sizeof(matrixData));
     return JenkinsHashWhiten(hash);
 }
 
@@ -428,7 +454,7 @@ static VertexBuffer* tessellateRoundRect(const TessellationCache::Description& d
 TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(
         const Matrix4& transform, const SkPaint& paint,
         float width, float height, float rx, float ry) {
-    Description entry(Description::kRoundRect, transform, paint);
+    Description entry(Description::Type::RoundRect, transform, paint);
     entry.shape.roundRect.width = width;
     entry.shape.roundRect.height = height;
     entry.shape.roundRect.rx = rx;
