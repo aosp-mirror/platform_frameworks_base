@@ -363,6 +363,41 @@ class Mapper {
     }
 
     /**
+     * Cancels adding documents.
+     * @param parentId
+     */
+    void cancelAddingDocuments(@Nullable String parentId) {
+        final String selection;
+        final String[] args;
+        if (parentId != null) {
+            selection = COLUMN_PARENT_DOCUMENT_ID + " = ?";
+            args = strings(parentId);
+        } else {
+            selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
+            args = EMPTY_ARGS;
+        }
+
+        final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
+        database.beginTransaction();
+        try {
+            if (!mInMappingIds.contains(parentId)) {
+                return;
+            }
+            mInMappingIds.remove(parentId);
+            final ContentValues values = new ContentValues();
+            values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
+            mDatabase.getSQLiteDatabase().update(
+                    TABLE_DOCUMENTS,
+                    values,
+                    selection + " AND " + COLUMN_ROW_STATE + " = ?",
+                    DatabaseUtils.appendSelectionArgs(args, strings(ROW_STATE_INVALIDATED)));
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
+
+    /**
      * Queries candidate for each mappingKey, and returns the first cursor that includes a
      * candidate.
      *

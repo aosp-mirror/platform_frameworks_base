@@ -33,7 +33,6 @@ import com.android.internal.util.Preconditions;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -118,9 +117,10 @@ class DocumentLoader implements AutoCloseable {
     synchronized @Nullable LoaderTask getNextTaskOrReleaseBackgroundThread() {
         Preconditions.checkState(mBackgroundThread != null);
 
-        final LoaderTask task = mTaskList.findRunningTask();
-        if (task != null) {
-            return task;
+        for (final LoaderTask task : mTaskList) {
+            if (task.getState() == LoaderTask.STATE_LOADING) {
+                return task;
+            }
         }
 
         final Identifier identifier = mDatabase.getUnmappedDocumentsParent(mDevice.deviceId);
@@ -161,8 +161,21 @@ class DocumentLoader implements AutoCloseable {
         mTaskList.clearCompletedTasks();
     }
 
-    synchronized void clearTask(Identifier parentIdentifier) {
-        mTaskList.clearTask(parentIdentifier);
+    /**
+     * Cancels the task for |parentIdentifier|.
+     *
+     * Task is removed from the cached list and it will create new task when |parentIdentifier|'s
+     * children are queried next.
+     */
+    void cancelTask(Identifier parentIdentifier) {
+        final LoaderTask task;
+        synchronized (this) {
+            task = mTaskList.findTask(parentIdentifier);
+        }
+        if (task != null) {
+            task.cancel();
+            mTaskList.remove(task);
+        }
     }
 
     /**
@@ -205,14 +218,6 @@ class DocumentLoader implements AutoCloseable {
             return null;
         }
 
-        LoaderTask findRunningTask() {
-            for (int i = 0; i < size(); i++) {
-                if (get(i).getState() == LoaderTask.STATE_LOADING)
-                    return get(i);
-            }
-            return null;
-        }
-
         void clearCompletedTasks() {
             int i = 0;
             while (i < size()) {
@@ -220,17 +225,6 @@ class DocumentLoader implements AutoCloseable {
                     remove(i);
                 } else {
                     i++;
-                }
-            }
-        }
-
-        void clearTask(Identifier parentIdentifier) {
-            for (int i = 0; i < size(); i++) {
-                final LoaderTask task = get(i);
-                if (task.mIdentifier.mDeviceId == parentIdentifier.mDeviceId &&
-                        task.mIdentifier.mObjectHandle == parentIdentifier.mObjectHandle) {
-                    remove(i);
-                    return;
                 }
             }
         }
@@ -245,6 +239,7 @@ class DocumentLoader implements AutoCloseable {
         static final int STATE_LOADING = 1;
         static final int STATE_COMPLETED = 2;
         static final int STATE_ERROR = 3;
+        static final int STATE_CANCELLED = 4;
 
         final MtpManager mManager;
         final MtpDatabase mDatabase;
@@ -272,6 +267,7 @@ class DocumentLoader implements AutoCloseable {
 
         synchronized void loadObjectHandles() {
             assert mState == STATE_START;
+            mPosition = 0;
             int parentHandle = mIdentifier.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
             // getObjectHandles if we would like to obtain children under the root.
@@ -303,12 +299,10 @@ class DocumentLoader implements AutoCloseable {
                 case STATE_ERROR:
                     throw mError;
             }
-
             final Cursor cursor =
                     mDatabase.queryChildDocuments(columnNames, mIdentifier.mDocumentId);
+            cursor.setExtras(extras);
             cursor.setNotificationUri(resolver, createUri());
-            cursor.respond(extras);
-
             return cursor;
         }
 
@@ -374,6 +368,10 @@ class DocumentLoader implements AutoCloseable {
                 }
             }
             synchronized (this) {
+                // Check if the task is cancelled or not.
+                if (mState != STATE_LOADING) {
+                    return;
+                }
                 try {
                     mDatabase.getMapper().putChildDocuments(
                             mIdentifier.mDeviceId,
@@ -400,6 +398,14 @@ class DocumentLoader implements AutoCloseable {
                     }
                 }
             }
+        }
+
+        /**
+         * Cancels the task.
+         */
+        synchronized void cancel() {
+            mDatabase.getMapper().cancelAddingDocuments(mIdentifier.mDocumentId);
+            mState = STATE_CANCELLED;
         }
 
         /**
