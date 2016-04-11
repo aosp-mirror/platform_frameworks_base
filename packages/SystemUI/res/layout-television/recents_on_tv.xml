@@ -35,9 +35,9 @@
     <!-- Placeholder view to give focus to the PIP menus. -->
     <View
         android:id="@+id/pip"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:focusable="true"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </com.android.systemui.recents.tv.views.RecentsTvView>

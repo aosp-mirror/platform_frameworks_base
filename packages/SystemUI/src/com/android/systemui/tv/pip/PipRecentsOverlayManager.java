@@ -150,9 +150,13 @@ public class PipRecentsOverlayManager {
      * is focused.
      * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
      */
-    private void clearFocus() {
+    public void clearFocus() {
         if (!mIsRecentsShown || !mIsPipFocusedInRecent) {
             return;
+        }
+        if (!mRecentsView.hasFocus()) {
+            // Let mRecentsView's focus listener handle clearFocus().
+            mRecentsView.requestFocus();
         }
         mIsPipFocusedInRecent = false;
         mPipManager.resizePinnedStack(STATE_PIP_RECENTS);
