@@ -13648,6 +13648,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            // Check for shared user id changes
+            String invalidPackageName =
+                    getParentOrChildPackageChangedSharedUser(oldPackage, pkg);
+            if (invalidPackageName != null) {
+                res.setError(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                        "Package " + invalidPackageName + " tried to change user "
+                                + oldPackage.mSharedUserId);
+                return;
+            }
+
             // In case of rollback, remember per-user/profile install state
             allUsers = sUserManager.getUserIds();
         }
@@ -13896,15 +13906,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageSetting deletedPkgSetting = (PackageSetting) deletedPackage.mExtras;
             setInstallAndUpdateTime(newPackage, deletedPkgSetting.firstInstallTime,
                     System.currentTimeMillis());
-
-            // Check for shared user id changes
-            String invalidPackageName = getParentOrChildPackageChangedSharedUser(
-                    deletedPackage, newPackage);
-            if (invalidPackageName != null) {
-                res.setError(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
-                        "Forbidding shared user change from " + deletedPkgSetting.sharedUser
-                                + " to " + invalidPackageName);
-            }
 
             // Update the package dynamic state if succeeded
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
