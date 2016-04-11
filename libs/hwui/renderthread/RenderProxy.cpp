@@ -167,18 +167,6 @@ bool RenderProxy::pauseSurface(const sp<Surface>& surface) {
     return (bool) postAndWait(task);
 }
 
-CREATE_BRIDGE2(setStopped, CanvasContext* context, bool stopped) {
-    args->context->setStopped(args->stopped);
-    return nullptr;
-}
-
-void RenderProxy::setStopped(bool stopped) {
-    SETUP_TASK(setStopped);
-    args->context = mContext;
-    args->stopped = stopped;
-    postAndWait(task);
-}
-
 CREATE_BRIDGE6(setup, CanvasContext* context, int width, int height,
         float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     args->context->setup(args->width, args->height, args->lightRadius,
