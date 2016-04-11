@@ -17,14 +17,9 @@
 
 package com.android.internal.widget;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -90,10 +85,6 @@ public class ResolverDrawerLayout extends ViewGroup {
     private final float mMinFlingVelocity;
     private final OverScroller mScroller;
     private final VelocityTracker mVelocityTracker;
-    private final Drawable mScrollIndicatorDrawable;
-    private final Drawable mFakeForeground;
-
-    private View mButtonBar;
 
     private OnDismissedListener mOnDismissedListener;
     private RunOnDismissedListener mRunOnDismissedListener;
@@ -114,8 +105,6 @@ public class ResolverDrawerLayout extends ViewGroup {
                     }
                 }
             };
-
-    private final int[] mTempOffset = new int[2];
 
     public ResolverDrawerLayout(Context context) {
         this(context, null);
@@ -138,9 +127,6 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mMaxCollapsedHeight);
         a.recycle();
 
-        mScrollIndicatorDrawable = mContext.getDrawable(R.drawable.scroll_indicator_material);
-        mFakeForeground = new ColorDrawable(Color.TRANSPARENT);
-
         mScroller = new OverScroller(context, AnimationUtils.loadInterpolator(context,
                 android.R.interpolator.decelerate_quint));
         mVelocityTracker = VelocityTracker.obtain();
@@ -150,13 +136,6 @@ public class ResolverDrawerLayout extends ViewGroup {
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
 
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
-        mButtonBar = findViewById(R.id.button_bar);
     }
 
     public void setSmallCollapsed(boolean smallCollapsed) {
@@ -223,7 +202,8 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
             final boolean isCollapsedNew = mCollapseOffset != 0;
             if (isCollapsedOld != isCollapsedNew) {
-                onCollapsedChanged(isCollapsedNew);
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         } else {
             // Start out collapsed at first unless we restored state for otherwise
@@ -462,20 +442,13 @@ public class ResolverDrawerLayout extends ViewGroup {
             mTopOffset += dy;
             final boolean isCollapsedNew = newPos != 0;
             if (isCollapsedOld != isCollapsedNew) {
-                onCollapsedChanged(isCollapsedNew);
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
             postInvalidateOnAnimation();
             return dy;
         }
         return 0;
-    }
-
-    private void onCollapsedChanged(boolean isCollapsed) {
-        notifyViewAccessibilityStateChangedIfNeeded(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
-
-        // Set a fake foreground so that we receive onDrawForeground().
-        setForeground(isCollapsed ? mFakeForeground : null);
     }
 
     void dispatchOnDismissed() {
@@ -733,23 +706,6 @@ public class ResolverDrawerLayout extends ViewGroup {
         }
 
         return false;
-    }
-
-    @Override
-    public void onDrawForeground(Canvas canvas) {
-        if (isCollapsed() && mButtonBar != null) {
-            // Draw the scroll indicator directly above the button bar.
-            final int height = mScrollIndicatorDrawable.getIntrinsicHeight();
-            mButtonBar.getLocationInWindow(mTempOffset);
-            final int barTop = mTempOffset[1];
-            getLocationInWindow(mTempOffset);
-            final int myTop = mTempOffset[1];
-            final int top = (barTop - myTop) - height;
-            mScrollIndicatorDrawable.setBounds(0, top, getWidth(), top + height);
-            mScrollIndicatorDrawable.draw(canvas);
-        }
-
-        super.onDrawForeground(canvas);
     }
 
     @Override
