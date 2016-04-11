@@ -833,6 +833,15 @@ public class DirectoryFragment extends Fragment
                 getActivity(),
                 DocumentsActivity.class);
 
+
+        // Relay any config overrides bits present in the original intent.
+        Intent original = getActivity().getIntent();
+        if (original != null && original.hasExtra(Shared.EXTRA_PRODUCTIVITY_MODE)) {
+            intent.putExtra(
+                    Shared.EXTRA_PRODUCTIVITY_MODE,
+                    original.getBooleanExtra(Shared.EXTRA_PRODUCTIVITY_MODE, false));
+        }
+
         // Set an appropriate title on the drawer when it is shown in the picker.
         // Coupled with the fact that we auto-open the drawer for copy/move operations
         // it should basically be the thing people see first.
