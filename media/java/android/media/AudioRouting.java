@@ -57,7 +57,7 @@ public interface AudioRouting {
      * the callback. If <code>null</code>, the {@link Handler} associated with the main
      * {@link Looper} will be used.
      */
-    public void addOnRoutingListener(OnRoutingChangedListener listener,
+    public void addOnRoutingChangedListener(OnRoutingChangedListener listener,
             Handler handler);
 
     /**
@@ -66,7 +66,7 @@ public interface AudioRouting {
      * @param listener The previously added {@link AudioRouting.OnRoutingChangedListener} interface
      * to remove.
      */
-    public void removeOnRoutingListener(OnRoutingChangedListener listener);
+    public void removeOnRoutingChangedListener(OnRoutingChangedListener listener);
 
     /**
      * Defines the interface by which applications can receive notifications of routing
