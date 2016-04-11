@@ -7147,6 +7147,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
+    // if the package can now be considered up to date for the given filter.
     private boolean performDexOptInternal(String packageName, String instructionSet,
                 boolean checkProfiles, String targetCompilerFilter, boolean force) {
         PackageParser.Package p;
@@ -7167,7 +7169,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = performDexOptInternalWithDependenciesLI(p, instructionSets,
                         checkProfiles, targetCompilerFilter, force);
-                return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
+                return result != PackageDexOptimizer.DEX_OPT_FAILED;
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);

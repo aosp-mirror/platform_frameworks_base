@@ -53,7 +53,6 @@ class PackageDexOptimizer {
     // TODO b/19550105 Remove error codes and use exceptions
     static final int DEX_OPT_SKIPPED = 0;
     static final int DEX_OPT_PERFORMED = 1;
-    static final int DEX_OPT_DEFERRED = 2;
     static final int DEX_OPT_FAILED = -1;
 
     private final Installer mInstaller;
@@ -170,6 +169,8 @@ class PackageDexOptimizer {
         final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
         boolean performedDexOpt = false;
+        boolean successfulDexOpt = true;
+
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
             for (String path : paths) {
@@ -226,15 +227,20 @@ class PackageDexOptimizer {
                     performedDexOpt = true;
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
+                    successfulDexOpt = false;
                 }
             }
         }
 
-        // If we've gotten here, we're sure that no error occurred and that we haven't
-        // deferred dex-opt. We've either dex-opted one more paths or instruction sets or
-        // we've skipped all of them because they are up to date. In both cases this
-        // package doesn't need dexopt any longer.
-        return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
+        if (successfulDexOpt) {
+            // If we've gotten here, we're sure that no error occurred. We've either
+            // dex-opted one or more paths or instruction sets or we've skipped
+            // all of them because they are up to date. In both cases this package
+            // doesn't need dexopt any longer.
+            return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
+        } else {
+            return DEX_OPT_FAILED;
+        }
     }
 
     /**
