@@ -69,6 +69,12 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             return;
         }
 
+        if (!mService.isUserRunning(mUserId, 0)) {
+            Slog.i(TAG, "User " + mUserId + " is no longer running; skipping remaining receivers");
+            onFinished();
+            return;
+        }
+
         final ResolveInfo ri = mTargets.get(mIndex++);
         final ComponentName componentName = ri.activityInfo.getComponentName();
 
