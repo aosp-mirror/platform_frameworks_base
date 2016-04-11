@@ -18,6 +18,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -153,7 +154,11 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     private String mBitmapPath;
 
+    private final int mUserId;
+
     private ShortcutInfo(Builder b) {
+        mUserId = b.mContext.getUserId();
+
         mId = Preconditions.checkStringNotEmpty(b.mId, "Shortcut ID must be provided");
 
         // Note we can't do other null checks here because SM.updateShortcuts() takes partial
@@ -191,6 +196,7 @@ public final class ShortcutInfo implements Parcelable {
      * Copy constructor.
      */
     private ShortcutInfo(ShortcutInfo source, @CloneFlags int cloneFlags) {
+        mUserId = source.mUserId;
         mId = source.mId;
         mPackageName = source.mPackageName;
         mFlags = source.mFlags;
@@ -238,6 +244,7 @@ public final class ShortcutInfo implements Parcelable {
      * @hide
      */
     public void copyNonNullFieldsFrom(ShortcutInfo source) {
+        Preconditions.checkState(mUserId == source.mUserId, "Owner User ID must match");
         Preconditions.checkState(mId.equals(source.mId), "ID must match");
         Preconditions.checkState(mPackageName.equals(source.mPackageName),
                 "Package name must match");
@@ -362,8 +369,8 @@ public final class ShortcutInfo implements Parcelable {
          *
          * <p>For performance reasons, icons will <b>NOT</b> be available on instances
          * returned by {@link ShortcutManager} or {@link LauncherApps}.  Launcher applications
-         * need to use {@link LauncherApps#getShortcutIconFd(ShortcutInfo, UserHandle)}
-         * and {@link LauncherApps#getShortcutIconResId(ShortcutInfo, UserHandle)}.
+         * need to use {@link LauncherApps#getShortcutIconFd(ShortcutInfo)}
+         * and {@link LauncherApps#getShortcutIconResId(ShortcutInfo)}.
          */
         @NonNull
         public Builder setIcon(Icon icon) {
@@ -544,6 +551,18 @@ public final class ShortcutInfo implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public int getUserId() {
+        return mUserId;
+    }
+
+    /**
+     * {@link UserHandle} on which the publisher created shortcuts.
+     */
+    public UserHandle getUserHandle() {
+        return UserHandle.of(mUserId);
+    }
+
     /**
      * Last time when any of the fields was updated.
      */
@@ -590,7 +609,7 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return whether a shortcut's icon is a resource in the owning package.
      *
-     * @see LauncherApps#getShortcutIconResId(ShortcutInfo, UserHandle)
+     * @see LauncherApps#getShortcutIconResId(ShortcutInfo)
      */
     public boolean hasIconResource() {
         return hasFlags(FLAG_HAS_ICON_RES);
@@ -599,7 +618,7 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return whether a shortcut's icon is stored as a file.
      *
-     * @see LauncherApps#getShortcutIconFd(ShortcutInfo, UserHandle)
+     * @see LauncherApps#getShortcutIconFd(ShortcutInfo)
      */
     public boolean hasIconFile() {
         return hasFlags(FLAG_HAS_ICON_FILE);
@@ -661,6 +680,7 @@ public final class ShortcutInfo implements Parcelable {
     private ShortcutInfo(Parcel source) {
         final ClassLoader cl = getClass().getClassLoader();
 
+        mUserId = source.readInt();
         mId = source.readString();
         mPackageName = source.readString();
         mActivityComponent = source.readParcelable(cl);
@@ -679,6 +699,7 @@ public final class ShortcutInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mUserId);
         dest.writeString(mId);
         dest.writeString(mPackageName);
         dest.writeParcelable(mActivityComponent, flags);
@@ -784,11 +805,13 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /** @hide */
-    public ShortcutInfo(String id, String packageName, ComponentName activityComponent,
+    public ShortcutInfo(
+            @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
             Icon icon, String title, String text, Intent intent,
             PersistableBundle intentPersistableExtras,
             int weight, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
+        mUserId = userId;
         mId = id;
         mPackageName = packageName;
         mActivityComponent = activityComponent;
