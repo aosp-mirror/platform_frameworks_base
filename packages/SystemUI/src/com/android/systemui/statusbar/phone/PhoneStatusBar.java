@@ -3470,7 +3470,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             @Override
             public void run() {
                 mLeaveOpenOnKeyguardHide = true;
-                executeRunnableDismissingKeyguard(runnable, null, false, true);
+                executeRunnableDismissingKeyguard(runnable, null, false, false);
             }
         });
     }
