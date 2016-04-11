@@ -308,7 +308,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final Identifier parentIdentifier = mDatabase.getParentIdentifier(documentId);
             mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
             mDatabase.deleteDocument(documentId);
-            getDocumentLoader(parentIdentifier).clearTask(parentIdentifier);
+            getDocumentLoader(parentIdentifier).cancelTask(parentIdentifier);
             notifyChildDocumentsChange(parentIdentifier.mDocumentId);
             if (parentIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
                 // If the parent is storage, the object might be appeared as child of device because
@@ -402,7 +402,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final String documentId = mDatabase.putNewDocument(
                     parentId.mDeviceId, parentDocumentId, record.operationsSupported,
                     infoWithHandle, 0l);
-            getDocumentLoader(parentId).clearTask(parentId);
+            getDocumentLoader(parentId).cancelTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;
         } catch (FileNotFoundException | RuntimeException error) {
