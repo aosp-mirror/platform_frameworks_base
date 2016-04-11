@@ -2459,10 +2459,12 @@ public class NotificationManagerService extends SystemService {
 
         // Fix the notification as best we can.
         try {
-            Notification.addFieldsFromContext(getContext().createApplicationContext(
-                    getContext().getPackageManager().getApplicationInfoAsUser(
-                            pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId),
-                    Context.CONTEXT_RESTRICTED), notification);
+            if (!"android".equals(pkg) && !"system".equals(pkg)) {
+                Notification.addFieldsFromContext(getContext().createApplicationContext(
+                        getContext().getPackageManager().getApplicationInfoAsUser(
+                                pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId),
+                        Context.CONTEXT_RESTRICTED), notification);
+            }
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
             return;
