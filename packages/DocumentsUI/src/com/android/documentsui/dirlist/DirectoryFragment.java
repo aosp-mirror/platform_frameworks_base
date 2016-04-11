@@ -17,6 +17,7 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.MAX_DOCS_IN_INTENT;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
@@ -108,9 +109,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Display the documents inside a single directory.
@@ -475,8 +478,18 @@ public class DirectoryFragment extends Fragment
 
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+                if (!mTuner.canSelectType(docMimeType, docFlags)) {
+                    return false;
+                }
 
-                return mTuner.canSelectType(docMimeType, docFlags);
+                if (mSelected.size() >= MAX_DOCS_IN_INTENT) {
+                    Snackbars.makeSnackbar(
+                            getActivity(),
+                            R.string.too_many_selected,
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                    return false;
+                }
             }
             return true;
         }
@@ -1108,9 +1121,17 @@ public class DirectoryFragment extends Fragment
     public void selectAllFiles() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SELECT_ALL);
 
-        // Exclude disabled files
-        List<String> enabled = new ArrayList<String>();
-        for (String id : mAdapter.getModelIds()) {
+        // Exclude disabled files.
+        Set<String> enabled = new HashSet<String>();
+        List<String> modelIds = mAdapter.getModelIds();
+
+        // Get the current selection.
+        String[] alreadySelected = mSelectionManager.getSelection().getAll();
+        for (String id : alreadySelected) {
+           enabled.add(id);
+        }
+
+        for (String id : modelIds) {
             Cursor cursor = getModel().getItem(id);
             if (cursor == null) {
                 Log.w(TAG, "Skipping selection. Can't obtain cursor for modeId: " + id);
@@ -1118,7 +1139,15 @@ public class DirectoryFragment extends Fragment
             }
             String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
             int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            if (isDocumentEnabled(docMimeType, docFlags)) {
+            if (mTuner.canSelectType(docMimeType, docFlags)) {
+                if (enabled.size() >= MAX_DOCS_IN_INTENT) {
+                    Snackbars.makeSnackbar(
+                        getActivity(),
+                        R.string.too_many_in_select_all,
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+                    break;
+                }
                 enabled.add(id);
             }
         }
