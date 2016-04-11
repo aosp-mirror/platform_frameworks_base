@@ -192,7 +192,7 @@ public class NanoApp {
      * @return publisher name
      */
     public String getPublisher() {
-      return mPublisher;
+        return mPublisher;
     }
 
     /**
@@ -201,7 +201,7 @@ public class NanoApp {
      * @return app name
      */
     public String getName() {
-    return mName;
+        return mName;
     }
 
     /**
@@ -210,7 +210,7 @@ public class NanoApp {
      * @return identifier for this app
      */
     public int getAppId() {
-      return mAppId;
+        return mAppId;
     }
 
     /**
@@ -219,7 +219,7 @@ public class NanoApp {
      * @return app version
      */
     public int getAppVersion() {
-      return mAppVersion;
+        return mAppVersion;
     }
 
     /**
@@ -228,7 +228,7 @@ public class NanoApp {
      * @return readable memory needed in bytes
      */
     public int getNeededReadMemBytes() {
-      return mNeededReadMemBytes;
+        return mNeededReadMemBytes;
     }
 
     /**
@@ -237,7 +237,7 @@ public class NanoApp {
      * @return writable memory needed in bytes
      */
     public int getNeededWriteMemBytes() {
-      return mNeededWriteMemBytes;
+        return mNeededWriteMemBytes;
     }
 
     /**
@@ -246,7 +246,7 @@ public class NanoApp {
      * @return executable memory needed in bytes
      */
     public int getNeededExecMemBytes() {
-      return mNeededExecMemBytes;
+        return mNeededExecMemBytes;
     }
 
     /**
@@ -255,7 +255,7 @@ public class NanoApp {
      * @return sensors needed
      */
     public int[] getNeededSensors() {
-      return mNeededSensors;
+        return mNeededSensors;
     }
 
     /**
@@ -264,7 +264,7 @@ public class NanoApp {
      * @return generated events
      */
     public int[] getOutputEvents() {
-      return mOutputEvents;
+        return mOutputEvents;
     }
 
     /**
@@ -273,7 +273,7 @@ public class NanoApp {
      * @return app binary
      */
     public byte[] getAppBinary() {
-      return mAppBinary;
+        return mAppBinary;
     }
 
     private NanoApp(Parcel in) {
