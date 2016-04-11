@@ -24,7 +24,8 @@ namespace android {
 
 MinikinFontSkia::MinikinFontSkia(SkTypeface* typeface, const void* fontData, size_t fontSize,
         int ttcIndex) :
-    mTypeface(typeface), mFontData(fontData), mFontSize(fontSize), mTtcIndex(ttcIndex) {
+    MinikinFont(typeface->uniqueID()), mTypeface(typeface), mFontData(fontData),
+    mFontSize(fontSize), mTtcIndex(ttcIndex) {
 }
 
 MinikinFontSkia::~MinikinFontSkia() {
@@ -97,10 +98,6 @@ size_t MinikinFontSkia::GetFontSize() const {
 
 int MinikinFontSkia::GetFontIndex() const {
     return mTtcIndex;
-}
-
-int32_t MinikinFontSkia::GetUniqueId() const {
-    return mTypeface->uniqueID();
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
