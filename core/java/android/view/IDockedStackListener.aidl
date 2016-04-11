@@ -42,4 +42,9 @@ oneway interface IDockedStackListener {
      * @param animDuration The duration of the animation for changing the minimized state.
      */
     void onDockedStackMinimizedChanged(boolean minimized, long animDuration);
+
+    /**
+     * Called when window manager repositioned the docked stack after a screen rotation change.
+     */
+    void onDockSideChanged(int newDockSide);
 }
