@@ -242,7 +242,12 @@ public class WebViewUpdateService extends SystemService {
                 throw new SecurityException(msg);
             }
 
-            WebViewUpdateService.this.mImpl.enableFallbackLogic(enable);
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                WebViewUpdateService.this.mImpl.enableFallbackLogic(enable);
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
         }
     }
 }
