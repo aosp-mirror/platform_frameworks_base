@@ -300,8 +300,7 @@ public void onGroupItemClick(MenuItem item) {
     // All other menu item clicks are handled by {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}
 }
 </pre>
-<p class="note"><strong>Note:</strong> The {@code android:showAsAction} attribute is
-available only on Android 3.0 (API Level 11) and greater.</p>
+
 </dd> <!-- end example -->
 
 
