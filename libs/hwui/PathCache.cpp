@@ -19,6 +19,7 @@
 #include <SkColor.h>
 #include <SkPaint.h>
 #include <SkPath.h>
+#include <SkPathEffect.h>
 #include <SkRect.h>
 
 #include <utils/JenkinsHash.h>
@@ -35,18 +36,34 @@
 namespace android {
 namespace uirenderer {
 
+template <class T>
+static bool compareWidthHeight(const T& lhs, const T& rhs) {
+    return (lhs.mWidth == rhs.mWidth) && (lhs.mHeight == rhs.mHeight);
+}
+
+static bool compareRoundRects(const PathDescription::Shape::RoundRect& lhs,
+        const PathDescription::Shape::RoundRect& rhs) {
+    return compareWidthHeight(lhs, rhs) && lhs.mRx == rhs.mRx && lhs.mRy == rhs.mRy;
+}
+
+static bool compareArcs(const PathDescription::Shape::Arc& lhs, const PathDescription::Shape::Arc& rhs) {
+    return compareWidthHeight(lhs, rhs) && lhs.mStartAngle == rhs.mStartAngle &&
+            lhs.mSweepAngle == rhs.mSweepAngle && lhs.mUseCenter == rhs.mUseCenter;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Cache entries
 ///////////////////////////////////////////////////////////////////////////////
 
 PathDescription::PathDescription()
-        : type(kShapeNone)
+        : type(ShapeType::None)
         , join(SkPaint::kDefault_Join)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
         , miter(4.0f)
         , strokeWidth(1.0f)
         , pathEffect(nullptr) {
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -58,11 +75,12 @@ PathDescription::PathDescription(ShapeType type, const SkPaint* paint)
         , miter(paint->getStrokeMiter())
         , strokeWidth(paint->getStrokeWidth())
         , pathEffect(paint->getPathEffect()) {
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
 hash_t PathDescription::hash() const {
-    uint32_t hash = JenkinsHashMix(0, type);
+    uint32_t hash = JenkinsHashMix(0, static_cast<int>(type));
     hash = JenkinsHashMix(hash, join);
     hash = JenkinsHashMix(hash, cap);
     hash = JenkinsHashMix(hash, style);
@@ -71,6 +89,32 @@ hash_t PathDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(pathEffect));
     hash = JenkinsHashMixBytes(hash, (uint8_t*) &shape, sizeof(Shape));
     return JenkinsHashWhiten(hash);
+}
+
+bool PathDescription::operator==(const PathDescription& rhs) const {
+    if (type != rhs.type) return false;
+    if (join != rhs.join) return false;
+    if (cap != rhs.cap) return false;
+    if (style != rhs.style) return false;
+    if (miter != rhs.miter) return false;
+    if (strokeWidth != rhs.strokeWidth) return false;
+    if (pathEffect != rhs.pathEffect) return false;
+    switch (type) {
+        case ShapeType::None:
+            return 0;
+        case ShapeType::Rect:
+            return compareWidthHeight(shape.rect, rhs.shape.rect);
+        case ShapeType::RoundRect:
+            return compareRoundRects(shape.roundRect, rhs.shape.roundRect);
+        case ShapeType::Circle:
+            return shape.circle.mRadius == rhs.shape.circle.mRadius;
+        case ShapeType::Oval:
+            return compareWidthHeight(shape.oval, rhs.shape.oval);
+        case ShapeType::Arc:
+            return compareArcs(shape.arc, rhs.shape.arc);
+        case ShapeType::Path:
+            return shape.path.mGenerationID == rhs.shape.path.mGenerationID;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -322,7 +366,7 @@ void PathCache::clearGarbage() {
             LruCache<PathDescription, PathTexture*>::Iterator iter(mCache);
             while (iter.next()) {
                 const PathDescription& key = iter.key();
-                if (key.type == kShapePath && key.shape.path.mGenerationID == generationID) {
+                if (key.type == ShapeType::Path && key.shape.path.mGenerationID == generationID) {
                     pathsToRemove.push(key);
                 }
             }
@@ -336,7 +380,7 @@ void PathCache::clearGarbage() {
 }
 
 PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
-    PathDescription entry(kShapePath, paint);
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
@@ -366,9 +410,8 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     return texture;
 }
 
-void PathCache::remove(const SkPath* path, const SkPaint* paint)
-{
-    PathDescription entry(kShapePath, paint);
+void PathCache::remove(const SkPath* path, const SkPaint* paint) {
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
     mCache.remove(entry);
 }
@@ -378,7 +421,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
         return;
     }
 
-    PathDescription entry(kShapePath, paint);
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
@@ -417,7 +460,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
 
 PathTexture* PathCache::getRoundRect(float width, float height,
         float rx, float ry, const SkPaint* paint) {
-    PathDescription entry(kShapeRoundRect, paint);
+    PathDescription entry(ShapeType::RoundRect, paint);
     entry.shape.roundRect.mWidth = width;
     entry.shape.roundRect.mHeight = height;
     entry.shape.roundRect.mRx = rx;
@@ -442,7 +485,7 @@ PathTexture* PathCache::getRoundRect(float width, float height,
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
-    PathDescription entry(kShapeCircle, paint);
+    PathDescription entry(ShapeType::Circle, paint);
     entry.shape.circle.mRadius = radius;
 
     PathTexture* texture = get(entry);
@@ -462,7 +505,7 @@ PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint) {
-    PathDescription entry(kShapeOval, paint);
+    PathDescription entry(ShapeType::Oval, paint);
     entry.shape.oval.mWidth = width;
     entry.shape.oval.mHeight = height;
 
@@ -485,7 +528,7 @@ PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint)
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint) {
-    PathDescription entry(kShapeRect, paint);
+    PathDescription entry(ShapeType::Rect, paint);
     entry.shape.rect.mWidth = width;
     entry.shape.rect.mHeight = height;
 
@@ -509,7 +552,7 @@ PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint)
 
 PathTexture* PathCache::getArc(float width, float height,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
-    PathDescription entry(kShapeArc, paint);
+    PathDescription entry(ShapeType::Arc, paint);
     entry.shape.arc.mWidth = width;
     entry.shape.arc.mHeight = height;
     entry.shape.arc.mStartAngle = startAngle;
