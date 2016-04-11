@@ -57,7 +57,7 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
             !e.isCompatible(Element.F32_2(rs)) &&
             !e.isCompatible(Element.F32_3(rs)) &&
             !e.isCompatible(Element.F32_4(rs))) {
-            throw new RSIllegalArgumentException("Unsuported element type.");
+            throw new RSIllegalArgumentException("Unsupported element type.");
         }
 
         long id = rs.nScriptIntrinsicCreate(4, e.getID(rs));
