@@ -65,6 +65,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.AtomicFile;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -483,13 +484,50 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public int[] getProfileIds(int userId, boolean enabledOnly) {
+        if (userId != UserHandle.getCallingUserId()) {
+            checkManageUsersPermission("getting profiles related to user " + userId);
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mUsersLock) {
+                return getProfileIdsLU(userId, enabledOnly).toArray();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     /** Assume permissions already checked and caller's identity cleared */
     private List<UserInfo> getProfilesLU(int userId, boolean enabledOnly, boolean fullInfo) {
+        IntArray profileIds = getProfileIdsLU(userId, enabledOnly);
+        ArrayList<UserInfo> users = new ArrayList<>(profileIds.size());
+        for (int i = 0; i < profileIds.size(); i++) {
+            int profileId = profileIds.get(i);
+            UserInfo userInfo = mUsers.get(profileId).info;
+            // If full info is not required - clear PII data to prevent 3P apps from reading it
+            if (!fullInfo) {
+                userInfo = new UserInfo(userInfo);
+                userInfo.name = null;
+                userInfo.iconPath = null;
+            } else {
+                userInfo = userWithName(userInfo);
+            }
+            users.add(userInfo);
+        }
+        return users;
+    }
+
+    /**
+     *  Assume permissions already checked and caller's identity cleared
+     */
+    private IntArray getProfileIdsLU(int userId, boolean enabledOnly) {
         UserInfo user = getUserInfoLU(userId);
-        ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
+        IntArray result = new IntArray(mUsers.size());
         if (user == null) {
             // Probably a dying user
-            return users;
+            return result;
         }
         final int userSize = mUsers.size();
         for (int i = 0; i < userSize; i++) {
@@ -506,16 +544,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (profile.partial) {
                 continue;
             }
-            UserInfo userInfo = userWithName(profile);
-            // If full info is not required - clear PII data to prevent 3P apps from reading it
-            if (!fullInfo) {
-                userInfo = new UserInfo(userInfo);
-                userInfo.name = null;
-                userInfo.iconPath = null;
-            }
-            users.add(userInfo);
+            result.add(profile.id);
         }
-        return users;
+        return result;
     }
 
     @Override

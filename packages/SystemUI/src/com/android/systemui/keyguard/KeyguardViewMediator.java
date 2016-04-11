@@ -847,17 +847,16 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void doKeyguardLaterForChildProfilesLocked() {
         UserManager um = UserManager.get(mContext);
-        List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
-        for (UserInfo info : profiles) {
-            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
-                long userTimeout = getLockTimeout(info.id);
+        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
+                long userTimeout = getLockTimeout(profileId);
                 if (userTimeout == 0) {
                     doKeyguardForChildProfilesLocked();
                 } else {
                     long userWhen = SystemClock.elapsedRealtime() + userTimeout;
                     Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
                     lockIntent.putExtra("seq", mDelayedProfileShowingSequence);
-                    lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
+                    lockIntent.putExtra(Intent.EXTRA_USER_ID, profileId);
                     PendingIntent lockSender = PendingIntent.getBroadcast(
                             mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                     mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -869,10 +868,9 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void doKeyguardForChildProfilesLocked() {
         UserManager um = UserManager.get(mContext);
-        List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
-        for (UserInfo info : profiles) {
-            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
-                lockProfile(info.id);
+        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
+                lockProfile(profileId);
             }
         }
     }
@@ -1482,9 +1480,8 @@ public class KeyguardViewMediator extends SystemUI {
                 final UserHandle currentUser = new UserHandle(KeyguardUpdateMonitor.getCurrentUser());
                 final UserManager um = (UserManager) mContext.getSystemService(
                         Context.USER_SERVICE);
-                List <UserInfo> userHandles = um.getProfiles(currentUser.getIdentifier());
-                for (UserInfo ui : userHandles) {
-                    mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, ui.getUserHandle());
+                for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
+                    mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
                 }
             } else {
                 mBootSendUserPresent = true;
