@@ -2700,9 +2700,9 @@ public class WifiManager {
      * @return true -- if set successful false -- if set failed
      * @hide
      */
-    public boolean enableAutoJoinWhenAssociated(boolean enabled) {
+    public boolean setEnableAutoJoinWhenAssociated(boolean enabled) {
         try {
-            return mService.enableAutoJoinWhenAssociated(enabled);
+            return mService.setEnableAutoJoinWhenAssociated(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
