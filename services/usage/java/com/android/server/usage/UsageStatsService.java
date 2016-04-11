@@ -152,6 +152,7 @@ public class UsageStatsService extends SystemService implements
     private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
 
+    private boolean mHaveCarrierPrivilegedApps;
     private List<String> mCarrierPrivilegedApps;
 
     public UsageStatsService(Context context) {
@@ -931,11 +932,14 @@ public class UsageStatsService extends SystemService implements
 
     private boolean isCarrierApp(String packageName) {
         synchronized (mLock) {
-            if (mCarrierPrivilegedApps == null) {
+            if (!mHaveCarrierPrivilegedApps) {
                 fetchCarrierPrivilegedAppsLocked();
             }
+            if (mCarrierPrivilegedApps != null) {
+                return mCarrierPrivilegedApps.contains(packageName);
+            }
+            return false;
         }
-        return mCarrierPrivilegedApps.contains(packageName);
     }
 
     void clearCarrierPrivilegedApps() {
@@ -943,6 +947,7 @@ public class UsageStatsService extends SystemService implements
             Slog.i(TAG, "Clearing carrier privileged apps list");
         }
         synchronized (mLock) {
+            mHaveCarrierPrivilegedApps = false;
             mCarrierPrivilegedApps = null; // Need to be refetched.
         }
     }
@@ -951,6 +956,7 @@ public class UsageStatsService extends SystemService implements
         TelephonyManager telephonyManager =
                 getContext().getSystemService(TelephonyManager.class);
         mCarrierPrivilegedApps = telephonyManager.getPackagesWithCarrierPrivileges();
+        mHaveCarrierPrivilegedApps = true;
         if (DEBUG) {
             Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);
         }
@@ -1024,7 +1030,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             pw.println();
-            pw.println("Carrier privileged apps: " + mCarrierPrivilegedApps);
+            pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
+                    + "): " + mCarrierPrivilegedApps);
 
             pw.println();
             pw.println("Settings:");
