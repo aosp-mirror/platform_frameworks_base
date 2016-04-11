@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -37,6 +38,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     private OnGroupChangeListener mListener;
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
+    private HeadsUpManager mHeadsUpManager;
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
@@ -142,6 +144,9 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                         && group.summary.notification.getNotification().isGroupSummary()
                         && hasIsolatedChildren(group)));
         if (prevSuppressed != group.suppressed) {
+            if (group.suppressed) {
+                handleSuppressedSummaryHeadsUpped(group.summary);
+            }
             mListener.onGroupsChanged();
         }
     }
@@ -158,6 +163,15 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             }
         }
         return count;
+    }
+
+    private NotificationData.Entry getIsolatedChild(String groupKey) {
+        for (StatusBarNotification sbn : mIsolatedEntries.values()) {
+            if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn)) {
+                return mGroupMap.get(sbn.getKey()).summary;
+            }
+        }
+        return null;
     }
 
     public void onEntryUpdated(NotificationData.Entry entry,
@@ -332,6 +346,9 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 // it doesn't lead to an update.
                 updateSuppression(mGroupMap.get(entry.notification.getGroupKey()));
                 mListener.onGroupsChanged();
+            } else {
+                handleSuppressedSummaryHeadsUpped(entry);
+
             }
         } else {
             if (mIsolatedEntries.containsKey(sbn.getKey())) {
@@ -342,6 +359,32 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 mListener.onGroupsChanged();
             }
         }
+    }
+
+    private void handleSuppressedSummaryHeadsUpped(NotificationData.Entry entry) {
+        StatusBarNotification sbn = entry.notification;
+        if (!isGroupSuppressed(sbn.getGroupKey())
+                || !sbn.getNotification().isGroupSummary()
+                || !entry.row.isHeadsUp()) {
+            return;
+        }
+        // The parent of a suppressed group got huned, lets hun the child!
+        NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
+        if (notificationGroup != null) {
+            Iterator<NotificationData.Entry> iterator = notificationGroup.children.iterator();
+            NotificationData.Entry child = iterator.hasNext() ? iterator.next() : null;
+            if (child == null) {
+                child = getIsolatedChild(sbn.getGroupKey());
+            }
+            if (child != null) {
+                if (mHeadsUpManager.isHeadsUp(child.key)) {
+                    mHeadsUpManager.updateNotification(child, true);
+                } else {
+                    mHeadsUpManager.showNotification(child);
+                }
+            }
+        }
+        mHeadsUpManager.releaseImmediately(entry.key);
     }
 
     private boolean shouldIsolate(StatusBarNotification sbn) {
@@ -358,6 +401,10 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 || notificationGroup.summary.row.getClipTopOptimization() > 0
                 || notificationGroup.summary.row.getClipTopAmount() > 0
                 || notificationGroup.summary.row.getTranslationY() < 0;
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
     }
 
     public static class NotificationGroup {

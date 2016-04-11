@@ -185,6 +185,11 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
+            if (headsUpEntry == null) {
+                // the entry was released before this update (i.e by a listener) This can happen
+                // with the groupmanager
+                return;
+            }
             headsUpEntry.updateEntry();
             setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUp));
         }
