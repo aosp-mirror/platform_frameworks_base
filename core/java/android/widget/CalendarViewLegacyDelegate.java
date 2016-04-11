@@ -103,7 +103,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
 
     private static final int DEFAULT_WEEK_DAY_TEXT_APPEARANCE_RES_ID = -1;
 
-    private final int mWeekSeperatorLineWidth;
+    private final int mWeekSeparatorLineWidth;
 
     private int mDateTextSize;
 
@@ -308,7 +308,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
                 UNSCALED_BOTTOM_BUFFER, displayMetrics);
         mSelectedDateVerticalBarWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 UNSCALED_SELECTED_DATE_VERTICAL_BAR_WIDTH, displayMetrics);
-        mWeekSeperatorLineWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        mWeekSeparatorLineWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 UNSCALED_WEEK_SEPARATOR_LINE_WIDTH, displayMetrics);
 
         LayoutInflater layoutInflater = (LayoutInflater) mContext
@@ -599,6 +599,30 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
     @Override
     public void setOnDateChangeListener(CalendarView.OnDateChangeListener listener) {
         mOnDateChangeListener = listener;
+    }
+
+    @Override
+    public boolean getBoundsForDate(long date, Rect outBounds) {
+        Calendar calendarDate = Calendar.getInstance();
+        calendarDate.setTimeInMillis(date);
+        int listViewEntryCount = mListView.getCount();
+        for (int i = 0; i < listViewEntryCount; i++) {
+            WeekView currWeekView = (WeekView) mListView.getChildAt(i);
+            if (currWeekView.getBoundsForDate(calendarDate, outBounds)) {
+                // Found the date in this week. Now need to offset vertically to return correct
+                // bounds in the coordinate system of the entire layout
+                final int[] weekViewPositionOnScreen = new int[2];
+                final int[] delegatorPositionOnScreen = new int[2];
+                currWeekView.getLocationOnScreen(weekViewPositionOnScreen);
+                mDelegator.getLocationOnScreen(delegatorPositionOnScreen);
+                final int extraVerticalOffset =
+                        weekViewPositionOnScreen[1] - delegatorPositionOnScreen[1];
+                outBounds.top += extraVerticalOffset;
+                outBounds.bottom += extraVerticalOffset;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -1199,7 +1223,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
             super(context);
 
             // Sets up any standard paints that will be used
-            initilaizePaints();
+            initializePaints();
         }
 
         /**
@@ -1270,7 +1294,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
         /**
          * Initialize the paint instances.
          */
-        private void initilaizePaints() {
+        private void initializePaints() {
             mDrawPaint.setFakeBoldText(false);
             mDrawPaint.setAntiAlias(true);
             mDrawPaint.setStyle(Paint.Style.FILL);
@@ -1348,6 +1372,34 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
             return true;
         }
 
+        public boolean getBoundsForDate(Calendar date, Rect outBounds) {
+            Calendar currDay = Calendar.getInstance();
+            currDay.setTime(mFirstDay.getTime());
+            for (int i = 0; i < mDaysPerWeek; i++) {
+                if ((date.get(Calendar.YEAR) == currDay.get(Calendar.YEAR))
+                    && (date.get(Calendar.MONTH) == currDay.get(Calendar.MONTH))
+                    && (date.get(Calendar.DAY_OF_MONTH) == currDay.get(Calendar.DAY_OF_MONTH))) {
+                    // We found the matching date. Follow the logic in the draw pass that divides
+                    // the available horizontal space equally between all the entries in this week.
+                    // Note that if we're showing week number, the start entry will be that number.
+                    int cellSize = mWidth / mNumCells;
+                    if (isLayoutRtl()) {
+                        outBounds.left = cellSize *
+                                (mShowWeekNumber ? (mNumCells - i - 2) : (mNumCells - i - 1));
+                    } else {
+                        outBounds.left = cellSize * (mShowWeekNumber ? i + 1 : i);
+                    }
+                    outBounds.top = 0;
+                    outBounds.right = outBounds.left + cellSize;
+                    outBounds.bottom = getHeight();
+                    return true;
+                }
+                // Add one day
+                currDay.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            return false;
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             drawBackground(canvas);
@@ -1367,7 +1419,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
             }
             mDrawPaint.setColor(mSelectedWeekBackgroundColor);
 
-            mTempRect.top = mWeekSeperatorLineWidth;
+            mTempRect.top = mWeekSeparatorLineWidth;
             mTempRect.bottom = mHeight;
 
             final boolean isLayoutRtl = isLayoutRtl();
@@ -1398,7 +1450,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
          */
         private void drawWeekNumbersAndDates(Canvas canvas) {
             final float textHeight = mDrawPaint.getTextSize();
-            final int y = (int) ((mHeight + textHeight) / 2) - mWeekSeperatorLineWidth;
+            final int y = (int) ((mHeight + textHeight) / 2) - mWeekSeparatorLineWidth;
             final int nDays = mNumCells;
             final int divisor = 2 * nDays;
 
@@ -1450,7 +1502,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
                 return;
             }
             mDrawPaint.setColor(mWeekSeparatorLineColor);
-            mDrawPaint.setStrokeWidth(mWeekSeperatorLineWidth);
+            mDrawPaint.setStrokeWidth(mWeekSeparatorLineWidth);
             float startX;
             float stopX;
             if (isLayoutRtl()) {
@@ -1474,13 +1526,13 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
             }
             mSelectedDateVerticalBar.setBounds(
                     mSelectedLeft - mSelectedDateVerticalBarWidth / 2,
-                    mWeekSeperatorLineWidth,
+                    mWeekSeparatorLineWidth,
                     mSelectedLeft + mSelectedDateVerticalBarWidth / 2,
                     mHeight);
             mSelectedDateVerticalBar.draw(canvas);
             mSelectedDateVerticalBar.setBounds(
                     mSelectedRight - mSelectedDateVerticalBarWidth / 2,
-                    mWeekSeperatorLineWidth,
+                    mWeekSeparatorLineWidth,
                     mSelectedRight + mSelectedDateVerticalBarWidth / 2,
                     mHeight);
             mSelectedDateVerticalBar.draw(canvas);

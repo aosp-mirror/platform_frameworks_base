@@ -1009,7 +1009,7 @@ class SimpleMonthView extends View {
      * @param id the day of the month
      * @param outBounds the rect to populate with bounds
      */
-    private boolean getBoundsForDay(int id, Rect outBounds) {
+    public boolean getBoundsForDay(int id, Rect outBounds) {
         if (!isValidDayOfMonth(id)) {
             return false;
         }

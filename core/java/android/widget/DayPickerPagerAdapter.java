@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.graphics.Rect;
 import com.android.internal.widget.PagerAdapter;
 
 import android.annotation.IdRes;
@@ -106,6 +107,17 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     public int getFirstDayOfWeek() {
         return mFirstDayOfWeek;
+    }
+
+    public boolean getBoundsForDate(Calendar day, Rect outBounds) {
+        final int position = getPositionForDay(day);
+        final ViewHolder monthView = mItems.get(position, null);
+        if (monthView == null) {
+            return false;
+        } else {
+            final int dayOfMonth = day.get(Calendar.DAY_OF_MONTH);
+            return monthView.calendar.getBoundsForDay(dayOfMonth, outBounds);
+        }
     }
 
     /**

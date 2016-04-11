@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.graphics.Rect;
 import com.android.internal.R;
 import com.android.internal.widget.ViewPager;
 import com.android.internal.widget.ViewPager.OnPageChangeListener;
@@ -307,6 +308,16 @@ class DayPickerView extends ViewGroup {
 
     public long getDate() {
         return mSelectedDay.getTimeInMillis();
+    }
+
+    public boolean getBoundsForDate(long timeInMillis, Rect outBounds) {
+        final int position = getPositionFromDay(timeInMillis);
+        if (position != mViewPager.getCurrentItem()) {
+            return false;
+        }
+
+        mTempCalendar.setTimeInMillis(timeInMillis);
+        return mAdapter.getBoundsForDate(mTempCalendar, outBounds);
     }
 
     public void setFirstDayOfWeek(int firstDayOfWeek) {
