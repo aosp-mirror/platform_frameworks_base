@@ -111,8 +111,8 @@ page.tags=studio,templates,firstapp
       <p>This template includes:</p>
 
       <ul>
-        <li>Title bar ({@link android.app.ActionBar} on Android 3.0 and later)</li>
-        <li>Options menu (action overflow on Android 3.0 and later) </li>
+        <li>{@link android.app.ActionBar}</li>
+        <li>Action overflow</li>
         <li>Basic layout</li>
       </ul>
     </td>

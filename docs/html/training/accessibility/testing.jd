@@ -158,7 +158,7 @@ accessibility testing.</p>
 the Explore by Touch system feature. The TalkBack accessibility service comes preinstalled on most
 Android devices and can also be downloaded for free from
 <a href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">Google
-Play</a>. The Explore by Touch system feature is available on devices running Android 4.0 and later.
+Play</a>.
 </p>
 
 <h4 id="testing-talkback">Testing with TalkBack</h4>
@@ -192,7 +192,7 @@ focus navigation and audible prompts.</p>
   hover events over user interface controls.
 </p>
 
-<p>To enable Explore by Touch on Android 4.0 and later:</p>
+<p>To enable Explore by Touch:</p>
 <ol>
   <li>Launch the <strong>Settings</strong> application.</li>
   <li>Navigate to the <strong>Accessibility</strong> category and select it.</li>
@@ -239,7 +239,7 @@ option is not available.</p>
 than keyboards and D-pads. While gestures allow users to focus on nearly any on-screen
 content, keyboard and D-pad navigation only allow focus on input fields and buttons.</p>
 
-<p>To enable gesture navigation on Android 4.1 and later:</p>
+<p>To enable gesture navigation:</p>
 <ul>
   <li>Enable both TalkBack and the Explore by Touch feature as described in the
     <a href="#testing-ebt">Testing with Explore by Touch</a>. When <em>both</em> of these
