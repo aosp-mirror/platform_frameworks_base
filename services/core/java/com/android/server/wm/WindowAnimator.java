@@ -670,7 +670,6 @@ public class WindowAnimator {
         if (SHOW_TRANSACTIONS) Slog.i(
                 TAG, ">>> OPEN TRANSACTION animateLocked");
         SurfaceControl.openTransaction();
-        SurfaceControl.setAnimationTransaction();
         try {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
