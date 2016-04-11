@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 
 @MediumTest
 public class DocumentLoaderTest extends AndroidTestCase {
@@ -138,6 +140,33 @@ public class DocumentLoaderTest extends AndroidTestCase {
                 MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
             // Even if MtpManager returns an error for a document, loading must complete.
             assertFalse(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
+        }
+    }
+
+    public void testCancelTask() throws IOException, InterruptedException {
+        setUpDocument(mManager,
+                DocumentLoader.NUM_INITIAL_ENTRIES + DocumentLoader.NUM_LOADING_ENTRIES + 1);
+
+        // Block the first iteration in the background thread.
+        mManager.blockDocument(
+                0, DocumentLoader.NUM_INITIAL_ENTRIES + 1);
+        setUpLoader();
+        try (final Cursor cursor = mLoader.queryChildDocuments(
+                MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
+            assertTrue(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
+        }
+        Thread.sleep(DocumentLoader.NOTIFY_PERIOD_MS);
+
+        // Clear task while the first iteration is being blocked.
+        mManager.unblockDocument(
+                0, DocumentLoader.NUM_INITIAL_ENTRIES + 1);
+        mLoader.cancelTask(mParentIdentifier);
+
+        Thread.sleep(DocumentLoader.NOTIFY_PERIOD_MS * 2);
+
+        // Check if it's OK to query invalidated task.
+        try (final Cursor cursor = mLoader.queryChildDocuments(
+                MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
         }
     }
 
