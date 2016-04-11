@@ -2611,10 +2611,13 @@ public final class MediaCodecInfo {
         public static final int VP8ProfileMain = 0x01;
 
         // from OMX_VIDEO_VP9PROFILETYPE
-        public static final int VP9Profile0 = 0x00;
-        public static final int VP9Profile1 = 0x01;
-        public static final int VP9Profile2 = 0x02;
-        public static final int VP9Profile3 = 0x03;
+        public static final int VP9Profile0 = 0x01;
+        public static final int VP9Profile1 = 0x02;
+        public static final int VP9Profile2 = 0x04;
+        public static final int VP9Profile3 = 0x08;
+        // HDR profiles also support passing HDR metadata
+        public static final int VP9Profile2HDR = 0x1000;
+        public static final int VP9Profile3HDR = 0x2000;
 
         // from OMX_VIDEO_VP9LEVELTYPE
         public static final int VP9Level1  = 0x0;
