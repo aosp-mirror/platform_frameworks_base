@@ -318,7 +318,7 @@ class LoaderManagerImpl extends LoaderManager {
             if (mStarted) {
                 if (mReportNextStart) {
                     mReportNextStart = false;
-                    if (mHaveData) {
+                    if (mHaveData && !mRetaining) {
                         callOnLoadFinished(mLoader, mData);
                     }
                 }
