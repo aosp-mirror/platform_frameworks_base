@@ -242,6 +242,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String VIDEO_DATA = "vid";
     private static final String AUDIO_DATA = "aud";
 
+    public static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
+
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
 
