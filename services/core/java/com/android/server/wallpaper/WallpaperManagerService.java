@@ -49,6 +49,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -265,70 +266,134 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      */
     private void generateCrop(WallpaperData wallpaper) {
         boolean success = false;
-        boolean needCrop = false;
-        boolean needScale = false;
+
+        Rect cropHint = new Rect(wallpaper.cropHint);
 
         if (DEBUG) {
             Slog.v(TAG, "Generating crop for new wallpaper(s): 0x"
                     + Integer.toHexString(wallpaper.whichPending)
-                    + " to " + wallpaper.cropFile.getName());
+                    + " to " + wallpaper.cropFile.getName()
+                    + " crop=(" + cropHint.width() + 'x' + cropHint.height()
+                    + ") dim=(" + wallpaper.width + 'x' + wallpaper.height + ')');
         }
 
         // Analyse the source; needed in multiple cases
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(wallpaper.wallpaperFile.getAbsolutePath(), options);
-
-        // We'll need to scale if the crop is sufficiently bigger than the display
-
-        // Legacy case uses an empty crop rect here, so we just preserve the
-        // source image verbatim
-        if (!wallpaper.cropHint.isEmpty()) {
-            // ...clamp the crop rect to the measured bounds...
-            wallpaper.cropHint.right = Math.min(wallpaper.cropHint.right, options.outWidth);
-            wallpaper.cropHint.bottom = Math.min(wallpaper.cropHint.bottom, options.outHeight);
-            // ...and don't bother cropping if what we're left with is identity
-            needCrop = (options.outHeight >= wallpaper.cropHint.height()
-                    && options.outWidth >= wallpaper.cropHint.width());
-        }
-
-        if (!needCrop && !needScale) {
-            // Simple case:  the nominal crop is at least as big as the source image,
-            // so we take the whole thing and just copy the image file directly.
-            if (DEBUG) {
-                Slog.v(TAG, "Null crop of new wallpaper; copying");
-            }
-            success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
-            if (!success) {
-                wallpaper.cropFile.delete();
-                // TODO: fall back to default wallpaper in this case
-            }
+        if (options.outWidth <= 0 || options.outHeight <= 0) {
+            Slog.e(TAG, "Invalid wallpaper data");
+            success = false;
         } else {
-            // Fancy case: crop and/or scale
-            FileOutputStream f = null;
-            BufferedOutputStream bos = null;
-            try {
-                BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(
-                        wallpaper.wallpaperFile.getAbsolutePath(), false);
-                Bitmap cropped = decoder.decodeRegion(wallpaper.cropHint, null);
-                decoder.recycle();
+            boolean needCrop = false;
+            boolean needScale = false;
 
-                if (cropped == null) {
-                    Slog.e(TAG, "Could not decode new wallpaper");
-                } else {
-                    f = new FileOutputStream(wallpaper.cropFile);
-                    bos = new BufferedOutputStream(f, 32*1024);
-                    cropped.compress(Bitmap.CompressFormat.PNG, 90, bos);
-                    bos.flush();  // don't rely on the implicit flush-at-close when noting success
-                    success = true;
-                }
-            } catch (IOException e) {
+            // Empty crop means use the full image
+            if (cropHint.isEmpty()) {
+                cropHint.left = cropHint.top = 0;
+                cropHint.right = options.outWidth;
+                cropHint.bottom = options.outHeight;
+            } else {
+                // force the crop rect to lie within the measured bounds
+                cropHint.offset(
+                        (cropHint.right > options.outWidth ? options.outWidth - cropHint.right : 0),
+                        (cropHint.bottom > options.outHeight ? options.outHeight - cropHint.bottom : 0));
+
+                // Don't bother cropping if what we're left with is identity
+                needCrop = (options.outHeight >= cropHint.height()
+                        && options.outWidth >= cropHint.width());
+            }
+
+            // scale if the crop height winds up not matching the recommended metrics
+            needScale = (wallpaper.height != cropHint.height());
+
+            if (DEBUG) {
+                Slog.v(TAG, "crop: w=" + cropHint.width() + " h=" + cropHint.height());
+                Slog.v(TAG, "dims: w=" + wallpaper.width + " h=" + wallpaper.height);
+                Slog.v(TAG, "meas: w=" + options.outWidth + " h=" + options.outHeight);
+                Slog.v(TAG, "crop?=" + needCrop + " scale?=" + needScale);
+            }
+
+            if (!needCrop && !needScale) {
+                // Simple case:  the nominal crop fits what we want, so we take
+                // the whole thing and just copy the image file directly.
                 if (DEBUG) {
-                    Slog.e(TAG, "I/O error decoding crop: " + e.getMessage());
+                    Slog.v(TAG, "Null crop of new wallpaper; copying");
                 }
-            } finally {
-                IoUtils.closeQuietly(bos);
-                IoUtils.closeQuietly(f);
+                success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
+                if (!success) {
+                    wallpaper.cropFile.delete();
+                    // TODO: fall back to default wallpaper in this case
+                }
+            } else {
+                // Fancy case: crop and scale.  First, we decode and scale down if appropriate.
+                FileOutputStream f = null;
+                BufferedOutputStream bos = null;
+                try {
+                    BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(
+                            wallpaper.wallpaperFile.getAbsolutePath(), false);
+
+                    // This actually downsamples only by powers of two, but that's okay; we do
+                    // a proper scaling blit later.  This is to minimize transient RAM use.
+                    // We calculate the largest power-of-two under the actual ratio rather than
+                    // just let the decode take care of it because we also want to remap where the
+                    // cropHint rectangle lies in the decoded [super]rect.
+                    final BitmapFactory.Options scaler;
+                    final int actualScale = cropHint.height() / wallpaper.height;
+                    int scale = 1;
+                    while (2*scale < actualScale) {
+                        scale *= 2;
+                    }
+                    if (scale > 1) {
+                        scaler = new BitmapFactory.Options();
+                        scaler.inSampleSize = scale;
+                        if (DEBUG) {
+                            Slog.v(TAG, "Downsampling cropped rect with scale " + scale);
+                        }
+                    } else {
+                        scaler = null;
+                    }
+                    Bitmap cropped = decoder.decodeRegion(cropHint, scaler);
+                    decoder.recycle();
+
+                    if (cropped == null) {
+                        Slog.e(TAG, "Could not decode new wallpaper");
+                    } else {
+                        // We've got the extracted crop; now we want to scale it properly to
+                        // the desired rectangle.  That's a height-biased operation: make it
+                        // fit the hinted height, and accept whatever width we end up with.
+                        cropHint.offsetTo(0, 0);
+                        cropHint.right /= scale;    // adjust by downsampling factor
+                        cropHint.bottom /= scale;
+                        final float heightR = ((float)wallpaper.height) / ((float)cropHint.height());
+                        if (DEBUG) {
+                            Slog.v(TAG, "scale " + heightR + ", extracting " + cropHint);
+                        }
+                        final int destWidth = (int)(cropHint.width() * heightR);
+                        final Bitmap finalCrop = Bitmap.createScaledBitmap(cropped,
+                                destWidth, wallpaper.height, true);
+                        if (DEBUG) {
+                            Slog.v(TAG, "Final extract:");
+                            Slog.v(TAG, "  dims: w=" + wallpaper.width
+                                    + " h=" + wallpaper.height);
+                            Slog.v(TAG, "   out: w=" + finalCrop.getWidth()
+                                    + " h=" + finalCrop.getHeight());
+                        }
+
+                        f = new FileOutputStream(wallpaper.cropFile);
+                        bos = new BufferedOutputStream(f, 32*1024);
+                        finalCrop.compress(Bitmap.CompressFormat.PNG, 90, bos);
+                        bos.flush();  // don't rely on the implicit flush-at-close when noting success
+                        success = true;
+                    }
+                } catch (Exception e) {
+                    if (DEBUG) {
+                        Slog.e(TAG, "Error decoding crop", e);
+                    }
+                } finally {
+                    IoUtils.closeQuietly(bos);
+                    IoUtils.closeQuietly(f);
+                }
             }
         }
 
