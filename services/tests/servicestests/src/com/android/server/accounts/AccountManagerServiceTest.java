@@ -16,23 +16,34 @@
 
 package com.android.server.accounts;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.accounts.Account;
 import android.accounts.AuthenticatorDescription;
+import android.app.AppOpsManager;
 import android.app.Notification;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.UserInfo;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.test.AndroidTestCase;
-import android.test.IsolatedContext;
-import android.test.RenamingDelegatingContext;
-import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockPackageManager;
+import android.util.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -41,20 +52,28 @@ import java.util.Collection;
 import java.util.Comparator;
 
 public class AccountManagerServiceTest extends AndroidTestCase {
+    private static final String TAG = AccountManagerServiceTest.class.getSimpleName();
+
+    static final String PREN_DB = "pren.db";
+    static final String DE_DB = "de.db";
+    static final String CE_DB = "ce.db";
     private AccountManagerService mAms;
 
     @Override
     protected void setUp() throws Exception {
-        final String filenamePrefix = "test.";
-        MockContentResolver resolver = new MockContentResolver();
-        RenamingDelegatingContext targetContextWrapper = new RenamingDelegatingContext(
-                new MyMockContext(), // The context that most methods are delegated to
-                getContext(), // The context that file methods are delegated to
-                filenamePrefix);
-        Context context = new IsolatedContext(resolver, targetContextWrapper);
-        setContext(context);
+        Context realTestContext = getContext();
+        Context mockContext = new MyMockContext(realTestContext);
+        setContext(mockContext);
         mAms = new MyAccountManagerService(getContext(),
-                new MyMockPackageManager(), new MockAccountAuthenticatorCache());
+                new MyMockPackageManager(), new MockAccountAuthenticatorCache(), realTestContext);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        new File(mAms.getCeDatabaseName(UserHandle.USER_SYSTEM)).delete();
+        new File(mAms.getDeDatabaseName(UserHandle.USER_SYSTEM)).delete();
+        new File(mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM)).delete();
+        super.tearDown();
     }
 
     public class AccountSorter implements Comparator<Account> {
@@ -69,6 +88,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testCheckAddAccount() throws Exception {
+        unlockUser(UserHandle.USER_SYSTEM);
         Account a11 = new Account("account1", "type1");
         Account a21 = new Account("account2", "type1");
         Account a31 = new Account("account3", "type1");
@@ -109,6 +129,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testPasswords() throws Exception {
+        unlockUser(UserHandle.USER_SYSTEM);
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
         mAms.addAccountExplicitly(a11, "p11", null);
@@ -124,6 +145,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testUserdata() throws Exception {
+        unlockUser(UserHandle.USER_SYSTEM);
         Account a11 = new Account("account1", "type1");
         Bundle u11 = new Bundle();
         u11.putString("a", "a_a11");
@@ -156,6 +178,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testAuthtokens() throws Exception {
+        unlockUser(UserHandle.USER_SYSTEM);
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
         mAms.addAccountExplicitly(a11, "p11", null);
@@ -188,15 +211,21 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertNull(mAms.peekAuthToken(a12, "att2"));
     }
 
+    private void unlockUser(int userId) {
+        Intent intent = new Intent();
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        mAms.onUserUnlocked(intent);
+    }
+
     static public class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
         private ArrayList<ServiceInfo<AuthenticatorDescription>> mServices;
 
         public MockAccountAuthenticatorCache() {
-            mServices = new ArrayList<ServiceInfo<AuthenticatorDescription>>();
+            mServices = new ArrayList<>();
             AuthenticatorDescription d1 = new AuthenticatorDescription("type1", "p1", 0, 0, 0, 0);
             AuthenticatorDescription d2 = new AuthenticatorDescription("type2", "p2", 0, 0, 0, 0);
-            mServices.add(new ServiceInfo<AuthenticatorDescription>(d1, null, null));
-            mServices.add(new ServiceInfo<AuthenticatorDescription>(d2, null, null));
+            mServices.add(new ServiceInfo<>(d1, null, null));
+            mServices.add(new ServiceInfo<>(d2, null, null));
         }
 
         @Override
@@ -232,9 +261,67 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     static public class MyMockContext extends MockContext {
+        private Context mTestContext;
+        private AppOpsManager mAppOpsManager;
+        private UserManager mUserManager;
+
+        public MyMockContext(Context testContext) {
+            this.mTestContext = testContext;
+            this.mAppOpsManager = mock(AppOpsManager.class);
+            this.mUserManager = mock(UserManager.class);
+            final UserInfo ui = new UserInfo(UserHandle.USER_SYSTEM, "user0", 0);
+            when(mUserManager.getUserInfo(eq(ui.id))).thenReturn(ui);
+        }
+
         @Override
         public int checkCallingOrSelfPermission(final String permission) {
             return PackageManager.PERMISSION_GRANTED;
+        }
+
+        @Override
+        public Object getSystemService(String name) {
+            if (Context.APP_OPS_SERVICE.equals(name)) {
+                return mAppOpsManager;
+            } else if( Context.USER_SERVICE.equals(name)) {
+                return mUserManager;
+            }
+            return null;
+        }
+
+        @Override
+        public String getSystemServiceName(Class<?> serviceClass) {
+            if (AppOpsManager.class.equals(serviceClass)) {
+                return Context.APP_OPS_SERVICE;
+            }
+            return null;
+        }
+
+        @Override
+        public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+            return null;
+        }
+
+        @Override
+        public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+                IntentFilter filter, String broadcastPermission, Handler scheduler) {
+            return null;
+        }
+
+        @Override
+        public SQLiteDatabase openOrCreateDatabase(String file, int mode,
+                SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
+            Log.i(TAG, "openOrCreateDatabase " + file + " mode " + mode);
+            return mTestContext.openOrCreateDatabase(file, mode, factory,errorHandler);
+        }
+
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+            Log.i(TAG, "sendBroadcastAsUser " + intent + " " + user);
+        }
+
+        @Override
+        public String getOpPackageName() {
+            return null;
         }
     }
 
@@ -246,9 +333,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     static public class MyAccountManagerService extends AccountManagerService {
+        private Context mRealTestContext;
         public MyAccountManagerService(Context context, PackageManager packageManager,
-                IAccountAuthenticatorCache authenticatorCache) {
+                IAccountAuthenticatorCache authenticatorCache, Context realTestContext) {
             super(context, packageManager, authenticatorCache);
+            this.mRealTestContext = realTestContext;
         }
 
         @Override
@@ -257,6 +346,21 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         protected void cancelNotification(final int id, UserHandle user) {
+        }
+
+        @Override
+        protected String getCeDatabaseName(int userId) {
+            return new File(mRealTestContext.getCacheDir(), CE_DB).getPath();
+        }
+
+        @Override
+        protected String getDeDatabaseName(int userId) {
+            return new File(mRealTestContext.getCacheDir(), DE_DB).getPath();
+        }
+
+        @Override
+        String getPreNDatabaseName(int userId) {
+            return new File(mRealTestContext.getCacheDir(), PREN_DB).getPath();
         }
     }
 }
