@@ -72,6 +72,10 @@ public class TileServices extends IQSService.Stub {
         return mContext;
     }
 
+    public QSTileHost getHost() {
+        return mHost;
+    }
+
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
         TileServiceManager service = onCreateTileService(component);
@@ -89,6 +93,7 @@ public class TileServices extends IQSService.Stub {
     public void freeService(CustomTile tile, TileServiceManager service) {
         synchronized (mServices) {
             service.setBindAllowed(false);
+            service.handleDestroy();
             mServices.remove(tile);
             mTiles.remove(tile.getComponent());
             final String slot = tile.getComponent().getClassName();
