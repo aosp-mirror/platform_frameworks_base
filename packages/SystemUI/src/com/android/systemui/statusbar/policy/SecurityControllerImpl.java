@@ -114,8 +114,8 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getProfileOwnerName() {
-        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
-            String name = mDevicePolicyManager.getProfileOwnerNameAsUser(profile.id);
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mCurrentUserId)) {
+            String name = mDevicePolicyManager.getProfileOwnerNameAsUser(profileId);
             if (name != null) {
                 return name;
             }
@@ -135,13 +135,13 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getProfileVpnName() {
-        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
-            if (profile.id == mVpnUserId) {
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
+            if (profileId == mVpnUserId) {
                 continue;
             }
-            VpnConfig cfg = mCurrentVpns.get(profile.id);
+            VpnConfig cfg = mCurrentVpns.get(profileId);
             if (cfg != null) {
-                return getNameForVpnConfig(cfg, profile.getUserHandle());
+                return getNameForVpnConfig(cfg, UserHandle.of(profileId));
             }
         }
         return null;
@@ -149,8 +149,8 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean isVpnEnabled() {
-        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
-            if (mCurrentVpns.get(profile.id) != null) {
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
+            if (mCurrentVpns.get(profileId) != null) {
                 return true;
             }
         }

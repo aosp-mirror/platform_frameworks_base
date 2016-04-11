@@ -21,6 +21,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.FlpHardwareProvider;
 import com.android.server.location.FusedProxy;
@@ -53,7 +54,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.location.ActivityRecognitionHardware;
@@ -359,12 +359,9 @@ public class LocationManagerService extends ILocationManager.Stub {
      * @param currentUserId the current user, who might have an alter-ego.
      */
     void updateUserProfiles(int currentUserId) {
-        List<UserInfo> profiles = mUserManager.getProfiles(currentUserId);
+        int[] profileIds = mUserManager.getProfileIdsWithDisabled(currentUserId);
         synchronized (mLock) {
-            mCurrentUserProfiles = new int[profiles.size()];
-            for (int i = 0; i < mCurrentUserProfiles.length; i++) {
-                mCurrentUserProfiles[i] = profiles.get(i).id;
-            }
+            mCurrentUserProfiles = profileIds;
         }
     }
 
@@ -374,12 +371,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     private boolean isCurrentProfile(int userId) {
         synchronized (mLock) {
-            for (int i = 0; i < mCurrentUserProfiles.length; i++) {
-                if (mCurrentUserProfiles[i] == userId) {
-                    return true;
-                }
-            }
-            return false;
+            return ArrayUtils.contains(mCurrentUserProfiles, userId);
         }
     }
 

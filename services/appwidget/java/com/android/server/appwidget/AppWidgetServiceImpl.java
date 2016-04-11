@@ -460,12 +460,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         synchronized (mLock) {
             reloadWidgetsMaskedState(userId);
-            List<UserInfo> profiles = mUserManager.getEnabledProfiles(userId);
-            if (profiles != null) {
-                for (int i = 0; i < profiles.size(); i++) {
-                    UserInfo user  = profiles.get(i);
-                    reloadWidgetsMaskedState(user.id);
-                }
+            int[] profileIds = mUserManager.getEnabledProfileIds(userId);
+            for (int profileId : profileIds) {
+                reloadWidgetsMaskedState(profileId);
             }
         }
     }
@@ -3458,33 +3455,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public int[] getEnabledGroupProfileIds(int userId) {
             final int parentId = getGroupParent(userId);
 
-            final List<UserInfo> profiles;
             final long identity = Binder.clearCallingIdentity();
             try {
-                profiles = mUserManager.getProfiles(parentId);
+                return mUserManager.getEnabledProfileIds(parentId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-
-            int enabledProfileCount = 0;
-            final int profileCount = profiles.size();
-            for (int i = 0; i < profileCount; i++) {
-                if (profiles.get(i).isEnabled()) {
-                    enabledProfileCount++;
-                }
-            }
-
-            int enabledProfileIndex = 0;
-            final int[] profileIds = new int[enabledProfileCount];
-            for (int i = 0; i < profileCount; i++) {
-                UserInfo profile = profiles.get(i);
-                if (profile.isEnabled()) {
-                    profileIds[enabledProfileIndex] = profile.getUserHandle().getIdentifier();
-                    enabledProfileIndex++;
-                }
-            }
-
-            return profileIds;
         }
 
         public void enforceServiceExistsAndRequiresBindRemoteViewsPermission(

@@ -39,7 +39,6 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
@@ -343,31 +342,25 @@ public class DpmMockContext extends MockContext {
                     @Override
                     public List<UserInfo> answer(InvocationOnMock invocation) throws Throwable {
                         final int userId = (int) invocation.getArguments()[0];
-                        final ArrayList<UserInfo> ret = new ArrayList<UserInfo>();
-                        UserInfo parent = null;
-                        for (UserInfo ui : mUserInfos) {
-                            if (ui.id == userId) {
-                                parent = ui;
-                                break;
-                            }
-                        }
-                        if (parent == null) {
-                            return ret;
-                        }
-                        ret.add(parent);
-                        for (UserInfo ui : mUserInfos) {
-                            if (ui.id == userId) {
-                                continue;
-                            }
-                            if (ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                                    && ui.profileGroupId == parent.profileGroupId) {
-                                ret.add(ui);
-                            }
-                        }
-                        return ret;
+                        return getProfiles(userId);
                     }
                 }
         );
+        when(userManager.getProfileIdsWithDisabled(anyInt())).thenAnswer(
+                new Answer<int[]>() {
+                    @Override
+                    public int[] answer(InvocationOnMock invocation) throws Throwable {
+                        final int userId = (int) invocation.getArguments()[0];
+                        List<UserInfo> profiles = getProfiles(userId);
+                        int[] results = new int[profiles.size()];
+                        for (int i = 0; i < results.length; i++) {
+                            results[i] = profiles.get(i).id;
+                        }
+                        return results;
+                    }
+                }
+        );
+
 
         // Create a data directory.
         final File dir = new File(dataDir, "user" + userId);
@@ -375,6 +368,31 @@ public class DpmMockContext extends MockContext {
 
         when(environment.getUserSystemDirectory(eq(userId))).thenReturn(dir);
         return dir;
+    }
+
+    private List<UserInfo> getProfiles(int userId) {
+        final ArrayList<UserInfo> ret = new ArrayList<UserInfo>();
+        UserInfo parent = null;
+        for (UserInfo ui : mUserInfos) {
+            if (ui.id == userId) {
+                parent = ui;
+                break;
+            }
+        }
+        if (parent == null) {
+            return ret;
+        }
+        ret.add(parent);
+        for (UserInfo ui : mUserInfos) {
+            if (ui.id == userId) {
+                continue;
+            }
+            if (ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                    && ui.profileGroupId == parent.profileGroupId) {
+                ret.add(ui);
+            }
+        }
+        return ret;
     }
 
     /**
