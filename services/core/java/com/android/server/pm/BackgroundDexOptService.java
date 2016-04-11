@@ -89,6 +89,15 @@ public class BackgroundDexOptService extends JobService {
         }
     }
 
+    public static void notifyPackageChanged(String packageName) {
+        // The idle maintanance job skips packages which previously failed to
+        // compile. The given package has changed and may successfully compile
+        // now. Remove it from the list of known failing packages.
+        synchronized (sFailedPackageNames) {
+            sFailedPackageNames.remove(packageName);
+        }
+    }
+
     // Returns the current battery level as a 0-100 integer.
     private int getBatteryLevel() {
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -170,7 +179,9 @@ public class BackgroundDexOptService extends JobService {
                     }
                     // Conservatively add package to the list of failing ones in case performDexOpt
                     // never returns.
-                    sFailedPackageNames.add(pkg);
+                    synchronized (sFailedPackageNames) {
+                        sFailedPackageNames.add(pkg);
+                    }
                     // Optimize package if needed. Note that there can be no race between
                     // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
                     if (pm.performDexOpt(pkg,
@@ -179,7 +190,9 @@ public class BackgroundDexOptService extends JobService {
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
                             /* force */ false)) {
                         // Dexopt succeeded, remove package from the list of failing ones.
-                        sFailedPackageNames.remove(pkg);
+                        synchronized (sFailedPackageNames) {
+                            sFailedPackageNames.remove(pkg);
+                        }
                     }
                 }
                 // Ran to completion, so we abandon our timeslice and do not reschedule.
