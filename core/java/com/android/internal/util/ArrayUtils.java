@@ -27,6 +27,7 @@ import libcore.util.EmptyArray;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -128,7 +129,7 @@ public class ArrayUtils {
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(@Nullable List<?> array) {
+    public static boolean isEmpty(@Nullable Collection<?> array) {
         return array == null || array.isEmpty();
     }
 
@@ -451,7 +452,7 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(@Nullable ArrayList<T> cur, T val) {
+    public static <T> boolean contains(@Nullable Collection<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
     }
 
