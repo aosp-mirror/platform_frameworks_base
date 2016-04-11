@@ -179,42 +179,37 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        final NumberFormat nf = NumberFormat.getPercentInstance();
-        nf.setMinimumFractionDigits(2);
-        nf.setMaximumFractionDigits(2);
-
-        assertProgressNotification(NAME, nf.format(0));
+        assertProgressNotification(NAME, 0f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "108");
-        assertProgressNotification(NAME, nf.format(0.108));
+        assertProgressNotification(NAME, 10.80f);
 
-        SystemProperties.set(PROGRESS_PROPERTY, "500");
-        assertProgressNotification(NAME, nf.format(0.50));
+        assertProgressNotification(NAME, 50.00f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "950");
-        assertProgressNotification(NAME, nf.format(0.95));
+        assertProgressNotification(NAME, 95.00f);
 
         // Make sure progress never goes back...
         SystemProperties.set(MAX_PROPERTY, "2000");
         Thread.sleep(POLLING_FREQUENCY + DateUtils.SECOND_IN_MILLIS);
-        assertProgressNotification(NAME, nf.format(0.95));
+        assertProgressNotification(NAME, 95.00f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "1000");
-        assertProgressNotification(NAME, nf.format(0.95));
+        assertProgressNotification(NAME, 95.00f);
 
         // ...only forward...
         SystemProperties.set(PROGRESS_PROPERTY, "1902");
-        assertProgressNotification(NAME, nf.format(0.9510));
+        assertProgressNotification(NAME, 95.10f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "1960");
-        assertProgressNotification(NAME, nf.format(0.98));
+        assertProgressNotification(NAME, 98.00f);
 
         // ...but never more than the capped value.
         SystemProperties.set(PROGRESS_PROPERTY, "2000");
-        assertProgressNotification(NAME, nf.format(0.99));
+        assertProgressNotification(NAME, 99.00f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "3000");
-        assertProgressNotification(NAME, nf.format(0.99));
+        assertProgressNotification(NAME, 99.00f);
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath, mScreenshotPath);
@@ -233,7 +228,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
 
-        assertProgressNotification(NAME, nf.format(0));
+        assertProgressNotification(NAME, 00.00f);
 
         openProgressNotification(ID);
         UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
@@ -338,7 +333,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.clickOk();
 
         assertPropertyValue(NAME_PROPERTY, NEW_NAME);
-        assertProgressNotification(NEW_NAME, "0.00%");
+        assertProgressNotification(NEW_NAME, 00.00f);
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath,
                 mScreenshotPath);
@@ -375,7 +370,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.clickOk();
 
         assertPropertyValue(NAME_PROPERTY, NEW_NAME);
-        assertProgressNotification(NEW_NAME, "0.00%");
+        assertProgressNotification(NEW_NAME, 00.00f);
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID,
                 plainText? mPlainTextPath : mZipPath, mScreenshotPath);
@@ -571,13 +566,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
     }
 
-    private void assertProgressNotification(String name, String percent) {
+    private void assertProgressNotification(String name, float percent) {
         // TODO: it currently looks for 3 distinct objects, without taking advantage of their
         // relationship.
         openProgressNotification(ID);
         Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
         mUiBot.getObject(name);
-        mUiBot.getObject(percent);
+        // TODO: need a way to get the ProgresBar from the "android:id/progress" UIObject...
     }
 
     private UiObject openProgressNotification(int id) {
