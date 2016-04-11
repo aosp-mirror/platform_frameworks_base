@@ -193,9 +193,10 @@ private:
     void deferNodePropsAndOps(RenderNode& node);
 
     template <typename V>
-    void defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes);
+    void defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMode mode,
+            const V& zTranslatedNodes);
 
-    void deferShadow(const RenderNodeOp& casterOp);
+    void deferShadow(const ClipBase* reorderClip, const RenderNodeOp& casterOp);
 
     void deferProjectedChildren(const RenderNode& renderNode);
 

@@ -1722,6 +1722,35 @@ RENDERTHREAD_TEST(FrameBuilder, shadowLayering) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
+RENDERTHREAD_TEST(FrameBuilder, shadowClipping) {
+    class ShadowClippingTestRenderer : public TestRendererBase {
+    public:
+        void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(25, 25, 75, 75), state.computedState.clipState->rect)
+                    << "Shadow must respect pre-barrier canvas clip value.";
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+        }
+    };
+    auto parent = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        // Apply a clip before the reorder barrier/shadow casting child is drawn.
+        // This clip must be applied to the shadow cast by the child.
+        canvas.clipRect(25, 25, 75, 75, SkRegion::kIntersect_Op);
+        canvas.insertReorderBarrier(true);
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+            TestUtils::createSyncedNodeList(parent),
+            (FrameBuilder::LightGeometry) {{ 100, 100, 100 }, 50}, Caches::getInstance());
+    ShadowClippingTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
 static void testProperty(std::function<void(RenderProperties&)> propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
     class PropertyTestRenderer : public TestRendererBase {

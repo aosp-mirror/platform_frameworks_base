@@ -137,6 +137,9 @@ public:
 
         // whether children with non-zero Z in the chunk should be reordered
         bool reorderChildren;
+#if HWUI_NEW_OPS
+        const ClipBase* reorderClip;
+#endif
     };
 
     DisplayList();
