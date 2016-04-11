@@ -27,7 +27,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
-import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.AnimationProps;
 
@@ -47,6 +46,7 @@ public class TaskStackHorizontalViewAdapter extends
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TaskCardView mTaskCardView;
         private Task mTask;
+        private boolean mShouldReset;
         public ViewHolder(View v) {
             super(v);
             if(v instanceof TaskCardView) {
@@ -69,7 +69,6 @@ public class TaskStackHorizontalViewAdapter extends
                 } else {
                     EventBus.getDefault().send(new LaunchTvTaskEvent(mTaskCardView, mTask,
                             null, INVALID_STACK_ID));
-                    ((Activity) (v.getContext())).finish();
                 }
             } catch (Exception e) {
                 Log.e(TAG, v.getContext()
@@ -89,6 +88,7 @@ public class TaskStackHorizontalViewAdapter extends
                 public void onAnimationEnd(Animator animation) {
                     removeAt(position);
                     EventBus.getDefault().send(new DeleteTaskDataEvent(task));
+                    mShouldReset = true;
                 }
 
                 @Override
@@ -114,9 +114,9 @@ public class TaskStackHorizontalViewAdapter extends
     @Override
     public TaskStackHorizontalViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
             int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recents_tv_task_card_view, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        ViewHolder viewHolder = new ViewHolder(
+                        inflater.inflate(R.layout.recents_tv_task_card_view, parent, false));
         return viewHolder;
     }
 
@@ -127,7 +127,12 @@ public class TaskStackHorizontalViewAdapter extends
 
     @Override
     public void onViewDetachedFromWindow(ViewHolder holder) {
-        holder.mTaskCardView.reset();
+        // We only want to reset on view detach if this is the last task being dismissed.
+        // This is so that we do not reset when shifting to apps etc, as it is not needed.
+        if (holder.mShouldReset) {
+            holder.mTaskCardView.reset();
+            holder.mShouldReset = false;
+        }
     }
 
     @Override
@@ -156,6 +161,7 @@ public class TaskStackHorizontalViewAdapter extends
         int position = mTaskList.indexOf(task);
         return (position >= 0) ? position : 0;
     }
+
 
     public void setTaskStackHorizontalGridView(TaskStackHorizontalGridView gridView) {
         mGridView = gridView;

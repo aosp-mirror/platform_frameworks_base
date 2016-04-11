@@ -26,6 +26,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.tv.views.TaskCardView;
 
 public class ViewFocusAnimator implements View.OnFocusChangeListener {
     private final float mUnselectedScale;
@@ -94,10 +95,13 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
 
         mTargetView.setScaleX(scale);
         mTargetView.setScaleY(scale);
-        mTargetView.setZ(z);
 
         mTargetView.setPadding((int) spacing, mTargetView.getPaddingTop(),
                 (int) spacing, mTargetView.getPaddingBottom());
+
+        if (mTargetView instanceof TaskCardView) {
+            ((TaskCardView) mTargetView).getThumbnailView().setZ(z);
+        }
     }
 
     public float getFocusProgress() {
