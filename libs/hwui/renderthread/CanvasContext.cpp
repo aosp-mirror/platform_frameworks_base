@@ -113,9 +113,16 @@ void CanvasContext::setSurface(Surface* surface) {
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        makeCurrent();
     } else {
         mRenderThread.removeFrameCallback(this);
     }
+}
+
+void CanvasContext::requireSurface() {
+    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+            "requireSurface() called but no surface set!");
+    makeCurrent();
 }
 
 void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
@@ -137,18 +144,6 @@ void CanvasContext::updateSurface(Surface* surface) {
 
 bool CanvasContext::pauseSurface(Surface* surface) {
     return mRenderThread.removeFrameCallback(this);
-}
-
-void CanvasContext::setStopped(bool stopped) {
-    if (mStopped != stopped) {
-        mStopped = stopped;
-        if (mStopped) {
-            mRenderThread.removeFrameCallback(this);
-            if (mEglManager.isCurrent(mEglSurface)) {
-                mEglManager.makeCurrent(EGL_NO_SURFACE);
-            }
-        }
-    }
 }
 
 // TODO: don't pass viewport size, it's automatic via EGL
@@ -177,9 +172,7 @@ void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
 }
 
-bool CanvasContext::makeCurrent() {
-    if (mStopped) return false;
-
+void CanvasContext::makeCurrent() {
     // TODO: Figure out why this workaround is needed, see b/13913604
     // In the meantime this matches the behavior of GLRenderer, so it is not a regression
     EGLint error = 0;
@@ -187,7 +180,6 @@ bool CanvasContext::makeCurrent() {
     if (error) {
         setSurface(nullptr);
     }
-    return !error;
 }
 
 static bool wasSkipped(FrameInfo* info) {
@@ -679,7 +671,7 @@ void CanvasContext::runWithGlContext(RenderTask* task) {
 }
 
 Layer* CanvasContext::createTextureLayer() {
-    mEglManager.initialize();
+    requireSurface();
     return LayerRenderer::createTextureLayer(mRenderThread.renderState());
 }
 
