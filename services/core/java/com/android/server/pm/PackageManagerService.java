@@ -229,6 +229,7 @@ import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
+import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -2051,6 +2052,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);
         m.enableSystemUserPackages();
+        // Disable any carrier apps. We do this very early in boot to prevent the apps from being
+        // disabled after already being started.
+        CarrierAppUtils.disableCarrierAppsUntilPrivileged(context.getOpPackageName(), m,
+                UserHandle.USER_SYSTEM);
         ServiceManager.addService("package", m);
         return m;
     }
@@ -17057,8 +17062,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        final int permission = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
+        final int permission;
+        if (uid == Process.SYSTEM_UID) {
+            permission = PackageManager.PERMISSION_GRANTED;
+        } else {
+            permission = mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
+        }
         enforceCrossUserPermission(uid, userId,
                 false /* requireFullPermission */, true /* checkShell */, "set enabled");
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
