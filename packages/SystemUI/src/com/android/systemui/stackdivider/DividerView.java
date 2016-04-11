@@ -31,12 +31,13 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VelocityTracker;
@@ -45,7 +46,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -866,6 +866,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mEntranceAnimationRunning = true;
         resizeStack(position, mSnapAlgorithm.getMiddleTarget().position,
                 mSnapAlgorithm.getMiddleTarget());
+
+        // Vibrate after docking
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
@@ -894,6 +897,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             // Don't start immediately - give a little bit time to settle the drag resize change.
             stopDragging(getCurrentPosition(), target, 336 /* duration */, 100 /* startDelay */,
                     Interpolators.TOUCH_RESPONSE);
+
+            // Vibrate after undocking
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
         }
     }
 }
