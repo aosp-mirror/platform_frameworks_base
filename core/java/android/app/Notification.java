@@ -1955,9 +1955,16 @@ public class Notification implements Parcelable
      * @hide
      */
     public static void addFieldsFromContext(Context context, Notification notification) {
-        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO,
-                context.getApplicationInfo());
-        notification.extras.putInt(EXTRA_ORIGINATING_USERID, context.getUserId());
+        addFieldsFromContext(context.getApplicationInfo(), context.getUserId(), notification);
+    }
+
+    /**
+     * @hide
+     */
+    public static void addFieldsFromContext(ApplicationInfo ai, int userId,
+            Notification notification) {
+        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, ai);
+        notification.extras.putInt(EXTRA_ORIGINATING_USERID, userId);
     }
 
     @Override
