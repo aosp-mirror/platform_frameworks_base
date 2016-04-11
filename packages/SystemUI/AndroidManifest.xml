@@ -488,5 +488,12 @@
                 <action android:name="com.android.systemui.action.CLEAR_TUNER" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".statusbar.KeyboardShortcutsReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

@@ -1676,6 +1676,17 @@ public class Activity extends ContextThemeWrapper
     public void onProvideAssistContent(AssistContent outContent) {
     }
 
+    /**
+     * Request the Keyboard Shortcuts screen to show up. If it succeeds, this will trigger
+     * {@link #onProvideKeyboardShortcuts} to retrieve the shortcuts for the foreground activity.
+     */
+    public final void requestKeyboardShortcutsHelper() {
+        Intent intent = new Intent(Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS);
+        intent.setComponent(new ComponentName("com.android.systemui",
+                "com.android.systemui.statusbar.KeyboardShortcutsReceiver"));
+        sendBroadcast(intent);
+    }
+
     @Override
     public void onProvideKeyboardShortcuts(
             List<KeyboardShortcutGroup> data, Menu menu, int deviceId) {

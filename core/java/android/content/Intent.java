@@ -1404,6 +1404,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
 
     /**
+     * Activity Action: Start the Keyboard Shortcuts Helper screen.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHOW_KEYBOARD_SHORTCUTS =
+            "android.intent.action.SHOW_KEYBOARD_SHORTCUTS";
+
+    /**
      * Activity Action: Show settings for managing network data usage of a
      * specific application. Applications should define an activity that offers
      * options to control data usage.
