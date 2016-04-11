@@ -55,10 +55,7 @@ public:
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE
 // ----------------------------------------------------------------------------
-    virtual void insertReorderBarrier(bool enableReorder) override {
-        mDeferredBarrierType = enableReorder
-                ? DeferredBarrierType::OutOfOrder : DeferredBarrierType::InOrder;
-    }
+    virtual void insertReorderBarrier(bool enableReorder) override;
 
     virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(RenderNode* renderNode) override;
@@ -312,6 +309,7 @@ private:
     std::unique_ptr<SkiaCanvasProxy> mSkiaCanvasProxy;
     ResourceCache& mResourceCache;
     DeferredBarrierType mDeferredBarrierType = DeferredBarrierType::None;
+    const ClipBase* mDeferredBarrierClip = nullptr;
     DisplayList* mDisplayList = nullptr;
     bool mHighContrastText = false;
     SkAutoTUnref<SkDrawFilter> mDrawFilter;
