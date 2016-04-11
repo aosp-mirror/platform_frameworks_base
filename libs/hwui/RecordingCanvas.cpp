@@ -57,6 +57,16 @@ DisplayList* RecordingCanvas::finishRecording() {
     return displayList;
 }
 
+void RecordingCanvas::insertReorderBarrier(bool enableReorder) {
+    if (enableReorder) {
+        mDeferredBarrierType = DeferredBarrierType::OutOfOrder;
+        mDeferredBarrierClip = getRecordedClip();
+    } else {
+        mDeferredBarrierType = DeferredBarrierType::InOrder;
+        mDeferredBarrierClip = nullptr;
+    }
+}
+
 SkCanvas* RecordingCanvas::asSkCanvas() {
     LOG_ALWAYS_FATAL_IF(!mDisplayList,
             "attempting to get an SkCanvas when we are not recording!");
@@ -610,6 +620,7 @@ size_t RecordingCanvas::addOp(RecordedOp* op) {
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == DeferredBarrierType::OutOfOrder);
+        newChunk.reorderClip = mDeferredBarrierClip;
 
         int nextChildIndex = mDisplayList->children.size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
