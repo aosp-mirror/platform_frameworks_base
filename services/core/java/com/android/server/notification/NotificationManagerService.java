@@ -2543,27 +2543,18 @@ public class NotificationManagerService extends SystemService {
                 // Handle grouped notifications and bail out early if we
                 // can to avoid extracting signals.
                 handleGroupedNotificationLocked(r, old, callingUid, callingPid);
-                boolean ignoreNotification =
-                        removeUnusedGroupedNotificationLocked(r, old, callingUid, callingPid);
-                if (DBG) Slog.d(TAG, "ignoreNotification is " + ignoreNotification);
 
                 // This conditional is a dirty hack to limit the logging done on
                 //     behalf of the download manager without affecting other apps.
                 if (!pkg.equals("com.android.providers.downloads")
                         || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
                     int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
-                    if (ignoreNotification) {
-                        enqueueStatus = EVENTLOG_ENQUEUE_STATUS_IGNORED;
-                    } else if (old != null) {
+                    if (old != null) {
                         enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
                     }
                     EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
                             pkg, id, tag, userId, notification.toString(),
                             enqueueStatus);
-                }
-
-                if (ignoreNotification) {
-                    return;
                 }
 
                 mRankingHelper.extractSignals(r);
@@ -2679,58 +2670,6 @@ public class NotificationManagerService extends SystemService {
             cancelGroupChildrenLocked(old, callingUid, callingPid, null,
                     REASON_GROUP_SUMMARY_CANCELED);
         }
-    }
-
-    /**
-     * Performs group notification optimizations if SysUI is the only active
-     * notification listener and returns whether the given notification should
-     * be ignored.
-     *
-     * <p>Returns true if the given notification is a child of a group with a
-     * summary, which means that SysUI will never show it, and hence the new
-     * notification can be safely ignored. Also cancels any previous instance
-     * of the ignored notification.</p>
-     *
-     * <p>For summaries, cancels all children of that group, as SysUI will
-     * never show them anymore.</p>
-     *
-     * @return true if the given notification can be ignored as an optimization
-     */
-    private boolean removeUnusedGroupedNotificationLocked(NotificationRecord r,
-            NotificationRecord old, int callingUid, int callingPid) {
-        if (!ENABLE_CHILD_NOTIFICATIONS) {
-            // No optimizations are possible if listeners want groups.
-            if (mListeners.notificationGroupsDesired()) {
-                return false;
-            }
-
-            StatusBarNotification sbn = r.sbn;
-            String group = sbn.getGroupKey();
-            boolean isSummary = sbn.getNotification().isGroupSummary();
-            boolean isChild = !isSummary && sbn.isGroup();
-
-            NotificationRecord summary = mSummaryByGroupKey.get(group);
-            if (isChild && summary != null) {
-                // Child with an active summary -> ignore
-                if (DBG) {
-                    Slog.d(TAG, "Ignoring group child " + sbn.getKey() + " due to existing summary "
-                            + summary.getKey());
-                }
-                // Make sure we don't leave an old version of the notification around.
-                if (old != null) {
-                    if (DBG) {
-                        Slog.d(TAG, "Canceling old version of ignored group child " + sbn.getKey());
-                    }
-                    cancelNotificationLocked(old, false, REASON_GROUP_OPTIMIZATION);
-                }
-                return true;
-            } else if (isSummary) {
-                // Summary -> cancel children
-                cancelGroupChildrenLocked(r, callingUid, callingPid, null,
-                        REASON_GROUP_OPTIMIZATION);
-            }
-        }
-        return false;
     }
 
     @VisibleForTesting
@@ -3869,7 +3808,6 @@ public class NotificationManagerService extends SystemService {
     public class NotificationListeners extends ManagedServices {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
-        private boolean mNotificationGroupsDesired;
 
         public NotificationListeners() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
@@ -3902,7 +3840,6 @@ public class NotificationManagerService extends SystemService {
             final INotificationListener listener = (INotificationListener) info.service;
             final NotificationRankingUpdate update;
             synchronized (mNotificationList) {
-                updateNotificationGroupsDesiredLocked();
                 update = makeRankingUpdateLocked(info);
             }
             try {
@@ -3919,7 +3856,6 @@ public class NotificationManagerService extends SystemService {
                 updateEffectsSuppressorLocked();
             }
             mLightTrimListeners.remove(removed);
-            updateNotificationGroupsDesiredLocked();
         }
 
         public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {
@@ -4111,31 +4047,6 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             return false;
-        }
-
-        /**
-         * Returns whether any of the currently registered listeners wants to receive notification
-         * groups.
-         *
-         * <p>Currently we assume groups are desired by non-SystemUI listeners.</p>
-         */
-        public boolean notificationGroupsDesired() {
-            return mNotificationGroupsDesired;
-        }
-
-        private void updateNotificationGroupsDesiredLocked() {
-            mNotificationGroupsDesired = true;
-            // No listeners, no groups.
-            if (mServices.isEmpty()) {
-                mNotificationGroupsDesired = false;
-                return;
-            }
-            // One listener: Check whether it's SysUI.
-            if (mServices.size() == 1 &&
-                    mServices.get(0).component.getPackageName().equals("com.android.systemui")) {
-                mNotificationGroupsDesired = false;
-                return;
-            }
         }
     }
 
