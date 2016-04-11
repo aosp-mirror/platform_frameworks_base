@@ -28,6 +28,8 @@ import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
 
+import java.util.Arrays;
+
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
 
@@ -90,14 +92,14 @@ public final class Installer extends SystemService {
         mInstaller.execute("migrate_app_data", uuid, pkgname, userid, flags);
     }
 
-    public void clearAppData(String uuid, String pkgname, int userid, int flags)
+    public void clearAppData(String uuid, String pkgname, int userid, int flags, long ceDataInode)
             throws InstallerException {
-        mInstaller.execute("clear_app_data", uuid, pkgname, userid, flags);
+        mInstaller.execute("clear_app_data", uuid, pkgname, userid, flags, ceDataInode);
     }
 
-    public void destroyAppData(String uuid, String pkgname, int userid, int flags)
+    public void destroyAppData(String uuid, String pkgname, int userid, int flags, long ceDataInode)
             throws InstallerException {
-        mInstaller.execute("destroy_app_data", uuid, pkgname, userid, flags);
+        mInstaller.execute("destroy_app_data", uuid, pkgname, userid, flags, ceDataInode);
     }
 
     public void moveCompleteApp(String from_uuid, String to_uuid, String package_name,
@@ -107,31 +109,26 @@ public final class Installer extends SystemService {
                 data_app_name, appid, seinfo, targetSdkVersion);
     }
 
-    public void getAppSize(String uuid, String pkgname, int userid, int flags, String apkPath,
-            String libDirPath, String fwdLockApkPath, String asecPath, String[] instructionSets,
-            PackageStats pStats) throws InstallerException {
-        for (String instructionSet : instructionSets) {
-            assertValidInstructionSet(instructionSet);
-        }
-
-        // TODO: Extend getSizeInfo to look at the full subdirectory tree,
-        // not just the first level.
-        // TODO: Extend getSizeInfo to look at *all* instrution sets, not
-        // just the primary.
-        final String rawRes = mInstaller.executeForResult("get_app_size", uuid, pkgname, userid,
-                flags, apkPath, libDirPath, fwdLockApkPath, asecPath, instructionSets[0]);
-        final String res[] = rawRes.split(" ");
-
-        if ((res == null) || (res.length != 5)) {
-            throw new InstallerException("Invalid size result: " + rawRes);
-        }
+    public void getAppSize(String uuid, String pkgname, int userid, int flags, long ceDataInode,
+            String codePath, PackageStats stats) throws InstallerException {
+        final String[] res = mInstaller.execute("get_app_size", uuid, pkgname, userid, flags,
+                ceDataInode, codePath);
         try {
-            pStats.codeSize = Long.parseLong(res[1]);
-            pStats.dataSize = Long.parseLong(res[2]);
-            pStats.cacheSize = Long.parseLong(res[3]);
-            pStats.externalCodeSize = Long.parseLong(res[4]);
-        } catch (NumberFormatException e) {
-            throw new InstallerException("Invalid size result: " + rawRes);
+            stats.codeSize += Long.parseLong(res[1]);
+            stats.dataSize += Long.parseLong(res[2]);
+            stats.cacheSize += Long.parseLong(res[3]);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            throw new InstallerException("Invalid size result: " + Arrays.toString(res));
+        }
+    }
+
+    public long getAppDataInode(String uuid, String pkgname, int userid, int flags)
+            throws InstallerException {
+        final String[] res = mInstaller.execute("get_app_data_inode", uuid, pkgname, userid, flags);
+        try {
+            return Long.parseLong(res[1]);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            throw new InstallerException("Invalid inode result: " + Arrays.toString(res));
         }
     }
 

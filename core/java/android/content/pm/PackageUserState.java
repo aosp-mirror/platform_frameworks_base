@@ -36,21 +36,20 @@ import com.android.internal.util.ArrayUtils;
  * @hide
  */
 public class PackageUserState {
+    public long ceDataInode;
+    public boolean installed;
     public boolean stopped;
     public boolean notLaunched;
-    public boolean installed;
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
-    public int enabled;
     public boolean blockUninstall;
-
+    public int enabled;
     public String lastDisableAppCaller;
+    public int domainVerificationStatus;
+    public int appLinkGeneration;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
-
-    public int domainVerificationStatus;
-    public int appLinkGeneration;
 
     public PackageUserState() {
         installed = true;
@@ -62,18 +61,19 @@ public class PackageUserState {
     }
 
     public PackageUserState(PackageUserState o) {
+        ceDataInode = o.ceDataInode;
         installed = o.installed;
         stopped = o.stopped;
         notLaunched = o.notLaunched;
-        enabled = o.enabled;
         hidden = o.hidden;
         suspended = o.suspended;
-        lastDisableAppCaller = o.lastDisableAppCaller;
-        disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
-        enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
         blockUninstall = o.blockUninstall;
+        enabled = o.enabled;
+        lastDisableAppCaller = o.lastDisableAppCaller;
         domainVerificationStatus = o.domainVerificationStatus;
         appLinkGeneration = o.appLinkGeneration;
+        disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
+        enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
     }
 
     /**

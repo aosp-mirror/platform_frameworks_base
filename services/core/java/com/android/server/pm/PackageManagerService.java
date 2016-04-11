@@ -2394,9 +2394,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
                         psit.remove();
                         logCriticalInfo(Log.WARN, "System package " + ps.name
-                                + " no longer exists; wiping its data");
-                        // No apps are running this early, so no need to freeze
-                        removeDataDirsLIF(null, ps.name);
+                                + " no longer exists; it's data will be wiped");
+                        // Actual deletion of code and data will be handled by later
+                        // reconciliation step
                     } else {
                         final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
@@ -2409,8 +2409,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
             for (int i = 0; i < deletePkgsList.size(); i++) {
-                // No apps are running this early, so no need to freeze
-                cleanupInstallFailedPackageLIF(deletePkgsList.get(i));
+                // Actual deletion of code and data will be handled by later
+                // reconciliation step
+                final String packageName = deletePkgsList.get(i).name;
+                logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + packageName);
+                synchronized (mPackages) {
+                    mSettings.removePackageLPw(packageName);
+                }
             }
 
             //delete tmp files
@@ -2443,9 +2448,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     String msg;
                     if (deletedPkg == null) {
                         msg = "Updated system package " + deletedAppName
-                                + " no longer exists; wiping its data";
-                        // No apps are running this early, so no need to freeze
-                        removeDataDirsLIF(null, deletedAppName);
+                                + " no longer exists; it's data will be wiped";
+                        // Actual deletion of code and data will be handled by later
+                        // reconciliation step
                     } else {
                         msg = "Updated system app + " + deletedAppName
                                 + " no longer present; removing system privileges for "
@@ -2591,7 +2596,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             }
-            reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
+            reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
                     storageFlags);
 
             // If this is first boot after an OTA, and a normal boot, then
@@ -2602,8 +2607,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final PackageSetting ps = mSettings.mPackages.valueAt(i);
                     if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.volumeUuid)) {
                         // No apps are running this early, so no need to freeze
-                        deleteCodeCacheDirsLIF(ps.volumeUuid, ps.name);
+                        clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
+                                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
+                                        | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
+                    clearAppProfilesLIF(ps.pkg);
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
@@ -2984,24 +2992,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.wtf(TAG, "Package Manager Crash", e);
             }
             throw e;
-        }
-    }
-
-    void cleanupInstallFailedPackageLIF(PackageSetting ps) {
-        logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + ps.name);
-
-        removeDataDirsLIF(ps.volumeUuid, ps.name);
-        if (ps.codePath != null) {
-            removeCodePathLI(ps.codePath);
-        }
-        if (ps.resourcePath != null && !ps.resourcePath.equals(ps.codePath)) {
-            if (ps.resourcePath.isDirectory()) {
-                FileUtils.deleteContents(ps.resourcePath);
-            }
-            ps.resourcePath.delete();
-        }
-        synchronized (mPackages) {
-            mSettings.removePackageLPw(ps.name);
         }
     }
 
@@ -7327,23 +7317,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private boolean removeDataDirsLIF(String volumeUuid, String packageName) {
-        // TODO: triage flags as part of 26466827
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
-
-        boolean res = true;
-        final int[] userIds = sUserManager.getUserIds();
-        for (int userId : userIds) {
-            try {
-                mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to delete data directory", e);
-                res = false;
-            }
-        }
-        return res;
-    }
-
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
             try {
@@ -7356,74 +7329,103 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void destroyAppDataLI(String volumeUuid, String packageName, int userId, int flags) {
-        try (PackageFreezer freezer = freezePackage(packageName, "destroyAppDataLI")) {
-            try {
-                mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to destroy app data", e);
-            }
-        }
+    private int[] resolveUserIds(int userId) {
+        return (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds() : new int[] { userId };
     }
 
-    void restoreconAppDataLI(String volumeUuid, String packageName, int userId, int flags,
-            int appId, String seinfo) {
-        try {
-            mInstaller.restoreconAppData(volumeUuid, packageName, userId, flags, appId, seinfo);
-        } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to restorecon for " + packageName + ": " + e);
-        }
-    }
-
-    private void deleteProfilesLIF(PackageParser.Package pkg, boolean destroy) {
-        try {
-            if (destroy) {
-                mInstaller.destroyAppProfiles(pkg.packageName);
-            } else {
-                mInstaller.clearAppProfiles(pkg.packageName);
-            }
-        } catch (InstallerException ex) {
-            Log.e(TAG, "Could not delete profiles for package " + pkg.packageName);
-        }
-    }
-
-    private void deleteCodeCacheDirsLIF(String volumeUuid, String packageName) {
-        final PackageParser.Package pkg;
-        synchronized (mPackages) {
-            pkg = mPackages.get(packageName);
-        }
+    private void clearAppDataLIF(PackageParser.Package pkg, int userId, int flags) {
         if (pkg == null) {
-            Slog.w(TAG, "Failed to delete code cache directory. No package: " + packageName);
+            Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        deleteCodeCacheDirsLIF(pkg);
+        clearAppDataLeafLIF(pkg, userId, flags);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            clearAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
+        }
     }
 
-    private void deleteCodeCacheDirsLIF(PackageParser.Package pkg) {
-        // TODO: triage flags as part of 26466827
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
-
-        int[] users = sUserManager.getUserIds();
-        int res = 0;
-        for (int user : users) {
-            // Remove the parent code cache
+    private void clearAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
+        final PackageSetting ps;
+        synchronized (mPackages) {
+            ps = mSettings.mPackages.get(pkg.packageName);
+        }
+        for (int realUserId : resolveUserIds(userId)) {
+            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
             try {
-                mInstaller.clearAppData(pkg.volumeUuid, pkg.packageName, user,
-                        flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                mInstaller.clearAppData(pkg.volumeUuid, pkg.packageName, realUserId, flags,
+                        ceDataInode);
             } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to delete code cache directory", e);
+                Slog.w(TAG, String.valueOf(e));
             }
-            final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                PackageParser.Package childPkg = pkg.childPackages.get(i);
-                // Remove the child code cache
-                try {
-                    mInstaller.clearAppData(childPkg.volumeUuid, childPkg.packageName,
-                            user, flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                } catch (InstallerException e) {
-                    Slog.w(TAG, "Failed to delete code cache directory", e);
-                }
+        }
+    }
+
+    private void destroyAppDataLIF(PackageParser.Package pkg, int userId, int flags) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        destroyAppDataLeafLIF(pkg, userId, flags);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            destroyAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
+        }
+    }
+
+    private void destroyAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
+        final PackageSetting ps;
+        synchronized (mPackages) {
+            ps = mSettings.mPackages.get(pkg.packageName);
+        }
+        for (int realUserId : resolveUserIds(userId)) {
+            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
+            try {
+                mInstaller.destroyAppData(pkg.volumeUuid, pkg.packageName, realUserId, flags,
+                        ceDataInode);
+            } catch (InstallerException e) {
+                Slog.w(TAG, String.valueOf(e));
             }
+        }
+    }
+
+    private void destroyAppProfilesLIF(PackageParser.Package pkg) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        destroyAppProfilesLeafLIF(pkg);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            destroyAppProfilesLeafLIF(pkg.childPackages.get(i));
+        }
+    }
+
+    private void destroyAppProfilesLeafLIF(PackageParser.Package pkg) {
+        try {
+            mInstaller.destroyAppProfiles(pkg.packageName);
+        } catch (InstallerException e) {
+            Slog.w(TAG, String.valueOf(e));
+        }
+    }
+
+    private void clearAppProfilesLIF(PackageParser.Package pkg) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        clearAppProfilesLeafLIF(pkg);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            clearAppProfilesLeafLIF(pkg.childPackages.get(i));
+        }
+    }
+
+    private void clearAppProfilesLeafLIF(PackageParser.Package pkg) {
+        try {
+            mInstaller.clearAppProfiles(pkg.packageName);
+        } catch (InstallerException e) {
+            Slog.w(TAG, String.valueOf(e));
         }
     }
 
@@ -7613,7 +7615,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         } finally {
             if (!success && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
                 // DELETE_DATA_ON_FAILURES is only used by frozen paths
-                removeDataDirsLIF(pkg.volumeUuid, pkg.packageName);
+                destroyAppDataLIF(pkg, UserHandle.USER_ALL,
+                        StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                destroyAppProfilesLIF(pkg);
             }
         }
     }
@@ -11245,7 +11249,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (installed) {
                 if (pkgSetting.pkg != null) {
-                    prepareAppDataAfterInstall(pkgSetting.pkg);
+                    synchronized (mInstallLock) {
+                        // We don't need to freeze for a brand new install
+                        prepareAppDataAfterInstallLIF(pkgSetting.pkg);
+                    }
                 }
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
             }
@@ -13371,7 +13378,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 // Clean up both app data and code
                 // All package moves are frozen until finished
-                removeDataDirsLIF(volumeUuid, move.packageName);
+                try {
+                    mInstaller.destroyAppData(volumeUuid, move.packageName, UserHandle.USER_ALL,
+                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE, 0);
+                } catch (InstallerException e) {
+                    Slog.w(TAG, String.valueOf(e));
+                }
                 removeCodePathLI(codeFile);
             }
             return true;
@@ -13552,7 +13564,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             updateSettingsLI(newPackage, installerPackageName, null, res, user);
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                prepareAppDataAfterInstall(newPackage);
+                prepareAppDataAfterInstallLIF(newPackage);
 
             } else {
                 // Remove package from internal structures, but keep around any
@@ -13738,8 +13750,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
             }
 
-            deleteCodeCacheDirsLIF(pkg);
-            deleteProfilesLIF(pkg, /*destroy*/ false);
+            clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
+                    | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            clearAppProfilesLIF(pkg);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
@@ -13766,7 +13779,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         childPs.oldCodePaths = ps.oldCodePaths;
                     }
                 }
-                prepareAppDataAfterInstall(newPackage);
+                prepareAppDataAfterInstallLIF(newPackage);
                 addedPkg = true;
             } catch (PackageManagerException e) {
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
@@ -13870,8 +13883,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Successfully disabled the old package. Now proceed with re-installation
-        deleteCodeCacheDirsLIF(pkg);
-        deleteProfilesLIF(pkg, /*destroy*/ false);
+        clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
+                | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+        clearAppProfilesLIF(pkg);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -13927,7 +13941,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user);
-                prepareAppDataAfterInstall(newPackage);
+                prepareAppDataAfterInstallLIF(newPackage);
             }
         } catch (PackageManagerException e) {
             res.setReturnCode(INSTALL_FAILED_INTERNAL_ERROR);
@@ -15080,11 +15094,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = ps.name;
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + ps);
-        removePackageLI(ps, (flags&REMOVE_CHATTY) != 0);
         // Retrieve object to delete permissions for shared user later on
+        final PackageParser.Package deletedPkg;
         final PackageSetting deletedPs;
         // reader
         synchronized (mPackages) {
+            deletedPkg = mPackages.get(packageName);
             deletedPs = mSettings.mPackages.get(packageName);
             if (outInfo != null) {
                 outInfo.removedPackage = packageName;
@@ -15093,13 +15108,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                         : null;
             }
         }
-        if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
-            removeDataDirsLIF(ps.volumeUuid, ps.name);
+
+        removePackageLI(ps, (flags & REMOVE_CHATTY) != 0);
+
+        if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+            destroyAppDataLIF(deletedPkg, UserHandle.USER_ALL,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            destroyAppProfilesLIF(deletedPkg);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
             schedulePackageCleaning(packageName, UserHandle.USER_ALL, true);
         }
+
         // writer
         synchronized (mPackages) {
             if (deletedPs != null) {
@@ -15277,7 +15298,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
 
-        prepareAppDataAfterInstall(newPkg);
+        prepareAppDataAfterInstallLIF(newPkg);
 
         // writer
         synchronized (mPackages) {
@@ -15603,7 +15624,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) {
                 Slog.d(TAG, "Marking package:" + ps.name + " uninstalled for user:" + nextUserId);
             }
-            ps.setUserState(nextUserId, COMPONENT_ENABLED_STATE_DEFAULT,
+            ps.setUserState(nextUserId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                     false /*installed*/, true /*stopped*/, true /*notLaunched*/,
                     false /*hidden*/, false /*suspended*/, null, null, null,
                     false /*blockUninstall*/,
@@ -15613,6 +15634,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean clearPackageStateForUserLIF(PackageSetting ps, int userId,
             PackageRemovedInfo outInfo) {
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(ps.name);
+        }
+
         final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -15620,13 +15646,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.d(TAG, "Updating package:" + ps.name + " install state for user:"
                         + nextUserId);
             }
-            final int flags =  StorageManager.FLAG_STORAGE_CE|  StorageManager.FLAG_STORAGE_DE;
-            try {
-                mInstaller.destroyAppData(ps.volumeUuid, ps.name, nextUserId, flags);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Couldn't remove cache files for package " + ps.name, e);
-                return false;
-            }
+
+            destroyAppDataLIF(pkg, userId,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
             schedulePackageCleaning(ps.name, nextUserId, false);
             synchronized (mPackages) {
@@ -15663,6 +15685,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void clearExternalStorageDataSync(String packageName, int userId, boolean allData) {
+        if (DEFAULT_CONTAINER_PACKAGE.equals(packageName)) return;
+
         final boolean mounted;
         if (Environment.isExternalStorageEmulated()) {
             mounted = true;
@@ -15722,14 +15746,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void clearApplicationProfileData(String packageName) {
         enforceSystemOrRoot("Only the system can clear all profile data");
-        synchronized (mInstallLock) {
-            try (PackageFreezer freezer = freezePackage(packageName,
-                    "clearApplicationProfileData")) {
-                try {
-                    mInstaller.clearAppProfiles(packageName);
-                } catch (InstallerException ex) {
-                    Log.e(TAG, "Could not clear profile data of package " + packageName);
-                }
+
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+        }
+
+        try (PackageFreezer freezer = freezePackage(packageName, "clearApplicationProfileData")) {
+            synchronized (mInstallLock) {
+                clearAppProfilesLIF(pkg);
             }
         }
     }
@@ -15753,13 +15778,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 mHandler.removeCallbacks(this);
                 final boolean succeeded;
-                synchronized (mInstallLock) {
-                    try (PackageFreezer freezer = freezePackage(packageName,
-                            "clearApplicationUserData")) {
+                try (PackageFreezer freezer = freezePackage(packageName,
+                        "clearApplicationUserData")) {
+                    synchronized (mInstallLock) {
                         succeeded = clearApplicationUserDataLIF(packageName, userId);
                     }
+                    clearExternalStorageDataSync(packageName, userId, true);
                 }
-                clearExternalStorageDataSync(packageName, userId, true);
                 if (succeeded) {
                     // invoke DeviceStorageMonitor's update method to clear any notifications
                     DeviceStorageMonitorInternal dsm = LocalServices
@@ -15805,35 +15830,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, userId);
         }
 
-        // Always delete data directories for package, even if we found no other
-        // record of app. This helps users recover from UID mismatches without
-        // resorting to a full data wipe.
-        // TODO: triage flags as part of 26466827
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
-        try {
-            mInstaller.clearAppData(pkg.volumeUuid, packageName, userId, flags);
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Couldn't remove cache files for package " + packageName, e);
-            return false;
-        }
+        clearAppDataLIF(pkg, userId,
+                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
 
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         removeKeystoreDataIfNeeded(userId, appId);
 
-        // Create a native library symlink only if we have native libraries
-        // and if the native libraries are 32 bit libraries. We do not provide
-        // this symlink for 64 bit libraries.
-        if (pkg.applicationInfo.primaryCpuAbi != null &&
-                !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
-            final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
-            try {
-                mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
-                        nativeLibPath, userId);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed linking native library dir", e);
-                return false;
-            }
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        final int flags;
+        if (um.isUserUnlocked(userId)) {
+            flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+        } else if (um.isUserRunning(userId)) {
+            flags = StorageManager.FLAG_STORAGE_DE;
+        } else {
+            flags = 0;
         }
+        prepareAppDataContentsLIF(pkg, userId, flags);
 
         return true;
     }
@@ -16003,54 +16015,33 @@ public class PackageManagerService extends IPackageManager.Stub {
                 android.Manifest.permission.DELETE_CACHE_FILES, null);
         // Queue up an async operation since the package deletion may take a little while.
         final int userId = UserHandle.getCallingUserId();
+
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+        }
+
         mHandler.post(new Runnable() {
             public void run() {
-                mHandler.removeCallbacks(this);
-                final boolean succeded;
-                synchronized (mInstallLock) {
-                    succeded = deleteApplicationCacheFilesLI(packageName, userId);
+                try (PackageFreezer freezer = freezePackage(packageName,
+                        "deleteApplicationCacheFiles")) {
+                    synchronized (mInstallLock) {
+                        final int flags = StorageManager.FLAG_STORAGE_DE
+                                | StorageManager.FLAG_STORAGE_CE;
+                        clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CACHE_ONLY);
+                        clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                    }
+                    clearExternalStorageDataSync(packageName, userId, false);
                 }
-                clearExternalStorageDataSync(packageName, userId, false);
                 if (observer != null) {
                     try {
-                        observer.onRemoveCompleted(packageName, succeded);
+                        observer.onRemoveCompleted(packageName, true);
                     } catch (RemoteException e) {
                         Log.i(TAG, "Observer no longer exists.");
                     }
-                } //end if observer
-            } //end run
+                }
+            }
         });
-    }
-
-    private boolean deleteApplicationCacheFilesLI(String packageName, int userId) {
-        if (packageName == null) {
-            Slog.w(TAG, "Attempt to delete null packageName.");
-            return false;
-        }
-        PackageParser.Package p;
-        synchronized (mPackages) {
-            p = mPackages.get(packageName);
-        }
-        if (p == null) {
-            Slog.w(TAG, "Package named '" + packageName +"' doesn't exist.");
-            return false;
-        }
-        final ApplicationInfo applicationInfo = p.applicationInfo;
-        if (applicationInfo == null) {
-            Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
-            return false;
-        }
-        // TODO: triage flags as part of 26466827
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
-        try {
-            mInstaller.clearAppData(p.volumeUuid, packageName, userId,
-                    flags | Installer.FLAG_CLEAR_CACHE_ONLY);
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Couldn't remove cache files for package "
-                    + packageName + " u" + userId, e);
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -16073,90 +16064,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
-    private boolean getPackageSizeInfoLI(String packageName, int userHandle,
-            PackageStats pStats) {
-        if (packageName == null) {
-            Slog.w(TAG, "Attempt to get size of null packageName.");
-            return false;
-        }
-        PackageParser.Package p;
-        boolean dataOnly = false;
-        String libDirRoot = null;
-        String asecPath = null;
-        PackageSetting ps = null;
+    private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
+        final PackageSetting ps;
         synchronized (mPackages) {
-            p = mPackages.get(packageName);
             ps = mSettings.mPackages.get(packageName);
-            if(p == null) {
-                dataOnly = true;
-                if((ps == null) || (ps.pkg == null)) {
-                    Slog.w(TAG, "Package named '" + packageName +"' doesn't exist.");
-                    return false;
-                }
-                p = ps.pkg;
-            }
-            if (ps != null) {
-                libDirRoot = ps.legacyNativeLibraryPathString;
-            }
-            if (p != null && (p.isForwardLocked() || p.applicationInfo.isExternalAsec())) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
-                    if (secureContainerId != null) {
-                        asecPath = PackageHelper.getSdFilesystem(secureContainerId);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        }
-        String publicSrcDir = null;
-        if(!dataOnly) {
-            final ApplicationInfo applicationInfo = p.applicationInfo;
-            if (applicationInfo == null) {
-                Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
+            if (ps == null) {
+                Slog.w(TAG, "Failed to find settings for " + packageName);
                 return false;
             }
-            if (p.isForwardLocked()) {
-                publicSrcDir = applicationInfo.getBaseResourcePath();
-            }
         }
-        // TODO: extend to measure size of split APKs
-        // TODO(multiArch): Extend getSizeInfo to look at the full subdirectory tree,
-        // not just the first level.
-        // TODO(multiArch): Extend getSizeInfo to look at *all* instruction sets, not
-        // just the primary.
-        String[] dexCodeInstructionSets = getDexCodeInstructionSets(getAppDexInstructionSets(ps));
-
-        String apkPath;
-        File packageDir = new File(p.codePath);
-
-        if (packageDir.isDirectory() && p.canHaveOatDir()) {
-            apkPath = packageDir.getAbsolutePath();
-            // If libDirRoot is inside a package dir, set it to null to avoid it being counted twice
-            if (libDirRoot != null && libDirRoot.startsWith(apkPath)) {
-                libDirRoot = null;
-            }
-        } else {
-            apkPath = p.baseCodePath;
-        }
-
-        // TODO: triage flags as part of 26466827
-        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
         try {
-            mInstaller.getAppSize(p.volumeUuid, packageName, userHandle, flags, apkPath,
-                    libDirRoot, publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
+            mInstaller.getAppSize(ps.volumeUuid, packageName, userId,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE,
+                    ps.getCeDataInode(userId), ps.codePathString, stats);
+            return true;
         } catch (InstallerException e) {
+            Slog.w(TAG, String.valueOf(e));
             return false;
         }
-
-        // Fix-up for forward-locked applications in ASEC containers.
-        if (!isExternal(p)) {
-            pStats.codeSize += pStats.externalCodeSize;
-            pStats.externalCodeSize = 0L;
-        }
-
-        return true;
     }
 
     private int getUidTargetSdkVersionLockedLPr(int uid) {
@@ -18562,7 +18487,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
-                    deleteCodeCacheDirsLIF(ps.volumeUuid, ps.name);
+                    clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
+                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
+                                    | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
             }
         }
@@ -18581,7 +18508,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
 
             sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
-            reconcileAppsData(volumeUuid, user.id, flags);
+            synchronized (mInstallLock) {
+                reconcileAppsDataLI(volumeUuid, user.id, flags);
+            }
         }
 
         synchronized (mPackages) {
@@ -18773,7 +18702,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
-            reconcileAppsData(volumeUuid, userId, flags);
+            synchronized (mInstallLock) {
+                reconcileAppsDataLI(volumeUuid, userId, flags);
+            }
         }
     }
 
@@ -18786,7 +18717,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps.
      */
-    private void reconcileAppsData(String volumeUuid, int userId, int flags) {
+    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags));
 
@@ -18813,9 +18744,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
-                    synchronized (mInstallLock) {
-                        destroyAppDataLI(volumeUuid, packageName, userId,
-                                StorageManager.FLAG_STORAGE_CE);
+                    try {
+                        mInstaller.destroyAppData(volumeUuid, packageName, userId,
+                                StorageManager.FLAG_STORAGE_CE, 0);
+                    } catch (InstallerException e2) {
+                        logCriticalInfo(Log.WARN, "Failed to destroy: " + e2);
                     }
                 }
             }
@@ -18830,9 +18763,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
-                    synchronized (mInstallLock) {
-                        destroyAppDataLI(volumeUuid, packageName, userId,
-                                StorageManager.FLAG_STORAGE_DE);
+                    try {
+                        mInstaller.destroyAppData(volumeUuid, packageName, userId,
+                                StorageManager.FLAG_STORAGE_DE, 0);
+                    } catch (InstallerException e2) {
+                        logCriticalInfo(Log.WARN, "Failed to destroy: " + e2);
                     }
                 }
             }
@@ -18855,12 +18790,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
 
             if (ps.getInstalled(userId)) {
-                prepareAppData(volumeUuid, userId, flags, ps.pkg, restoreconNeeded);
+                prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
 
-                if (maybeMigrateAppData(volumeUuid, userId, ps.pkg)) {
+                if (maybeMigrateAppDataLIF(ps.pkg, userId)) {
                     // We may have just shuffled around app data directories, so
                     // prepare them one more time
-                    prepareAppData(volumeUuid, userId, flags, ps.pkg, restoreconNeeded);
+                    prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
                 }
 
                 preparedCount++;
@@ -18892,16 +18827,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * <p>
      * <em>Note: To avoid a deadlock, do not call this method with {@code mPackages} lock held</em>
      */
-    private void prepareAppDataAfterInstall(PackageParser.Package pkg) {
-        prepareAppDataAfterInstallInternal(pkg);
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-        for (int i = 0; i < childCount; i++) {
-            PackageParser.Package childPackage = pkg.childPackages.get(i);
-            prepareAppDataAfterInstallInternal(childPackage);
-        }
-    }
-
-    private void prepareAppDataAfterInstallInternal(PackageParser.Package pkg) {
+    private void prepareAppDataAfterInstallLIF(PackageParser.Package pkg) {
         final PackageSetting ps;
         synchronized (mPackages) {
             ps = mSettings.mPackages.get(pkg.packageName);
@@ -18922,7 +18848,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             if (ps.getInstalled(user.id)) {
                 // Whenever an app changes, force a restorecon of its data
                 // TODO: when user data is locked, mark that we're still dirty
-                prepareAppData(pkg.volumeUuid, user.id, flags, pkg, true);
+                prepareAppDataLIF(pkg, user.id, flags, true);
             }
         }
     }
@@ -18935,56 +18861,111 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
      */
-    private void prepareAppData(String volumeUuid, int userId, int flags,
-            PackageParser.Package pkg, boolean restoreconNeeded) {
+    private void prepareAppDataLIF(PackageParser.Package pkg, int userId, int flags,
+            boolean restoreconNeeded) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        prepareAppDataLeafLIF(pkg, userId, flags, restoreconNeeded);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            prepareAppDataLeafLIF(pkg.childPackages.get(i), userId, flags, restoreconNeeded);
+        }
+    }
+
+    private void prepareAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags,
+            boolean restoreconNeeded) {
         if (DEBUG_APP_DATA) {
             Slog.v(TAG, "prepareAppData for " + pkg.packageName + " u" + userId + " 0x"
                     + Integer.toHexString(flags) + (restoreconNeeded ? " restoreconNeeded" : ""));
         }
 
+        final String volumeUuid = pkg.volumeUuid;
         final String packageName = pkg.packageName;
         final ApplicationInfo app = pkg.applicationInfo;
         final int appId = UserHandle.getAppId(app.uid);
 
         Preconditions.checkNotNull(app.seinfo);
 
-        synchronized (mInstallLock) {
-            try {
-                mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                        appId, app.seinfo, app.targetSdkVersion);
-            } catch (InstallerException e) {
-                if (app.isSystemApp()) {
-                    logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
-                            + ", but trying to recover: " + e);
-                    destroyAppDataLI(volumeUuid, packageName, userId, flags);
-                    try {
-                        mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                                appId, app.seinfo, app.targetSdkVersion);
-                        logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
-                    } catch (InstallerException e2) {
-                        logCriticalInfo(Log.DEBUG, "Recovery failed!");
-                    }
-                } else {
-                    Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
+        try {
+            mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+                    appId, app.seinfo, app.targetSdkVersion);
+        } catch (InstallerException e) {
+            if (app.isSystemApp()) {
+                logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                        + ", but trying to recover: " + e);
+                destroyAppDataLeafLIF(pkg, userId, flags);
+                try {
+                    mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+                            appId, app.seinfo, app.targetSdkVersion);
+                    logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
+                } catch (InstallerException e2) {
+                    logCriticalInfo(Log.DEBUG, "Recovery failed!");
                 }
+            } else {
+                Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
             }
+        }
 
-            if (restoreconNeeded) {
-                restoreconAppDataLI(volumeUuid, packageName, userId, flags, appId, app.seinfo);
+        if (restoreconNeeded) {
+            try {
+                mInstaller.restoreconAppData(volumeUuid, packageName, userId, flags, appId,
+                        app.seinfo);
+            } catch (InstallerException e) {
+                Slog.e(TAG, "Failed to restorecon for " + packageName + ": " + e);
             }
+        }
 
-            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-                // Create a native library symlink only if we have native libraries
-                // and if the native libraries are 32 bit libraries. We do not provide
-                // this symlink for 64 bit libraries.
-                if (app.primaryCpuAbi != null && !VMRuntime.is64BitAbi(app.primaryCpuAbi)) {
-                    final String nativeLibPath = app.nativeLibraryDir;
-                    try {
-                        mInstaller.linkNativeLibraryDirectory(volumeUuid, packageName,
-                                nativeLibPath, userId);
-                    } catch (InstallerException e) {
-                        Slog.e(TAG, "Failed to link native for " + packageName + ": " + e);
+        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
+            try {
+                // CE storage is unlocked right now, so read out the inode and
+                // remember for use later when it's locked
+                // TODO: mark this structure as dirty so we persist it!
+                final long ceDataInode = mInstaller.getAppDataInode(volumeUuid, packageName, userId,
+                        StorageManager.FLAG_STORAGE_CE);
+                synchronized (mPackages) {
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        ps.setCeDataInode(ceDataInode, userId);
                     }
+                }
+            } catch (InstallerException e) {
+                Slog.e(TAG, "Failed to find inode for " + packageName + ": " + e);
+            }
+        }
+
+        prepareAppDataContentsLeafLIF(pkg, userId, flags);
+    }
+
+    private void prepareAppDataContentsLIF(PackageParser.Package pkg, int userId, int flags) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        prepareAppDataContentsLeafLIF(pkg, userId, flags);
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        for (int i = 0; i < childCount; i++) {
+            prepareAppDataContentsLeafLIF(pkg.childPackages.get(i), userId, flags);
+        }
+    }
+
+    private void prepareAppDataContentsLeafLIF(PackageParser.Package pkg, int userId, int flags) {
+        final String volumeUuid = pkg.volumeUuid;
+        final String packageName = pkg.packageName;
+        final ApplicationInfo app = pkg.applicationInfo;
+
+        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
+            // Create a native library symlink only if we have native libraries
+            // and if the native libraries are 32 bit libraries. We do not provide
+            // this symlink for 64 bit libraries.
+            if (app.primaryCpuAbi != null && !VMRuntime.is64BitAbi(app.primaryCpuAbi)) {
+                final String nativeLibPath = app.nativeLibraryDir;
+                try {
+                    mInstaller.linkNativeLibraryDirectory(volumeUuid, packageName,
+                            nativeLibPath, userId);
+                } catch (InstallerException e) {
+                    Slog.e(TAG, "Failed to link native for " + packageName + ": " + e);
                 }
             }
         }
@@ -18995,18 +18976,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * CE/DE data to match the {@code defaultToDeviceProtectedStorage} flag
      * requested by the app.
      */
-    private boolean maybeMigrateAppData(String volumeUuid, int userId, PackageParser.Package pkg) {
+    private boolean maybeMigrateAppDataLIF(PackageParser.Package pkg, int userId) {
         if (pkg.isSystemApp() && !StorageManager.isFileEncryptedNativeOrEmulated()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
             final int storageTarget = pkg.applicationInfo.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
-            synchronized (mInstallLock) {
-                try {
-                    mInstaller.migrateAppData(volumeUuid, pkg.packageName, userId, storageTarget);
-                } catch (InstallerException e) {
-                    logCriticalInfo(Log.WARN,
-                            "Failed to migrate " + pkg.packageName + ": " + e.getMessage());
-                }
+            try {
+                mInstaller.migrateAppData(pkg.volumeUuid, pkg.packageName, userId,
+                        storageTarget);
+            } catch (InstallerException e) {
+                logCriticalInfo(Log.WARN,
+                        "Failed to migrate " + pkg.packageName + ": " + e.getMessage());
             }
             return true;
         } else {

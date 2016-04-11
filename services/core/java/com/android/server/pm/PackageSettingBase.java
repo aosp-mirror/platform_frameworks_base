@@ -323,6 +323,14 @@ abstract class PackageSettingBase extends SettingBase {
         return res;
     }
 
+    long getCeDataInode(int userId) {
+        return readUserState(userId).ceDataInode;
+    }
+
+    void setCeDataInode(long ceDataInode, int userId) {
+        modifyUserState(userId).ceDataInode = ceDataInode;
+    }
+
     boolean getStopped(int userId) {
         return readUserState(userId).stopped;
     }
@@ -363,12 +371,13 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).blockUninstall = blockUninstall;
     }
 
-    void setUserState(int userId, int enabled, boolean installed, boolean stopped,
+    void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden, boolean suspended,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
             ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
             int linkGeneration) {
         PackageUserState state = modifyUserState(userId);
+        state.ceDataInode = ceDataInode;
         state.enabled = enabled;
         state.installed = installed;
         state.stopped = stopped;

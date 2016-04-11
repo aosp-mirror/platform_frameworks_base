@@ -195,23 +195,26 @@ final class Settings {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
     private static final String ATTR_CODE = "code";
-    private static final String ATTR_NOT_LAUNCHED = "nl";
-    private static final String ATTR_ENABLED = "enabled";
     private static final String ATTR_GRANTED = "granted";
     private static final String ATTR_FLAGS = "flags";
-    private static final String ATTR_ENABLED_CALLER = "enabledCaller";
+
+    private static final String ATTR_CE_DATA_INODE = "ceDataInode";
+    private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_STOPPED = "stopped";
+    private static final String ATTR_NOT_LAUNCHED = "nl";
     // Legacy, here for reading older versions of the package-restrictions.
     private static final String ATTR_BLOCKED = "blocked";
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
-    private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
+    private static final String ATTR_ENABLED = "enabled";
+    private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
+    private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
+
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
-    private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
@@ -790,7 +793,7 @@ final class Settings {
                                     || (installUserId == UserHandle.USER_ALL
                                         && !isAdbInstallDisallowed(userManager, user.id))
                                     || installUserId == user.id;
-                            p.setUserState(user.id, COMPONENT_ENABLED_STATE_DEFAULT,
+                            p.setUserState(user.id, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
@@ -1574,7 +1577,7 @@ final class Settings {
                     // in the stopped state, but not at first boot.  Also
                     // consider all applications to be installed.
                     for (PackageSetting pkg : mPackages.values()) {
-                        pkg.setUserState(userId, COMPONENT_ENABLED_STATE_DEFAULT,
+                        pkg.setUserState(userId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
@@ -1626,17 +1629,16 @@ final class Settings {
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
-                    final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
-                    final int enabled = enabledStr == null
-                            ? COMPONENT_ENABLED_STATE_DEFAULT : Integer.parseInt(enabledStr);
-                    final String enabledCaller = parser.getAttributeValue(null,
-                            ATTR_ENABLED_CALLER);
-                    final String installedStr = parser.getAttributeValue(null, ATTR_INSTALLED);
-                    final boolean installed = installedStr == null
-                            ? true : Boolean.parseBoolean(installedStr);
-                    final String stoppedStr = parser.getAttributeValue(null, ATTR_STOPPED);
-                    final boolean stopped = stoppedStr == null
-                            ? false : Boolean.parseBoolean(stoppedStr);
+
+                    final long ceDataInode = XmlUtils.readLongAttribute(parser, ATTR_CE_DATA_INODE,
+                            0);
+                    final boolean installed = XmlUtils.readBooleanAttribute(parser, ATTR_INSTALLED,
+                            true);
+                    final boolean stopped = XmlUtils.readBooleanAttribute(parser, ATTR_STOPPED,
+                            false);
+                    final boolean notLaunched = XmlUtils.readBooleanAttribute(parser,
+                            ATTR_NOT_LAUNCHED, false);
+
                     // For backwards compatibility with the previous name of "blocked", which
                     // now means hidden, read the old attribute as well.
                     final String blockedStr = parser.getAttributeValue(null, ATTR_BLOCKED);
@@ -1645,25 +1647,21 @@ final class Settings {
                     final String hiddenStr = parser.getAttributeValue(null, ATTR_HIDDEN);
                     hidden = hiddenStr == null
                             ? hidden : Boolean.parseBoolean(hiddenStr);
-                    final String suspendedStr = parser.getAttributeValue(null, ATTR_SUSPENDED);
-                    final boolean suspended = suspendedStr == null
-                            ? false : Boolean.parseBoolean(suspendedStr);
-                    final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
-                    final boolean notLaunched = stoppedStr == null
-                            ? false : Boolean.parseBoolean(notLaunchedStr);
-                    final String blockUninstallStr = parser.getAttributeValue(null,
-                            ATTR_BLOCK_UNINSTALL);
-                    final boolean blockUninstall = blockUninstallStr == null
-                            ? false : Boolean.parseBoolean(blockUninstallStr);
 
-                    final String verifStateStr =
-                            parser.getAttributeValue(null, ATTR_DOMAIN_VERIFICATON_STATE);
-                    final int verifState = (verifStateStr == null) ?
-                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED :
-                            Integer.parseInt(verifStateStr);
+                    final boolean suspended = XmlUtils.readBooleanAttribute(parser, ATTR_SUSPENDED,
+                            false);
+                    final boolean blockUninstall = XmlUtils.readBooleanAttribute(parser,
+                            ATTR_BLOCK_UNINSTALL, false);
+                    final int enabled = XmlUtils.readIntAttribute(parser, ATTR_ENABLED,
+                            COMPONENT_ENABLED_STATE_DEFAULT);
+                    final String enabledCaller = parser.getAttributeValue(null,
+                            ATTR_ENABLED_CALLER);
 
-                    final String linkGenStr = parser.getAttributeValue(null, ATTR_APP_LINK_GENERATION);
-                    final int linkGeneration = linkGenStr == null ? 0 : Integer.parseInt(linkGenStr);
+                    final int verifState = XmlUtils.readIntAttribute(parser,
+                            ATTR_DOMAIN_VERIFICATON_STATE,
+                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
+                    final int linkGeneration = XmlUtils.readIntAttribute(parser,
+                            ATTR_APP_LINK_GENERATION, 0);
                     if (linkGeneration > maxAppLinkGeneration) {
                         maxAppLinkGeneration = linkGeneration;
                     }
@@ -1687,8 +1685,8 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
-                            suspended, enabledCaller, enabledComponents, disabledComponents,
+                    ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
+                            hidden, suspended, enabledCaller, enabledComponents, disabledComponents,
                             blockUninstall, verifState, linkGeneration);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1927,80 +1925,69 @@ final class Settings {
             serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
 
             for (final PackageSetting pkg : mPackages.values()) {
-                PackageUserState ustate = pkg.readUserState(userId);
-                if (ustate.stopped || ustate.notLaunched || !ustate.installed
-                        || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
-                        || ustate.hidden
-                        || ustate.suspended
-                        || (ustate.enabledComponents != null
-                                && ustate.enabledComponents.size() > 0)
-                        || (ustate.disabledComponents != null
-                                && ustate.disabledComponents.size() > 0)
-                        || ustate.blockUninstall
-                        || (ustate.domainVerificationStatus !=
-                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED)) {
-                    serializer.startTag(null, TAG_PACKAGE);
-                    serializer.attribute(null, ATTR_NAME, pkg.name);
-                    if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
+                final PackageUserState ustate = pkg.readUserState(userId);
+                if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
 
-                    if (!ustate.installed) {
-                        serializer.attribute(null, ATTR_INSTALLED, "false");
-                    }
-                    if (ustate.stopped) {
-                        serializer.attribute(null, ATTR_STOPPED, "true");
-                    }
-                    if (ustate.notLaunched) {
-                        serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
-                    }
-                    if (ustate.hidden) {
-                        serializer.attribute(null, ATTR_HIDDEN, "true");
-                    }
-                    if (ustate.suspended) {
-                        serializer.attribute(null, ATTR_SUSPENDED, "true");
-                    }
-                    if (ustate.blockUninstall) {
-                        serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
-                    }
-                    if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
-                        serializer.attribute(null, ATTR_ENABLED,
-                                Integer.toString(ustate.enabled));
-                        if (ustate.lastDisableAppCaller != null) {
-                            serializer.attribute(null, ATTR_ENABLED_CALLER,
-                                    ustate.lastDisableAppCaller);
-                        }
-                    }
-                    if (ustate.domainVerificationStatus !=
-                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-                        serializer.attribute(null, ATTR_DOMAIN_VERIFICATON_STATE,
-                                Integer.toString(ustate.domainVerificationStatus));
-                    }
-                    if (ustate.appLinkGeneration != 0) {
-                        serializer.attribute(null, ATTR_APP_LINK_GENERATION,
-                                Integer.toString(ustate.appLinkGeneration));
-                    }
-                    if (ustate.enabledComponents != null
-                            && ustate.enabledComponents.size() > 0) {
-                        serializer.startTag(null, TAG_ENABLED_COMPONENTS);
-                        for (final String name : ustate.enabledComponents) {
-                            serializer.startTag(null, TAG_ITEM);
-                            serializer.attribute(null, ATTR_NAME, name);
-                            serializer.endTag(null, TAG_ITEM);
-                        }
-                        serializer.endTag(null, TAG_ENABLED_COMPONENTS);
-                    }
-                    if (ustate.disabledComponents != null
-                            && ustate.disabledComponents.size() > 0) {
-                        serializer.startTag(null, TAG_DISABLED_COMPONENTS);
-                        for (final String name : ustate.disabledComponents) {
-                            serializer.startTag(null, TAG_ITEM);
-                            serializer.attribute(null, ATTR_NAME, name);
-                            serializer.endTag(null, TAG_ITEM);
-                        }
-                        serializer.endTag(null, TAG_DISABLED_COMPONENTS);
-                    }
-
-                    serializer.endTag(null, TAG_PACKAGE);
+                serializer.startTag(null, TAG_PACKAGE);
+                serializer.attribute(null, ATTR_NAME, pkg.name);
+                if (ustate.ceDataInode != 0) {
+                    XmlUtils.writeLongAttribute(serializer, ATTR_CE_DATA_INODE, ustate.ceDataInode);
                 }
+                if (!ustate.installed) {
+                    serializer.attribute(null, ATTR_INSTALLED, "false");
+                }
+                if (ustate.stopped) {
+                    serializer.attribute(null, ATTR_STOPPED, "true");
+                }
+                if (ustate.notLaunched) {
+                    serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
+                }
+                if (ustate.hidden) {
+                    serializer.attribute(null, ATTR_HIDDEN, "true");
+                }
+                if (ustate.suspended) {
+                    serializer.attribute(null, ATTR_SUSPENDED, "true");
+                }
+                if (ustate.blockUninstall) {
+                    serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
+                }
+                if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
+                    serializer.attribute(null, ATTR_ENABLED,
+                            Integer.toString(ustate.enabled));
+                    if (ustate.lastDisableAppCaller != null) {
+                        serializer.attribute(null, ATTR_ENABLED_CALLER,
+                                ustate.lastDisableAppCaller);
+                    }
+                }
+                if (ustate.domainVerificationStatus !=
+                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                    XmlUtils.writeIntAttribute(serializer, ATTR_DOMAIN_VERIFICATON_STATE,
+                            ustate.domainVerificationStatus);
+                }
+                if (ustate.appLinkGeneration != 0) {
+                    XmlUtils.writeIntAttribute(serializer, ATTR_APP_LINK_GENERATION,
+                            ustate.appLinkGeneration);
+                }
+                if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
+                    serializer.startTag(null, TAG_ENABLED_COMPONENTS);
+                    for (final String name : ustate.enabledComponents) {
+                        serializer.startTag(null, TAG_ITEM);
+                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.endTag(null, TAG_ITEM);
+                    }
+                    serializer.endTag(null, TAG_ENABLED_COMPONENTS);
+                }
+                if (!ArrayUtils.isEmpty(ustate.disabledComponents)) {
+                    serializer.startTag(null, TAG_DISABLED_COMPONENTS);
+                    for (final String name : ustate.disabledComponents) {
+                        serializer.startTag(null, TAG_ITEM);
+                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.endTag(null, TAG_ITEM);
+                    }
+                    serializer.endTag(null, TAG_DISABLED_COMPONENTS);
+                }
+
+                serializer.endTag(null, TAG_PACKAGE);
             }
 
             writePreferredActivitiesLPr(serializer, userId, true);
@@ -4532,6 +4519,8 @@ final class Settings {
 
         for (UserInfo user : users) {
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
+            pw.print("ceDataInode=");
+            pw.print(ps.getCeDataInode(user.id));
             pw.print(" installed=");
             pw.print(ps.getInstalled(user.id));
             pw.print(" hidden=");
