@@ -40,6 +40,7 @@ import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 
 /**
@@ -1489,6 +1490,7 @@ public class AudioTrack implements AudioRouting
      * @deprecated Applications should use {@link #setVolume} instead, as it
      * more gracefully scales down to mono, and up to multi-channel content beyond stereo.
      */
+    @Deprecated
     public int setStereoVolume(float leftGain, float rightGain) {
         if (isRestricted()) {
             return SUCCESS;
@@ -2397,6 +2399,7 @@ public class AudioTrack implements AudioRouting
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio output device.
      */
+    @Override
     public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
         // Do some validation....
         if (deviceInfo != null && !deviceInfo.isSink()) {
@@ -2416,6 +2419,7 @@ public class AudioTrack implements AudioRouting
      * Returns the selected output specified by {@link #setPreferredDevice}. Note that this
      * is not guaranteed to correspond to the actual device being used for playback.
      */
+    @Override
     public AudioDeviceInfo getPreferredDevice() {
         synchronized (this) {
             return mPreferredDevice;
@@ -2427,6 +2431,7 @@ public class AudioTrack implements AudioRouting
      * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
      * <code>getRoutedDevice()</code> will return null.
      */
+    @Override
     public AudioDeviceInfo getRoutedDevice() {
         int deviceId = native_getRoutedDeviceId();
         if (deviceId == 0) {
@@ -2445,8 +2450,8 @@ public class AudioTrack implements AudioRouting
     /*
      * Call BEFORE adding a routing callback handler.
      */
-    private void testEnableNativeRoutingCallbacks() {
-        if (mRoutingChangeListeners.size() == 0 && mNewRoutingChangeListeners.size() == 0) {
+    private void testEnableNativeRoutingCallbacksLocked() {
+        if (mRoutingChangeListeners.size() == 0) {
             native_enableDeviceCallback();
         }
     }
@@ -2454,24 +2459,23 @@ public class AudioTrack implements AudioRouting
     /*
      * Call AFTER removing a routing callback handler.
      */
-    private void testDisableNativeRoutingCallbacks() {
-        if (mRoutingChangeListeners.size() == 0 && mNewRoutingChangeListeners.size() == 0) {
+    private void testDisableNativeRoutingCallbacksLocked() {
+        if (mRoutingChangeListeners.size() == 0) {
             native_disableDeviceCallback();
         }
     }
 
     //--------------------------------------------------------------------------
-    // >= "N" (Re)Routing Info
+    // (Re)Routing Info
     //--------------------
     /**
      * The list of AudioRouting.OnRoutingChangedListener interfaces added (with
-     * {@link AudioTrack#addOnRoutingListener(AudioRouting.OnRoutingChangedListener,
-     *          android.os.Handler)}
-     * by an app to receive (re)routing notifications.
+     * {@link AudioRecord#addOnRoutingChangedListener} by an app to receive
+     * (re)routing notifications.
      */
-   private ArrayMap<AudioRouting.OnRoutingChangedListener, NativeNewRoutingEventHandlerDelegate>
-    mNewRoutingChangeListeners =
-        new ArrayMap<AudioRouting.OnRoutingChangedListener, NativeNewRoutingEventHandlerDelegate>();
+    @GuardedBy("mRoutingChangeListeners")
+    private ArrayMap<AudioRouting.OnRoutingChangedListener,
+            NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
 
    /**
     * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -2482,14 +2486,15 @@ public class AudioTrack implements AudioRouting
     * the callback. If <code>null</code>, the {@link Handler} associated with the main
     * {@link Looper} will be used.
     */
-    public void addOnRoutingListener(AudioRouting.OnRoutingChangedListener listener,
+    @Override
+    public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
             Handler handler) {
-        if (listener != null && !mNewRoutingChangeListeners.containsKey(listener)) {
-            synchronized (mNewRoutingChangeListeners) {
-                testEnableNativeRoutingCallbacks();
-                mNewRoutingChangeListeners.put(
-                    listener, new NativeNewRoutingEventHandlerDelegate(this, listener,
-                            handler != null ? handler : new Handler(mInitializationLooper)));
+        synchronized (mRoutingChangeListeners) {
+            if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
+                testEnableNativeRoutingCallbacksLocked();
+                mRoutingChangeListeners.put(
+                        listener, new NativeRoutingEventHandlerDelegate(this, listener,
+                                handler != null ? handler : new Handler(mInitializationLooper)));
             }
         }
     }
@@ -2500,39 +2505,42 @@ public class AudioTrack implements AudioRouting
      * @param listener The previously added {@link AudioRouting.OnRoutingChangedListener} interface
      * to remove.
      */
-    public void removeOnRoutingListener(AudioRouting.OnRoutingChangedListener listener) {
-        if (mNewRoutingChangeListeners.containsKey(listener)) {
-            mNewRoutingChangeListeners.remove(listener);
+    @Override
+    public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
+        synchronized (mRoutingChangeListeners) {
+            if (mRoutingChangeListeners.containsKey(listener)) {
+                mRoutingChangeListeners.remove(listener);
+            }
+            testDisableNativeRoutingCallbacksLocked();
         }
-        testDisableNativeRoutingCallbacks();
     }
 
     //--------------------------------------------------------------------------
-    // Marshmallow (Re)Routing Info
+    // (Re)Routing Info
     //--------------------
     /**
-     * Defines the interface by which applications can receive notifications of routing
-     * changes for the associated {@link AudioTrack}.
+     * Defines the interface by which applications can receive notifications of
+     * routing changes for the associated {@link AudioTrack}.
+     *
+     * @deprecated users should switch to the general purpose
+     *             {@link AudioRouting.OnRoutingChangedListener} class instead.
      */
     @Deprecated
-    public interface OnRoutingChangedListener {
+    public interface OnRoutingChangedListener extends AudioRouting.OnRoutingChangedListener {
         /**
-         * Called when the routing of an AudioTrack changes from either and explicit or
-         * policy rerouting.  Use {@link #getRoutedDevice()} to retrieve the newly routed-to
-         * device.
+         * Called when the routing of an AudioTrack changes from either and
+         * explicit or policy rerouting. Use {@link #getRoutedDevice()} to
+         * retrieve the newly routed-to device.
          */
-        @Deprecated
         public void onRoutingChanged(AudioTrack audioTrack);
-    }
 
-    /**
-     * The list of AudioTrack.OnRoutingChangedListener interfaces added (with
-     * {@link AudioTrack#addOnRoutingChangedListener(OnRoutingChangedListener, android.os.Handler)}
-     * by an app to receive (re)routing notifications.
-     */
-    private ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>
-        mRoutingChangeListeners =
-            new ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>();
+        @Override
+        default public void onRoutingChanged(AudioRouting router) {
+            if (router instanceof AudioTrack) {
+                onRoutingChanged((AudioTrack) router);
+            }
+        }
+    }
 
     /**
      * Adds an {@link OnRoutingChangedListener} to receive notifications of routing changes
@@ -2542,33 +2550,25 @@ public class AudioTrack implements AudioRouting
      * @param handler  Specifies the {@link Handler} object for the thread on which to execute
      * the callback. If <code>null</code>, the {@link Handler} associated with the main
      * {@link Looper} will be used.
+     * @deprecated users should switch to the general purpose
+     *             {@link AudioRouting.OnRoutingChangedListener} class instead.
      */
     @Deprecated
     public void addOnRoutingChangedListener(OnRoutingChangedListener listener,
             android.os.Handler handler) {
-        if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-            synchronized (mRoutingChangeListeners) {
-                testEnableNativeRoutingCallbacks();
-                mRoutingChangeListeners.put(
-                    listener, new NativeRoutingEventHandlerDelegate(this, listener,
-                            handler != null ? handler : new Handler(mInitializationLooper)));
-            }
-        }
+        addOnRoutingChangedListener((AudioRouting.OnRoutingChangedListener) listener, handler);
     }
 
     /**
      * Removes an {@link OnRoutingChangedListener} which has been previously added
      * to receive rerouting notifications.
      * @param listener The previously added {@link OnRoutingChangedListener} interface to remove.
+     * @deprecated users should switch to the general purpose
+     *             {@link AudioRouting.OnRoutingChangedListener} class instead.
      */
     @Deprecated
     public void removeOnRoutingChangedListener(OnRoutingChangedListener listener) {
-        synchronized (mRoutingChangeListeners) {
-            if (mRoutingChangeListeners.containsKey(listener)) {
-                mRoutingChangeListeners.remove(listener);
-            }
-            testDisableNativeRoutingCallbacks();
-        }
+        removeOnRoutingChangedListener((AudioRouting.OnRoutingChangedListener) listener);
     }
 
     /**
@@ -2576,27 +2576,12 @@ public class AudioTrack implements AudioRouting
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
-
-        // Marshmallow Routing
-        Collection<NativeRoutingEventHandlerDelegate> values;
         synchronized (mRoutingChangeListeners) {
-            values = mRoutingChangeListeners.values();
-        }
-        for(NativeRoutingEventHandlerDelegate delegate : values) {
-            Handler handler = delegate.getHandler();
-            if (handler != null) {
-                handler.sendEmptyMessage(AudioSystem.NATIVE_EVENT_ROUTING_CHANGE);
-            }
-        }
-        // >= "N" Routing
-        Collection<NativeNewRoutingEventHandlerDelegate> newValues;
-        synchronized (mNewRoutingChangeListeners) {
-            newValues = mNewRoutingChangeListeners.values();
-        }
-        for(NativeNewRoutingEventHandlerDelegate delegate : newValues) {
-            Handler handler = delegate.getHandler();
-            if (handler != null) {
-                handler.sendEmptyMessage(AudioSystem.NATIVE_EVENT_ROUTING_CHANGE);
+            for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
+                Handler handler = delegate.getHandler();
+                if (handler != null) {
+                    handler.sendEmptyMessage(AudioSystem.NATIVE_EVENT_ROUTING_CHANGE);
+                }
             }
         }
     }
@@ -2681,7 +2666,6 @@ public class AudioTrack implements AudioRouting
     }
 
     /**
-     * Marshmallow Routing API.
      * Helper class to handle the forwarding of native events to the appropriate listener
      * (potentially) handled in a different thread
      */
@@ -2689,57 +2673,6 @@ public class AudioTrack implements AudioRouting
         private final Handler mHandler;
 
         NativeRoutingEventHandlerDelegate(final AudioTrack track,
-                                   final OnRoutingChangedListener listener,
-                                   Handler handler) {
-            // find the looper for our new event handler
-            Looper looper;
-            if (handler != null) {
-                looper = handler.getLooper();
-            } else {
-                // no given handler, use the looper the AudioTrack was created in
-                looper = mInitializationLooper;
-            }
-
-            // construct the event handler with this looper
-            if (looper != null) {
-                // implement the event handler delegate
-                mHandler = new Handler(looper) {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        if (track == null) {
-                            return;
-                        }
-                        switch(msg.what) {
-                        case AudioSystem.NATIVE_EVENT_ROUTING_CHANGE:
-                            if (listener != null) {
-                                listener.onRoutingChanged(track);
-                            }
-                            break;
-                        default:
-                            loge("Unknown native event type: " + msg.what);
-                            break;
-                        }
-                    }
-                };
-            } else {
-                mHandler = null;
-            }
-        }
-
-        Handler getHandler() {
-            return mHandler;
-        }
-    }
-
-    /**
-     * Marshmallow Routing API.
-     * Helper class to handle the forwarding of native events to the appropriate listener
-     * (potentially) handled in a different thread
-     */
-    private class NativeNewRoutingEventHandlerDelegate {
-        private final Handler mHandler;
-
-        NativeNewRoutingEventHandlerDelegate(final AudioTrack track,
                                    final AudioRouting.OnRoutingChangedListener listener,
                                    Handler handler) {
             // find the looper for our new event handler
