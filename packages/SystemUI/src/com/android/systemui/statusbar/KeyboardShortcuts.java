@@ -530,8 +530,15 @@ public final class KeyboardShortcuts {
             List<KeyboardShortcutGroup> keyboardShortcutGroups) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         final int keyboardShortcutGroupsSize = keyboardShortcutGroups.size();
+        TextView shortcutsKeyView = (TextView) inflater.inflate(
+                R.layout.keyboard_shortcuts_key_view, null, false);
+        shortcutsKeyView.measure(
+                View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        final int shortcutKeyTextItemMinWidth = shortcutsKeyView.getMeasuredHeight();
         // Needed to be able to scale the image items to the same height as the text items.
-        final int shortcutTextItemHeight = getShortcutTextItemHeight(inflater);
+        final int shortcutKeyIconItemHeightWidth = shortcutsKeyView.getMeasuredHeight()
+                - shortcutsKeyView.getPaddingTop()
+                - shortcutsKeyView.getPaddingBottom();
         for (int i = 0; i < keyboardShortcutGroupsSize; i++) {
             KeyboardShortcutGroup group = keyboardShortcutGroups.get(i);
             TextView categoryTitle = (TextView) inflater.inflate(
@@ -582,8 +589,8 @@ public final class KeyboardShortcuts {
                         ImageView shortcutKeyIconView = (ImageView) inflater.inflate(
                                 R.layout.keyboard_shortcuts_key_icon_view, shortcutItemsContainer,
                                 false);
-                        Bitmap bitmap = Bitmap.createBitmap(shortcutTextItemHeight,
-                                shortcutTextItemHeight, Bitmap.Config.ARGB_8888);
+                        Bitmap bitmap = Bitmap.createBitmap(shortcutKeyIconItemHeightWidth,
+                                shortcutKeyIconItemHeightWidth, Bitmap.Config.ARGB_8888);
                         Canvas canvas = new Canvas(bitmap);
                         shortcutRepresentation.drawable.setBounds(0, 0, canvas.getWidth(),
                                 canvas.getHeight());
@@ -594,6 +601,7 @@ public final class KeyboardShortcuts {
                         TextView shortcutKeyTextView = (TextView) inflater.inflate(
                                 R.layout.keyboard_shortcuts_key_view, shortcutItemsContainer,
                                 false);
+                        shortcutKeyTextView.setMinimumWidth(shortcutKeyTextItemMinWidth);
                         shortcutKeyTextView.setText(shortcutRepresentation.string);
                         shortcutItemsContainer.addView(shortcutKeyTextView);
                     }
@@ -608,16 +616,6 @@ public final class KeyboardShortcuts {
                 keyboardShortcutsLayout.addView(separator);
             }
         }
-    }
-
-    private int getShortcutTextItemHeight(LayoutInflater inflater) {
-        TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                R.layout.keyboard_shortcuts_key_view, null, false);
-        shortcutKeyTextView.measure(
-                View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        return shortcutKeyTextView.getMeasuredHeight()
-                - shortcutKeyTextView.getPaddingTop()
-                - shortcutKeyTextView.getPaddingBottom();
     }
 
     private List<StringOrDrawable> getHumanReadableShortcutKeys(KeyboardShortcutInfo info) {
