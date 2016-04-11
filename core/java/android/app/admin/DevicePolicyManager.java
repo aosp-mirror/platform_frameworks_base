@@ -2216,7 +2216,9 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD}
      */
     public boolean resetPassword(String password, int flags) {
-        throwIfParentInstance("resetPassword");
+        if (mParentInstance) {
+            throw new SecurityException("Reset password does not work across profiles.");
+        }
         if (mService != null) {
             try {
                 return mService.resetPassword(password, flags);
@@ -2336,7 +2338,6 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
-        throwIfParentInstance("wipeData");
         if (mService != null) {
             try {
                 mService.wipeData(flags);
@@ -2370,7 +2371,6 @@ public class DevicePolicyManager {
      */
     public ComponentName setGlobalProxy(@NonNull ComponentName admin, Proxy proxySpec,
             List<String> exclusionList ) {
-        throwIfParentInstance("setGlobalProxy");
         if (proxySpec == null) {
             throw new NullPointerException();
         }
@@ -2436,7 +2436,6 @@ public class DevicePolicyManager {
      */
     public void setRecommendedGlobalProxy(@NonNull ComponentName admin, @Nullable ProxyInfo
             proxyInfo) {
-        throwIfParentInstance("setRecommendedGlobalProxy");
         if (mService != null) {
             try {
                 mService.setRecommendedGlobalProxy(admin, proxyInfo);
@@ -2587,7 +2586,6 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_ENCRYPTED_STORAGE}
      */
     public int setStorageEncryption(@NonNull ComponentName admin, boolean encrypt) {
-        throwIfParentInstance("setStorageEncryption");
         if (mService != null) {
             try {
                 return mService.setStorageEncryption(admin, encrypt);
@@ -2608,7 +2606,6 @@ public class DevicePolicyManager {
      * @return true if the admin(s) are requesting encryption, false if not.
      */
     public boolean getStorageEncryption(@Nullable ComponentName admin) {
-        throwIfParentInstance("getStorageEncryption");
         if (mService != null) {
             try {
                 return mService.getStorageEncryption(admin, myUserId());
@@ -2704,7 +2701,6 @@ public class DevicePolicyManager {
      *         owner.
      */
     public boolean installCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
-        throwIfParentInstance("installCaCert");
         if (mService != null) {
             try {
                 return mService.installCaCert(admin, certBuffer);
@@ -2725,7 +2721,6 @@ public class DevicePolicyManager {
      *         owner.
      */
     public void uninstallCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
-        throwIfParentInstance("uninstallCaCert");
         if (mService != null) {
             try {
                 final String alias = getCaCertAlias(certBuffer);
@@ -2751,7 +2746,6 @@ public class DevicePolicyManager {
      */
     public List<byte[]> getInstalledCaCerts(@Nullable ComponentName admin) {
         List<byte[]> certs = new ArrayList<byte[]>();
-        throwIfParentInstance("getInstalledCaCerts");
         if (mService != null) {
             try {
                 mService.enforceCanManageCaCerts(admin);
@@ -2780,7 +2774,6 @@ public class DevicePolicyManager {
      *         owner.
      */
     public void uninstallAllUserCaCerts(@Nullable ComponentName admin) {
-        throwIfParentInstance("uninstallAllUserCaCerts");
         if (mService != null) {
             try {
                 mService.uninstallCaCerts(admin, new TrustedCertificateStore().userAliases()
@@ -2801,7 +2794,6 @@ public class DevicePolicyManager {
      *         owner.
      */
     public boolean hasCaCertInstalled(@Nullable ComponentName admin, byte[] certBuffer) {
-        throwIfParentInstance("hasCaCertInstalled");
         if (mService != null) {
             try {
                 mService.enforceCanManageCaCerts(admin);
@@ -2870,7 +2862,6 @@ public class DevicePolicyManager {
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
-        throwIfParentInstance("installKeyPair");
         try {
             final byte[] pemCert = Credentials.convertToPem(certs[0]);
             byte[] pemChain = null;
@@ -2903,7 +2894,6 @@ public class DevicePolicyManager {
      *         owner.
      */
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
-        throwIfParentInstance("removeKeyPair");
         try {
             return mService.removeKeyPair(admin, alias);
         } catch (RemoteException e) {
@@ -2944,7 +2934,6 @@ public class DevicePolicyManager {
      */
     public void setCertInstallerPackage(@NonNull ComponentName admin, @Nullable String
             installerPackage) throws SecurityException {
-        throwIfParentInstance("setCertInstallerPackage");
         if (mService != null) {
             try {
                 mService.setCertInstallerPackage(admin, installerPackage);
@@ -2964,7 +2953,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public String getCertInstallerPackage(@NonNull ComponentName admin) throws SecurityException {
-        throwIfParentInstance("getCertInstallerPackage");
         if (mService != null) {
             try {
                 return mService.getCertInstallerPackage(admin);
@@ -2995,7 +2983,6 @@ public class DevicePolicyManager {
      */
     public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
             throws NameNotFoundException, UnsupportedOperationException {
-        throwIfParentInstance("setAlwaysOnVpnPackage");
         if (mService != null) {
             try {
                 if (!mService.setAlwaysOnVpnPackage(admin, vpnPackage)) {
@@ -3017,7 +3004,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public String getAlwaysOnVpnPackage(@NonNull ComponentName admin) {
-        throwIfParentInstance("getAlwaysOnVpnPackage");
         if (mService != null) {
             try {
                 return mService.getAlwaysOnVpnPackage(admin);
@@ -3045,7 +3031,6 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     public void setCameraDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setCameraDisabled");
         if (mService != null) {
             try {
                 mService.setCameraDisabled(admin, disabled);
@@ -3062,7 +3047,6 @@ public class DevicePolicyManager {
      * have disabled the camera
      */
     public boolean getCameraDisabled(@Nullable ComponentName admin) {
-        throwIfParentInstance("getCameraDisabled");
         return getCameraDisabled(admin, myUserId());
     }
 
@@ -3092,7 +3076,6 @@ public class DevicePolicyManager {
      *             than the one managed by the device owner.
      */
     public boolean requestBugreport(@NonNull ComponentName admin) {
-        throwIfParentInstance("requestBugreport");
         if (mService != null) {
             try {
                 return mService.requestBugreport(admin);
@@ -3131,7 +3114,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setScreenCaptureDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setScreenCaptureDisabled");
         if (mService != null) {
             try {
                 mService.setScreenCaptureDisabled(admin, disabled);
@@ -3148,7 +3130,6 @@ public class DevicePolicyManager {
      * have disabled screen capture.
      */
     public boolean getScreenCaptureDisabled(@Nullable ComponentName admin) {
-        throwIfParentInstance("getScreenCaptureDisabled");
         return getScreenCaptureDisabled(admin, myUserId());
     }
 
@@ -3178,7 +3159,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setAutoTimeRequired(@NonNull ComponentName admin, boolean required) {
-        throwIfParentInstance("setAutoTimeRequired");
         if (mService != null) {
             try {
                 mService.setAutoTimeRequired(admin, required);
@@ -3192,7 +3172,6 @@ public class DevicePolicyManager {
      * @return true if auto time is required.
      */
     public boolean getAutoTimeRequired() {
-        throwIfParentInstance("getAutoTimeRequired");
         if (mService != null) {
             try {
                 return mService.getAutoTimeRequired();
@@ -3219,7 +3198,6 @@ public class DevicePolicyManager {
      */
     public void setForceEphemeralUsers(
             @NonNull ComponentName admin, boolean forceEphemeralUsers) {
-        throwIfParentInstance("setForceEphemeralUsers");
         if (mService != null) {
             try {
                 mService.setForceEphemeralUsers(admin, forceEphemeralUsers);
@@ -3235,7 +3213,6 @@ public class DevicePolicyManager {
      * @hide
      */
     public boolean getForceEphemeralUsers(@NonNull ComponentName admin) {
-        throwIfParentInstance("getForceEphemeralUsers");
         if (mService != null) {
             try {
                 return mService.getForceEphemeralUsers(admin);
@@ -3523,7 +3500,6 @@ public class DevicePolicyManager {
      * @return whether or not the package is registered as the device owner app.
      */
     public boolean isDeviceOwnerApp(String packageName) {
-        throwIfParentInstance("isDeviceOwnerApp");
         return isDeviceOwnerAppOnCallingUser(packageName);
     }
 
@@ -3621,7 +3597,6 @@ public class DevicePolicyManager {
      *             does not own the current device owner component.
      */
     public void clearDeviceOwnerApp(String packageName) {
-        throwIfParentInstance("clearDeviceOwnerApp");
         if (mService != null) {
             try {
                 mService.clearDeviceOwner(packageName);
@@ -3739,7 +3714,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active profile owner.
      */
     public void clearProfileOwner(@NonNull ComponentName admin) {
-        throwIfParentInstance("clearProfileOwner");
         if (mService != null) {
             try {
                 mService.clearProfileOwner(admin);
@@ -3813,7 +3787,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setDeviceOwnerLockScreenInfo(@NonNull ComponentName admin, CharSequence info) {
-        throwIfParentInstance("setDeviceOwnerLockScreenInfo");
         if (mService != null) {
             try {
                 mService.setDeviceOwnerLockScreenInfo(admin, info);
@@ -3827,7 +3800,6 @@ public class DevicePolicyManager {
      * @return The device owner information. If it is not set returns {@code null}.
      */
     public CharSequence getDeviceOwnerLockScreenInfo() {
-        throwIfParentInstance("getDeviceOwnerLockScreenInfo");
         if (mService != null) {
             try {
                 return mService.getDeviceOwnerLockScreenInfo();
@@ -3859,7 +3831,6 @@ public class DevicePolicyManager {
      */
     public String[] setPackagesSuspended(@NonNull ComponentName admin, String[] packageNames,
             boolean suspended) {
-        throwIfParentInstance("setPackagesSuspended");
         if (mService != null) {
             try {
                 return mService.setPackagesSuspended(admin, packageNames, suspended);
@@ -3882,7 +3853,6 @@ public class DevicePolicyManager {
      */
     public boolean isPackageSuspended(@NonNull ComponentName admin, String packageName)
             throws NameNotFoundException {
-        throwIfParentInstance("isPackageSuspended");
         if (mService != null) {
             try {
                 return mService.isPackageSuspended(admin, packageName);
@@ -3904,7 +3874,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setProfileEnabled(@NonNull ComponentName admin) {
-        throwIfParentInstance("setProfileEnabled");
         if (mService != null) {
             try {
                 mService.setProfileEnabled(admin);
@@ -3926,7 +3895,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setProfileName(@NonNull ComponentName admin, String profileName) {
-        throwIfParentInstance("setProfileName");
         if (mService != null) {
             try {
                 mService.setProfileName(admin, profileName);
@@ -3945,7 +3913,6 @@ public class DevicePolicyManager {
      * @return Whether or not the package is registered as the profile owner.
      */
     public boolean isProfileOwnerApp(String packageName) {
-        throwIfParentInstance("isProfileOwnerApp");
         if (mService != null) {
             try {
                 ComponentName profileOwner = mService.getProfileOwner(myUserId());
@@ -4040,7 +4007,6 @@ public class DevicePolicyManager {
      */
     public void addPersistentPreferredActivity(@NonNull ComponentName admin, IntentFilter filter,
             @NonNull ComponentName activity) {
-        throwIfParentInstance("addPersistentPreferredActivity");
         if (mService != null) {
             try {
                 mService.addPersistentPreferredActivity(admin, filter, activity);
@@ -4063,7 +4029,6 @@ public class DevicePolicyManager {
      */
     public void clearPackagePersistentPreferredActivities(@NonNull ComponentName admin,
             String packageName) {
-        throwIfParentInstance("clearPackagePersistentPreferredActivities");
         if (mService != null) {
             try {
                 mService.clearPackagePersistentPreferredActivities(admin, packageName);
@@ -4092,7 +4057,6 @@ public class DevicePolicyManager {
      */
     public void setApplicationRestrictionsManagingPackage(@NonNull ComponentName admin,
             @Nullable String packageName) throws NameNotFoundException {
-        throwIfParentInstance("setApplicationRestrictionsManagingPackage");
         if (mService != null) {
             try {
                 if (!mService.setApplicationRestrictionsManagingPackage(admin, packageName)) {
@@ -4114,7 +4078,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public String getApplicationRestrictionsManagingPackage(@NonNull ComponentName admin) {
-        throwIfParentInstance("getApplicationRestrictionsManagingPackage");
         if (mService != null) {
             try {
                 return mService.getApplicationRestrictionsManagingPackage(admin);
@@ -4134,7 +4097,6 @@ public class DevicePolicyManager {
      * that method.
      */
     public boolean isCallerApplicationRestrictionsManagingPackage() {
-        throwIfParentInstance("isCallerApplicationRestrictionsManagingPackage");
         if (mService != null) {
             try {
                 return mService.isCallerApplicationRestrictionsManagingPackage();
@@ -4180,7 +4142,6 @@ public class DevicePolicyManager {
      */
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        throwIfParentInstance("setApplicationRestrictions");
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, packageName, settings);
@@ -4279,7 +4240,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setCrossProfileCallerIdDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setCrossProfileCallerIdDisabled");
         if (mService != null) {
             try {
                 mService.setCrossProfileCallerIdDisabled(admin, disabled);
@@ -4300,7 +4260,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getCrossProfileCallerIdDisabled(@NonNull ComponentName admin) {
-        throwIfParentInstance("getCrossProfileCallerIdDisabled");
         if (mService != null) {
             try {
                 return mService.getCrossProfileCallerIdDisabled(admin);
@@ -4341,7 +4300,6 @@ public class DevicePolicyManager {
      */
     public void setCrossProfileContactsSearchDisabled(@NonNull ComponentName admin,
             boolean disabled) {
-        throwIfParentInstance("setCrossProfileContactsSearchDisabled");
         if (mService != null) {
             try {
                 mService.setCrossProfileContactsSearchDisabled(admin, disabled);
@@ -4362,7 +4320,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getCrossProfileContactsSearchDisabled(@NonNull ComponentName admin) {
-        throwIfParentInstance("getCrossProfileContactsSearchDisabled");
         if (mService != null) {
             try {
                 return mService.getCrossProfileContactsSearchDisabled(admin);
@@ -4433,7 +4390,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setBluetoothContactSharingDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setBluetoothContactSharingDisabled");
         if (mService != null) {
             try {
                 mService.setBluetoothContactSharingDisabled(admin, disabled);
@@ -4456,7 +4412,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getBluetoothContactSharingDisabled(@NonNull ComponentName admin) {
-        throwIfParentInstance("getBluetoothContactSharingDisabled");
         if (mService != null) {
             try {
                 return mService.getBluetoothContactSharingDisabled(admin);
@@ -4500,7 +4455,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addCrossProfileIntentFilter(@NonNull ComponentName admin, IntentFilter filter, int flags) {
-        throwIfParentInstance("addCrossProfileIntentFilter");
         if (mService != null) {
             try {
                 mService.addCrossProfileIntentFilter(admin, filter, flags);
@@ -4519,7 +4473,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearCrossProfileIntentFilters(@NonNull ComponentName admin) {
-        throwIfParentInstance("clearCrossProfileIntentFilters");
         if (mService != null) {
             try {
                 mService.clearCrossProfileIntentFilters(admin);
@@ -4549,7 +4502,6 @@ public class DevicePolicyManager {
      */
     public boolean setPermittedAccessibilityServices(@NonNull ComponentName admin,
             List<String> packageNames) {
-        throwIfParentInstance("setPermittedAccessibilityServices");
         if (mService != null) {
             try {
                 return mService.setPermittedAccessibilityServices(admin, packageNames);
@@ -4571,7 +4523,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public List<String> getPermittedAccessibilityServices(@NonNull ComponentName admin) {
-        throwIfParentInstance("getPermittedAccessibilityServices");
         if (mService != null) {
             try {
                 return mService.getPermittedAccessibilityServices(admin);
@@ -4649,7 +4600,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean setPermittedInputMethods(@NonNull ComponentName admin, List<String> packageNames) {
-        throwIfParentInstance("setPermittedInputMethods");
         if (mService != null) {
             try {
                 return mService.setPermittedInputMethods(admin, packageNames);
@@ -4672,7 +4622,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public List<String> getPermittedInputMethods(@NonNull ComponentName admin) {
-        throwIfParentInstance("getPermittedInputMethods");
         if (mService != null) {
             try {
                 return mService.getPermittedInputMethods(admin);
@@ -4868,7 +4817,6 @@ public class DevicePolicyManager {
     public UserHandle createAndManageUser(@NonNull ComponentName admin, @NonNull String name,
             @NonNull ComponentName profileOwner, @Nullable PersistableBundle adminExtras,
             int flags) {
-        throwIfParentInstance("createAndManageUser");
         try {
             return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);
         } catch (RemoteException re) {
@@ -4886,7 +4834,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean removeUser(@NonNull ComponentName admin, UserHandle userHandle) {
-        throwIfParentInstance("removeUser");
         try {
             return mService.removeUser(admin, userHandle);
         } catch (RemoteException re) {
@@ -4904,7 +4851,6 @@ public class DevicePolicyManager {
      * @see Intent#ACTION_USER_FOREGROUND
      */
     public boolean switchUser(@NonNull ComponentName admin, @Nullable UserHandle userHandle) {
-        throwIfParentInstance("switchUser");
         try {
             return mService.switchUser(admin, userHandle);
         } catch (RemoteException re) {
@@ -4930,7 +4876,6 @@ public class DevicePolicyManager {
      * @see {@link #setApplicationRestrictionsManagingPackage}
      */
     public Bundle getApplicationRestrictions(@Nullable ComponentName admin, String packageName) {
-        throwIfParentInstance("getApplicationRestrictions");
         if (mService != null) {
             try {
                 return mService.getApplicationRestrictions(admin, packageName);
@@ -4953,7 +4898,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addUserRestriction(@NonNull ComponentName admin, String key) {
-        throwIfParentInstance("addUserRestriction");
         if (mService != null) {
             try {
                 mService.setUserRestriction(admin, key, true);
@@ -4975,7 +4919,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearUserRestriction(@NonNull ComponentName admin, String key) {
-        throwIfParentInstance("clearUserRestriction");
         if (mService != null) {
             try {
                 mService.setUserRestriction(admin, key, false);
@@ -4997,7 +4940,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public Bundle getUserRestrictions(@NonNull ComponentName admin) {
-        throwIfParentInstance("getUserRestrictions");
         Bundle ret = null;
         if (mService != null) {
             try {
@@ -5042,7 +4984,6 @@ public class DevicePolicyManager {
      */
     public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
             boolean hidden) {
-        throwIfParentInstance("setApplicationHidden");
         if (mService != null) {
             try {
                 return mService.setApplicationHidden(admin, packageName, hidden);
@@ -5062,7 +5003,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("isApplicationHidden");
         if (mService != null) {
             try {
                 return mService.isApplicationHidden(admin, packageName);
@@ -5082,7 +5022,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void enableSystemApp(@NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("enableSystemApp");
         if (mService != null) {
             try {
                 mService.enableSystemApp(admin, packageName);
@@ -5103,7 +5042,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public int enableSystemApp(@NonNull ComponentName admin, Intent intent) {
-        throwIfParentInstance("enableSystemApp");
         if (mService != null) {
             try {
                 return mService.enableSystemAppWithIntent(admin, intent);
@@ -5136,7 +5074,6 @@ public class DevicePolicyManager {
      */
     public void setAccountManagementDisabled(@NonNull ComponentName admin, String accountType,
             boolean disabled) {
-        throwIfParentInstance("setAccountManagementDisabled");
         if (mService != null) {
             try {
                 mService.setAccountManagementDisabled(admin, accountType, disabled);
@@ -5157,7 +5094,6 @@ public class DevicePolicyManager {
      * @see #setAccountManagementDisabled
      */
     public String[] getAccountTypesWithManagementDisabled() {
-        throwIfParentInstance("getAccountTypesWithManagementDisabled");
         return getAccountTypesWithManagementDisabledAsUser(myUserId());
     }
 
@@ -5195,7 +5131,6 @@ public class DevicePolicyManager {
      */
     public void setLockTaskPackages(@NonNull ComponentName admin, String[] packages)
             throws SecurityException {
-        throwIfParentInstance("setLockTaskPackages");
         if (mService != null) {
             try {
                 mService.setLockTaskPackages(admin, packages);
@@ -5212,7 +5147,6 @@ public class DevicePolicyManager {
      * @hide
      */
     public String[] getLockTaskPackages(@NonNull ComponentName admin) {
-        throwIfParentInstance("getLockTaskPackages");
         if (mService != null) {
             try {
                 return mService.getLockTaskPackages(admin);
@@ -5229,7 +5163,6 @@ public class DevicePolicyManager {
      * @param pkg The package to check
      */
     public boolean isLockTaskPermitted(String pkg) {
-        throwIfParentInstance("isLockTaskPermitted");
         if (mService != null) {
             try {
                 return mService.isLockTaskPermitted(pkg);
@@ -5278,7 +5211,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setGlobalSetting(@NonNull ComponentName admin, String setting, String value) {
-        throwIfParentInstance("setGlobalSetting");
         if (mService != null) {
             try {
                 mService.setGlobalSetting(admin, setting, value);
@@ -5311,7 +5243,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setSecureSetting(@NonNull ComponentName admin, String setting, String value) {
-        throwIfParentInstance("setSecureSetting");
         if (mService != null) {
             try {
                 mService.setSecureSetting(admin, setting, value);
@@ -5335,7 +5266,6 @@ public class DevicePolicyManager {
      */
     public void setRestrictionsProvider(@NonNull ComponentName admin,
             @Nullable ComponentName provider) {
-        throwIfParentInstance("setRestrictionsProvider");
         if (mService != null) {
             try {
                 mService.setRestrictionsProvider(admin, provider);
@@ -5353,7 +5283,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setMasterVolumeMuted(@NonNull ComponentName admin, boolean on) {
-        throwIfParentInstance("setMasterVolumeMuted");
         if (mService != null) {
             try {
                 mService.setMasterVolumeMuted(admin, on);
@@ -5371,7 +5300,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isMasterVolumeMuted(@NonNull ComponentName admin) {
-        throwIfParentInstance("isMasterVolumeMuted");
         if (mService != null) {
             try {
                 return mService.isMasterVolumeMuted(admin);
@@ -5392,7 +5320,6 @@ public class DevicePolicyManager {
      */
     public void setUninstallBlocked(@NonNull ComponentName admin, String packageName,
             boolean uninstallBlocked) {
-        throwIfParentInstance("setUninstallBlocked");
         if (mService != null) {
             try {
                 mService.setUninstallBlocked(admin, packageName, uninstallBlocked);
@@ -5418,7 +5345,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isUninstallBlocked(@Nullable ComponentName admin, String packageName) {
-        throwIfParentInstance("isUninstallBlocked");
         if (mService != null) {
             try {
                 return mService.isUninstallBlocked(admin, packageName);
@@ -5446,7 +5372,6 @@ public class DevicePolicyManager {
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
     public boolean addCrossProfileWidgetProvider(@NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("addCrossProfileWidgetProvider");
         if (mService != null) {
             try {
                 return mService.addCrossProfileWidgetProvider(admin, packageName);
@@ -5474,7 +5399,6 @@ public class DevicePolicyManager {
      */
     public boolean removeCrossProfileWidgetProvider(
             @NonNull ComponentName admin, String packageName) {
-        throwIfParentInstance("removeCrossProfileWidgetProvider");
         if (mService != null) {
             try {
                 return mService.removeCrossProfileWidgetProvider(admin, packageName);
@@ -5496,7 +5420,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public List<String> getCrossProfileWidgetProviders(@NonNull ComponentName admin) {
-        throwIfParentInstance("getCrossProfileWidgetProviders");
         if (mService != null) {
             try {
                 List<String> providers = mService.getCrossProfileWidgetProviders(admin);
@@ -5518,7 +5441,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setUserIcon(@NonNull ComponentName admin, Bitmap icon) {
-        throwIfParentInstance("setUserIcon");
         try {
             mService.setUserIcon(admin, icon);
         } catch (RemoteException re) {
@@ -5538,7 +5460,6 @@ public class DevicePolicyManager {
      * @see SystemUpdatePolicy
      */
     public void setSystemUpdatePolicy(@NonNull ComponentName admin, SystemUpdatePolicy policy) {
-        throwIfParentInstance("setSystemUpdatePolicy");
         if (mService != null) {
             try {
                 mService.setSystemUpdatePolicy(admin, policy);
@@ -5554,7 +5475,6 @@ public class DevicePolicyManager {
      * @return The current policy object, or {@code null} if no policy is set.
      */
     public SystemUpdatePolicy getSystemUpdatePolicy() {
-        throwIfParentInstance("getSystemUpdatePolicy");
         if (mService != null) {
             try {
                 return mService.getSystemUpdatePolicy();
@@ -5580,7 +5500,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean setKeyguardDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setKeyguardDisabled");
         try {
             return mService.setKeyguardDisabled(admin, disabled);
         } catch (RemoteException re) {
@@ -5599,7 +5518,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean setStatusBarDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setStatusBarDisabled");
         try {
             return mService.setStatusBarDisabled(admin, disabled);
         } catch (RemoteException re) {
@@ -5645,7 +5563,6 @@ public class DevicePolicyManager {
      * @see #setPermissionGrantState
      */
     public void setPermissionPolicy(@NonNull ComponentName admin, int policy) {
-        throwIfParentInstance("setPermissionPolicy");
         try {
             mService.setPermissionPolicy(admin, policy);
         } catch (RemoteException re) {
@@ -5660,7 +5577,6 @@ public class DevicePolicyManager {
      * @return the current policy for future permission requests.
      */
     public int getPermissionPolicy(ComponentName admin) {
-        throwIfParentInstance("getPermissionPolicy");
         try {
             return mService.getPermissionPolicy(admin);
         } catch (RemoteException re) {
@@ -5697,7 +5613,6 @@ public class DevicePolicyManager {
      */
     public boolean setPermissionGrantState(@NonNull ComponentName admin, String packageName,
             String permission, int grantState) {
-        throwIfParentInstance("setPermissionGrantState");
         try {
             return mService.setPermissionGrantState(admin, packageName, permission, grantState);
         } catch (RemoteException re) {
@@ -5726,7 +5641,6 @@ public class DevicePolicyManager {
      */
     public int getPermissionGrantState(@NonNull ComponentName admin, String packageName,
             String permission) {
-        throwIfParentInstance("getPermissionGrantState");
         try {
             return mService.getPermissionGrantState(admin, packageName, permission);
         } catch (RemoteException re) {
@@ -5742,7 +5656,6 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the supplied action is not valid.
      */
     public boolean isProvisioningAllowed(String action) {
-        throwIfParentInstance("isProvisioningAllowed");
         try {
             return mService.isProvisioningAllowed(action);
         } catch (RemoteException re) {
@@ -5758,7 +5671,6 @@ public class DevicePolicyManager {
      * @return if this user is a managed profile of another user.
      */
     public boolean isManagedProfile(@NonNull ComponentName admin) {
-        throwIfParentInstance("isManagedProfile");
         try {
             return mService.isManagedProfile(admin);
         } catch (RemoteException re) {
@@ -5792,7 +5704,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public String getWifiMacAddress(@NonNull ComponentName admin) {
-        throwIfParentInstance("getWifiMacAddress");
         try {
             return mService.getWifiMacAddress(admin);
         } catch (RemoteException re) {
@@ -5809,7 +5720,6 @@ public class DevicePolicyManager {
      * @see TelephonyManager#CALL_STATE_IDLE
      */
     public void reboot(@NonNull ComponentName admin) {
-        throwIfParentInstance("reboot");
         try {
             mService.reboot(admin);
         } catch (RemoteException re) {
@@ -5836,7 +5746,6 @@ public class DevicePolicyManager {
      */
     public void setShortSupportMessage(@NonNull ComponentName admin,
             @Nullable String message) {
-        throwIfParentInstance("setShortSupportMessage");
         if (mService != null) {
             try {
                 mService.setShortSupportMessage(admin, message);
@@ -5855,7 +5764,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public String getShortSupportMessage(@NonNull ComponentName admin) {
-        throwIfParentInstance("getShortSupportMessage");
         if (mService != null) {
             try {
                 return mService.getShortSupportMessage(admin);
@@ -5882,7 +5790,6 @@ public class DevicePolicyManager {
      */
     public void setLongSupportMessage(@NonNull ComponentName admin,
             @Nullable String message) {
-        throwIfParentInstance("setLongSupportMessage");
         if (mService != null) {
             try {
                 mService.setLongSupportMessage(admin, message);
@@ -5901,7 +5808,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public String getLongSupportMessage(@NonNull ComponentName admin) {
-        throwIfParentInstance("getLongSupportMessage");
         if (mService != null) {
             try {
                 return mService.getLongSupportMessage(admin);
@@ -5998,7 +5904,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
-        throwIfParentInstance("getParentProfileInstance");
         try {
             if (!mService.isManagedProfile(admin)) {
                 throw new SecurityException("The current user does not have a parent profile.");
@@ -6025,7 +5930,6 @@ public class DevicePolicyManager {
      * @see #retrieveSecurityLogs
      */
     public void setSecurityLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
-        throwIfParentInstance("setSecurityLoggingEnabled");
         try {
             mService.setSecurityLoggingEnabled(admin, enabled);
         } catch (RemoteException re) {
@@ -6044,7 +5948,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean isSecurityLoggingEnabled(@NonNull ComponentName admin) {
-        throwIfParentInstance("isSecurityLoggingEnabled");
         try {
             return mService.isSecurityLoggingEnabled(admin);
         } catch (RemoteException re) {
@@ -6068,7 +5971,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public List<SecurityEvent> retrieveSecurityLogs(@NonNull ComponentName admin) {
-        throwIfParentInstance("retrieveSecurityLogs");
         try {
             ParceledListSlice<SecurityEvent> list = mService.retrieveSecurityLogs(admin);
             if (list != null) {
@@ -6114,7 +6016,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public List<SecurityEvent> retrievePreRebootSecurityLogs(@NonNull ComponentName admin) {
-        throwIfParentInstance("retrievePreRebootSecurityLogs");
         try {
             ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(admin);
             return list.getList();
@@ -6136,7 +6037,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setOrganizationColor(@NonNull ComponentName admin, int color) {
-        throwIfParentInstance("setOrganizationColor");
         try {
             mService.setOrganizationColor(admin, color);
         } catch (RemoteException re) {
@@ -6172,7 +6072,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public int getOrganizationColor(@NonNull ComponentName admin) {
-        throwIfParentInstance("getOrganizationColor");
         try {
             return mService.getOrganizationColor(admin);
         } catch (RemoteException re) {
@@ -6208,7 +6107,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setOrganizationName(@NonNull ComponentName admin, @Nullable String title) {
-        throwIfParentInstance("setOrganizationName");
         try {
             mService.setOrganizationName(admin, title);
         } catch (RemoteException re) {
@@ -6225,7 +6123,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public String getOrganizationName(@NonNull ComponentName admin) {
-        throwIfParentInstance("getOrganizationName");
         try {
             return mService.getOrganizationName(admin);
         } catch (RemoteException re) {
@@ -6349,12 +6246,6 @@ public class DevicePolicyManager {
             mService.uninstallPackageWithActiveAdmins(packageName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
-        }
-    }
-
-    private void throwIfParentInstance(String functionName) {
-        if (mParentInstance) {
-            throw new SecurityException(functionName + " cannot be called on the parent instance");
         }
     }
 }
