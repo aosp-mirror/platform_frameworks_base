@@ -47,6 +47,7 @@ abstract public class SafetyWarningDialog extends SystemUIDialog
         mAudioManager = audioManager;
 
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+        setShowForAllUsers(true);
         setMessage(mContext.getString(com.android.internal.R.string.safe_media_volume_warning));
         setButton(DialogInterface.BUTTON_POSITIVE,
                 mContext.getString(com.android.internal.R.string.yes), this);
