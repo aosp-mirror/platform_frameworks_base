@@ -419,26 +419,26 @@ public class ShortcutService extends IShortcutService.Stub {
             result = false;
         }
 
-        mSaveDelayMillis = (int) parser.getLong(ConfigConstants.KEY_SAVE_DELAY_MILLIS,
-                DEFAULT_SAVE_DELAY_MS);
+        mSaveDelayMillis = Math.max(0, (int) parser.getLong(ConfigConstants.KEY_SAVE_DELAY_MILLIS,
+                DEFAULT_SAVE_DELAY_MS));
 
-        mResetInterval = parser.getLong(
+        mResetInterval = Math.max(1, parser.getLong(
                 ConfigConstants.KEY_RESET_INTERVAL_SEC, DEFAULT_RESET_INTERVAL_SEC)
-                * 1000L;
+                * 1000L);
 
-        mMaxDailyUpdates = (int) parser.getLong(
-                ConfigConstants.KEY_MAX_DAILY_UPDATES, DEFAULT_MAX_DAILY_UPDATES);
+        mMaxDailyUpdates = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_DAILY_UPDATES, DEFAULT_MAX_DAILY_UPDATES));
 
-        mMaxDynamicShortcuts = (int) parser.getLong(
-                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP);
+        mMaxDynamicShortcuts = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP));
 
-        final int iconDimensionDp = injectIsLowRamDevice()
+        final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
                     ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM,
                     DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP)
                 : (int) parser.getLong(
                     ConfigConstants.KEY_MAX_ICON_DIMENSION_DP,
-                    DEFAULT_MAX_ICON_DIMENSION_DP);
+                    DEFAULT_MAX_ICON_DIMENSION_DP));
 
         mMaxIconDimension = injectDipToPixel(iconDimensionDp);
 
@@ -1128,7 +1128,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (injectGetPackageUid(packageName, userId) == injectBinderCallingUid()) {
             return; // Caller is valid.
         }
-        throw new SecurityException("Caller UID= doesn't own " + packageName);
+        throw new SecurityException("Calling package name mismatch");
     }
 
     void postToHandler(Runnable r) {
@@ -1425,6 +1425,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public int getIconMaxDimensions(String packageName, int userId) throws RemoteException {
+        verifyCaller(packageName, userId);
+
         synchronized (mLock) {
             return mMaxIconDimension;
         }
@@ -1445,7 +1447,15 @@ public class ShortcutService extends IShortcutService.Stub {
             getUserShortcutsLocked(userId).resetThrottling();
         }
         scheduleSaveUser(userId);
-        Slog.i(TAG, "ShortcutManager: throttling counter reset");
+        Slog.i(TAG, "ShortcutManager: throttling counter reset for user " + userId);
+    }
+
+    void resetAllThrottlingInner() {
+        synchronized (mLock) {
+            mRawLastResetTime = injectCurrentTimeMillis();
+        }
+        scheduleSaveBaseState();
+        Slog.i(TAG, "ShortcutManager: throttling counter reset for all users");
     }
 
     // We override this method in unit tests to do a simpler check.
@@ -1528,14 +1538,20 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // === House keeping ===
 
+    @VisibleForTesting
+    void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
+        cleanUpPackageLocked(packageName, owningUserId, packageUserId,
+                /* forceForCommandLine= */ false);
+    }
+
     /**
      * Remove all the information associated with a package.  This will really remove all the
      * information, including the restore information (i.e. it'll remove packages even if they're
      * shadow).
      */
-    @VisibleForTesting
-    void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
-        if (isPackageInstalled(packageName, packageUserId)) {
+    private void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId,
+            boolean forceForCommandLine) {
+        if (!forceForCommandLine && isPackageInstalled(packageName, packageUserId)) {
             wtf("Package " + packageName + " is still installed for user " + packageUserId);
             return;
         }
@@ -1863,9 +1879,15 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName,
                     packageUserId));
         }
+        handlePackageRemovedInner(packageName, packageUserId, /* forceForCommandLine =*/ false);
+    }
+
+    private void handlePackageRemovedInner(String packageName, @UserIdInt int packageUserId,
+            boolean forceForCommandLine) {
         synchronized (mLock) {
             forEachLoadedUserLocked(user ->
-                cleanUpPackageLocked(packageName, user.getUserId(), packageUserId));
+                cleanUpPackageLocked(packageName, user.getUserId(), packageUserId,
+                        forceForCommandLine));
         }
     }
 
@@ -2046,17 +2068,26 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print(formatTime(next));
             pw.println();
 
-            pw.print("  Max icon dim: ");
-            pw.print(mMaxIconDimension);
-            pw.print("  Icon format: ");
-            pw.print(mIconPersistFormat);
-            pw.print("  Icon quality: ");
+            pw.print("  Config:");
+            pw.print("    Max icon dim: ");
+            pw.println(mMaxIconDimension);
+            pw.print("    Icon format: ");
+            pw.println(mIconPersistFormat);
+            pw.print("    Icon quality: ");
             pw.println(mIconPersistQuality);
+            pw.print("    saveDelayMillis:");
+            pw.println(mSaveDelayMillis);
+            pw.print("    resetInterval:");
+            pw.println(mResetInterval);
+            pw.print("    maxDailyUpdates:");
+            pw.println(mMaxDailyUpdates);
+            pw.print("    maxDynamicShortcuts:");
+            pw.println(mMaxDynamicShortcuts);
             pw.println();
 
             pw.println("  Stats:");
             synchronized (mStatLock) {
-                final String p = "     ";
+                final String p = "    ";
                 dumpStatLS(pw, p, Stats.GET_DEFAULT_HOME, "getHomeActivities()");
                 dumpStatLS(pw, p, Stats.LAUNCHER_PERMISSION_CHECK, "Launcher permission check");
 
@@ -2142,6 +2173,9 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "reset-throttling":
                         handleResetThrottling();
                         break;
+                    case "reset-all-throttling":
+                        handleResetAllThrottling();
+                        break;
                     case "override-config":
                         handleOverrideConfig();
                         break;
@@ -2159,6 +2193,9 @@ public class ShortcutService extends IShortcutService.Stub {
                         break;
                     case "unload-user":
                         handleUnloadUser();
+                        break;
+                    case "clear-shortcuts":
+                        handleClearShortcuts();
                         break;
                     default:
                         return handleDefaultCommands(cmd);
@@ -2179,8 +2216,11 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("cmd shortcut reset-package-throttling [--user USER_ID] PACKAGE");
             pw.println("    Reset throttling for a package");
             pw.println();
-            pw.println("cmd shortcut reset-throttling");
+            pw.println("cmd shortcut reset-throttling [--user USER_ID]");
             pw.println("    Reset throttling for all packages and users");
+            pw.println();
+            pw.println("cmd shortcut reset-all-throttling");
+            pw.println("    Reset the throttling state for all users");
             pw.println();
             pw.println("cmd shortcut override-config CONFIG");
             pw.println("    Override the configuration for testing (will last until reboot)");
@@ -2201,19 +2241,31 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("    Unload a user from the memory");
             pw.println("    (This should not affect any observable behavior)");
             pw.println();
+            pw.println("cmd shortcut clear-shortcuts [--user USER_ID] PACKAGE");
+            pw.println("    Remove all shortcuts from a package, including pinned shortcuts");
+            pw.println();
         }
 
-        private int handleResetThrottling() throws CommandException {
+        private void handleResetThrottling() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
+            Slog.i(TAG, "cmd: handleResetThrottling");
+
             resetThrottlingInner(mUserId);
-            return 0;
+        }
+
+        private void handleResetAllThrottling() {
+            Slog.i(TAG, "cmd: handleResetAllThrottling");
+
+            resetAllThrottlingInner();
         }
 
         private void handleResetPackageThrottling() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
             final String packageName = getNextArgRequired();
+
+            Slog.i(TAG, "cmd: handleResetPackageThrottling: " + packageName);
 
             synchronized (mLock) {
                 getPackageShortcutsLocked(packageName, mUserId).resetRateLimitingForCommandLine();
@@ -2224,6 +2276,8 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleOverrideConfig() throws CommandException {
             final String config = getNextArgRequired();
 
+            Slog.i(TAG, "cmd: handleOverrideConfig: " + config);
+
             synchronized (mLock) {
                 if (!updateConfigurationLocked(config)) {
                     throw new CommandException("override-config failed.  See logcat for details.");
@@ -2232,6 +2286,8 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         private void handleResetConfig() {
+            Slog.i(TAG, "cmd: handleResetConfig");
+
             synchronized (mLock) {
                 loadConfigurationLocked();
             }
@@ -2276,7 +2332,19 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleUnloadUser() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
+            Slog.i(TAG, "cmd: handleUnloadUser: " + mUserId);
+
             ShortcutService.this.handleCleanupUser(mUserId);
+        }
+
+        private void handleClearShortcuts() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+            final String packageName = getNextArgRequired();
+
+            Slog.i(TAG, "cmd: handleClearShortcuts: " + mUserId + ", " + packageName);
+
+            ShortcutService.this.handlePackageRemovedInner(packageName, mUserId,
+                    /* forceForCommandLine= */ true);
         }
     }
 
