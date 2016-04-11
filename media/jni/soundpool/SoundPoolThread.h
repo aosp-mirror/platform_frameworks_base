@@ -47,7 +47,7 @@ public:
     void write(SoundPoolMsg msg);
 
 private:
-    static const size_t maxMessages = 5;
+    static const size_t maxMessages = 128;
 
     static int beginThread(void* arg);
     int run();
