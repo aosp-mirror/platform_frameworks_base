@@ -179,10 +179,7 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        mUserImportance = previous.mUserImportance;
-        mImportance = previous.mImportance;
-        mImportanceExplanation = previous.mImportanceExplanation;
-        // Don't copy mGlobalSortKey, recompute it.
+        // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
     public Notification getNotification() { return sbn.getNotification(); }
