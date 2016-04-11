@@ -16,24 +16,36 @@
 
 package com.android.test.soundtrigger;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
 import android.app.Activity;
-import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.soundtrigger.SoundTriggerDetector;
 import android.media.soundtrigger.SoundTriggerManager;
-import android.text.Editable;
-import android.text.method.ScrollingMovementMethod;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserManager;
+import android.text.Editable;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,20 +56,17 @@ public class TestSoundTriggerActivity extends Activity {
 
     private SoundTriggerUtil mSoundTriggerUtil;
     private Random mRandom;
-    private UUID mModelUuid1 = UUID.randomUUID();
-    private UUID mModelUuid2 = UUID.randomUUID();
-    private UUID mModelUuid3 = UUID.randomUUID();
-    private UUID mVendorUuid = UUID.randomUUID();
 
-    private SoundTriggerDetector mDetector1 = null;
-    private SoundTriggerDetector mDetector2 = null;
-    private SoundTriggerDetector mDetector3 = null;
+    private Map<Integer, ModelInfo> mModelInfoMap;
+    private Map<View, Integer> mModelIdMap;
 
     private TextView mDebugView = null;
-    private int mSelectedModelId = 1;
+    private int mSelectedModelId = -1;
     private ScrollView mScrollView = null;
+    private Button mPlayTriggerButton = null;
     private PowerManager.WakeLock mScreenWakelock;
     private Handler mHandler;
+    private RadioGroup mRadioGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +75,108 @@ public class TestSoundTriggerActivity extends Activity {
         setContentView(R.layout.main);
         mDebugView = (TextView) findViewById(R.id.console);
         mScrollView = (ScrollView) findViewById(R.id.scroller_id);
+        mRadioGroup = (RadioGroup) findViewById(R.id.model_group_id);
+        mPlayTriggerButton = (Button) findViewById(R.id.play_trigger_id);
         mDebugView.setText(mDebugView.getText(), TextView.BufferType.EDITABLE);
         mDebugView.setMovementMethod(new ScrollingMovementMethod());
         mSoundTriggerUtil = new SoundTriggerUtil(this);
         mRandom = new Random();
         mHandler = new Handler();
+
+        mModelInfoMap = new HashMap();
+        mModelIdMap = new HashMap();
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        // Load all the models in the data dir.
+        for (File file : getFilesDir().listFiles()) {
+            // Find meta-data in .properties files, ignore everything else.
+            if (!file.getName().endsWith(".properties")) {
+                continue;
+            }
+            try {
+                Properties properties = new Properties();
+                properties.load(new FileInputStream(file));
+                createModelInfoAndWidget(properties);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to load properties file " + file.getName());
+            }
+        }
+
+        // Create a few dummy models if we didn't load anything.
+        if (mModelIdMap.isEmpty()) {
+            Properties dummyModelProperties = new Properties();
+            for (String name : new String[]{"One", "Two", "Three"}) {
+                dummyModelProperties.setProperty("name", "Model " + name);
+                createModelInfoAndWidget(dummyModelProperties);
+            }
+        }
+    }
+
+    private void createModelInfoAndWidget(Properties properties) {
+        try {
+            ModelInfo modelInfo = new ModelInfo();
+
+            if (!properties.containsKey("name")) {
+                throw new RuntimeException("must have a 'name' property");
+            }
+            modelInfo.name = properties.getProperty("name");
+
+            if (properties.containsKey("modelUuid")) {
+                modelInfo.modelUuid = UUID.fromString(properties.getProperty("modelUuid"));
+            } else {
+                modelInfo.modelUuid = UUID.randomUUID();
+            }
+
+            if (properties.containsKey("vendorUuid")) {
+                modelInfo.vendorUuid = UUID.fromString(properties.getProperty("vendorUuid"));
+            } else {
+                modelInfo.vendorUuid = UUID.randomUUID();
+            }
+
+            if (properties.containsKey("triggerAudio")) {
+                modelInfo.triggerAudioPlayer = MediaPlayer.create(this, Uri.parse(
+                        getFilesDir().getPath() + "/" + properties.getProperty("triggerAudio")));
+            }
+
+            if (properties.containsKey("dataFile")) {
+                File modelDataFile = new File(
+                        getFilesDir().getPath() + "/" + properties.getProperty("dataFile"));
+                modelInfo.modelData = new byte[(int) modelDataFile.length()];
+                FileInputStream input = new FileInputStream(modelDataFile);
+                input.read(modelInfo.modelData, 0, modelInfo.modelData.length);
+            } else {
+                modelInfo.modelData = new byte[1024];
+                mRandom.nextBytes(modelInfo.modelData);
+            }
+
+            // TODO: Add property support for keyphrase models when they're exposed by the
+            // service. Also things like how much audio they should record with the capture session
+            // provided in the callback.
+
+            // Add a widget into the radio group.
+            RadioButton button = new RadioButton(this);
+            mRadioGroup.addView(button);
+            button.setText(modelInfo.name);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    onRadioButtonClicked(v);
+                }
+            });
+
+            // Update our maps containing the button -> id and id -> modelInfo.
+            int newModelId = mModelIdMap.size() + 1;
+            mModelIdMap.put(button, newModelId);
+            mModelInfoMap.put(newModelId, modelInfo);
+
+            // If we don't have something selected, select this first thing.
+            if (mSelectedModelId < 0) {
+                button.setChecked(true);
+                onRadioButtonClicked(button);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error parsing properties for " + properties.getProperty("name"), e);
+        }
     }
 
     private void postMessage(String msg) {
@@ -91,27 +197,15 @@ public class TestSoundTriggerActivity extends Activity {
     }
 
     private synchronized UUID getSelectedUuid() {
-        if (mSelectedModelId == 2) return mModelUuid2;
-        if (mSelectedModelId == 3) return mModelUuid3;
-        return mModelUuid1;  // Default.
+        return mModelInfoMap.get(mSelectedModelId).modelUuid;
     }
 
     private synchronized void setDetector(SoundTriggerDetector detector) {
-        if (mSelectedModelId == 2) {
-            mDetector2 = detector;
-            return;
-        }
-        if (mSelectedModelId == 3) {
-            mDetector3 = detector;
-            return;
-        }
-        mDetector1 = detector;
+        mModelInfoMap.get(mSelectedModelId).detector = detector;
     }
 
     private synchronized SoundTriggerDetector getDetector() {
-        if (mSelectedModelId == 2) return mDetector2;
-        if (mSelectedModelId == 3) return mDetector3;
-        return mDetector1;
+        return mModelInfoMap.get(mSelectedModelId).detector;
     }
 
     private void screenWakeup() {
@@ -127,25 +221,29 @@ public class TestSoundTriggerActivity extends Activity {
         mScreenWakelock.release();
     }
 
+    /** TODO: Should return the abstract sound model that can be then sent to the service. */
+    private GenericSoundModel createNewSoundModel() {
+        ModelInfo modelInfo = mModelInfoMap.get(mSelectedModelId);
+        return new GenericSoundModel(modelInfo.modelUuid, modelInfo.vendorUuid,
+                modelInfo.modelData);
+    }
+
     /**
      * Called when the user clicks the enroll button.
      * Performs a fresh enrollment.
      */
     public void onEnrollButtonClicked(View v) {
         postMessage("Loading model: " + mSelectedModelId);
-        // Generate a fake model to push.
-        byte[] data = new byte[1024];
-        mRandom.nextBytes(data);
-        UUID modelUuid = getSelectedUuid();
-        GenericSoundModel model = new GenericSoundModel(modelUuid, mVendorUuid, data);
+
+        GenericSoundModel model = createNewSoundModel();
 
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(model);
         if (status) {
             Toast.makeText(
-                    this, "Successfully created sound trigger model UUID=" + modelUuid,
+                    this, "Successfully created sound trigger model UUID=" + model.uuid,
                     Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Failed to enroll!!!" + modelUuid, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to enroll!!!" + model.uuid, Toast.LENGTH_SHORT).show();
         }
 
         // Test the SoundManager API.
@@ -185,11 +283,7 @@ public class TestSoundTriggerActivity extends Activity {
             Toast.makeText(this, "Sound model not found!!!", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Generate a fake model to push.
-        byte[] data = new byte[2048];
-        mRandom.nextBytes(data);
-        GenericSoundModel updated = new GenericSoundModel(soundModel.uuid,
-                soundModel.vendorUuid, data);
+        GenericSoundModel updated = createNewSoundModel();
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(updated);
         if (status) {
             Toast.makeText(this, "Successfully re-enrolled, model UUID=" + updated.uuid,
@@ -237,28 +331,31 @@ public class TestSoundTriggerActivity extends Activity {
     public synchronized void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.model_one:
-                if (checked) {
-                    mSelectedModelId = 1;
-                    postMessage("Selected model one.");
-                }
-                break;
-            case R.id.model_two:
-                if (checked) {
-                    mSelectedModelId = 2;
-                    postMessage("Selected model two.");
-                }
-                break;
-            case R.id.model_three:
-                if (checked) {
-                    mSelectedModelId = 3;
-                    postMessage("Selected model three.");
-                }
-                break;
+        if (checked) {
+            mSelectedModelId = mModelIdMap.get(view);
+            ModelInfo modelInfo = mModelInfoMap.get(mSelectedModelId);
+            postMessage("Selected " + modelInfo.name);
+
+            // Set the play trigger button to be enabled only if we actually have some audio.
+            mPlayTriggerButton.setEnabled(modelInfo.triggerAudioPlayer != null);
         }
     }
+
+    public synchronized void onPlayTriggerButtonClicked(View v) {
+        ModelInfo modelInfo = mModelInfoMap.get(mSelectedModelId);
+        modelInfo.triggerAudioPlayer.start();
+        postMessage("Playing trigger audio for " + modelInfo.name);
+    }
+
+    // Helper struct for holding information about a model.
+    private static class ModelInfo {
+      public String name;
+      public UUID modelUuid;
+      public UUID vendorUuid;
+      public MediaPlayer triggerAudioPlayer;
+      public SoundTriggerDetector detector;
+      public byte modelData[];
+    };
 
     // Implementation of SoundTriggerDetector.Callback.
     public class DetectorCallback extends SoundTriggerDetector.Callback {

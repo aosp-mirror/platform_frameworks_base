@@ -21,8 +21,6 @@
     <string name="unenroll">Un-load</string>
     <string name="start_recog">Start</string>
     <string name="stop_recog">Stop</string>
-    <string name="model_one">Model One</string>
-    <string name="model_two">Model Two</string>
-    <string name="model_three">Model Three</string>
+    <string name="play_trigger">Play Trigger Audio</string>
     <string name="none">Debug messages appear here:\n</string>
 </resources>
