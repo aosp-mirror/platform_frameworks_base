@@ -93,6 +93,12 @@ public class QSTileBaseView extends LinearLayout {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        // Avoid layers for this layout - we don't need them.
+        return false;
+    }
+
     /**
      * Update the accessibility order for this view.
      *
