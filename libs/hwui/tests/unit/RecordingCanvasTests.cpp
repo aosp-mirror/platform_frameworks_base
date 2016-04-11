@@ -603,6 +603,36 @@ TEST(RecordingCanvas, insertReorderBarrier) {
     EXPECT_TRUE(chunks[1].reorderChildren);
 }
 
+TEST(RecordingCanvas, insertReorderBarrier_clip) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        // first chunk: no recorded clip
+        canvas.insertReorderBarrier(true);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+
+        // second chunk: no recorded clip, since inorder region
+        canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
+        canvas.insertReorderBarrier(false);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+
+        // third chunk: recorded clip
+        canvas.insertReorderBarrier(true);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+    });
+
+    auto chunks = dl->getChunks();
+    ASSERT_EQ(3u, chunks.size());
+
+    EXPECT_TRUE(chunks[0].reorderChildren);
+    EXPECT_EQ(nullptr, chunks[0].reorderClip);
+
+    EXPECT_FALSE(chunks[1].reorderChildren);
+    EXPECT_EQ(nullptr, chunks[1].reorderClip);
+
+    EXPECT_TRUE(chunks[2].reorderChildren);
+    ASSERT_NE(nullptr, chunks[2].reorderClip);
+    EXPECT_EQ(Rect(200, 200), chunks[2].reorderClip->rect);
+}
+
 TEST(RecordingCanvas, refPaint) {
     SkPaint paint;
 

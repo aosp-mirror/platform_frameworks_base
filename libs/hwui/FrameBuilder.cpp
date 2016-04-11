@@ -269,7 +269,8 @@ static size_t findNonNegativeIndex(const V& zTranslatedNodes) {
 }
 
 template <typename V>
-void FrameBuilder::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
+void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMode mode,
+        const V& zTranslatedNodes) {
     const int size = zTranslatedNodes.size();
     if (size == 0
             || (mode == ChildrenSelectMode::Negative&& zTranslatedNodes[0].key > 0.0f)
@@ -305,7 +306,7 @@ void FrameBuilder::defer3dChildren(ChildrenSelectMode mode, const V& zTranslated
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < 0.1f) {
-                deferShadow(*casterNodeOp);
+                deferShadow(reorderClip, *casterNodeOp);
 
                 lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
                 shadowIndex++;
@@ -319,7 +320,7 @@ void FrameBuilder::defer3dChildren(ChildrenSelectMode mode, const V& zTranslated
     }
 }
 
-void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
+void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& casterNodeOp) {
     auto& node = *casterNodeOp.renderNode;
     auto& properties = node.properties();
 
@@ -365,6 +366,10 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
         casterPath = frameAllocatedPath;
     }
 
+    // apply reorder clip to shadow, so it respects clip at beginning of reorderable chunk
+    int restoreTo = mCanvasState.save(SaveFlags::MatrixClip);
+    mCanvasState.writableSnapshot()->applyClip(reorderClip,
+            *mCanvasState.currentSnapshot()->transform);
     if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
         Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
         Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
@@ -386,6 +391,7 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
             currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
         }
     }
+    mCanvasState.restoreToCount(restoreTo);
 }
 
 void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
@@ -438,11 +444,11 @@ void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
     const DisplayList& displayList = *(renderNode.getDisplayList());
-    for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
+    for (auto& chunk : displayList.getChunks()) {
         FatVector<ZRenderNodeOpPair, 16> zTranslatedNodes;
         buildZSortedChildList(&zTranslatedNodes, displayList, chunk);
 
-        defer3dChildren(ChildrenSelectMode::Negative, zTranslatedNodes);
+        defer3dChildren(chunk.reorderClip, ChildrenSelectMode::Negative, zTranslatedNodes);
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             const RecordedOp* op = displayList.getOps()[opIndex];
             receivers[op->opId](*this, *op);
@@ -453,7 +459,7 @@ void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
                 deferProjectedChildren(renderNode);
             }
         }
-        defer3dChildren(ChildrenSelectMode::Positive, zTranslatedNodes);
+        defer3dChildren(chunk.reorderClip, ChildrenSelectMode::Positive, zTranslatedNodes);
     }
 }
 
