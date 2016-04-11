@@ -17,6 +17,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -522,7 +523,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                         ret.getPackageInfo().loadFromXml(parser, fromBackup);
                         continue;
                     case TAG_SHORTCUT:
-                        final ShortcutInfo si = parseShortcut(parser, packageName);
+                        final ShortcutInfo si = parseShortcut(parser, packageName, ownerUserId);
 
                         // Don't use addShortcut(), we don't need to save the icon.
                         ret.mShortcuts.put(si.getId(), si);
@@ -534,8 +535,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         return ret;
     }
 
-    private static ShortcutInfo parseShortcut(XmlPullParser parser, String packageName)
-            throws IOException, XmlPullParserException {
+    private static ShortcutInfo parseShortcut(XmlPullParser parser, String packageName,
+            @UserIdInt int userId) throws IOException, XmlPullParserException {
         String id;
         ComponentName activityComponent;
         // Icon icon;
@@ -586,7 +587,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
         return new ShortcutInfo(
-                id, packageName, activityComponent, /* icon =*/ null, title, text, intent,
+                userId, id, packageName, activityComponent, /* icon =*/ null, title, text, intent,
                 intentPersistableExtras, weight, extras, lastChangedTimestamp, flags,
                 iconRes, bitmapPath);
     }

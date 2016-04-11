@@ -42,14 +42,9 @@ public abstract class ShortcutServiceInternal {
     public abstract List<ShortcutInfo>
             getShortcuts(int launcherUserId,
             @NonNull String callingPackage, long changedSince,
-            @Nullable String packageName, @Nullable ComponentName componentName,
-            @ShortcutQuery.QueryFlags int flags,
+            @Nullable String packageName, @Nullable List<String> shortcutIds,
+            @Nullable ComponentName componentName, @ShortcutQuery.QueryFlags int flags,
             int userId);
-
-    public abstract List<ShortcutInfo>
-            getShortcutInfo(int launcherUserId, @NonNull String callingPackage,
-            @NonNull String packageName, @Nullable List<String> ids, int userId);
-
 
     public abstract boolean
             isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,
@@ -65,11 +60,11 @@ public abstract class ShortcutServiceInternal {
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
 
     public abstract int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
-            @NonNull ShortcutInfo shortcut, int userId);
+            @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
             @NonNull String callingPackage,
-            @NonNull ShortcutInfo shortcut, int userId);
+            @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage);

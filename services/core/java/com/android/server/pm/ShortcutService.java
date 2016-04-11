@@ -968,7 +968,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 return; // has no icon
             }
 
-            Bitmap bitmap = null;
+            Bitmap bitmap;
+            Bitmap bitmapToRecycle = null;
             try {
                 switch (icon.getType()) {
                     case Icon.TYPE_RESOURCE: {
@@ -979,7 +980,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         return;
                     }
                     case Icon.TYPE_BITMAP: {
-                        bitmap = icon.getBitmap();
+                        bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
                     }
                     case Icon.TYPE_URI: {
@@ -987,7 +988,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                         try (InputStream is = mContext.getContentResolver().openInputStream(uri)) {
 
-                            bitmap = BitmapFactory.decodeStream(is);
+                            bitmapToRecycle = BitmapFactory.decodeStream(is);
+                            bitmap = bitmapToRecycle;
 
                         } catch (IOException e) {
                             Slog.e(TAG, "Unable to load icon from " + uri);
@@ -1011,8 +1013,14 @@ public class ShortcutService extends IShortcutService.Stub {
                     try {
                         path = out.getFile();
 
-                        shrinkBitmap(bitmap, mMaxIconDimension)
-                                .compress(mIconPersistFormat, mIconPersistQuality, out);
+                        Bitmap shrunk = shrinkBitmap(bitmap, mMaxIconDimension);
+                        try {
+                            shrunk.compress(mIconPersistFormat, mIconPersistQuality, out);
+                        } finally {
+                            if (bitmap != shrunk) {
+                                shrunk.recycle();
+                            }
+                        }
 
                         shortcut.setBitmapPath(out.getFile().getAbsolutePath());
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_FILE);
@@ -1027,8 +1035,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                 }
             } finally {
-                if (bitmap != null) {
-                    bitmap.recycle();
+                if (bitmapToRecycle != null) {
+                    bitmapToRecycle.recycle();
                 }
                 // Once saved, we won't use the original icon information, so null it out.
                 shortcut.clearIcon();
@@ -1075,8 +1083,6 @@ public class ShortcutService extends IShortcutService.Stub {
         final RectF dst = new RectF(0, 0, nw, nh);
 
         c.drawBitmap(in, /*src=*/ null, dst, /* paint =*/ null);
-
-        in.recycle();
 
         return scaledBitmap;
     }
@@ -1580,13 +1586,17 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public List<ShortcutInfo> getShortcuts(int launcherUserId,
                 @NonNull String callingPackage, long changedSince,
-                @Nullable String packageName, @Nullable ComponentName componentName,
+                @Nullable String packageName, @Nullable List<String> shortcutIds,
+                @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
             final int cloneFlag =
                     ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) == 0)
                             ? ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER
                             : ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO;
+            if (packageName == null) {
+                shortcutIds = null; // LauncherAppsService already threw for it though.
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -1594,14 +1604,14 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 if (packageName != null) {
                     getShortcutsInnerLocked(launcherUserId,
-                            callingPackage, packageName, changedSince,
+                            callingPackage, packageName, shortcutIds, changedSince,
                             componentName, queryFlags, userId, ret, cloneFlag);
                 } else {
                     final ArrayMap<String, ShortcutPackage> packages =
                             getUserShortcutsLocked(userId).getAllPackages();
                     for (int i = packages.size() - 1; i >= 0; i--) {
                         getShortcutsInnerLocked(launcherUserId,
-                                callingPackage, packages.keyAt(i), changedSince,
+                                callingPackage, packages.keyAt(i), shortcutIds, changedSince,
                                 componentName, queryFlags, userId, ret, cloneFlag);
                     }
                 }
@@ -1610,12 +1620,18 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
-                @Nullable String packageName,long changedSince,
+                @Nullable String packageName, @Nullable List<String> shortcutIds, long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag) {
+            final ArraySet<String> ids = shortcutIds == null ? null
+                    : new ArraySet<>(shortcutIds);
+
             getPackageShortcutsLocked(packageName, userId).findAll(ShortcutService.this, ret,
                     (ShortcutInfo si) -> {
                         if (si.getLastChangedTimestamp() < changedSince) {
+                            return false;
+                        }
+                        if (ids != null && !ids.contains(si.getId())) {
                             return false;
                         }
                         if (componentName != null
@@ -1630,27 +1646,6 @@ public class ShortcutService extends IShortcutService.Stub {
                                         && si.isPinned();
                         return matchDynamic || matchPinned;
                     }, cloneFlag, callingPackage, launcherUserId);
-        }
-
-        @Override
-        public List<ShortcutInfo> getShortcutInfo(int launcherUserId,
-                @NonNull String callingPackage,
-                @NonNull String packageName, @Nullable List<String> ids, int userId) {
-            // Calling permission must be checked by LauncherAppsImpl.
-            Preconditions.checkStringNotEmpty(packageName, "packageName");
-
-            final ArrayList<ShortcutInfo> ret = new ArrayList<>(ids.size());
-            final ArraySet<String> idSet = new ArraySet<>(ids);
-            synchronized (mLock) {
-                getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
-                        .attemptToRestoreIfNeededAndSave(ShortcutService.this);
-
-                getPackageShortcutsLocked(packageName, userId).findAll(
-                        ShortcutService.this, ret,
-                        (ShortcutInfo si) -> idSet.contains(si.getId()),
-                        ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER, callingPackage, launcherUserId);
-            }
-            return ret;
         }
 
         @Override
@@ -1733,17 +1728,18 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public int getShortcutIconResId(int launcherUserId,
-                @NonNull String callingPackage,
-                @NonNull ShortcutInfo shortcut, int userId) {
-            Preconditions.checkNotNull(shortcut, "shortcut");
+        public int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId) {
+            Preconditions.checkNotNull(callingPackage, "callingPackage");
+            Preconditions.checkNotNull(packageName, "packageName");
+            Preconditions.checkNotNull(shortcutId, "shortcutId");
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave(ShortcutService.this);
 
                 final ShortcutInfo shortcutInfo = getPackageShortcutsLocked(
-                        shortcut.getPackageName(), userId).findShortcutById(shortcut.getId());
+                        packageName, userId).findShortcutById(shortcutId);
                 return (shortcutInfo != null && shortcutInfo.hasIconResource())
                         ? shortcutInfo.getIconResourceId() : 0;
             }
@@ -1751,16 +1747,18 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
-                @NonNull String callingPackage,
-                @NonNull ShortcutInfo shortcutIn, int userId) {
-            Preconditions.checkNotNull(shortcutIn, "shortcut");
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull String shortcutId, int userId) {
+            Preconditions.checkNotNull(callingPackage, "callingPackage");
+            Preconditions.checkNotNull(packageName, "packageName");
+            Preconditions.checkNotNull(shortcutId, "shortcutId");
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave(ShortcutService.this);
 
                 final ShortcutInfo shortcutInfo = getPackageShortcutsLocked(
-                        shortcutIn.getPackageName(), userId).findShortcutById(shortcutIn.getId());
+                        packageName, userId).findShortcutById(shortcutId);
                 if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
                     return null;
                 }
