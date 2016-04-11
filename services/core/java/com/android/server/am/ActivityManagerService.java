@@ -13164,6 +13164,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private volatile long mWtfClusterStart;
+    private volatile int mWtfClusterCount;
+
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
      * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
@@ -13189,6 +13192,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Exit early if the dropbox isn't configured to accept this report type.
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
+
+        // Rate-limit how often we're willing to do the heavy lifting below to
+        // collect and record logs; currently 5 logs per 10 second period.
+        final long now = SystemClock.elapsedRealtime();
+        if (now - mWtfClusterStart > 10 * DateUtils.SECOND_IN_MILLIS) {
+            mWtfClusterStart = now;
+            mWtfClusterCount = 1;
+        } else {
+            if (mWtfClusterCount++ >= 5) return;
+        }
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);
