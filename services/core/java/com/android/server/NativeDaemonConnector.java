@@ -110,6 +110,14 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
+     * Like SystemClock.uptimeMillis, except truncated to an int so it will fit in a message arg.
+     * Inaccurate across 49.7 days of uptime, but only used for debugging.
+     */
+    private int uptimeMillisInt() {
+        return (int) SystemClock.uptimeMillis() & Integer.MAX_VALUE;
+    }
+
+    /**
      * Yell loudly if someone tries making future {@link #execute(Command)}
      * calls while holding a lock on the given object.
      */
@@ -134,7 +142,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     @Override
     public boolean handleMessage(Message msg) {
-        String event = (String) msg.obj;
+        final String event = (String) msg.obj;
+        final int start = uptimeMillisInt();
+        final int sent = msg.arg1;
         try {
             if (!mCallbacks.onEvent(msg.what, event, NativeDaemonEvent.unescapeArgs(event))) {
                 log(String.format("Unhandled event '%s'", event));
@@ -144,6 +154,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         } finally {
             if (mCallbacks.onCheckHoldWakeLock(msg.what) && mWakeLock != null) {
                 mWakeLock.release();
+            }
+            final int end = uptimeMillisInt();
+            if (start > sent && start - sent > WARN_EXECUTE_DELAY_MS) {
+                loge(String.format("NDC event {%s} processed too late: %dms", event, start - sent));
+            }
+            if (end > start && end - start > WARN_EXECUTE_DELAY_MS) {
+                loge(String.format("NDC event {%s} took too long: %dms", event, end - start));
             }
         }
         return true;
@@ -214,8 +231,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                     mWakeLock.acquire();
                                     releaseWl = true;
                                 }
-                                if (mCallbackHandler.sendMessage(mCallbackHandler.obtainMessage(
-                                        event.getCode(), event.getRawEvent()))) {
+                                Message msg = mCallbackHandler.obtainMessage(
+                                        event.getCode(), uptimeMillisInt(), 0, event.getRawEvent());
+                                if (mCallbackHandler.sendMessage(msg)) {
                                     releaseWl = false;
                                 }
                             } else {

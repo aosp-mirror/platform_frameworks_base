@@ -57,7 +57,7 @@ public class Protocol {
     public static final int BASE_DATA_CONNECTION                                    = 0x00040000;
     public static final int BASE_DATA_CONNECTION_AC                                 = 0x00041000;
     public static final int BASE_DATA_CONNECTION_TRACKER                            = 0x00042000;
-    public static final int BASE_DNS_PINGER                                         = 0x00050000;
+    public static final int BASE_TETHERING                                          = 0x00050000;
     public static final int BASE_NSD_MANAGER                                        = 0x00060000;
     public static final int BASE_NETWORK_STATE_TRACKER                              = 0x00070000;
     public static final int BASE_CONNECTIVITY_MANAGER                               = 0x00080000;

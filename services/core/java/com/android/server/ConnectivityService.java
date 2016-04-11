@@ -116,6 +116,7 @@ import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.MessageUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
@@ -223,6 +224,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
+
+    private static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
+            new Class[] { AsyncChannel.class, ConnectivityService.class, NetworkAgent.class });
 
     private enum ReapUnvalidatedNetworks {
         // Tear down networks that have no chance (e.g. even if validated) of becoming
@@ -1900,11 +1904,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private boolean isLiveNetworkAgent(NetworkAgentInfo nai, String msg) {
+    private boolean isLiveNetworkAgent(NetworkAgentInfo nai, int what) {
         if (nai.network == null) return false;
         final NetworkAgentInfo officialNai = getNetworkAgentInfoForNetwork(nai.network);
         if (officialNai != null && officialNai.equals(nai)) return true;
         if (officialNai != null || VDBG) {
+            final String msg = sMagicDecoderRing.get(what, Integer.toString(what));
             loge(msg + " - isLiveNetworkAgent found mismatched netId: " + officialNai +
                 " - " + nai);
         }
@@ -1921,10 +1926,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             super(looper);
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            NetworkInfo info;
+        private boolean maybeHandleAsyncChannelMessage(Message msg) {
             switch (msg.what) {
+                default:
+                    return false;
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
                     handleAsyncChannelHalfConnect(msg);
                     break;
@@ -1938,69 +1943,58 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleAsyncChannelDisconnected(msg);
                     break;
                 }
+            }
+            return true;
+        }
+
+        private void maybeHandleNetworkAgentMessage(Message msg) {
+            NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+            if (nai == null) {
+                if (VDBG) {
+                    final String what = sMagicDecoderRing.get(msg.what, Integer.toString(msg.what));
+                    log(String.format("%s from unknown NetworkAgent", what));
+                }
+                return;
+            }
+
+            switch (msg.what) {
                 case NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_NETWORK_CAPABILITIES_CHANGED from unknown NetworkAgent");
-                    } else {
-                        final NetworkCapabilities networkCapabilities =
-                                (NetworkCapabilities)msg.obj;
-                        if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL) ||
-                                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
-                            Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
-                        }
-                        if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
-                                networkCapabilities)) {
-                            Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
-                                    + nai.networkCapabilities + " -> " + networkCapabilities);
-                        }
-                        updateCapabilities(nai, networkCapabilities);
+                    final NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
+                    if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL) ||
+                            networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                        Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
                     }
+                    if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
+                            networkCapabilities)) {
+                        Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
+                                + nai.networkCapabilities + " -> " + networkCapabilities);
+                    }
+                    updateCapabilities(nai, networkCapabilities);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("NetworkAgent not found for EVENT_NETWORK_PROPERTIES_CHANGED");
-                    } else {
-                        if (VDBG) {
-                            log("Update of LinkProperties for " + nai.name() +
-                                    "; created=" + nai.created);
-                        }
-                        LinkProperties oldLp = nai.linkProperties;
-                        synchronized (nai) {
-                            nai.linkProperties = (LinkProperties)msg.obj;
-                        }
-                        if (nai.created) updateLinkProperties(nai, oldLp);
+                    if (VDBG) {
+                        log("Update of LinkProperties for " + nai.name() +
+                                "; created=" + nai.created);
                     }
+                    LinkProperties oldLp = nai.linkProperties;
+                    synchronized (nai) {
+                        nai.linkProperties = (LinkProperties)msg.obj;
+                    }
+                    if (nai.created) updateLinkProperties(nai, oldLp);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_INFO_CHANGED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_NETWORK_INFO_CHANGED from unknown NetworkAgent");
-                        break;
-                    }
-                    info = (NetworkInfo) msg.obj;
+                    NetworkInfo info = (NetworkInfo) msg.obj;
                     updateNetworkInfo(nai, info);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_NETWORK_SCORE_CHANGED from unknown NetworkAgent");
-                        break;
-                    }
                     Integer score = (Integer) msg.obj;
                     if (score != null) updateNetworkScore(nai, score.intValue());
                     break;
                 }
                 case NetworkAgent.EVENT_UID_RANGES_ADDED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_UID_RANGES_ADDED from unknown NetworkAgent");
-                        break;
-                    }
                     try {
                         mNetd.addVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
                     } catch (Exception e) {
@@ -2010,11 +2004,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_UID_RANGES_REMOVED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_UID_RANGES_REMOVED from unknown NetworkAgent");
-                        break;
-                    }
                     try {
                         mNetd.removeVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
                     } catch (Exception e) {
@@ -2024,11 +2013,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_SET_EXPLICITLY_SELECTED from unknown NetworkAgent");
-                        break;
-                    }
                     if (nai.created && !nai.networkMisc.explicitlySelected) {
                         loge("ERROR: created network explicitly selected.");
                     }
@@ -2037,17 +2021,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_PACKET_KEEPALIVE: {
-                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
-                    if (nai == null) {
-                        loge("EVENT_PACKET_KEEPALIVE from unknown NetworkAgent");
-                        break;
-                    }
                     mKeepaliveTracker.handleEventPacketKeepalive(nai, msg);
                     break;
                 }
+            }
+        }
+
+        private boolean maybeHandleNetworkMonitorMessage(Message msg) {
+            switch (msg.what) {
+                default:
+                    return false;
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_TESTED")) {
+                    if (isLiveNetworkAgent(nai, msg.what)) {
                         final boolean valid =
                                 (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
                         if (DBG) log(nai.name() + " validation " + (valid ? " passed" : "failed"));
@@ -2070,7 +2056,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case NetworkMonitor.EVENT_NETWORK_LINGER_COMPLETE: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_LINGER_COMPLETE")) {
+                    if (isLiveNetworkAgent(nai, msg.what)) {
                         handleLingerComplete(nai);
                     }
                     break;
@@ -2101,6 +2087,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     break;
                 }
+            }
+            return true;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (!maybeHandleAsyncChannelMessage(msg) && !maybeHandleNetworkMonitorMessage(msg)) {
+                maybeHandleNetworkAgentMessage(msg);
             }
         }
     }
