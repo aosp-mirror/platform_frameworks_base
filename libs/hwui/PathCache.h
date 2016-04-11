@@ -25,6 +25,7 @@
 #include "utils/Pair.h"
 
 #include <GLES2/gl2.h>
+#include <SkPaint.h>
 #include <SkPath.h>
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
@@ -108,18 +109,18 @@ private:
     sp<Task<SkBitmap*> > mTask;
 }; // struct PathTexture
 
-enum ShapeType {
-    kShapeNone,
-    kShapeRect,
-    kShapeRoundRect,
-    kShapeCircle,
-    kShapeOval,
-    kShapeArc,
-    kShapePath
+enum class ShapeType {
+    None,
+    Rect,
+    RoundRect,
+    Circle,
+    Oval,
+    Arc,
+    Path
 };
 
 struct PathDescription {
-    DESCRIPTION_TYPE(PathDescription);
+    HASHABLE_TYPE(PathDescription);
     ShapeType type;
     SkPaint::Join join;
     SkPaint::Cap cap;
@@ -159,8 +160,6 @@ struct PathDescription {
 
     PathDescription();
     PathDescription(ShapeType shapeType, const SkPaint* paint);
-
-    hash_t hash() const;
 };
 
 /**
