@@ -481,12 +481,6 @@ static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject 
     return proxy->pauseSurface(surface);
 }
 
-static void android_view_ThreadedRenderer_setStopped(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jboolean stopped) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setStopped(stopped);
-}
-
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
         jint width, jint height, jfloat lightRadius, jint ambientShadowAlpha, jint spotShadowAlpha) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -739,7 +733,6 @@ static const JNINativeMethod gMethods[] = {
     { "nInitialize", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
-    { "nSetStopped", "(JZ)V", (void*) android_view_ThreadedRenderer_setStopped },
     { "nSetup", "(JIIFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },

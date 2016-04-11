@@ -1079,16 +1079,13 @@ public final class ViewRootImpl implements ViewParent,
     void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
-            final ThreadedRenderer renderer = mAttachInfo.mHardwareRenderer;
-            if (renderer != null) {
-                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
-                renderer.setStopped(mStopped);
-            }
             if (!mStopped) {
                 scheduleTraversals();
             } else {
-                if (renderer != null) {
-                    renderer.destroyHardwareResources(mView);
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle());
+                    mAttachInfo.mHardwareRenderer.updateSurface(null);
+                    mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
                 }
             }
         }
