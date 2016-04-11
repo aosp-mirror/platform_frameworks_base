@@ -76,6 +76,11 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
                     public void onSelectionChanged(Set<String> updatedSelection) {
                         lastSelection = updatedSelection;
                     }
+
+                    @Override
+                    public boolean onBeforeItemStateChange(String id, boolean nextState) {
+                        return true;
+                    }
                 });
     }
 
