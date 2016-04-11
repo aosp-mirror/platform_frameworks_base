@@ -14522,7 +14522,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
-
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
             // Do not run PackageDexOptimizer through the local performDexOpt
             // method because `pkg` is not in `mPackages` yet.
@@ -14530,10 +14529,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     false /* checkProfiles */, getCompilerFilterForReason(REASON_INSTALL));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                String msg = "Extracking package failed for " + pkgName;
+                String msg = "Extracting package failed for " + pkgName;
                 res.setError(INSTALL_FAILED_DEXOPT, msg);
                 return;
             }
+
+            // Notify BackgroundDexOptService that the package has been changed.
+            // If this is an update of a package which used to fail to compile,
+            // BDOS will remove it from its blacklist.
+            BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
