@@ -1590,16 +1590,16 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
     /**
-     * <p>The amount of additional sesnsitivity boost applied to output images
+     * <p>The amount of additional sensitivity boost applied to output images
      * after RAW sensor data is captured.</p>
      * <p>Some camera devices support additional digital sensitivity boosting in the
      * camera processing pipeline after sensor RAW image is captured.
      * Such a boost will be applied to YUV/JPEG format output images but will not
      * have effect on RAW output formats like RAW_SENSOR, RAW10, RAW12 or RAW_OPAQUE.</p>
-     * <p>This key is optional. Applications can assume there is no boost applied
-     * after RAW is captured if this key is not available.
-     * When this key is available, the sensitivity boost value must be within
-     * {@link CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE android.control.postRawSensitivityBoostRange}.</p>
+     * <p>This key will be <code>null</code> for devices that do not support any RAW format
+     * outputs. For devices that do support RAW format outputs, this key will always
+     * present, and if a device does not support post RAW sensitivity boost, it will
+     * list <code>100</code> in this key.</p>
      * <p>If the camera device cannot apply the exact boost requested, it will reduce the
      * boost to the nearest supported value.
      * The final boost value used will be available in the output capture result.</p>
