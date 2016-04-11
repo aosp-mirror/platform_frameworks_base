@@ -60,29 +60,22 @@
         android:onClick="onUnEnrollButtonClicked"
         android:padding="20dp" />
 
+    <Button
+        android:id="@+id/play_trigger_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/play_trigger"
+        android:onClick="onPlayTriggerButtonClicked"
+        android:padding="20dp" />
+
 </LinearLayout>
 
 <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/model_group_id"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:checkedButton="@+id/model_one"
         android:orientation="vertical">
-   <RadioButton android:id="@+id/model_one"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/model_one"
-        android:onClick="onRadioButtonClicked"/>
-   <RadioButton android:id="@+id/model_two"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/model_two"
-        android:onClick="onRadioButtonClicked"/>
-   <RadioButton android:id="@+id/model_three"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/model_three"
-        android:onClick="onRadioButtonClicked"/>
 </RadioGroup>
 
 <ScrollView
@@ -93,7 +86,7 @@
        android:fillViewport="true">
 
       <TextView
-         android:id="@+id/console"
+        android:id="@+id/console"
         android:paddingTop="20pt"
         android:layout_height="fill_parent"
         android:layout_width="fill_parent"
