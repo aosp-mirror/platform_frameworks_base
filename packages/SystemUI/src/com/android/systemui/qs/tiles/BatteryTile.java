@@ -130,6 +130,8 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             }
         };
         state.label = percentage;
+        state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_battery,
+                percentage);
     }
 
     @Override
