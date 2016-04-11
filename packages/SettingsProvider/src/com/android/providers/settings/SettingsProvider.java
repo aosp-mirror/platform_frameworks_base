@@ -1831,14 +1831,11 @@ public class SettingsProvider extends ContentProvider {
         private void maybeNotifyProfiles(int userId, Uri uri, String name,
                 Set<String> keysCloned) {
             if (keysCloned.contains(name)) {
-                List<UserInfo> profiles = mUserManager.getProfiles(userId);
-                int size = profiles.size();
-                for (int i = 0; i < size; i++) {
-                    UserInfo profile = profiles.get(i);
+                for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
                     // the notification for userId has already been sent.
-                    if (profile.id != userId) {
+                    if (profileId != userId) {
                         mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
-                                profile.id, 0, uri).sendToTarget();
+                                profileId, 0, uri).sendToTarget();
                     }
                 }
             }

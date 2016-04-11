@@ -21,8 +21,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -57,7 +55,6 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -85,7 +82,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -2065,10 +2061,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private void sendAdminCommandToSelfAndProfilesLocked(String action, int reqPolicy,
             int userHandle) {
-        List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
-        for (UserInfo ui : profiles) {
-            int id = ui.id;
-            sendAdminCommandLocked(action, reqPolicy, id);
+        int[] profileIds = mUserManager.getProfileIdsWithDisabled(userHandle);
+        for (int profileId : profileIds) {
+            sendAdminCommandLocked(action, reqPolicy, profileId);
         }
     }
 
@@ -3968,9 +3963,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // moment so we set the screen off timeout regardless of whether it affects the parent user
         // or the profile challenge only.
         long timeMs = Long.MAX_VALUE;
-        List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
-        for (UserInfo userInfo : profiles) {
-            DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+        int[] profileIds = mUserManager.getProfileIdsWithDisabled(userHandle);
+        for (int profileId : profileIds) {
+            DevicePolicyData policy = getUserDataUnchecked(profileId);
             final int N = policy.mAdminList.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = policy.mAdminList.get(i);
@@ -6708,19 +6703,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // If we have multiple profiles we return the intersection of the
             // permitted lists. This can happen in cases where we have a device
             // and profile owner.
-            List<UserInfo> profiles = mUserManager.getProfiles(userId);
-            final int PROFILES_SIZE = profiles.size();
-            for (int i = 0; i < PROFILES_SIZE; ++i) {
+            int[] profileIds = mUserManager.getProfileIdsWithDisabled(userId);
+            for (int profileId : profileIds) {
                 // Just loop though all admins, only device or profiles
                 // owners can have permitted lists set.
-                DevicePolicyData policy = getUserDataUnchecked(profiles.get(i).id);
+                DevicePolicyData policy = getUserDataUnchecked(profileId);
                 final int N = policy.mAdminList.size();
                 for (int j = 0; j < N; j++) {
                     ActiveAdmin admin = policy.mAdminList.get(j);
                     List<String> fromAdmin = admin.permittedAccessiblityServices;
                     if (fromAdmin != null) {
                         if (result == null) {
-                            result = new ArrayList<String>(fromAdmin);
+                            result = new ArrayList<>(fromAdmin);
                         } else {
                             result.retainAll(fromAdmin);
                         }
@@ -6888,12 +6882,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // If we have multiple profiles we return the intersection of the
             // permitted lists. This can happen in cases where we have a device
             // and profile owner.
-            List<UserInfo> profiles = mUserManager.getProfiles(userId);
-            final int PROFILES_SIZE = profiles.size();
-            for (int i = 0; i < PROFILES_SIZE; ++i) {
+            int[] profileIds = mUserManager.getProfileIdsWithDisabled(userId);
+            for (int profileId : profileIds) {
                 // Just loop though all admins, only device or profiles
                 // owners can have permitted lists set.
-                DevicePolicyData policy = getUserDataUnchecked(profiles.get(i).id);
+                DevicePolicyData policy = getUserDataUnchecked(profileId);
                 final int N = policy.mAdminList.size();
                 for (int j = 0; j < N; j++) {
                     ActiveAdmin admin = policy.mAdminList.get(j);

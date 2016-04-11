@@ -1590,18 +1590,46 @@ public class UserManager {
      * @return A non-empty list of UserHandles associated with the calling user.
      */
     public List<UserHandle> getUserProfiles() {
-        ArrayList<UserHandle> profiles = new ArrayList<UserHandle>();
-        List<UserInfo> users;
+        int[] userIds = getProfileIds(UserHandle.myUserId(), true /* enabledOnly */);
+        List<UserHandle> result = new ArrayList<>(userIds.length);
+        for (int userId : userIds) {
+            result.add(UserHandle.of(userId));
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list of ids for profiles associated with the specified user including the user
+     * itself.
+     *
+     * @param userId      id of the user to return profiles for
+     * @param enabledOnly whether return only {@link UserInfo#isEnabled() enabled} profiles
+     * @return A non-empty list of ids of profiles associated with the specified user.
+     *
+     * @hide
+     */
+    public int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
         try {
-            users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
+            return mService.getProfileIds(userId, enabledOnly);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        for (UserInfo info : users) {
-            UserHandle userHandle = new UserHandle(info.id);
-            profiles.add(userHandle);
-        }
-        return profiles;
+    }
+
+    /**
+     * @see #getProfileIds(int, boolean)
+     * @hide
+     */
+    public int[] getProfileIdsWithDisabled(@UserIdInt int userId) {
+        return getProfileIds(userId, false /* enabledOnly */);
+    }
+
+    /**
+     * @see #getProfileIds(int, boolean)
+     * @hide
+     */
+    public int[] getEnabledProfileIds(@UserIdInt int userId) {
+        return getProfileIds(userId, true /* enabledOnly */);
     }
 
     /**

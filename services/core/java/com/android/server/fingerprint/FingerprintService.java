@@ -541,10 +541,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         UserManager um = UserManager.get(mContext);
 
         // Allow current user or profiles of the current user...
-        List<UserInfo> profiles = um.getEnabledProfiles(userId);
-        final int n = profiles.size();
-        for (int i = 0; i < n; i++) {
-            if (profiles.get(i).id == userId) {
+        for (int profileId : um.getEnabledProfileIds(userId)) {
+            if (profileId == userId) {
                 return true;
             }
         }
