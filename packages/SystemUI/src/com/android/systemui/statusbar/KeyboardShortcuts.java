@@ -255,10 +255,7 @@ public final class KeyboardShortcuts {
     }
 
     public void toggleKeyboardShortcuts(int deviceId) {
-        InputDevice inputDevice = InputManager.getInstance().getInputDevice(deviceId);
-        if (inputDevice != null) {
-            mKeyCharacterMap = inputDevice.getKeyCharacterMap();
-        }
+        retrieveKeyCharacterMap(deviceId);
         if (mKeyboardShortcutsDialog == null) {
             Recents.getSystemServices().requestKeyboardShortcuts(mContext,
                 new KeyboardShortcutsReceiver() {
@@ -276,6 +273,35 @@ public final class KeyboardShortcuts {
         } else {
             dismissKeyboardShortcutsDialog();
         }
+    }
+
+    /**
+     * Retrieves a {@link KeyCharacterMap} and assigns it to mKeyCharacterMap. If the given id is an
+     * existing device, that device's map is used. Otherwise, it checks first all available devices
+     * and if there is a full keyboard it uses that map, otherwise falls back to the Virtual
+     * Keyboard with its default map.
+     */
+    private void retrieveKeyCharacterMap(int deviceId) {
+        final InputManager inputManager = InputManager.getInstance();
+        if (deviceId != -1) {
+            final InputDevice inputDevice = inputManager.getInputDevice(deviceId);
+            if (inputDevice != null) {
+                mKeyCharacterMap = inputDevice.getKeyCharacterMap();
+                return;
+            }
+        }
+        final int[] deviceIds = inputManager.getInputDeviceIds();
+        for (int i = 0; i < deviceIds.length; ++i) {
+            final InputDevice inputDevice = inputManager.getInputDevice(deviceIds[i]);
+            // -1 is the Virtual Keyboard, with the default key map. Use that one only as last
+            // resort.
+            if (inputDevice.getId() != -1 && inputDevice.isFullKeyboard()) {
+                mKeyCharacterMap = inputDevice.getKeyCharacterMap();
+                return;
+            }
+        }
+        final InputDevice inputDevice = inputManager.getInputDevice(-1);
+        mKeyCharacterMap = inputDevice.getKeyCharacterMap();
     }
 
     public void dismissKeyboardShortcutsDialog() {
@@ -488,12 +514,6 @@ public final class KeyboardShortcuts {
             final int itemsSize = group.getItems().size();
             for (int j = 0; j < itemsSize; j++) {
                 KeyboardShortcutInfo info = group.getItems().get(j);
-                if (info.getKeycode() != KeyEvent.KEYCODE_UNKNOWN
-                        && !KeyCharacterMap.deviceHasKey(info.getKeycode())) {
-                    // The user can't achieve this shortcut, so skipping.
-                    Log.w(TAG, "Keyboard Shortcut contains key not on device, skipping.");
-                    continue;
-                }
                 List<StringOrDrawable> shortcutKeys = getHumanReadableShortcutKeys(info);
                 if (shortcutKeys == null) {
                     // Ignore shortcuts we can't display keys for.
@@ -585,9 +605,7 @@ public final class KeyboardShortcuts {
             if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
                 return shortcutKeys;
             }
-            // TODO: Have a generic map for when we don't have the device's.
-            char displayLabel = mKeyCharacterMap == null
-                    ? 0 : mKeyCharacterMap.getDisplayLabel(info.getKeycode());
+            char displayLabel = mKeyCharacterMap.getDisplayLabel(info.getKeycode());
             if (displayLabel != 0) {
                 displayLabelString = String.valueOf(displayLabel);
             } else {
