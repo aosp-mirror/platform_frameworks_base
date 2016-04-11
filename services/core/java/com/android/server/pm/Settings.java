@@ -2672,7 +2672,7 @@ final class Settings {
 
     void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
             throws XmlPullParserException, java.io.IOException {
-        if (bp.type != BasePermission.TYPE_BUILTIN && bp.sourcePackage != null) {
+        if (bp.sourcePackage != null) {
             serializer.startTag(null, TAG_ITEM);
             serializer.attribute(null, ATTR_NAME, bp.name);
             serializer.attribute(null, "package", bp.sourcePackage);
@@ -3333,8 +3333,12 @@ final class Settings {
                 final String ptype = parser.getAttributeValue(null, "type");
                 if (name != null && sourcePackage != null) {
                     final boolean dynamic = "dynamic".equals(ptype);
-                    final BasePermission bp = new BasePermission(name.intern(), sourcePackage,
-                            dynamic ? BasePermission.TYPE_DYNAMIC : BasePermission.TYPE_NORMAL);
+                    BasePermission bp = out.get(name);
+                    // If the permission is builtin, do not clobber it.
+                    if (bp == null || bp.type != BasePermission.TYPE_BUILTIN) {
+                        bp = new BasePermission(name.intern(), sourcePackage,
+                                dynamic ? BasePermission.TYPE_DYNAMIC : BasePermission.TYPE_NORMAL);
+                    }
                     bp.protectionLevel = readInt(parser, null, "protection",
                             PermissionInfo.PROTECTION_NORMAL);
                     bp.protectionLevel = PermissionInfo.fixProtectionLevel(bp.protectionLevel);
