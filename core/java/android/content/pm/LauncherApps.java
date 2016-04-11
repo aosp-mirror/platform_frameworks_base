@@ -205,6 +205,9 @@ public class LauncherApps {
         String mPackage;
 
         @Nullable
+        List<String> mShortcutIds;
+
+        @Nullable
         ComponentName mActivity;
 
         @QueryFlags
@@ -226,6 +229,14 @@ public class LauncherApps {
          */
         public void setPackage(@Nullable String packageName) {
             mPackage = packageName;
+        }
+
+        /**
+         * If non-null, return only the specified shortcuts by ID.  When setting this field,
+         * a packange name must also be set with {@link #setPackage}.
+         */
+        public void setShortcutIds(@Nullable List<String> shortcutIds) {
+            mShortcutIds = shortcutIds;
         }
 
         /**
@@ -429,7 +440,8 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         try {
             return mService.getShortcuts(mContext.getPackageName(),
-                    query.mChangedSince, query.mPackage, query.mActivity, query.mQueryFlags, user)
+                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
+                    query.mQueryFlags, user)
                     .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -437,28 +449,17 @@ public class LauncherApps {
     }
 
     /**
-     * Returns {@link ShortcutInfo}s with the given IDs from a package.
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param packageName The target package.
-     * @param ids IDs of the shortcuts to retrieve.
-     * @param user The UserHandle of the profile.
-     *
-     * @return list of {@link ShortcutInfo} associated with the package.
+     * @hide // No longer used.  Use getShortcuts() instead.  Kept for unit tests.
      */
     @Nullable
     public List<ShortcutInfo> getShortcutInfo(@NonNull String packageName,
             @NonNull List<String> ids, @NonNull UserHandle user) {
-        try {
-            return mService.getShortcutInfo(mContext.getPackageName(), packageName, ids, user)
-                    .getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setPackage(packageName);
+        q.setShortcutIds(ids);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        return getShortcuts(q, user);
     }
-
 
     /**
      * Pin shortcuts on a package.
@@ -490,11 +491,33 @@ public class LauncherApps {
      * #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
+     */
+    public int getShortcutIconResId(@NonNull ShortcutInfo shortcut) {
+        return getShortcutIconResId(shortcut.getPackageName(), shortcut.getId(),
+                shortcut.getUserId());
+    }
+
+    /**
+     * Return the icon resource ID, if {@code shortcut} has one
+     * (i.e. when {@link ShortcutInfo#hasIconResource()} returns {@code true}).
+     *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
+     * @param packageName The target package name.
+     * @param shortcutId The ID of the shortcut to lad rom.
      * @param user The UserHandle of the profile.
      */
-    public int getShortcutIconResId(@NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
+    public int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
+            @NonNull UserHandle user) {
+        return getShortcutIconResId(packageName, shortcutId, user.getIdentifier());
+    }
+
+    private int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
+            int userId) {
         try {
-            return mService.getShortcutIconResId(mContext.getPackageName(), shortcut, user);
+            return mService.getShortcutIconResId(mContext.getPackageName(),
+                    packageName, shortcutId, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -508,12 +531,34 @@ public class LauncherApps {
      * #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
+     */
+    public ParcelFileDescriptor getShortcutIconFd(
+            @NonNull ShortcutInfo shortcut) {
+        return getShortcutIconFd(shortcut.getPackageName(), shortcut.getId(),
+                shortcut.getUserId());
+    }
+
+    /**
+     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
+     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
+     *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
+     * @param packageName The target package name.
+     * @param shortcutId The ID of the shortcut to lad rom.
      * @param user The UserHandle of the profile.
      */
     public ParcelFileDescriptor getShortcutIconFd(
-            @NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
+            @NonNull String packageName, @NonNull String shortcutId, @NonNull UserHandle user) {
+        return getShortcutIconFd(packageName, shortcutId, user.getIdentifier());
+    }
+
+    private ParcelFileDescriptor getShortcutIconFd(
+            @NonNull String packageName, @NonNull String shortcutId, int userId) {
         try {
-            return mService.getShortcutIconFd(mContext.getPackageName(), shortcut, user);
+            return mService.getShortcutIconFd(mContext.getPackageName(),
+                    packageName, shortcutId, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -536,9 +581,35 @@ public class LauncherApps {
     public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {
+        return startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
+                user.getIdentifier());
+    }
+
+    /**
+     * Launches a shortcut.
+     *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
+     * @param shortcut The target shortcut.
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon.
+     * @param startActivityOptions Options to pass to startActivity.
+     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
+     *   has been uninstalled). {@code true} when the shortcut is still valid.
+     */
+    public boolean startShortcut(@NonNull ShortcutInfo shortcut,
+            @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
+        return startShortcut(shortcut.getPackageName(), shortcut.getId(),
+                sourceBounds, startActivityOptions,
+                shortcut.getUserId());
+    }
+
+    private boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
+            @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
+            int userId) {
         try {
             return mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
-                    sourceBounds, startActivityOptions, user);
+                    sourceBounds, startActivityOptions, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

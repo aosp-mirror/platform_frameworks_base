@@ -172,6 +172,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         public String getPackageName() {
             return mInjectedClientPackage;
         }
+
+        @Override
+        public int getUserId() {
+            return getCallingUserId();
+        }
     }
 
     /** Context used in the service side */
@@ -189,6 +194,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
                 UserHandle userId) {
+        }
+
+        @Override
+        public int getUserId() {
+            return UserHandle.USER_SYSTEM;
         }
     }
 
@@ -1152,9 +1162,25 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return intentCaptor.getValue();
     }
 
+    private Intent launchShortcutAndGetIntent_withShortcutInfo(
+            @NonNull String packageName, @NonNull String shortcutId, int userId) {
+        reset(mServiceContext);
+
+        assertTrue(mLauncherApps.startShortcut(
+                getShortcutInfoAsLauncher(packageName, shortcutId, userId), null, null));
+
+        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mServiceContext).startActivityAsUser(
+                intentCaptor.capture(),
+                any(Bundle.class),
+                eq(UserHandle.of(userId)));
+        return intentCaptor.getValue();
+    }
+
     private void assertShortcutLaunchable(@NonNull String packageName, @NonNull String shortcutId,
             int userId) {
         assertNotNull(launchShortcutAndGetIntent(packageName, shortcutId, userId));
+        assertNotNull(launchShortcutAndGetIntent_withShortcutInfo(packageName, shortcutId, userId));
     }
 
     private void assertShortcutNotLaunchable(@NonNull String packageName,
@@ -1193,6 +1219,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return getLauncherShortcuts(launcher, userId, ShortcutQuery.FLAG_GET_PINNED);
     }
 
+    private ShortcutInfo getShortcutInfoAsLauncher(String packageName, String shortcutId,
+            int userId) {
+        final List<ShortcutInfo> infoList =
+                mLauncherApps.getShortcutInfo(packageName, list(shortcutId),
+                        UserHandle.of(userId));
+        assertEquals("No shortcutInfo found (or too many of them)", 1, infoList.size());
+        return infoList.get(0);
+    }
 
     private Intent genPackageDeleteIntent(String pakcageName, int userId) {
         Intent i = new Intent(Intent.ACTION_PACKAGE_REMOVED);
@@ -1728,6 +1762,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 "res64x64",
                 "none");
 
+        // Different profile.  Note the names and the contents don't match.
+        setCaller(CALLING_PACKAGE_1, USER_P0);
+        assertTrue(mManager.setDynamicShortcuts(list(
+                makeShortcutWithIcon("res32x32", res512x512),
+                makeShortcutWithIcon("bmp32x32", bmp512x512)
+        )));
+        assertShortcutIds(assertAllNotHaveIcon(mManager.getDynamicShortcuts()),
+                "res32x32",
+                "bmp32x32");
+
         // Re-initialize and load from the files.
         mService.saveDirtyInfo();
         initService();
@@ -1737,61 +1781,90 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         setCaller(LAUNCHER_1);
         // Check hasIconResource()/hasIconFile().
-        assertShortcutIds(assertAllHaveIconResId(mLauncherApps.getShortcutInfo(
-                CALLING_PACKAGE_1, list("res32x32"),
-                getCallingUser())), "res32x32");
+        assertShortcutIds(assertAllHaveIconResId(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res32x32", USER_0))),
+                "res32x32");
 
-        assertShortcutIds(assertAllHaveIconResId(mLauncherApps.getShortcutInfo(
-                CALLING_PACKAGE_1, list("res64x64"), getCallingUser())),
+        assertShortcutIds(assertAllHaveIconResId(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res64x64", USER_0))),
                 "res64x64");
 
-        assertShortcutIds(assertAllHaveIconFile(mLauncherApps.getShortcutInfo(
-                CALLING_PACKAGE_1, list("bmp32x32"), getCallingUser())),
+        assertShortcutIds(assertAllHaveIconFile(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp32x32", USER_0))),
                 "bmp32x32");
 
-        assertShortcutIds(assertAllHaveIconFile(mLauncherApps.getShortcutInfo(
-                CALLING_PACKAGE_1, list("bmp64x64"), getCallingUser())),
+        assertShortcutIds(assertAllHaveIconFile(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp64x64", USER_0))),
                 "bmp64x64");
 
-        assertShortcutIds(assertAllHaveIconFile(mLauncherApps.getShortcutInfo(
-                CALLING_PACKAGE_1, list("bmp512x512"), getCallingUser())),
+        assertShortcutIds(assertAllHaveIconFile(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp512x512", USER_0))),
                 "bmp512x512");
+
+        assertShortcutIds(assertAllHaveIconResId(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res32x32", USER_P0))),
+                "res32x32");
+        assertShortcutIds(assertAllHaveIconFile(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp32x32", USER_P0))),
+                "bmp32x32");
 
         // Check
         assertEquals(
                 R.drawable.black_32x32,
                 mLauncherApps.getShortcutIconResId(
-                        makePackageShortcut(CALLING_PACKAGE_1, "res32x32"), getCallingUser()));
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res32x32", USER_0)));
 
         assertEquals(
                 R.drawable.black_64x64,
                 mLauncherApps.getShortcutIconResId(
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res64x64", USER_0)));
 
-                        makePackageShortcut(CALLING_PACKAGE_1, "res64x64"), getCallingUser()));
-
         assertEquals(
                 0, // because it's not a resource
                 mLauncherApps.getShortcutIconResId(
-                        makePackageShortcut(CALLING_PACKAGE_1, "bmp32x32"), getCallingUser()));
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp32x32", USER_0)));
         assertEquals(
                 0, // because it's not a resource
                 mLauncherApps.getShortcutIconResId(
-                        makePackageShortcut(CALLING_PACKAGE_1, "bmp64x64"), getCallingUser()));
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp64x64", USER_0)));
         assertEquals(
                 0, // because it's not a resource
                 mLauncherApps.getShortcutIconResId(
-                        makePackageShortcut(CALLING_PACKAGE_1, "bmp512x512"), getCallingUser()));
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp512x512", USER_0)));
 
         bmp = pfdToBitmap(mLauncherApps.getShortcutIconFd(
-                makePackageShortcut(CALLING_PACKAGE_1, "bmp32x32"), getCallingUser()));
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp32x32", USER_0)));
         assertBitmapSize(32, 32, bmp);
 
         bmp = pfdToBitmap(mLauncherApps.getShortcutIconFd(
-                makePackageShortcut(CALLING_PACKAGE_1, "bmp64x64"), getCallingUser()));
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp64x64", USER_0)));
         assertBitmapSize(64, 64, bmp);
 
         bmp = pfdToBitmap(mLauncherApps.getShortcutIconFd(
-                makePackageShortcut(CALLING_PACKAGE_1, "bmp512x512"), getCallingUser()));
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp512x512", USER_0)));
+        assertBitmapSize(128, 128, bmp);
+
+        assertEquals(
+                R.drawable.black_512x512,
+                mLauncherApps.getShortcutIconResId(
+                        getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res32x32", USER_P0)));
+        // Should be 512x512, so shrunk.
+        bmp = pfdToBitmap(mLauncherApps.getShortcutIconFd(
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp32x32", USER_P0)));
+        assertBitmapSize(128, 128, bmp);
+
+        // Also check the overload APIs too.
+        assertEquals(
+                R.drawable.black_32x32,
+                mLauncherApps.getShortcutIconResId(CALLING_PACKAGE_1, "res32x32", HANDLE_USER_0));
+        assertEquals(
+                R.drawable.black_64x64,
+                mLauncherApps.getShortcutIconResId(CALLING_PACKAGE_1, "res64x64", HANDLE_USER_0));
+        assertEquals(
+                R.drawable.black_512x512,
+                mLauncherApps.getShortcutIconResId(CALLING_PACKAGE_1, "res32x32", HANDLE_USER_P0));
+        bmp = pfdToBitmap(
+                mLauncherApps.getShortcutIconFd(CALLING_PACKAGE_1, "bmp32x32", HANDLE_USER_P0));
         assertBitmapSize(128, 128, bmp);
 
         // TODO Test the content URI case too.
@@ -2034,9 +2107,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private static ShortcutQuery buildQuery(long changedSince,
             String packageName, ComponentName componentName,
             /* @ShortcutQuery.QueryFlags */ int flags) {
+        return buildQuery(changedSince, packageName, null, componentName, flags);
+    }
+
+    private static ShortcutQuery buildQuery(long changedSince,
+            String packageName, List<String> shortcutIds, ComponentName componentName,
+            /* @ShortcutQuery.QueryFlags */ int flags) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setChangedSince(changedSince);
         q.setPackage(packageName);
+        q.setShortcutIds(shortcutIds);
         q.setActivity(componentName);
         q.setQueryFlags(flags);
         return q;
@@ -2110,6 +2190,36 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                         getCallingUser())),
                 "s2", "s3"))));
 
+        // With ID.
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list("s3"),
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser())),
+                "s3"))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list("s3", "s2", "ss"),
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser())),
+                "s2", "s3"))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list("s3x", "s2x"),
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser()))
+                /* empty */))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list(),
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser()))
+                /* empty */))));
+
         // Pin some shortcuts.
         mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
                 list("s3", "s4"), getCallingUser());
@@ -2131,6 +2241,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED),
                         getCallingUser())),
                 "s1", "s3");
+
+        TestUtils.assertExpectException(
+                IllegalArgumentException.class, "package name must also be set", () -> {
+            mLauncherApps.getShortcuts(buildQuery(
+                    /* time =*/ 0, /* package= */ null, list("id"),
+                    /* activity =*/ null, /* flags */ 0), getCallingUser());
+        });
 
         // TODO More tests: pinned but dynamic, filter by activity
     }
@@ -5063,12 +5180,15 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     public void testShortcutInfoParcel() {
-        ShortcutInfo si = parceled(new ShortcutInfo.Builder(getTestContext())
+        setCaller(CALLING_PACKAGE_1, USER_10);
+        ShortcutInfo si = parceled(new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setTitle("title")
                 .setIntent(makeIntent("action", ShortcutActivity.class))
                 .build());
-        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals(mClientContext.getPackageName(), si.getPackageName());
+        assertEquals(USER_10, si.getUserId());
+        assertEquals(HANDLE_USER_10, si.getUserHandle());
         assertEquals("id", si.getId());
         assertEquals("title", si.getTitle());
         assertEquals("action", si.getIntent().getAction());
@@ -5109,9 +5229,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     public void testShortcutInfoClone() {
+        setCaller(CALLING_PACKAGE_1, USER_11);
+
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
-        ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
+        ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivityComponent(new ComponentName("a", "b"))
                 .setIcon(Icon.createWithContentUri("content://a.b.c/"))
@@ -5127,7 +5249,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
 
-        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
+        assertEquals(mClientContext.getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
         assertEquals("content://a.b.c/", si.getIcon().getUriString());
@@ -5144,7 +5268,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
 
-        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals(mClientContext.getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
         assertEquals(null, si.getIcon());
@@ -5161,7 +5285,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
-        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals(mClientContext.getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
         assertEquals(null, si.getIcon());
@@ -5177,7 +5301,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
-        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals(mClientContext.getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(null, si.getActivityComponent());
         assertEquals(null, si.getIcon());
@@ -5267,7 +5391,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     public void testShortcutInfoSaveAndLoad() throws InterruptedException {
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
@@ -5293,11 +5417,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Save and load.
         mService.saveDirtyInfo();
         initService();
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
 
+        assertEquals(USER_10, si.getUserId());
+        assertEquals(HANDLE_USER_10, si.getUserHandle());
         assertEquals(CALLING_PACKAGE_1, si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(ShortcutActivity2.class.getName(), si.getActivityComponent().getClassName());
