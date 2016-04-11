@@ -890,6 +890,11 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@null</item>
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+
+        <item name="windowFixedWidthMajor">@null</item>
+        <item name="windowFixedWidthMinor">@null</item>
+        <item name="windowFixedHeightMajor">@null</item>
+        <item name="windowFixedHeightMinor">@null</item>
     </style>
 
     <!-- Theme overlay that overrides window properties to display as a date picker dialog. -->
