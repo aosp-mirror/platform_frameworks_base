@@ -545,14 +545,15 @@ This format is represented by the following OpenGL extension name:
   </li>
   <li><strong>S3TC (DXT<em>n</em>/DXTC)</strong> - S3 texture compression (S3TC) has several
 format variations (DXT1 to DXT5) and is less widely available. The format supports RGB textures with
-4-bit alpha or 8-bit alpha channels. This format may be represented by several OpenGL extension
-names, for example:
+4-bit alpha or 8-bit alpha channels. These formats are represented by the following OpenGL extension
+name:
     <ul>
-      <li>{@code GL_OES_texture_compression_S3TC}</li>
       <li>{@code GL_EXT_texture_compression_s3tc}</li>
+    </ul>
+    Some devices only support the DXT1 format variation; this limited support is represented by the
+following OpenGL extension name:
+    <ul>
       <li>{@code GL_EXT_texture_compression_dxt1}</li>
-      <li>{@code GL_EXT_texture_compression_dxt3}</li>
-      <li>{@code GL_EXT_texture_compression_dxt5}</li>
     </ul>
   </li>
   <li><strong>3DC</strong> - 3DC texture compression (3DC) is a less widely available format that
