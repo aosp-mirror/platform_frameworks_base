@@ -1386,7 +1386,7 @@ public class DirectoryFragment extends Fragment
                 // Handle range selection adjustments. Extending the selection will adjust the
                 // bounds of the in-progress range selection. Each time an unshifted navigation
                 // event is received, the range selection is restarted.
-                if (shouldExtendSelection(event)) {
+                if (shouldExtendSelection(doc, event)) {
                     if (!mSelectionManager.isRangeSelectionActive()) {
                         // Start a range selection if one isn't active
                         mSelectionManager.startRangeSelection(doc.getAdapterPosition());
@@ -1423,9 +1423,22 @@ public class DirectoryFragment extends Fragment
             return false;
         }
 
-        private boolean shouldExtendSelection(KeyEvent event) {
-            return Events.isNavigationKeyCode(event.getKeyCode()) &&
-                    event.isShiftPressed();
+        private boolean shouldExtendSelection(DocumentHolder doc, KeyEvent event) {
+            if (!Events.isNavigationKeyCode(event.getKeyCode()) || !event.isShiftPressed()) {
+                return false;
+            }
+
+            // TODO: Combine this method with onBeforeItemStateChange, as both of them are almost
+            // the same, and responsible for the same thing (whether to select or not).
+            final Cursor cursor = mModel.getItem(doc.modelId);
+            if (cursor == null) {
+                Log.w(TAG, "Couldn't obtain cursor for modelId: " + doc.modelId);
+                return false;
+            }
+
+            final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            return mTuner.canSelectType(docMimeType, docFlags);
         }
     }
 
