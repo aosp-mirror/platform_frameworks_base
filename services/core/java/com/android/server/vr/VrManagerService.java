@@ -103,6 +103,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             new RemoteCallbackList<>();
     private final ArraySet<String> mPreviousToggledListenerSettings = new ArraySet<>();
     private String mPreviousNotificationPolicyAccessPackage;
+    private String mPreviousCoarseLocationPackage;
     private String mPreviousManageOverlayPackage;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
@@ -418,6 +419,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         mWasDefaultGranted = true;
 
+        grantCoarseLocationAccess(pName, userId);
         grantOverlayAccess(pName, userId);
         grantNotificationPolicyAccess(pName);
         grantNotificationListenerAccess(pName, userId);
@@ -447,12 +449,34 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         String pName = component.getPackageName();
         if (mWasDefaultGranted) {
+            revokeCoarseLocationAccess(userId);
             revokeOverlayAccess(userId);
             revokeNotificationPolicyAccess(pName);
             revokeNotificiationListenerAccess();
             mWasDefaultGranted = false;
         }
 
+    }
+
+    private void grantCoarseLocationAccess(String pkg, UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        boolean prev = (PackageManager.PERMISSION_GRANTED ==
+                pm.checkPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION, pkg));
+        mPreviousCoarseLocationPackage = null;
+        if (!prev) {
+            pm.grantRuntimePermission(pkg, android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                    userId);
+            mPreviousCoarseLocationPackage = pkg;
+        }
+    }
+
+    private void revokeCoarseLocationAccess(UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        if (mPreviousCoarseLocationPackage != null) {
+            pm.revokeRuntimePermission(mPreviousCoarseLocationPackage,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION, userId);
+            mPreviousCoarseLocationPackage = null;
+        }
     }
 
     private void grantOverlayAccess(String pkg, UserHandle userId) {
@@ -475,7 +499,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             mPreviousManageOverlayPackage = null;
         }
     }
-
 
     private void grantNotificationPolicyAccess(String pkg) {
         NotificationManager nm = mContext.getSystemService(NotificationManager.class);
