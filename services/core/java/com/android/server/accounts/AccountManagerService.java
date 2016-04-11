@@ -85,6 +85,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -267,10 +268,10 @@ public class AccountManagerService
         private int debugDbInsertionPoint = -1;
         private SQLiteStatement statementForLogging;
 
-        UserAccounts(Context context, int userId) {
+        UserAccounts(Context context, int userId, File preNDbFile, File deDbFile) {
             this.userId = userId;
             synchronized (cacheLock) {
-                openHelper = DeDatabaseHelper.create(context, userId);
+                openHelper = DeDatabaseHelper.create(context, userId, preNDbFile, deDbFile);
             }
         }
     }
@@ -540,7 +541,9 @@ public class AccountManagerService
             UserAccounts accounts = mUsers.get(userId);
             boolean validateAccounts = false;
             if (accounts == null) {
-                accounts = new UserAccounts(mContext, userId);
+                File preNDbFile = new File(getPreNDatabaseName(userId));
+                File deDbFile = new File(getDeDatabaseName(userId));
+                accounts = new UserAccounts(mContext, userId, preNDbFile, deDbFile);
                 initializeDebugDbSizeAndCompileSqlStatementForLogging(
                         accounts.openHelper.getWritableDatabase(), accounts);
                 mUsers.append(userId, accounts);
@@ -551,8 +554,10 @@ public class AccountManagerService
             if (!accounts.openHelper.isCeDatabaseAttached() && mUnlockedUsers.get(userId)) {
                 Log.i(TAG, "User " + userId + " is unlocked - opening CE database");
                 synchronized (accounts.cacheLock) {
-                    CeDatabaseHelper.create(mContext, userId);
-                    accounts.openHelper.attachCeDatabase();
+                    File preNDatabaseFile = new File(getPreNDatabaseName(userId));
+                    File ceDatabaseFile = new File(getCeDatabaseName(userId));
+                    CeDatabaseHelper.create(mContext, userId, preNDatabaseFile, ceDatabaseFile);
+                    accounts.openHelper.attachCeDatabase(ceDatabaseFile);
                 }
                 syncDeCeAccountsLocked(accounts);
             }
@@ -647,7 +652,8 @@ public class AccountManagerService
         }
     }
 
-    private void onUserUnlocked(Intent intent) {
+    @VisibleForTesting
+    void onUserUnlocked(Intent intent) {
         int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "onUserUnlocked " + userId);
@@ -1553,7 +1559,7 @@ public class AccountManagerService
         }
     }
 
-    /* For testing */
+    @VisibleForTesting
     protected void removeAccountInternal(Account account) {
         removeAccountInternal(getUserAccountsForCaller(), account, getCallingUid());
     }
@@ -4044,7 +4050,8 @@ public class AccountManagerService
         }
     }
 
-    static String getPreNDatabaseName(int userId) {
+    @VisibleForTesting
+    String getPreNDatabaseName(int userId) {
         File systemDir = Environment.getDataSystemDirectory();
         File databaseFile = new File(Environment.getUserSystemDirectory(userId),
                 PRE_N_DATABASE_NAME);
@@ -4070,13 +4077,15 @@ public class AccountManagerService
         return databaseFile.getPath();
     }
 
-    static String getDeDatabaseName(int userId) {
+    @VisibleForTesting
+    String getDeDatabaseName(int userId) {
         File databaseFile = new File(Environment.getDataSystemDeDirectory(userId),
                 DE_DATABASE_NAME);
         return databaseFile.getPath();
     }
 
-    static String getCeDatabaseName(int userId) {
+    @VisibleForTesting
+    String getCeDatabaseName(int userId) {
         File databaseFile = new File(Environment.getDataSystemCeDirectory(userId),
                 CE_DATABASE_NAME);
         return databaseFile.getPath();
@@ -4217,13 +4226,11 @@ public class AccountManagerService
     }
 
     static class PreNDatabaseHelper extends SQLiteOpenHelper {
-
         private final Context mContext;
         private final int mUserId;
 
-        public PreNDatabaseHelper(Context context, int userId) {
-            super(context, AccountManagerService.getPreNDatabaseName(userId), null,
-                    PRE_N_DATABASE_VERSION);
+        public PreNDatabaseHelper(Context context, int userId, String preNDatabaseName) {
+            super(context, preNDatabaseName, null, PRE_N_DATABASE_VERSION);
             mContext = context;
             mUserId = userId;
         }
@@ -4360,8 +4367,8 @@ public class AccountManagerService
         private final int mUserId;
         private volatile boolean mCeAttached;
 
-        private DeDatabaseHelper(Context context, int userId) {
-            super(context, getDeDatabaseName(userId), null, DE_DATABASE_VERSION);
+        private DeDatabaseHelper(Context context, int userId, String deDatabaseName) {
+            super(context, deDatabaseName, null, DE_DATABASE_VERSION);
             mUserId = userId;
         }
 
@@ -4426,8 +4433,7 @@ public class AccountManagerService
             }
         }
 
-        public void attachCeDatabase() {
-            File ceDbFile = new File(getCeDatabaseName(mUserId));
+        public void attachCeDatabase(File ceDbFile) {
             SQLiteDatabase db = getWritableDatabase();
             db.execSQL("ATTACH DATABASE '" +  ceDbFile.getPath()+ "' AS ceDb");
             mCeAttached = true;
@@ -4440,8 +4446,8 @@ public class AccountManagerService
 
         public SQLiteDatabase getReadableDatabaseUserIsUnlocked() {
             if(!mCeAttached) {
-                Log.wtf(TAG, "getReadableDatabaseUserIsUnlocked called while user "
-                        + mUserId + " is still locked ", new Throwable());
+                Log.wtf(TAG, "getReadableDatabaseUserIsUnlocked called while user " + mUserId
+                        + " is still locked. CE database is not yet available.", new Throwable());
             }
             return super.getReadableDatabase();
         }
@@ -4449,7 +4455,7 @@ public class AccountManagerService
         public SQLiteDatabase getWritableDatabaseUserIsUnlocked() {
             if(!mCeAttached) {
                 Log.wtf(TAG, "getWritableDatabaseUserIsUnlocked called while user " + mUserId
-                        + " is still locked ", new Throwable());
+                        + " is still locked. CE database is not yet available.", new Throwable());
             }
             return super.getWritableDatabase();
         }
@@ -4502,20 +4508,24 @@ public class AccountManagerService
             db.execSQL("DETACH DATABASE preNDb");
         }
 
-        static DeDatabaseHelper create(Context context, int userId) {
-            File oldDb = new File(getPreNDatabaseName(userId));
-            File newDb = new File(getDeDatabaseName(userId));
-            boolean newDbExists = newDb.exists();
-            DeDatabaseHelper deDatabaseHelper = new DeDatabaseHelper(context, userId);
+        static DeDatabaseHelper create(
+                Context context,
+                int userId,
+                File preNDatabaseFile,
+                File deDatabaseFile) {
+            boolean newDbExists = deDatabaseFile.exists();
+            DeDatabaseHelper deDatabaseHelper = new DeDatabaseHelper(context, userId,
+                    deDatabaseFile.getPath());
             // If the db just created, and there is a legacy db, migrate it
-            if (!newDbExists && oldDb.exists()) {
+            if (!newDbExists && preNDatabaseFile.exists()) {
                 // Migrate legacy db to the latest version -  PRE_N_DATABASE_VERSION
-                PreNDatabaseHelper preNDatabaseHelper = new PreNDatabaseHelper(context, userId);
+                PreNDatabaseHelper preNDatabaseHelper = new PreNDatabaseHelper(context, userId,
+                        preNDatabaseFile.getPath());
                 // Open the database to force upgrade if required
                 preNDatabaseHelper.getWritableDatabase();
                 preNDatabaseHelper.close();
                 // Move data without SPII to DE
-                deDatabaseHelper.migratePreNDbToDe(oldDb);
+                deDatabaseHelper.migratePreNDbToDe(preNDatabaseFile);
             }
             return deDatabaseHelper;
         }
@@ -4523,8 +4533,8 @@ public class AccountManagerService
 
     static class CeDatabaseHelper extends SQLiteOpenHelper {
 
-        public CeDatabaseHelper(Context context, int userId) {
-            super(context, getCeDatabaseName(userId), null, CE_DATABASE_VERSION);
+        public CeDatabaseHelper(Context context, String ceDatabaseName) {
+            super(context, ceDatabaseName, null, CE_DATABASE_VERSION);
         }
 
         /**
@@ -4640,27 +4650,28 @@ public class AccountManagerService
          * @param context
          * @param userId id of the user where the database is located
          */
-        static CeDatabaseHelper create(Context context, int userId) {
-
-            File oldDatabaseFile = new File(getPreNDatabaseName(userId));
-            File ceDatabaseFile = new File(getCeDatabaseName(userId));
+        static CeDatabaseHelper create(
+                Context context,
+                int userId,
+                File preNDatabaseFile,
+                File ceDatabaseFile) {
             boolean newDbExists = ceDatabaseFile.exists();
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "CeDatabaseHelper.create userId=" + userId + " oldDbExists="
-                        + oldDatabaseFile.exists() + " newDbExists=" + newDbExists);
+                        + preNDatabaseFile.exists() + " newDbExists=" + newDbExists);
             }
             boolean removeOldDb = false;
-            if (!newDbExists && oldDatabaseFile.exists()) {
-                removeOldDb = migratePreNDbToCe(oldDatabaseFile, ceDatabaseFile);
+            if (!newDbExists && preNDatabaseFile.exists()) {
+                removeOldDb = migratePreNDbToCe(preNDatabaseFile, ceDatabaseFile);
             }
             // Try to open and upgrade if necessary
-            CeDatabaseHelper ceHelper = new CeDatabaseHelper(context, userId);
+            CeDatabaseHelper ceHelper = new CeDatabaseHelper(context, ceDatabaseFile.getPath());
             ceHelper.getWritableDatabase();
             ceHelper.close();
             if (removeOldDb) {
                 // TODO STOPSHIP - backup file during testing. Remove file before the release
-                Log.i(TAG, "Migration complete - creating backup of old db " + oldDatabaseFile);
-                renameToBakFile(oldDatabaseFile);
+                Log.i(TAG, "Migration complete - creating backup of old db " + preNDatabaseFile);
+                renameToBakFile(preNDatabaseFile);
             }
             return ceHelper;
         }
@@ -4825,12 +4836,14 @@ public class AccountManagerService
         }
     }
 
+    @VisibleForTesting
     protected void installNotification(final int notificationId, final Notification n,
             UserHandle user) {
         ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
                 .notifyAsUser(null, notificationId, n, user);
     }
 
+    @VisibleForTesting
     protected void cancelNotification(int id, UserHandle user) {
         long identityToken = clearCallingIdentity();
         try {
@@ -5368,7 +5381,7 @@ public class AccountManagerService
         HashMap<String, String> userDataForAccount = accounts.userDataCache.get(account);
         if (userDataForAccount == null) {
             // need to populate the cache for this account
-            final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
+            final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
             userDataForAccount = readUserDataForAccountFromDatabaseLocked(db, account);
             accounts.userDataCache.put(account, userDataForAccount);
         }
