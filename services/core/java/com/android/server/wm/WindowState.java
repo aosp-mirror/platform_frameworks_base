@@ -642,13 +642,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * Subtracts the insets calculated by intersecting {@param layoutFrame} with {@param insetFrame}
      * from {@param frame}. In other words, it applies the insets that would result if
      * {@param frame} would be shifted to {@param layoutFrame} and then applying the insets from
-     * {@param insetFrame}.
+     * {@param insetFrame}. Also it respects {@param displayFrame} in case window has minimum
+     * width/height applied and insets should be overridden.
      */
-    private void subtractInsets(Rect frame, Rect layoutFrame, Rect insetFrame) {
-        final int left = Math.max(0, insetFrame.left - layoutFrame.left);
-        final int top = Math.max(0, insetFrame.top - layoutFrame.top);
-        final int right = Math.max(0, layoutFrame.right - insetFrame.right);
-        final int bottom = Math.max(0, layoutFrame.bottom - insetFrame.bottom);
+    private void subtractInsets(Rect frame, Rect layoutFrame, Rect insetFrame, Rect displayFrame) {
+        final int left = Math.max(0, insetFrame.left - Math.max(layoutFrame.left, displayFrame.left));
+        final int top = Math.max(0, insetFrame.top - Math.max(layoutFrame.top, displayFrame.top));
+        final int right = Math.max(0, Math.min(layoutFrame.right, displayFrame.right) - insetFrame.right);
+        final int bottom = Math.max(0, Math.min(layoutFrame.bottom, displayFrame.bottom) - insetFrame.bottom);
         frame.inset(left, top, right, bottom);
     }
 
@@ -687,8 +688,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // The offset from the layout containing frame to the actual containing frame.
         final int layoutXDiff;
         final int layoutYDiff;
-        if (mInsetFrame.isEmpty()  && (fullscreenTask
-                || layoutInParentFrame())) {
+        if (mInsetFrame.isEmpty() && (fullscreenTask || layoutInParentFrame())) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(pf);
             mDisplayFrame.set(df);
@@ -733,10 +733,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             layoutXDiff = !mInsetFrame.isEmpty() ? mInsetFrame.left - mContainingFrame.left : 0;
             layoutYDiff = !mInsetFrame.isEmpty() ? mInsetFrame.top - mContainingFrame.top : 0;
             layoutContainingFrame = !mInsetFrame.isEmpty() ? mInsetFrame : mContainingFrame;
-            subtractInsets(mDisplayFrame, layoutContainingFrame, df);
+            mTmpRect.set(0, 0, mDisplayContent.getDisplayInfo().logicalWidth,
+                    mDisplayContent.getDisplayInfo().logicalHeight);
+            subtractInsets(mDisplayFrame, layoutContainingFrame, df, mTmpRect);
             if (!layoutInParentFrame()) {
-                subtractInsets(mContainingFrame, layoutContainingFrame, pf);
-                subtractInsets(mInsetFrame, layoutContainingFrame, pf);
+                subtractInsets(mContainingFrame, layoutContainingFrame, pf, mTmpRect);
+                subtractInsets(mInsetFrame, layoutContainingFrame, pf, mTmpRect);
             }
             layoutDisplayFrame = df;
             layoutDisplayFrame.intersect(layoutContainingFrame);
@@ -855,8 +857,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             getDisplayContent().getLogicalDisplayRect(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
-            boolean overrideRightInset = !fullscreenTask && mFrame.right > mTmpRect.right;
-            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mTmpRect.bottom;
+            boolean overrideRightInset = !fullscreenTask && layoutContainingFrame.right > mTmpRect.right;
+            boolean overrideBottomInset = !fullscreenTask && layoutContainingFrame.bottom > mTmpRect.bottom;
             mContentInsets.set(mContentFrame.left - layoutContainingFrame.left,
                     mContentFrame.top - layoutContainingFrame.top,
                     overrideRightInset ? mTmpRect.right - mContentFrame.right
@@ -2590,7 +2592,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = containingFrame.height();
         final Task task = getTask();
         final boolean nonFullscreenTask = isInMultiWindowMode();
-        final boolean fitToDisplay = task != null && !task.isFloating() && !layoutInParentFrame();
+        final boolean fitToDisplay = task != null && !nonFullscreenTask && !layoutInParentFrame();
         float x, y;
         int w,h;
 
