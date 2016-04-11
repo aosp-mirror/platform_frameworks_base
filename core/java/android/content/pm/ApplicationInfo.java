@@ -366,6 +366,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * <p>NOTE: {@code WebView} does not honor this flag.
      *
+     * <p>This flag is ignored on Android N and above if an Android Network Security Config is
+     * present.
+     *
      * <p>This flag comes from
      * {@link android.R.styleable#AndroidManifestApplication_usesCleartextTraffic
      * android:usesCleartextTraffic} of the &lt;application&gt; tag.
