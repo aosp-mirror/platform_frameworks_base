@@ -68,6 +68,7 @@ public final class InputMethodSubtype implements Parcelable {
     // TODO: remove this
     private static final String EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME =
             "UntranslatableReplacementStringInSubtypeName";
+    private static final int SUBTYPE_ID_NONE = 0;
 
     private final boolean mIsAuxiliary;
     private final boolean mOverridesImplicitlyEnabledSubtype;
@@ -157,13 +158,13 @@ public final class InputMethodSubtype implements Parcelable {
          * track of enabled subtypes by ID. When the IME package gets upgraded, enabled IDs will
          * stay enabled even if other attributes are different. If the ID is unspecified or 0,
          * Arrays.hashCode(new Object[] {locale, mode, extraValue,
-         * isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead.
+         * isAuxiliary, overridesImplicitlyEnabledSubtype, isAsciiCapable}) will be used instead.
          */
         public InputMethodSubtypeBuilder setSubtypeId(int subtypeId) {
             mSubtypeId = subtypeId;
             return this;
         }
-        private int mSubtypeId = 0;
+        private int mSubtypeId = SUBTYPE_ID_NONE;
 
         /**
          * @param subtypeLocale is the locale supported by this subtype.
@@ -268,7 +269,7 @@ public final class InputMethodSubtype implements Parcelable {
      * subtypes by ID. When the IME package gets upgraded, enabled IDs will stay enabled even if
      * other attributes are different. If the ID is unspecified or 0,
      * Arrays.hashCode(new Object[] {locale, mode, extraValue,
-     * isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead.
+     * isAuxiliary, overridesImplicitlyEnabledSubtype, isAsciiCapable}) will be used instead.
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype, int id) {
@@ -293,9 +294,12 @@ public final class InputMethodSubtype implements Parcelable {
         mIsAsciiCapable = builder.mIsAsciiCapable;
         // If hashCode() of this subtype is 0 and you want to specify it as an id of this subtype,
         // just specify 0 as this subtype's id. Then, this subtype's id is treated as 0.
-        mSubtypeHashCode = mSubtypeId != 0 ? mSubtypeId : hashCodeInternal(mSubtypeLocale,
-                mSubtypeMode, mSubtypeExtraValue, mIsAuxiliary, mOverridesImplicitlyEnabledSubtype,
-                mIsAsciiCapable);
+        if (mSubtypeId != SUBTYPE_ID_NONE) {
+            mSubtypeHashCode = mSubtypeId;
+        } else {
+            mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
+                    mIsAuxiliary, mOverridesImplicitlyEnabledSubtype, mIsAsciiCapable);
+        }
     }
 
     InputMethodSubtype(Parcel source) {
@@ -499,6 +503,22 @@ public final class InputMethodSubtype implements Parcelable {
     @Override
     public int hashCode() {
         return mSubtypeHashCode;
+    }
+
+    /**
+     * @hide
+     * @return {@code true} if a valid subtype ID exists.
+     */
+    public final boolean hasSubtypeId() {
+        return mSubtypeId != SUBTYPE_ID_NONE;
+    }
+
+    /**
+     * @hide
+     * @return subtype ID. {@code 0} means that not subtype ID is specified.
+     */
+    public final int getSubtypeId() {
+        return mSubtypeId;
     }
 
     @Override

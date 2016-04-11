@@ -3649,6 +3649,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final String ATTR_ID = "id";
         private static final String ATTR_LABEL = "label";
         private static final String ATTR_ICON = "icon";
+        private static final String ATTR_IME_SUBTYPE_ID = "subtypeId";
         private static final String ATTR_IME_SUBTYPE_LOCALE = "imeSubtypeLocale";
         private static final String ATTR_IME_SUBTYPE_LANGUAGE_TAG = "languageTag";
         private static final String ATTR_IME_SUBTYPE_MODE = "imeSubtypeMode";
@@ -3742,6 +3743,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     for (int i = 0; i < N; ++i) {
                         final InputMethodSubtype subtype = subtypesList.get(i);
                         out.startTag(null, NODE_SUBTYPE);
+                        if (subtype.hasSubtypeId()) {
+                            out.attribute(null, ATTR_IME_SUBTYPE_ID,
+                                    String.valueOf(subtype.getSubtypeId()));
+                        }
                         out.attribute(null, ATTR_ICON, String.valueOf(subtype.getIconResId()));
                         out.attribute(null, ATTR_LABEL, String.valueOf(subtype.getNameResId()));
                         out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
@@ -3820,7 +3825,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 parser.getAttributeValue(null, ATTR_IS_AUXILIARY)));
                         final boolean isAsciiCapable = "1".equals(String.valueOf(
                                 parser.getAttributeValue(null, ATTR_IS_ASCII_CAPABLE)));
-                        final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
+                        final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder()
                                 .setSubtypeNameResId(label)
                                 .setSubtypeIconResId(icon)
                                 .setSubtypeLocale(imeSubtypeLocale)
@@ -3828,9 +3833,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 .setSubtypeMode(imeSubtypeMode)
                                 .setSubtypeExtraValue(imeSubtypeExtraValue)
                                 .setIsAuxiliary(isAuxiliary)
-                                .setIsAsciiCapable(isAsciiCapable)
-                                .build();
-                        tempSubtypesArray.add(subtype);
+                                .setIsAsciiCapable(isAsciiCapable);
+                        final String subtypeIdString =
+                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_ID);
+                        if (subtypeIdString != null) {
+                            builder.setSubtypeId(Integer.valueOf(subtypeIdString));
+                        }
+                        tempSubtypesArray.add(builder.build());
                     }
                 }
             } catch (XmlPullParserException | IOException | NumberFormatException e) {
