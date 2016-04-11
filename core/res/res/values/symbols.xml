@@ -295,7 +295,6 @@
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
-  <java-symbol type="bool" name="config_wifi_enable_5GHz_preference" />
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="bool" name="config_wifi_enable_wifi_firmware_debugging" />
   <java-symbol type="integer" name="config_wifi_logger_ring_buffer_size_limit_kb" />
@@ -312,8 +311,6 @@
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_factor" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
-  <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_high" />
-  <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_low" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_RSSI_SCORE_OFFSET" />
   <java-symbol type="integer" name="config_wifi_framework_RSSI_SCORE_SLOPE" />
@@ -322,14 +319,11 @@
   <java-symbol type="integer" name="config_wifi_framework_PASSPOINT_SECURITY_AWARD" />
   <java-symbol type="integer" name="config_wifi_framework_SECURITY_AWARD" />
   <java-symbol type="integer" name="config_wifi_disconnected_short_scan_interval" />
-  <java-symbol type="integer" name="config_wifi_disconnected_long_scan_interval" />
   <java-symbol type="integer" name="config_wifi_associated_short_scan_interval" />
-  <java-symbol type="integer" name="config_wifi_associated_long_scan_interval" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_backoff" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_interval" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_total_dwell_time" />
   <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_max_num_active_channels" />
-  <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_max_num_passive_channels" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz" />
@@ -359,9 +353,6 @@
   <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_rx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_network_switch_tx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_network_switch_rx_packet_threshold" />
-  <java-symbol type="integer" name="config_wifi_framework_max_connection_errors_to_blacklist" />
-  <java-symbol type="integer" name="config_wifi_framework_max_auth_errors_to_blacklist" />
-  <java-symbol type="integer" name="config_wifi_framework_network_black_list_min_time_milli" />
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
