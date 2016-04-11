@@ -27,6 +27,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.*;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -608,14 +609,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         addPackage(packageName, uid, version, packageName);
     }
 
-    private <T> List<T> list(T... array) {
-        return Arrays.asList(array);
-    }
-
-    private <T> Set<T> set(Set<T> in) {
-        return new ArraySet<T>(in);
-    }
-
     private Signature[] genSignatures(String... signatures) {
         final Signature[] sigs = new Signature[signatures.length];
         for (int i = 0; i < signatures.length; i++){
@@ -799,33 +792,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         runTestOnUiThread(() -> {});
     }
 
-    public static Bundle makeBundle(Object... keysAndValues) {
-        Preconditions.checkState((keysAndValues.length % 2) == 0);
-
-        if (keysAndValues.length == 0) {
-            return null;
-        }
-        final Bundle ret = new Bundle();
-
-        for (int i = keysAndValues.length - 2; i >= 0; i -= 2) {
-            final String key = keysAndValues[i].toString();
-            final Object value = keysAndValues[i + 1];
-
-            if (value == null) {
-                ret.putString(key, null);
-            } else if (value instanceof Integer) {
-                ret.putInt(key, (Integer) value);
-            } else if (value instanceof String) {
-                ret.putString(key, (String) value);
-            } else if (value instanceof Bundle) {
-                ret.putBundle(key, (Bundle) value);
-            } else {
-                fail("Type not supported yet: " + value.getClass().getName());
-            }
-        }
-        return ret;
-    }
-
     /**
      * Make a shortcut with an ID.
      */
@@ -923,20 +889,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return new ComponentName(mClientContext, clazz);
     }
 
-    private <T> Set<T> makeSet(T... values) {
-        final HashSet<T> ret = new HashSet<>();
-        for (T s : values) {
-            ret.add(s);
-        }
-        return ret;
-    }
-
-    private static void resetAll(Collection<?> mocks) {
-        for (Object o : mocks) {
-            reset(o);
-        }
-    }
-
     @NonNull
     private ShortcutInfo findById(List<ShortcutInfo> list, String id) {
         for (ShortcutInfo s : list) {
@@ -957,90 +909,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(expectedNextResetTime, mService.getNextResetTimeLocked());
     }
 
-    @NonNull
-    private List<ShortcutInfo> assertShortcutIds(@NonNull List<ShortcutInfo> actualShortcuts,
-            String... expectedIds) {
-        final HashSet<String> expected = new HashSet<>(list(expectedIds));
-        final HashSet<String> actual = new HashSet<>();
-        for (ShortcutInfo s : actualShortcuts) {
-            actual.add(s.getId());
-        }
-
-        // Compare the sets.
-        assertEquals(expected, actual);
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllHaveIntents(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertNotNull("ID " + s.getId(), s.getIntent());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllNotHaveIntents(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertNull("ID " + s.getId(), s.getIntent());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllHaveTitle(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertNotNull("ID " + s.getId(), s.getTitle());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllNotHaveTitle(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertNull("ID " + s.getId(), s.getTitle());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllNotHaveIcon(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
+    public static List<ShortcutInfo> assertAllNotHaveIcon(
+            List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
             assertNull("ID " + s.getId(), s.getIcon());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllHaveIconResId(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
-            assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllHaveIconFile(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
-            assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllHaveIcon(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId() + " has no icon ", s.hasIconFile() || s.hasIconResource());
         }
         return actualShortcuts;
     }
@@ -1053,87 +925,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     s.hasFlags(shortcutFlags));
         }
         return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllKeyFieldsOnly(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId(), s.hasKeyFieldsOnly());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllNotKeyFieldsOnly(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertFalse("ID " + s.getId(), s.hasKeyFieldsOnly());
-        }
-        return actualShortcuts;
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllDynamic(@NonNull List<ShortcutInfo> actualShortcuts) {
-        return assertAllHaveFlags(actualShortcuts, ShortcutInfo.FLAG_DYNAMIC);
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllPinned(@NonNull List<ShortcutInfo> actualShortcuts) {
-        return assertAllHaveFlags(actualShortcuts, ShortcutInfo.FLAG_PINNED);
-    }
-
-    @NonNull
-    private List<ShortcutInfo> assertAllDynamicOrPinned(
-            @NonNull List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId(), s.isDynamic() || s.isPinned());
-        }
-        return actualShortcuts;
-    }
-
-    private void assertDynamicOnly(ShortcutInfo si) {
-        assertTrue(si.isDynamic());
-        assertFalse(si.isPinned());
-    }
-
-    private void assertPinnedOnly(ShortcutInfo si) {
-        assertFalse(si.isDynamic());
-        assertTrue(si.isPinned());
-    }
-
-    private void assertDynamicAndPinned(ShortcutInfo si) {
-        assertTrue(si.isDynamic());
-        assertTrue(si.isPinned());
-    }
-
-    private void assertBitmapSize(int expectedWidth, int expectedHeight, @NonNull Bitmap bitmap) {
-        assertEquals("width", expectedWidth, bitmap.getWidth());
-        assertEquals("height", expectedHeight, bitmap.getHeight());
-    }
-
-    private <T> void assertAllUnique(Collection<T> list) {
-        final Set<Object> set = new HashSet<>();
-        for (T item : list) {
-            if (set.contains(item)) {
-                fail("Duplicate item found: " + item + " (in the list: " + list + ")");
-            }
-            set.add(item);
-        }
-    }
-
-    @NonNull
-    private Bitmap pfdToBitmap(@NonNull ParcelFileDescriptor pfd) {
-        Preconditions.checkNotNull(pfd);
-        try {
-            return BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
-        } finally {
-            IoUtils.closeQuietly(pfd);
-        }
-    }
-
-    private void assertBundleEmpty(BaseBundle b) {
-        assertTrue(b == null || b.size() == 0);
     }
 
     private ShortcutInfo getPackageShortcut(String packageName, String shortcutId, int userId) {
@@ -1718,7 +1509,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertFalse(mManager.setDynamicShortcuts(list(si2)));
     }
 
-    public void testIcons() {
+    public void testIcons() throws IOException {
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
         final Icon res64x64 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
         final Icon res512x512 = Icon.createWithResource(getTestContext(), R.drawable.black_512x512);
@@ -2242,7 +2033,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                         getCallingUser())),
                 "s1", "s3");
 
-        TestUtils.assertExpectException(
+        assertExpectException(
                 IllegalArgumentException.class, "package name must also be set", () -> {
             mLauncherApps.getShortcuts(buildQuery(
                     /* time =*/ 0, /* package= */ null, list("id"),
@@ -3341,20 +3132,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(0, shortcuts.getValue().size());
     }
 
-    private void assertCallbackNotReceived(LauncherApps.Callback mock) {
-        verify(mock, times(0)).onShortcutsChanged(anyString(), anyList(),
-                any(UserHandle.class));
-    }
-
-    private void assertCallbackReceived(LauncherApps.Callback mock,
-            UserHandle user, String packageName, String... ids) {
-        ArgumentCaptor<List> shortcutsCaptor = ArgumentCaptor.forClass(List.class);
-
-        verify(mock, times(1)).onShortcutsChanged(eq(packageName), shortcutsCaptor.capture(),
-                eq(user));
-        assertShortcutIds(shortcutsCaptor.getValue(), ids);
-    }
-
     public void testLauncherCallback_crossProfile() throws Throwable {
         prepareCrossProfileDataSet();
 
@@ -3724,18 +3501,18 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Check the registered packages.
         dumpsysOnLogcat();
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_10, LAUNCHER_1),
+                set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                set(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3756,18 +3533,18 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked("abc", USER_0, USER_0);
 
         // No changes.
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_10, LAUNCHER_1),
+                set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                set(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3787,18 +3564,18 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         uninstallPackage(USER_0, CALLING_PACKAGE_1);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_0, USER_0);
 
-        assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_10, LAUNCHER_1),
+                set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                set(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3818,17 +3595,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         uninstallPackage(USER_10, LAUNCHER_1);
         mService.cleanUpPackageLocked(LAUNCHER_1, USER_10, USER_10);
 
-        assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_10, LAUNCHER_2)),
-                set(user10.getAllLaunchers().keySet()));
+                set(PackageWithUser.of(USER_10, LAUNCHER_2)),
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3846,17 +3623,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         uninstallPackage(USER_10, CALLING_PACKAGE_2);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_10, USER_10);
 
-        assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_10, LAUNCHER_2)),
-                set(user10.getAllLaunchers().keySet()));
+                set(PackageWithUser.of(USER_10, LAUNCHER_2)),
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3874,17 +3651,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         uninstallPackage(USER_10, LAUNCHER_2);
         mService.cleanUpPackageLocked(LAUNCHER_2, USER_10, USER_10);
 
-        assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(CALLING_PACKAGE_1),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_1),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
         assertEquals(
-                makeSet(),
-                set(user10.getAllLaunchers().keySet()));
+                set(),
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3902,16 +3679,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_10, USER_10);
 
-        assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getAllPackages().keySet()));
-        assertEquals(makeSet(),
-                set(user10.getAllPackages().keySet()));
+        assertEquals(set(CALLING_PACKAGE_2),
+                hashSet(user0.getAllPackages().keySet()));
+        assertEquals(set(),
+                hashSet(user10.getAllPackages().keySet()));
         assertEquals(
-                makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
+                set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                set(user0.getAllLaunchers().keySet()));
-        assertEquals(makeSet(),
-                set(user10.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchers().keySet()));
+        assertEquals(set(),
+                hashSet(user10.getAllLaunchers().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -5052,7 +4829,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertShortcutIds(
                     mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_P0)
                     /* empty */);
-            TestUtils.assertExpectException(
+            assertExpectException(
                     SecurityException.class, "", () -> {
                         mLauncherApps.getShortcuts(
                                 buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_10);
@@ -5131,7 +4908,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertShortcutIds(
                     mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0),
                     "s1", "s4");
-            TestUtils.assertExpectException(
+            assertExpectException(
                     SecurityException.class, "unrelated profile", () -> {
                         mLauncherApps.getShortcuts(
                                 buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_10);
@@ -5147,12 +4924,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertShortcutIds(
                     mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_10)
                     /* empty */);
-            TestUtils.assertExpectException(
+            assertExpectException(
                     SecurityException.class, "unrelated profile", () -> {
                         mLauncherApps.getShortcuts(
                                 buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0);
                     });
-            TestUtils.assertExpectException(
+            assertExpectException(
                     SecurityException.class, "unrelated profile", () -> {
                         mLauncherApps.getShortcuts(
                                 buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_P0);
@@ -5163,16 +4940,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     // ShortcutInfo tests
 
     public void testShortcutInfoMissingMandatoryFields() {
-        TestUtils.assertExpectException(
+        assertExpectException(
                 IllegalArgumentException.class,
                 "ID must be provided",
                 () -> new ShortcutInfo.Builder(getTestContext()).build());
-        TestUtils.assertExpectException(
+        assertExpectException(
                 IllegalArgumentException.class,
                 "title must be provided",
                 () -> new ShortcutInfo.Builder(getTestContext()).setId("id").build()
                         .enforceMandatoryFields());
-        TestUtils.assertExpectException(
+        assertExpectException(
                 NullPointerException.class,
                 "Intent must be provided",
                 () -> new ShortcutInfo.Builder(getTestContext()).setId("id").setTitle("x").build()
@@ -5493,7 +5270,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         dumpsysOnLogcat("test1", /* force= */ true);
     }
 
-    public void testDumpsys_withIcons() {
+    public void testDumpsys_withIcons() throws IOException {
         testIcons();
         // Dump after having some icons.
         dumpsysOnLogcat("test1", /* force= */ true);

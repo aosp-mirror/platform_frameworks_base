@@ -16,8 +16,11 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -94,6 +97,15 @@ public class ShortcutManager {
     public ShortcutManager(Context context, IShortcutService service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public ShortcutManager(Context context) {
+        this(context, IShortcutService.Stub.asInterface(
+                ServiceManager.getService(Context.SHORTCUT_SERVICE)));
     }
 
     /**
