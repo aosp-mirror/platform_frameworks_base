@@ -369,8 +369,7 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Returns the extras associated with this TV input.
-     * @hide
+     * Returns domain-specific extras associated with this TV input.
      */
     public Bundle getExtras() {
         return mExtras;
@@ -847,11 +846,12 @@ public final class TvInputInfo implements Parcelable {
         }
 
         /**
-         * Sets the extras associated with this TV input.
+         * Sets domain-specific extras associated with this TV input.
          *
-         * @param extras The extras associated with this TV input.
+         * @param extras Domain-specific extras associated with this TV input. Keys <em>must</em> be
+         *            a scoped name, i.e. prefixed with a package name you own, so that different
+         *            developers will not create conflicting keys.
          * @return This Builder object to allow for chaining of calls to builder methods.
-         * @hide
          */
         public Builder setExtras(Bundle extras) {
             this.mExtras = extras;
