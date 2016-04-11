@@ -893,8 +893,9 @@ final class UserController {
     boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
             ProgressReporter progress) {
         synchronized (mService) {
-            // Bail if already running unlocked
+            // Bail if already running unlocked, or if not running at all
             final UserState uss = mStartedUsers.get(userId);
+            if (uss == null) return false;
             switch (uss.state) {
                 case STATE_RUNNING_UNLOCKING:
                 case STATE_RUNNING_UNLOCKED:
