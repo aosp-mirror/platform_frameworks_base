@@ -22,30 +22,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
-
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
-public class CarStatusBar extends PhoneStatusBar {
+public class CarStatusBar extends PhoneStatusBar implements
+        CarBatteryController.BatteryViewHandler {
+    private static final String TAG = "CarStatusBar";
+
     private TaskStackListenerImpl mTaskStackListener;
 
     private CarNavigationBarView mCarNavigationBar;
     private CarNavigationBarController mController;
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
+
+    private CarBatteryController mCarBatteryController;
+    private BatteryMeterView mBatteryMeterView;
 
     @Override
     public void start() {
@@ -53,6 +59,38 @@ public class CarStatusBar extends PhoneStatusBar {
         mTaskStackListener = new TaskStackListenerImpl();
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
+
+        mCarBatteryController.startListening();
+    }
+
+    @Override
+    public void destroy() {
+        mCarBatteryController.stopListening();
+        super.destroy();
+    }
+
+    @Override
+    protected PhoneStatusBarView makeStatusBarView() {
+        PhoneStatusBarView statusBarView = super.makeStatusBarView();
+
+        mBatteryMeterView = ((BatteryMeterView) statusBarView.findViewById(R.id.battery));
+
+        // By default, the BatteryMeterView should not be visible. It will be toggled visible
+        // when a device has connected by bluetooth.
+        mBatteryMeterView.setVisibility(View.GONE);
+
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
+        }
+
+        return statusBarView;
+    }
+
+    @Override
+    protected BatteryController createBatteryController() {
+        mCarBatteryController = new CarBatteryController(mContext);
+        mCarBatteryController.addBatteryViewHandler(this);
+        return mCarBatteryController;
     }
 
     @Override
@@ -83,6 +121,28 @@ public class CarStatusBar extends PhoneStatusBar {
                 this /* ActivityStarter*/);
         mNavigationBarView = mCarNavigationBar;
 
+    }
+
+    @Override
+    public void showBatteryView() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "showBatteryView(). mBatteryMeterView: " + mBatteryMeterView);
+        }
+
+        if (mBatteryMeterView != null) {
+            mBatteryMeterView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void hideBatteryView() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "hideBatteryView(). mBatteryMeterView: " + mBatteryMeterView);
+        }
+
+        if (mBatteryMeterView != null) {
+            mBatteryMeterView.setVisibility(View.GONE);
+        }
     }
 
     private BroadcastReceiver mPackageChangeReceiver = new BroadcastReceiver() {
