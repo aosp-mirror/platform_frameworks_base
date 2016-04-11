@@ -147,6 +147,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void addOnAppsChangedListener(String callingPackage, IOnAppsChangedListener listener)
                 throws RemoteException {
+            verifyCallingPackage(callingPackage);
             synchronized (mListeners) {
                 if (DEBUG) {
                     Log.d(TAG, "Adding listener from " + Binder.getCallingUserHandle());

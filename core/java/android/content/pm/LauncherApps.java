@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -259,6 +261,13 @@ public class LauncherApps {
         mContext = context;
         mService = service;
         mPm = context.getPackageManager();
+    }
+
+    /** @hide */
+    @TestApi
+    public LauncherApps(Context context) {
+        this(context, ILauncherApps.Stub.asInterface(
+                ServiceManager.getService(Context.LAUNCHER_APPS_SERVICE)));
     }
 
     /**

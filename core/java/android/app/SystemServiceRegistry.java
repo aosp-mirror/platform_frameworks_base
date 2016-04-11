@@ -589,9 +589,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<LauncherApps>() {
             @Override
             public LauncherApps createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.LAUNCHER_APPS_SERVICE);
-                ILauncherApps service = ILauncherApps.Stub.asInterface(b);
-                return new LauncherApps(ctx, service);
+                return new LauncherApps(ctx);
             }});
 
         registerService(Context.RESTRICTIONS_SERVICE, RestrictionsManager.class,
@@ -758,8 +756,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<ShortcutManager>() {
             @Override
             public ShortcutManager createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.SHORTCUT_SERVICE);
-                return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
+                return new ShortcutManager(ctx);
             }});
 
         registerService(Context.SYSTEM_HEALTH_SERVICE, SystemHealthManager.class,
