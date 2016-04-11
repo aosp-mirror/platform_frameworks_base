@@ -26,10 +26,13 @@ public class StatusBarIconList {
     private ArrayList<StatusBarIcon> mIcons = new ArrayList<>();
 
     public void defineSlots(String[] slots) {
+        mSlots.clear();
         final int N = slots.length;
         for (int i=0; i < N; i++) {
             mSlots.add(slots[i]);
-            mIcons.add(null);
+            if (mIcons.size() < mSlots.size()) {
+                mIcons.add(null);
+            }
         }
     }
 

@@ -3116,8 +3116,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setOverflowContainer(NotificationOverflowContainer overFlowContainer) {
+        int index = -1;
+        if (mOverflowContainer != null) {
+            index = indexOfChild(mOverflowContainer);
+            removeView(mOverflowContainer);
+        }
         mOverflowContainer = overFlowContainer;
-        addView(mOverflowContainer);
+        addView(mOverflowContainer, index);
     }
 
     public void updateOverflowContainerVisibility(boolean visible) {

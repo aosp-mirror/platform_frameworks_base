@@ -108,7 +108,7 @@ public class BrightnessMirrorController {
         mBrightnessMirror.setLayoutParams(lp);
     }
 
-    public void reInflate() {
+    public void onDensityOrFontScaleChanged() {
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
         mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(

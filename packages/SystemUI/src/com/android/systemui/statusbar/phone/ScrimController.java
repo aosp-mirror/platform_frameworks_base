@@ -521,7 +521,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mScrimBehind.setChangeRunnable(changeRunnable);
     }
 
-    public void reInflateViews() {
+    public void onDensityOrFontScaleChanged() {
         ViewGroup.LayoutParams layoutParams = mHeadsUpScrim.getLayoutParams();
         layoutParams.height = mHeadsUpScrim.getResources().getDimensionPixelSize(
                 R.dimen.heads_up_scrim_height);
