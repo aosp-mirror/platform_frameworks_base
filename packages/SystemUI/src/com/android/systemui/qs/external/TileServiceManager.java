@@ -16,13 +16,18 @@
 package com.android.systemui.qs.external;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import libcore.util.Objects;
 
 /**
  * Manages the priority which lets {@link TileServices} make decisions about which tiles
@@ -68,6 +73,12 @@ public class TileServiceManager {
         mHandler = handler;
         mStateManager = tileLifecycleManager;
         mStateManager.setQSService(tileServices);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mServices.getContext().registerReceiverAsUser(mUninstallReceiver,
+                new UserHandle(ActivityManager.getCurrentUser()), filter, null, mHandler);
     }
 
     public boolean isActiveTile() {
@@ -106,6 +117,7 @@ public class TileServiceManager {
     }
 
     public void handleDestroy() {
+        mServices.getContext().unregisterReceiver(mUninstallReceiver);
         mStateManager.handleDestroy();
     }
 
@@ -196,6 +208,25 @@ public class TileServiceManager {
         public void run() {
             mJustBound = false;
             mServices.recalculateBindAllowance();
+        }
+    };
+
+    private final BroadcastReceiver mUninstallReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                return;
+            }
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                return;
+            }
+            Uri data = intent.getData();
+            String pkgName = data.getEncodedSchemeSpecificPart();
+            final ComponentName component = mStateManager.getComponent();
+            if (!Objects.equal(pkgName, component.getPackageName())) {
+                return;
+            }
+            mServices.getHost().removeTile(component);
         }
     };
 }
