@@ -1469,6 +1469,7 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/admob/topic/2784623",
       "https://admob.blogspot.com/",
       "https://analyticsacademy.withgoogle.com/mobile-app",
+      "https://www.udacity.com/courses/ud876-3"
     ]
   },
   "distribute/monetize/paymentmethods": {
