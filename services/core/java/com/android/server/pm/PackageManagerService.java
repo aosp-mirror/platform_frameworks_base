@@ -4716,27 +4716,39 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
-        if (!sUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, intent);
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                false /* requireFullPermission */, false /* checkShell */, "resolve intent");
-        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
-                userId);
-        final ResolveInfo bestChoice =
-                chooseBestActivity(intent, resolvedType, flags, query, userId);
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
-        if (isEphemeralAllowed(intent, query, userId)) {
-            final EphemeralResolveInfo ai =
-                    getEphemeralResolveInfo(intent, resolvedType, userId);
-            if (ai != null) {
-                if (DEBUG_EPHEMERAL) {
-                    Slog.v(TAG, "Returning an EphemeralResolveInfo");
+            if (!sUserManager.exists(userId)) return null;
+            flags = updateFlagsForResolve(flags, userId, intent);
+            enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                    false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
+
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
+            final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
+                    flags, userId);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
+            final ResolveInfo bestChoice =
+                    chooseBestActivity(intent, resolvedType, flags, query, userId);
+
+            if (isEphemeralAllowed(intent, query, userId)) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
+                final EphemeralResolveInfo ai =
+                        getEphemeralResolveInfo(intent, resolvedType, userId);
+                if (ai != null) {
+                    if (DEBUG_EPHEMERAL) {
+                        Slog.v(TAG, "Returning an EphemeralResolveInfo");
+                    }
+                    bestChoice.ephemeralInstaller = mEphemeralInstallerInfo;
+                    bestChoice.ephemeralResolveInfo = ai;
                 }
-                bestChoice.ephemeralInstaller = mEphemeralInstallerInfo;
-                bestChoice.ephemeralResolveInfo = ai;
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
+            return bestChoice;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        return bestChoice;
     }
 
     @Override
@@ -5183,8 +5195,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(
-                queryIntentActivitiesInternal(intent, resolvedType, flags, userId));
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
+
+            return new ParceledListSlice<>(
+                    queryIntentActivitiesInternal(intent, resolvedType, flags, userId));
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
