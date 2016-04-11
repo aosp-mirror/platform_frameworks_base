@@ -2546,7 +2546,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
+                    onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype,
+                    true /* forward */);
             if (nextSubtype == null) {
                 return false;
             }
@@ -2569,7 +2570,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
+                    false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype,
+                    true /* forward */);
             if (nextSubtype == null) {
                 return false;
             }
@@ -2963,9 +2965,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void handleSwitchInputMethod(final boolean forwardDirection) {
         synchronized (mMethodMap) {
-            // TODO: Support forwardDirection.
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false, mMethodMap.get(mCurMethodId), mCurrentSubtype);
+                    false, mMethodMap.get(mCurMethodId), mCurrentSubtype, forwardDirection);
             if (nextSubtype == null) {
                 return;
             }
