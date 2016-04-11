@@ -188,7 +188,7 @@ support French.</p>
 <h2 id="design">Designing your App to Support Additional Locales</h2>
 <h3>LocaleList API</h3>
 
-<p>Android N adds a new API {@code LocaleList.GetDefault()}
+<p>Android N adds a new API {@code LocaleList.getDefault()}
 that lets apps directly query the list of languages a user has specified. This API
 allows you to create more sophisticated
  app behavior and better-optimized display of content. For example, Search
