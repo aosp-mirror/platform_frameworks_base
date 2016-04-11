@@ -555,7 +555,15 @@ public class TextClock extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
 
-        getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
+        // OK, this is gross but needed. This class is supported by the
+        // remote views mechanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For example, when adding widgets from a managed profile to the
+        // home screen. Therefore, we register the receiver as the user
+        // the app is running as not the one the context is for.
+        getContext().registerReceiverAsUser(mIntentReceiver, android.os.Process.myUserHandle(),
+                filter, null, getHandler());
     }
 
     private void registerObserver() {
