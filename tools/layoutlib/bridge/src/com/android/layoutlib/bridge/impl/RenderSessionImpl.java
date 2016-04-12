@@ -1415,10 +1415,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         return mSystemViewInfoList;
     }
 
-    public Map<String, String> getDefaultProperties(Object viewObject) {
-        return getContext().getDefaultPropMap(viewObject);
-    }
-
     public void setScene(RenderSession session) {
         mScene = session;
     }
