@@ -39,7 +39,6 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -141,15 +140,12 @@ public class TaskViewHeader extends FrameLayout
     // Header views
     ImageView mIconView;
     TextView mTitleView;
-    TextView mSubTitleView;
     ImageView mMoveTaskButton;
     ImageView mDismissButton;
-    ViewStub mAppOverlayViewStub;
     FrameLayout mAppOverlayView;
     ImageView mAppIconView;
     ImageView mAppInfoView;
     TextView mAppTitleView;
-    ViewStub mFocusTimerIndicatorStub;
     ProgressBar mFocusTimerIndicator;
 
     // Header drawables
@@ -242,13 +238,10 @@ public class TaskViewHeader extends FrameLayout
         mIconView.setClickable(false);
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
-        mSubTitleView = (TextView) findViewById(R.id.sub_title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         if (ssp.hasFreeformWorkspaceSupport()) {
             mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
         }
-        mFocusTimerIndicatorStub = (ViewStub) findViewById(R.id.focus_timer_indicator_stub);
-        mAppOverlayViewStub = (ViewStub) findViewById(R.id.app_overlay_stub);
 
         onConfigurationChanged();
     }
@@ -305,8 +298,7 @@ public class TaskViewHeader extends FrameLayout
                 R.dimen.recents_task_view_header_button_padding_tablet_land,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding_tablet_land);
-        updateLayoutParams(mIconView, findViewById(R.id.title_container), mMoveTaskButton,
-                mDismissButton);
+        updateLayoutParams(mIconView, mTitleView, mMoveTaskButton, mDismissButton);
         if (mAppOverlayView != null) {
             updateLayoutParams(mAppIconView, mAppTitleView, null, mAppInfoView);
         }
@@ -462,13 +454,6 @@ public class TaskViewHeader extends FrameLayout
         mTitleView.setContentDescription(t.titleDescription);
         mTitleView.setTextColor(t.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
-        if (!t.isDockable && ssp.hasDockedTask()) {
-            mSubTitleView.setVisibility(View.VISIBLE);
-            mSubTitleView.setTextColor(t.useLightOnPrimaryColor ?
-                    mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
-        } else {
-            mSubTitleView.setVisibility(View.GONE);
-        }
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(t.dismissDescription);
@@ -491,7 +476,8 @@ public class TaskViewHeader extends FrameLayout
 
         if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
             if (mFocusTimerIndicator == null) {
-                mFocusTimerIndicator = (ProgressBar) mFocusTimerIndicatorStub.inflate();
+                mFocusTimerIndicator = (ProgressBar) Utilities.findViewStubById(this,
+                        R.id.focus_timer_indicator_stub).inflate();
             }
             mFocusTimerIndicator.getProgressDrawable()
                     .setColorFilter(
@@ -637,7 +623,8 @@ public class TaskViewHeader extends FrameLayout
 
         // Inflate the overlay if necessary
         if (mAppOverlayView == null) {
-            mAppOverlayView = (FrameLayout) mAppOverlayViewStub.inflate();
+            mAppOverlayView = (FrameLayout) Utilities.findViewStubById(this,
+                    R.id.app_overlay_stub).inflate();
             mAppOverlayView.setBackground(mOverlayBackground);
             mAppIconView = (ImageView) mAppOverlayView.findViewById(R.id.app_icon);
             mAppIconView.setOnClickListener(this);

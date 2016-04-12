@@ -39,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -157,6 +158,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
     TaskViewHeader mHeaderView;
     View mActionButtonView;
+    View mIncompatibleAppToastView;
     TaskViewCallbacks mCb;
 
     @ViewDebug.ExportedProperty(category="recents")
@@ -345,6 +347,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mActionButtonView.setScaleY(1f);
         mActionButtonView.setAlpha(0f);
         mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
+        if (mIncompatibleAppToastView != null) {
+            mIncompatibleAppToastView.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**
@@ -536,6 +541,10 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         // These values will be animated in when onStartLaunchTargetEnterAnimation() is called
         setDimAlphaWithoutHeader(0);
         mActionButtonView.setAlpha(0f);
+        if (mIncompatibleAppToastView != null &&
+                mIncompatibleAppToastView.getVisibility() == View.VISIBLE) {
+            mIncompatibleAppToastView.setAlpha(0f);
+        }
     }
 
     @Override
@@ -553,6 +562,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
         if (screenPinningEnabled) {
             showActionButton(true /* fadeIn */, duration /* fadeInDuration */);
+        }
+
+        if (mIncompatibleAppToastView != null &&
+                mIncompatibleAppToastView.getVisibility() == View.VISIBLE) {
+            mIncompatibleAppToastView.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .start();
         }
     }
 
@@ -587,6 +605,18 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTask = t;
         mTask.addCallback(this);
         mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
+
+        if (!t.isDockable && ssp.hasDockedTask()) {
+            if (mIncompatibleAppToastView == null) {
+                mIncompatibleAppToastView = Utilities.findViewStubById(this,
+                        R.id.incompatible_app_toast_stub).inflate();
+                TextView msg = (TextView) findViewById(com.android.internal.R.id.message);
+                msg.setText(R.string.recents_incompatible_app_message);
+            }
+            mIncompatibleAppToastView.setVisibility(View.VISIBLE);
+        } else if (mIncompatibleAppToastView != null) {
+            mIncompatibleAppToastView.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
