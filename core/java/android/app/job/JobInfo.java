@@ -264,7 +264,8 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Flex time for this job. Only valid if this is a periodic job.
+     * Flex time for this job. Only valid if this is a periodic job.  The job can
+     * execute at any time in a window of flex length at the end of the period.
      */
     public long getFlexMillis() {
         long interval = getIntervalMillis();
