@@ -22,6 +22,7 @@ import android.util.Slog;
 
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobStore;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
@@ -41,9 +42,51 @@ public class AppIdleController extends StateController {
     // Singleton factory
     private static Object sCreationLock = new Object();
     private static volatile AppIdleController sController;
-    final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
+    private final JobSchedulerService mJobSchedulerService;
     private final UsageStatsManagerInternal mUsageStatsInternal;
     boolean mAppIdleParoleOn;
+
+    final class GlobalUpdateFunc implements JobStore.JobStatusFunctor {
+        boolean mChanged;
+
+        @Override public void process(JobStatus jobStatus) {
+            String packageName = jobStatus.getSourcePackageName();
+            final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
+                    jobStatus.getSourceUid(), jobStatus.getSourceUserId());
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
+            }
+            if (jobStatus.setAppNotIdleConstraintSatisfied(!appIdle)) {
+                mChanged = true;
+            }
+        }
+    };
+
+    final static class PackageUpdateFunc implements JobStore.JobStatusFunctor {
+        final int mUserId;
+        final String mPackage;
+        final boolean mIdle;
+        boolean mChanged;
+
+        PackageUpdateFunc(int userId, String pkg, boolean idle) {
+            mUserId = userId;
+            mPackage = pkg;
+            mIdle = idle;
+        }
+
+        @Override public void process(JobStatus jobStatus) {
+            if (jobStatus.getSourcePackageName().equals(mPackage)
+                    && jobStatus.getSourceUserId() == mUserId) {
+                if (jobStatus.setAppNotIdleConstraintSatisfied(!mIdle)) {
+                    if (DEBUG) {
+                        Slog.d(LOG_TAG, "App Idle state changed, setting idle state of "
+                                + mPackage + " to " + mIdle);
+                    }
+                    mChanged = true;
+                }
+            }
+        }
+    };
 
     public static AppIdleController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
@@ -55,9 +98,9 @@ public class AppIdleController extends StateController {
         }
     }
 
-    private AppIdleController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        super(stateChangedListener, context, lock);
+    private AppIdleController(JobSchedulerService service, Context context, Object lock) {
+        super(service, context, lock);
+        mJobSchedulerService = service;
         mUsageStatsInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mAppIdleParoleOn = mUsageStatsInternal.isAppIdleParoleOn();
         mUsageStatsInternal.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
@@ -65,7 +108,6 @@ public class AppIdleController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        mTrackedTasks.add(jobStatus);
         String packageName = jobStatus.getSourcePackageName();
         final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
                 jobStatus.getSourceUid(), jobStatus.getSourceUserId());
@@ -78,19 +120,20 @@ public class AppIdleController extends StateController {
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
-        mTrackedTasks.remove(jobStatus);
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(final PrintWriter pw) {
         pw.println("AppIdle");
         pw.println("Parole On: " + mAppIdleParoleOn);
-        for (JobStatus task : mTrackedTasks) {
-            pw.print(task.getSourcePackageName());
-            pw.print(":runnable="
-                    + ((task.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0));
-            pw.print(", ");
-        }
+        mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
+            @Override public void process(JobStatus jobStatus) {
+                pw.print("  ");
+                pw.print(jobStatus.getSourcePackageName());
+                pw.print(": runnable=");
+                pw.println((jobStatus.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0);
+            }
+        });
         pw.println();
     }
 
@@ -102,16 +145,10 @@ public class AppIdleController extends StateController {
                 return;
             }
             mAppIdleParoleOn = isAppIdleParoleOn;
-            for (JobStatus task : mTrackedTasks) {
-                String packageName = task.getSourcePackageName();
-                final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                        task.getSourceUid(), task.getSourceUserId());
-                if (DEBUG) {
-                    Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
-                }
-                if (task.setAppNotIdleConstraintSatisfied(!appIdle)) {
-                    changed = true;
-                }
+            GlobalUpdateFunc update = new GlobalUpdateFunc();
+            mJobSchedulerService.getJobStore().forEachJob(update);
+            if (update.mChanged) {
+                changed = true;
             }
         }
         if (changed) {
@@ -128,17 +165,10 @@ public class AppIdleController extends StateController {
                 if (mAppIdleParoleOn) {
                     return;
                 }
-                for (JobStatus task : mTrackedTasks) {
-                    if (task.getSourcePackageName().equals(packageName)
-                            && task.getSourceUserId() == userId) {
-                        if (task.setAppNotIdleConstraintSatisfied(!idle)) {
-                            if (DEBUG) {
-                                Slog.d(LOG_TAG, "App Idle state changed, setting idle state of "
-                                        + packageName + " to " + idle);
-                            }
-                            changed = true;
-                        }
-                    }
+                PackageUpdateFunc update = new PackageUpdateFunc(userId, packageName, idle);
+                mJobSchedulerService.getJobStore().forEachJob(update);
+                if (update.mChanged) {
+                    changed = true;
                 }
             }
             if (changed) {
