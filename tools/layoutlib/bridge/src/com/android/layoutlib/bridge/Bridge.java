@@ -537,7 +537,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Note that while this can be called several time, the first call to {@link #cleanupThread()}
      * will do the clean-up, and make the thread unable to do further scene actions.
      */
-    public static void prepareThread() {
+    public synchronized static void prepareThread() {
         // we need to make sure the Looper has been initialized for this thread.
         // this is required for View that creates Handler objects.
         if (Looper.myLooper() == null) {
@@ -551,7 +551,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
      * call to this will prevent the thread from doing further scene actions
      */
-    public static void cleanupThread() {
+    public synchronized static void cleanupThread() {
         // clean up the looper
         Looper_Accessor.cleanupThread();
     }
