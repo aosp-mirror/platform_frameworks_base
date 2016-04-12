@@ -1288,7 +1288,7 @@ class WindowStateAnimator {
         }
 
         final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
-        if (w == winShowWhenLocked) {
+        if (w == winShowWhenLocked && mPolicy.isKeyguardShowingOrOccluded()) {
             return;
         }
 
