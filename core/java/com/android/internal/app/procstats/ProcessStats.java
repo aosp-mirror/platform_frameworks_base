@@ -516,7 +516,7 @@ public final class ProcessStats implements Parcelable {
                 out.writeInt((int)val);
             } else {
                 int top = ~((int)((val>>32)&0x7fffffff));
-                int bottom = (int)(val&0xfffffff);
+                int bottom = (int)(val&0x0ffffffffL);
                 out.writeInt(top);
                 out.writeInt(bottom);
             }
