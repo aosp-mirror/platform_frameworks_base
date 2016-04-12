@@ -285,6 +285,7 @@ void JankTracker::dumpData(const ProfileData* data, int fd) {
 void JankTracker::reset() {
     mData->jankTypeCounts.fill(0);
     mData->frameCounts.fill(0);
+    mData->slowFrameCounts.fill(0);
     mData->totalFrameCount = 0;
     mData->jankFrameCount = 0;
     mData->statStartTime = systemTime(CLOCK_MONOTONIC);
