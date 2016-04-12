@@ -10278,7 +10278,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @Visibility boolean dispatchVisibilityAggregated(boolean isVisible) {
         final boolean thisVisible = getVisibility() == VISIBLE;
-        if (thisVisible) {
+        // If we're not visible but something is telling us we are, ignore it.
+        if (thisVisible || !isVisible) {
             onVisibilityAggregated(isVisible);
         }
         return thisVisible && isVisible;
