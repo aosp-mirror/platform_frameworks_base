@@ -58,8 +58,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private static final long DELAY_COMMIT_MILLIS = 2000;
 
     // Index used by RadialPickerLayout
-    private static final int HOUR_INDEX = 0;
-    private static final int MINUTE_INDEX = 1;
+    private static final int HOUR_INDEX = RadialTimePickerView.HOURS;
+    private static final int MINUTE_INDEX = RadialTimePickerView.MINUTES;
 
     // NOT a real index for the purpose of what's showing.
     private static final int AMPM_INDEX = 2;
@@ -82,16 +82,16 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     private final Calendar mTempCalendar;
 
+    // Accessibility strings.
+    private final String mSelectHours;
+    private final String mSelectMinutes;
+
     private boolean mIsEnabled = true;
     private boolean mAllowAutoAdvance;
     private int mInitialHourOfDay;
     private int mInitialMinute;
     private boolean mIs24Hour;
     private boolean mIsAmPmAtStart;
-
-    // Accessibility strings.
-    private String mSelectHours;
-    private String mSelectMinutes;
 
     // Localization data.
     private boolean mHourFormatShowLeadingZero;
@@ -520,11 +520,15 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         } else {
             flags |= DateUtils.FORMAT_12HOUR;
         }
+
         mTempCalendar.set(Calendar.HOUR_OF_DAY, getHour());
         mTempCalendar.set(Calendar.MINUTE, getMinute());
-        String selectedDate = DateUtils.formatDateTime(mContext,
+
+        final String selectedTime = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
-        event.getText().add(selectedDate);
+        final String selectionMode = mRadialTimePickerView.getCurrentItemShowing() == HOUR_INDEX ?
+                mSelectHours : mSelectMinutes;
+        event.getText().add(selectedTime + " " + selectionMode);
     }
 
     /**
