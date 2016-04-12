@@ -17,6 +17,7 @@
 package android.net.http;
 
 import android.annotation.SystemApi;
+import android.security.net.config.UserCertificateSource;
 
 import com.android.org.conscrypt.TrustManagerImpl;
 
@@ -43,7 +44,6 @@ public class X509TrustManagerExtensions {
     // Methods to use when mDelegate is not a TrustManagerImpl and duck typing is being used.
     private final X509TrustManager mTrustManager;
     private final Method mCheckServerTrusted;
-    private final Method mIsUserAddedCertificate;
     private final Method mIsSameTrustConfiguration;
 
     /**
@@ -57,7 +57,6 @@ public class X509TrustManagerExtensions {
             mDelegate = (TrustManagerImpl) tm;
             mTrustManager = null;
             mCheckServerTrusted = null;
-            mIsUserAddedCertificate = null;
             mIsSameTrustConfiguration = null;
             return;
         }
@@ -73,14 +72,6 @@ public class X509TrustManagerExtensions {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Required method"
                     + " checkServerTrusted(X509Certificate[], String, String, String) missing");
-        }
-        // Check that isUserAddedCertificate is present.
-        try {
-            mIsUserAddedCertificate = tm.getClass().getMethod("isUserAddedCertificate",
-                    X509Certificate.class);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(
-                    "Required method isUserAddedCertificate(X509Certificate) missing");
         }
         // Get the option isSameTrustConfiguration method.
         Method isSameTrustConfiguration = null;
@@ -128,29 +119,15 @@ public class X509TrustManagerExtensions {
     /**
      * Checks whether a CA certificate is added by an user.
      *
-     * <p>Since {@link X509TrustManager#checkServerTrusted} allows its parameter {@code chain} to
+     * <p>Since {@link X509TrustManager#checkServerTrusted} may allow its parameter {@code chain} to
      * chain up to user-added CA certificates, this method can be used to perform additional
      * policies for user-added CA certificates.
      *
-     * @return {@code true} to indicate that the certificate was added by the user, {@code false}
-     * otherwise.
+     * @return {@code true} to indicate that the certificate authority exists in the user added
+     * certificate store, {@code false} otherwise.
      */
     public boolean isUserAddedCertificate(X509Certificate cert) {
-        if (mDelegate != null) {
-            return mDelegate.isUserAddedCertificate(cert);
-        } else {
-            try {
-                return (Boolean) mIsUserAddedCertificate.invoke(mTrustManager, cert);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to call isUserAddedCertificate", e);
-            } catch (InvocationTargetException e) {
-                if (e.getCause() instanceof RuntimeException) {
-                    throw (RuntimeException) e.getCause();
-                } else {
-                    throw new RuntimeException("isUserAddedCertificate failed", e.getCause());
-                }
-            }
-        }
+        return UserCertificateSource.getInstance().findBySubjectAndPublicKey(cert) != null;
     }
 
     /**

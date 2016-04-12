@@ -115,15 +115,6 @@ public class NetworkSecurityTrustManager extends X509ExtendedTrustManager {
         return trustedChain;
     }
 
-    /**
-     * Check if the provided certificate is a user added certificate authority.
-     * This is required by android.net.http.X509TrustManagerExtensions.
-     */
-    public boolean isUserAddedCertificate(X509Certificate cert) {
-        // TODO: Figure out the right way to handle this, and if it is still even used.
-        return false;
-    }
-
     private void checkPins(List<X509Certificate> chain) throws CertificateException {
         PinSet pinSet = mNetworkSecurityConfig.getPins();
         if (pinSet.pins.isEmpty()
