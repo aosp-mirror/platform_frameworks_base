@@ -774,10 +774,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         applyGravityAndUpdateFrame(layoutContainingFrame, layoutDisplayFrame);
 
-        // Offset the actual frame by the amount layout frame is off.
-        mFrame.offset(-layoutXDiff, -layoutYDiff);
-        mCompatFrame.offset(-layoutXDiff, -layoutYDiff);
-
         // Calculate the outsets before the content frame gets shrinked to the window frame.
         if (hasOutsets) {
             mOutsets.set(Math.max(mContentFrame.left - mOutsetFrame.left, 0),
@@ -816,20 +812,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mMovedByResize = true;
             }
         } else {
-            mContentFrame.set(Math.max(mContentFrame.left, layoutContainingFrame.left),
-                    Math.max(mContentFrame.top, layoutContainingFrame.top),
-                    Math.min(mContentFrame.right, layoutContainingFrame.right),
-                    Math.min(mContentFrame.bottom, layoutContainingFrame.bottom));
+            mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
+                    Math.max(mContentFrame.top, mFrame.top),
+                    Math.min(mContentFrame.right, mFrame.right),
+                    Math.min(mContentFrame.bottom, mFrame.bottom));
 
-            mVisibleFrame.set(Math.max(mVisibleFrame.left, layoutContainingFrame.left),
-                    Math.max(mVisibleFrame.top, layoutContainingFrame.top),
-                    Math.min(mVisibleFrame.right, layoutContainingFrame.right),
-                    Math.min(mVisibleFrame.bottom, layoutContainingFrame.bottom));
+            mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
+                    Math.max(mVisibleFrame.top, mFrame.top),
+                    Math.min(mVisibleFrame.right, mFrame.right),
+                    Math.min(mVisibleFrame.bottom, mFrame.bottom));
 
-            mStableFrame.set(Math.max(mStableFrame.left, layoutContainingFrame.left),
-                    Math.max(mStableFrame.top, layoutContainingFrame.top),
-                    Math.min(mStableFrame.right, layoutContainingFrame.right),
-                    Math.min(mStableFrame.bottom, layoutContainingFrame.bottom));
+            mStableFrame.set(Math.max(mStableFrame.left, mFrame.left),
+                    Math.max(mStableFrame.top, mFrame.top),
+                    Math.min(mStableFrame.right, mFrame.right),
+                    Math.min(mStableFrame.bottom, mFrame.bottom));
         }
 
         if (fullscreenTask && !windowsAreFloating) {
@@ -857,30 +853,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             getDisplayContent().getLogicalDisplayRect(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
-            boolean overrideRightInset = !fullscreenTask && layoutContainingFrame.right > mTmpRect.right;
-            boolean overrideBottomInset = !fullscreenTask && layoutContainingFrame.bottom > mTmpRect.bottom;
-            mContentInsets.set(mContentFrame.left - layoutContainingFrame.left,
-                    mContentFrame.top - layoutContainingFrame.top,
+            boolean overrideRightInset = !fullscreenTask && mFrame.right > mTmpRect.right;
+            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mTmpRect.bottom;
+            mContentInsets.set(mContentFrame.left - mFrame.left,
+                    mContentFrame.top - mFrame.top,
                     overrideRightInset ? mTmpRect.right - mContentFrame.right
-                            : layoutContainingFrame.right - mContentFrame.right,
+                            : mFrame.right - mContentFrame.right,
                     overrideBottomInset ? mTmpRect.bottom - mContentFrame.bottom
-                            : layoutContainingFrame.bottom - mContentFrame.bottom);
+                            : mFrame.bottom - mContentFrame.bottom);
 
-            mVisibleInsets.set(mVisibleFrame.left - layoutContainingFrame.left,
-                    mVisibleFrame.top - layoutContainingFrame.top,
+            mVisibleInsets.set(mVisibleFrame.left - mFrame.left,
+                    mVisibleFrame.top - mFrame.top,
                     overrideRightInset ? mTmpRect.right - mVisibleFrame.right
-                            : layoutContainingFrame.right - mVisibleFrame.right,
+                            : mFrame.right - mVisibleFrame.right,
                     overrideBottomInset ? mTmpRect.bottom - mVisibleFrame.bottom
-                            : layoutContainingFrame.bottom - mVisibleFrame.bottom);
+                            : mFrame.bottom - mVisibleFrame.bottom);
 
-            mStableInsets.set(Math.max(mStableFrame.left - layoutContainingFrame.left, 0),
-                    Math.max(mStableFrame.top - layoutContainingFrame.top, 0),
+            mStableInsets.set(Math.max(mStableFrame.left - mFrame.left, 0),
+                    Math.max(mStableFrame.top - mFrame.top, 0),
                     overrideRightInset ? Math.max(mTmpRect.right - mStableFrame.right, 0)
-                            : Math.max(layoutContainingFrame.right - mStableFrame.right, 0),
+                            : Math.max(mFrame.right - mStableFrame.right, 0),
                     overrideBottomInset ? Math.max(mTmpRect.bottom - mStableFrame.bottom, 0)
-                            :  Math.max(layoutContainingFrame.bottom - mStableFrame.bottom, 0));
+                            :  Math.max(mFrame.bottom - mStableFrame.bottom, 0));
         }
 
+        // Offset the actual frame by the amount layout frame is off.
+        mFrame.offset(-layoutXDiff, -layoutYDiff);
+        mCompatFrame.offset(-layoutXDiff, -layoutYDiff);
         mContentFrame.offset(-layoutXDiff, -layoutYDiff);
         mVisibleFrame.offset(-layoutXDiff, -layoutYDiff);
         mStableFrame.offset(-layoutXDiff, -layoutYDiff);
