@@ -64,15 +64,14 @@ public class PathParser_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nParseStringForPath(long pathPtr, @NonNull String pathString, int
+    /*package*/ static void nParseStringForPath(long pathPtr, @NonNull String pathString, int
             stringLength) {
         Path_Delegate path_delegate = Path_Delegate.getDelegate(pathPtr);
         if (path_delegate == null) {
-            return false;
+            return;
         }
         assert pathString.length() == stringLength;
         PathDataNode.nodesToPath(createNodesFromPathData(pathString), path_delegate);
-        return true;
     }
 
     @LayoutlibDelegate

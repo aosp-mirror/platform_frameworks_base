@@ -245,6 +245,13 @@ public class FontFamily_Delegate {
         return sFontLocation;
     }
 
+    // ---- delegate methods ----
+    @LayoutlibDelegate
+    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex) {
+        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mNativePtr);
+        return delegate != null && delegate.addFont(path, ttcIndex);
+    }
+
     // ---- native methods ----
 
     @LayoutlibDelegate
@@ -270,16 +277,8 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long nativeFamily, final String path, int ttcIndex) {
-        // FIXME: support ttc fonts. Hack JRE??
-        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
-        if (delegate != null) {
-            if (sFontLocation == null) {
-                delegate.mPostInitRunnables.add(() -> delegate.addFont(path));
-                return true;
-            }
-            return delegate.addFont(path);
-        }
+    /*package*/ static boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex) {
+        assert false : "The only client of this method has been overriden.";
         return false;
     }
 
@@ -388,6 +387,15 @@ public class FontFamily_Delegate {
             postInitRunnable.run();
         }
         mPostInitRunnables = null;
+    }
+
+    private boolean addFont(final String path, int ttcIndex) {
+        // FIXME: support ttc fonts. Hack JRE??
+        if (sFontLocation == null) {
+            mPostInitRunnables.add(() -> addFont(path));
+            return true;
+        }
+        return addFont(path);
     }
 
      private boolean addFont(@NonNull String path) {
