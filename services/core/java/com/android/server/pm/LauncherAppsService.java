@@ -294,7 +294,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ResolveInfo resolveActivity(Intent intent, UserHandle user)
+        public ActivityInfo resolveActivity(ComponentName component, UserHandle user)
                 throws RemoteException {
             ensureInUserProfiles(user, "Cannot resolve activity for unrelated profile " + user);
             if (!isUserEnabled(user)) {
@@ -303,11 +303,11 @@ public class LauncherAppsService extends SystemService {
 
             long ident = Binder.clearCallingIdentity();
             try {
-                ResolveInfo app = mPm.resolveActivityAsUser(intent,
+                IPackageManager pm = AppGlobals.getPackageManager();
+                return pm.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         user.getIdentifier());
-                return app;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

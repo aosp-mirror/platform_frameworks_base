@@ -39,7 +39,6 @@ public class LauncherActivityInfo {
 
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
-    private ResolveInfo mResolveInfo;
     private UserHandle mUser;
 
     /**
@@ -49,11 +48,10 @@ public class LauncherActivityInfo {
      * @param info ResolveInfo from which to create the LauncherActivityInfo.
      * @param user The UserHandle of the profile to which this activity belongs.
      */
-    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user) {
+    LauncherActivityInfo(Context context, ActivityInfo info, UserHandle user) {
         this(context);
-        mResolveInfo = info;
-        mActivityInfo = info.activityInfo;
-        mComponentName = LauncherApps.getComponentName(info);
+        mActivityInfo = info;
+        mComponentName =  new ComponentName(info.packageName, info.name);
         mUser = user;
     }
 
@@ -91,7 +89,7 @@ public class LauncherActivityInfo {
      * @return The label for the activity.
      */
     public CharSequence getLabel() {
-        return mResolveInfo.loadLabel(mPm);
+        return mActivityInfo.loadLabel(mPm);
     }
 
     /**
@@ -103,7 +101,7 @@ public class LauncherActivityInfo {
      * @return The drawable associated with the activity.
      */
     public Drawable getIcon(int density) {
-        final int iconRes = mResolveInfo.getIconResourceInternal();
+        final int iconRes = mActivityInfo.getIconResource();
         Drawable icon = null;
         // Get the preferred density icon from the app's resources
         if (density != 0 && iconRes != 0) {
@@ -116,7 +114,7 @@ public class LauncherActivityInfo {
         }
         // Get the default density icon
         if (icon == null) {
-            icon = mResolveInfo.loadIcon(mPm);
+            icon = mActivityInfo.loadIcon(mPm);
         }
         return icon;
     }
