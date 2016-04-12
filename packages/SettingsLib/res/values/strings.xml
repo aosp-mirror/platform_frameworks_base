@@ -804,7 +804,7 @@
     <string name="disabled_by_admin">Disabled by administrator</string>
 
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
-    <string name="home">Home</string>
+    <string name="home">Settings Home</string>
 
     <string-array name="battery_labels" translatable="false">
         <item>0%</item>
