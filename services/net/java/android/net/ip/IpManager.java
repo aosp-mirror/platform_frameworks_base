@@ -355,6 +355,8 @@ public class IpManager extends StateMachine {
 
     public void startProvisioning(ProvisioningConfiguration req) {
         getNetworkInterface();
+
+        mCallback.setNeighborDiscoveryOffload(true);
         sendMessage(CMD_START, new ProvisioningConfiguration(req));
     }
 
