@@ -8129,6 +8129,11 @@ i
         <attr name="maxCollapsedHeightSmall" format="dimension" />
     </declare-styleable>
 
+    <declare-styleable name="MessagingLinearLayout">
+        <attr name="maxHeight" />
+        <attr name="spacing" />
+    </declare-styleable>
+
     <declare-styleable name="ResolverDrawerLayout_LayoutParams">
         <attr name="layout_alwaysShow" format="boolean" />
         <attr name="layout_ignoreOffset" format="boolean" />

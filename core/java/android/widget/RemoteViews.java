@@ -1856,6 +1856,7 @@ public class RemoteViews implements Parcelable, Filter {
         public static final int LAYOUT_MARGIN_END = 1;
         /** Set width */
         public static final int LAYOUT_WIDTH = 2;
+        public static final int LAYOUT_MARGIN_BOTTOM = 3;
 
         /**
          * @param viewId ID of the view alter
@@ -1895,6 +1896,12 @@ public class RemoteViews implements Parcelable, Filter {
                 case LAYOUT_MARGIN_END:
                     if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
                         ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_MARGIN_BOTTOM:
+                    if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+                        ((ViewGroup.MarginLayoutParams) layoutParams).bottomMargin = value;
                         target.setLayoutParams(layoutParams);
                     }
                     break;
@@ -2867,6 +2874,16 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setViewLayoutMarginEnd(int viewId, int endMargin) {
         addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END, endMargin));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.MarginLayoutParams#bottomMargin}.
+     *
+     * @hide
+     */
+    public void setViewLayoutMarginBottom(int viewId, int bottomMargin) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_BOTTOM,
+                bottomMargin));
     }
 
     /**
