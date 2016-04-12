@@ -11,11 +11,10 @@ page.image=/design/media/navigation_between_siblings_gmail.png
 </a>
 
 <p itemprop="description">Consistent navigation is an essential component of the overall user experience. Few things frustrate
-users more than basic navigation that behaves in inconsistent and unexpected ways. Android 3.0
-introduced significant changes to the global navigation behavior. Thoughtfully following the
-guidelines for Back and Up will make your app's navigation predictable and reliable for your users.</p>
-<p>Android 2.3 and earlier relied upon the system <em>Back</em> button for supporting navigation within an
-app. With the introduction of action bars in Android 3.0, a second navigation mechanism appeared:
+users more than basic navigation that behaves in inconsistent and unexpected ways. Thoughtfully
+following the guidelines for Back and Up will make your app's navigation predictable and reliable
+for your users.</p>
+<p>Action bars provide a second, standard navigation mechanism:
 the <em>Up</em> button, consisting of the app icon and a left-point caret.</p>
 
 <img src="{@docRoot}design/media/navigation_with_back_and_up.png">

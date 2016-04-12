@@ -132,6 +132,15 @@ help you place the widget, as shown in figure 6:</p>
 <p>Within the graphical editor, you can rearrange your app's UI by dragging widgets to
 the desired location.</p>
 
+<h3>Multi-API Version Rendering</h3>
+
+<p>Android Studio supports multi-API version rendering. When you click the Android version icon <img src="{@docRoot}images/tools/as-api-level-preview.png" style="vertical-align:bottom;margin:0;height:19px" /> in the <b>Design</b> view,
+Android Studio allows you to preview your Android layouts across multiple Android API levels.
+</p>
+
+<p><img src="{@docRoot}images/tools/studio-api-version-rendering.png" /></p>
+    <p class="img-caption"><strong>Figure 7.</strong> Multi-API version rendering.</p>
+
 <h3>Taking a snapshot</h3>
 
 <p>When you run your app on a connected device, you can take a snapshot of it by clicking

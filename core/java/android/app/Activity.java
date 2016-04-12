@@ -200,7 +200,7 @@ import java.util.List;
  *
  * <p>An activity has essentially four states:</p>
  * <ul>
- *     <li> If an activity in the foreground of the screen (at the top of
+ *     <li> If an activity is in the foreground of the screen (at the top of
  *         the stack),
  *         it is <em>active</em> or  <em>running</em>. </li>
  *     <li>If an activity has lost focus but is still visible (that is, a new non-full-sized
@@ -674,7 +674,7 @@ import java.util.List;
  * independently of the activity lifecycle itself.  An example may be a camera
  * application that allows you to upload a picture to a web site.  The upload
  * may take a long time, and the application should allow the user to leave
- * the application will it is executing.  To accomplish this, your Activity
+ * the application while it is executing.  To accomplish this, your Activity
  * should start a {@link Service} in which the upload takes place.  This allows
  * the system to properly prioritize your process (considering it to be more
  * important than other non-visible applications) for the duration of the
@@ -4069,28 +4069,10 @@ public class Activity extends ContextThemeWrapper
      * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
      * </p>
      * <p>
-     * A sample permissions request looks like this:
+     * The <a href="http://developer.android.com/samples/RuntimePermissions/index.html">
+     * RuntimePermissions</a> sample app demonstrates how to use this method to
+     * request permissions at run time.
      * </p>
-     * <code><pre><p>
-     * private void showContacts() {
-     *     if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-     *             != PackageManager.PERMISSION_GRANTED) {
-     *         requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
-     *                 PERMISSIONS_REQUEST_READ_CONTACTS);
-     *     } else {
-     *         doShowContacts();
-     *     }
-     * }
-     *
-     * {@literal @}Override
-     * public void onRequestPermissionsResult(int requestCode, String[] permissions,
-     *         int[] grantResults) {
-     *     if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS
-     *             && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-     *         showContacts();
-     *     }
-     * }
-     * </code></pre></p>
      *
      * @param permissions The requested permissions. Must me non-null and not empty.
      * @param requestCode Application specific request code to match with a result

@@ -1,0 +1,186 @@
+page.title=Material Design cho Android
+page.tags=Material,design
+page.type=thiết kế
+page.image=images/cards/design-material-for-android_2x.jpg
+
+@jd:body
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>Tài liệu cho Nhà phát triển</h3>
+    <p>Tạo ứng dụng với Material Design</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>Video</h3>
+    <p>Giới thiệu Material Design</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>Video</h3>
+    <p>Giấy và Mực: Những vật liệu quan trọng</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>Video</h3>
+    <p>Material Design trong Google I/O App</p>
+</div>
+</a>
+
+
+
+<p itemprop="description">Material design là một hướng dẫn toàn diện về thiết kế
+trực quan, chuyển động và tương tác giữa nhiều nền tảng và thiết bị. Hiện nay Android có hỗ trợ
+những ứng dụng theo phong cách material design. Để sử dụng material design trong ứng dụng Androi của mình, hãy làm theo hướng dẫn nêu
+trong <a href="http://www.google.com/design/spec">đặc tả material design</a> và sử dụng
+những thành phần và tính năng mới sẵn có trong Android 5.0 (API mức 21) trở lên.</p>
+
+<p>Android cung cấp những phần tử sau để bạn dựng ứng dụng theo phong cách material design:</p>
+
+<ul>
+  <li>Một giao diện mới</li>
+  <li>Widget mới cho các dạng xem phức tạp</li>
+  <li>API mới cho đổ bóng và hoạt hình tùy chỉnh</li>
+</ul>
+
+<p>Để biết thêm thông tin về triển khai material design trên Android, hãy xem
+<a href="{@docRoot}training/material/index.html">Tạo ứng dụng với Material Design</a>.</p>
+
+
+<h3>Giao diện Material</h3>
+
+<p>Giao diện material mang đến một phong cách mới cho ứng dụng của bạn và các widget hệ thống, cho phép bạn đặt
+bảng màu của chúng và hoạt hình mặc định cho phản hồi chạm và chuyển tiếp hoạt động.</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Giao diện material tối</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238" />
+  <div style="width:140px;margin:0 auto">
+  <p style="margin-top:8px">Giao diện material sáng</p>
+  </div>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/theme.html">Sử dụng Giao diện Material
+</a>.</p>
+
+
+<h3>Danh sách và Thẻ</h3>
+
+<p>Android cung cấp hai loại widget mới để hiển thị thẻ và danh sách bằng phong cách
+và hoạt hình material design:</p>
+
+<!-- two columns -->
+<div style="width:700px;margin-top:25px;margin-bottom:20px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
+  <p>Widget <code>RecyclerView</code> mới là một phiên bản có thể ghép nối hơn của <code>ListView</code>
+  có hỗ trợ nhiều kiểu bố trí khác nhau và cải thiện hiệu năng.</p>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
+  <p>Widget <code>CardView</code> mới cho phép bạn hiển thị những mẩu thông tin quan trọng bên trong
+  thẻ với diện mạo và cảm nhận nhất quán.</p>
+</div>
+<br style="clear:left"/>
+</div>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/lists-cards.html">Tạo Danh sách
+và Thẻ</a>.</p>
+
+
+<h3>Đổ bóng Dạng xem</h3>
+
+<p>Bên cạnh các thuộc tính X và Y, dạng xem trong Android nay có
+thêm thuộc tính Z. Thuộc tính mới này biểu diễn độ cao của một dạng xem và sẽ quyết định:</p>
+
+<ul>
+<li>Kích cỡ của đổ bóng: dạng xem có giá trị Z cao hơn sẽ đặt đổ bóng lớn hơn.</li>
+<li>Thứ tự vẽ: dạng xem có giá trị Z cao hơn sẽ xuất hiện phía trên những dạng xem khác.</li>
+</ul>
+
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.webm"/>
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv"/>
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>Để phát lại phim, nhấp vào màn hình thiết bị</em>
+  </div>
+</div>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/shadows-clipping.html">Định nghĩa
+Đổ bóng và Dạng xem Cắt hình</a>.</p>
+
+
+<h3>Hoạt hình</h3>
+
+<p>API hoạt hình mới cho phép bạn tạo hoạt hình tùy chỉnh cho phản hồi chạm trong điều khiển UI,
+thay đổi trạng thái xem và chuyển tiếp hoạt động.</p>
+
+<p>Những API này cho phép bạn:</p>
+
+<ul>
+<li style="margin-bottom:15px">
+Phản hồi lại sự kiện chạm trong dạng xem của mình bằng hoạt hình <strong>phản hồi chạm</strong>.
+</li>
+<li style="margin-bottom:15px">
+Ẩn và hiện dạng xem bằng hoạt hình <strong>hiện hình tròn</strong>.
+</li>
+<li style="margin-bottom:15px">
+Chuyển giữa các hoạt động bằng hoạt hình <strong>chuyển tiếp hoạt động</strong> tùy chỉnh.
+</li>
+<li style="margin-bottom:15px">
+Tạo hoạt hình tự nhiên hơn bằng <strong>chuyển động cong</strong>.
+</li>
+<li style="margin-bottom:15px">
+Tạo hoạt hình cho các thay đổi trong một hoặc nhiều thuộc tính dạng xem bằng hoạt hình <strong>thay đổi trạng thái dạng xem</strong>.
+</li>
+<li style="margin-bottom:15px">
+Thể hiện hoạt hình trong các <strong>nội dung vẽ được theo danh sách trạng thái</strong> giữa những thay đổi về trạng thái dạng xem.
+</li>
+</ul>
+
+<p>Hoạt hình phản hồi chạm được tích hợp vào một vài dạng xem tiêu chuẩn, ví dụ như các nút. Các API mới này
+cho phép bạn tùy biến những hoạt hình này và thêm chúng vào dạng xem tùy chỉnh của mình.</p>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/animations.html">Định nghĩa Hoạt hình
+Tùy chỉnh</a>.</p>
+
+
+<h3>Nội dung vẽ được</h3>
+
+<p>Những khả năng mới này của nội dung vẽ được sẽ giúp bạn triển khai các ứng dụng theo phong cách material design:</p>
+
+<ul>
+<li><strong>Nội dung vẽ được véc-tơ</strong> có thể thay đổi kích cỡ mà không làm mất độ sắc nét và hoàn hảo
+cho các biểu tượng trong ứng dụng đơn sắc.</li>
+<li><strong>Nhuộm nội dung vẽ được</strong> cho phép bạn định nghĩa ảnh bitmap thành mặt nạ alpha và nhuộm
+màu cho chúng theo thời gian chạy.</li>
+<li><strong>Trích xuất màu</strong> cho phép bạn tự động trích xuất màu nổi bật từ
+hình ảnh bitmap.</li>
+</ul>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/drawables.html">Làm việc với
+Nội dung Vẽ được</a>.</p>

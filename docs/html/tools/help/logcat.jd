@@ -3,15 +3,25 @@ parent.title=Tools
 parent.link=index.html
 @jd:body
 
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>See also</h2>
+
+      <ol>
+          <li><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></li>
+      </ol>
+    </div>
+  </div>
+
   <p>The Android logging system provides a mechanism for collecting and viewing system debug
   output. Logs from various applications and portions of the system are collected in a series of
-  circular buffers, which then can be viewed and filtered by the <code>logcat</code> command. You can use 
+  circular buffers, which then can be viewed and filtered by the <code>logcat</code> command. You can use
   <code>logcat</code> from an ADB shell to view the log messages.</p>
 
   <p>For complete information about logcat options and filtering specifications, see
   <a href="{@docRoot}tools/debugging/debugging-log.html">Reading and Writing Logs</a>.</p>
 
-  <p>For more information on accessing <code>logcat</code> from DDMS, instead of the command line, see 
+  <p>For more information on accessing <code>logcat</code> from DDMS, instead of the command line, see
   <a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>. </p>
 
   <h3>Syntax</h3>
@@ -34,7 +44,7 @@ $ adb shell
 
   <h3>Options</h3>
   <p>The following table describes the command line options of <code>logcat</code>.</p>
-  
+
   <table>
     <tr>
       <th>Option</th>
@@ -46,7 +56,7 @@ $ adb shell
       <td><code>-b&nbsp;&lt;buffer&gt;</code></td>
 
       <td>Loads an alternate log buffer for viewing, such as <code>events</code> or
-      <code>radio</code>. The <code>main</code> buffer is used by default. See <a href= 
+      <code>radio</code>. The <code>main</code> buffer is used by default. See <a href=
       "{@docRoot}tools/debugging/debugging-log.html#alternativeBuffers">Viewing Alternative Log Buffers</a>.</td>
     </tr>
 

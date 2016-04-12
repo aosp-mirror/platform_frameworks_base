@@ -1,0 +1,70 @@
+page.title=Tương thích Ngược
+page.tags="support"
+page.metaDescription=Lưu ý về cách Android 4.x thích ứng với UI được thiết kế cho các phần cứng và phiên bản HĐH cũ hơn.
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>Tài liệu cho Nhà phát triển</h3>
+    <p>Hỗ trợ nhiều Thiết bị khác nhau</p>
+  </div>
+</a>
+
+<p>Những thay đổi đáng kể trong Android 3.0 gồm có:</p>
+<ul>
+<li>Bỏ phím cứng điều hướng (Quay lại, Menu, Tìm kiếm, Trang chủ̉), đổi thành xử lý điều hướng
+  thông qua các nút điều khiển ảo (Quay lại, Trang chủ, Gần đây).</li>
+<li>Mẫu hình thiết thực để sử dụng menu trong thanh hành động.</li>
+</ul>
+<p>Android 4.0 mang những thay đổi cho máy tính bảng sang nền tảng điện thoại.</p>
+
+<h2 id="older-hardware">Thích nghi Android 4.0 với Phần cứng và Ứng dụng cũ hơn</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Điện thoại có các điều khiển điều hướng ảo</h4>
+<p>Ứng dụng Android được viết cho Android 3.0 trở lên sẽ hiển thị các hành động trong thanh hành động. Những hành động không vừa
+với thanh hành động hoặc không đủ quan trọng để được hiển thị ở mức trên cùng sẽ xuất hiện trong
+vùng tràn hành động.</p>
+<p>Người dùng truy cập vùng tràn hành động bằng cách chạm vào nó trong thanh hành động.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Điện thoại có phím điều hướng vật lý</h4>
+<p>Điện thoại Android có phím cứng điều hướng truyền thống không hiển thị thanh điều hướng ảo ở
+phía dưới màn hình. Thay vào đó, có thể sử dụng vùng tràn hành động từ phím cứng menu. Kết quả là
+cửa sổ hành động bật lên có cùng kiểu như trong ví dụ trước, nhưng được hiển thị ở phía dưới màn hình.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Ứng dụng kế thừa trên điện thoại có điều khiển điều hướng ảo</h4>
+<p>Khi bạn chạy một ứng dụng được dựng cho Android 2.3 hoặc cũ hơn trên một điện thoại có điều khiển điều hướng
+ảo, điều khiển vùng tràn hành động sẽ xuất hiện phía bên phải của thanh điều hướng ảo. Bạn có thể
+chạm vào điều khiển này để hiển thị hành động của ứng dụng theo kiểu dáng menu Android truyền thống.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

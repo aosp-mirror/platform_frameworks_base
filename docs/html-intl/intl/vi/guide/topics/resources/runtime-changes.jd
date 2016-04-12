@@ -1,0 +1,281 @@
+page.title=Xử lý Thay đổi Thời gian chạy
+page.tags=hoạt động,vòng đời
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">Giữ lại một Đối tượng trong khi Thay đổi Cấu hình</a></li>
+    <li><a href="#HandlingTheChange">Tự mình Xử lý Thay đổi Cấu hình</a>
+  </ol>
+
+  <h2>Xem thêm</h2>
+  <ol>
+    <li><a href="providing-resources.html">Cung cấp Tài nguyên</a></li>
+    <li><a href="accessing-resources.html">Truy cập Tài nguyên</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Thay đổi
+        Hướng Màn hình Nhanh hơn</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Một số cấu hình thiết bị có thể thay đổi trong thời gian chạy
+(chẳng hạn như hướng màn hình, sự sẵn có của bàn phím, và ngôn ngữ). Khi sự thay đổi như vậy diễn ra,
+Android sẽ khởi động lại việc chạy
+{@link android.app.Activity} ({@link android.app.Activity#onDestroy()} sẽ được gọi, sau đó là {@link
+android.app.Activity#onCreate(Bundle) onCreate()}). Hành vi khởi động lại được thiết kế để giúp
+ứng dụng điều chỉnh phù hợp với cấu hình mới bằng cách tự động tải lại ứng dụng của bạn bằng
+các tài nguyên thay thế khớp với cấu hình thiết bị mới.</p>
+
+<p>Để xử lý khởi động lại cho đúng, điều quan trọng là hoạt động của bạn khôi phục lại trạng thái trước đó
+của nó thông qua vòng đời <a href="{@docRoot}guide/components/activities.html#Lifecycle">Hoạt động
+thông thường</a>, trong đó Android sẽ gọi
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} trước khi nó hủy
+hoạt động của bạn sao cho bạn có thể lưu dữ liệu về trạng thái của ứng dụng. Khi đó, bạn có thể khôi phục trạng thái
+trong khi {@link android.app.Activity#onCreate(Bundle) onCreate()} hoặc {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()}.</p>
+
+<p>Để kiểm tra xem ứng dụng của bạn có tự khởi động lại mà giữ nguyên trạng thái ứng dụng hay không,
+bạn cần gọi ra các thay đổi cấu hình (chẳng hạn như thay đổi hướng màn hình) trong khi thực hiện các
+tác vụ khác nhau trong ứng dụng của bạn. Ứng dụng của bạn sẽ có thể khởi động lại vào bất cứ lúc nào mà không bị mất
+dữ liệu của người dùng hay trạng thái để xử lý các sự kiện như thay đổi cấu hình hoặc khi người dùng nhận được
+một cuộc gọi đến rồi quay lại ứng dụng của bạn muộn hơn nhiều sau khi tiến trình
+ứng dụng của bạn có thể đã bị hủy. Để tìm hiểu về cách bạn có thể khôi phục trạng thái hoạt động của mình, hãy đọc về <a href="{@docRoot}guide/components/activities.html#Lifecycle">Vòng đời của hoạt động</a>.</p>
+
+<p>Tuy nhiên, bạn có thể gặp phải một tình huống trong đó việc khởi động lại ứng dụng của bạn và
+khôi phục phần lớn dữ liệu có thể tốn kém và tạo nên trải nghiệm người dùng kém. Trong
+tình huống như vậy, bạn có hai tùy chọn:</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">Giữ lại một đối tượng trong khi thay đổi cấu hình</a>
+  <p>Cho phép hoạt động của bạn khởi động lại khi cấu hình thay đổi, nhưng mang theo một
+đối tượng có trạng thái tới thực thể mới của hoạt động của bạn.</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">Tự mình xử lý thay đổi cấu hình</a>
+  <p>Ngăn không cho hệ thống khởi động lại hoạt động của bạn trong những thay đổi
+cấu hình nhất định, nhưng nhận một lệnh gọi lại khi cấu hình thay đổi, sao cho bạn có thể cập nhật thủ công
+hoạt động của mình nếu cần.</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">Giữ lại một Đối tượng trong khi Thay đổi Cấu hình</h2>
+
+<p>Nếu việc khởi động lại hoạt động của bạn yêu cầu bạn phải khôi phục nhiều tập hợp dữ liệu lớn, hãy thiết lập lại kết nối
+mạng, hoặc thực hiện các thao tác tăng cường khác, khi đó khởi động lại hoàn toàn do thay đổi cấu hình
+có thể gây ra trải nghiệm người dùng chậm chạp. Đồng thời, có thể bạn sẽ không thể hoàn toàn khôi phục được
+trạng thái hoạt động của mình với {@link android.os.Bundle} mà hệ thống lưu cho bạn bằng phương pháp gọi lại {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()}&mdash;nó không
+được thiết kế để mang các đối tượng lớn (chẳng hạn như bitmap) và dữ liệu trong nó phải được nối tiếp hóa rồi
+bỏ nối tiếp hóa, điều này có thể tiêu tốn nhiều bộ nhớ và khiến việc thay đổi cấu hình diễn ra chậm. Trong một
+tình huống như vậy, bạn có thể gỡ bỏ gánh nặng khởi tạo lại hoạt động của mình bằng cách giữ lại {@link
+android.app.Fragment} khi hoạt động của bạn được khởi động lại do thay đổi cấu hình. Phân đoạn này
+có thể chứa các tham chiếu tới đối tượng có trạng thái mà bạn muốn giữ lại.</p>
+
+<p>Khi hệ thống Android tắt hoạt động của bạn do một thay đổi cấu hình, các phân đoạn
+của hoạt động mà bạn đã đánh dấu để giữ lại sẽ không bị hủy. Bạn có thể thêm các phân đoạn này vào
+hoạt động của mình để giữ lại các đối tượng có trạng thái.</p>
+
+<p>Để giữ lại các đối tượng có trạng thái trong một phân đoạn trong khi thay đổi cấu hình thời gian chạy:</p>
+
+<ol>
+  <li>Mở rộng lớp {@link android.app.Fragment} và khai báo các tham chiếu tới đối tượng 
+      có trạng thái của bạn.</li>
+  <li>Gọi {@link android.app.Fragment#setRetainInstance(boolean)} khi phân đoạn được tạo.
+      </li>
+  <li>Thêm phân đoạn vào hoạt động của bạn.</li>
+  <li>Sử dụng {@link android.app.FragmentManager} để truy xuất phân đoạn khi hoạt động 
+      được khởi động lại.</li>
+</ol>
+
+<p>Ví dụ, định nghĩa phân đoạn của bạn như sau:</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>Chú ý:</strong> Trong khi bạn có thể lưu trữ bất kỳ đối tượng nào, bạn
+không nên chuyển một đối tượng được gắn với {@link android.app.Activity}, chẳng hạn như {@link
+android.graphics.drawable.Drawable}, {@link android.widget.Adapter}, {@link android.view.View}
+hay bất kỳ đối tượng nào khác đi kèm với một {@link android.content.Context}. Nếu bạn làm vậy, nó sẽ
+rò rỉ tất cả dạng xem và tài nguyên của thực thể hoạt động gốc. (Rò rỉ tài nguyên
+có nghĩa là ứng dụng của bạn duy trì việc lưu giữ tài nguyên và chúng không thể được thu dọn bộ nhớ rác, vì thế
+rất nhiều bộ nhớ có thể bị mất.)</p>
+
+<p>Khi đó, hãy sử dụng {@link android.app.FragmentManager} để thêm phân đoạn vào hoạt động. 
+Bạn có thể thu được đối tượng dữ liệu từ phân đoạn khi hoạt động bắt đầu lại trong khi 
+thay đổi cấu hình thời gian chạy. Ví dụ, định nghĩa hoạt động của bạn như sau:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>Trong ví dụ này, {@link android.app.Activity#onCreate(Bundle) onCreate()} thêm một phân đoạn
+hoặc khôi phục một tham chiếu đến nó. {@link android.app.Activity#onCreate(Bundle) onCreate()} cũng
+lưu trữ đối tượng có trạng thái bên trong thực thể phân đoạn đó.
+{@link android.app.Activity#onDestroy() onDestroy()} cập nhật đối tượng có trạng thái bên trong 
+thực thể phân đoạn được giữ lại.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">Tự mình Xử lý Thay đổi Cấu hình</h2>
+
+<p>Nếu ứng dụng của bạn không cần cập nhật các tài nguyên trong một thay đổi
+cấu hình cụ thể <em>và</em> bạn có giới hạn về hiệu năng yêu cầu bạn phải
+tránh khởi động lại hoạt động, khi đó bạn có thể khai báo rằng hoạt động của bạn tự mình xử lý thay đổi cấu hình
+, làm vậy sẽ tránh cho hệ thống khởi động lại hoạt động của bạn.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Việc tự mình xử lý thay đổi cấu hình có thể khiến việc
+sử dụng các tài nguyên thay thế khó khăn hơn nhiều, vì hệ thống không tự động áp dụng chúng
+cho bạn. Kỹ thuật này nên được coi là giải pháp cuối cùng khi bạn phải tránh khởi động lại do một
+thay đổi cấu hình và không được khuyến cáo đối với hầu hết ứng dụng.</p>
+
+<p>Để khai báo rằng hoạt động của bạn xử lý một thay đổi cấu hình, hãy chỉnh sửa phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> phù hợp trong
+tệp bản kê khai của bạn để bao gồm thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> với một giá trị có chức năng biểu diễn cấu hình mà bạn muốn
+xử lý. Các giá trị có thể được liệt kê trong tài liệu dành cho thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> (các giá trị thường được sử dụng nhất là {@code "orientation"} để
+ngăn khởi động lại khi hướng màn hình thay đổi và {@code "keyboardHidden"} để ngăn
+khởi động lại khi tính sẵn có của bàn phím thay đổi).  Bạn có thể khai báo nhiều giá trị cấu hình trong
+thuộc tính bằng cách tách chúng bằng một ký tự {@code |} đường dẫn nối.</p>
+
+<p>Ví dụ, đoạn mã bản kê khai sau khai báo một hoạt động có chức năng xử lý cả
+thay đổi về hướng màn hình và thay đổi về tính sẵn có của bàn phím:</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>Lúc này, khi một trong những cấu hình này thay đổi, {@code MyActivity} không khởi động lại.
+Thay vào đó, {@code MyActivity} nhận được một lệnh gọi tới {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Phương pháp này
+được chuyển bởi một đối tượng {@link android.content.res.Configuration} mà quy định
+cấu hình thiết bị mới. Bằng cách đọc các trường trong {@link android.content.res.Configuration},
+bạn có thể xác định cấu hình mới và thực hiện những thay đổi phù hợp bằng cách cập nhật
+tài nguyên được sử dụng trong giao diện của bạn. Tại
+thời điểm phương pháp này được gọi, đối tượng {@link android.content.res.Resources} của hoạt động của bạn được cập nhật
+để trả về các tài nguyên dựa trên cấu hình mới, sao cho bạn có thể dễ dàng
+đặt lại các phần tử trong UI của mình mà không để hệ thống khởi động lại hoạt động của bạn.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Bắt đầu với Android 3.2 (API mức 13), <strong>
+"kích cỡ màn hình" cũng thay đổi</strong> khi thiết bị chuyển giữa hướng dọc và khổ ngang
+. Vì thế, nếu bạn muốn ngăn cản việc khởi động lại vào thời gian chạy do thay đổi hướng khi phát triển
+cho API mức 13 hoặc cao hơn (như được khai báo bởi các thuộc tính <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> và <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+), bạn phải bao gồm giá trị {@code "screenSize"} bên cạnh giá trị {@code
+"orientation"}. Cụ thể, bạn phải khai báo {@code
+android:configChanges="orientation|screenSize"}. Tuy nhiên, nếu ứng dụng của bạn nhắm tới API mức
+12 hoặc thấp hơn, khi đó hoạt động của bạn luôn tự mình xử lý thay đổi cấu hình này (thay đổi
+cấu hình này không khởi động lại hoạt động của bạn, ngay cả khi đang chạy trên một thiết bị phiên bản Android 3.2 hoặc cao hơn).</p>
+
+<p>Ví dụ, việc triển khai {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} sau
+sẽ kiểm tra hướng thiết bị hiện tại:</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>Đối tượng {@link android.content.res.Configuration} biểu diễn tất cả cấu hình
+hiện tại, không chỉ những cấu hình đã thay đổi. Trong phần lớn thời gian, bạn sẽ không quan tâm chính xác xem
+cấu hình đã thay đổi như thế nào và có thể đơn giản gán lại tất cả tài nguyên của mình với chức năng cung cấp nội dung thay thế
+cho cấu hình mà bạn đang xử lý. Ví dụ, do đối tượng {@link
+android.content.res.Resources} nay đã được cập nhật, bạn có thể đặt lại
+bất kỳ{@link android.widget.ImageView} nào với {@link android.widget.ImageView#setImageResource(int)
+setImageResource()}
+và tài nguyên phù hợp cho cấu hình mới được sử dụng (như được mô tả trong phần <a href="providing-resources.html#AlternateResources">Cung cấp Tài nguyên</a>).</p>
+
+<p>Lưu ý rằng giá trị từ các trường {@link
+android.content.res.Configuration} là những số nguyên khớp với hằng số cụ thể
+từ lớp {@link android.content.res.Configuration}. Đối với tài liệu về những hằng số
+cần sử dụng với mỗi trường, hãy tham khảo trường phù hợp trong tham chiếu {@link
+android.content.res.Configuration}.</p>
+
+<p class="note"><strong>Hãy ghi nhớ:</strong> Khi bạn khai báo hoạt động của mình để xử lý một
+thay đổi cấu hình, bạn có trách nhiệm đặt lại bất kỳ phần tử nào mà bạn cung cấp nội dung thay thế cho. Nếu bạn
+khai báo hoạt động của mình để xử lý thay đổi hướng và có những hình ảnh nên thay đổi
+giữa khổ ngang và hướng dọc, bạn phải gán lại từng tài nguyên cho từng phần tử trong khi {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}.</p>
+
+<p>Nếu bạn không cần cập nhật ứng dụng của mình dựa trên những thay đổi
+cấu hình này, thay vào đó bạn có thể <em>không</em> triển khai {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Trong
+trường hợp đó, tất cả tài nguyên được sử dụng trước khi thay đổi cấu hình sẽ vẫn được sử dụng
+và bạn chỉ mới tránh được việc khởi động lại hoạt động của mình. Tuy nhiên, ứng dụng của bạn cần luôn có khả năng
+tắt và khởi động lại với trạng thái trước đó của nó được giữ nguyên, vì thế bạn không nên coi
+kỹ thuật này như một cách để thoát khỏi việc giữ lại trạng thái của mình trong vòng đời của hoạt động bình thường. Không chỉ bởi
+có những thay đổi cấu hình khác mà bạn không thể ngăn không cho khởi động lại ứng dụng của mình, mà
+cả bởi vì bạn nên xử lý những sự kiện như là khi người dùng rời khỏi ứng dụng của bạn và nó bị
+hủy trước khi người dùng quay lại.</p>
+
+<p>Để biết thêm về những thay đổi cấu hình nào mà bạn có thể xử lý trong hoạt động của mình, hãy xem tài liệu <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> và lớp {@link android.content.res.Configuration}
+.</p>

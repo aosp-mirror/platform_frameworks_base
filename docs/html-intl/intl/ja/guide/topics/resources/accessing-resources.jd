@@ -1,0 +1,337 @@
+page.title=リソースへのアクセス
+parent.title=アプリケーション リソース
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>クイックビュー</h2>
+  <ul>
+    <li>リソースは、{@code R.java} の整数を使うコード（{@code R.drawable.myimage} など）を使用して参照できます。
+</li>
+    <li>リソースは、特殊な XML 構文（{@code
+&#64;drawable/myimage} など）を使用して参照できます。</li>
+    <li>さらに、{@link android.content.res.Resources} のメソッドを使用すると、アプリ リソースにアクセスできます。
+</li>
+  </ul>
+
+  <h2>キークラス</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">コードからリソースにアクセスする</a></li>
+    <li><a href="#ResourcesFromXml">XML からリソースにアクセスする</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">スタイル属性を参照する</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">プラットフォーム リソースにアクセスする</a></li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="providing-resources.html">リソースの提供</a></li>
+    <li><a href="available-resources.html">Resource Types</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>アプリケーションでリソースを提供すると（詳細は「<a href="providing-resources.html">リソースの提供</a>」）、リソース ID を参照することで適用できるようになります。リソース ID はすべてプロジェクトの {@code R} クラスで定義します。これは {@code aapt} ツールが自動的に生成します。
+
+</p>
+
+<p>アプリケーションをコンパイルすると、{@code aapt} が {@code R} クラスを生成します。このクラスには、{@code
+res/} ディレクトリに含まれるの全リソースのリソース ID が入ります。
+リソースのそれぞれのタイプに対して、{@code R} サブクラス（例: ドローアブル リソースの場合はすべて {@code R.drawable}）があり、そのタイプのそれぞれのリソースには、静的整数（例: {@code R.drawable.icon}）があります。
+
+この整数がリソース ID であり、リソースを取得するのに使用できます。
+</p>
+
+<p>{@code R} クラスではリソース ID を指定されていますが、リソース ID を探す必要はありません。リソース ID は常に次のように構成されます。
+</p>
+<ul>
+  <li><em>リソースタイプ</em>: それぞれのリソースは、{@code
+string}、{@code drawable}、{@code layout} のようなタイプにグループ化されます。さまざまなタイプに関する詳細は、「<a href="available-resources.html">Resource Types</a>」をご覧ください。
+  </li>
+  <li><em>リソース名</em>。これは、拡張子を除外したファイル名か、XML {@code android:name} 属性（リソースが文字列などの単純な値の場合）のいずれかになります。
+
+</li>
+</ul>
+
+<p>リソースにアクセスするには次の 2 つの方法があります。</p>
+<ul>
+  <li><strong>コード内:</strong> {@code R} クラスのサブクラスから次のような静的整数を使用します。
+
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} はリソースタイプ、{@code hello} はリソース名です。多くの Android API が、リソース ID をこの形式で指定してリソースにアクセスします。
+<a href="#ResourcesFromCode">コードでリソースにアクセスする</a>をご覧ください。
+</p>
+  </li>
+  <li><strong>XML 内:</strong> {@code R} クラスで定義するリソース ID に対応する、次のような特殊な XML 構文を使用します。
+
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} はリソースタイプ、{@code hello} はリソース名です。この構文は、リソースで提供する値が想定される、XML リソース内の任意の場所に使用できます。
+<a href="#ResourcesFromXml">XML からリソースにアクセスする</a>をご覧ください。</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">コードでリソースにアクセスする </h2>
+
+<p>リソース ID をメソッド パラメータとして渡すことで、コード内でリソースを使用できます。たとえば、{@link android.widget.ImageView#setImageResource(int) setImageResource()} を使って、{@link android.widget.ImageView} が {@code res/drawable/myimage.png} を使用するように設定できます。
+
+</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>さらに、{@link
+android.content.res.Resources} のメソッドを使用して、個々のリソースを取得することもできます。{@link android.content.Context#getResources()} を使用すると、インスタンスを取得できます。
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>元のファイルへのアクセス</h2>
+
+<p>一般的な操作ではありませんが、元のファイルやディレクトリへのアクセスが必要になることがあります。その場合、{@code res/} からリソースを読み込むにはリソース ID が必要なため、{@code res/} にファイルを保存しても機能しません。その代わりに、{@code assets/} ディレクトリにリソースを保存します。
+
+
+</p>
+<p>{@code assets/} ディレクトリに保存したファイルにはリソース ID が付与されないため、<em></em>{@code R} クラスや XML リソースからはそれらのファイルを参照できません。
+その代わりに、通常のファイル システムのように {@code assets/} ディレクトリ内のファイルを照会し、{@link android.content.res.AssetManager} を使用して未処理のデータを読み込みます。
+
+</p>
+<p>ただし、単に（ビデオやオーディオなどの）未処理データの読み込みのみが必要となる場合は、ファイルを {@code res/raw/} ディレクトリに保存し、{@link
+android.content.res.Resources#openRawResource(int) openRawResource()} を使用してバイトのストリームを読み込みます。
+</p>
+
+</div>
+</div>
+
+
+<h3>構文</h3>
+
+<p>次の構文を使用して、コード内のリソースを参照します。</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em>{@code &lt;package_name&gt;}</em> は、リソースが配置されるパッケージの名前です（独自のパッケージからリソースを参照する場合は必要ありません）。
+</li>
+  <li><em>{@code &lt;resource_type&gt;}</em> は、リソースタイプの {@code R} サブクラスです。</li>
+  <li><em>{@code &lt;resource_name&gt;}</em> は、拡張子以外のリソース ファイル名か、XML 要素の {@code android:name} 属性値（単純な値の場合）のいずれかになります。
+
+</li>
+</ul>
+<p>リソースタイプの詳細やそれらの査証方法については、「<a href="available-resources.html">Resource Types</a>」をご覧ください。
+</p>
+
+
+<h3>使用例</h3>
+
+<p>多くのメソッドでリソース ID パラメータを使うことができ、{@link android.content.res.Resources} のメソッドを使用すればリソースを取得できます。
+{@link
+android.content.res.Resources} のインスタンスは、{@link android.content.Context#getResources
+Context.getResources()} により取得できます。</p>
+
+
+<p>次は、コードのリソースにアクセスする例です。</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>警告:</strong> {@code
+R.java} ファイルを手動で修正しないでください。&mdash;プロジェクトがコンパイルされると、{@code aapt} ツールによって生成されます。
+変更した場合は、次回のコンパイルの際に上書きされます。</p>
+
+
+
+<h2 id="ResourcesFromXml">XML からリソースにアクセスする</h2>
+
+<p>一部の XML 属性や要素の値は、既存のリソースへの参照を使用して定義できます。
+通常は、ウィジェットに文字列や画像を提供するレイアウト ファイルを作成する場合に、この方法を使用します。
+</p>
+
+<p>たとえば、レイアウトに {@link android.widget.Button} を追加する場合は、次のように、ボタンテキストの<a href="string-resource.html">文字列リソース</a>を使用します。
+</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>構文</h3>
+
+<p>次の構文を使用して、XML リソース内のリソースを参照します。</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} は、リソースが配置されるパッケージの名前です（同一のパッケージからリソースを参照する場合は必要ありません）
+</li>
+  <li>{@code &lt;resource_type&gt;} は、リソースタイプの {@code R} サブクラスです
+</li>
+  <li>{@code &lt;resource_name&gt;} は、拡張子以外のリソース ファイル名か、XML 要素の {@code android:name} 属性値（単純な値の場合）のいずれかになります。
+
+</li>
+</ul>
+
+<p>リソースタイプの詳細やそれらの査証方法については、「<a href="available-resources.html">Resource Types</a>」をご覧ください。
+</p>
+
+
+<h3>使用例</h3>
+
+<p>場合によっては、XML の値にリソースを使用する必要がありますが（ウィジェットにドローアブル画像を適用するような場合など）、単純な値を受け入れる XML の任意の場所にリソースを使用できます。
+たとえば、<a href="more-resources.html#Color">カラーリソース</a>と<a href="string-resource.html">文字列リソース</a>を持つ、次のようなリソースがあるとします。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>これらのリソースを次のようなレイアウト ファイルに使用して、テキストカラーとテキストの文字列を設定できます。
+</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>この場合、リソースは独自のパッケージ内のものであることから、リソースの参照でパッケージ名を指定する必要はありません。
+システム リソースを参照するには、パッケージ名を含める必要があります。
+次に例を示します。</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>注:</strong> アプリケーションを他の言語にローカライズできるように、常に文字列リソースを使用するようにします。
+代替リソース（ローカライズされた文字列など）の作成方法についての詳細は、<a href="providing-resources.html#AlternativeResources">代替リソースを提供する</a>をご覧ください。
+
+
+アプリケーションを他の言語にローカライズするための詳細なガイドは、「<a href="localization.html">Localization</a>」をご覧ください。
+</p>
+
+<p>XML でリソースを使用すれば、エイリアスを作成することもできます。たとえば、別のドローアブル リソースのエイリアスとなる、次のようなドローアブル リソースを作成できます。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>これは冗長のように思われますが、代替リソースを使用する場合に大変便利です。詳細は、<a href="providing-resources.html#AliasResources">エイリアス リソースを作成する</a>をご覧ください。
+</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">スタイル属性を参照する</h3>
+
+<p>スタイル属性リソースを使用すると、現在適用されているテーマの属性の値を参照できます。
+スタイル属性を参照すれば、ハードコードした値を指定しなくても、現在のテーマで与えられる標準的なバリエーションに合わせてスタイルを設定して、UI 要素の外観をカスタマイズできます。
+
+本質的に、スタイル属性を参照するというのは、「現在のテーマのこの属性で定義されるスタイルを使用する」という意味になります。
+</p>
+
+<p>属性スタイルを参照する場合、名前構文は通常のリソース形式とほぼ同じですが、アットマーク（{@code @}）の代わりに疑問符（{@code ?}）を使用します。リソースタイプの部分は省略可能です。
+
+例: </p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>たとえば、次の例では、属性を参照して、テキスト カラーをシステム テーマの「プライマリ」テキスト カラーに合わせて設定します。
+</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>ここでは、{@code android:textColor} 属性が、現在のテーマのスタイル属性の名前を指定しています。
+Android は、{@code android:textColorSecondary} スタイル属性に適用された値を、このウィジェットの {@code android:textColor} の値として使用できるようになりました。
+このコンテキストで属性リソースが必要なことはシステム リソース ツールで認識されているため、タイプ（ここでは <code>?android:attr/textColorSecondary</code>）を明示的に指定する必要はありません &mdash; {@code attr} タイプを除外できます。
+
+
+</p>
+
+
+
+
+<h2 id="PlatformResources">プラットフォーム リソースにアクセスする</h2>
+
+<p>Android には、スタイル、テーマ、レイアウトといった多数の標準的なリソースが用意されています。これらのリソースにアクセスするには、<code>android</code> パッケージ名でリソース参照を修飾します。
+
+たとえば、Android には、{@link android.widget.ListAdapter} のリストアイテムに使用できるレイアウト リソースが用意されています。
+</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>この例では、{@link android.R.layout#simple_list_item_1} は、プラットフォームによって {@link android.widget.ListView} のアイテム向けに定義されるレイアウト リソースです。
+リストアイテムに独自のレイアウトを作成する代わりに、このレイアウトを使用できます。
+詳細については、「<a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>」のデベロッパー ガイドをご覧ください。
+</p>
+

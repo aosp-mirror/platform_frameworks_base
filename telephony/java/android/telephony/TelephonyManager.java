@@ -2844,27 +2844,40 @@ public class TelephonyManager {
 
     /**
      * Returns all observed cell information from all radios on the
-     * device including the primary and neighboring cells. This does
-     * not cause or change the rate of PhoneStateListener#onCellInfoChanged.
-     *<p>
-     * The list can include one or more of {@link android.telephony.CellInfoGsm CellInfoGsm},
-     * {@link android.telephony.CellInfoCdma CellInfoCdma},
-     * {@link android.telephony.CellInfoLte CellInfoLte} and
-     * {@link android.telephony.CellInfoWcdma CellInfoWcdma} in any combination.
-     * Specifically on devices with multiple radios it is typical to see instances of
-     * one or more of any these in the list. In addition 0, 1 or more CellInfo
-     * objects may return isRegistered() true.
-     *<p>
-     * This is preferred over using getCellLocation although for older
-     * devices this may return null in which case getCellLocation should
-     * be called.
-     *<p>
-     * This API will return valid data for registered cells on devices with
-     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}
-     *<p>
-     * @return List of CellInfo or null if info unavailable.
+     * device including the primary and neighboring cells. Calling this method does
+     * not trigger a call to {@link android.telephony.PhoneStateListener#onCellInfoChanged
+     * onCellInfoChanged()}, or change the rate at which
+     * {@link android.telephony.PhoneStateListener#onCellInfoChanged
+     * onCellInfoChanged()} is called.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     *<p>
+     * The list can include one or more {@link android.telephony.CellInfoGsm CellInfoGsm},
+     * {@link android.telephony.CellInfoCdma CellInfoCdma},
+     * {@link android.telephony.CellInfoLte CellInfoLte}, and
+     * {@link android.telephony.CellInfoWcdma CellInfoWcdma} objects, in any combination.
+     * On devices with multiple radios it is typical to see instances of
+     * one or more of any these in the list. In addition, zero, one, or more
+     * of the returned objects may be considered registered; that is, their
+     * {@link android.telephony.CellInfo#isRegistered CellInfo.isRegistered()}
+     * methods may return true.
+     *
+     * <p>This method returns valid data for registered cells on devices with
+     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}.
+     *
+     *<p>
+     * This method is preferred over using {@link
+     * android.telephony.TelephonyManager#getCellLocation getCellLocation()}.
+     * However, for older devices, <code>getAllCellInfo()</code> may return
+     * null. In these cases, you should call {@link
+     * android.telephony.TelephonyManager#getCellLocation getCellLocation()}
+     * instead.
+     *
+     * <p>Requires permission:
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     *
+     * @return List of {@link android.telephony.CellInfo}; null if cell
+     * information is unavailable.
+     *
      */
     public List<CellInfo> getAllCellInfo() {
         try {

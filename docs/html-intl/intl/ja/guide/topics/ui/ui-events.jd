@@ -1,0 +1,291 @@
+page.title=入力イベント
+parent.title=ユーザー インターフェース
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#EventListeners">イベントリスナ</a></li>
+    <li><a href="#EventHandlers">イベント ハンドラ</a></li>
+    <li><a href="#TouchMode">タッチモード</a></li>
+    <li><a href="#HandlingFocus">フォーカスの処理</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Android では、アプリケーションでのユーザーの操作からイベントをインターセプトする方法が複数用意されていますが、ユーザー インターフェース内のイベントをインターセプトする場合は、ユーザーが操作する個々の View オブジェクトからイベントを取得することになります。
+
+View クラスは、このための手段を提供しています。</p>
+
+<p>レイアウトを構成するために使用する各種の View クラスには、UI イベントの処理に役に立ついくつかのパブリック コールバック メソッドが含まれています。
+これらのパブリック コールバック メソッドは、オブジェクトで対応するアクションが発生したときに Android フレームワークによって呼び出されます。
+たとえば、ビュー（ボタンなど）がタップされたときには、そのオブジェクト上で <code>onTouchEvent()</code> メソッドが呼び出されます。
+このようなイベントをインターセプトするには、クラスを継承しメソッドをオーバーライドする必要があります。
+ただし、このようなイベントを処理するたびに View オブジェクトを継承することは、実用的とは言えません。
+そのため、View クラスには、簡単に定義できるコールバックを持つネストされたインターフェースのコレクションも含まれています。
+これらのインターフェースは、<a href="#EventListeners">イベントリスナ</a>と呼ばれ、UI へのユーザーの操作を取得するために使用されます。
+</p>
+
+<p>通常は、イベントリスナを使用して、ユーザーの操作をリッスンすることになりますが、カスタム コンポーネントを作成するために View クラスを継承する場合や、
+処理を工夫するために {@link android.widget.Button} クラスを継承することもできます。
+
+その場合は、クラスの<a href="#EventHandlers">イベント ハンドラ</a>を使用して、クラスにデフォルトのイベント動作を定義できます。
+</p>
+
+
+<h2 id="EventListeners">イベントリスナ</h2>
+
+<p>イベントリスナは、コールバック メソッド 1 つを含む {@link android.view.View} クラスのインターフェースです。
+以下のメソッドは、イベントリスナが登録されているビューが UI アイテムへのユーザーの操作によってトリガーされたときに、Android フレームワークによって呼び出されます。
+</p>
+
+<p>イベントリスナ インターフェースに含まれているのは、以下のコールバック メソッドです。</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>{@link android.view.View.OnClickListener} のメソッド。ユーザーがアイテムをタップしたとき（タッチモードの場合）、またはナビゲーション キーまたはトラックボールでアイテムにフォーカスを合わせ、適切な「エンター」キーまたはトラックボールを押したときに、呼び出されます。
+
+
+</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>{@link android.view.View.OnLongClickListener} のメソッド。ユーザーがアイテムをタップしてホールドしたとき（タッチモードの場合）、またはナビゲーション キーまたはトラックボールでアイテムにフォーカスを合わせ、適切な「エンター」キーまたはトラックボールを長押し（1 秒間）したときに、呼び出されます。
+
+
+</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>{@link android.view.View.OnFocusChangeListener} のメソッド。ナビゲーション キーやトラックボールを使用してユーザーがアイテムに移動してきたときまたはアイテムから離れるときに、呼び出されます。
+</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>{@link android.view.View.OnKeyListener} のメソッド。ユーザーがアイテムにフォーカスを合わせて端末のハードウェア キーを押したとき、または離したときに、呼び出されます。
+</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>{@link android.view.View.OnTouchListener} のメソッド。画面（アイテムの境界線内）での押す、離す、移動操作などのタップイベントと認定されるアクションをユーザーが実行した場合に呼び出されます。
+
+</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>{@link android.view.View.OnCreateContextMenuListener} のメソッド。コンテキスト メニュー（「長押しクリック」し続けると作成されます）の作成中に呼び出されます。
+コンテキスト メニューについての詳細は、「<a href="{@docRoot}guide/topics/ui/menus.html#context-menu">メニュー</a>」のデベロッパー ガイドをご覧ください。
+
+</dd>
+</dl>
+
+<p>これらのメソッドは、それぞれのインターフェースにおける唯一のメソッドです。これらのいずれかのメソッドを定義しイベントを処理するには、ネストされたインターフェースをアクティビティに実装するか、ネストされたインターフェースを匿名クラスとして定義します。次に、その実装のインスタンスを対応する <code>View.set...Listener()</code> メソッドに渡します。
+
+
+（例: <code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code> を呼び出し、{@link android.view.View.OnClickListener OnClickListener} の実装を渡します）。
+
+</p>
+
+<p>次の例は、ボタンへの on-click リスナの登録方法を示しています。 </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>OnClickListener をアクティビティの一部として実装すると、余分なクラスのロードとオブジェクトの割り当てを避けることができます。
+次に例を示します。</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>上の例の <code>onClick()</code> コールバックには戻り値がありませんが、イベントリスナ メソッドの中には、ブール値を返すことが必要なものもあることに注意してください。
+ブール値が示す事柄はイベントによって異なります。
+以下はその例です。</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> - イベントを消費済みでこれ以上イベントを引き継ぐべきでないかどうかを示すブール値を返します。
+つまり、イベントが処理済みでイベントの停止が必要なことを示す場合は、<em>true</em> を返します。イベントが未処理の場合や、他の on-click リスナへのイベントの引き継ぎが必要な場合は、<em>false</em> を返します。
+
+
+</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> - イベントを消費済みでこれ以上イベントを引き継ぐべきでないかどうかを示すブール値を返します。
+
+    つまり、イベントが処理済みでイベントの停止が必要なことを示す場合は、<em>true</em> を返します。イベントが未処理の場合や、他の on-key リスナへのイベントの引き継ぎが必要な場合は、<em>false</em> を返します。
+
+</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> - リスナがイベントを消費しているかどうかを示すブール値を返します。
+ここで注意する必要があるのは、このイベントが相互にフォローし合う複数のアクションを含むことがあることです。
+ダウン アクション イベントが受け取られたときに <em>false</em> を返すと、そのイベントを消費しておらず、そのイベントから続けて発生するアクションに関心がないことを示すことになります。
+
+そのため、指での操作などのそのイベント内のその他のアクションや操作の最後に発生する アップ アクション イベントで、呼び出されることはなくなります。
+</li>
+</ul>
+
+<p>ハードウェア キー イベントは常に、その時点でフォーカスがあるビューに届けられることに注意してください。ハードウェア・キー・イベントは、ビュー階層の一番上から下に適切な対象に到達するまでディスパッチされます。
+ビュー（またはビューの子）にフォーカスがある場合、イベントが <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断できます。
+ビューを通じてキーイベントを取得する別の方法としては、<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code> と <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code> を使用してアクティビティ内のすべてのイベントを受け取る方法もあります。
+
+</p>
+
+<p>また、アプリケーションのテキスト入力について検討する際は、多くの端末にソフトウェア入力メソッドしかないことに注意してください。
+ソフトウェア入力メソッドでは、キーの利用は必要ありません。音声入力や手書き入力などを利用できるものもあります。入力メソッドがキーボードに似たインターフェースを提供していたとしても、そのインターフェースは通常、<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code> ファミリーのイベントをトリガー<strong>しません</strong>。
+
+アプリケーションの使用をハードウェア キーボード付きの端末に限定するのではない限り、制御するために特定のキーを押すことが必要な UI は作成しないでください。
+
+特に、ユーザーのリターンキー押下時に入力を検証するような処理は行わないようにし、代わりに {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} などのアクションを使用して入力メソッドにアプリケーションが求める反応を伝えてください。そうすることで、入力メソッドが UI を意味のあるものにします。
+
+ソフトウェア入力メソッドの動作を推測し、その推測に基づいて、書式設定済みのテキストをアプリケーションに提供することは避けてください。
+</p>
+
+<p class="note"><strong>注:</strong> Android では、まずイベント ハンドラが呼び出され、次にクラス定義から適切なデフォルト ハンドラが呼び出されます。
+そのため、これらのイベントリスナから <em>true</em> が返された場合、イベントの他のイベントリスナへの伝播は止まり、ビューのデフォルトのイベント ハンドラへのコールバックもブロックされます。
+
+そのため、イベントを終了させたいことが確実な場合のみ、<em>true</em> を返すようにしてください。</p>
+
+
+<h2 id="EventHandlers">イベント ハンドラ</h2>
+
+<p>ビューからカスタム コンポーネントを作成する場合、デフォルトのイベント ハンドラとして使用される複数のコールバック メソッドを定義できます。イベント ハンドリングに使用される次のような一般的なコールバックの一部については、詳細を<a href="{@docRoot}guide/topics/ui/custom-components.html">カスタム コンポーネント</a>についてのドキュメントでご覧いただけます。
+
+
+
+</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - 新しいキーイベントの発生時に呼び出されます。</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - キー アップ イベントの発生時に呼び出されます。</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - トラックボール モーション イベントの発生時に呼び出されます。</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - タッチスクリーン モーション イベント発生時に呼び出されます。</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - ビューがフォーカスを取得した場合または失った場合に呼び出されます。</li>
+</ul>
+<p>View クラスに含まれていないメソッドの中にも、イベントの処理の方法に直接関係するメソッドがいくつかあります。
+そのため、レイアウト内の複雑なイベントを管理する場合は、以下のメソッドの使用を検討してください。
+</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - {@link android.app.Activity} が、すべてのタップイベントをウィンドウにディスパッチされる前にインターセプトできるようにします。
+</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - {@link android.view.ViewGroup} が、イベントが子ビューにディスパッチされたときにイベントを監視できるようにします。
+</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - このメソッドを親ビュー上で呼び出すことで、<code>{@link 
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code> による親ビューのタップイベントのインターセプトを許可しないことを示すことができます。
+</li>
+</ul>
+
+<h2 id="TouchMode">タッチモード</h2>
+<p>
+ユーザーが方向キーまたはトラックボールを使用してユーザー インターフェースを操作する場合、入力を受け付けるアイテムがどのアイテムなのかユーザーが知ることができるようにアクション可能なアイテム（ボタンなど）にフォーカスを与えることが必要になります。
+
+ただし、端末にタッチ機能がある場合は、ユーザーはタップでインターフェースの操作を開始するため、アイテムをハイライトすることや、特定のビューにフォーカスを与えることは必要ではなくなりました。
+
+そのため、「タッチモード」と名付けられた操作モードが存在します。
+ 
+</p>
+<p>
+タッチ可能な端末では、ユーザーが画面をタップすると、端末がタッチモードになります。
+端末がタッチモードの場合、テキスト編集ウィジェットなどの {@link android.view.View#isFocusableInTouchMode} が true のビューのみがフォーカス可能であり、ボタンなどのタップ可能なその他のビューは、タップされたときにフォーカスされることはありません。それらのビューは、押されたときに、on-click リスナを起動します。
+
+
+
+</p>
+<p>
+ユーザーが方向キーを押すか、またはトラックボールをスクロールすると、端末はタッチモードから抜け、ビューがフォーカスを取得します。
+これにより、ユーザーは、画面をタップすることなく、ユーザー インターフェースの操作を再開できます。
+
+</p>
+<p>
+タッチモード状態は、システム全体（すべてのウィンドウとアクティビティ）で維持されます。端末が現在タッチモードかどうか確認するには、{@link android.view.View#isInTouchMode} を呼び出します。
+
+
+</p>
+
+
+<h2 id="HandlingFocus">フォーカスの処理</h2>
+
+<p>フレームワークは、ユーザーに入力に応じて、通常のフォーカス移動を処理します。フレームワークが処理するフォーカス移動には、ビューが削除されたり非表示になったり、新しいビューが利用可能になったりしたことによるフォーカスの変化も含まれます。
+
+ビューは、<code>{@link android.view.View#isFocusable()}</code> メソッドで、フォーカスが取得可能なことを示します。
+ビューのフォーカスの取得可否を変更するには、<code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code> を呼び出します。
+タッチモードでは、<code>{@link android.view.View#isFocusableInTouchMode()}</code> でビューがフォーカスを取得可能かどうか確認できます。ビューのフォーカスの取得可否は、<code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code> で変更できます。
+
+
+</p>
+
+<p>フォーカスの移動は、所定の方向で最も近くにあるアイテムを見つけるアルゴリズムに基づきますが、
+まれに、デフォルトのアルゴリズムが開発者の意図する動作と一致しない場合もあります。
+この場合、レイアウト ファイルの 
+
+<var>nextFocusDown</var>、 <var>nextFocusLeft</var>、 <var>nextFocusRight</var>、
+<var>nextFocusUp</var> の各 XML 属性を明示的にオーバーライドできます。これらの属性のいずれかを、フォーカスの移動<em>元</em>のビューに追加します。
+フォーカスの移動<em>先</em>のビューの ID になる属性の値を定義します。
+次に例を示します。</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>本来、上記の縦方向のレイアウトでは、1 番上のボタンから上に移動しようとしても、2 番目のボタンから下に移動しようしても、どこにもフォーカスが移動しないはずでしたが、上記の処理により、
+1 番上のボタンによって 1 番下のボタンが 
+ <var>nextFocusUp</var>  として定義され（逆の場合も同様）、フォーカスが、上から下と下から上に順番に移動するようになります。
+</p>
+
+<p>UI でビューをフォーカス可能にする場合は（従来は、ビューはフォーカス可能ではありません）、レイアウトの宣言で <code>android:focusable</code> XML 属性をビューに追加し、値を 
+
+ <var>true</var> に設定します。また、<code>android:focusableInTouchMode</code> を使用して、タッチモードのときにビューをフォーカス可能にすることもできます。
+</p>
+<p>特定のビューへのフォーカスをリクエストするには、<code>{@link android.view.View#requestFocus()}</code> を呼び出します。</p>
+<p>フォーカス イベントをリッスンするには（ビューがフォーカスを受け取ったときまたは失ったときに通知を受け取るには）、上記の<a href="#EventListeners">イベントリスナ</a>のセクションの説明に従って <code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code> を使用します。
+
+</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

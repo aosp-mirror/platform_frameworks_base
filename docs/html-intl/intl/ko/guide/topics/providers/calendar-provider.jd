@@ -1,0 +1,1184 @@
+page.title=캘린더 제공자
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>이 문서의 내용</h2>
+    <ol>
+  <li><a href="#overview">기본 정보</a></li>
+  <li><a href="#manifest">사용자 권한</a></li>
+  <li><a href="#calendar">캘린더 테이블</a>
+<ol>
+      <li><a href="#query">캘린더 쿼리</a></li>
+      <li><a href="#modify-calendar">캘린더 수정</a></li>
+      <li><a href="#insert-calendar">캘린더 삽입</a></li>
+    </ol>
+  </li>
+  <li><a href="#events">이벤트 테이블</a>
+<ol>
+      <li><a href="#add-event">이벤트 추가</a></li>
+      <li><a href="#update-event">이벤트 업데이트</a></li>
+      <li><a href="#delete-event">이벤트 삭제</a></li>
+    </ol>
+  </li>
+  <li><a href="#attendees">참석자 테이블</a>
+<ol>
+      <li><a href="#add-attendees">참석자 추가</a></li>
+    </ol>
+  </li>
+  <li><a href="#reminders">알림 테이블</a>
+<ol>
+      <li><a href="#add-reminders">알림 추가</a></li>
+    </ol>
+  </li>
+  <li><a href="#instances">인스턴스 테이블</a>
+  <ol>
+      <li><a href="#query-instances">인스턴스 테이블 쿼리</a></li>
+  </ol></li>
+  <li><a href="#intents">캘린더 인텐트</a>
+  <ol>
+      <li><a href="#intent-insert">인텐트를 사용하여 이벤트 삽입</a></li>
+      <li><a href="#intent-edit">인텐트를 사용하여 이벤트 편집</a></li>
+      <li><a href="#intent-view">인텐트를 사용하여 캘린더 데이터 보기</a></li>
+    </ol>
+  </li>
+  
+  <li><a href="#sync-adapter">동기화 어댑터</a></li>
+</ol>
+
+    <h2>Key 클래스</h2>
+    <ol>
+      <li>{@link android.provider.CalendarContract.Calendars}</li>
+      <li>{@link android.provider.CalendarContract.Events}</li>
+      <li>{@link android.provider.CalendarContract.Attendees}</li>
+      <li>{@link android.provider.CalendarContract.Reminders}</li>
+    </ol>
+</div>
+</div>
+
+<p>캘린더 제공자는 사용자의 캘린더 이벤트를 저장하는 리포지토리입니다. 
+캘린더 제공자 API를 사용하면 캘린더, 이벤트, 참석자, 알림 등의 쿼리, 삽입, 업데이트 및 
+삭제 등의 작업을 수행할 수 있습니다.</p>
+
+
+<p>캘린더 제공자 API는 애플리케이션과 동기화 어댑터에서 사용할 수 있습니다. 
+어떤 유형의 프로그램이 호출을 하는 주체인지에 따라 규칙이 각기 다릅니다. 
+이 문서는 주로 캘린더 제공자 API를 애플리케이션으로 사용하는 것에 주안점을 두었습니다. 
+여러 동기화 어댑터가 서로 어떻게 다른지 논의한 내용은 
+<a href="#sync-adapter">동기화 어댑터</a>를 참조하십시오.</p>
+
+
+<p>캘린더 데이터를 읽거나 쓰려면 보통 애플리케이션의 매니페스트에 
+적절한 권한이 포함되어 있어야 합니다. 이는 <a href="#manifest">사용자 
+권한</a>에 설명되어 있습니다. 공통 작업을 쉽게 수행하기 위해 캘린더
+제공자는 <a href="#intents">캘린더
+인텐트</a>에 설명된 바와 같이 인텐트 집합을 제공합니다. 이와 같은 인텐트는 사용자를 캘린더 애플리케이션으로 이동시켜 
+이벤트 삽입, 보기 및 편집을 할 수 있게 해줍니다. 사용자는 캘린더 애플리케이션과 상호 작용한 다음 
+원래 애플리케이션으로 돌아옵니다. 따라서, 여러분의 애플리케이션이 이벤트를 보거나 
+생성하기 위해 권한 허가를 요청할 필요도 없고 사용자 인터페이스를 제공할 필요도 없는 것입니다.</p>
+
+<h2 id="overview">기본 정보</h2>
+
+<p><a href="{@docRoot}guide/topics/providers/content-providers.html">콘텐츠 제공자</a>는 데이터를 저장하여 애플리케이션에서 
+이에 액세스할 수 있도록 합니다. 일반적으로, Android 플랫폼에서 제공하는 콘텐츠 제공자(캘린더 제공자 포함)는
+관계 데이터베이스 모델에 기초하여 테이블 집합으로 데이터를 노출합니다. 이 모델에서 각 행은 레코드이고,
+각 열은 특정한 유형과 의미를 가진 데이터입니다. 애플리케이션과 동기화 어댑터는 
+캘린더 제공자 API를 통해 사용자의 캘린더 데이터를 보관하고 있는 데이터베이스 테이블에 
+읽기/쓰기 액세스 권한을 얻을 수 있습니다.</p>
+
+<p>모든 콘텐츠 제공자는 데이터 세트를 고유하게 식별하는 공개 URI(
+{@link android.net.Uri} 
+개체로 래핑됨)를 노출합니다.  여러 데이터 세트(여러 테이블)를 제어하는 콘텐츠 제공자는
+각 데이터 세트에 별도의 URI를 노출합니다.  
+제공자에 대한 URI는 모두 문자열 "content://"로 시작합니다.  
+이것을 보면 데이터를 콘텐츠 제공자가 제어하고 있다는 것을 알아볼 수 있습니다. 
+캘린더 제공자가 각각의 클래스(테이블)에 대한 URI의 상수를 정의합니다. 
+이와 같은 URI는 <code><em>&lt;class&gt;</em>.CONTENT_URI</code> 형식을 취합니다. 
+예를 들면 다음과 같습니다. {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}</p>
+
+<p>그림 1은 캘린더 제공자 데이터 모델을 그림으로 나타낸 것입니다. 
+이 그림에는 메인 테이블과이들을 서로 연결하는 필드가 표시되어 있습니다.</p>
+
+<img src="{@docRoot}images/providers/datamodel.png" alt="Calendar Provider Data Model" />
+<p class="img-caption"><strong>그림 1.</strong> 캘린더 제공자 데이터 모델.</p>
+
+<p>한 사용자가 여러 개의 캘린더를 가질 수 있으며, 여러 가지 캘린더는 각기 다른 유형의 계정(Google 캘린더, Exchange 등)과 연결될 수 있습니다.</p>
+
+<p>{@link android.provider.CalendarContract}가 캘린더의 데이터 모델과 이벤트 관련 정보를 정의합니다. 이 데이터는 아래에 나열한 것과 같은 여러 테이블에 저장됩니다.</p>
+
+<table>
+  <tr>
+    <th>테이블(클래스)</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
+    
+    <td>이 테이블에는 캘린더별 정보가 담겨 있습니다.
+ 이 테이블의 행마다 한 캘린더의 세부 정보, 
+예를 들어 이름, 색상, 동기화 정보 등이 들어갑니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Events}</td>
+    
+    <td>이 테이블에는 이벤트별 정보가 담겨 있습니다.
+ 이 테이블의 행마다 한 이벤트의 세부 정보
+예를 들어 이벤트 제목, 위치, 시작 시간, 종료 시간 등의 정보가 들어갑니다.
+ 이벤트는 일회성일 수도 있고 여러 번 반복될 수도 있습니다. 
+참석자, 알림 및 확장된 속성 등은 별도의 테이블에 저장됩니다. 
+이들 테이블에는 각기 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}가 있어 
+이벤트 테이블의 {@link android.provider.BaseColumns#_ID}를 참조합니다.</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances}</td>
+    
+    <td>이 테이블에는 각 이벤트 발생의 시작 시간과 종료 시간이 
+담겨 있습니다. 이 테이블의 각 행이 하나의 이벤트 발생을 나타냅니다.
+ 일회성 이벤트의 경우, 이벤트에 대한 1:1 인스턴스 매핑이 있습니다.
+ 반복되는 이벤트의 경우, 해당 이벤트가 여러 번 발생하는 것에 맞추어 
+자동으로 여러 행이 생성됩니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Attendees}</td>
+    
+    <td>이 테이블에는 이벤트 참석자(게스트) 정보가 담겨 있습니다.
+ 각 행이 주어진 이벤트의 게스트 한 사람을 나타냅니다.
+ 이것이 게스트의 유형과, 이벤트에 대한 해당 게스트의 참석 여부 응답을 
+나타냅니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Reminders}</td>
+    
+    <td>이 테이블에는 경고/알림 데이터가 담겨 있습니다.
+ 각 행이 주어진 이벤트에 대한 경고 하나를 나타냅니다. 
+이벤트 하나에 여러 개의 알림이 있을 수 있습니다. 이벤트당 최대 알림 개수는
+
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS}에서 지정되고, 
+이는 주어진 캘린더를 소유한 동기화 어댑터가 설정합니다.
+ 알림은 이벤트 몇 분 전에 지정되며 사용자에게 어떻게 경고할 것인지를 
+결정하는 메서드를 가지고 있습니다.</td>
+  </tr>
+  
+</table>
+
+<p>캘린더 제공자 API는 유연성과 강력함을 염두에 두고 만들어진 것입니다. 
+그와 동시에 우수한 최종 사용자 경험을 제공하고 캘린더와 그 데이터의 
+무결성을 보호하는 것 또한 중요합니다. 이를 위해서
+API를 사용할 때 유념해야 할 사항은 다음과 같습니다.</p>
+
+<ul>
+
+<li><strong>캘린더 이벤트 삽입, 업데이트 및 보기.</strong> 캘린더 제공자로부터 직접 이벤트를 삽입, 변경하고 읽으려면 적절한 <a href="#manifest">권한</a>이 필요합니다. 그러나, 완전한 캘린더 애플리케이션 또는 동기화 어댑터를 구축하는 경우가 아니라면 이와 같은 권한을 요청할 필요가 없습니다. 대신 Android의 캘린더 애플리케이션이 지원하는 인텐트를 사용하여 해당 애플리케이션에 읽기 및 쓰기 작업을 분배하면 됩니다. 인텐트를 사용하면, 애플리케이션이 사용자를 캘린더 애플리케이션으로 보내 사전에 작성된 양식으로 원하는 작업을 
+수행하게 합니다. 작업이 끝나면 사용자는 애플리케이션으로 돌아옵니다. 
+캘린더를 통해 공통 작업을 수행하도록 애플리케이션을 설계함으로써 사용자에게 일관되고 강력한 
+사용자 인터페이스를 제공하는 것입니다. 이것이 권장 방법입니다.
+ 자세한 정보는 <a href="#intents">캘린더
+인텐트</a>를 참조하십시오.</p>
+
+
+<li><strong>동기화 어댑터.</strong> 
+동기화 어댑터는 사용자의 기기에 있는 캘린더 데이터를 다른 서버 또는 데이터 소스와 동기화합니다. 
+{@link android.provider.CalendarContract.Calendars}와
+{@link android.provider.CalendarContract.Events} 테이블에는
+동기화 어댑터가 사용하도록 예약된 열이 있습니다.
+제공자와 애플리케이션은 이를 수정해서는 안 됩니다. 사실, 동기화 어댑터로 액세스하지 않는 한 
+이 열이 표시되지 않습니다. 
+동기화 어댑터에 대한 자세한 정보는 <a href="#sync-adapter">동기화 어댑터</a>를 참조하십시오.</li>
+
+</ul>
+
+
+<h2 id="manifest">사용자 권한</h2>
+
+<p>캘린더 데이터를 읽으려면 애플리케이션의 매니페스트 파일에 {@link
+android.Manifest.permission#READ_CALENDAR} 권한이 포함되어 있어야 합니다. 
+캘린더 데이터를 삭제, 삽입 또는 업데이트하려면{@link android.Manifest.permission#WRITE_CALENDAR} 
+권한이 포함되어 있어야 합니다.</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;...&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.READ_CALENDAR&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_CALENDAR&quot; /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="calendar">캘린더 테이블</h2>
+
+<p>{@link android.provider.CalendarContract.Calendars} 
+테이블에는 각각의 캘린더에 대한 세부 정보가 들어 있습니다. 
+다음 캘린더 열은 애플리케이션과 <a href="#sync-adapter">동기화 어댑터</a> 모두 쓸 수 있는 것입니다. 
+지원되는 필드의 전체 목록은 
+{@link android.provider.CalendarContract.Calendars} 참조를 확인하십시오.</p>
+<table>
+  <tr>
+    <th>상수</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#NAME}</td>
+    <td>캘린더 이름입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#CALENDAR_DISPLAY_NAME}</td>
+    <td>사용자에게 표시되는 이 캘린더의 이름입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
+    
+    <td>캘린더를 표시하기로 선택했는지를 나타내는 부울입니다. 
+값이 0이면 이 캘린더와 연관된 이벤트는 표시하면 안 된다는 뜻입니다.
+  값이 1이면 이 캘린더와 연관된 이벤트를 표시해야 한다는 뜻입니다.
+ 이 값이 {@link
+android.provider.CalendarContract.Instances} 테이블의 행 생성에 영향을 미칩니다.</td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
+    
+    <td>캘린더를 동기화하고 이 캘린더의 이벤트를 기기에 저장해야할지를 
+나타내는 부울입니다. 값이 0이면 이 캘린더를 동기화하거나 이에 속한 이벤트를 
+기기에 저장하면 안 된다는 뜻입니다.  값이 1이면 이 캘린더에 대한 이벤트를 동기화하고 이에 속한 
+이벤트를 기기에 저장하라는 뜻입니다.</td>
+  </tr>
+</table>
+
+<h3 id="query">캘린더 쿼리</h3>
+
+<p>다음은 특정한 사용자가 소유한 캘린더를 가져오는 법을 나타낸 예시입니다.
+ 이 예시에서는 단순하게 나타내기 위해 쿼리 작업을 사용자 인터페이스 스레드("주 스레드")에 표시했습니다.
+ 실제로는, 이 작업은 주 스레드 대신 비동기화 스레드에서 해야 합니다.
+ 자세한 논의는 
+<a href="{@docRoot}guide/components/loaders.html">로더</a>를 참조하십시오. 데이터를 읽기만 하는 것이 아니라 변경도 하는 경우라면, 
+{@link android.content.AsyncQueryHandler}를 참조하십시오.
+</p>
+
+
+<pre>
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
+    Calendars._ID,                           // 0
+    Calendars.ACCOUNT_NAME,                  // 1
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
+  
+
+<div class="sidebox-wrapper"> <div class="sidebox"> <h3>
+ACCOUNT_TYPE을 반드시 포함시켜야 하는 이유는 무엇일까요?</h3> <p>{@link
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
+Calendars.ACCOUNT_NAME}에 대해 쿼리하는 경우, 해당 선택에 
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
+도 포함시켜야 합니다. 이는 주어진 계정을 고유하다고 간주하는 것은 해당 계정의 
+<code>ACCOUNT_NAME</code> 및 
+<code>ACCOUNT_TYPE</code>이 모두 있을 때뿐이기 때문입니다. <code>ACCOUNT_TYPE</code>은 계정이 
+
+{@link android.accounts.AccountManager}로 등록되었을 때 사용된 계정 인증자에 상응하는 문자열입니다. 기기와 연관되지 않은 캘린더에 적용되는 특별한 유형의 계정도 있으며 이를 {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}이라고 합니다.
+{@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 계정은 동기화되지 않습니다.
+</p> </div> </div> 
+
+
+<p> 다음 예시에서는 여러분이 직접 나름의 쿼리를 생성해보십시오. 선택 영역이 쿼리의 기준을 나타냅니다.
+ 이 예시에서 쿼리는 
+<code>ACCOUNT_NAME</code>
+"sampleuser@google.com", <code>ACCOUNT_TYPE</code>
+"com.google" 및 <code>OWNER_ACCOUNT</code>
+"sampleuser@google.com"을 가지고 있는 캘린더를 찾고 있습니다. 사용자가 소유한 캘린더뿐만 아니라 사용자가 전에 본 캘린더까지 모두 확인하려면 
+<code>OWNER_ACCOUNT</code>를 생략합니다. 
+쿼리가 {@link android.database.Cursor}
+개체를 반환하여 이를 시용하면 데이터베이스 쿼리가 반환한 결과 집합을 트래버스할 수 있습니다.
+ 콘텐츠 제공자에서 쿼리를 사용하는 법에 대한 자세한 논의는 
+<a href="{@docRoot}guide/topics/providers/content-providers.html">콘텐츠 제공자</a>를 참조하십시오.</p>
+
+
+<pre>// Run query
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+Uri uri = Calendars.CONTENT_URI;   
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"}; 
+// Submit the query and get a Cursor object back. 
+cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
+
+<p>다음에 표시된 섹션에서는 커서를 사용하여 결과 집합을 단계별로 살펴봅니다. 
+여기에서는 예시의 시작 부분에서 설정된 상수를 사용하여 각 필드에 대한 값을 반환합니다.
+</p>
+    
+<pre>// Use the cursor to step through the returned records
+while (cur.moveToNext()) {
+    long calID = 0;
+    String displayName = null;
+    String accountName = null;
+    String ownerName = null;
+      
+    // Get the field values
+    calID = cur.getLong(PROJECTION_ID_INDEX);
+    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
+    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
+              
+    // Do something with the values...
+
+   ...
+}
+</pre>
+  
+<h3 id="modify-calendar">캘린더 수정</h3>
+
+<p>캘린더 업데이트를 수행하려면 캘린더의 {@link
+android.provider.BaseColumns#_ID}를 
+URI에 추가된 ID로
+
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}), 또는 첫 번째 선택 항목으로 제공하면 됩니다.
+ 
+선택은 <code>&quot;_id=?&quot;</code>로 시작해야 하며, 첫 번째 
+<code>selectionArg</code>는 캘린더의 {@link
+android.provider.BaseColumns#_ID}여야 합니다. 
+또한 ID를 URI에 인코딩해서도 업데이트를 수행할 수 있습니다. 이 예시에서는 캘린더의 표시 이름을 
+
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+방식으로 변경하였습니다.</p>
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long calID = 2;
+ContentValues values = new ContentValues();
+// The new display name for the calendar
+values.put(Calendars.CALENDAR_DISPLAY_NAME, &quot;Trevor's Calendar&quot;);
+Uri updateUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
+
+<h3 id="insert-calendar">캘린더 삽입</h2>
+
+<p>캘린더는 주로 동기화 어댑터가 관리하도록 설계되어 있습니다. 따라서 새 캘린더는 
+동기화 어댑터로서만 삽입해야 합니다. 대다수의 경우 애플리케이션은 캘린더에 
+표면적인 사항만 변경할 수 있게 되어 있습니다(예: 표시 이름 변경 등). 
+어떤 애플리케이션이 로컬 캘린더를 생성해야 하는 경우, 캘린더 삽입을 동기화 어댑터로 수행하면 됩니다. 
+이때 {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}의 {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE}을 사용합니다.
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
+은 기기 계정과 연관되지 않은 캘린더에 적용되는 특별한 유형의 계정입니다.
+ 이 유형의 캘린더는 서버에 동기화되지 않습니다. 
+동기화 어댑터에 대한 논의는 <a href="#sync-adapter">동기화 어댑터</a>를 참조하십시오.</p>
+
+<h2 id="events">이벤트 테이블</h2>
+
+<p>{@link android.provider.CalendarContract.Events} 
+테이블에는 각각의 이벤트에 대한 세부 정보가 들어 있습니다. 이벤트를 추가, 업데이트 또는 삭제하려면 애플리케이션의 
+<a href="#manifest">매니페스트 파일</a>에 {@link android.Manifest.permission#WRITE_CALENDAR}
+권한이 포함되어 있어야 합니다.</p>
+
+<p>다음 이벤트 열은 애플리케이션과 
+동기화 어댑터 모두 쓸 수 있는 것입니다. 지원되는 필드의 전체 목록은 {@link
+android.provider.CalendarContract.Events} 참조를 확인하십시오.</p>
+
+<table>
+  <tr>
+    <th>상수</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#CALENDAR_ID}</td>
+    <td>이벤트가 속한 캘린더의 {@link android.provider.BaseColumns#_ID}입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ORGANIZER}</td>
+    <td>이벤트 조직자(소유자)의 이메일입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE}</td>
+    <td>이벤트 제목입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</td>
+    <td>이벤트가 일어나는 장소입니다. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</td>
+    <td>이벤트 설명입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTSTART}</td>
+    <td>이벤트가 시작되는 시간을 Epoch 이후 UTC 밀리초 단위로 나타낸 것입니다. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTEND}</td>
+    <td>이벤트가 종료되는 시간을 Epoch 이후 UTC 밀리초 단위로 나타낸 것입니다. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}</td>
+    <td>이벤트의 표준 시간대입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_END_TIMEZONE}</td>
+    <td>이벤트 종료 시간의 표준 시간대입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
+    
+    <td>이벤트 기간을 <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a> 형식으로 나타낸 것입니다.
+예를 들어 <code>&quot;PT1H&quot;</code> 값을 보면 이벤트가 한 시간 지속될 것임을 알 수 있고, 
+<code>&quot;P2W&quot;</code>는 2주의 지속 기간을 나타냅니다.
+ </td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
+    
+    <td>값이 1이면 이 이벤트가 현지 시간대에서 정의한 바에 의해 하루 종일 걸린다는 것을 나타냅니다.
+ 값이 0이면 이것이 하루 중 언제라도 시작하고 종료될 수 있는 정기 이벤트라는 것을 나타냅니다.
+</td>
+
+    
+  </tr>
+  
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
+    
+    <td>이벤트 형식의 반복 규칙입니다. 
+예를 들면 다음과 같습니다. <code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code> 더 많은 예시를 확인하려면 
+<a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">여기</a>를 참조하십시오.</td>
+    
+  </tr>
+  
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
+    <td>이벤트의 반복 날짜입니다. 
+일반적으로 {@link android.provider.CalendarContract.EventsColumns#RDATE}
+를 {@link android.provider.CalendarContract.EventsColumns#RRULE}
+과 함께 사용하여 반복되는 발생의 집계 집합을 정의하게 됩니다.
+ 자세한 논의는 <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 사양</a>을 참조하십시오.</td>
+</tr>
+ 
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
+    
+    <td>이 이벤트가 사용 중인 시간으로 간주되는지, 다시 일정을 예약할 수 있는 자유 시간으로 간주되는지를 나타냅니다.
+ </td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
+    <td>게스트가 이벤트를 수정할 수 있는지를 나타냅니다. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_INVITE_OTHERS}</td>
+    <td>게스트가 다른 게스트를 초대할 수 있는지를 나타냅니다. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_SEE_GUESTS}</td>
+    <td>게스트가 참석자 목록을 볼 수 있는지를 나타냅니다.</td>
+  </tr>
+</table>
+
+<h3 id="add-event">이벤트 추가</h3>
+
+<p>애플리케이션이 새 이벤트를 추가하는 경우, 
+{@link android.content.Intent#ACTION_INSERT INSERT} 인텐트를 사용하는 것이 좋습니다. 이때 <a href="#intent-insert">인텐트를 사용하여 이벤트 삽입</a>에서 설명한 대로 따릅니다. 그러나, 필요한 경우 직접 이벤트를 삽입해도 됩니다.
+ 이 섹션에서는 이렇게 하는 방법을 설명합니다.
+</p>
+
+
+<p>다음은 새 이벤트를 삽입할 때 따라야 하는 규칙입니다. </p>
+<ul>
+
+  <li>{@link
+android.provider.CalendarContract.EventsColumns#CALENDAR_ID}와 {@link
+android.provider.CalendarContract.EventsColumns#DTSTART}를 포함해야 합니다.</li>
+
+<li>{@link
+android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}을 포함해야 합니다. 
+시스템에 설치된 표준 시간대 ID 목록을 가져오려면 {@link
+java.util.TimeZone#getAvailableIDs()}를 사용하십시오. 이 규칙은 <a href="#intent-insert">인텐트를 사용하여 이벤트 삽입</a>에서 설명한 바와 같이
+{@link
+android.content.Intent#ACTION_INSERT INSERT} 인텐트를 통해서 이벤트를 삽입할 경우에는 적용되지 않습니다. 이 시나리오의 경우,
+기본 시간대가 제공됩니다.</li>
+  
+  <li>비반복적인 이벤트의 경우, {@link
+android.provider.CalendarContract.EventsColumns#DTEND}를 포함해야 합니다. </li>
+  
+  
+  <li>반복적인 이벤트의 경우 {@link
+android.provider.CalendarContract.EventsColumns#DURATION}과 {@link
+android.provider.CalendarContract.EventsColumns#RRULE} 또는 {@link
+android.provider.CalendarContract.EventsColumns#RDATE}를 포함해야 합니다. 이 규칙은 <a href="#intent-insert">인텐트를 사용하여 이벤트 삽입</a>에서 설명한 바와 같이
+{@link
+android.content.Intent#ACTION_INSERT INSERT} 인텐트를 통해서 이벤트를 삽입할 경우에는 적용되지 않습니다. 
+이 시나리오에서는 {@link android.provider.CalendarContract.EventsColumns#DTSTART} 및 {@link android.provider.CalendarContract.EventsColumns#DTEND}와 함께 {@link
+android.provider.CalendarContract.EventsColumns#RRULE}를 사용할 수 있고, 캘린더 애플리케이션이 이것을 기간으로 자동 변환해줍니다.
+</li>
+  
+</ul>
+
+<p>다음은 이벤트 삽입의 예입니다. 단순하게 나타내기 위해 UI 스레드에서 수행한 것입니다.
+ 실제로, 삽입과 업데이트는 비동기화 스레드에서 수행해야 작업을 배경 스레드로 이동시킬 수 있습니다.
+ 
+자세한 정보는 {@link android.content.AsyncQueryHandler}를 참조하십시오.</p>
+
+
+<pre>
+long calID = 3;
+long startMillis = 0; 
+long endMillis = 0;     
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 9, 14, 7, 30);
+startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 9, 14, 8, 45);
+endMillis = endTime.getTimeInMillis();
+...
+
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Events.DTSTART, startMillis);
+values.put(Events.DTEND, endMillis);
+values.put(Events.TITLE, &quot;Jazzercise&quot;);
+values.put(Events.DESCRIPTION, &quot;Group workout&quot;);
+values.put(Events.CALENDAR_ID, calID);
+values.put(Events.EVENT_TIMEZONE, "America/Los_Angeles");
+Uri uri = cr.insert(Events.CONTENT_URI, values);
+
+// get the event ID that is the last element in the Uri
+long eventID = Long.parseLong(uri.getLastPathSegment());
+// 
+// ... do something with event ID
+//
+//</pre>
+
+<p class="note"><strong>참고:</strong> 이벤트가 생성된 다음 이 예시가 이벤트 ID를 캡처하는 법을 눈여겨 보십시오.
+ 이것이 이벤트 ID를 가져오는 가장 쉬운 방법입니다. 
+다른 캘린더 작업을 수행하기 위해 이벤트 ID가 필요한 경우가 자주 있습니다. 예를 들어 이벤트에 참석자나 알림을 추가하는 데 필요합니다.
+</p>
+
+
+<h3 id="update-event">이벤트 업데이트</h3>
+
+<p>애플리케이션이 사용자에게 이벤트 편집을 허용할 경우, <a href="#intent-edit">인텐트로 이벤트 편집</a>에서 설명한 바와 같이
+{@link android.content.Intent#ACTION_EDIT EDIT} 인텐트
+를 사용하는 것이 좋습니다.
+그러나 필요한 경우 직접 이벤트를 편집해도 됩니다. 
+이벤트 업데이트를 수행하려면 이벤트의 <code>_ID</code>를 URI에 추가된 ID로({@link
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
+또는 첫 번째 선택 항목으로 제공하면 됩니다.
+ 
+선택은 <code>&quot;_id=?&quot;</code>로 시작해야 하며, 첫 번째 
+<code>selectionArg</code>는 이벤트의 <code>_ID</code>여야 합니다. 
+ID 없이 선택을 사용해도 업데이트를 수행할 수 있습니다. 다음은 이벤트 업데이트의 예입니다.
+ 여기에서는 이벤트 제목을 변경할 때 
+{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}
+ 방법을 사용합니다.</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 188;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri updateUri = null;
+// The new title for the event
+values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
+
+<h3 id="delete-event">이벤트 삭제</h3>
+
+<p>이벤트를 삭제하려면 이벤트의 {@link
+android.provider.BaseColumns#_ID}를 URI에 추가된 ID로 써도 되고, 표준 선택을 사용해도 됩니다.
+ 추가된 ID를 사용하는 경우, 선택도 할 수 없습니다.
+삭제에는 두 가지 버전이 있습니다. 애플리케이션으로 삭제와 동기화 어댑터로의 삭제입니다. 
+애플리케이션 삭제의 경우 <em>삭제된</em> 열을 1로 설정합니다. 
+이것은 동기화 어댑터에 행이 삭제되었다고 알리는 플래그이며, 
+이 삭제를 서버에 알려야 한다는 것을 나타내기도 합니다. 
+동기화 어댑터 삭제의 경우, 이벤트를 연관된 데이터 일체와 함께 데이터베이스에서 제거합니다. 
+다음은 애플리케이션이 이벤트를 {@link android.provider.BaseColumns#_ID}를 통해 삭제하는 예입니다.</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 201;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri deleteUri = null;
+deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().delete(deleteUri, null, null);
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+</pre>
+
+<h2 id="attendees">참석자 테이블</h2>
+
+<p>{@link android.provider.CalendarContract.Attendees} 테이블의 각 행은
+이벤트의 참석자 또는 게스트 하나를 나타냅니다. 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
+를호출하면 주어진 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}와 함께 해당 이벤트의 참석자 목록을 반환합니다. 
+이 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}는
+ 특정 이벤트의 {@link
+android.provider.BaseColumns#_ID}와 반드시 일치해야 합니다.</p> 
+
+<p>다음 표는 쓸 수 있는 필드를 목록으로 나열한 것입니다.
+ 새 참석자를 삽입하는 경우 이 모두를 포함해야 하며, 
+단 <code>ATTENDEE_NAME</code>은 예외입니다.
+</p>
+
+
+<table>
+  <tr>
+    <th>상수</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}</td>
+    <td>이벤트 ID입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_NAME}</td>
+    <td>참석자 이름입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_EMAIL}</td>
+    <td>참석자 이메일 주소입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_RELATIONSHIP}</td>
+    <td><p>참석자와 이벤트의 관계입니다. 다음 중 하나로 정해집니다.</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ATTENDEE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ORGANIZER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_PERFORMER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_SPEAKER}</li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_TYPE}</td>
+    <td><p>참석자 유형입니다. 다음 중 하나로 정해집니다. </p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_REQUIRED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_OPTIONAL}</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS}</td>
+    <td><p>참석자의 참석 상태입니다. 다음 중 하나로 정해집니다.</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_ACCEPTED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_DECLINED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_INVITED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_TENTATIVE}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-attendees">참석자 추가</h3>
+
+<p>다음은 이벤트에 참석자 한 명을 추가하는 예입니다. 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+가 필수인 점을 유념하십시오.</p>
+
+<pre>
+long eventID = 202;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Attendees.ATTENDEE_NAME, &quot;Trevor&quot;);
+values.put(Attendees.ATTENDEE_EMAIL, &quot;trevor@example.com&quot;);
+values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ATTENDEE);
+values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_OPTIONAL);
+values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_INVITED);
+values.put(Attendees.EVENT_ID, eventID);
+Uri uri = cr.insert(Attendees.CONTENT_URI, values);
+</pre>
+
+<h2 id="reminders">알림 테이블</h2>
+
+<p>{@link android.provider.CalendarContract.Reminders} 
+테이블의 각 행은 이벤트의 알림 하나를 나타냅니다. 
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 를 호출하면
+
+주어진 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}와 함께 이벤트 알림 목록을 반환합니다.</p>
+
+
+<p>다음 표는 알림의 쓸 수 있는 필드를 목록으로 나열한 것입니다. 새 알림을 삽입하는 경우 이 모두를 포함해야 합니다.
+ 동기화 어댑터가 {@link
+android.provider.CalendarContract.Calendars} 테이블에서 지원하는 알림을 나타낸다는 점을 눈여겨 보십시오.
+ 자세한 내용은
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS} 
+를 참조하십시오.</p>
+
+
+<table>
+  <tr>
+    <th>상수</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#EVENT_ID}</td>
+    <td>이벤트 ID입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#MINUTES}</td>
+    <td>이벤트 몇 분 전에 알림을 보내야 하는지 나타냅니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#METHOD}</td>
+    <td><p>알림 메서드이며, 서버에서 설정한 대로 따릅니다. 다음 중 하나로 정해집니다.</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_ALERT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_DEFAULT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_EMAIL}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_SMS}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-reminders">알림 추가</h3>
+
+<p>이 예시는 이벤트에 알림을 추가하는 것입니다. 알림이 이벤트 15분 전에 발송됩니다.
+</p>
+<pre>
+long eventID = 221;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Reminders.MINUTES, 15);
+values.put(Reminders.EVENT_ID, eventID);
+values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
+Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
+
+<h2 id="instances">인스턴스 테이블</h2>
+
+<p>
+{@link android.provider.CalendarContract.Instances} 테이블에는 
+이벤트 발생의 시작 및 종료 시간이 담겨 있습니다. 이 테이블의 각 행이 하나의 이벤트 발생을 나타냅니다.
+ 이 인스턴스 테이블은 쓸 수 없으며 이벤트 발생 쿼리 방법을 제공할 뿐입니다.
+ </p>
+
+<p>다음 표에는 인스턴스에 대해 쿼리할 수 있는 몇 가지 필드를 목록으로 나열하였습니다. 
+표준 시간대가 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+ 및 
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}에 의해 정의된다는 점을 눈여겨 보십시오.</p>
+
+
+<table>
+  <tr>
+    <th>상수</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#BEGIN}</td>
+    <td>인스턴스 시작 시간을 UTC 밀리초로 나타낸 것입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END}</td>
+    <td>인스턴스 종료 시간을 UTC 밀리초로 나타낸 것입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
+    
+    <td>인스턴스의 율리우스력 종료 날짜를 캘린더의 시간대에 비례하여 나타낸 것입니다.
+ 
+    
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
+    
+    <td>인스턴스의 종료 시간(분 단위)을 캘린더 시간대의 자정부터 측정한 것입니다.
+</td>
+    
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
+    <td>이 인스턴스에 대한 이벤트의 <code>_ID</code>입니다.</td>
+  </tr>
+    <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
+    <td>인스턴스의 율리우스력 시작 날짜를 캘린더의 시간대에 비례하여 나타낸 것입니다. 
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
+    
+    <td>인스턴스의 시작 시간(분 단위)을 캘린더 시간대에 비례하여 자정부터 측정한 것입니다.
+ 
+</td>
+    
+  </tr>
+
+</table>
+
+<h3 id="query-instances">인스턴스 테이블 쿼리</h3>
+
+<p>인스턴스 테이블을 쿼리하려면, 해당 쿼리에 대한 범위 시간을 URI에 지정해야 합니다.
+ 이 예시에서는 {@link android.provider.CalendarContract.Instances}
+가 {@link
+android.provider.CalendarContract.EventsColumns#TITLE} 필드에 액세스 권한을 얻으며, 이때 
+{@link android.provider.CalendarContract.EventsColumns} 인터페이스의 구현을 통합니다. 
+바꿔 말하면, {@link
+android.provider.CalendarContract.EventsColumns#TITLE}이 
+데이터베이스 보기를 통해 반환되며 원시 {@link
+android.provider.CalendarContract.Instances} 테이블 쿼리를 통해서가 아니라는 뜻입니다.</p>
+
+<pre>
+private static final String DEBUG_TAG = "MyActivity";
+public static final String[] INSTANCE_PROJECTION = new String[] {
+    Instances.EVENT_ID,      // 0
+    Instances.BEGIN,         // 1
+    Instances.TITLE          // 2
+  };
+  
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_BEGIN_INDEX = 1;
+private static final int PROJECTION_TITLE_INDEX = 2;
+...
+
+// Specify the date range you want to search for recurring
+// event instances
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2011, 9, 23, 8, 0);
+long startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2011, 10, 24, 8, 0);
+long endMillis = endTime.getTimeInMillis();
+  
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+
+// The ID of the recurring event whose instances you are searching
+// for in the Instances table
+String selection = Instances.EVENT_ID + " = ?";
+String[] selectionArgs = new String[] {"207"};
+
+// Construct the query with the desired date range.
+Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+ContentUris.appendId(builder, startMillis);
+ContentUris.appendId(builder, endMillis);
+
+// Submit the query
+cur =  cr.query(builder.build(), 
+    INSTANCE_PROJECTION, 
+    selection, 
+    selectionArgs, 
+    null);
+   
+while (cur.moveToNext()) {
+    String title = null;
+    long eventID = 0;
+    long beginVal = 0;    
+    
+    // Get the field values
+    eventID = cur.getLong(PROJECTION_ID_INDEX);
+    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+    title = cur.getString(PROJECTION_TITLE_INDEX);
+              
+    // Do something with the values. 
+    Log.i(DEBUG_TAG, "Event:  " + title); 
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(beginVal);  
+    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    }
+ }</pre>
+
+<h2 id="intents">캘린더 인텐트</h2>
+<p>캘린더 데이터를 읽고 쓰려면 애플리케이션에 <a href="#manifest">권한</a>이 없어도 됩니다. 대신 Android의 캘린더 애플리케이션이 지원하는 인텐트를 사용하여 해당 애플리케이션에 읽기 및 쓰기 작업을 분배하면 됩니다. 다음 표는 캘린더 제공자가 지원하는 인텐트를 목록으로 나열한 것입니다.</p>
+<table>
+  <tr>
+    <th>동작</th>
+    <th>URI</th>
+
+    <th>설명</th>
+    <th>추가</th>
+  </tr>
+  <tr>
+    <td><br>
+    {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
+    <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
+    
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}로도 URI를 참조할 수 있습니다. 
+이 인텐트 사용법의 예시를 보려면 <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">인텐트를 사용하여 캘린더 데이터 보기</a>를 참조하십시오. 
+
+    </td>
+    <td>캘린더를 <code>&lt;ms_since_epoch&gt;</code>에 의해 지정된 시간으로 엽니다.</td>
+    <td>없음.</td>
+  </tr>
+  <tr>
+    <td><p>{@link android.content.Intent#ACTION_VIEW VIEW} </p>
+
+     </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+    
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}로도 URI를 참조할 수 있습니다. 
+이 인텐트 사용법의 예시를 보려면 <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">인텐트를 사용하여 캘린더 데이터 보기</a>를 참조하십시오.
+    
+    </td>
+    <td><code>&lt;event_id&gt;</code>에 의해 지정된 이벤트를 봅니다.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+    
+  
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}로도 URI를 참조할 수 있습니다. 
+이 인텐트 사용법의 예시를 보려면 <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">인텐트를 사용하여 이벤트 편집</a>을 참조하십시오.
+    
+    
+    </td>
+    <td><code>&lt;event_id&gt;</code>에 의해 지정된 이벤트를 편집합니다.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} <br>
+    <br>
+    {@link android.content.Intent#ACTION_INSERT INSERT} </td>
+    <td><p><code>content://com.android.calendar/events</code></p>
+    
+   
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}로도 URI를 참조할 수 있습니다. 
+이 인텐트 사용법의 예시를 보려면 <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">인텐트를 사용하여 이벤트 삽입</a>을 참조하십시오.
+    
+    </td>
+
+    <td>이벤트를 생성합니다.</td>
+    <td>아래 테이블에 목록으로 표시된 추가 사항 모두입니다.</td>
+  </tr>
+</table>
+
+<p>다음 표에는 캘린더 제공자가 지원하는 인텐트 추가 사항이 목록으로 나열되어 있습니다.
+</p>
+<table>
+  <tr>
+    <th>인텐트 추가 사항</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}</td>
+    <td>이벤트의 이름입니다.</td>
+  </tr>
+  <tr>
+  
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
+    <td>이벤트 시작 시간을 Epoch로부터 밀리초 단위로 나타낸 것입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME}</td>
+    
+    <td>이벤트 종료 시간을 Epoch로부터 밀리초 단위로 나타낸 것입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
+CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
+    
+    <td>이벤트가 종일 이벤트인지 나타내는 부울입니다. 값은 
+<code>true</code> 또는 <code>false</code>가 될 수 있습니다.</td> </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
+Events.EVENT_LOCATION}</td>
+    
+    <td>이벤트 위치입니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
+Events.DESCRIPTION}</td>
+    
+    <td>이벤트 설명입니다.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</td>
+    <td>초대할 사람의 이메일 주소를 쉼표로 구분한 목록입니다.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#RRULE Events.RRULE}</td>
+    <td>이벤트의 반복 규칙입니다.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
+Events.ACCESS_LEVEL}</td>
+    
+    <td>이벤트가 비공개인지 공개인지 나타냅니다.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
+Events.AVAILABILITY}</td>
+    
+    <td>이 이벤트가 사용 중인 시간으로 간주되는지, 다시 일정을 예약할 수 있는 자유 시간으로 간주되는지를 나타냅니다.</td>
+    
+</table> 
+<p>아래 섹션에서는 이와 같은 인텐트의 사용법을 설명합니다.</p>
+
+
+<h3 id="intent-insert">인텐트를 사용하여 이벤트 삽입</h3>
+
+<p>{@link android.content.Intent#ACTION_INSERT INSERT} 인텐트를 사용하면 
+캘린더에 이벤트 삽입 작업을 분배할 수 있습니다.
+이 방법을 사용하는 경우, 애플리케이션의 <a href="#manifest">매니페스트 파일</a>에 {@link
+android.Manifest.permission#WRITE_CALENDAR} 권한을 포함할 필요가 없습니다.</p>
+
+  
+<p>사용자가 이 방법을 사용하는 애플리케이션을 실행하면 해당 애플리케이션이
+사용자를 캘린더로 보내 이벤트 추가를 완료합니다. {@link
+android.content.Intent#ACTION_INSERT INSERT} 인텐트는 추가 필드를 사용하여
+캘린더에 있는 이벤트 세부 정보로 양식을 미리 채웁니다. 
+그러면 사용자가 이벤트를 취소하거나 양식을 필요에 따라 편집할 수 있고, 
+이벤트를 본인의 캘린더에 저장할 수도 있습니다.</p>
+  
+
+
+<p>다음은 2012년 1월 19일에 이벤트 일정을 예약하는 코드 조각으로, 
+이는 오전 7:30~오전 8:30까지 실행됩니다. 이 코드 조각에 관해서는 다음 내용을 주의하십시오.</p>
+
+<ul>
+  <li>이것은 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}를 URI로 지정합니다.
+</li>
+  
+  <li>이것은 {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME} 및 {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME} 추가 필드를 사용하여 이벤트 시간으로 양식을 미리 채웁니다.
+ 이러한 시간에 해당하는 값은 Epoch로부터 UTC 밀리초 단위로 표시해야 합니다.
+</li>
+  
+  <li>이것은 {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
+추가 필드를 사용하여 쉼표로 구분된 초청인 목록을 제공하며, 이는 이메일 주소로 나타납니다.</li>
+  
+</ul>
+<pre>
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 0, 19, 8, 30);
+Intent intent = new Intent(Intent.ACTION_INSERT)
+        .setData(Events.CONTENT_URI)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+        .putExtra(Events.TITLE, &quot;Yoga&quot;)
+        .putExtra(Events.DESCRIPTION, &quot;Group class&quot;)
+        .putExtra(Events.EVENT_LOCATION, &quot;The gym&quot;)
+        .putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+        .putExtra(Intent.EXTRA_EMAIL, &quot;rowan@example.com,trevor@example.com&quot;);
+startActivity(intent);
+</pre>
+
+<h3 id="intent-edit">인텐트를 사용하여 이벤트 편집</h3>
+
+<p><a href="#update-event">이벤트 업데이트</a>에서 설명한 바와 같이 이벤트를 직접 업데이트할 수 있습니다. 그러나 {@link
+android.content.Intent#ACTION_EDIT EDIT} 인텐트를 사용하면 
+캘린더 애플리케이션에 이벤트 편집을 분배할 권한이 없는 애플리케이션을 허용합니다.
+사용자가 캘린더에서 이벤트 편집을 마치면 원래 애플리케이션으로 돌아오게 됩니다.
+</p> <p>다음은 지정된 이벤트에 새 제목을 설정하여 사용자에게 캘린더에서 이벤트를 편집할 수 있도록 해주는 인텐트의 예입니다.
+</p>
+
+
+<pre>long eventID = 208;
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_EDIT)
+    .setData(uri)
+    .putExtra(Events.TITLE, &quot;My New Title&quot;);
+startActivity(intent);</pre>
+
+<h3 id="intent-view">인텐트를 사용하여 캘린더 데이터 보기</h3>
+<p>캘린더 제공자는 {@link android.content.Intent#ACTION_VIEW VIEW} 인텐트를 사용하는 두 가지 방식을 제공합니다.</p>
+<ul>
+  <li>캘린더를 특정 날짜에 여는 방식</li>
+  <li>이벤트를 보는 방식</li>
+
+</ul>
+<p>다음은 캘린더를 특정 날짜에 여는 방법을 보여주는 예입니다.</p>
+<pre>// A date-time specified in milliseconds since the epoch.
+long startMillis;
+...
+Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+builder.appendPath(&quot;time&quot;);
+ContentUris.appendId(builder, startMillis);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+    .setData(builder.build());
+startActivity(intent);</pre>
+
+<p>다음은 이벤트를 보기 위해 여는 방법을 나타낸 예입니다.</p>
+<pre>long eventID = 208;
+...
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+   .setData(uri);
+startActivity(intent);
+</pre>
+
+
+<h2 id="sync-adapter">동기화 어댑터</h2>
+
+
+<p>애플리케이션과 동기화 어댑터가 캘린더 제공자에 액세스하는 방식에는 사소한 차이만이 있을 뿐입니다.
+</p>
+
+<ul>
+  <li>동기화 어댑터는 {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER}를 <code>true</code>로 설정하여 이것이 동기화 어댑터라는 것을 나타내야 합니다.</li>
+  
+  
+  <li>동기화 어댑터는 URI에서 쿼리 매개변수로 {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME}과 {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE}을 제공해야 합니다. </li>
+  
+  <li>동기화 어댑터에는 애플리케이션 또는 위젯에 비해 더 많은 열에 대한 쓰기 액세스 권한이 있습니다.
+  예를 들어, 애플리케이션은 캘린더의 몇 가지 특성만 수정할 수 있습니다. 
+즉 이름, 표시 이름, 가시성 설정 및 캘린더 동기화 여부 등만 해당됩니다.
+ 이에 비해 동기화 어댑터의 경우 이 열만이 아니라 다른 수많은 열에도 액세스할 수 있습니다.
+예를 들어 캘린더 색상, 표준 시간대, 액세스 수준 등이 해당됩니다.
+다만, 동기화 어댑터는 지정된 <code>ACCOUNT_NAME</code> 및 
+<code>ACCOUNT_TYPE</code>에 한정됩니다.</li> </ul>
+
+<p>다음은 URI를 반환하여 동기화 어댑터와 사용하도록 할 때 쓸 수 있는 도우미 메서드입니다.</p>
+<pre> static Uri asSyncAdapter(Uri uri, String account, String accountType) {
+    return uri.buildUpon()
+        .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,&quot;true&quot;)
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
+ }
+</pre>
+<p>동기화 어댑터의 샘플 구현(캘린더에 구체적으로 관련된 것이 아님)은 
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdpater</a>를 참조하십시오.

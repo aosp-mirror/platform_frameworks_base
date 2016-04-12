@@ -196,10 +196,7 @@ lockscreen, priority notifications, and cloud-synced notifications.</p>
   <div class="col-7">
     <p>Android 4.0 removes the need for traditional hardware keys on
     phones by replacing them with a virtual navigation bar that houses
-    the Back, Home and Recents buttons. Read the
-    <a href="{@docRoot}design/patterns/compatibility.html">Compatibility</a>
-    pattern to learn how the OS adapts to phones with hardware buttons and
-    how pre-Android 3.0 apps that rely on menu keys are supported.</p>
+    the Back, Home and Recents buttons.</p>
   </div>
   <div class="col-6">
     <img src="{@docRoot}design/media/whats_new_nav_bar.png">

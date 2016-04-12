@@ -1,0 +1,108 @@
+page.title=Trình cung cấp Nội dung
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>Chủ đề</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Nội dung Cơ bản về Trình cung cấp Nội dung</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        Tạo một Trình cung cấp Nội dung</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Trình cung cấp Lịch</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Trình cung cấp Danh bạ</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>Các Mẫu Liên quan</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">
+            Ứng dụng Trình quản lý Danh bạ</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        "Con chạy (Danh bạ)"
+        </a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        "Con chạy (Điện thoại)"</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+            Trình điều hợp Đồng bộ Mẫu</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    Trình cung cấp nội dung quản lý truy cập vào một tập dữ liệu cấu trúc. Chúng gói gọn
+    dữ liệu và cung cấp các cơ chế để định nghĩa bảo mật dữ liệu. Trình cung cấp nội dung là
+    giao diện tiêu chuẩn kết nối dữ liệu trong một tiến trình với mã đang chạy trong một tiến trình khác.
+</p>
+<p>
+    Khi bạn truy cập dữ liệu trong một trình cung cấp nội dung, bạn sử dụng đối tượng
+    {@link android.content.ContentResolver} trong
+    {@link android.content.Context} của ứng dụng của bạn để giao tiếp với trình cung cấp như một máy khách.
+    Đối tượng {@link android.content.ContentResolver} giao tiếp với đối tượng trình cung cấp, một
+    thực thể của lớp triển khai {@link android.content.ContentProvider}. Đối tượng
+    trình cung cấp nhận các yêu cầu dữ liệu từ máy khách, thực hiện hành động được yêu cầu, và
+    trả về kết quả.
+</p>
+<p>
+    Bạn không cần phát triển trình cung cấp của chính mình nếu không có ý định chia sẻ dữ liệu của bạn với
+    các ứng dụng khác. Tuy nhiên, bạn cần phải có trình cung cấp của chính mình để cung cấp các gợi ý tìm kiếm tùy chỉnh
+    trong ứng dụng của chính bạn. Bạn cũng cần phải có trình cung cấp của chính mình nếu muốn sao chép và
+    dán dữ liệu hoặc tệp phức tạp từ ứng dụng của bạn sang các ứng dụng khác.
+</p>
+<p>
+    Bản thân Android bao gồm các trình cung cấp nội dung chuyên quản lý dữ liệu như âm thanh, video, hình ảnh và
+    thông tin liên lạc cá nhân. Bạn có thể thấy một số được liệt kê trong tài liệu
+    tham khảo cho gói
+    <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code>. Với một số hạn chế, những trình cung cấp này có thể truy cập vào bất kỳ ứng dụng
+    Android nào.
+</p><p>
+    Các chủ đề sau mô tả chi tiết hơn về các trình cung cấp nội dung:
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Nội dung Cơ bản về Trình cung cấp Nội dung</a></strong>
+    </dt>
+    <dd>
+        Cách truy cập dữ liệu trong một trình cung cấp nội dung khi dữ liệu được tổ chức dưới dạng bảng.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        Tạo một Trình cung cấp Nội dung</a></strong>
+    </dt>
+    <dd>
+        Cách tạo trình cung cấp nội dung của chính bạn.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        Trình cung cấp Lịch</a></strong>
+    </dt>
+    <dd>
+        Cách truy cập Trình cung cấp Lịch mà là một bộ phận của nền tảng Android.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        Trình cung cấp Danh bạ</a></strong>
+    </dt>
+    <dd>
+        Cách truy cập Trình cung cấp Danh bạ mà là một bộ phận của nền tảng Android.
+    </dd>
+</dl>

@@ -1,0 +1,126 @@
+page.title=Trabajar con interfaces dibujables
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lección te enseña a realizar lo siguiente:</h2>
+<ol>
+  <li><a href="#DrawableTint">Cambiar el matiz de los recursos dibujables</a></li>
+  <li><a href="#ColorExtract">Extraer colores prominentes de una imagen</a></li>
+  <li><a href="#VectorDrawables">Crear interfaces dibujables en vector</a></li>
+</ol>
+<h2>También deberías leer</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificación de Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Diseño material en Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Las siguientes capacidades para las interfaces dibujables te ayudan a implementar Material Design en tus aplicaciones:</p>
+
+<ul>
+<li>Matiz de la interfaz dibujable</li>
+<li>Extracción de color prominente</li>
+<li>Interfaces dibujables en vector</li>
+</ul>
+
+<p>Esta lección te muestra cómo usar estas características en tu aplicación.</p>
+
+
+<h2 id="DrawableTint">Cambiar el matiz de los recursos dibujables</h2>
+
+<p>Con Android 5.0 (API nivel 21) y superior, puedes cambiar el matiz de los mapas de bits y nueve parches definidos como
+máscaras alfa. Puedes cambiar el matiz con recursos de colores o atributos de temas que se resuelven a
+recursos de colores (por ejemplo, <code>?android:attr/colorPrimary</code>). Generalmente, puedes crear estos recursos
+solo una vez y agregarles color automáticamente para que coincidan con tu tema.</p>
+
+<p>Puedes aplicar un matiz a los objetos {@link android.graphics.drawable.BitmapDrawable} o {@link
+android.graphics.drawable.NinePatchDrawable} con el método {@code setTint()}. También puedes
+establecer el color de matiz y el modo en tus diseños con los atributos <code>android:tint</code> y
+<code>android:tintMode</code>.</p>
+
+
+<h2 id="ColorExtract">Extraer colores prominentes de una imagen</h2>
+
+<p>La Biblioteca de soporte de Android r21 y superiores incluye la clase {@link
+android.support.v7.graphics.Palette}, que te permite extraer colores prominentes de una imagen.
+Esta clase extrae los siguientes colores prominentes:</p>
+
+<ul>
+<li>Brillante</li>
+<li>Oscuro brillante</li>
+<li>Claro brillante</li>
+<li>Apagado</li>
+<li>Oscuro apagado</li>
+<li>Claro apagado</li>
+</ul>
+
+<p>Para extraer estos colores, pasa un objeto {@link android.graphics.Bitmap} al método estático
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} en el subproceso en
+segundo plano en donde cargas tus imágenes. Si no puedes usar dicho subproceso, llama al método
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} y proporciona
+un gestor de eventos en su lugar.</p>
+
+<p>Puedes recuperar los colores prominentes de la imagen mediante los métodos de obtención en la clase
+<code>Palette</code>, como <code>Palette.getVibrantColor</code>.</p>
+
+<p>Para usar la clase {@link android.support.v7.graphics.Palette} en tu proyecto, agrega la siguiente
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Dependencia Gradle</a> al módulo de
+tu aplicación:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>Para más información, consulta la referencia de la API para la clase {@link android.support.v7.graphics.Palette}.
+</p>
+
+
+<h2 id="VectorDrawables">Crear interfaces dibujables en vector</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>Video</h3>
+    <p>Gráficos en vector de Android</p>
+</div>
+</a>
+
+<p>En Android 5.0 (API nivel 21) y superiores, puedes definir las interfaces dibujables en vector, que escalan sin
+perder definición. Solo necesitas un archivo de recurso para una imagen en vector, en oposición a un archivo de recurso para
+la densidad de cada pantalla en el caso de imágenes de mapa de bits. Para crear una imagen en vector, defines los detalles
+de la forma dentro de un elemento XML <code>&lt;vector&gt;</code>.</p>
+
+<p>El siguiente ejemplo define una imagen en vector con la forma de un corazón:</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Las imágenes en vector están representadas en Android como objetos {@link android.graphics.drawable.VectorDrawable}.
+ Para más información sobre la sintaxis <code>pathData</code>, consulta la <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">referencia de ruta de acceso SVG</a>. Para más información
+sobre la animación de las propiedades de las interfaces dibujables en vector, consulta
+<a href="{@docRoot}training/material/animations.html#AnimVector">Animación de interfaces dibujables en vector</a>.</p>

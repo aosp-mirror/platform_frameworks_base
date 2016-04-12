@@ -29,11 +29,17 @@ parent.link=index.html
   </ol>
 </div>
 </div>
-<p>This documentation provides technical reference information for using the In-app Billing Version 3 API. </p>
+<p>This documentation provides technical reference information for using the
+In-app Billing Version 3 API. </p>
 
 <h2 id="billing-codes">Server Response Codes</h2>
-<p>The following table lists all of the server response codes that are sent from Google Play to your application. Google Play sends the response code synchronously as an integer mapped to the {@code RESPONSE_CODE} key in the response {@code Bundle}. Your application must handle all of these response codes.</p>
-
+<p>
+  The following table lists all of the server response codes that are sent from
+  Google Play to your application. Google Play sends the response code
+  synchronously as an integer mapped to the {@code RESPONSE_CODE} key in the
+  response {@code Bundle}. Your application must handle all of these response
+  codes.
+</p>
 <p class="table-caption" id="response-codes-table">
 <strong>Table 1.</strong> Summary of response codes for In-app Billing Version 3 API calls.</p>
 <table>
@@ -70,7 +76,10 @@ parent.link=index.html
   <tr>
     <td>{@code BILLING_RESPONSE_RESULT_DEVELOPER_ERROR}</td>
     <td>5</td>
-    <td>Invalid arguments provided to the API. This error can also indicate that the application was not correctly signed or properly set up for In-app Billing in Google Play, or does not have the necessary permissions in its manifest</td>
+    <td>Invalid arguments provided to the API. This error can also indicate that
+    the application was not correctly signed or properly set up for In-app
+    Billing in Google Play, or does not have the necessary permissions in its
+    manifest</td>
   </tr>
   <tr>
     <td>{@code BILLING_RESPONSE_RESULT_ERROR}</td>
@@ -90,13 +99,23 @@ parent.link=index.html
 </table>
 
 <h2 id="billing-interface">API Reference</h2>
-<p>The In-app Billing Version 3 API is defined in the {@code IInAppBillingService.aidl} file, which is included with the Version 3 <a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">sample application</a>.</p>
+<p>The In-app Billing Version 3 API is defined in the {@code
+  IInAppBillingService.aidl} file, which is included with the Version 3
+  <a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">
+  sample application</a>.</p>
 
 <h3 id="getSkuDetails">The getSkuDetails() method</h3>
-<p>This method returns product details for a list of product IDs. In the response {@code Bundle} sent by Google Play, the query results are stored in a String {@code ArrayList} mapped to the {@code DETAILS_LIST} key. Each String in the details list contains product details for a single product in JSON format. The fields in the JSON string with the product details are summarized in table 2.</p>
-
+<p>
+  This method returns product details for a list of product IDs. In the
+  response {@code Bundle} sent by Google Play, the query results are stored in
+  a String {@code ArrayList} mapped to the {@code DETAILS_LIST} key. Each
+  String in the details list contains product details for a single product in
+  JSON format. The fields in the JSON string with the product details are
+  summarized in table 2.
+</p>
 <p class="table-caption" id="product-details-table">
-<strong>Table 2.</strong> Description of JSON fields with product item details returned from a {@code getSkuDetails} request.</p>
+<strong>Table 2.</strong> Description of JSON fields with product item details
+returned from a {@code getSkuDetails} request.</p>
 <table>
   <tr>
     <th scope="col">Key</th>
@@ -179,7 +198,8 @@ RSASSA-PKCS1-v1_5 scheme.</td>
 </table>
 </p>
 
-<p>Table 4 describes the JSON fields that are returned in the response data for a purchase order.</p>
+<p>Table 4 describes the JSON fields that are returned in the response data for
+a purchase order.</p>
 <p class="table-caption" id="purchase-data-table">
 <strong>Table 4.</strong>  Descriptions of the JSON fields for {@code INAPP_PURCHASE_DATA}.</p>
 <table>
@@ -208,7 +228,9 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   <tr>
     <td>{@code orderId}</td>
     <td>A unique order identifier for the transaction. This identifier
-      corresponds to the Google payments order ID.</td>
+      corresponds to the Google payments order ID. If the order is a test
+      purchase made through the In-app Billing Sandbox, {@code orderId} is
+      blank.</td>
   </tr>
   <tr>
     <td>{@code packageName}</td>
@@ -216,7 +238,9 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
   <tr>
     <td>{@code productId}</td>
-    <td>The item's product identifier. Every item has a product ID, which you must specify in the application's product list on the Google Play Developer Console.</td>
+    <td>The item's product identifier. Every item has a product ID, which you
+      must specify in the application's product list on the Google Play
+      Developer Console.</td>
   </tr>
   <tr>
     <td>{@code purchaseTime}</td>
@@ -304,7 +328,11 @@ subscriptions.</p>
 </p>
 
 <h3 id="getPurchases">The getPurchases() method</h3>
-<p>This method returns the current un-consumed products owned by the user. Table 5 lists the response data that is returned in the {@code Bundle}.</p>
+<p>This method returns the current un-consumed products owned by the user,
+  including both purchased items and items acquired by redeeming a promo code.
+  Table 5 lists the response data that is returned in the
+  {@link android.os.Bundle}.</p>
+
 <p class="table-caption" id="getpurchases-response-table">
 <strong>Table 6.</strong> Response data from a {@code getPurchases} request.</p>
 <table>
@@ -330,8 +358,13 @@ subscriptions.</p>
   </tr>
   <tr>
     <td>{@code INAPP_CONTINUATION_TOKEN}</td>
-    <td>String containing a continuation token to retrieve the next set of in-app products owned by the user. This is only set by the Google Play service if the number of products owned by the user is very large. When a continuation token is present in the response, you must make another call to {@code getPurchases} and pass in the continuation token that you received. The subsequent {@code getPurchases} call returns more purchases and possibly another continuation token.</td>
+    <td>String containing a continuation token to retrieve the next set of
+      in-app products owned by the user. This is only set by the Google Play
+      service if the number of products owned by the user is very large. When a
+      continuation token is present in the response, you must make another call
+      to {@code getPurchases} and pass in the continuation token that you
+      received. The subsequent {@code getPurchases} call returns more purchases
+      and possibly another continuation token.</td>
   </tr>
 </table>
 </p>
-

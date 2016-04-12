@@ -879,8 +879,8 @@ vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
     A contract class also helps developers because it usually has mnemonic names for its constants,
     so developers are less likely to use incorrect values for column names or URIs. Since it's a
     class, it can contain Javadoc documentation. Integrated development environments such as
-    Eclipse can auto-complete constant names from the contract class and display Javadoc for the
-    constants.
+    Android Studio can auto-complete constant names from the contract class and display Javadoc for 
+    the constants.
 </p>
 <p>
     Developers can't access the contract class's class file from your application, but they can

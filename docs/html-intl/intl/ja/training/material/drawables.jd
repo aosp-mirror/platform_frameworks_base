@@ -1,0 +1,126 @@
+page.title=ドローアブルの使用
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#DrawableTint">ドローアブル リソースに色を付ける</a></li>
+  <li><a href="#ColorExtract">画像から代表色を抽出する</a></li>
+  <li><a href="#VectorDrawables">ベクター型ドローアブルを作成する</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+<p>アプリにマテリアル デザインを実装する際は、Drawable （ドローアブル）の次の機能を活用できます。</p>
+
+<ul>
+<li>ドローアブルによる着色</li>
+<li>代表色の抽出</li>
+<li>ベクター型ドローアブル</li>
+</ul>
+
+<p>このレッスンでは、アプリでのこれらの機能を使用する方法について説明します。</p>
+
+
+<h2 id="DrawableTint">ドローアブル リソースに色を付ける</h2>
+
+<p>Android 5.0（API レベル 21）以降では、アルファ マスクとして定義されたビットマップや 9-patch に色を付けることができます。
+着色には、カラーリソースまたはカラーリソースに変換されるテーマ属性を使用できます（<code>?android:attr/colorPrimary</code> など）。
+通常は、これらのアセットを一度作成するだけで、テーマに合うように自動的に着色されます。
+</p>
+
+<p>{@code setTint()} メソッドを使用して {@link android.graphics.drawable.BitmapDrawable} オブジェクトか {@link
+android.graphics.drawable.NinePatchDrawable} オブジェクトに色を適用できます。また、<code>android:tint</code> 属性や
+<code>android:tintMode</code> 属性を使ってレイアウトで色やモードを設定できます。
+</p>
+
+
+<h2 id="ColorExtract">画像から代表色を抽出する</h2>
+
+<p>Android サポート ライブラリ r21 以降には、画像から代表色を抽出できる {@link
+android.support.v7.graphics.Palette} クラスが含まれています。
+</p>
+
+<ul>
+<li>Vibrant （鮮やか）</li>
+<li>Vibrant dark （鮮やかな暗色）</li>
+<li>Vibrant light （鮮やかな明色）</li>
+<li>Muted （控えめ）</li>
+<li>Muted dark （控えめな暗色）</li>
+<li>Muted light （控えめな明色）</li>
+</ul>
+
+<p>これらの色を抽出するには、画像を読み込むバックグラウンド スレッドで {@link android.graphics.Bitmap} オブジェクトを
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} の静的メソッドに渡します。
+スレッドを使用できない場合は、代わりに
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} メソッドを呼び出してリスナーを提供します。
+</p>
+
+<p>
+<code>Palette</code> クラスで、<code>Palette.getVibrantColor</code> などの getter メソッドを使って画像から代表色を取得できます。</p>
+
+<p>プロジェクトで {@link android.support.v7.graphics.Palette} クラスを使用するには、アプリのモジュールに次の
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依存関係</a>を追加します。
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>詳細については、API リファレンスの {@link android.support.v7.graphics.Palette} クラスをご覧ください。
+</p>
+
+
+<h2 id="VectorDrawables">ベクター型ドローアブルを作成する</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>ビデオ</h3>
+    <p>Android ベクター グラフィック</p>
+</div>
+</a>
+
+<p>Android 5.0（API レベル 21）以降では、ベクター型ドローアブルを定義できます。このドローアブルは定義を失わずに拡張できます。
+ビットマップ画像では画面密度ごとにアセット ファイルが必要ですが、ベクター画像で必要なアセット ファイルは 1 つのみです。
+ベクター画像を作成するには、<code>&lt;vector&gt;</code> XML 要素で図形の詳細を定義します。
+</p>
+
+<p>次の例では、ハート型のベクター画像を定義しています。</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Android ではベクター画像は {@link android.graphics.drawable.VectorDrawable}
+ オブジェクトとして表示されます。<code>pathData</code> 構文の詳細については、<a href="http://www.w3.org/TR/SVG11/paths.html#PathData">SVG パス リファレンス</a>をご覧ください。ベクター型ドローアブルのアニメーションの詳細については、
+<a href="{@docRoot}training/material/animations.html#AnimVector">ベクター ドローアブルのアニメーション</a>をご覧ください。
+</p>

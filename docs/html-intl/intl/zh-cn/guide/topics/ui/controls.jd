@@ -1,0 +1,90 @@
+page.title=输入控件
+parent.title=用户界面
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>输入控件是您的应用用户界面中的交互式组件。Android 提供了多种可在 UI 中使用的控件，如按钮、文本字段、定位栏、复选框、缩放按钮、切换按钮等。
+
+</p>
+
+<p>向 UI 中添加输入控件与向 <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML 布局</a>中添加 XML 元素一样简单。例如，以下是一个包含文本字段和按钮的布局：
+</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>每个输入控件都支持一组特定的输入事件，以便您处理用户输入文本或触摸按钮等事件。
+</p>
+
+
+<h2 id="CommonControls">通用控件</h2>
+<p>以下列出了您可以在应用中使用的一些通用控件。点击链接可了解有关各控件用法的详情。
+</p>
+
+<p class="note"><strong>注：</strong>除了此处列出的控件外，Android 还提供了几种其他控件。
+浏览 {@link android.widget} 软件包可发现更多控件。如果您的应用需要特定类型的输入控件，则可以构建您自己的<a href="{@docRoot}guide/topics/ui/custom-components.html">自定义组件</a>。
+</p>
+
+<table>
+    <tr>
+        <th scope="col">控件类型</th>
+        <th scope="col">描述</th>
+	<th scope="col">相关类</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">按钮</a></td>
+        <td>可由用户按压或点击来执行操作的按钮。</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">文本字段</a></td>
+        <td>一种可编辑的文本字段。您可以使用 <code>AutoCompleteTextView</code> 小工具创建提供自动完成建议的文本输入小工具</td>
+	<td>{@link android.widget.EditText EditText}、{@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">复选框</a></td>
+        <td>可由用户切换的启用/禁用开关。您应该在向用户呈现一组不互斥的可选选项时使用复选框。</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">单选按钮</a></td>
+        <td>与复选框类似，不同的是只能选择组中的一个选项。</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">切换按钮</a></td>
+        <td>一种具有指示灯的开/关按钮。</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">微调框</a></td>
+        <td>一种允许用户从值集中选择一个值的下拉列表。</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">选取器</a></td>
+        <td>一种供用户通过使用向上/向下按钮或轻扫手势选择值集中单个值的对话框。使用 <code>DatePicker</code> 小工具输入日期（月、日、年）值，或使用 <code>TimePicker</code> 小工具输入时间（小时、分钟、上午/下午）值，系统将根据用户的区域设置自动设置所输入内容的格式。</td>
+	<td>{@link android.widget.DatePicker}、{@link android.widget.TimePicker}</td>
+    </tr>
+</table>

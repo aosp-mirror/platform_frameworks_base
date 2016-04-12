@@ -1,0 +1,899 @@
+page.title=Ý định và Bộ lọc Ý định
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#Types">Các Loại Ý định</a></li>
+  <li><a href="#Building">Xây dựng một Ý định</a>
+    <ol>
+      <li><a href="#ExampleExplicit">Ví dụ về ý định biểu thị</a></li>
+      <li><a href="#ExampleSend">Ví dụ về ý định không biểu thị</a></li>
+      <li><a href="#ForceChooser">Bắt buộc một bộ chọn ứng dụng</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">Nhận một Ý định Không biểu thị</a>
+    <ol>
+      <li><a href="#ExampleFilters">Ví dụ về bộ lọc</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">Sử dụng một Ý định Chờ</a></li>
+  <li><a href="#Resolution">Giải quyết Ý định</a>
+    <ol>
+      <li><a href="#ActionTest">Kiểm tra hành động</a></li>
+      <li><a href="#CategoryTest">Kiểm tra thể loại</a></li>
+      <li><a href="#DataTest">Kiểm tra dữ liệu</a></li>
+      <li><a href="#imatch">So khớp ý định</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">Tương tác với các Ứng dụng khác</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">Chia sẻ Nội dung</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent} là một đối tượng nhắn tin mà bạn có thể sử dụng để yêu cầu một hành động
+từ một <a href="{@docRoot}guide/components/fundamentals.html#Components">thành phần ứng dụng</a> khác.
+Mặc dù các ý định sẽ tạo điều kiện cho giao tiếp giữa các thành phần bằng một vài cách, có ba
+trường hợp sử dụng cơ bản:</p>
+
+<ul>
+<li><b>Để bắt đầu một hoạt động:</b>
+<p>{@link android.app.Activity} biểu diễn một màn hình đơn trong một ứng dụng. Bạn có thể bắt đầu một thực thể
+mới của một {@link android.app.Activity} bằng cách chuyển {@link android.content.Intent}
+sang {@link android.content.Context#startActivity startActivity()}. {@link android.content.Intent}
+mô tả hoạt động cần bắt đầu và mang theo mọi dữ liệu cần thiết.</p>
+
+<p>Nếu bạn muốn nhận một kết quả từ hoạt động khi nó hoàn thành,
+hãy gọi {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Hoạt động của bạn nhận được kết quả
+dưới dạng một đối tượng {@link android.content.Intent} riêng biệt trong lệnh gọi lại {@link
+android.app.Activity#onActivityResult onActivityResult()} của hoạt động của bạn.
+Để biết thêm thông tin, hãy xem hướng dẫn <a href="{@docRoot}guide/components/activities.html">Hoạt động</a>.</p></li>
+
+<li><b>Để bắt đầu một dịch vụ:</b>
+<p>{@link android.app.Service} là một thành phần có chức năng thực hiện các thao tác dưới nền
+mà không cần giao diện người dùng. Bạn có thể bắt đầu một dịch vụ để thực hiện một thao tác một lần
+(chẳng hạn như tải xuống một tệp) bằng cách chuyển {@link android.content.Intent}
+tới {@link android.content.Context#startService startService()}. {@link android.content.Intent}
+mô tả dịch vụ cần bắt đầu và mang theo mọi dữ liệu cần thiết.</p>
+
+<p>Nếu dịch vụ được thiết kế với một giao diện máy khách-máy chủ, bạn có thể gắn kết với dịch vụ
+từ một thành phần khác bằng cách chuyển {@link android.content.Intent} sang {@link
+android.content.Context#bindService bindService()}</code>. Để biết thêm thông tin, hãy xem hướng dẫn <a href="{@docRoot}guide/components/services.html">Dịch vụ</a>.</p></li>
+
+<li><b>Để chuyển một quảng bá:</b>
+<p>Quảng bá là một tin nhắn mà bất kỳ ứng dụng nào cũng có thể nhận được. Hệ thống sẽ chuyển các quảng bá
+khác nhau tới các sự kiện hệ thống, chẳng hạn như khi hệ thống khởi động hoặc thiết bị bắt đầu sạc.
+Bạn có thể chuyển một quảng bá tới các ứng dụng khác bằng cách chuyển một {@link android.content.Intent}
+tới {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()},
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()}, hoặc {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">Các Loại Ý định</h2>
+
+<p>Có hai loại ý định:</p>
+
+<ul>
+<li><b>Ý định biểu thị</b> quy định thành phần cần bắt đầu theo tên (tên lớp hoàn toàn đạt tiêu chuẩn
+). Thường bạn sẽ sử dụng một ý định biểu thị để bắt đầu một thành phần trong
+ứng dụng của chính mình, vì bạn biết tên lớp của hoạt động hay dịch vụ mà mình muốn bắt đầu. Ví dụ
+, bắt đầu một hoạt động mới để hồi đáp một hành động của người dùng hay bắt đầu một dịch vụ để tải xuống
+tệp dưới nền.</li>
+
+<li><b>Ý định không biểu thị</b> không chỉ định một thành phần cụ thể mà thay vào đó, sẽ khai báo một hành động thông thường
+cần thực hiện, cho phép một thành phần từ một ứng dụng khác xử lý nó. Ví dụ, nếu bạn muốn
+hiển thị cho người dùng một vị trí trên bản đồ, bạn có thể sử dụng một ý định không biểu thị để yêu cầu một ứng dụng
+có khả năng khác hiển thị một vị trí được chỉ định trên bản đồ.</li>
+</ul>
+
+<p>Khi bạn tạo một ý định biểu thị để bắt đầu một hoạt động hoặc dịch vụ, hệ thống ngay lập tức
+sẽ bắt đầu thành phần ứng dụng được quy định trong đối tượng {@link android.content.Intent}.</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>Hình 1.</strong> Minh họa về cách một ý định không biểu thị được
+chuyển thông qua hệ thống để bắt đầu một hoạt động khác: <b>[1]</b> <em>Hoạt động A</em> tạo một
+{@link android.content.Intent} bằng một mô tả hành động và chuyển nó cho {@link
+android.content.Context#startActivity startActivity()}. <b>[2]</b> Hệ thống Android tìm kiếm tất cả
+ứng dụng xem có một bộ lọc ý định khớp với ý định đó không. Khi tìm thấy kết quả khớp, <b>[3]</b> hệ thống
+sẽ bắt đầu hoạt động so khớp đó (<em>Hoạt động B</em>) bằng cách gọi ra phương pháp {@link
+android.app.Activity#onCreate onCreate()} và chuyển nó cho {@link android.content.Intent}.
+</p>
+</div>
+
+<p>Khi bạn tạo một ý định không biểu thị, hệ thống Android sẽ tìm kiếm thành phần phù hợp để bắt đầu
+bằng cách so sánh nội dung của ý định với các <em>bộ lọc ý định</em> được khai báo trong <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">tệp bản kê khai</a> của các ứng dụng khác trên
+thiết bị. Nếu ý định khớp với một bộ lọc ý định, hệ thống sẽ bắt đầu thành phần đó và chuyển cho nó
+đối tượng {@link android.content.Intent}. Nếu có nhiều bộ lọc ý định tương thích, hệ thống
+sẽ hiển thị một hộp thoại để người dùng có thể chọn ứng dụng sẽ sử dụng.</p>
+
+<p>Bộ lọc ý định là một biểu thức trong tệp bản kê khai của một ứng dụng, có chức năng
+chỉ định loại ý định mà thành phần
+muốn nhận. Ví dụ, bằng cách khai báo một bộ lọc ý định cho một hoạt động,
+bạn giúp các ứng dụng khác có thể trực tiếp bắt đầu hoạt động của mình với một loại ý định nhất định.
+Tương tự, nếu bạn <em>không</em> khai báo bất kỳ bộ lọc ý định nào cho một hoạt động, khi đó nó chỉ có thể
+được bắt đầu bằng một ý định biểu thị.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Để đảm bảo ứng dụng của bạn được bảo mật, luôn sử dụng một ý định
+biểu thị khi bắt đầu một {@link android.app.Service} và không được
+khai báo bộ lọc ý định cho các dịch vụ của bạn. Việc sử dụng một ý định không biểu thị để bắt đầu một dịch vụ sẽ là một nguy cơ
+về bảo mật vì bạn không thể chắc chắn dịch vụ nào sẽ hồi đáp ý định đó,
+và người dùng không thể thấy dịch vụ nào bắt đầu. Bắt đầu với Android 5.0 (API mức 21), hệ thống
+sẽ đưa ra lỗi ngoại lệ nếu bạn gọi {@link android.content.Context#bindService bindService()}
+bằng một ý định không biểu thị.</p>
+
+
+
+
+
+<h2 id="Building">Xây dựng một Ý định</h2>
+
+<p>Đối tượng {@link android.content.Intent} mang thông tin mà hệ thống Android sử dụng
+để xác định thành phần nào sẽ bắt đầu (chẳng hạn như tên thành phần chính xác hoặc thể loại
+thành phần mà sẽ nhận ý định), cộng với thông tin mà thành phần nhận sử dụng để
+thực hiện hành động cho phù hợp (chẳng hạn như hành động sẽ thực hiện và dữ liệu để dựa vào đó mà thực hiện).</p>
+
+
+<p>Thông tin chính chứa trong một {@link android.content.Intent} như sau:</p>
+
+<dl>
+
+<dt><b>Tên thành phần</b></dt>
+<dd>Tên của thành phần sẽ bắt đầu.
+
+<p>Nội dung này không bắt buộc, nhưng đó là một thông tin trọng yếu để khiến một ý định trở nên
+<b>biểu thị</b>, có nghĩa là ý định nên chỉ được chuyển tới thành phần ứng dụng
+được xác định bởi tên thành phần đó. Nếu thiếu một tên thành phần, ý định trở thành <b>không biểu thị</b> và hệ thống
+sẽ quyết định thành phần nào nhận ý định đó dựa trên các thông tin còn lại của ý định
+(chẳng hạn như hành động, dữ liệu và thể loại&mdash;được mô tả bên dưới). Vì vậy, nếu bạn bắt đầu một thành phần
+cụ thể trong ứng dụng của mình, bạn nên chỉ định tên thành phần.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Khi bắt đầu một {@link android.app.Service}, bạn nên
+<strong>luôn chỉ định tên thành phần</strong>. Nếu không, bạn không thể chắc chắn dịch vụ nào
+sẽ hồi đáp ý định và người dùng không thể thấy dịch vụ nào bắt đầu.</p>
+
+<p>Trường này của {@link android.content.Intent} là một đối tượng
+{@link android.content.ComponentName} mà bạn có thể chỉ định bằng cách sử dụng một tên lớp
+hoàn toàn đủ tiêu chuẩn của thành phần đích, bao gồm tên gói của ứng dụng. Ví dụ,
+{@code com.example.ExampleActivity}. Bạn có thể đặt tên thành phần bằng {@link
+android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()}, hoặc bằng
+ hàm dựng {@link android.content.Intent}.</p>
+
+</dd>
+
+<p><dt><b>Hành động</b></dt>
+<dd>Một xâu quy định hành động thông thường sẽ thực hiện (chẳng hạn như <em>xem</em> hoặc <em>chọn</em>).
+
+<p>Trong trường hợp một ý định quảng bá, đây là hành động đã diễn ra và đang được báo cáo.
+Hành động này quyết định phần lớn cách thức xác định cấu trúc phần còn lại của ý định&mdash;đặc biệt là
+những gì chứa trong dữ liệu và phụ thêm.
+
+<p>Bạn có thể quy định các hành động của chính mình để các ý định bên trong ứng dụng của bạn sử dụng (hoặc để
+các ứng dụng khác sử dụng nhằm gọi ra các thành phần trong ứng dụng của mình), nhưng bạn nên thường xuyên sử dụng hằng số hành động
+được định nghĩa bởi lớp {@link android.content.Intent} hoặc các lớp khuôn khổ khác. Sau đây là một số
+hành động thường dùng để bắt đầu một hoạt động:</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>Sử dụng hành động này trong một ý định với {@link
+   android.content.Context#startActivity startActivity()} khi bạn có một số thông tin mà
+   một hoạt động có thể hiển thị cho người dùng, chẳng hạn như ảnh để xem trong một ứng dụng bộ sưu tập ảnh, hay địa chỉ để
+   xem trong ứng dụng bản đồ.</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>Còn được biết đến như là ý định "chia sẻ", bạn nên sử dụng kiểu này trong một ý định với {@link
+   android.content.Context#startActivity startActivity()} khi bạn có một số dữ liệu mà người dùng có thể
+   chia sẻ thông qua một ứng dụng khác, chẳng hạn như một ứng dụng e-mail hay ứng dụng chia sẻ mạng xã hội.</dd>
+</dl>
+
+<p>Xem tham chiếu lớp {@link android.content.Intent} để biết thêm
+hằng số có chức năng định nghĩa các hành động thông thường.  Những hành động khác được định nghĩa
+ở phần khác trong khuôn khổ Android, chẳng hạn như trong {@link android.provider.Settings} đối với những hành động
+có chức năng mở màn hình cụ thể trong ứng dụng Cài đặt của hệ thống.</p>
+
+<p>Bạn có thể quy định hành động cho một ý định với {@link android.content.Intent#setAction
+setAction()} hoặc với một hàm dựng {@link android.content.Intent}.</p>
+
+<p>Nếu bạn định nghĩa các hành động của chính mình, nhớ nêu tên gói ứng dụng của bạn
+làm tiền tố. Ví dụ:</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>Dữ liệu</b></dt>
+<dd>URI (một đối tượng {@link android.net.Uri}) tham chiếu dữ liệu sẽ được hành động dựa trên nó và/hoặc kiểu MIME
+của dữ liệu đó. Kiểu dữ liệu được cung cấp thường sẽ bị chi phối bởi hành động của ý định. Ví
+dụ, nếu hành động là {@link android.content.Intent#ACTION_EDIT}, dữ liệu cần chứa
+URI của tài liệu cần chỉnh sửa.
+
+<p>Khi tạo một ý định,
+một điều thường quan trọng đó là quy định kiểu dữ liệu (kiểu MIME của nó) ngoài URI của nó.
+Ví dụ, một hoạt động có thể hiển thị hình ảnh có thể sẽ không
+phát được tệp âm thanh, ngay cả khi định dạng URI có thể tương tự.
+Vì thế, việc quy định kiểu MIME cho dữ liệu của bạn sẽ giúp hệ thống
+Android tìm được thành phần tốt nhất để nhận ý định của bạn.
+Tuy nhiên, kiểu MIME đôi khi có thể được suy ra từ URI&mdash;cụ thể, khi dữ liệu là một URI
+{@code content:}, có chức năng cho biết dữ liệu nằm trên thiết bị và được kiểm soát bởi một
+{@link android.content.ContentProvider}, điều này khiến kiểu MIME của dữ liệu hiển thị đối với hệ thống.</p>
+
+<p>Để chỉ đặt URI dữ liệu, hãy gọi {@link android.content.Intent#setData setData()}.
+Để chỉ đặt kiểu MIME, hãy gọi {@link android.content.Intent#setType setType()}. Nếu cần, bạn
+bạn có thể công khai đặt cả hai với {@link
+android.content.Intent#setDataAndType setDataAndType()}.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Nếu bạn muốn đặt cả URI và kiểu MIME,
+<strong>không</strong> gọi {@link android.content.Intent#setData setData()} và
+{@link android.content.Intent#setType setType()} vì chúng sẽ vô hiệu hóa giá trị của nhau.
+Luôn sử dụng {@link android.content.Intent#setDataAndType setDataAndType()} để đặt cả
+URI và kiểu MIME.</p>
+</dd>
+
+<p><dt><b>Thể loại</b></dt>
+<dd>Một xâu chứa thông tin bổ sung về kiểu thành phần
+sẽ xử lý ý định.  Trong một ý định có thể chứa
+nhiều mô tả thể loại, nhưng hầu hết các ý định lại không yêu cầu thể loại.
+Sau đây là một số thể loại thường gặp:
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>Hoạt động mục tiêu cho phép chính nó được bắt đầu bởi một trình duyệt web để hiển thị dữ liệu
+       được một liên kết tham chiếu&mdash;chẳng hạn như một hình ảnh hay thư e-mail.
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>Hoạt động là hoạt động ban đầu của một tác vụ và được liệt kê trong
+       trình khởi chạy ứng dụng của hệ thống.
+  </dd>
+</dl>
+
+<p>Xem mô tả lớp {@link android.content.Intent} để biết danh sách đầy đủ về các
+thể loại.</p>
+
+<p>Bạn có thể quy định một thể loại bằng {@link android.content.Intent#addCategory addCategory()}.</p>
+</dd>
+</dl>
+
+
+<p>Những tính chất này được liệt kê ở trên (tên thành phần, hành động, dữ liệu và thể loại) biểu hiện các
+đặc điểm xác định của một ý định. Bằng cách đọc những tính chất này, hệ thống Android
+có thể quyết định nó sẽ bắt đầu thành phần ứng dụng nào.</p>
+
+<p>Tuy nhiên, một ý định có thể mang thông tin bổ sung không ảnh hưởng tới
+cách nó được giải quyết đối với một thành phần ứng dụng. Một ý định cũng có thể cung cấp:</p>
+
+<dl>
+<dt><b>Phụ thêm</b></dt>
+<dd>Các cặp khóa-giá trị mang thông tin bổ sung cần thiết để hoàn thành hành động được yêu cầu.
+Giống như việc một số hành động sử dụng các kiểu URI dữ liệu riêng, một số hành động cũng sử dụng các phần phụ thêm riêng.
+
+<p>Bạn có thể thêm dữ liệu phụ thêm bằng các phương pháp {@link android.content.Intent#putExtra putExtra()} khác nhau,
+mỗi phương pháp chấp nhận hai tham số: tên khóa và giá trị.
+Bạn cũng có thể tạo một đối tượng {@link android.os.Bundle} bằng tất cả dữ liệu phụ thêm, sau đó chèn
+ {@link android.os.Bundle} vào {@link android.content.Intent} bằng {@link
+android.content.Intent#putExtras putExtras()}.</p>
+
+<p>Ví dụ, khi tạo một ý định để gửi một e-mail bằng
+{@link android.content.Intent#ACTION_SEND}, bạn có thể chỉ định người nhận "tới" bằng khóa
+{@link android.content.Intent#EXTRA_EMAIL}, và chỉ định "chủ đề" bằng khóa
+{@link android.content.Intent#EXTRA_SUBJECT}.</p>
+
+<p>Lớp {@link android.content.Intent} quy định nhiều hằng số {@code EXTRA_*} cho
+các kiểu dữ liệu chuẩn hóa. Nếu bạn cần khai báo các khóa phụ thêm của riêng mình (cho những ý định
+mà ứng dụng của bạn nhận), hãy chắc chắn nêu tên gói ứng dụng của bạn
+làm tiền tố. Ví dụ:</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>Cờ</b></dt>
+<dd>Cờ được định nghĩa trong lớp {@link android.content.Intent} có chức năng như siêu dữ liệu cho
+ý định. Cờ có thể chỉ lệnh hệ thống Android về cách khởi chạy một hoạt động (ví dụ, hoạt động sẽ thuộc về
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">tác vụ</a> nào
+) và cách xử lý sau khi nó được khởi chạy (ví dụ, nó có thuộc về danh sách hoạt động
+gần đây hay không).
+
+<p>Để biết thêm thông tin, hãy xem phương pháp {@link android.content.Intent#setFlags setFlags()}.</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">Ví dụ về ý định biểu thị</h3>
+
+<p>Ý định biểu thị là ý định mà bạn sử dụng để khởi chạy một thành phần ứng dụng cụ thể
+chẳng hạn như một hoạt động hay dịch vụ cụ thể trong ứng dụng của bạn. Để tạo một ý định biểu thị, hãy định nghĩa
+tên thành phần cho đối tượng {@link android.content.Intent} &mdash;tất cả các
+tính chất ý định khác đều không bắt buộc.</p>
+
+<p>Ví dụ, nếu bạn đã xây dựng một dịch vụ trong ứng dụng của mình, đặt tên là {@code DownloadService},
+được thiết kế để tải xuống một tệp từ web, bạn có thể bắt đầu nó bằng mã sau:</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>Hàm dựng {@link android.content.Intent#Intent(Context,Class)}
+cung cấp cho ứng dụng {@link android.content.Context} và thành phần
+một đối tượng {@link java.lang.Class}. Như vậy,
+ý định này rõ ràng sẽ bắt đầu lớp {@code DownloadService} trong ứng dụng.</p>
+
+<p>Để biết thêm thông tin về việc xây dựng và bắt đầu một dịch vụ, hãy xem hướng dẫn
+<a href="{@docRoot}guide/components/services.html">Dịch vụ</a>.</p>
+
+
+
+
+<h3 id="ExampleSend">Ví dụ về ý định không biểu thị</h3>
+
+<p>Ý định không biểu thị quy định một hành động mà có thể gọi ra bất kỳ ứng dụng nào trên thiết bị mà có
+khả năng thực hiện hành động đó. Việc sử dụng ý định không biểu thị có ích khi ứng dụng của bạn không thể thực hiện
+hành động, nhưng các ứng dụng khác có thể và bạn muốn người dùng chọn ứng dụng sẽ sử dụng.</p>
+
+<p>Ví dụ, nếu bạn có nội dung mà mình muốn người dùng chia sẻ với người khác, hãy tạo một ý định
+với hành động {@link android.content.Intent#ACTION_SEND} và
+bổ sung phần phụ thêm quy định nội dung sẽ chia sẻ. Khi bạn gọi
+{@link android.content.Context#startActivity startActivity()} bằng ý định đó, người dùng có thể
+chọn một ứng dụng để chia sẻ nội dung thông qua đó.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Có thể là người dùng sẽ không có <em>bất kỳ</em>
+ứng dụng nào xử lý được ý định không biểu thị mà bạn gửi tới {@link android.content.Context#startActivity
+startActivity()}. Nếu chuyện đó xảy ra, phương pháp gọi sẽ thất bại và ứng dụng của bạn sẽ gặp lỗi. Để xác minh rằng
+một hoạt động sẽ nhận được ý định, hãy gọi {@link android.content.Intent#resolveActivity
+resolveActivity()} trên đối tượng {@link android.content.Intent} của bạn. Nếu kết quả không rỗng
+thì có ít nhất một ứng dụng có thể xử lý ý định và sẽ an toàn nếu gọi
+{@link android.content.Context#startActivity startActivity()}. Nếu kết quả rỗng,
+bạn không nên sử dụng ý định và, nếu có thể, bạn nên vô hiệu hóa tính năng phát hành
+ý định.</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Trong trường hợp này, URI không được sử dụng, nhưng kiểu dữ liệu của ý định
+sẽ được khai báo để quy định nội dung được thực hiện bởi phần phụ thêm.</p>
+
+
+<p>Khi {@link android.content.Context#startActivity startActivity()} được gọi, hệ thống
+sẽ kiểm tra tất cả ứng dụng đã cài đặt để xác định những ứng dụng có thể xử lý kiểu ý định này (một
+ý định với hành động {@link android.content.Intent#ACTION_SEND} và có mang dữ liệu
+"văn bản/thuần"). Nếu chỉ có một ứng dụng có thể xử lý nó, ứng dụng đó sẽ mở ngay lập tức và được cấp cho
+ý định. Nếu có nhiều hoạt động chấp nhận ý định, hệ thống
+sẽ hiển thị một hộp thoại để người dùng có thể chọn ứng dụng sẽ sử dụng.</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>Hình 2.</strong> Hộp thoại bộ chọn.</p>
+</div>
+
+<h3 id="ForceChooser">Bắt buộc một bộ chọn ứng dụng</h3>
+
+<p>Khi có nhiều hơn một ứng dụng hồi đáp ý định không biểu thị của bạn,
+người dùng có thể chọn ứng dụng nào sẽ sử dụng và đặt ứng dụng đó làm lựa chọn mặc định cho
+hành động. Điều này tốt khi thực hiện một hành động mà người dùng
+có thể muốn sử dụng ứng dụng tương tự từ lúc này trở đi, chẳng hạn như khi mở một trang web (người dùng
+thường thích ưu tiên sử dụng chỉ một trình duyệt web).</p>
+
+<p>Tuy nhiên, nếu nhiều ứng dụng có thể hồi đáp ý định và người dùng có thể muốn sử dụng mỗi
+lần một ứng dụng khác, bạn nên công khai hiển thị một hộp thoại bộ chọn. Hộp thoại bộ chọn yêu cầu
+người dùng phải chọn ứng dụng sẽ sử dụng mỗi lần cho hành động (người dùng không thể chọn một ứng dụng mặc định cho
+hành động). Ví dụ, khi ứng dụng của bạn thực hiện "chia sẻ" với hành động {@link
+android.content.Intent#ACTION_SEND}, người dùng có thể muốn chia sẻ bằng cách sử dụng một ứng dụng khác tùy vào
+tình hình thực tế của họ, vì thế bạn nên luôn sử dụng hộp thoại bộ chọn như minh họa trong hình 2.</p>
+
+
+
+
+<p>Để hiển thị bộ chọn, hãy tạo một {@link android.content.Intent} bằng cách sử dụng {@link
+android.content.Intent#createChooser createChooser()} và chuyển nó sang {@link
+android.app.Activity#startActivity startActivity()}. Ví dụ:</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>Một hộp thoại hiển thị với một danh sách ứng dụng hồi đáp lại ý định được chuyển sang phương pháp {@link
+android.content.Intent#createChooser createChooser()} và sử dụng văn bản được cung cấp làm
+tiêu đề của hộp thoại.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">Nhận một Ý định Không biểu thị</h2>
+
+<p>Để quảng cáo những ý định không biểu thị mà ứng dụng của bạn có thể nhận, hãy khai báo một hoặc nhiều bộ lọc ý định cho
+từng thành phần ứng dụng của bạn với một phần tử <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+trong <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">tệp bản kê khai của mình</a>.
+Mỗi bộ lọc ý định sẽ quy định loại ý định mà nó chấp nhận dựa trên hành động,
+dữ liệu và thể loại của ý định. Hệ thống sẽ chỉ chuyển một ý định không biểu thị tới thành phần ứng dụng của bạn nếu
+ý định đó có thể chuyển qua một trong các bộ lọc ý định của bạn.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Ý định biểu thị luôn được chuyển tới mục tiêu của mình,
+không phụ thuộc vào bất kỳ bộ lọc ý định nào mà thành phần khai báo.</p>
+
+<p>Một thành phần ứng dụng nên khai báo các bộ lọc riêng cho từng công việc duy nhất mà nó có thể thực hiện.
+Ví dụ, một hoạt động trong một ứng dụng bộ sưu tập ảnh có thể có hai bộ lọc: một bộ lọc
+để xem một hình ảnh và một bộ lọc để chỉnh sửa một hình ảnh. Khi hoạt động bắt đầu,
+nó sẽ kiểm tra {@link android.content.Intent} và quyết định cách xử lý dựa trên thông tin
+trong {@link android.content.Intent} (chẳng hạn như có hiển thị các điều khiển của trình chỉnh sửa hoặc không).</p>
+
+<p>Mỗi bộ lọc ý định sẽ được định nghĩa bởi một phần tử <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+trong tệp bản kê khai của ứng dụng, được lồng trong thành phần ứng dụng tương ứng (chẳng hạn như
+một phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+). Bên trong <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>,
+bạn có thể quy định loại ý định sẽ chấp nhận bằng cách sử dụng một hoặc nhiều
+phần tử trong ba phần tử sau:</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>Khai báo hành động ý định được chấp nhận, trong thuộc tính {@code name}. Giá trị
+  phải là giá trị xâu ký tự của một hành động chứ không phải hằng số lớp.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>Khai báo kiểu dữ liệu được chấp nhận, bằng cách sử dụng một hoặc nhiều thuộc tính quy định
+  các khía cạnh của URI dữ liệu (<code>scheme</code>, <code>host</code>, <code>port</code>,
+  <code>path</code>, v.v.) và kiểu MIME.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>Khai báo thể loại ý định được chấp nhận, trong thuộc tính {@code name}. Giá trị
+  phải là giá trị xâu ký tự của một hành động chứ không phải hằng số lớp.
+
+  <p class="note"><strong>Lưu ý:</strong> Để nhận các ý định không biểu thị, bạn
+  <strong>phải nêu</strong> thể loại
+  {@link android.content.Intent#CATEGORY_DEFAULT} trong bộ lọc ý định. Các phương pháp
+  {@link android.app.Activity#startActivity startActivity()} và
+  {@link android.app.Activity#startActivityForResult startActivityForResult()} xử lý tất cả ý định
+  như thể chúng khai báo thể loại {@link android.content.Intent#CATEGORY_DEFAULT}.
+  Nếu bạn không khai báo thể loại này trong bộ lọc ý định của mình, không có ý định không biểu thị nào sẽ phân giải thành
+  hoạt động của bạn.</p>
+  </dd>
+</dl>
+
+<p>Ví dụ, sau đây là một khai báo hoạt động với một bộ lọc ý định để nhận một ý định
+{@link android.content.Intent#ACTION_SEND} khi kiểu dữ liệu là văn bản:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Không sao nếu tạo một bộ lọc chứa nhiều hơn một thực thể của
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>, hoặc
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>.
+Nếu làm vậy, bạn chỉ cần chắc chắn rằng thành phần có thể xử lý bất kỳ và tất cả các cách kết hợp
+những phần tử bộ lọc đó.</p>
+
+<p>Khi bạn muốn xử lý nhiều kiểu ý định, nhưng chỉ theo các cách kết hợp cụ thể giữa
+hành động, dữ liệu và kiểu thể loại, khi đó bạn cần tạo nhiều bộ lọc ý định.</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Hạn chế truy cập vào các thành phần</h2>
+<p>Sử dụng một bộ lọc ý định không phải là một cách bảo mật để ngăn các ứng dụng khác bắt đầu
+các thành phần của bạn. Mặc dù bộ lọc ý định hạn chế một thành phần chỉ hồi đáp
+một số kiểu ý định không biểu thị nhất định, một ứng dụng khác có thể có khả năng bắt đầu thành phần ứng dụng của bạn
+bằng cách sử dụng ý định biểu thị nếu nhà phát triển xác định tên thành phần của bạn.
+Nếu điều quan trọng là <em>chỉ ứng dụng của chính bạn</em> mới có thể bắt đầu một trong các thành phần của bạn,
+hãy đặt thuộc tính <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> thành {@code "false"} cho thành phần đó.
+</p>
+</div>
+</div>
+
+<p>Ý định không biểu thị sẽ được kiểm tra dựa trên một bộ lọc bằng cách so sánh ý định với từng phần tử trong số
+ba phần tử. Để được chuyển tới thành phần, ý định phải vượt qua tất cả ba lần kiểm tra.
+Nếu không khớp với thậm chí chỉ một lần thì hệ thống Android sẽ không chuyển ý định tới
+thành phần.  Tuy nhiên, vì một thành phần có thể có nhiều bộ lọc ý định, ý định mà không chuyển qua
+một trong các bộ lọc của thành phần có thể chuyển qua trên một bộ lọc khác.
+Bạn có thể tìm hiểu thêm thông tin về cách hệ thống giải quyết ý định trong phần bên dưới
+về <a href="#Resolution">Giải quyết Ý định</a>.</p>
+
+<p class="caution"><strong>Chú ý:</strong> Để tránh vô ý chạy
+{@link android.app.Service} của một ứng dụng khác, hãy luôn sử dụng một ý định biểu thị để bắt đầu dịch vụ của chính bạn và không được
+khai báo các bộ lọc ý định cho dịch vụ của bạn.</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+Đối với tất cả hoạt động, bạn phải khai báo các bộ lọc ý định của mình trong một tệp bản kê khai.
+Tuy nhiên, các bộ lọc cho hàm nhận quảng bá có thể được đăng ký linh hoạt bằng cách gọi
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()}. Sau đó, bạn có thể bỏ đăng ký hàm nhận đó bằng {@link
+android.content.Context#unregisterReceiver unregisterReceiver()}. Làm vậy sẽ cho phép ứng dụng của bạn
+lắng nghe các quảng bá cụ thể chỉ trong một khoảng thời gian xác định trong khi ứng dụng của bạn
+đang chạy.</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">Ví dụ về bộ lọc</h3>
+
+<p>Để hiểu hơn về một số hành vi của bộ lọc ý định, hãy xem đoạn mã HTML sau
+từ tệp bản kê khai của một ứng dụng chia sẻ mạng xã hội.</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Hoạt động thứ nhất, {@code MainActivity}, là điểm mục nhập chính của ứng dụng&mdash;hoạt động này
+sẽ mở khi người dùng khởi tạo ban đầu ứng dụng bằng biểu tượng trình khởi chạy:</p>
+<ul>
+  <li>Hành động {@link android.content.Intent#ACTION_MAIN} thể hiện
+  đây là điểm mục nhập chính và không yêu cầu bất kỳ dữ liệu ý định nào.</li>
+  <li>Thể loại {@link android.content.Intent#CATEGORY_LAUNCHER} cho biết rằng biểu tượng
+  của hoạt động này nên được đặt trong trình khởi chạy ứng dụng của hệ thống. Nếu phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+  không quy định một biểu tượng bằng {@code icon}, khi đó hệ thống sẽ sử dụng biểu tượng từ phần tử <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+.</li>
+</ul>
+<p>Hai nội dung này phải được ghép đôi cùng nhau để hoạt động xuất hiện trong trình khởi chạy ứng dụng.</p>
+
+<p>Hoạt động thứ hai, {@code ShareActivity}, có mục đích để tạo điều kiện chia sẻ nội dung văn bản và
+phương tiện. Mặc dù người dùng có thể nhập hoạt động này bằng cách điều hướng tới nó từ {@code MainActivity},
+họ cũng có thể nhập {@code ShareActivity} trực tiếp từ một ứng dụng khác mà phát hành
+ý định không biểu thị khớp với một trong hai bộ lọc ý định.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Kiểu MIME,
+<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>, là một kiểu dữ liệu đặc biệt quy định
+ảnh chụp toàn cảnh mà bạn có thể xử lý bằng các API <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
+panorama</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">Sử dụng một Ý định Chờ</h2>
+
+<p>Đối tượng {@link android.app.PendingIntent} là một trình bao bọc xung quanh một đối tượng {@link
+android.content.Intent}. Mục đích chính của một {@link android.app.PendingIntent}
+ là cấp quyền cho một ứng dụng ngoài
+để sử dụng {@link android.content.Intent} chứa trong nó như thể nó được thực thi từ tiến trình
+của chính ứng dụng của bạn.</p>
+
+<p>Các trường hợp sử dụng chính đối với một ý định chờ bao gồm:</p>
+<ul>
+  <li>Khai báo một ý định cần được thực thi khi người dùng thực hiện một hành động bằng <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo</a> của bạn
+  ({@link android.app.NotificationManager}
+  của hệ thống Android thực thi {@link android.content.Intent}).
+  <li>Khai báo một ý định cần được thực thi khi người dùng thực hiện một hành động bằng
+  <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widget</a> của bạn
+  (ứng dụng màn hình Trang chủ thực thi {@link android.content.Intent}).
+  <li>Khai báo một ý định cần được thực thi tại một thời điểm xác định trong tương lai (
+{@link android.app.AlarmManager} của hệ thống Android thực thi {@link android.content.Intent}).
+</ul>
+
+<p>Vì mỗi đối tượng {@link android.content.Intent} được thiết kế để được xử lý bởi một
+loại thành phần ứng dụng cụ thể (hoặc là {@link android.app.Activity}, {@link android.app.Service}, hay
+ {@link android.content.BroadcastReceiver}), vì thế {@link android.app.PendingIntent} cũng
+phải được tạo lập với cân nhắc tương tự. Khi sử dụng một ý định chờ, ứng dụng của bạn sẽ không
+thực thi ý định bằng một lệnh gọi chẳng hạn như {@link android.content.Context#startActivity
+startActivity()}. Thay vào đó, bạn phải khai báo loại thành phần theo ý định khi bạn tạo lập
+{@link android.app.PendingIntent} bằng cách gọi phương pháp trình tạo lập tương ứng:</p>
+
+<ul>
+  <li>{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()} đối với một
+  {@link android.content.Intent} mà bắt đầu {@link android.app.Activity}.</li>
+  <li>{@link android.app.PendingIntent#getService PendingIntent.getService()} đối với một
+  {@link android.content.Intent} mà bắt đầu {@link android.app.Service}.</li>
+  <li>{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()} đối với một
+  {@link android.content.Intent} mà bắt đầu {@link android.content.BroadcastReceiver}.</li>
+</ul>
+
+<p>Trừ khi ứng dụng của bạn đang <em>nhận</em> ý định chờ từ các ứng dụng khác,
+các phương pháp để tạo lập {@link android.app.PendingIntent} trên là những phương pháp
+{@link android.app.PendingIntent} duy nhất mà bạn sẽ cần.</p>
+
+<p>Mỗi phương pháp sẽ lấy ứng dụng {@link android.content.Context} hiện tại,
+{@link android.content.Intent} mà bạn muốn bao bọc, và một hoặc nhiều cờ quy định
+cách thức sử dụng ý định (chẳng hạn như ý định có thể được sử dụng nhiều hơn một lần hay không).</p>
+
+<p>Bạn có thể tham khảo thêm thông tin về việc sử dụng ý định chờ trong tài liệu cho từng
+trường hợp sử dụng tương ứng chẳng hạn như trong hướng dẫn về API <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo</a>
+và <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">Giải quyết Ý định</h2>
+
+
+<p>Khi hệ thống nhận được một ý định không biểu thị nhằm bắt đầu một hoạt động, nó sẽ tìm
+hoạt động tốt nhất cho ý định đó bằng cách so sánh ý định với các bộ lọc ý định dựa trên ba phương diện:</p>
+
+<ul>
+  <li>Hành động của ý định
+  <li>Dữ liệu của ý định (cả URI và kiểu dữ liệu)
+  <li>Thể loại của ý định
+</ul>
+
+<p>Các phần sau mô tả cách một ý định được so khớp với (các) thành phần phù hợp
+về phương diện bộ lọc ý định được khai báo như thế nào trong tệp bản kê khai của một ứng dụng.</p>
+
+
+<h3 id="ActionTest">Kiểm tra hành động</h3>
+
+<p>Để quy định các hành động của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Để vượt qua bộ lọc này, hành động được quy định trong {@link android.content.Intent}
+  phải khớp với một trong các hành động được liệt kê trong bộ lọc.</p>
+
+<p>Nếu bộ lọc không liệt kê bất kỳ hành động nào thì sẽ không có gì để
+ý định so khớp, vì thế tất cả ý định sẽ không vượt qua kiểm tra. Tuy nhiên, nếu một {@link android.content.Intent}
+không quy định một hành động, nó sẽ vượt qua kiểm tra (miễn là bộ lọc
+chứa ít nhất một hành động).</p>
+
+
+
+<h3 id="CategoryTest">Kiểm tra thể loại</h3>
+
+<p>Để quy định các thể loại của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Để một ý định vượt qua kiểm tra thể loại, mỗi thể loại trong {@link android.content.Intent}
+phải khớp với một thể loại trong bộ lọc. Trường hợp ngược lại là không cần thiết&mdash;bộ lọc ý định có thể
+khai báo nhiều thể loại hơn được quy định trong {@link android.content.Intent} và
+{@link android.content.Intent} sẽ vẫn vượt qua. Vì thế, ý định không có thể loại
+luôn vượt qua kiểm tra này, không phụ thuộc vào những thể loại nào được khai báo trong bộ lọc.</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+Android sẽ tự động áp dụng thể loại {@link android.content.Intent#CATEGORY_DEFAULT}
+cho tất cả ý định không biểu thị được chuyển tới {@link
+android.content.Context#startActivity startActivity()} và {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.
+Vì thế, nếu bạn muốn hoạt động của mình nhận ý định không biểu thị, nó phải
+nêu một thể loại cho {@code "android.intent.category.DEFAULT"} trong các bộ lọc ý định của mình (như
+được minh họa trong ví dụ {@code &lt;intent-filter&gt;} trước đó.</p>
+
+
+
+<h3 id="DataTest">Kiểm tra dữ liệu</h3>
+
+<p>Để quy định dữ liệu của ý định được chấp nhận, một bộ lọc ý định có thể khai báo 0 phần tử
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> hoặc nhiều hơn.  Ví dụ:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Mỗi phần tử <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+có thể quy định một cấu trúc URI và kiểu dữ liệu (kiểu phương tiện MIME).  Có các thuộc tính
+riêng &mdash; {@code scheme}, {@code host}, {@code port},
+và {@code path} &mdash; cho từng phần của URI:
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+Ví dụ:
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>Trong URI này, lược đồ là {@code content}, máy chủ là {@code com.example.project},
+cổng là {@code 200}, và đường dẫn là {@code folder/subfolder/etc}.
+</p>
+
+<p>Mỗi thuộc tính sau đều không bắt buộc trong một phần tử <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>,
+nhưng có sự phụ thuộc mang tính chất tuyến tính:</p>
+<ul>
+  <li>Nếu không quy định một lược đồ thì máy chủ bị bỏ qua.</li>
+  <li>Nếu không quy định một máy chủ thì cổng bị bỏ qua.</li>
+  <li>Nếu không quy định cả lược đồ và máy chủ thì đường dẫn bị bỏ qua.</li>
+</ul>
+
+<p>Khi URI trong một ý định được so sánh với đặc tả URI trong một bộ lọc,
+nó chỉ được so sánh với các bộ phận của URI được nêu trong bộ lọc. Ví dụ:</p>
+<ul>
+  <li>Nếu một bộ lọc chỉ quy định một lược đồ, tất cả URI có lược đồ đó sẽ khớp
+với bộ lọc.</li>
+  <li>Nếu một bộ lọc quy định một lược đồ và thẩm quyền nhưng không có đường dẫn, tất cả URI
+với cùng lược đồ và thẩm quyền sẽ thông qua bộ lọc, không phụ thuộc vào đường dẫn của nó.</li>
+  <li>Nếu bộ lọc quy định một lược đồ, thẩm quyền và đường dẫn, chỉ những URI có cùng lược đồ,
+thẩm quyền và đường dẫn mới thông qua bộ lọc.</li>
+</ul>
+
+<p class="note"><strong>Lưu ý:</strong> Đặc tả đường dẫn có thể
+chứa một ký tự đại diện dấu sao (*) để yêu cầu chỉ khớp một phần với tên đường dẫn.</p>
+
+<p>Kiểm tra dữ liệu so sánh cả URI và kiểu MIME trong ý định với một URI
+và kiểu MIME được quy định trong bộ lọc.  Các quy tắc như sau:
+</p>
+
+<ol type="a">
+<li>Một ý định mà không chứa URI cũng như kiểu MIME sẽ chỉ vượt qua
+kiểm tra nếu bộ lọc không quy định bất kỳ URI hay kiểu MIME nào.</li>
+
+<li>Một ý định chứa URI nhưng không có kiểu MIME (không biểu thị cũng như suy luận được từ
+URI) sẽ chỉ vượt qua kiểm tra nếu URI của nó khớp với định dạng URI của bộ lọc
+và bộ lọc tương tự không quy định một kiểu MIME.</li>
+
+<li>Một ý định chứa kiểu MIME nhưng không chứa URI sẽ chỉ vượt qua kiểm tra
+nếu bộ lọc liệt kê cùng kiểu MIME và không quy định một định dạng URI.</li>
+
+<li>Ý định mà chứa cả URI và kiểu MIME (hoặc biểu thị hoặc suy ra được từ
+URI) sẽ chỉ vượt qua phần kiểu MIME của kiểm tra nếu kiểu đó
+khớp với kiểu được liệt kê trong bộ lọc.  Nó vượt qua phần URI của kiểm tra
+nếu URI của nó khớp với một URI trong bộ lọc hoặc nếu nó có một {@code content:}
+hoặc {@code file:} URI và bộ lọc không quy định một URI. Nói cách khác,
+một thành phần được giả định là hỗ trợ dữ liệu {@code content:} và {@code file:} nếu
+bộ lọc của nó liệt kê <em>chỉ</em> một kiểu MIME.</p></li>
+</ol>
+
+<p>
+Quy tắc cuối cùng này, quy tắc (d), phản ánh kỳ vọng
+rằng các thành phần có thể nhận được dữ liệu cục bộ từ một tệp hoặc trình cung cấp nội dung.
+Vì thế, các bộ lọc của chúng có thể chỉ liệt kê một kiểu dữ liệu và không cần công khai
+nêu tên {@code content:} và các lược đồ {@code file:}.
+Đây là một trường hợp điển hình.  Phần tử <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> như
+ sau, ví dụ, sẽ thông báo cho Android biết rằng thành phần có thể nhận được dữ liệu ảnh từ một trình cung cấp
+nội dung và sẽ hiển thị nó:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+Vì hầu hết dữ liệu có sẵn đều được cấp phát bởi các trình cung cấp nội dung, những bộ lọc mà
+quy định một kiểu dữ liệu chứ không phải URI có lẽ là phổ biến nhất.
+</p>
+
+<p>
+Một cấu hình phổ biến khác đó là các bộ lọc có một lược đồ và một kiểu dữ liệu.  Ví
+dụ, một phần tử <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
+như sau thông báo cho Android rằng
+thành phần có thể truy xuất dữ liệu video từ mạng để thực hiện hành động:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">So khớp ý định</h3>
+
+<p>Các ý định được so khớp với các bộ lọc ý định không chỉ để khám phá một thành phần
+mục tiêu cần kích hoạt, mà còn để khám phá điều gì đó về tập hợp
+các thành phần trên thiết bị.  Ví dụ, ứng dụng Trang chủ đưa trình khởi chạy ứng dụng
+vào bằng cách tìm tất cả hoạt động có bộ lọc ý định mà quy định hành động
+{@link android.content.Intent#ACTION_MAIN} và thể loại
+{@link android.content.Intent#CATEGORY_LAUNCHER}.</p>
+
+<p>Ứng dụng của bạn có thể sử dụng so khớp ý định theo cách tương tự.
+{@link android.content.pm.PackageManager} có một tập hợp các phương pháp{@code query...()}
+trả về tất cả thành phần có thể chấp nhận một ý định cụ thể, và
+một chuỗi các phương pháp {@code resolve...()} tương tự để xác định thành phần
+tốt nhất nhằm hồi đáp lại một ý định.  Ví dụ,
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} sẽ trả về một danh sách tất cả hoạt động có thể thực hiện
+ý định được chuyển qua như một tham đối, và {@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} trả về một danh sách dịch vụ tương tự.
+Cả hai phương pháp đều không kích hoạt các thành phần; chúng chỉ liệt kê những thành phần
+có thể hồi đáp.  Có một phương pháp tương tự,
+{@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()}, dành cho hàm nhận quảng bá.
+</p>
+
+
+
+

@@ -1,0 +1,101 @@
+page.title=Adding the App Bar
+page.tags="appbar","actionbar"
+helpoutsWidget=true
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/implementing-navigation/index.html">
+    Implementing Effective Navigation</a></li>
+  <li><a href="http://www.google.com/design/spec/layout/structure.html#structure-app-bar">
+    Material Design: App Bar</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>
+  The <em>app bar</em>, also known as the <em>action bar</em>, is one of the most
+  important design elements in your app's activities, because
+  it provides a visual structure and interactive elements that are familiar to
+  users. Using the app bar makes your app consistent with other Android apps,
+  allowing users to quickly understand how to operate your app and have a great
+  experience.
+  The key functions of the app bar
+  are as follows:
+</p>
+
+<ul>
+  <li>A dedicated space for giving your app an identity and indicating the
+  user's location in the app.
+  </li>
+
+  <li>Access to important actions in a predictable way, such as search.
+  </li>
+
+  <li>Support for navigation and view switching (with tabs or drop-down lists).
+  </li>
+</ul>
+
+<img src="{@docRoot}images/training/appbar/appbar_sheets_2x.png"
+    srcset="{@docRoot}images/training/appbar/appbar_sheets.png 1x,
+        {@docRoot}images/training/appbar/appbar_sheets_2x.png 2x"
+    width="400" alt="" />
+
+<p>
+  This class describes how to use the
+  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> support library's {@link
+  android.support.v7.widget.Toolbar} widget as an app bar. There are other ways
+  to implement an app bar—for example, some themes set up an {@link
+  android.app.ActionBar} as an app bar by default—but using the appcompat
+  {@link android.support.v7.widget.Toolbar} makes it easy to set up an app bar
+  that works on the widest range of devices, and also gives you room to
+  customize your app bar later on as your app develops.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+    <b><a href="setting-up.html">Setting Up the App Bar</a></b>
+  </dt>
+
+  <dd>
+    Learn how to add a {@link android.support.v7.widget.Toolbar} widget to your
+    activity, and set it as the activity's app bar.
+  </dd>
+
+  <dt>
+    <b><a href="actions.html">Adding and Handling Actions</a></b>
+  </dt>
+
+  <dd>
+    Learn how to add actions to the app bar and its overflow menu, and how to
+    respond when users choose those actions.
+  </dd>
+
+  <dt>
+    <b><a href="up-action.html">Adding an Up Action</a></b>
+  </dt>
+
+  <dd>
+    Learn how to add an <em>Up</em> button to your app bar, so users
+    can navigate back to the app's home screen.
+  </dd>
+
+  <dt>
+    <b><a href="action-views.html">Action Views and Action Providers</a></b>
+  </dt>
+
+  <dd>
+    Learn how to use these widgets to provide advanced functionality in your
+    app bar.
+  </dd>
+</dl>

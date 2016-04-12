@@ -36,9 +36,9 @@ UI patterns:</p>
 provides classes that help you implement these patterns and create layouts that work on
 both round and square Android Wear devices.</p>
 
-<p class="note"><b>Note:</b> We recommend using Android Studio for Android Wear development
-as it provides project setup, library inclusion, and packaging conveniences that aren't available
-in ADT. This training assumes you are using Android Studio.</p>
+<p class="note"><b>Note:</b> We recommend using Android Studio for Android Wear development,
+as it provides project setup, library inclusion, and packaging conveniences. This training assumes
+you are using Android Studio.</p>
 
 <h2>Lessons</h2>
 

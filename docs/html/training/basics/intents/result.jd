@@ -107,8 +107,8 @@ contact the user selected.</p>
 <p>In order to successfully handle the result, you must understand what the format of the result
 {@link android.content.Intent} will be. Doing so is easy when the activity returning a result is
 one of your own activities. Apps included with the Android platform offer their own APIs that
-you can count on for specific result data. For instance, the People app (Contacts app on some older
-versions) always returns a result with the content URI that identifies the selected contact, and the
+you can count on for specific result data. For instance, the People app always returns a result
+with the content URI that identifies the selected contact, and the
 Camera app returns a {@link android.graphics.Bitmap} in the {@code "data"} extra (see the class
 about <a href="{@docRoot}training/camera/index.html">Capturing Photos</a>).</p>
 

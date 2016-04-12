@@ -1,0 +1,2356 @@
+page.title=Trình cung cấp Danh bạ
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Xem nhanh</h2>
+<ul>
+    <li>Kho lưu giữ thông tin về con người của Android.</li>
+    <li>
+        Đồng bộ với web.
+    </li>
+    <li>
+        Tích hợp dữ liệu theo luồng xã hội.
+    </li>
+</ul>
+<h2>Trong tài liệu này</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">Tổ chức Trình cung cấp Danh bạ</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">Liên lạc thô</a>
+    </li>
+    <li>
+        <a href="#DataBasics">Dữ liệu</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">Danh bạ</a>
+    </li>
+    <li>
+        <a href="#Sources">Dữ liệu từ Trình điều hợp Đồng bộ</a>
+    </li>
+    <li>
+        <a href="#Permissions">Quyền được Yêu cầu</a>
+    </li>
+    <li>
+        <a href="#UserProfile">Hồ sơ Người dùng</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">Siêu dữ liệu Trình cung cấp Danh bạ</a>
+    </li>
+    <li>
+        <a href="#Access">Truy cập Trình cung cấp Danh bạ</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">Trình điều hợp Đồng bộ Trình cung cấp Danh bạ</a>
+    </li>
+    <li>
+        <a href="#SocialStream">Dữ liệu từ Luồng Xã hội</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">Các Tính năng Bổ sung của Trình cung cấp Danh bạ</a>
+    </li>
+</ol>
+<h2>Lớp khóa</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>Các Mẫu Liên quan</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">
+        Trình quản lý Danh bạ
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Trình điều hợp Đồng bộ Mẫu</a>
+    </li>
+</ol>
+<h2>Xem thêm</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Nội dung Cơ bản về Trình cung cấp Nội dung
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Trình cung cấp Danh bạ là một thành phần Android mạnh mẽ và linh hoạt có chức năng quản lý
+    kho dữ liệu trung tâm về con người của thiết bị. Trình cung cấp Danh bạ là nguồn của những dữ liệu
+    mà bạn thấy trong ứng dụng danh bạ của thiết bị, và bạn cũng có thể truy cập dữ liệu của nó trong
+    ứng dụng của chính mình và chuyển dữ liệu giữa thiết bị và các dịch vụ trực tuyến. Trình cung cấp chứa
+    đủ loại nguồn dữ liệu và cố gắng quản lý nhiều dữ liệu nhất có thể cho mỗi người, kết quả
+    là tổ chức của nó trở nên phức tạp. Vì điều này, API của trình cung cấp bao gồm một
+    tập mở rộng gồm các lớp hợp đồng và giao diện tạo điều kiện cho việc truy xuất và sửa đổi
+    dữ liệu.
+</p>
+<p>
+    Hướng dẫn này trình bày những nội dung sau:
+</p>
+    <ul>
+        <li>
+            Cấu trúc cơ bản của trình cung cấp.
+        </li>
+        <li>
+            Cách truy xuất dữ liệu từ trình cung cấp.
+        </li>
+        <li>
+            Cách sửa đổi dữ liệu trong trình cung cấp.
+        </li>
+        <li>
+            Cách ghi một trình điều hợp đồng bộ để đồng bộ hóa dữ liệu từ máy chủ của bạn với
+            Trình cung cấp Danh bạ.
+        </li>
+    </ul>
+<p>
+    Hướng dẫn này giả sử rằng bạn biết những nội dung cơ bản về trình cung cấp nội dung Android. Để tìm hiểu thêm
+    về trình cung cấp nội dung Android, hãy đọc hướng dẫn
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Nội dung Cơ bản về Trình cung cấp Nội dung</a>. Ứng dụng mẫu
+    <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Trình điều hợp Đồng bộ Mẫu</a>
+    là một ví dụ về cách sử dụng một trình điều hợp đồng bộ để chuyển dữ liệu giữa Trình cung cấp
+    Danh bạ và ứng dụng mẫu được lưu trữ bởi Dịch vụ Web Google.
+</p>
+<h2 id="InformationTypes">Tổ chức Trình cung cấp Danh bạ</h2>
+<p>
+    Trình cung cấp Danh bạ là một thành phần của trình cung cấp nội dung Android. Nó chứa ba loại
+    dữ liệu về một người, từng loại tương ứng với một bảng do trình cung cấp đưa ra, như
+    được minh họa trong hình 1:
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>Hình 1.</strong> Cấu trúc bảng của Trình cung cấp Danh bạ.
+</p>
+<p>
+    Ba bảng này thường được đề cập theo tên các lớp hợp đồng của chúng. Các lớp này
+    sẽ định nghĩa các hằng số cho URI nội dung, tên cột và giá trị cột được sử dụng bởi các bảng:
+</p>
+<dl>
+    <dt>
+        Bảng {@link android.provider.ContactsContract.Contacts}
+    </dt>
+    <dd>
+        Hàng thể hiện những người khác nhau dựa trên tổng hợp của các hàng liên lạc thô.
+    </dd>
+    <dt>
+        Bảng {@link android.provider.ContactsContract.RawContacts}
+    </dt>
+    <dd>
+        Hàng chứa một bản tổng hợp dữ liệu về một người, liên quan tới tài khoản và loại người dùng.
+    </dd>
+    <dt>
+        Bảng {@link android.provider.ContactsContract.Data}
+    </dt>
+    <dd>
+        Hàng chứa các thông tin chi tiết về liên lạc thô, chẳng hạn như địa chỉ e-mail hoặc số điện thoại.
+    </dd>
+</dl>
+<p>
+    Các bảng khác được đại diện bởi các lớp hợp đồng trong {@link android.provider.ContactsContract}
+    là bảng phụ mà Trình cung cấp Danh bạ sử dụng để quản lý thao tác của nó hoặc hỗ trợ
+    các chức năng cụ thể trong ứng dụng danh bạ hoặc điện thoại của thiết bị.
+</p>
+<h2 id="RawContactBasics">Liên lạc thô</h2>
+<p>
+    Một liên lạc thô thể hiện dữ liệu của một người xuất phát từ một loại tài khoản và tên tài khoản
+ riêng. Vì Trình cung cấp Danh bạ cho phép nhiều hơn một dịch vụ trực tuyến làm nguồn
+ dữ liệu cho một người, Trình cung cấp Danh bạ cho phép nhiều liên lạc thô cho cùng một người.
+    Nhiều liên lạc thô cũng cho phép người dùng kết hợp dữ liệu của một người từ nhiều hơn một tài khoản
+ từ cùng loại tài khoản.
+</p>
+<p>
+    Hầu hết dữ liệu của một liên lạc thô không được lưu giữ trong bảng
+    {@link android.provider.ContactsContract.RawContacts}. Thay vào đó, nó được lưu giữ trong một hoặc nhiều
+    hàng trong bảng {@link android.provider.ContactsContract.Data}. Mỗi hàng dữ liệu có một cột
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} chứa
+    giá trị {@code android.provider.BaseColumns#_ID RawContacts._ID} của
+    hàng {@link android.provider.ContactsContract.RawContacts} mẹ của nó.
+</p>
+<h3 id="RawContactsColumns">Các cột liên lạc thô quan trọng</h3>
+<p>
+    Các cột quan trọng trong bảng {@link android.provider.ContactsContract.RawContacts} được
+    liệt kê trong bảng 1. Hãy đọc các lưu ý theo sau bảng dưới đây:
+</p>
+<p class="table-caption" id="table1">
+    <strong>Bảng 1.</strong> Các cột liên lạc thô quan trọng.
+</p>
+<table>
+    <tr>
+        <th scope="col">Tên cột</th>
+        <th scope="col">Sử dụng</th>
+        <th scope="col">Lưu ý</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            Tên tài khoản cho loại tài khoản là nguồn của liên lạc thô này.
+            Ví dụ, tên tài khoản của một tài khoản Google là một trong các địa chỉ Gmail
+            của chủ sở hữu thiết bị. Xem mục nhập tiếp theo cho
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE} để biết thêm
+            thông tin.
+        </td>
+        <td>
+            Định dạng của tên này áp dụng theo loại tài khoản của nó. Đó không nhất thiết
+            là một địa chỉ e-mail.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            Loại tài khoản là nguồn của liên lạc thô này. Ví dụ, loại tài khoản
+            của một tài khoản Google là <code>com.google</code>. Luôn xác định loại tài khoản của bạn
+            bằng một mã định danh miền cho một miền mà bạn sở hữu hoặc kiểm soát. Điều này đảm bảo rằng loại tài khoản
+            của bạn là duy nhất.
+        </td>
+        <td>
+            Một loại tài khoản cung cấp dữ liệu danh bạ thường có một trình điều hợp đồng bộ liên kết để
+            đồng bộ hoá với Trình điều hợp Đồng bộ.
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            Cờ "đã xóa" cho một liên lạc thô.
+        </td>
+        <td>
+            Cờ này cho phép Trình cung cấp Danh bạ duy trì hàng bên trong tới khi trình điều hợp đồng bộ
+            có thể xóa hàng đó khỏi máy chủ của chúng rồi cuối cùng là xóa hàng
+            khỏi kho lưu giữ.
+        </td>
+    </tr>
+</table>
+<h4>Lưu ý</h4>
+<p>
+    Sau đây là các ghi chú quan trọng về bảng
+    {@link android.provider.ContactsContract.RawContacts}:
+</p>
+<ul>
+    <li>
+        Tên của liên lạc thô không được lưu giữ trong hàng của nó trong
+        {@link android.provider.ContactsContract.RawContacts}. Thay vào đó, nó được lưu giữ trong
+        bảng {@link android.provider.ContactsContract.Data}, trong một hàng
+        {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}. Liên lạc thô
+        chỉ có một hàng thuộc loại này trong bảng {@link android.provider.ContactsContract.Data}.
+    </li>
+    <li>
+        <strong>Chú ý:</strong> Để sử dụng dữ liệu tài khoản của chính bạn trong một hàng liên lạc thô, trước tiên dữ liệu
+        phải được đăng ký với {@link android.accounts.AccountManager}. Để làm điều này, hãy nhắc
+        người dùng thêm loại tài khoản và tên tài khoản của chúng vào danh sách tài khoản. Nếu bạn không
+        làm vậy, Trình cung cấp Danh bạ sẽ tự động xóa hàng liên lạc thô của bạn.
+        <p>
+            Ví dụ, nếu bạn muốn ứng dụng của mình duy trì dữ liệu danh bạ cho dịch vụ dựa trên nền web của mình
+            với miền {@code com.example.dataservice}, và tài khoản của người dùng cho dịch vụ của bạn
+            là {@code becky.sharp@dataservice.example.com}, trước tiên, người dùng phải thêm
+            "loại" tài khoản ({@code com.example.dataservice}) và "tên" tài khoản 
+            ({@code becky.smart@dataservice.example.com}) trước khi ứng dụng của bạn có thể thêm hàng liên lạc thô.
+            Bạn có thể giải thích yêu cầu này với người dùng bằng tài liệu, hoặc bạn có thể nhắc
+            người dùng thêm loại và tên này, hoặc cả hai. Loại tài khoản và tên tài khoản
+            được trình bày chi tiết hơn trong phần sau.
+    </li>
+</ul>
+<h3 id="RawContactsExample">Các nguồn dữ liệu liên lạc thô</h3>
+<p>
+    Để hiểu cách hoạt động của liên lạc thô, hãy xét người dùng "Emily Dickinson", cô ta có ba tài khoản
+    người dùng sau được xác định trên thiết bị của mình:
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Tài khoản Twitter "belle_of_amherst"</li>
+</ul>
+<p>
+    Người dùng này đã kích hoạt <em>Đồng bộ Danh bạ</em> cho cả ba tài khoản này trong cài đặt
+    <em>Tài khoản</em>.
+</p>
+<p>
+    Giả sử Emily Dickinson mở một cửa sổ trình duyệt, đăng nhập vào Gmail bằng tài khoản
+    <code>emily.dickinson@gmail.com</code>, mở
+    Danh bạ, và thêm "Thomas Higginson". Sau đó, cô đăng nhập vào Gmail bằng tài khoản
+    <code>emilyd@gmail.com</code> và gửi một e-mail tới "Thomas Higginson", làm vậy sẽ tự động
+    thêm người này làm một liên lạc. Cô ấy cũng theo dõi "colonel_tom" (ID Twitter của Thomas Higginson) trên
+    Twitter.
+</p>
+<p>
+    Trình cung cấp Danh bạ sẽ tạo ba liên lạc thô do kết quả của việc làm này:
+</p>
+<ol>
+    <li>
+        Một liên lạc thô cho "Thomas Higginson" liên kết với <code>emily.dickinson@gmail.com</code>.
+        Loại tài khoản người dùng là Google.
+    </li>
+    <li>
+        Một liên lạc thô thứ hai cho "Thomas Higginson" liên kết với <code>emilyd@gmail.com</code>.
+        Loại tài khoản người dùng cũng là Google. Có một liên lạc thô thứ hai ngay cả khi
+        tên giống với một tên trước đó, vì người này đã được thêm cho một
+        tài khoản người dùng khác.
+    </li>
+    <li>
+        Một liên lạc thô thứ ba cho "Thomas Higginson" liên kết với "belle_of_amherst". Loại tài khoản người dùng
+        là Twitter.
+    </li>
+</ol>
+<h2 id="DataBasics">Dữ liệu</h2>
+<p>
+    Như đề cập trước đó, dữ liệu của một liên lạc thô được lưu giữ trong một hàng
+    {@link android.provider.ContactsContract.Data} được liên kết với giá trị
+    <code>_ID</code> của liên lạc thô. Điều này cho phép một liên lạc thô có nhiều thực thể cùng loại
+    dữ liệu chẳng hạn như địa chỉ e-mail hay số điện thoại. Ví dụ, nếu
+    "Thomas Higginson" của {@code emilyd@gmail.com}  (hàng liên lạc thô cho Thomas Higginson
+    liên kết với tài khoản Google <code>emilyd@gmail.com</code>) có một địa chỉ e-mail nhà là
+    <code>thigg@gmail.com</code> và một địa chỉ e-mail cơ quan là
+    <code>thomas.higginson@gmail.com</code>, Trình cung cấp Danh bạ sẽ lưu trữ hai hàng địa chỉ e-mail đó
+    và liên kết cả hai với liên lạc thô.
+</p>
+<p>
+    Để ý rằng các loại dữ liệu khác nhau được lưu giữ trong một bảng này. Các hàng tên hiển thị,
+    số điện thoại, e-mail, địa chỉ gửi thư, ảnh và chi tiết trang web đều được tìm thấy trong bảng
+    {@link android.provider.ContactsContract.Data}. Để giúp quản lý điều này, bảng
+    {@link android.provider.ContactsContract.Data} có một số cột có tên mô tả,
+    và các cột còn lại có tên chung. Các nội dung của cột tên mô tả có cùng ý nghĩa
+    không phụ thuộc vào loại dữ liệu trong hàng, trong khi nội dung của cột tên chung có
+    ý nghĩa khác nhau tùy vào loại dữ liệu.
+</p>
+<h3 id="DescriptiveColumns">Tên cột mô tả</h3>
+<p>
+    Một số ví dụ về tên cột mô tả là:
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        Giá trị của cột <code>_ID</code> của liên lạc thô đối với dữ liệu này.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        Loại dữ liệu được lưu giữ trong hàng này, được thể hiện dưới dạng một kiểu MIME tùy chỉnh. Trình cung cấp Danh bạ
+        sử dụng các kiểu MIME được định nghĩa trong lớp con của
+        {@link android.provider.ContactsContract.CommonDataKinds}. Các kiểu MIME là nguồn mở,
+        và có thể được sử dụng bởi bất kỳ ứng dụng hay trình điều hợp đồng bộ nào hoạt động với Trình cung cấp Danh bạ.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        Nếu kiểu hàng dữ liệu này có thể xảy ra nhiều hơn một lần đối với một liên lạc thô, cột
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} sẽ gắn cờ
+        hàng dữ liệu chứa dữ liệu sơ cấp cho kiểu đó. Ví dụ, nếu
+        người dùng nhấn giữ một số điện thoại cho một liên lạc và chọn <strong>Đặt mặc định</strong>,
+        khi đó hàng {@link android.provider.ContactsContract.Data} chứa số đó
+        có cột tương ứng {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} được đặt thành một
+        giá trị khác 0.
+    </dd>
+</dl>
+<h3 id="GenericColumns">Tên cột chung</h3>
+<p>
+    Có 15 cột chung được đặt tên <code>DATA1</code> thông qua
+    <code>DATA15</code> thường có sẵn và thêm bốn cột
+    chung <code>SYNC1</code> thông qua <code>SYNC4</code> mà chỉ được sử dụng bởi trình điều hợp
+    đồng bộ. Các hằng số tên cột chung luôn có tác dụng, không phụ thuộc vào loại
+    dữ liệu mà hàng đó chứa.
+</p>
+<p>
+    Cột <code>DATA1</code> được đánh chỉ mục.  Trình cung cấp Danh bạ luôn sử dụng cột này cho
+    dữ liệu mà trình cung cấp kỳ vọng sẽ là đối tượng truy vấn thường xuyên nhất. Ví dụ,
+    trong một hàng e-mail, cột này chứa địa chỉ e-mail thực sự.
+</p>
+<p>
+    Theo quy ước, cột <code>DATA15</code> được dành để lưu giữ dữ liệu Binary Large Object
+    (BLOB) chẳng hạn như hình thu nhỏ của ảnh.
+</p>
+<h3 id="TypeSpecificNames">Tên cột theo kiểu</h3>
+<p>
+    Để tạo điều kiện làm việc với các cột đối với một kiểu hàng cụ thể, Trình cung cấp Danh bạ
+    cũng cung cấp các hằng số tên cột theo kiểu, được định nghĩa trong các lớp con của
+    {@link android.provider.ContactsContract.CommonDataKinds}. Các hằng số chỉ cấp một
+    tên hằng số khác cho cùng tên cột, điều này giúp bạn truy cập dữ liệu trong một hàng thuộc
+    một kiểu cụ thể.
+</p>
+<p>
+    Ví dụ, lớp {@link android.provider.ContactsContract.CommonDataKinds.Email} định nghĩa
+    các hằng số tên cột theo kiểu cho một hàng {@link android.provider.ContactsContract.Data} mà
+    có kiểu MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE}. Lớp chứa hằng số
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} cho cột
+    địa chỉ e-mail. Giá trị thực sự của
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} là "data1", giá trị này
+    giống hệt như tên chung của cột.
+</p>
+<p class="caution">
+    <strong>Chú ý:</strong> Không được thêm dữ liệu tùy chỉnh của chính bạn vào bảng
+    {@link android.provider.ContactsContract.Data} bằng cách sử dụng một hàng có một trong các kiểu MIME được xác định trước
+    của trình cung cấp. Nếu làm vậy, bạn có thể làm mất dữ liệu hoặc khiến trình cung cấp
+    gặp trục trặc. Ví dụ, bạn không nên thêm một hàng có kiểu MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE} mà chứa tên người dùng thay vì địa chỉ e-mail trong cột
+    <code>DATA1</code>. Nếu sử dụng kiểu MIME tùy chỉnh của mình cho hàng, khi đó bạn được tự do
+    định nghĩa tên cột theo kiểu của chính mình và sử dụng các cột theo cách bạn muốn.
+</p>
+<p>
+    Hình 2 minh họa cách các cột mô tả và cột dữ liệu xuất hiện trong hàng
+    {@link android.provider.ContactsContract.Data}, và cách mà tên cột theo kiểu "phủ lên"
+   tên cột chung
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>Hình 2.</strong> Tên cột theo kiểu và tên cột chung.
+</p>
+<h3 id="ColumnMaps">Lớp tên cột theo kiểu</h3>
+<p>
+    Bảng 2 liệt kê các lớp tên cột theo kiểu thường được sử dụng nhất:
+</p>
+<p class="table-caption" id="table2">
+  <strong>Bảng 2.</strong> Lớp tên cột theo kiểu</p>
+<table>
+  <tr>
+    <th scope="col">Lớp ánh xạ</th>
+    <th scope="col">Kiểu dữ liệu</th>
+    <th scope="col">Lưu ý</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>Dữ liệu tên của liên lạc thô liên kết với hàng dữ liệu này.</td>
+    <td>Một liên lạc thô chỉ có một trong những hàng này.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>Ảnh chính của liên lạc thô được liên kết với hàng dữ liệu này.</td>
+    <td>Một liên lạc thô chỉ có một trong những hàng này.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>Địa chỉ e-mail của liên lạc thô được liên kết với hàng dữ liệu này.</td>
+    <td>Một liên lạc thô có thể có nhiều địa chỉ e-mail.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>Địa chỉ cổng của liên lạc thô được liên kết với hàng dữ liệu này.</td>
+    <td>Một liên lạc thô có thể có nhiều địa chỉ cổng.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>Mã định danh liên kết liên lạc thô với một trong các nhóm trong Trình cung cấp Danh bạ.</td>
+    <td>
+        Nhóm là một tính năng tùy chọn của loại tài khoản và tên tài khoản. Chúng được mô tả
+        chi tiết hơn trong phần <a href="#Groups">Nhóm liên lạc</a>.
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">Danh bạ</h3>
+<p>
+    Trình cung cấp Danh bạ kết hợp các hàng liên lạc thô giữa tất cả các loại tài khoản và tên tài khoản
+    để tạo thành một <strong>liên lạc</strong>. Điều này tạo điều kiện để hiển thị và sửa đổi tất cả dữ liệu mà một
+    người dùng đã thu thập cho một người. Trình cung cấp Danh bạ quản lý việc tạo các hàng liên lạc mới
+    và tổng hợp các liên lạc thô với hàng liên lạc hiện có. Ứng dụng lẫn
+    trình điều hợp đồng bộ đều không được cho phép thêm liên lạc và một số cột trong một hàng liên lạc là cột chỉ đọc.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Nếu bạn cố gắng thêm một liên lạc vào Trình cung cấp Danh bạ có một
+    {@link android.content.ContentResolver#insert(Uri,ContentValues) insert()}, bạn sẽ gặp
+    lỗi ngoại lệ {@link java.lang.UnsupportedOperationException}. Nếu bạn cố gắng cập nhật một cột
+    mà được liệt kê là "chỉ đọc," cập nhật sẽ bị bỏ qua.
+</p>
+<p>
+    Trình cung cấp Danh bạ tạo một liên lạc mới để hồi đáp lại việc thêm một liên lạc thô mới
+    không khớp với bất kỳ liên lạc nào hiện có. Trình cung cấp cũng làm vậy nếu dữ liệu
+    của một liên lạc thô hiện có thay đổi sao cho nó không còn khớp với liên lạc mà trước đó
+    nó được gắn với. Nếu một ứng dụng hoặc trình điều hợp đồng bộ tạo một liên lạc thô mới mà
+    <em>khớp</em> với một liên lạc hiện tại, liên lạc thô mới sẽ được tổng hợp vào liên lạc
+    hiện có.
+</p>
+<p>
+    Trình cung cấp Danh bạ sẽ liên kết một hàng liên lạc với các hàng liên lạc thô của nó bằng cột
+    <code>_ID</code> của hàng liên lạc đó trong bảng {@link android.provider.ContactsContract.Contacts Contacts}
+. Cột <code>CONTACT_ID</code> của bảng liên lạc thô
+    {@link android.provider.ContactsContract.RawContacts} chứa các giá trị <code>_ID</code> cho
+    các hàng liên lạc liên kết với từng hàng liên lạc thô.
+</p>
+<p>
+    Bảng {@link android.provider.ContactsContract.Contacts} cũng có cột
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} mà là một liên kết
+    "cố định" với hàng liên lạc đó. Vì Trình cung cấp Danh bạ tự động duy trì
+    các liên lạc, nó có thể thay đổi giá trị {@code android.provider.BaseColumns#_ID} của một hàng liên lạc
+    hồi đáp lại một sự tổng hợp hoặc đồng bộ. Ngay cả khi điều này xảy ra, URI nội dung
+    {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} kết hợp với
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc sẽ vẫn
+    chỉ về hàng liên lạc đó, vì thế bạn có thể sử dụng
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+    để duy trì các liên kết đến liên lạc "yêu thích", v.v. Cột này có định dạng riêng không
+    liên quan tới định dạng của cột {@code android.provider.BaseColumns#_ID}.
+</p>
+<p>
+    Hình 3 minh họa mối liên quan giữa ba bảng chính này với nhau.
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>Hình 3.</strong> Mối quan hệ giữa các bảng Danh bạ, Liên lạc Thô, và Chi tiết.
+</p>
+<h2 id="Sources">Dữ liệu từ Trình điều hợp Đồng bộ</h2>
+<p>
+    Người dùng nhập dữ liệu danh bạ trực tiếp vào thiết bị, nhưng dữ liệu cũng đi đến Trình cung cấp
+    Danh bạ từ các dịch vụ web thông qua <strong>trình điều hợp đồng bộ</strong>, giúp tự động
+    chuyển dữ liệu giữa thiết bị và các dịch vụ. Trình điều hợp đồng bộ chạy ngầm
+    dưới sự kiểm soát của hệ thống, và chúng gọi các phương pháp {@link android.content.ContentResolver} để
+    quản lý dữ liệu.
+</p>
+<p>
+    Trong Android, dịch vụ web mà một trình điều hợp đồng bộ làm việc cùng sẽ được xác định bằng một loại tài khoản.
+    Mỗi trình điều hợp đồng bộ làm việc với một loại tài khoản, nhưng nó có thể hỗ trợ nhiều tên tài khoản cho
+    loại đó. Các loại tài khoản và tên tài khoản được mô tả sơ qua trong phần
+    <a href="#RawContactsExample">Các nguồn dữ liệu liên lạc thô</a>. Các định nghĩa sau trình bày
+    chi tiết hơn và mô tả mối liên quan giữa loại và tên tài khoản với các trình điều hợp đồng bộ và dịch vụ.
+</p>
+<dl>
+    <dt>
+        Loại tài khoản
+    </dt>
+    <dd>
+        Xác định một dịch vụ mà người dùng đã lưu giữ dữ liệu trong đó. Trong phần lớn thời gian, người dùng phải
+        xác thực dịch vụ. Ví dụ, Google Contacts là một loại tài khoản được xác định
+        bởi mã <code>google.com</code>. Giá trị này tương ứng với loại tài khoản được sử dụng bởi
+        {@link android.accounts.AccountManager}.
+    </dd>
+    <dt>
+        Tên tài khoản
+    </dt>
+    <dd>
+        Xác định một tài khoản hoặc đăng nhập cụ thể cho một loại tài khoản. Tài khoản Google Contacts
+        giống như tài khoản Google, chúng có một địa chỉ e-mail làm tên tài khoản.
+        Các dịch vụ khác có thể sử dụng tên người dùng là một từ hoặc id chữ số.
+    </dd>
+</dl>
+<p>
+    Loại tài khoản không nhất thiết phải duy nhất. Một người dùng có thể cấu hình nhiều tài khoản Google Contacts
+    và tải xuống dữ liệu của chúng vào Trình cung cấp Danh bạ; điều này có thể xảy ra nếu người dùng có một tập hợp
+    các liên lạc cá nhân cho một tên tài khoản cá nhân, và một tập hợp khác cho cơ quan. Tên tài khoản thường
+    là duy nhất. Cùng nhau, chúng xác định một dòng dữ liệu cụ thể giữa Trình cung cấp Danh bạ và
+    một dịch vụ bên ngoài.
+</p>
+<p>
+    Nếu muốn chuyển dữ liệu từ dịch vụ của bạn sang Trình cung cấp Danh bạ, bạn cần ghi
+    vào trình điều hợp đồng bộ của chính mình. Điều này được mô tả chi tiết hơn trong phần
+    <a href="#SyncAdapters">Trình điều hợp Đồng bộ Trình cung cấp Danh bạ</a>.
+</p>
+<p>
+    Hình 4 minh họa cách mà Trình cung cấp Danh bạ phù hợp với dòng dữ liệu
+    về con người. Trong hộp được đánh dấu "trình điều hợp đồng bộ," mỗi trình điều hợp được ghi nhãn theo loại tài khoản của nó.
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>Hình 4.</strong> Luồng dữ liệu của Trình cung cấp Danh bạ.
+</p>
+<h2 id="Permissions">Quyền được Yêu cầu</h2>
+<p>
+    Những ứng dụng muốn truy cập Trình cung cấp Danh bạ phải yêu cầu các quyền
+    sau:
+</p>
+<dl>
+    <dt>Quyền truy cập đọc vào một hoặc nhiều bảng</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}, được quy định trong
+        <code>AndroidManifest.xml</code> với phần tử
+        <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> là
+        <code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code>.
+    </dd>
+    <dt>Quyền truy cập ghi vào một hoặc nhiều bảng</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}, được quy định trong
+        <code>AndroidManifest.xml</code> với phần tử
+        <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> là
+        <code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code>.
+    </dd>
+</dl>
+<p>
+    Những quyền này không mở rộng sang dữ liệu hồ sơ người dùng. Hồ sơ người dùng và các quyền
+    được yêu cầu được đề cập trong phần sau,
+    <a href="#UserProfile">Hồ sơ Người dùng</a>.
+</p>
+<p>
+    Nhớ rằng dữ liệu danh bạ của người dùng là dữ liệu cá nhân và nhạy cảm. Người dùng quan tâm về
+    quyền riêng tư của họ, vì thế họ không muốn các ứng dụng thu thập dữ liệu về mình hoặc danh bạ của mình.
+    Nếu không rõ ràng về lý do bạn cần quyền truy cập dữ liệu danh bạ của họ, họ có thể cho
+    ứng dụng của bạn đánh giá thấp hoặc từ chối cài đặt ứng dụng.
+</p>
+<h2 id="UserProfile">Hồ sơ Người dùng</h2>
+<p>
+    Bảng {@link android.provider.ContactsContract.Contacts} có một hàng đơn chứa
+    dữ liệu hồ sơ cho người dùng của thiết bị. Dữ liệu này mô tả <code>user</code> của thiết bị chứ không phải
+    của một trong các liên lạc của người dùng. Hàng liên lạc hồ sơ được liên kết với hàng
+    liên lạc thô đối với từng hệ thống sử dụng hồ sơ.
+    Mỗi hàng liên lạc thô của hồ sơ có thể có nhiều hàng dữ liệu. Các hằng số để truy cập hồ sơ
+    người dùng có sẵn trong lớp {@link android.provider.ContactsContract.Profile}.
+</p>
+<p>
+    Truy cập hồ sơ người dùng đòi hỏi phải có các quyền đặc biệt. Ngoài các quyền
+    {@link android.Manifest.permission#READ_CONTACTS} và
+    {@link android.Manifest.permission#WRITE_CONTACTS} cần để đọc và ghi, truy cập
+    hồ sơ người dùng còn yêu cầu quyền {@code android.Manifest.permission#READ_PROFILE} và
+    {@code android.Manifest.permission#WRITE_PROFILE} tương ứng cho quyền truy cập đọc và
+    ghi.
+</p>
+<p>
+    Nhớ rằng bạn nên coi hồ sơ của một người dùng là nội dung nhạy cảm. Quyền
+    {@code android.Manifest.permission#READ_PROFILE} cho phép bạn truy cập dữ liệu xác định cá nhân
+    của người dùng thiết bị. Chắc chắn phải nói cho người dùng biết lý do tại sao
+    bạn cần các quyền truy cập hồ sơ người dùng trong phần mô tả ứng dụng của mình.
+</p>
+<p>
+    Để truy xuất hàng liên lạc chứa hồ sơ của người dùng,
+    hãy gọi {@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
+    ContentResolver.query()}. Đặt URI nội dung thành
+    {@link android.provider.ContactsContract.Profile#CONTENT_URI} và không cung cấp bất kỳ
+    tiêu chí lựa chọn nào. Bạn cũng có thể sử dụng URI nội dung này làm URI cơ sở để truy xuất các liên lạc thô
+    hoặc dữ liệu cho hồ sơ. Ví dụ, đoạn mã HTML này truy xuất dữ liệu cho hồ sơ:
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>Lưu ý:</strong> Nếu bạn truy xuất nhiều hàng liên lạc và muốn xác định xem một trong số chúng có phải
+    là hồ sơ người dùng không, hãy kiểm tra cột
+    {@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} của hàng. Cột này
+    được đặt thành "1" nếu liên lạc là hồ sơ người dùng.
+</p>
+<h2 id="ContactsProviderMetadata">Siêu dữ liệu Trình cung cấp Danh bạ</h2>
+<p>
+    Trình cung cấp Danh bạ quản lý dữ liệu theo dõi trạng thái của dữ liệu danh bạ trong
+    kho lưu giữ. Siêu dữ liệu về kho lưu giữ này được lưu giữ ở nhiều nơi khác nhau, bao gồm
+    các hàng bảng Liên lạc Thô, Dữ liệu, và Danh bạ, bảng
+    {@link android.provider.ContactsContract.Settings}, và bảng
+    {@link android.provider.ContactsContract.SyncState}. Bảng sau đây cho biết
+    ảnh hưởng của từng mục trong siêu dữ liệu này:
+</p>
+<p class="table-caption" id="table3">
+  <strong>Bảng 3.</strong> Siêu dữ liệu trong Trình cung cấp Danh bạ</p>
+<table>
+    <tr>
+        <th scope="col">Bảng</th>
+        <th scope="col">Cột</th>
+        <th scope="col">Giá trị</th>
+        <th scope="col">Ý nghĩa</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>"0" - không thay đổi kể từ lần đồng bộ cuối cùng.</td>
+        <td rowspan="2">
+            Đánh dấu các liên lạc thô đã được thay đổi trên thiết bị và phải được đồng bộ trở lại
+            máy chủ. Giá trị được đặt tự động bởi Trình cung cấp Danh bạ khi các ứng dụng
+            Android cập nhật một hàng.
+            <p>
+                Các trình điều hợp đồng bộ sửa đổi bảng liên lạc thô hoặc dữ liệu nên luôn nối
+                xâu {@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER} với
+                URI nội dung mà chúng sử dụng. Làm vậy sẽ ngăn không cho trình cung cấp đánh dấu hàng là không tốt.
+                Nếu không, các sửa đổi trình điều hợp đồng bộ xem như sửa đổi cục bộ và được
+                gửi tới máy chủ, ngay cả khi máy chủ là nguồn sửa đổi.
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>"1" - đã thay đổi kể từ lần đồng bộ cuối cùng, cần được đồng bộ lại máy chủ.</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>Số phiên bản của hàng này.</td>
+        <td>
+            Trình cung cấp Danh bạ tự động tăng dần giá trị này bất cứ khi nào hàng hoặc
+            dữ liệu có liên quan của hàng thay đổi.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>Số phiên bản của hàng này.</td>
+        <td>
+            Trình cung cấp Danh bạ tự động tăng dần giá trị này bất cứ khi nào hàng dữ liệu
+            bị thay đổi.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            Một xâu giá trị xác định duy nhất liên lạc thô này cho tài khoản mà
+            nó được tạo trong đó.
+        </td>
+        <td>
+            Khi một trình điều hợp đồng bộ tạo một liên lạc thô mới, cột này nên được đặt thành
+            ID duy nhất của máy chủ dành cho liên lạc thô đó. Khi một ứng dụng Android tạo một liên lạc thô
+            mới, ứng dụng đó sẽ để trống cột này. Điều này báo hiệu với trình điều hợp
+            đồng bộ rằng nó nên tạo một liên lạc thô mới trên máy chủ, và lấy một
+            giá trị cho {@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}.
+            <p>
+                Cụ thể, id nguồn phải là <strong>duy nhất</strong> đối với từng loại tài khoản
+                và nên ổn định giữa các lần đồng bộ:
+            </p>
+                <ul>
+                    <li>
+                        Duy nhất: Mỗi liên lạc thô đối với một tài khoản phải có id nguồn riêng của mình. Nếu không
+                        thi hành điều này, bạn sẽ gây ra sự cố trong ứng dụng danh bạ.
+                        Để ý rằng hai liên lạc thô đối với cùng <em>loại</em> tài khoản có thể có
+                        cùng id nguồn. Ví dụ, liên lạc thô "Thomas Higginson" đối với
+                        tài khoản {@code emily.dickinson@gmail.com} được cho phép có cùng id nguồn
+                        như liên lạc thô "Thomas Higginson" đối với tài khoản
+                        {@code emilyd@gmail.com}.
+                    </li>
+                    <li>
+                        Ổn định: Id nguồn là một bộ phận cố định của dữ liệu từ dịch vụ trực tuyến đối với
+                        liên lạc thô. Ví dụ, nếu người dùng xóa Lưu trữ Danh bạ khỏi
+                        cài đặt Ứng dụng và đồng bộ lại, các liên lạc thô được khôi phục sẽ có cùng
+                        id nguồn như trước. Nếu bạn không thi hành điều này, các lối tắt sẽ dừng
+                        hoạt động.
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>"0" - Các liên lạc trong nhóm này không nên được hiển thị trong UI ứng dụng Android.</td>
+        <td>
+            Cột này dành cho tính tương thích với các máy chủ mà cho phép người dùng ẩn các liên lạc trong
+            một số nhóm.
+        </td>
+    </tr>
+    <tr>
+        <td>"1" - Các liên lạc trong nhóm này được cho phép hiển thị trong UI ứng dụng.</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            "0" - Đối với tài khoản và loại tài khoản này, những liên lạc không thuộc về nhóm
+            được ẩn đối với UI ứng dụng Android.
+        </td>
+        <td rowspan="2">
+            Theo mặc định, các liên lạc được hiển thị nếu không có liên lạc thô nào của chúng thuộc về một nhóm
+            (Tư cách thành viên nhóm đối với một liên lạc thô được thể hiện bằng một hoặc nhiều hàng
+            {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} trong
+            bảng {@link android.provider.ContactsContract.Data}).
+            Bằng cách đặt cờ này trong hàng bảng {@link android.provider.ContactsContract.Settings} đối với
+            một loại tài khoản và tài khoản, bạn có thể buộc những liên lạc không có nhóm phải hiển thị.
+            Một công dụng của cờ này đó là để hiển thị liên lạc từ các máy chủ không sử dụng nhóm.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            "1" - Đối với tài khoản và loại tài khoản này, những liên lạc không thuộc về nhóm
+            sẽ được hiển thị đối với UI ứng dụng.
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>(tất cả)</td>
+        <td>
+            Sử dụng bảng này để lưu giữ siêu dữ liệu cho trình điều hợp đồng bộ của bạn.
+        </td>
+        <td>
+            Với bảng này, bạn có thể lưu giữ trạng thái đồng bộ và các dữ liệu khác liên quan tới đồng bộ một cách lâu dài
+            trên thiết bị.
+        </td>
+    </tr>
+</table>
+<h2 id="Access">Truy cập Trình cung cấp Danh bạ</h2>
+<p>
+    Phần này mô tả các hướng dẫn về truy cập dữ liệu từ Trình cung cấp Danh bạ, tập trung vào những
+    nội dung sau:
+</p>
+<ul>
+    <li>
+        Truy vấn thực thể.
+    </li>
+    <li>
+        Sửa đổi hàng loạt.
+    </li>
+    <li>
+        Truy xuất và sửa đổi bằng ý định.
+    </li>
+    <li>
+        Toàn vẹn dữ liệu.
+    </li>
+</ul>
+<p>
+    Thực hiện sửa đổi từ một trình điều hợp đồng bộ cũng được đề cập chi tiết hơn trong phần
+    <a href="#SyncAdapters">Trình điều hợp Đồng bộ Trình cung cấp Danh bạ</a>.
+</p>
+<h3 id="Entities">Truy vấn thực thể</h3>
+<p>
+    Vì các bảng của Trình cung cấp Danh bạ được tổ chức theo một phân cấp, thường sẽ hữu ích nếu
+    truy xuất một hàng và tất cả hàng "con" được liên kết với nó. Ví dụ, để hiển thị
+    tất cả thông tin cho một người, bạn có thể muốn truy xuất tất cả hàng
+    {@link android.provider.ContactsContract.RawContacts} đối với một hàng
+    {@link android.provider.ContactsContract.Contacts} đơn, hoặc tất cả hàng
+    {@link android.provider.ContactsContract.CommonDataKinds.Email} đối với một hàng
+    {@link android.provider.ContactsContract.RawContacts} đơn. Để tạo điều kiện cho điều này, Trình cung cấp
+    Danh bạ sẽ cung cấp các cấu trúc <strong>thực thể</strong> đóng vai trò như liên kết cơ sở dữ liệu
+    giữa các bảng.
+</p>
+<p>
+    Thực thể giống như một bảng bao gồm các cột được chọn từ một bảng mẹ và bảng con của nó.
+    Khi bạn truy vấn một thực thể, bạn cung cấp một dự thảo và các tiêu chí dựa trên các cột
+    có sẵn từ thực thể. Kết quả là một {@link android.database.Cursor} trong đó chứa
+    một hàng cho từng hàng bảng con được truy xuất. Ví dụ, nếu bạn truy vấn
+    {@link android.provider.ContactsContract.Contacts.Entity} cho một tên liên lạc
+    và tất cả hàng {@link android.provider.ContactsContract.CommonDataKinds.Email} đối với tất cả
+    liên lạc thô cho tên đó, bạn sẽ nhận lại một {@link android.database.Cursor} chứa một hàng
+    cho mỗi hàng {@link android.provider.ContactsContract.CommonDataKinds.Email}.
+</p>
+<p>
+    Các thực thể sẽ đơn giản hóa việc truy vấn. Bằng cách sử dụng một thực thể, bạn có thể truy xuất ngay lập tức tất cả dữ liệu danh bạ cho một
+    liên lạc hoặc liên lạc thô, thay vì phải truy vấn bảng mẹ trước để nhận một
+    ID, và rồi phải truy xuất bảng con bằng ID đó. Đồng thời, Trình cung cấp Danh bạ xử lý
+    một truy vấn đối với một thực thể trong một giao tác đơn, điều này đảm bảo rằng dữ liệu được truy xuất sẽ được
+    nhất quán trong nội bộ.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Một thực thể thường không chứa tất cả cột của bảng mẹ và
+    bảng con. Nếu bạn cố gắng làm việc với một tên cột không có trong danh sách các hằng số tên cột
+    đối với thực thể đó, bạn sẽ nhận được một {@link java.lang.Exception}.
+</p>
+<p>
+    Đoạn mã HTML sau cho biết cách truy xuất tất cả hàng liên lạc thô cho một liên lạc. Đoạn mã HTML
+    là bộ phận của một ứng dụng lớn hơn có hai hoạt động, "chính" và "chi tiết". Hoạt động chính
+    hiển thị một danh sách các hàng liên lạc; khi người dùng chọn một hàng, hoạt động sẽ gửi ID của hàng tới hoạt động
+    chi tiết. Hoạt động chi tiết sử dụng {@link android.provider.ContactsContract.Contacts.Entity}
+    để hiển thị tất cả hàng dữ liệu từ tất cả liên lạc thô được liên kết với liên lạc
+    đã chọn.
+</p>
+<p>
+    Đoạn mã HTML này được lấy từ hoạt động "chi tiết":
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    Khi hoàn thành việc tải, {@link android.app.LoaderManager} gọi ra một lệnh gọi lại đến
+    {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D)
+    onLoadFinished()}. Một trong các tham đối đến với phương pháp này là một
+    {@link android.database.Cursor} với các kết quả của truy vấn. Trong ứng dụng của chính mình, bạn có thể nhận dữ liệu
+    từ {@link android.database.Cursor} này để hiển thị nó hoặc thao tác thêm với nó.
+</p>
+<h3 id="Transactions">Sửa đổi hàng loạt</h3>
+<p>
+    Bất cứ khi nào có thể, bạn nên chèn, cập nhật và xóa dữ liệu trong Trình cung cấp Danh bạ trong
+    "chế độ hàng loạt", bằng cách tạo một {@link java.util.ArrayList} của các đối tượng
+    {@link android.content.ContentProviderOperation} và gọi
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Vì
+    Trình cung cấp Danh bạ thực hiện tất cả thao tác trong một
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} trong một giao tác
+    đơn, các sửa đổi của bạn sẽ không bao giờ ra khỏi kho lưu giữ danh bạ một cách
+    không nhất quán. Sửa đổi hàng loạt cũng tạo điều kiện cho việc chèn một liên lạc thô và dữ liệu chi tiết của liên lạc
+    tại cùng thời điểm.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Để sửa đổi một liên lạc thô <em>đơn</em>, hãy xét gửi một ý định tới
+    ứng dụng danh bạ của thiết bị thay vì xử lý sửa đổi trong ứng dụng của bạn.
+    Việc làm này được mô tả chi tiết hơn trong phần
+    <a href="#Intents">Truy xuất và sửa đổi bằng ý định</a>.
+</p>
+<h4>Điểm kết quả</h4>
+<p>
+    Sửa đổi hàng loạt chứa nhiều thao tác có thể chặn các tiến trình khác,
+    dẫn đến trải nghiệm người dùng tổng thể không tốt. Để sắp xếp tổ chức tất cả sửa đổi mà bạn muốn
+    thực hiện trong ít danh sách riêng nhất có thể, và đồng thời ngăn chúng
+    chặn hệ thống, bạn nên đặt các <strong>điểm kết quả</strong> cho một hoặc nhiều thao tác.
+    Điểm kết quả là một đối tượng {@link android.content.ContentProviderOperation} có giá trị
+    {@link android.content.ContentProviderOperation#isYieldAllowed()} được đặt thành
+    <code>true</code>. Khi các Trình cung cấp Danh bạ gặp phải một điểm kết quả, nó tạm dừng công việc để
+    cho phép các tiến trình khác chạy và đóng giao tác hiện tại. Khi trình cung cấp bắt đầu lại, nó
+    tiếp tục với thao tác tiếp theo trong {@link java.util.ArrayList} và bắt đầu một giao tác
+    mới.
+</p>
+<p>
+    Điểm kết quả dẫn đến có nhiều hơn một giao tác trên mỗi lệnh gọi tới
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Vì
+    điều này, bạn nên đặt một điểm kết quả cho thao tác cuối cùng đối với một tập hợp các hàng có liên quan.
+    Ví dụ, bạn nên đặt một điểm kết quả cho thao tác cuối cùng trong một tập hợp mà thêm
+    các hàng liên lạc thô và hàng dữ liệu liên kết của chúng, hoặc thao tác cuối cùng đối với một tập hợp các hàng liên quan tới
+    một liên lạc riêng lẻ.
+</p>
+<p>
+    Điểm kết quả cũng là một đơn vị thao tác nguyên tử. Tất cả truy cập giữa hai điểm kết quả sẽ
+    hoặc thành công hoặc thất bại như một đơn vị riêng lẻ. Nếu bạn không đặt bất kỳ điểm kết quả nào, thao tác
+    nguyên tử nhỏ nhất chính là toàn bộ loạt thao tác. Nếu sử dụng điểm kết quả, bạn ngăn cản
+    các thao tác làm giảm hiệu suất của hệ thống, đồng thời đảm bảo rằng một tập con của
+    thao tác là tập nguyên tử.
+</p>
+<h4>Tham chiếu lại sửa đổi</h4>
+<p>
+    Khi bạn đang chèn một hàng liên lạc thô mới và các hàng dữ liệu liên kết của nó như một tập hợp các đối tượng
+    {@link android.content.ContentProviderOperation}, bạn phải liên kết các hàng dữ liệu với
+    hàng liên lạc thô bằng cách chèn giá trị
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô làm giá trị
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Tuy nhiên, giá trị
+    này không có sẵn khi bạn đang tạo {@link android.content.ContentProviderOperation}
+    cho hàng dữ liệu, vì bạn chưa áp dụng
+    {@link android.content.ContentProviderOperation} cho hàng liên lạc thô. Để khắc phục điều này,
+    lớp {@link android.content.ContentProviderOperation.Builder} có phương pháp
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}.
+    Phương pháp này cho phép bạn chèn hoặc sửa đổi một cột bằng
+    kết quả của một thao tác trước đó.
+</p>
+<p>
+    Phương pháp {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    có hai tham đối:
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            Khóa của một cặp khóa-giá trị. Giá trị của tham đối này nên là tên của một cột
+            trong bảng mà bạn đang sửa đổi.
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            Chỉ mục dựa trên 0 của một giá trị trong mảng đối tượng
+            {@link android.content.ContentProviderResult} từ
+            {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Khi
+            thao tác hàng loạt được áp dụng, kết quả của mỗi thao tác được lưu giữ trong một mảng kết quả
+            trung gian. Giá trị <code>previousResult</code> là chỉ mục
+            của một trong những kết quả này, nó được truy xuất và lưu giữ với giá trị <code>key</code>
+. Điều này cho phép bạn chèn một bản ghi liên lạc thô mới và nhận lại giá trị
+            {@code android.provider.BaseColumns#_ID} của nó, rồi thực hiện một "tham chiếu ngược" về
+            giá trị đó khi bạn thêm một hàng {@link android.provider.ContactsContract.Data}.
+            <p>
+                Toàn bộ mảng kết quả được tạo khi bạn lần đầu gọi
+                {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()},
+                với kích cỡ bằng với kích cỡ của {@link java.util.ArrayList} của các đối tượng
+                {@link android.content.ContentProviderOperation} mà bạn cung cấp. Tuy nhiên, tất cả
+                các phần tử trong mảng kết quả được đặt thành <code>null</code>, và nếu bạn cố gắng
+                thực hiện tham chiếu ngược tới một kết quả cho một thao tác chưa được áp dụng,
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+                sẽ đưa ra một lỗi {@link java.lang.Exception}.
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    Các đoạn mã HTML sau minh họa cách chèn một liên lạc thô mới và dữ liệu hàng loạt. Chúng
+    bao gồm mã thiết lập một điểm kết quả và sử dụng một tham chiếu lại. Đoạn mã HTML là một
+    phiên bản mở rộng của phương pháp <code>createContacEntry()</code>, nó là một phần của lớp
+    <code>ContactAdder</code> trong ứng dụng mẫu
+    <code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code>.
+</p>
+<p>
+    Đoạn mã HTML đầu tiên truy xuất dữ liệu liên lạc từ UI. Tại điểm này, người dùng đã
+    chọn tài khoản mà liên lạc thô mới nên được thêm cho tài khoản đó.
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    Đoạn mã HTML tiếp theo tạo một thao tác để chèn hàng liên lạc thô vào bảng
+    {@link android.provider.ContactsContract.RawContacts}:
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    Tiếp theo, mã tạo các hàng dữ liệu cho hàng tên hiển thị, điện thoại và e-mail.
+</p>
+<p>
+    Từng đối tượng bộ dựng thao tác sẽ sử dụng
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    để nhận
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Tham chiếu đó sẽ trỏ
+    ngược về đối tượng {@link android.content.ContentProviderResult} từ thao tác đầu tiên,
+    là thao tác thêm hàng liên lạc thô và trả về giá trị {@code android.provider.BaseColumns#_ID}
+    mới của nó. Kết quả là, mỗi hàng dữ liệu được tự động liên kết bởi
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
+    của nó với hàng {@link android.provider.ContactsContract.RawContacts} mới mà nó thuộc về.
+</p>
+<p>
+    Đối tượng {@link android.content.ContentProviderOperation.Builder} thêm hàng e-mail sẽ được
+    gắn cờ bằng {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean)
+    withYieldAllowed()}, mà điều này đặt một điểm kết quả:
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    Đoạn mã HTML cuối cùng hiển thị lệnh gọi tới
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} mà
+    chèn liên lạc thô mới và các hàng dữ liệu.
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    Thao tác hàng loạt cũng cho phép bạn triển khai <strong>kiểm soát đồng thời lạc quan</strong>,
+    một phương pháp áp dụng các giao tác sửa đổi mà không phải khóa kho lưu giữ liên quan.
+    Để sử dụng phương pháp này, bạn áp dụng giao tác đó rồi kiểm tra các sửa đổi khác mà
+    có thể đã được thực hiện tại cùng thời điểm. Nếu bạn thấy đã diễn ra một sửa đổi không nhất quán,
+    hãy quay lui giao tác của bạn và thử lại.
+</p>
+<p>
+    Kiểm soát đồng thời lạc quan rất hữu ích đối với thiết bị di động, khi đó mỗi lúc chỉ có một người dùng
+    và việc truy cập đồng thời vào một kho lưu giữ dữ liệu hiếm khi xảy ra. Vì không sử dụng khóa nên
+    không bị lãng phí thời gian cho việc thiết đặt khóa hay chờ các giao tác khác nhả khóa của mình.
+</p>
+<p>
+    Để sử dụng kiểm soát đồng thời lạc quan trong khi đang cập nhật một hàng
+    {@link android.provider.ContactsContract.RawContacts} đơn, hãy làm theo các bước sau:
+</p>
+<ol>
+    <li>
+        Truy xuất cột {@link android.provider.ContactsContract.SyncColumns#VERSION}
+        của liên lạc thô cùng với dữ liệu khác mà bạn truy xuất.
+    </li>
+    <li>
+        Tạo một đối tượng {@link android.content.ContentProviderOperation.Builder} phù hợp để
+        thi hành một ràng buộc, bằng cách sử dụng phương pháp
+        {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Đối với URI nội dung,
+        sử dụng {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+        RawContacts.CONTENT_URI}
+        với {@code android.provider.BaseColumns#_ID} của liên lạc thô được nối với nó.
+    </li>
+    <li>
+        Đối với đối tượng {@link android.content.ContentProviderOperation.Builder}, hãy gọi
+        {@link android.content.ContentProviderOperation.Builder#withValue(String, Object)
+        withValue()} để so sánh cột {@link android.provider.ContactsContract.SyncColumns#VERSION}
+        với số phiên bản bạn vừa truy xuất.
+    </li>
+    <li>
+        Đối với cùng {@link android.content.ContentProviderOperation.Builder}, hãy gọi
+        {@link android.content.ContentProviderOperation.Builder#withExpectedCount(int)
+        withExpectedCount()} để đảm bảo rằng chỉ một hàng được kiểm tra bằng xác nhận này.
+    </li>
+    <li>
+        Gọi {@link android.content.ContentProviderOperation.Builder#build()} để tạo đối tượng
+        {@link android.content.ContentProviderOperation}, rồi thêm đối tượng này làm
+        đối tượng đầu tiên trong {@link java.util.ArrayList} mà bạn chuyển cho
+        {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}.
+    </li>
+    <li>
+        Áp dụng giao tác hàng loạt.
+    </li>
+</ol>
+<p>
+    Nếu hàng liên lạc thô được cập nhật bởi một thao tác khác giữa thời điểm bạn đọc hàng và
+    thời điểm bạn cố gắng sửa đổi nó, "xác nhận" {@link android.content.ContentProviderOperation}
+    sẽ thất bại, và toàn bộ loạt thao tác sẽ được rút khỏi. Sau đó, bạn có thể chọn thử lại
+    loạt hoặc thực hiện một hành động khác.
+</p>
+<p>
+    Đoạn mã HTML sau minh họa cách tạo một "xác nhận"
+    {@link android.content.ContentProviderOperation} sau khi truy vấn một liên lạc thô đơn bằng cách sử dụng
+    một {@link android.content.CursorLoader}:
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">Truy xuất và sửa đổi bằng ý định</h3>
+<p>
+    Việc gửi một ý định tới ứng dụng danh bạ của thiết bị cho phép bạn truy cập Trình cung cấp Danh bạ
+    một cách gián tiếp. Ý định sẽ khởi động UI ứng dụng danh bạ của thiết bị, trong đó người dùng có thể
+    thực hiện công việc liên quan tới danh bạ. Với kiểu truy cập này, người dùng có thể:
+    <ul>
+        <li>Chọn một liên lạc từ danh sách và trả nó về ứng dụng của bạn để làm việc tiếp.</li>
+        <li>Chỉnh sửa dữ liệu của một liên lạc hiện có.</li>
+        <li>Chèn một liên lạc thô mới cho bất kỳ tài khoản nào của họ.</li>
+        <li>Xóa một liên lạc hoặc dữ liệu danh bạ.</li>
+    </ul>
+<p>
+    Nếu người dùng đang chèn hoặc cập nhật dữ liệu, bạn có thể thu thập dữ liệu trước và gửi nó như
+    một phần của ý định.
+</p>
+<p>
+    Khi bạn sử dụng ý định để truy cập Trình cung cấp Danh bạ thông qua ứng dụng danh bạ của thiết bị, bạn
+    không phải ghi UI hay mã của chính mình để truy nhập trình cung cấp. Bạn cũng không phải
+    yêu cầu quyền đọc hoặc ghi đến trình cung cấp. Ứng dụng danh bạ của thiết bị có thể
+    cấp quyền đọc đối với một liên lạc cho bạn, và vì bạn đang thực hiện sửa đổi đối với
+    trình cung cấp thông qua một ứng dụng khác, bạn không cần phải có quyền ghi.
+</p>
+<p>
+    Tiến trình chung để gửi một ý định nhằm truy cập một trình cung cấp được mô tả chi tiết trong hướng dẫn
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Nội dung Cơ bản về Trình cung cấp Nội dung</a> trong phần "Truy cập dữ liệu thông qua ý định." Hành động,
+    kiểu MIME, và các giá trị dữ liệu bạn sử dụng cho các tác vụ có sẵn được tóm tắt trong Bảng 4, trong khi các giá trị
+    phụ thêm mà bạn có thể sử dụng với
+    {@link android.content.Intent#putExtra(String, String) putExtra()} được liệt kê trong
+    tài liệu tham khảo cho {@link android.provider.ContactsContract.Intents.Insert}:
+</p>
+<p class="table-caption" id="table4">
+  <strong>Bảng 4.</strong> Ý định của Trình cung cấp Danh bạ.
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">Tác vụ</th>
+        <th scope="col" style="width:5%">Hành động</th>
+        <th scope="col" style="width:10%">Dữ liệu</th>
+        <th scope="col" style="width:10%">Kiểu MIME</th>
+        <th scope="col" style="width:25%">Lưu ý</th>
+    </tr>
+    <tr>
+        <td><strong>Chọn một liên lạc từ danh sách</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            Một trong:
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI},
+                    mà hiển thị một danh sách các liên lạc.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI},
+                    mà hiển thị một danh sách các số điện thoại cho một liên lạc thô.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI
+StructuredPostal.CONTENT_URI},
+                    mà hiển thị một danh sách các địa chỉ bưu điện cho một liên lạc thô.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI},
+                    mà hiển thị một danh sách các địa chỉ e-mail cho một liên lạc thô.
+                </li>
+            </ul>
+        </td>
+        <td>
+            Không sử dụng
+        </td>
+        <td>
+            Hiển thị một danh sách các liên lạc thô hoặc danh sách dữ liệu từ một liên lạc thô, tùy vào kiểu
+            URI nội dung mà bạn cung cấp.
+            <p>
+                Gọi
+         {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+                nó trả về URI nội dung của hàng được chọn. Hình thức của URI là URI nội dung
+                của bảng với <code>LOOKUP_ID</code> của hàng được nối với nó.
+                Ứng dụng danh bạ của thiết bị cấp quyền đọc và ghi cho URI nội dung này
+                trong suốt thời gian hoạt động của bạn. Xem hướng dẫn
+                <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+                Nội dung Cơ bản về Trình cung cấp Nội dung</a> để biết thêm chi tiết.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Chèn một liên lạc thô mới</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>Không áp dụng</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE
+            RawContacts.CONTENT_TYPE}, kiểu MIME cho một tập hợp liên các lạc thô.
+        </td>
+        <td>
+            Hiển thị màn hình <strong>Thêm Liên lạc</strong> của ứng dụng danh bạ của thiết bị. Các
+            giá trị phụ thêm mà bạn thêm vào ý định sẽ được hiển thị. Nếu được gửi bằng
+        {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+            URI nội dung của liên lạc thô mới thêm sẽ được chuyển lại cho phương pháp gọi lại
+            {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}
+            của hoạt động của bạn trong tham đối {@link android.content.Intent}, trong
+            trường "dữ liệu". Để nhận giá trị, hãy gọi {@link android.content.Intent#getData()}.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Chỉnh sửa một liên lạc</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} đối với
+            liên lạc. Hoạt động của trình chỉnh sửa sẽ cho phép người dùng chỉnh sửa bất kỳ dữ liệu nào được liên kết
+            với liên lạc này.
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE
+            Contacts.CONTENT_ITEM_TYPE}, một liên lạc đơn.</td>
+        <td>
+            Hiển thị màn hình Chỉnh sửa Liên lạc trong ứng dụng danh bạ. Các giá trị phụ thêm mà bạn thêm
+            vào ý định sẽ được hiển thị. Khi người dùng nhấp vào <strong>Xong</strong> để lưu các
+            chỉnh sửa, hoạt động của bạn quay lại tiền cảnh.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Hiển thị một trình chọn mà cũng có thể thêm dữ liệu.</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            Không áp dụng
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            Ý định này luôn hiển thị màn hình bộ chọn của ứng dụng danh bạ. Người dùng có thể hoặc
+            chọn một liên lạc để chỉnh sửa, hoặc thêm một liên lạc mới. Hoặc màn hình chỉnh sửa hoặc màn hình thêm
+            sẽ xuất hiện, tùy vào lựa chọn của người dùng, và dữ liệu phụ thêm mà bạn chuyển trong ý định
+           sẽ được hiển thị. Nếu ứng dụng của bạn hiển thị dữ liệu chẳng hạn như e-mail hoặc số điện thoại, hãy sử dụng
+            ý định này để cho phép người dùng thêm dữ liệu vào một liên lạc hiện tại.
+            liên lạc,
+            <p class="note">
+                <strong>Lưu ý:</strong> Không cần gửi một giá trị tên trong phần phụ thêm của ý định,
+                vì người dùng luôn chọn một tên hiện có hoặc thêm một tên mới. Thêm nữa,
+                nếu bạn gửi một tên, và người dùng chọn thực hiện chỉnh sửa, ứng dụng danh bạ sẽ
+                hiển thị tên mà bạn gửi, ghi đè giá trị trước. Nếu người dùng không
+                để ý thấy điều này và lưu chỉnh sửa, giá trị cũ sẽ bị mất.
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    Ứng dụng danh bạ của thiết bị không cho phép bạn xóa một liên lạc thô hay bất kỳ dữ liệu nào bằng một
+    ý định. Thay vào đó, để xóa một liên lạc thô, hãy sử dụng
+    {@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()}
+    hoặc {@link android.content.ContentProviderOperation#newDelete(Uri)
+    ContentProviderOperation.newDelete()}.
+</p>
+<p>
+    Đoạn mã HTML sau minh họa cách xây dựng và gửi một ý định để chèn một liên lạc thô mới và
+    dữ liệu:
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">Toàn vẹn dữ liệu</h3>
+<p>
+    Vì kho lưu giữ danh bạ chứa dữ liệu quan trọng và nhạy cảm mà người dùng cho là
+    đúng và cập nhật, Trình cung cấp Danh bạ có các quy tắc về toàn vẹn dữ liệu được định nghĩa rõ ràng. Bạn có
+    trách nhiệm tuân theo những quy tắc này khi sửa đổi dữ liệu danh bạ. Các quy tắc
+    quan trọng được liệt kê ở đây:
+</p>
+<dl>
+    <dt>
+        Luôn thêm một hàng {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} cho
+        mỗi hàng {@link android.provider.ContactsContract.RawContacts} mà bạn thêm.
+    </dt>
+    <dd>
+        Hàng {@link android.provider.ContactsContract.RawContacts} không có một hàng
+        {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} trong bảng
+        {@link android.provider.ContactsContract.Data} có thể gây ra sự cố trong khi
+        tổng hợp.
+    </dd>
+    <dt>
+        Luôn liên kết các hàng {@link android.provider.ContactsContract.Data} mới với hàng
+        {@link android.provider.ContactsContract.RawContacts} mẹ của chúng.
+    </dt>
+    <dd>
+        Mỗi hàng {@link android.provider.ContactsContract.Data} mà không được liên kết với một
+        {@link android.provider.ContactsContract.RawContacts} sẽ không hiển thị trong ứng dụng danh bạ
+         của thiết bị, và nó có thể gây ra sự cố với trình điều hợp đồng bộ.
+    </dd>
+    <dt>
+        Chỉ thay đổi dữ liệu đối với những liên lạc thô mà bạn sở hữu.
+    </dt>
+    <dd>
+        Nhớ rằng Trình cung cấp Danh bạ luôn quản lý dữ liệu từ vài
+        loại tài khoản/dịch vụ trực tuyến khác nhau. Bạn cần đảm bảo rằng ứng dụng của bạn chỉ sửa đổi
+        hoặc xóa dữ liệu đối với các hàng thuộc về bạn, và rằng nó chỉ chèn dữ liệu có
+        loại và tên tài khoản mà bạn kiểm soát.
+    </dd>
+    <dt>
+        Luôn sử dụng các hằng số được định nghĩa trong {@link android.provider.ContactsContract} và các lớp con của nó
+        đối với thẩm quyền, URI nội dung, đường dẫn URI, tên cột, kiểu MIME, và các giá trị
+        {@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE}.
+    </dt>
+    <dd>
+        Sử dụng những hằng số này sẽ giúp bạn tránh gặp lỗi. Bạn cũng sẽ được thông báo bằng cảnh báo
+        từ trình biên dịch nếu bất kỳ hằng số nào không được chấp nhận.
+    </dd>
+</dl>
+<h3 id="CustomData">Hàng dữ liệu tùy chỉnh</h3>
+<p>
+    Bằng cách tạo và sử dụng các kiểu MIME tùy chỉnh của chính mình, bạn có thể chèn, chỉnh sửa, xóa và truy xuất
+    các hàng dữ liệu của chính mình trong bảng {@link android.provider.ContactsContract.Data}. Các hàng của bạn
+    bị giới hạn bằng cách sử dụng cột được định nghĩa trong
+    {@link android.provider.ContactsContract.DataColumns}, mặc dù bạn có thể ánh xạ
+    tên cột theo kiểu của chính mình với tên cột mặc định. Trong ứng dụng danh bạ của thiết bị,
+    dữ liệu cho các hàng của bạn được hiển thị nhưng không thể chỉnh sửa hay xóa được, và người dùng không thể thêm
+    dữ liệu bổ sung. Để cho phép người dùng sửa đổi các hàng dữ liệu tùy chỉnh của mình, bạn phải cung cấp một hoạt động
+    trình chỉnh sửa trong ứng dụng của chính mình.
+</p>
+<p>
+    Để hiển thị dữ liệu tùy chỉnh của mình, hãy cung cấp một tệp <code>contacts.xml</code> chứa một phần tử
+    <code>&lt;ContactsAccountType&gt;</code> và một hoặc nhiều phần tử con
+    <code>&lt;ContactsDataKind&gt;</code> của nó. Điều này được mô tả chi tiết hơn trong
+    phần <a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a>.
+</p>
+<p>
+    Để tìm hiểu thêm về các kiểu MIME tùy chỉnh, hãy đọc hướng dẫn
+    <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+    Tạo một Trình cung cấp Nội dung</a>.
+</p>
+<h2 id="SyncAdapters">Trình điều hợp Đồng bộ Trình cung cấp Danh bạ</h2>
+<p>
+    Trình cung cấp Danh bạ được thiết kế riêng để xử lý <strong>đồng bộ hoá</strong>
+    dữ liệu danh bạ giữa một thiết bị và một dịch vụ trực tuyến. Điều này cho phép người dùng tải
+    dữ liệu hiện có xuống một thiết bị mới và tải dữ liệu hiện có lên một tài khoản mới.
+    Đồng bộ hoá cũng đảm bảo rằng người dùng có sẵn dữ liệu mới nhất, không phụ thuộc vào
+    nguồn của các bổ sung và thay đổi. Một ưu điểm khác của đồng bộ hoá đó là nó khiến
+    dữ liệu danh bạ có sẵn ngay cả khi thiết bị không được kết nối với mạng.
+</p>
+<p>
+    Mặc dù bạn có thể triển khai đồng bộ hoá theo nhiều cách, hệ thống Android cung cấp
+    một khuôn khổ đồng bộ hóa bổ trợ có khả năng tự động hóa những tác vụ sau:
+    <ul>
+
+    <li>
+        Kiểm tra sự sẵn sàng của mạng.
+    </li>
+    <li>
+        Lập lịch biểu và thực hiện đồng bộ hoá dựa trên tùy chọn của người dùng.
+    </li>
+    <li>
+        Khởi động lại những đồng bộ hoá đã dừng.
+    </li>
+    </ul>
+<p>
+    Để sử dụng khuôn khổ này, bạn phải cung cấp một phần bổ trợ trình điều hợp đồng bộ. Mỗi trình điều hợp đồng bộ là duy nhất đối với
+    một dịch vụ và trình cung cấp nội dung, nhưng có thể xử lý nhiều tên tài khoản cho cùng dịch vụ. Khuôn khổ
+    cũng cho phép nhiều trình điều hợp đồng bộ cho cùng dịch vụ và trình cung cấp.
+</p>
+<h3 id="SyncClassesFiles">Các lớp và tệp trình điều hợp đồng bộ</h3>
+<p>
+    Bạn triển khai một trình điều hợp đồng bộ làm lớp con của
+    {@link android.content.AbstractThreadedSyncAdapter} và cài đặt nó như một phần của một ứng dụng
+    Android. Hệ thống biết về trình điều hợp đồng bộ từ các phần tử trong bản kê khai ứng dụng
+    của nó, và từ một tệp XML đặc biệt được chỉ đến trong bản kê khai. Tệp XML sẽ định nghĩa
+    loại tài khoản cho dịch vụ trực tuyến và thẩm quyền cho trình cung cấp nội dung, cùng nhau chúng
+   xác định duy nhất một trình điều hợp. Trình điều hợp đồng bộ không được kích hoạt cho tới khi người dùng thêm một
+    tài khoản cho loại tài khoản của trình điều hợp đồng bộ và kích hoạt đồng bộ hoá cho trình cung cấp
+    nội dung mà trình điều hợp đồng bộ sẽ đồng bộ cùng.  Tại thời điểm đó, hệ thống bắt đầu quản lý trình điều hợp,
+    gọi nó nếu cần thiết để đồng bộ hoá giữa trình cung cấp nội dung và máy chủ.
+</p>
+<p class="note">
+    <strong>Lưu ý:</strong> Việc sử dụng một loại tài khoản để tham gia nhận biết trình điều hợp đồng bộ sẽ cho phép
+    hệ thống phát hiện và nhóm cùng nhau những trình điều hợp đồng bộ truy cập các dịch vụ khác nhau từ
+    cùng tổ chức. Ví dụ, các trình điều hợp đồng bộ cho dịch vụ trực tuyến của Google đều có cùng
+    loại tài khoản <code>com.google</code>. Khi người dùng thêm một tài khoản Google vào thiết bị của mình, tất cả
+    trình điều hợp đồng bộ được cài đặt cho dịch vụ Google được liệt kê cùng nhau; mỗi trình điều hợp đồng bộ
+    được liệt kê sẽ đồng bộ với một trình cung cấp nội dung khác nhau trên thiết bị.
+</p>
+<p>
+    Vì hầu hết dịch vụ đều yêu cầu người dùng xác minh danh tính của họ trước khi truy cập
+    dữ liệu, hệ thống Android cung cấp một khuôn khổ xác thực tương tự như và thường
+    được sử dụng cùng với khuôn khổ của trình điều hợp đồng bộ. Khuôn khổ xác thực sử dụng
+    các trình xác thực bổ trợ là lớp con của
+    {@link android.accounts.AbstractAccountAuthenticator}. Một trình xác thực sẽ xác minh
+    danh tính của người dùng theo các bước sau:
+    <ol>
+        <li>
+            Thu thập tên, mật khẩu hoặc thông tin tương tự của người dùng (
+<strong>thông tin xác thực</strong> của người dùng).
+        </li>
+        <li>
+            Gửi thông tin xác thực tới dịch vụ
+        </li>
+        <li>
+            Kiểm tra trả lời của dịch vụ.
+        </li>
+    </ol>
+<p>
+    Nếu dịch vụ chấp nhận thông tin xác thực, trình xác thực có thể
+    lưu giữ thông tin xác thực đó để sử dụng sau. Vì khuôn khổ trình xác thực bổ trợ,
+    {@link android.accounts.AccountManager} có thể cung cấp quyền truy cập bất kỳ token xác thực nào mà một trình xác thực 
+    hỗ trợ và chọn hiện ra, chẳng hạn như token xác thực OAuth2.
+</p>
+<p>
+    Mặc dù không yêu cầu xác thực, phần lớn dịch vụ danh bạ đều sử dụng nó.
+    Tuy nhiên, bạn không phải sử dụng khuôn khổ xác thực của Android để thực hiện xác thực.
+</p>
+<h3 id="SyncAdapterImplementing">Triển khai trình điều hợp đồng bộ</h3>
+<p>
+    Để triển khai một trình điều hợp đồng bộ cho Trình cung cấp Danh bạ, bạn bắt đầu bằng cách tạo một
+    ứng dụng Android chứa:
+</p>
+    <dl>
+        <dt>
+            Một thành phần {@link android.app.Service} để hồi đáp lại các yêu cầu từ hệ thống nhằm
+            gắn kết với trình điều hợp đồng bộ.
+        </dt>
+        <dd>
+            Khi hệ thống muốn chạy đồng bộ hoá, nó gọi phương pháp
+            {@link android.app.Service#onBind(Intent) onBind()} của dịch vụ và nhận một
+            {@link android.os.IBinder} cho trình điều hợp đồng bộ. Điều này cho phép hệ thống thực hiện
+            lệnh gọi liên tiến trình tới các phương pháp của trình điều hợp.
+            <p>
+                Trong ứng dụng mẫu<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+                Trình điều hợp Đồng bộ Mẫu</a>, tên lớp của dịch vụ này là
+                <code>com.example.android.samplesync.syncadapter.SyncService</code>.
+            </p>
+        </dd>
+        <dt>
+            Trình điều hợp đồng bộ thực tế, được triển khai như một lớp con cụ thể của
+            {@link android.content.AbstractThreadedSyncAdapter}.
+        </dt>
+        <dd>
+            Lớp này thực hiện công việc tải xuống dữ liệu từ máy chủ, tải lên dữ liệu từ
+            thiết bị, và xử lý xung đột. Công việc chính của trình điều hợp được
+            thực hiện trong phương pháp {@link android.content.AbstractThreadedSyncAdapter#onPerformSync(
+            Account, Bundle, String, ContentProviderClient, SyncResult)
+            onPerformSync()}. Lớp này phải được khởi tạo như một đối tượng duy nhất (singleton).
+            <p>
+                Trong ứng dụng mẫu <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+                Trình điều hợp Đồng bộ Mẫu</a>, trình điều hợp đồng bộ được định nghĩa trong lớp
+                <code>com.example.android.samplesync.syncadapter.SyncAdapter</code>.
+            </p>
+        </dd>
+        <dt>
+            Một lớp con của {@link android.app.Application}.
+        </dt>
+        <dd>
+            Lớp này đóng vai trò như một nhà máy cho đối tượng duy nhất của trình điều hợp đồng bộ. Sử dụng phương pháp
+            {@link android.app.Application#onCreate()} để khởi tạo trình điều hợp đồng bộ, và
+            cung cấp một phương pháp "bộ nhận" tĩnh để trả đối tượng duy nhất về phương pháp
+            {@link android.app.Service#onBind(Intent) onBind()} của dịch vụ
+            của trình điều hợp đồng bộ.
+        </dd>
+        <dt>
+            <strong>Tùy chọn:</strong> Một thành phần {@link android.app.Service} để hồi đáp lại
+            các yêu cầu từ hệ thống về xác thực người dùng.
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager} khởi động dịch vụ này để bắt đầu tiến trình
+            xác thực. Phương pháp {@link android.app.Service#onCreate()} của dịch vụ này sẽ khởi tạo một
+            đối tượng trình xác thực. Khi hệ thống muốn xác thực một tài khoản người dùng cho trình điều hợp đồng bộ
+            của ứng dụng, nó sẽ gọi phương pháp
+            {@link android.app.Service#onBind(Intent) onBind()} của dịch vụ để nhận một
+            {@link android.os.IBinder} cho trình xác thực. Điều này cho phép hệ thống thực hiện
+            lệnh gọi liên tiến trình tới các phương pháp của trình xác thực.
+            <p>
+                Trong ứng dụng mẫu<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+                Trình điều hợp Đồng bộ Mẫu</a>, tên lớp của dịch vụ này là
+                <code>com.example.android.samplesync.authenticator.AuthenticationService</code>.
+            </p>
+        </dd>
+        <dt>
+            <strong>Tùy chọn:</strong> Một lớp con cụ thể của
+            {@link android.accounts.AbstractAccountAuthenticator} để xử lý các yêu cầu về
+            xác thực.
+        </dt>
+        <dd>
+            Lớp này cung cấp các phương pháp mà {@link android.accounts.AccountManager} gọi ra
+            để xác thực các thông tin xác thực của người dùng với máy chủ. Các chi tiết của
+            tiến trình xác thực rất khác nhau dựa trên công nghệ máy chủ đang sử dụng. Bạn nên
+            tham khảo tài liệu cho phần mềm máy chủ của mình để tìm hiểu thêm về xác thực.
+            <p>
+                Trong ứng dụng mẫu <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+                Trình điều hợp Đồng bộ Mẫu</a>, trình xác thực được định nghĩa trong lớp
+                <code>com.example.android.samplesync.authenticator.Authenticator</code>.
+            </p>
+        </dd>
+        <dt>
+            Các tệp XML để định nghĩa trình điều hợp đồng bộ và trình xác thực cho hệ thống.
+        </dt>
+        <dd>
+            Các thành phần dịch vụ trình điều hợp đồng bộ và trình xác thực đã nêu được
+            định nghĩa trong các phần tử
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code>
+            ở bản kê khai của ứng dụng. Những phần tử này
+            chứa các phần tử con
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+mà cung cấp dữ liệu cụ thể cho
+            hệ thống:
+            <ul>
+                <li>
+                    Phần tử
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+                    cho dịch vụ trình điều hợp đồng bộ sẽ trỏ về
+                    tệp XML <code>res/xml/syncadapter.xml</code>. Đến lượt mình, tệp này quy định
+                    một URI cho dịch vụ web mà sẽ được đồng bộ hóa với Trình cung cấp Danh bạ,
+                    và một loại tài khoản cho dịch vụ web.
+                </li>
+                <li>
+                    <strong>Tùy chọn:</strong> Phần tử
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+                    cho trình xác thực sẽ trỏ về tệp XML
+                    <code>res/xml/authenticator.xml</code>. Đến lượt mình, tệp này quy định
+                    loại tài khoản mà trình xác thực này hỗ trợ, cũng như các tài nguyên UI mà
+                    xuất hiện trong tiến trình xác thực. Loại tài khoản được quy định trong phần tử
+                    này phải giống như loại tài khoản được quy định cho trình điều hợp
+                    đồng bộ.
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">Dữ liệu từ Luồng Xã hội</h2>
+<p>
+    Các bảng {@code android.provider.ContactsContract.StreamItems} và 
+    {@code android.provider.ContactsContract.StreamItemPhotos} quản lý
+    dữ liệu đến từ các mạng xã hội. Bạn có thể ghi một trình điều hợp đồng bộ mà thêm dữ liệu luồng từ
+    mạng của chính mình vào những bảng này, hoặc bạn có thể đọc dữ liệu luồng từ những bảng này và
+    hiển thị nó trong ứng dụng của chính mình, hoặc cả hai. Với những tính năng này, các dịch vụ và ứng dụng
+    mạng xã hội của bạn có thể được tích hợp vào trải nghiệm mạng xã hội của Android.
+</p>
+<h3 id="StreamText">Văn bản từ luồng xã hội</h3>
+<p>
+    Các mục dòng dữ liệu luôn được liên kết với một liên lạc thô. 
+    {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} liên kết với giá trị
+    <code>_ID</code> của liên lạc thô mới. Loại tài khoản và tên tài khoản của liên lạc thô
+    cũng được lưu giữ trong hàng mục dòng.
+</p>
+<p>
+    Lưu giữ dữ liệu từ luồng của bạn vào những cột sau:
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>Bắt buộc.</strong> Loại tài khoản của người dùng đối với liên lạc thô được liên kết với mục dòng
+        này. Nhớ đặt giá trị này khi bạn chèn một mục dòng.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>Bắt buộc.</strong> Tên tài khoản của người dùng đối với liên lạc thô được liên kết với mục dòng
+        này. Nhớ đặt giá trị này khi bạn chèn một mục dòng.
+    </dd>
+    <dt>
+        Cột mã định danh
+    </dt>
+    <dd>
+        <strong>Bắt buộc.</strong> Bạn phải chèn các cột mã định danh sau khi chèn
+        một mục dòng:
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: Giá trị
+                {@code android.provider.BaseColumns#_ID} của liên lạc mà mục dòng
+                này được liên kết với.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: Giá trị
+                {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} của liên lạc
+                mà mục dòng này được liên kết với.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: Giá trị
+                {@code android.provider.BaseColumns#_ID} của liên lạc thô mà mục dòng này
+                được liên kết với.
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        Tùy chọn. Lưu giữ thông tin tóm tắt mà bạn có thể hiển thị ở phần đầu của một mục dòng.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        Văn bản của mục dòng, hoặc là nội dung đã được đăng bởi nguồn của mục đó,
+        hoặc là mô tả về một số hành động đã khởi tạo mục dòng. Cột này có thể chứa
+        bất kỳ hình ảnh tài nguyên định dạng và được nhúng nào mà có thể được kết xuất bởi
+        {@link android.text.Html#fromHtml(String) fromHtml()}. Trình cung cấp có thể cắt bớt hoặc
+        cắt ngắn bằng dấu ba chấm các nội dung dài, nhưng sẽ cố gắng tránh làm hỏng các tag.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        Xâu văn bản chứa thời gian mà mục dòng được chèn hoặc cập nhật, có
+        dạng <em>mili giây</em> trôi qua kể từ giờ epoch. Những ứng dụng chèn hoặc cập nhật mục dòng sẽ chịu
+        trách nhiệm  duy trì cột này; nó không được tự động duy trì bởi
+        Trình cung cấp Danh bạ.
+    </dd>
+</dl>
+<p>
+    Để hiển thị thông tin nhận dạng cho các mục dòng của bạn, hãy sử dụng
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL}, và
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} để liên kết với các tài nguyên
+    trong ứng dụng của mình.
+</p>
+<p>
+    Bảng {@code android.provider.ContactsContract.StreamItems} chứa các cột
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} thông qua
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} dành riêng để sử dụng
+    trình điều hợp đồng bộ.
+</p>
+<h3 id="StreamPhotos">Ảnh từ luồng xã hội</h3>
+<p>
+   Bảng {@code android.provider.ContactsContract.StreamItemPhotos} lưu giữ ảnh được liên kết
+   với một mục dòng. Cột
+   {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} của bảng
+   liên kết với các giá trị trong {@code android.provider.BaseColumns#_ID} của bảng
+   {@code android.provider.ContactsContract.StreamItems}. Các tham chiếu ảnh được lưu giữ trong
+   bảng ở những cột này:
+</p>
+<dl>
+    <dt>
+        Cột {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (một BLOB).
+    </dt>
+    <dd>
+        Biểu diễn dạng nhị phân của ảnh, được trình cung cấp đổi kích cỡ để lưu giữ và hiển thị.
+        Cột này có sẵn để tương thích ngược với các phiên bản trước của Trình cung cấp
+        Danh bạ mà đã sử dụng nó để lưu giữ ảnh. Tuy nhiên, trong phiên bản hiện tại
+        bạn không nên sử dụng cột này để lưu giữ ảnh. Thay vào đó, hãy sử dụng
+        hoặc {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} hoặc 
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (cả hai
+        đều được mô tả trong các điểm sau) để lưu giữ ảnh trong một tệp. Lúc này, cột này
+        chứa một hình thu nhỏ của ảnh sẵn sàng để đọc.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        Một mã định danh dạng số của ảnh cho một liên lạc thô. Nối giá trị này với hằng số
+        {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI}
+        để nhận một URI nội dung trỏ về một tệp ảnh đơn, rồi gọi
+        {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} để nhận một điều khiển (handle) cho tệp ảnh.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        Một URI nội dung trỏ trực tiếp tới tệp ảnh cho ảnh được đại diện bởi hàng này.
+        Gọi {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} bằng URI này để nhận một điều khiển (handle) cho tệp ảnh.
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">Sử dụng các bảng luồng xã hội</h3>
+<p>
+    Những bảng này hoạt động giống như các bảng chính khác trong Trình cung cấp Danh bạ, ngoại trừ:
+</p>
+    <ul>
+        <li>
+            Những bảng này yêu cầu quyền truy cập bổ sung. Để đọc từ chúng, ứng dụng của bạn
+            phải có quyền {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Để
+            sửa đổi chúng, ứng dụng của bạn phải có quyền
+            {@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+        </li>
+        <li>
+            Đối với bảng {@code android.provider.ContactsContract.StreamItems}, số hàng
+            được lưu giữ cho mỗi liên lạc thô sẽ bị giới hạn. Sau khi đạt đến giới hạn này,
+            Trình cung cấp Danh bạ sẽ tạo khoảng trống cho các hàng mục dòng mới bằng cách tự động xóa
+            những hàng có
+            {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} lâu nhất. Để nhận
+            giới hạn, hãy phát hành một truy vấn tới URI nội dung
+            {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. Bạn có thể để
+            tất cả các tham đối khác ngoài URI nội dung được đặt về <code>null</code>. Truy vấn
+            trả về một Con chạy chứa một hàng đơn, với cột đơn
+            {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+        </li>
+    </ul>
+
+<p>
+    Lớp {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} định nghĩa một
+    bảng con {@code android.provider.ContactsContract.StreamItemPhotos} chứa các hàng ảnh
+    cho một mục dòng đơn.
+</p>
+<h3 id="SocialStreamInteraction">Tương tác từ luồng xã hội</h3>
+<p>
+    Dữ liệu từ luồng xã hội được quản lý bởi Trình cung cấp Danh bạ, kết hợp với
+    ứng dụng danh bạ của thiết bị, cung cấp một cách hiệu quả để kết nối hệ thống mạng xã hội của bạn
+    với các liên lạc hiện tại. Có sẵn những tính năng sau:
+</p>
+    <ul>
+        <li>
+            Bằng cách đồng bộ dịch vụ mạng xã hội của bạn với Trình cung cấp Danh bạ bằng một trình điều hợp
+            đồng bộ, bạn có thể truy xuất hoạt động gần đây đối với danh bạ của một người dùng và lưu giữ nó trong
+            các bảng {@code android.provider.ContactsContract.StreamItems} và
+            {@code android.provider.ContactsContract.StreamItemPhotos} để sử dụng sau.
+        </li>
+        <li>
+            Bên cạnh việc đồng bộ hoá thường xuyên, bạn có thể kích khởi trình điều hợp đồng bộ của mình để truy xuất
+            dữ liệu bổ sung khi người dùng chọn một liên lạc để xem. Điều này cho phép trình điều hợp đồng bộ của bạn
+            truy xuất ảnh độ phân giải cao và các mục dòng gần đây nhất cho liên lạc đó.
+        </li>
+        <li>
+            Bằng cách đăng ký một thông báo với ứng dụng danh bạ của thiết bị và Trình cung cấp
+            Danh bạ, bạn có thể <em>nhận</em> một ý định khi một liên lạc được xem, và tại thời điểm đó,
+            cập nhật trạng thái của liên lạc đó từ dịch vụ của bạn. Phương pháp này có thể nhanh hơn và sử dụng ít
+            băng thông hơn việc thực hiện đồng bộ đầy đủ với một trình điều hợp đồng bộ.
+        </li>
+        <li>
+            Người dùng có thể thêm một liên lạc vào dịch vụ mạng xã hội của mình trong khi đang xem liên lạc đó
+            trong ứng dụng danh bạ của thiết bị. Bạn kích hoạt điều này bằng tính năng "mời liên lạc",
+           theo đó cho phép kết hợp một hoạt động để thêm một liên lạc hiện có vào mạng
+            của bạn, và một tệp XML để cung cấp cho ứng dụng danh bạ của thiết bị và
+            Trình cung cấp Danh bạ thông tin chi tiết về ứng dụng của bạn.
+        </li>
+    </ul>
+<p>
+    Đồng bộ hóa thường xuyên các mục dòng với Trình cung cấp Danh bạ giống như
+    các trường hợp đồng bộ hoá khác. Để tìm hiểu thêm về đồng bộ hoá, hãy xem phần
+    <a href="#SyncAdapters">Trình điều hợp Đồng bộ Trình cung cấp Danh bạ</a>. Việc đăng ký thông tin và
+    mời liên lạc được đề cập trong hai phần tiếp theo.
+</p>
+<h4>Đăng ký để xử lý các lượt xem mạng xã hội</h4>
+<p>
+    Để đăng ký để trình điều hợp đồng bộ của bạn nhận thông báo khi người dùng xem một liên lạc do
+    trình điều hợp đồng bộ của bạn quản lý:
+</p>
+<ol>
+    <li>
+        Tạo một tệp có tên <code>contacts.xml</code> trong thư mục <code>res/xml/</code>
+        của dự án của bạn. Nếu đã có tệp này, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Trong tệp này, hãy thêm phần tử
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Nếu phần tử này đã tồn tại, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Để đăng ký một dịch vụ được thông báo khi người dùng mở trang chi tiết của một liên lạc trong
+        ứng dụng danh bạ của thiết bị, hãy thêm thuộc tính
+        <code>viewContactNotifyService="<em>serviceclass</em>"</code> vào phần tử, trong đó
+        <code><em>serviceclass</em></code> là tên lớp được đáp ứng đầy đủ của dịch vụ
+        mà sẽ nhận ý định từ ứng dụng danh bạ của thiết bị. Đối với dịch vụ
+        trình thông báo, hãy sử dụng một lớp mở rộng {@link android.app.IntentService}, để cho phép dịch vụ
+        nhận các ý định. Dữ liệu trong ý định đến chứa URI nội dung của liên lạc
+        thô mà người dùng đã nhấp vào. Từ dịch vụ trình thông báo, bạn có thể gắn kết với rồi gọi trình điều hợp đồng bộ
+        của bạn để cập nhật dữ liệu cho liên lạc thô.
+    </li>
+</ol>
+<p>
+    Để đăng ký một hoạt động sẽ được gọi khi người dùng nhấp vào một mục dòng hay ảnh hoặc cả hai:
+</p>
+<ol>
+    <li>
+        Tạo một tệp có tên <code>contacts.xml</code> trong thư mục <code>res/xml/</code>
+        của dự án của bạn. Nếu đã có tệp này, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Trong tệp này, hãy thêm phần tử
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Nếu phần tử này đã tồn tại, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Để đăng ký một trong các hoạt động của bạn sẽ xử lý khi người dùng nhấp vào một mục dòng trong
+        ứng dụng danh bạ của thiết bị, hãy thêm thuộc tính
+        <code>viewStreamItemActivity="<em>activityclass</em>"</code> vào phần tử đó, trong đó
+        <code><em>activityclass</em></code> là tên lớp được xác định đầy đủ của hoạt động
+        mà sẽ nhận ý định từ ứng dụng danh bạ của thiết bị.
+    </li>
+    <li>
+        Để đăng ký một trong các hoạt động của bạn sẽ xử lý khi người dùng nhấp vào một ảnh luồng trong
+        ứng dụng danh bạ của thiết bị, hãy thêm thuộc tính
+        <code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> vào phần tử đó, trong đó
+        <code><em>activityclass</em></code> là tên lớp được xác định đầy đủ của hoạt động
+        mà sẽ nhận ý định từ ứng dụng danh bạ của thiết bị.
+    </li>
+</ol>
+<p>
+    Phần tử <code>&lt;ContactsAccountType&gt;</code> được mô tả chi tiết hơn trong mục
+    phần tử <a href="#SocialStreamAcctType">&lt;ContactsAccountType&gt;</a>.
+</p>
+<p>
+    Ý định đến chứa URI nội dung của mục hoặc ảnh mà người dùng đã nhấp vào.
+    Để có các hoạt động riêng cho các mục văn bản và ảnh, hãy sử dụng cả hai thuộc tính trong cùng tệp.
+</p>
+<h4>Tương tác với dịch vụ mạng xã hội của bạn</h4>
+<p>
+    Người dùng không phải rời ứng dụng danh bạ của thiết bị để mời một liên lạc tới trang mạng xã hội
+    của bạn. Thay vào đó, bạn có thể thiết đặt để ứng dụng danh bạ của thiết bị gửi một ý định để mời
+    liên lạc đó tới một trong các hoạt động của mình. Để thiết đặt điều này:
+</p>
+<ol>
+    <li>
+        Tạo một tệp có tên <code>contacts.xml</code> trong thư mục <code>res/xml/</code>
+        của dự án của bạn. Nếu đã có tệp này, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Trong tệp này, hãy thêm phần tử
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Nếu phần tử này đã tồn tại, bạn có thể bỏ qua bước này.
+    </li>
+    <li>
+        Thêm các thuộc tính sau:
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        Giá trị <code><em>activityclass</em></code> là tên lớp được xác định đầy đủ của hoạt động
+        mà sẽ nhận được ý định. Giá trị <code><em>invite_action_label</em></code>
+        là một xâu văn bản được hiển thị trong menu <strong>Thêm Kết nối</strong> trong ứng dụng danh bạ
+        của thiết bị.
+    </li>
+</ol>
+<p class="note">
+    <strong>Lưu ý:</strong> <code>ContactsSource</code> là một tên tag không được chấp nhận đối với
+    <code>ContactsAccountType</code>.
+</p>
+<h3 id="ContactsFile">Tham chiếu contacts.xml</h3>
+<p>
+    Tệp <code>contacts.xml</code> chứa các phần tử XML có chức năng kiểm soát tương tác giữa
+    trình điều hợp đồng bộ và ứng dụng của bạn với ứng dụng danh bạ và Trình cung cấp Danh bạ. Những
+    phần tử này được mô tả trong các mục sau.
+</p>
+<h4 id="SocialStreamAcctType">Thành phần &lt;ContactsAccountType&gt;</h4>
+<p>
+    Phần tử <code>&lt;ContactsAccountType&gt;</code> kiểm soát tương tác giữa
+    ứng dụng của bạn với ứng dụng danh bạ. Nó có những cú pháp sau:
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>chứa trong:</strong>
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>có thể chứa:</strong>
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>Mô tả:</strong>
+</p>
+<p>
+    Khai báo các thành phần Android và nhãn UI mà cho phép người dùng mời một trong các liên lạc của mình đến
+    một mạng xã hội, thông báo người dùng khi một trong các luồng mạng xã hội của họ được cập nhật,
+    v.v.
+</p>
+<p>
+    Để ý rằng tiền tố thuộc tính <code>android:</code> không nhất thiết áp dụng cho các thuộc tính
+    của <code>&lt;ContactsAccountType&gt;</code>.
+</p>
+<p>
+    <strong>Thuộc tính:</strong>
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        Tên lớp được xác định đầy đủ của hoạt động trong ứng dụng của bạn mà bạn muốn
+        kích hoạt khi người dùng chọn <strong>Thêm kết nối</strong> từ ứng dụng danh bạ
+        của thiết bị.
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        Một xâu văn bản được hiển thị cho hoạt động được quy định trong
+        {@code inviteContactActivity}, trong menu <strong>Thêm kết nối</strong>.
+        Ví dụ, bạn có thể sử dụng xâu "Follow in my network". Bạn có thể sử dụng mã định danh
+        tài nguyên xâu cho nhãn này.
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        Tên lớp được xác định đầy đủ của một dịch vụ trong ứng dụng của bạn mà sẽ nhận được
+        thông báo khi người dùng xem một liên lạc. Thông báo này được gửi từ ứng dụng danh bạ
+        của thiết bị; nó cho phép ứng dụng của bạn tạm hoãn các thao tác dùng nhiều dữ liệu tới
+        khi cần. Ví dụ, ứng dụng của bạn có thể hồi đáp lại thông báo này
+        bằng cách đọc và hiển thị ảnh độ phân giải cao của danh bạ và các mục dòng mạng xã hội
+        gần đây nhất. Tính năng này được mô tả chi tiết hơn trong phần
+        <a href="#SocialStreamInteraction">Tương tác với luồng xã hội</a>. Bạn có thể thấy một
+        ví dụ về dịch vụ thông báo trong tệp <code>NotifierService.java</code> trong ứng dụng mẫu
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>
+.
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        Tên lớp được xác định đầy đủ của một hoạt động trong ứng dụng của bạn mà có thể
+        hiển thị thông tin nhóm. Khi người dùng nhấp vào nhãn nhóm trong ứng dụng danh bạ
+        của thiết bị, UI cho hoạt động này sẽ được hiển thị.
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        Nhãn mà ứng dụng danh bạ hiển thị cho một điều khiển UI có cho phép
+        người dùng xem các nhóm trong ứng dụng của bạn.
+        <p>
+            Ví dụ, nếu bạn cài đặt ứng dụng Google+ trên thiết bị của mình và bạn đồng bộ
+            Google+ với ứng dụng danh bạ, bạn sẽ thấy các vòng tròn Google+ được liệt kê thành các nhóm
+            trong tab <strong>Nhóm</strong> của ứng dụng danh bạ của bạn. Nếu bạn nhấp vào một vòng tròn
+            Google+, bạn sẽ thấy những người trong vòng tròn đó được liệt kê thành một "nhóm". Phía bên trên của
+            hiển thị, bạn sẽ thấy một biểu tượng Google+; nếu bạn nhấp vào đó, điều khiển sẽ chuyển sang ứng dụng
+            Google+. Ứng dụng danh bạ làm điều này bằng
+            {@code viewGroupActivity}, bằng cách sử dụng biểu tượng Google+ làm giá trị của
+            {@code viewGroupActionLabel}.
+        </p>
+        <p>
+            Một mã định danh tài nguyên xâu được cho phép cho thuộc tính này.
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        Tên lớp được xác định đầy đủ của một hoạt động trong ứng dụng của bạn mà
+        ứng dụng danh bạ của thiết bị khởi chạy khi người dùng nhấp vào một mục dòng đối với một liên lạc thô.
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        Tên lớp được xác định đầy đủ của một hoạt động trong ứng dụng của bạn mà
+       ứng dụng danh bạ của thiết bị khởi chạy khi người dùng nhấp vào một ảnh trong mục dòng
+        đối với một liên lạc thô.
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">Phần tử &lt;ContactsDataKind&gt;</h4>
+<p>
+    Phần tử <code>&lt;ContactsDataKind&gt;</code> kiểm soát việc hiển thị các hàng
+    dữ liệu tùy chỉnh của ứng dụng của bạn trong UI của ứng dụng danh bạ. Nó có những cú pháp sau:
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>chứa trong:</strong>
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>Mô tả:</strong>
+</p>
+<p>
+    Sử dụng phần tử này để ứng dụng danh bạ hiển thị các nội dung trong một hàng dữ liệu tùy chỉnh như
+    một phần chi tiết của một liên lạc thô. Mỗi phần tử con <code>&lt;ContactsDataKind&gt;</code>
+    của <code>&lt;ContactsAccountType&gt;</code> đại diện cho một kiểu hàng dữ liệu tùy chỉnh mà trình điều hợp
+    đồng bộ của bạn thêm vào bảng {@link android.provider.ContactsContract.Data}. Thêm một phần tử
+    <code>&lt;ContactsDataKind&gt;</code> cho mỗi kiểu MIME tùy chỉnh mà bạn sử dụng. Bạn không phải
+    thêm phần tử nếu có một hàng dữ liệu tùy chỉnh mà bạn không muốn hiển thị dữ liệu.
+</p>
+<p>
+    <strong>Thuộc tính:</strong>
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        Kiểu MIME tùy chỉnh mà bạn đã định nghĩa cho một trong các kiểu hàng dữ liệu tùy chỉnh của bạn trong bảng
+        {@link android.provider.ContactsContract.Data}. Ví dụ, giá trị
+        <code>vnd.android.cursor.item/vnd.example.locationstatus</code> có thể là một kiểu
+        MIME tùy chỉnh cho một hàng dữ liệu có chức năng ghi lại vị trí được biết đến cuối cùng của một liên lạc.
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+        Một tài nguyên
+        <a href="{@docRoot}guide/topics/resources/drawable-resource.html">có thể vẽ của Android</a>
+        mà ứng dụng danh bạ hiển thị bên cạnh dữ liệu của bạn. Sử dụng nó để thể hiện với
+        người dùng rằng dữ liệu xuất phát từ dịch vụ của bạn.
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        Tên cột của giá trị thứ nhất trong hai giá trị được truy xuất từ hàng dữ liệu. Giá trị
+        được hiển thị là dòng thứ nhất của mục nhập cho hàng dữ liệu này. Dòng thứ nhất có
+        mục đích sử dụng làm bản tóm tắt dữ liệu, nhưng điều đó là tùy chọn. Xem thêm
+        <a href="#detailColumn">android:detailColumn</a>.
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        Tên cột của giá trị thứ hai trong hai giá trị được truy xuất từ hàng dữ liệu. Giá trị
+        được hiển thị là dòng thứ hai của mục nhập cho hàng dữ liệu này. Xem thêm
+        {@code android:summaryColumn}.
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">Các Tính năng Bổ sung của Trình cung cấp Danh bạ</h2>
+<p>
+    Bên cạnh các tính năng chính được mô tả trong các phần trước, Trình cung cấp Danh bạ còn cung cấp
+    những tính năng hữu ích sau khi làm việc với dữ liệu danh bạ:
+</p>
+    <ul>
+       <li>Nhóm liên lạc</li>
+       <li>Tính năng ảnh</li>
+    </ul>
+<h3 id="Groups">Nhóm liên lạc</h3>
+<p>
+    Trình cung cấp Danh bạ có thể tùy chọn đánh nhãn các bộ sưu tập liên lạc có liên quan bằng dữ liệu
+    <strong>nhóm</strong>. Nếu máy chủ liên kết với một tài khoản người dùng
+    muốn duy trì nhóm, trình điều hợp đồng bộ cho loại tài khoản của tài khoản đó sẽ chuyển
+    dữ liệu nhóm giữa Trình cung cấp Danh bạ và máy chủ. Khi người dùng thêm một liên lạc mới vào
+    máy chủ, trình điều hợp đồng bộ phải thêm nhóm mới
+    vào bảng {@link android.provider.ContactsContract.Groups}. Nhóm hoặc các nhóm mà một liên lạc
+    thô thuộc về được lưu giữ trong bảng {@link android.provider.ContactsContract.Data}, bằng cách sử dụng
+    kiểu MIME {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}.
+</p>
+<p>
+    Nếu bạn đang thiết kế một trình điều hợp đồng bộ mà sẽ thêm dữ liệu liên lạc thô từ
+    máy chủ tới Trình cung cấp Danh bạ, và bạn không sử dụng các nhóm, khi đó bạn cần báo cho
+    Trình cung cấp làm các dữ liệu của bạn thấy được. Trong đoạn mã được thực hiện khi một người dùng thêm một tài khoản
+    vào thiết bị, hãy cập nhật hàng {@link android.provider.ContactsContract.Settings}
+    mà Trình cung cấp Danh bạ thêm cho tài khoản. Trong hàng này, đặt giá trị của cột
+    {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE
+    Settings.UNGROUPED_VISIBLE} thành 1. Khi bạn làm vậy, Trình cung cấp Danh bạ sẽ luôn
+    làm cho dữ liệu danh bạ của bạn thấy được, ngay cả khi bạn không sử dụng nhóm.
+</p>
+<h3 id="Photos">Ảnh liên lạc</h3>
+<p>
+    Bảng {@link android.provider.ContactsContract.Data} lưu giữ ảnh thành hàng với kiểu MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}. Cột
+    {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} của hàng được liên kết với cột
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô mà nó thuộc về.
+    Lớp {@link android.provider.ContactsContract.Contacts.Photo} định nghĩa một bảng con của
+    {@link android.provider.ContactsContract.Contacts} chứa thông tin ảnh về ảnh chính
+    của một liên lạc, đây là ảnh chính của liên lạc thô chính của liên lạc. Tương tự,
+    lớp {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} định nghĩa một bảng con
+    của {@link android.provider.ContactsContract.RawContacts} chứa thông tin ảnh đối với ảnh chính
+    của một liên lạc thô.
+</p>
+<p>
+    Tài liệu tham khảo cho {@link android.provider.ContactsContract.Contacts.Photo} và
+    {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} có các ví dụ về
+    việc truy xuất thông tin ảnh. Không có lớp thuận tiện cho việc truy xuất hình thu nhỏ
+    chính đối với một liên lạc thô, nhưng bạn có thể gửi một truy vấn tới bảng
+    {@link android.provider.ContactsContract.Data}, chọn
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô, 
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}, và cột {@link android.provider.ContactsContract.Data#IS_PRIMARY}
+    để tìm hàng ảnh chính của liên lạc thô.
+</p>
+<p>
+    Dữ liệu từ luồng xã hội đối với một người cũng có thể bao gồm ảnh. Những ảnh này được lưu giữ trong bảng
+    {@code android.provider.ContactsContract.StreamItemPhotos}, được mô tả chi tiết hơn
+    trong phần <a href="#StreamPhotos">Ảnh từ luồng xã hội</a>.
+</p>

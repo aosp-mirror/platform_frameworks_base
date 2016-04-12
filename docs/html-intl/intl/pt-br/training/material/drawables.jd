@@ -1,0 +1,126 @@
+page.title=Como trabalhar com desenháveis
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#DrawableTint">Colorir recursos desenháveis</a></li>
+  <li><a href="#ColorExtract">Extrair cores proeminentes de uma imagem</a></li>
+  <li><a href="#VectorDrawables">Criar desenháveis de vetor</a></li>
+</ol>
+<h2>Você também deve ler</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificações do Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design no Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>As seguintes capacidades dos desenháveis ajudam na implementação do Material Design nos aplicativos:</p>
+
+<ul>
+<li>Tingimento desenhável</li>
+<li>Extração de cor proeminente</li>
+<li>Desenháveis de vetor</li>
+</ul>
+
+<p>Esta lição mostra como usar esses recursos no seu aplicativo.</p>
+
+
+<h2 id="DrawableTint">Colorir recursos desenháveis</h2>
+
+<p>Com o Android 5.0 (API de nível 21) e posteriores, você pode colorir bitmaps e nine-patches definidos como
+máscaras alfa. Você pode colori-los com recursos de cor ou atributos de tema que determinam os recursos
+de cor (por exemplo, <code>?android:attr/colorPrimary</code>). Normalmente, você cria esses ativos
+somente uma vez e colore-os automaticamente para combinar com seu tema.</p>
+
+<p>Você pode aplicar um tingimento aos objetos {@link android.graphics.drawable.BitmapDrawable} ou {@link
+android.graphics.drawable.NinePatchDrawable} com o método {@code setTint()}. Você também
+pode configurar a cor e o modo do tingimento nos layouts com os atributos <code>android:tint</code> e 
+<code>android:tintMode</code>.</p>
+
+
+<h2 id="ColorExtract">Extrair cores proeminentes de uma imagem</h2>
+
+<p>A Biblioteca de Suporte r21 do Android e posteriores incluem a classe {@link
+android.support.v7.graphics.Palette}, que permite a extração de cores proeminentes de uma imagem.
+Essa classe extrai as seguintes cores proeminentes:</p>
+
+<ul>
+<li>Vibrante</li>
+<li>Escuro vibrante</li>
+<li>Claro vibrante</li>
+<li>Suave</li>
+<li>Escuro suave</li>
+<li>Claro suave</li>
+</ul>
+
+<p>Para extrair essas cores, passe um objeto {@link android.graphics.Bitmap} para o método estático
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} no encadeamento do segundo
+plano em que você carrega as imagens. Se você não puder usar aquele encadeamento, chame o método
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} e forneça um escutador
+como alternativa.</p>
+
+<p>Você pode recuperar as cores proeminentes da imagem usando métodos de obtenção na classe
+<code>Palette</code>, como <code>Palette.getVibrantColor</code>.</p>
+
+<p>Para usar a classe {@link android.support.v7.graphics.Palette} no projeto, adicione a seguinte
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependência do Gradle</a> ao
+módulo do aplicativo:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>Para obter mais informações, consulte a referência de API para a classe {@link android.support.v7.graphics.Palette}
+.</p>
+
+
+<h2 id="VectorDrawables">Criar desenháveis de vetor</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>Vídeos</h3>
+    <p>Gráficos de vetor do Android</p>
+</div>
+</a>
+
+<p>No Android 5.0 (API de nível 21) e posteriores, você pode definir desenháveis de vetor que são dimensionáveis
+sem perder definição. Você precisa apenas de um arquivo de ativos para uma imagem de vetor, em vez de um arquivo de ativos
+para cada densidade de tela no caso de imagens de bitmap. Para criar uma imagem de vetor, defina os detalhes
+da forma dentro de um elemento XML <code>&lt;vector&gt;</code>.</p>
+
+<p>O exemplo a seguir define uma imagem de vetor com a forma de um coração:</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Imagens de vetor são representadas no Android como objetos {@link android.graphics.drawable.VectorDrawable}
+. Para obter mais informações sobre a sintaxe <code>pathData</code>, consulte a <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">Referência do caminho SVG</a>. Para obter informações sobre
+como animar propriedades de desenháveis de vetor, consulte
+<a href="{@docRoot}training/material/animations.html#AnimVector">Animar desenháveis de vetor</a>.</p>

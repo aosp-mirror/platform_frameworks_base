@@ -1,0 +1,64 @@
+page.title=Add An App Install Banner On Your Mobile Website
+page.metaDescription=Add a native app install banner to your mobile website and allow visitors to install your app straight from your site.
+page.image=images/cards/card-install-banners_16x9_2x.png
+page.tags="banner, chrome, web"
+Xnonavpage=true
+
+@jd:body
+
+<!--
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li>TOC item</li>
+    </ol>
+  </div>
+</div>
+-->
+
+<div class="figure" style="width:138px">
+  <img src="{@docRoot}images/distribute/users/banners.png"
+    srcset="{@docRoot}images/distribute/users/banners.png 1x,
+        {@docRoot}images/distribute/users/banners_2x.png 2x"
+    width="138">
+</div>
+
+<p>
+  Add a native app install banner to your mobile website and offer visitors the
+  added convenience of installing your app or game straight from your site.
+</p>
+
+<p>
+  Learn how to <a href=
+  "https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native"
+  class="external-link">add a native app install banner</a> to your mobile
+  site.
+</p>
+
+<h3 id="how">How it Works</h3>
+
+<p>
+  App install banners are offered as an extension of Chrome’s ability to
+  deliver Web App install banners. You can setup this feature in a web app
+  manifest file. In the manifest you define how your app will appear on the
+  user’s system, how it should be launched, and whether its banner has priority
+  over the banner for your Web App. Then, as long as your site is delivered
+  over HTTPS, after a user visits your site on two separate days within a two
+  week period they’ll be shown your app’s install banner.
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/banners/related"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

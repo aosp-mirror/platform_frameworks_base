@@ -95,6 +95,11 @@
 
 
 
+
+
+
+
+
 <html>
 <head>
 
@@ -469,6 +474,7 @@ type="text/css">
               
     <li><h2>Interfaces</h2>
       <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPageOptions.html">GridPageOptions</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/GridPageOptions.BackgroundListener.html">GridPageOptions.BackgroundListener</a></li>
@@ -484,6 +490,7 @@ type="text/css">
               
     <li><h2>Classes</h2>
       <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionLabel.html">ActionLabel</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionPage.html">ActionPage</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/BoxInsetLayout.html">BoxInsetLayout</a></li>
@@ -784,7 +791,7 @@ Summary:
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.support.v7.widget.RecyclerView.Adapter" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.support.v7.widget.RecyclerView.Adapter-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -954,7 +961,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyItemInserted</span>(int arg0)</nobr>
+        <span class="sympad">notifyItemChanged</span>(int arg0, Object arg1)</nobr>
         
   </td></tr>
 
@@ -970,7 +977,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyItemMoved</span>(int arg0, int arg1)</nobr>
+        <span class="sympad">notifyItemInserted</span>(int arg0)</nobr>
         
   </td></tr>
 
@@ -986,7 +993,39 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyItemMoved</span>(int arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyItemRangeChanged</span>(int arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyItemRangeChanged</span>(int arg0, int arg1, Object arg2)</nobr>
         
   </td></tr>
 
@@ -1058,6 +1097,22 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onBindViewHolder</span>(<a href="../../../../../reference/android/support/wearable/view/WearableListView.ViewHolder.html">WearableListView.ViewHolder</a> arg0, int arg1, List&lt;Object&gt; arg2)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
             abstract
             
             
@@ -1072,7 +1127,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1088,7 +1143,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1104,7 +1159,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1120,7 +1175,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1136,7 +1191,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1152,7 +1207,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1168,7 +1223,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1184,7 +1239,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1200,7 +1255,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1226,7 +1281,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 

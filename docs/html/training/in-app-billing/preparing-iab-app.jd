@@ -30,18 +30,35 @@ next.link=list-iab-products.html
 </div>
 </div>
 
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/watch?v=UvCl5Xx7Z5o">
+<div>
+    <h3>Video</h3>
+    <p>Implementing Freemium</p>
+  </div>
+  </a>
+
 <p>Before you can start using the In-app Billing service, you'll need to add the library that contains the In-app Billing Version 3 API to your Android project. You also need to set the permissions for your application to communicate with Google Play. In addition, you'll need to establish a connection between your application and  Google Play. You should also verify that the In-app Billing API version that you are using in your application is supported by Google Play.</p>
 
 <h2 id="GetSample">Download the Sample Application</h2>
 <p>In this training class, you will use a reference implementation for the In-app Billing Version 3 API called the {@code TrivialDrive} sample application. The sample includes convenience classes to quickly set up the In-app Billing service, marshal and unmarshal data types, and handle In-app Billing requests from the main thread of your application.</p>
 <p>To download the sample application:</p>
 <ol>
-<li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
-<li>In the SDK Manager, expand the {@code Extras} section.</li>
-<li>Select <strong>Google Play Billing Library</strong>.</li>
-<li>Click <strong>Install packages</strong> to complete the download.</li>
+<li>Open Android Studio and then close any open projects until you are
+presented with the welcome screen.</li>
+<li>Choose <strong>Import an Android code sample</strong> from the
+  <strong>Quick Start</strong> list on the right side the window.</li>
+<li>Type {@code Trivial Drive} into the search bar and select the
+  <strong>Trivial Drive</strong> sample.</li>
+<li>Follow the rest of the instructions in the <strong>Import Sample</strong>
+  wizard to import the sample to a directory of your choosing. The sample code
+  is in the <strong>TrivialDrive</strong> subdirectory of the repository.</li>
 </ol>
-<p>The sample files will be installed to {@code <sdk>/extras/google/play_billing/}.</p>
+
+<p>Alternatively, you can use {@code git} to manually clone
+ the repository from <a
+ href="https://github.com/googlesamples/android-play-billing"
+ class="external-link">https://github.com/googlesamples/android-play-billing</a></p>
 
 <h2 id="AddToDevConsole">Add Your Application to the Developer Console</h2>
 <p>The Google Play Developer Console is where you publish your In-app Billing application and  manage the various digital goods that are available for purchase from your application. When you create a new application entry in the Developer Console, it automatically generates a public license key for your application. You will need this key to establish a trusted connection from your application to the Google Play servers. You only need to generate this key once per application, and don’t need to repeat these steps when you update the APK file for your application.</p>
@@ -67,9 +84,9 @@ next.link=list-iab-products.html
 <p>To add the In-app Billing Version 3 library to your new In-app Billing project:</p>
 <ol>
 <li>Copy the {@code TrivialDrive} sample files into your Android project.</li>
-<li>Modify the package name in the files you copied to use the package name for your project. In Eclipse, you can use this shortcut: right-click the package name, then  select <strong>Refactor</strong> > <strong>Rename</strong>.</li>
+<li>Modify the package name in the files you copied to use the package name for your project. In Android Studio, you can use this shortcut: right-click the package name, then  select <strong>Refactor</strong> > <strong>Rename</strong>.</li>
 <li>Open the {@code AndroidManifest.xml} file and update the package attribute value to use the package name for your project.</li>
-<li>Fix import statements as needed so that your project compiles correctly.  In Eclipse, you can use this shortcut: press <strong>Ctrl+Shift+O</strong> in each file showing errors.</li>
+<li>Fix import statements as needed so that your project compiles correctly.  In Android Studio, you can use this shortcut: press <strong>Ctrl+Shift+O</strong> in each file showing errors.</li>
 <li>Modify the sample to create your own application. Remember to copy the Base64 public license key for your application from the Developer Console over to your {@code MainActivity.java}.</li>
 </ol>
 
@@ -81,7 +98,6 @@ next.link=list-iab-products.html
   <li>In Android Studio: Create a directory named {@code aidl} under {@code src/main}, add a new
   package {@code com.android.vending.billing} in this directory, and import the
   {@code IInAppBillingService.aidl} file into this package.</li>
-  <li>In Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory.</li>
   <li>In other dev environments: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory.</li>
   </ul>
 </li>

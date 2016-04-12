@@ -197,8 +197,7 @@ application: </p>
 
 <ul>
 <li>An application can use the service only if the Google Play client is
-installed on its host device and the device is running Android 1.5 (API level 3)
-or higher.</li>
+installed on its host device and the device is running Android 1.5 (API level 3) or higher.</li>
 <li>To complete a license check, the licensing server must be accessible over
 the network. You can implement license caching behaviors to manage access to your application when
 there is no network connectivity. </li>
@@ -233,8 +232,7 @@ managed on any device on any storage, including SD card.</p>
 
 <p>Although no license mechanism can completely prevent all unauthorized use,
 the licensing service lets you control access for most types of normal usage,
-across all compatible devices, locked or unlocked, that run Android 1.5 or
-higher version of the platform.</p>
+across all compatible devices, locked or unlocked.</p>
 
 <p>To begin adding application licensing to your application, continue to <a
 href="{@docRoot}google/play/licensing/setting-up.html">Setting Up for Licensing</a>.</p>

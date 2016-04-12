@@ -80,6 +80,13 @@ that the <code>android:versionCode</code> value does not necessarily have a
 strong resemblance to the application release version that is visible to the
 user (see <code>android:versionName</code>, below). Applications and publishing
 services should not display this version value to users.</p>
+
+<p class="warning">
+    <strong>Warning:</strong> The greatest possible value for <code>
+    android:versionCode</code> is <code>MAXINT</code> (2147483647). However, if
+    you upload an app with this value, your app can't ever be updated.
+</p>
+
 </li>
 <li><code>android:versionName</code> &mdash; A string value that represents the
 release version of the application code, as it should be shown to users.

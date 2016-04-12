@@ -1,0 +1,70 @@
+page.title=Mengonfirmasi &amp; Mengakui
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>Dalam beberapa situasi, bila pengguna memanggil suatu tindakan dalam aplikasi Anda, ada baiknya <em>mengonfirmasi</em> atau <em>mengakui</em> tindakan itu melalui teks.</p>
+
+<div class="cols">
+  <div class="col-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>Mengonfirmasi</strong> adalah meminta pengguna untuk memverifikasi bahwa mereka benar-benar ingin melanjutkan tindakan yang baru saja mereka panggil. Dalam beberapa kasus, konfirmasi ditampilkan bersama-sama dengan peringatan atau informasi penting yang terkait dengan tindakan yang perlu mereka pertimbangkan.</p>
+  </div>
+  <div class="col-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>Mengakui</strong> adalah menampilkan teks untuk memberi tahu pengguna bahwa tindakan yang baru mereka panggil sudah dilakukan. Ini menghilangkan ketidakpastian tentang operasi implisit yang dilakukan sistem. Dalam beberapa kasus, pengakuan ditampilkan bersama dengan opsi untuk membatalkan tindakan.</p>
+  </div>
+</div>
+
+<p>Berkomunikasi pada pengguna dengan cara ini bisa membantu mengurangi ketidakpastian tentang hal-hal yang sudah atau akan terjadi. Mengonfirmasi atau mengakui juga dapat mencegah pengguna melakukan kesalahan yang akan mereka sesali.</p>
+
+<h2>Kapan Harus Mengonfirmasi atau Mengakui Tindakan Pengguna</h2>
+<p>Tidak semua tindakan memerlukan konfirmasi atau pengakuan. Gunakan bagan alur ini untuk memandu keputusan desain Anda.</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>Mengonfirmasi</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Contoh: Google Play Books</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>Dalam contoh ini, pengguna telah meminta untuk menghapus sebuah buku dari perpustakaan Google Play mereka. Sebuah <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">peringatan</a> muncul untuk mengonfirmasi tindakan ini karena perlu dipahami bahwa buku tersebut tidak akan tersedia lagi dari perangkat apa pun.</p>
+    <p>Saat membuat dialog konfirmasi, buat judul bermakna dengan mencerminkan tindakan yang diminta.</p>
+  </div>
+  <div class="col-7">
+    <h4>Contoh: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>Konfirmasi tidak harus ditampilkan dalam peringatan dengan dua tombol. Setelah menjalankan Android Beam, pengguna diminta untuk menyentuh konten yang akan dibagikan (dalam contoh ini, sebuah foto). Jika mereka memutuskan untuk tidak melanjutkan, mereka tinggal memindahkan ponsel.</p>
+  </div>
+</div>
+
+<h2>Mengakui</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Contoh: Draf Gmail batal yang disimpan</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>Dalam contoh ini, jika pengguna menyusuri ke belakang atau ke atas dari layar pembuatan email di Gmail, sesuatu yang tak diharapkan bisa terjadi: draf saat itu akan disimpan secara otomatis. Pengakuan dalam bentuk pemberitahuan akan lebih jelas. Ini menghilang setelah beberapa detik.</p>
+    <p>Pembatalan tidak cocok di sini karena penyimpanan dilakukan oleh aplikasi, bukan pengguna. Cepat dan mudah untuk melanjutkan penulisan pesan dengan menyusuri daftar draf.</p>
+
+  </div>
+  <div class="col-6">
+    <h4>Contoh: Percakapan Gmail dihapus</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>Setelah pengguna menghapus percakapan dari daftar dalam Gmail, sebuah pengakuan muncul tanpa opsi pembatalan. Pengakuan tetap ada sampai pengguna melakukan tindakan yang tidak berkaitan, seperti menggulir daftar.</p>
+  </div>
+</div>
+
+<h2>Tidak ada Konfirmasi atau Pengakuan</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Contoh: memberikan +1</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>Konfirmasi tidak diperlukan</strong>. Jika pengguna telah memberikan +1 secara tidak sengaja, tidak masalah. Mereka cukup menyentuh kembali tombol itu untuk membatalkan tindakan.</p>
+    <p><strong>Pengakuan tidak diperlukan</strong>. Pengguna akan melihat tombol +1 memantul dan berubah merah. Itu tanda yang sangat jelas.</p>
+  </div>
+  <div class="col-7">
+    <h4>Contoh: Menghapus aplikasi dari Layar Beranda</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>Konfirmasi tidak diperlukan</strong>. Ini adalah tindakan yang disengaja: pengguna harus menyeret dan meletakkan sebuah item di atas target yang relatif besar dan terpisah. Karena itu, kecil kemungkinan terjadi ketidaksengajaan. Tetapi jika pengguna menyesali keputusan itu, maka hanya perlu beberapa detik untuk mengembalikannya lagi.</p>
+    <p><strong>Pengakuan tidak diperlukan</strong>. Pengguna akan mengetahui bahwa aplikasi itu tidak ada di Layar Beranda karena mereka menghilangkannya dengan cara menyeretnya.</p>
+
+  </div>
+</div>
