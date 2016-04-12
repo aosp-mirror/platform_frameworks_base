@@ -16,13 +16,18 @@
 
 package com.android.internal.widget;
 
+import com.android.internal.R;
+
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -35,7 +40,8 @@ import android.widget.TextView;
 @RemoteViews.RemoteView
 public class ImageFloatingTextView extends TextView {
 
-    private boolean mHasImage;
+    /** Number of lines from the top to indent */
+    private int mIndentLines;
 
     public ImageFloatingTextView(Context context) {
         this(context, null);
@@ -69,10 +75,16 @@ public class ImageFloatingTextView extends TextView {
                 .setEllipsizedWidth(ellipsisWidth)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
-        // we set the endmargin on the first 2 lines. this works just in our case but that's
-        // sufficient for now.
-        int endMargin = (int) (getResources().getDisplayMetrics().density * 52);
-        int[] margins = mHasImage ? new int[] {endMargin, endMargin, 0} : null;
+        // we set the endmargin on the requested number of lines.
+        int endMargin = getContext().getResources().getDimensionPixelSize(
+                R.dimen.notification_content_picture_margin);
+        int[] margins = null;
+        if (mIndentLines > 0) {
+            margins = new int[mIndentLines + 1];
+            for (int i = 0; i < mIndentLines; i++) {
+                margins[i] = endMargin;
+            }
+        }
         if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
             builder.setIndents(margins, null);
         } else {
@@ -84,8 +96,22 @@ public class ImageFloatingTextView extends TextView {
 
     @RemotableViewMethod
     public void setHasImage(boolean hasImage) {
-        mHasImage = hasImage;
+        mIndentLines = hasImage ? 2 : 0;
         // The new layout will be automatically created when the text is
         // set again by the notification.
+    }
+
+    /**
+     * @param lines the number of lines at the top that should be indented by indentEnd
+     * @return whether a change was made
+     */
+    public boolean setNumIndentLines(int lines) {
+        if (mIndentLines != lines) {
+            mIndentLines = lines;
+            // Invalidate layout.
+            setHint(getHint());
+            return true;
+        }
+        return false;
     }
 }
