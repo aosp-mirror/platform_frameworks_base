@@ -46677,6 +46677,7 @@ package java.io {
     ctor public BufferedReader(java.io.Reader, int);
     ctor public BufferedReader(java.io.Reader);
     method public void close() throws java.io.IOException;
+    method public java.util.stream.Stream<java.lang.String> lines();
     method public int read(char[], int, int) throws java.io.IOException;
     method public java.lang.String readLine() throws java.io.IOException;
   }
@@ -47545,6 +47546,11 @@ package java.io {
   public class UTFDataFormatException extends java.io.IOException {
     ctor public UTFDataFormatException();
     ctor public UTFDataFormatException(java.lang.String);
+  }
+
+  public class UncheckedIOException extends java.lang.RuntimeException {
+    ctor public UncheckedIOException(java.lang.String, java.io.IOException);
+    ctor public UncheckedIOException(java.io.IOException);
   }
 
   public class UnsupportedEncodingException extends java.io.IOException {
@@ -49640,7 +49646,6 @@ package java.lang.reflect {
   public final class Method extends java.lang.reflect.AccessibleObject implements java.lang.reflect.GenericDeclaration java.lang.reflect.Member {
     method public boolean equals(java.lang.Object);
     method public A getAnnotation(java.lang.Class<A>);
-    method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
     method public java.lang.Class<?> getDeclaringClass();
     method public java.lang.Object getDefaultValue();
     method public java.lang.Class<?>[] getExceptionTypes();
@@ -49654,7 +49659,6 @@ package java.lang.reflect {
     method public java.lang.Class<?> getReturnType();
     method public java.lang.reflect.TypeVariable<java.lang.reflect.Method>[] getTypeParameters();
     method public java.lang.Object invoke(java.lang.Object, java.lang.Object...) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException, java.lang.reflect.InvocationTargetException;
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isBridge();
     method public boolean isDefault();
     method public boolean isSynthetic();
@@ -55238,6 +55242,7 @@ package java.util {
     method public void set(int, int);
     method public void set(int, int, boolean);
     method public int size();
+    method public java.util.stream.IntStream stream();
     method public byte[] toByteArray();
     method public long[] toLongArray();
     method public static java.util.BitSet valueOf(long[]);
@@ -56276,6 +56281,18 @@ package java.util {
   public class Random implements java.io.Serializable {
     ctor public Random();
     ctor public Random(long);
+    method public java.util.stream.DoubleStream doubles(long);
+    method public java.util.stream.DoubleStream doubles();
+    method public java.util.stream.DoubleStream doubles(long, double, double);
+    method public java.util.stream.DoubleStream doubles(double, double);
+    method public java.util.stream.IntStream ints(long);
+    method public java.util.stream.IntStream ints();
+    method public java.util.stream.IntStream ints(long, int, int);
+    method public java.util.stream.IntStream ints(int, int);
+    method public java.util.stream.LongStream longs(long);
+    method public java.util.stream.LongStream longs();
+    method public java.util.stream.LongStream longs(long, long, long);
+    method public java.util.stream.LongStream longs(long, long);
     method protected int next(int);
     method public boolean nextBoolean();
     method public void nextBytes(byte[]);
@@ -57791,18 +57808,6 @@ package java.util.concurrent {
 
   public class ThreadLocalRandom extends java.util.Random {
     method public static java.util.concurrent.ThreadLocalRandom current();
-    method public java.util.stream.DoubleStream doubles(long);
-    method public java.util.stream.DoubleStream doubles();
-    method public java.util.stream.DoubleStream doubles(long, double, double);
-    method public java.util.stream.DoubleStream doubles(double, double);
-    method public java.util.stream.IntStream ints(long);
-    method public java.util.stream.IntStream ints();
-    method public java.util.stream.IntStream ints(long, int, int);
-    method public java.util.stream.IntStream ints(int, int);
-    method public java.util.stream.LongStream longs(long);
-    method public java.util.stream.LongStream longs();
-    method public java.util.stream.LongStream longs(long, long, long);
-    method public java.util.stream.LongStream longs(long, long);
     method public double nextDouble(double);
     method public double nextDouble(double, double);
     method public int nextInt(int, int);
@@ -59175,6 +59180,7 @@ package java.util.regex {
   }
 
   public final class Pattern implements java.io.Serializable {
+    method public java.util.function.Predicate<java.lang.String> asPredicate();
     method public static java.util.regex.Pattern compile(java.lang.String);
     method public static java.util.regex.Pattern compile(java.lang.String, int) throws java.util.regex.PatternSyntaxException;
     method public int flags();
@@ -59184,6 +59190,7 @@ package java.util.regex {
     method public static java.lang.String quote(java.lang.String);
     method public java.lang.String[] split(java.lang.CharSequence, int);
     method public java.lang.String[] split(java.lang.CharSequence);
+    method public java.util.stream.Stream<java.lang.String> splitAsStream(java.lang.CharSequence);
     field public static final int CANON_EQ = 128; // 0x80
     field public static final int CASE_INSENSITIVE = 2; // 0x2
     field public static final int COMMENTS = 4; // 0x4
