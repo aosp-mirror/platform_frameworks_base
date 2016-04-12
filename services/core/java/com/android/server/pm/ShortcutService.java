@@ -126,10 +126,10 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
 
     @VisibleForTesting
-    static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
+    static final long DEFAULT_RESET_INTERVAL_SEC = 60 * 60; // 1 hour
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_DAILY_UPDATES = 10;
+    static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 2;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 5;
@@ -180,7 +180,7 @@ public class ShortcutService extends IShortcutService.Stub {
         /**
          * Key name for the max number of modifying API calls per app for every interval. (int)
          */
-        String KEY_MAX_DAILY_UPDATES = "max_daily_updates";
+        String KEY_MAX_UPDATES_PER_INTERVAL = "max_updates_per_interval";
 
         /**
          * Key name for the max icon dimensions in DP, for non-low-memory devices.
@@ -232,9 +232,9 @@ public class ShortcutService extends IShortcutService.Stub {
     private int mMaxDynamicShortcuts;
 
     /**
-     * Max number of updating API calls that each application can make a day.
+     * Max number of updating API calls that each application can make during the interval.
      */
-    int mMaxDailyUpdates;
+    int mMaxUpdatesPerInterval;
 
     /**
      * Actual throttling-reset interval.  By default it's a day.
@@ -426,8 +426,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 ConfigConstants.KEY_RESET_INTERVAL_SEC, DEFAULT_RESET_INTERVAL_SEC)
                 * 1000L);
 
-        mMaxDailyUpdates = Math.max(0, (int) parser.getLong(
-                ConfigConstants.KEY_MAX_DAILY_UPDATES, DEFAULT_MAX_DAILY_UPDATES));
+        mMaxUpdatesPerInterval = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL, DEFAULT_MAX_UPDATES_PER_INTERVAL));
 
         mMaxDynamicShortcuts = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP));
@@ -1319,9 +1319,12 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public boolean addDynamicShortcut(String packageName, ShortcutInfo newShortcut,
+    public boolean addDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
+        final int size = newShortcuts.size();
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1330,12 +1333,15 @@ public class ShortcutService extends IShortcutService.Stub {
             if (!ps.tryApiCall(this)) {
                 return false;
             }
+            for (int i = 0; i < size; i++) {
+                final ShortcutInfo newShortcut = newShortcuts.get(i);
 
-            // Validate the shortcut.
-            fixUpIncomingShortcutInfo(newShortcut, /* forUpdate= */ false);
+                // Validate the shortcut.
+                fixUpIncomingShortcutInfo(newShortcut, /* forUpdate= */ false);
 
-            // Add it.
-            ps.addDynamicShortcut(this, newShortcut);
+                // Add it.
+                ps.addDynamicShortcut(this, newShortcut);
+            }
         }
         userPackageChanged(packageName, userId);
 
@@ -1343,19 +1349,22 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public void deleteDynamicShortcut(String packageName, String shortcutId,
+    public void removeDynamicShortcuts(String packageName, List shortcutIds,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
-        Preconditions.checkStringNotEmpty(shortcutId, "shortcutId must be provided");
+        Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
 
         synchronized (mLock) {
-            getPackageShortcutsLocked(packageName, userId).deleteDynamicWithId(this, shortcutId);
+            for (int i = shortcutIds.size() - 1; i >= 0; i--) {
+                getPackageShortcutsLocked(packageName, userId).deleteDynamicWithId(this,
+                        Preconditions.checkStringNotEmpty((String) shortcutIds.get(i)));
+            }
         }
         userPackageChanged(packageName, userId);
     }
 
     @Override
-    public void deleteAllDynamicShortcuts(String packageName, @UserIdInt int userId) {
+    public void removeAllDynamicShortcuts(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
@@ -1409,7 +1418,7 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
-            return mMaxDailyUpdates
+            return mMaxUpdatesPerInterval
                     - getPackageShortcutsLocked(packageName, userId).getApiCallCount(this);
         }
     }
@@ -2079,8 +2088,8 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println(mSaveDelayMillis);
             pw.print("    resetInterval:");
             pw.println(mResetInterval);
-            pw.print("    maxDailyUpdates:");
-            pw.println(mMaxDailyUpdates);
+            pw.print("    maxUpdatesPerInterval:");
+            pw.println(mMaxUpdatesPerInterval);
             pw.print("    maxDynamicShortcuts:");
             pw.println(mMaxDynamicShortcuts);
             pw.println();
@@ -2423,8 +2432,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    int getMaxDailyUpdatesForTest() {
-        return mMaxDailyUpdates;
+    int getMaxUpdatesPerIntervalForTest() {
+        return mMaxUpdatesPerInterval;
     }
 
     @VisibleForTesting

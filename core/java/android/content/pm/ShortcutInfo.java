@@ -34,6 +34,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO Enhance javadoc
 /**
@@ -107,6 +109,11 @@ public final class ShortcutInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CloneFlags {}
 
+    /**
+     * Shortcut category for
+     */
+    public static final String SHORTCUT_CATEGORY_CONVERSATION = "android.shortcut.conversation";
+
     private final String mId;
 
     @NonNull
@@ -123,6 +130,9 @@ public final class ShortcutInfo implements Parcelable {
 
     @Nullable
     private String mText;
+
+    @NonNull
+    private List<String> mCategories;
 
     /**
      * Intent *with extras removed*.
@@ -168,6 +178,7 @@ public final class ShortcutInfo implements Parcelable {
         mIcon = b.mIcon;
         mTitle = b.mTitle;
         mText = b.mText;
+        mCategories = clone(b.mCategories);
         mIntent = b.mIntent;
         if (mIntent != null) {
             final Bundle intentExtras = mIntent.getExtras();
@@ -179,6 +190,10 @@ public final class ShortcutInfo implements Parcelable {
         mWeight = b.mWeight;
         mExtras = b.mExtras;
         updateTimestamp();
+    }
+
+    private <T> ArrayList<T> clone(List<T> source) {
+        return (source == null) ? null : new ArrayList<>(source);
     }
 
     /**
@@ -202,17 +217,20 @@ public final class ShortcutInfo implements Parcelable {
         mFlags = source.mFlags;
         mLastChangedTimestamp = source.mLastChangedTimestamp;
 
+        // Just always keep it since it's cheep.
+        mIconResourceId = source.mIconResourceId;
+
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
             mActivityComponent = source.mActivityComponent;
 
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
                 mBitmapPath = source.mBitmapPath;
-                mIconResourceId = source.mIconResourceId;
             }
 
             mTitle = source.mTitle;
             mText = source.mText;
+            mCategories = clone(source.mCategories);
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntent = source.mIntent;
                 mIntentPersistableExtras = source.mIntentPersistableExtras;
@@ -261,6 +279,9 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (source.mText != null) {
             mText = source.mText;
+        }
+        if (source.mCategories != null) {
+            mCategories = clone(source.mCategories);
         }
         if (source.mIntent != null) {
             mIntent = source.mIntent;
@@ -325,6 +346,8 @@ public final class ShortcutInfo implements Parcelable {
 
         private String mText;
 
+        private List<String> mCategories;
+
         private Intent mIntent;
 
         private int mWeight;
@@ -369,8 +392,9 @@ public final class ShortcutInfo implements Parcelable {
          *
          * <p>For performance reasons, icons will <b>NOT</b> be available on instances
          * returned by {@link ShortcutManager} or {@link LauncherApps}.  Launcher applications
-         * need to use {@link LauncherApps#getShortcutIconFd(ShortcutInfo)}
-         * and {@link LauncherApps#getShortcutIconResId(ShortcutInfo)}.
+         * can use {@link ShortcutInfo#getIconResourceId()} if {@link #hasIconResource()} is true.
+         * Otherwise, if {@link #hasIconFile()} is true, use
+         * {@link LauncherApps#getShortcutIconFd} to load the image.
          */
         @NonNull
         public Builder setIcon(Icon icon) {
@@ -399,6 +423,18 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setText(@NonNull String text) {
             mText = Preconditions.checkStringNotEmpty(text, "text");
+            return this;
+        }
+
+        /**
+         * Sets categories for a shortcut.  Launcher applications may use this information to
+         * categorise shortcuts.
+         *
+         * @see #SHORTCUT_CATEGORY_CONVERSATION
+         */
+        @NonNull
+        public Builder setCategories(List<String> categories) {
+            mCategories = categories;
             return this;
         }
 
@@ -497,6 +533,14 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     public String getText() {
         return mText;
+    }
+
+    /**
+     * Return the categories.
+     */
+    @Nullable
+    public List<String> getCategories() {
+        return mCategories;
     }
 
     /**
@@ -662,7 +706,9 @@ public final class ShortcutInfo implements Parcelable {
         mIconResourceId = iconResourceId;
     }
 
-    /** @hide */
+    /**
+     * Get the resource ID for the icon, valid only when {@link #hasIconResource()} } is true.
+     */
     public int getIconResourceId() {
         return mIconResourceId;
     }
@@ -687,6 +733,8 @@ public final class ShortcutInfo implements Parcelable {
         mIcon = source.readParcelable(cl);
         mTitle = source.readString();
         mText = source.readString();
+        mCategories = new ArrayList<>();
+        source.readStringList(mCategories);
         mIntent = source.readParcelable(cl);
         mIntentPersistableExtras = source.readParcelable(cl);
         mWeight = source.readInt();
@@ -706,6 +754,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mIcon, flags);
         dest.writeString(mTitle);
         dest.writeString(mText);
+        dest.writeStringList(mCategories);
         dest.writeParcelable(mIntent, flags);
         dest.writeParcelable(mIntentPersistableExtras, flags);
         dest.writeInt(mWeight);
@@ -770,6 +819,9 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", text=");
         sb.append(secure ? "***" : mText);
 
+        sb.append(", categories=");
+        sb.append(mCategories);
+
         sb.append(", icon=");
         sb.append(mIcon);
 
@@ -807,7 +859,7 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public ShortcutInfo(
             @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
-            Icon icon, String title, String text, Intent intent,
+            Icon icon, String title, String text, List<String> categories, Intent intent,
             PersistableBundle intentPersistableExtras,
             int weight, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
@@ -818,6 +870,7 @@ public final class ShortcutInfo implements Parcelable {
         mIcon = icon;
         mTitle = title;
         mText = text;
+        mCategories = clone(categories);
         mIntent = intent;
         mIntentPersistableExtras = intentPersistableExtras;
         mWeight = weight;
