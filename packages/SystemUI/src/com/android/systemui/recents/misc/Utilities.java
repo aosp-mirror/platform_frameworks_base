@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.IntProperty;
 import android.util.Property;
@@ -258,6 +259,14 @@ public class Utilities {
      */
     public static float dpToPx(Resources res, float dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
+    }
+
+    /**
+     * Adds a trace event for debugging.
+     */
+    public static void addTraceEvent(String event) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, event);
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     /**
