@@ -1618,7 +1618,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (animation != null) {
             relayoutTaskViewsOnNextFrame(animation);
         }
-        mLayoutAlgorithm.updateFocusStateOnScroll(curScroll, curScroll - prevScroll);
 
         if (mEnterAnimationComplete) {
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&

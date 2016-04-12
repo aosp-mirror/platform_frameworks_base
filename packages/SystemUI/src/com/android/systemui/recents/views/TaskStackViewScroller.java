@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.util.MutableFloat;
 import android.util.Property;
 import android.view.ViewDebug;
 import android.widget.OverScroller;
@@ -66,6 +67,8 @@ public class TaskStackViewScroller {
 
     @ViewDebug.ExportedProperty(category="recents")
     float mStackScrollP;
+    @ViewDebug.ExportedProperty(category="recents")
+    float mLastDeltaP = 0f;
     float mFlingDownScrollP;
     int mFlingDownY;
 
@@ -84,6 +87,11 @@ public class TaskStackViewScroller {
     /** Resets the task scroller. */
     void reset() {
         mStackScrollP = 0f;
+        mLastDeltaP = 0f;
+    }
+
+    void resetDeltaScroll() {
+        mLastDeltaP = 0f;
     }
 
     /** Gets the current stack scroll */
@@ -99,14 +107,27 @@ public class TaskStackViewScroller {
     }
 
     /**
+     * Sets the current stack scroll immediately, and returns the difference between the target
+     * scroll and the actual scroll after accounting for the effect on the focus state.
+     */
+    public float setDeltaStackScroll(float downP, float deltaP) {
+        float targetScroll = downP + deltaP;
+        float newScroll = mLayoutAlgorithm.updateFocusStateOnScroll(downP + mLastDeltaP, targetScroll,
+                mStackScrollP);
+        setStackScroll(newScroll, AnimationProps.IMMEDIATE);
+        mLastDeltaP = deltaP;
+        return newScroll - targetScroll;
+    }
+
+    /**
      * Sets the current stack scroll, but indicates to the callback the preferred animation to
      * update to this new scroll.
      */
-    public void setStackScroll(float s, AnimationProps animation) {
-        float prevStackScroll = mStackScrollP;
-        mStackScrollP = s;
+    public void setStackScroll(float newScroll, AnimationProps animation) {
+        float prevScroll = mStackScrollP;
+        mStackScrollP = newScroll;
         if (mCb != null) {
-            mCb.onStackScrollChanged(prevStackScroll, mStackScrollP, animation);
+            mCb.onStackScrollChanged(prevScroll, mStackScrollP, animation);
         }
     }
 
@@ -115,9 +136,9 @@ public class TaskStackViewScroller {
      * @return whether the stack progress changed.
      */
     public boolean setStackScrollToInitialState() {
-        float prevStackScrollP = mStackScrollP;
+        float prevScroll = mStackScrollP;
         setStackScroll(mLayoutAlgorithm.mInitialScrollP);
-        return Float.compare(prevStackScrollP, mStackScrollP) != 0;
+        return Float.compare(prevScroll, mStackScrollP) != 0;
     }
 
     /**
@@ -227,10 +248,9 @@ public class TaskStackViewScroller {
     boolean computeScroll() {
         if (mScroller.computeScrollOffset()) {
             float deltaP = mLayoutAlgorithm.getDeltaPForY(mFlingDownY, mScroller.getCurrY());
-            float scroll = mFlingDownScrollP + deltaP;
-            setStackScroll(scroll);
+            mFlingDownScrollP += setDeltaStackScroll(mFlingDownScrollP, deltaP);
             if (DEBUG) {
-                Log.d(TAG, "computeScroll: " + scroll);
+                Log.d(TAG, "computeScroll: " + (mFlingDownScrollP + deltaP));
             }
             return true;
         }
