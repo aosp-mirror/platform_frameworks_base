@@ -175,7 +175,7 @@ toc:
     path: /tools/building/plugin-for-gradle.html
   - title: Manifest Merging
     path: /tools/building/manifest-merge.html
-  - title: Apps Over 65K Methods
+  - title: Apps Over 64K Methods
     path: /tools/building/multidex.html
 
 - title: Performance Tools

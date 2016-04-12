@@ -153,7 +153,7 @@ numbers, can cause unexpected version updates and regression incompatibilities.<
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v4:23.2.1
+com.android.support:support-v4:23.3.0
 </pre>
 
 
@@ -164,7 +164,7 @@ com.android.support:support-v4:23.2.1
   This library provides support for building apps with multiple Dalvik Executable (DEX) files.
   Apps that reference more than 65536 methods are required to use multidex configurations. For
   more information about using multidex, see <a href="{@docRoot}tools/building/multidex.html">
-  Building Apps with Over 65K Methods</a>.
+  Building Apps with Over 64K Methods</a>.
 </p>
 
 <p>
@@ -237,7 +237,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:appcompat-v7:23.2.1
+com.android.support:appcompat-v7:23.3.0
 </pre>
 
 
@@ -258,7 +258,7 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:cardview-v7:23.2.1
+com.android.support:cardview-v7:23.3.0
 </pre>
 
 
@@ -280,7 +280,7 @@ For detailed information about the v7 gridlayout library APIs, see the
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:gridlayout-v7:23.2.1
+com.android.support:gridlayout-v7:23.3.0
 </pre>
 
 
@@ -314,7 +314,7 @@ with resources</a>.</p>
 where "&lt;revision&gt;" is the minimum revision at which the library is available. For example:</p>
 
 <pre>
-com.android.support:mediarouter-v7:23.2.1
+com.android.support:mediarouter-v7:23.3.0
 </pre>
 
 <p class="caution">The v7 mediarouter library APIs introduced in Support Library
@@ -340,7 +340,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:palette-v7:23.2.1
+com.android.support:palette-v7:23.3.0
 </pre>
 
 
@@ -362,7 +362,7 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:recyclerview-v7:23.2.1
+com.android.support:recyclerview-v7:23.3.0
 </pre>
 
 
@@ -391,7 +391,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-v7:23.2.1
+com.android.support:preference-v7:23.3.0
 </pre>
 
 
@@ -455,7 +455,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v13:23.2.1
+com.android.support:support-v13:23.3.0
 </pre>
 
 
@@ -487,7 +487,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-v14:23.2.1
+com.android.support:preference-v14:23.3.0
 </pre>
 
 
@@ -516,7 +516,7 @@ resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:preference-leanback-v17:23.2.1
+com.android.support:preference-leanback-v17:23.3.0
 </pre>
 
 
@@ -558,7 +558,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:leanback-v17:23.2.1
+com.android.support:leanback-v17:23.3.0
 </pre>
 
 
@@ -579,7 +579,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-annotations:23.2.1
+com.android.support:support-annotations:23.3.0
 </pre>
 
 
@@ -604,7 +604,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:design:23.2.1
+com.android.support:design:23.3.0
 </pre>
 
 
@@ -632,7 +632,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:customtabs:23.2.1
+com.android.support:customtabs:23.3.0
 </pre>
 
 
@@ -663,7 +663,7 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:percent:23.2.1
+com.android.support:percent:23.3.0
 </pre>
 
 
@@ -693,5 +693,5 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:recommendation:23.2.1
+com.android.support:recommendation:23.3.0
 </pre>
