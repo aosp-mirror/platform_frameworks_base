@@ -220,6 +220,7 @@ public class BugreportProgressService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v(TAG, "onStartCommand(): " + dumpIntent(intent));
         if (intent != null) {
             // Handle it in a separate thread.
             final Message msg = mMainHandler.obtainMessage();
@@ -297,6 +298,7 @@ public class BugreportProgressService extends Service {
                 return;
             }
             final Parcelable parcel = ((Intent) msg.obj).getParcelableExtra(EXTRA_ORIGINAL_INTENT);
+            Log.v(TAG, "handleMessage(): " + dumpIntent((Intent) parcel));
             final Intent intent;
             if (parcel instanceof Intent) {
                 // The real intent was passed to BugreportReceiver, which delegated to the service.
@@ -707,7 +709,8 @@ public class BugreportProgressService extends Service {
             for (int i = 0; i < mProcesses.size(); i++) {
                 final BugreportInfo info = mProcesses.valueAt(i);
                 if (info.finished) {
-                    Log.d(TAG, "Not updating progress because share notification was already sent");
+                    Log.d(TAG, "Not updating progress for " + info.id + " while taking screenshot"
+                            + " because share notification was already sent");
                     continue;
                 }
                 updateProgress(info);
@@ -846,7 +849,15 @@ public class BugreportProgressService extends Service {
     private static Intent buildSendIntent(Context context, BugreportInfo info) {
         // Files are kept on private storage, so turn into Uris that we can
         // grant temporary permissions for.
-        final Uri bugreportUri = getUri(context, info.bugreportFile);
+        final Uri bugreportUri;
+        try {
+            bugreportUri = getUri(context, info.bugreportFile);
+        } catch (IllegalArgumentException e) {
+            // Should not happen on production, but happens when a Shell is sideloaded and
+            // FileProvider cannot find a configured root for it.
+            Log.wtf(TAG, "Could not get URI for " + info.bugreportFile, e);
+            return null;
+        }
 
         final Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         final String mimeType = "application/vnd.android.bugreport";
@@ -907,6 +918,12 @@ public class BugreportProgressService extends Service {
         addDetailsToZipFile(mContext, info);
 
         final Intent sendIntent = buildSendIntent(mContext, info);
+        if (sendIntent == null) {
+            Log.w(TAG, "Stopping progres on ID " + id + " because share intent could not be built");
+            stopProgress(id);
+            return;
+        }
+
         final Intent notifIntent;
 
         // Send through warning dialog by default
@@ -1163,6 +1180,52 @@ public class BugreportProgressService extends Service {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Dumps an intent, extracting the relevant extras.
+     */
+    static String dumpIntent(Intent intent) {
+        if (intent == null) {
+            return "NO INTENT";
+        }
+        String action = intent.getAction();
+        if (action == null) {
+            // Happens when BugreportReceiver calls startService...
+            action = "no action";
+        }
+        final StringBuilder buffer = new StringBuilder(action).append(" extras: ");
+        addExtra(buffer, intent, EXTRA_ID);
+        addExtra(buffer, intent, EXTRA_PID);
+        addExtra(buffer, intent, EXTRA_MAX);
+        addExtra(buffer, intent, EXTRA_NAME);
+        addExtra(buffer, intent, EXTRA_DESCRIPTION);
+        addExtra(buffer, intent, EXTRA_BUGREPORT);
+        addExtra(buffer, intent, EXTRA_SCREENSHOT);
+        addExtra(buffer, intent, EXTRA_INFO);
+
+        if (intent.hasExtra(EXTRA_ORIGINAL_INTENT)) {
+            buffer.append(SHORT_EXTRA_ORIGINAL_INTENT).append(": ");
+            final Intent originalIntent = intent.getParcelableExtra(EXTRA_ORIGINAL_INTENT);
+            buffer.append(dumpIntent(originalIntent));
+        } else {
+            buffer.append("no ").append(SHORT_EXTRA_ORIGINAL_INTENT);
+        }
+
+        return buffer.toString();
+    }
+
+    private static final String SHORT_EXTRA_ORIGINAL_INTENT =
+            EXTRA_ORIGINAL_INTENT.substring(EXTRA_ORIGINAL_INTENT.lastIndexOf('.') + 1);
+
+    private static void addExtra(StringBuilder buffer, Intent intent, String name) {
+        final String shortName = name.substring(name.lastIndexOf('.') + 1);
+        if (intent.hasExtra(name)) {
+            buffer.append(shortName).append('=').append(intent.getExtra(name));
+        } else {
+            buffer.append("no ").append(shortName);
+        }
+        buffer.append(", ");
     }
 
     private static boolean setSystemProperty(String key, String value) {
