@@ -44,6 +44,7 @@ public class X509TrustManagerExtensions {
     private final X509TrustManager mTrustManager;
     private final Method mCheckServerTrusted;
     private final Method mIsUserAddedCertificate;
+    private final Method mIsSameTrustConfiguration;
 
     /**
      * Constructs a new X509TrustManagerExtensions wrapper.
@@ -57,6 +58,7 @@ public class X509TrustManagerExtensions {
             mTrustManager = null;
             mCheckServerTrusted = null;
             mIsUserAddedCertificate = null;
+            mIsSameTrustConfiguration = null;
             return;
         }
         // Use duck typing if possible.
@@ -80,6 +82,15 @@ public class X509TrustManagerExtensions {
             throw new IllegalArgumentException(
                     "Required method isUserAddedCertificate(X509Certificate) missing");
         }
+        // Get the option isSameTrustConfiguration method.
+        Method isSameTrustConfiguration = null;
+        try {
+            isSameTrustConfiguration = tm.getClass().getMethod("isSameTrustConfiguration",
+                    String.class,
+                    String.class);
+        } catch (ReflectiveOperationException ignored) {
+        }
+        mIsSameTrustConfiguration = isSameTrustConfiguration;
     }
 
     /**
@@ -150,6 +161,19 @@ public class X509TrustManagerExtensions {
      */
     @SystemApi
     public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
-        return true;
+        if (mIsSameTrustConfiguration == null) {
+            return true;
+        }
+        try {
+            return (Boolean) mIsSameTrustConfiguration.invoke(mTrustManager, hostname1, hostname2);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to call isSameTrustConfiguration", e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new RuntimeException("isSameTrustConfiguration failed", e.getCause());
+            }
+        }
     }
 }
