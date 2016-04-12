@@ -34,7 +34,7 @@ static void parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring
     SkPath* skPath = reinterpret_cast<SkPath*>(skPathHandle);
 
     PathParser::ParseResult result;
-    PathParser::parseStringForSkPath(skPath, &result, pathString, strLength);
+    PathParser::parseAsciiStringForSkPath(skPath, &result, pathString, strLength);
     env->ReleaseStringUTFChars(inputPathStr, pathString);
     if (result.failureOccurred) {
         doThrowIAE(env, result.failureMessage.c_str());
@@ -56,7 +56,7 @@ static long createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr,
     const char* pathString = env->GetStringUTFChars(inputStr, NULL);
     PathData* pathData = new PathData();
     PathParser::ParseResult result;
-    PathParser::getPathDataFromString(pathData, &result, pathString, strLength);
+    PathParser::getPathDataFromAsciiString(pathData, &result, pathString, strLength);
     env->ReleaseStringUTFChars(inputStr, pathString);
     if (!result.failureOccurred) {
         return reinterpret_cast<jlong>(pathData);

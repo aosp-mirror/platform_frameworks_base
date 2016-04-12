@@ -234,9 +234,10 @@ const StringPath sStringPaths[] = {
     {"3e...3", false}, // Not starting with a verb and ill-formatted float
     {"L.M.F.A.O", false}, // No floats following verbs
     {"m 1 1", true}, // Valid path data
-    {"z", true}, // Valid path data
+    {"\n \t   z", true}, // Valid path data with leading spaces
     {"1-2e34567", false}, // Not starting with a verb and ill-formatted float
-    {"f 4 5", false} // Invalid verb
+    {"f 4 5", false}, // Invalid verb
+    {"\r      ", false} // Empty string
 };
 
 
@@ -250,7 +251,7 @@ TEST(PathParser, parseStringForData) {
         // Test generated path data against the given data.
         PathData pathData;
         size_t length = strlen(testData.pathString);
-        PathParser::getPathDataFromString(&pathData, &result, testData.pathString, length);
+        PathParser::getPathDataFromAsciiString(&pathData, &result, testData.pathString, length);
         EXPECT_EQ(testData.pathData, pathData);
     }
 
@@ -258,7 +259,7 @@ TEST(PathParser, parseStringForData) {
         PathParser::ParseResult result;
         PathData pathData;
         SkPath skPath;
-        PathParser::getPathDataFromString(&pathData, &result,
+        PathParser::getPathDataFromAsciiString(&pathData, &result,
                 stringPath.stringPath, strlen(stringPath.stringPath));
         EXPECT_EQ(stringPath.isValid, !result.failureOccurred);
     }
@@ -274,13 +275,13 @@ TEST(VectorDrawableUtils, createSkPathFromPathData) {
     }
 }
 
-TEST(PathParser, parseStringForSkPath) {
+TEST(PathParser, parseAsciiStringForSkPath) {
     for (TestData testData: sTestDataSet) {
         PathParser::ParseResult result;
         size_t length = strlen(testData.pathString);
         // Check the return value as well as the SkPath generated.
         SkPath actualPath;
-        PathParser::parseStringForSkPath(&actualPath, &result, testData.pathString, length);
+        PathParser::parseAsciiStringForSkPath(&actualPath, &result, testData.pathString, length);
         bool hasValidData = !result.failureOccurred;
         EXPECT_EQ(hasValidData, testData.pathData.verbs.size() > 0);
         SkPath expectedPath;
@@ -291,7 +292,7 @@ TEST(PathParser, parseStringForSkPath) {
     for (StringPath stringPath : sStringPaths) {
         PathParser::ParseResult result;
         SkPath skPath;
-        PathParser::parseStringForSkPath(&skPath, &result, stringPath.stringPath,
+        PathParser::parseAsciiStringForSkPath(&skPath, &result, stringPath.stringPath,
                 strlen(stringPath.stringPath));
         EXPECT_EQ(stringPath.isValid, !result.failureOccurred);
     }

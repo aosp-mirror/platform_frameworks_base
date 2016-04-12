@@ -175,7 +175,7 @@ static void setPathString(JNIEnv* env, jobject, jlong pathPtr, jstring inputStr,
 
     PathParser::ParseResult result;
     PathData data;
-    PathParser::getPathDataFromString(&data, &result, pathString, stringLength);
+    PathParser::getPathDataFromAsciiString(&data, &result, pathString, stringLength);
     if (result.failureOccurred) {
         doThrowIAE(env, result.failureMessage.c_str());
     }
