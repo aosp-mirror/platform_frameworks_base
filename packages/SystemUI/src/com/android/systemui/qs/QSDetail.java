@@ -35,6 +35,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
+import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSDetail extends LinearLayout {
@@ -62,6 +63,7 @@ public class QSDetail extends LinearLayout {
     private boolean mClosingDetail;
     private boolean mFullyExpanded;
     private View mQsDetailHeaderBack;
+    private BaseStatusBarHeader mHeader;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -107,8 +109,9 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
-    public void setQsPanel(QSPanel panel) {
+    public void setQsPanel(QSPanel panel, BaseStatusBarHeader header) {
         mQsPanel = panel;
+        mHeader = header;
         mQsPanel.setCallback(mQsPanelCallback);
     }
 
@@ -195,6 +198,7 @@ public class QSDetail extends LinearLayout {
             mClosingDetail = true;
             mDetailAdapter = null;
             listener = mTeardownDetailWhenDone;
+            mHeader.setVisibility(View.VISIBLE);
             mQsPanel.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
@@ -273,6 +277,7 @@ public class QSDetail extends LinearLayout {
             // Only hide content if still in detail state.
             if (mDetailAdapter != null) {
                 mQsPanel.setGridContentVisibility(false);
+                mHeader.setVisibility(View.INVISIBLE);
             }
         }
     };
