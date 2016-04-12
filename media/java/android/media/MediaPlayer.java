@@ -1107,6 +1107,9 @@ public class MediaPlayer implements SubtitleController.Listener
      * as this call returns.
      *
      * @param afd the AssetFileDescriptor for the file you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if afd is not a valid AssetFileDescriptor
+     * @throws IOException if afd can not be read
      */
     public void setDataSource(@NonNull AssetFileDescriptor afd)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -1127,6 +1130,8 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @param fd the FileDescriptor for the file you want to play
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if fd is not a valid FileDescriptor
+     * @throws IOException if fd can not be read
      */
     public void setDataSource(FileDescriptor fd)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -1143,6 +1148,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if fd is not a valid FileDescriptor
+     * @throws IOException if fd can not be read
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -1157,6 +1164,7 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @param dataSource the MediaDataSource for the media you want to play
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if dataSource is not a valid MediaDataSource
      */
     public void setDataSource(MediaDataSource dataSource)
             throws IllegalArgumentException, IllegalStateException {
