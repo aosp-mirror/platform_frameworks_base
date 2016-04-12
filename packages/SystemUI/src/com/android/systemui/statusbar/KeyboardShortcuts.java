@@ -72,6 +72,10 @@ import com.google.android.collect.Lists;
  */
 public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
+    private static final Object sLock = new Object();
+    private static KeyboardShortcuts sInstance;
+    private static boolean sIsShowing;
+
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
     private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
@@ -82,7 +86,7 @@ public final class KeyboardShortcuts {
     private final IPackageManager mPackageManager;
     private final OnClickListener mDialogCloseListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int id) {
-            dismissKeyboardShortcutsDialog();
+            dismissKeyboardShortcuts();
         }
     };
     private final Comparator<KeyboardShortcutInfo> mApplicationItemsComparator =
@@ -110,10 +114,47 @@ public final class KeyboardShortcuts {
     private Dialog mKeyboardShortcutsDialog;
     private KeyCharacterMap mKeyCharacterMap;
 
-    public KeyboardShortcuts(Context context) {
+    private KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
         this.mPackageManager = AppGlobals.getPackageManager();
         loadResources(context);
+    }
+
+    private static KeyboardShortcuts getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new KeyboardShortcuts(context);
+        }
+        return sInstance;
+    }
+
+    public static void show(Context context, int deviceId) {
+        synchronized (sLock) {
+            if (sInstance != null && !sInstance.mContext.equals(context)) {
+                dismiss();
+            }
+            getInstance(context).showKeyboardShortcuts(deviceId);
+            sIsShowing = true;
+        }
+    }
+
+    public static void toggle(Context context, int deviceId) {
+        synchronized (sLock) {
+            if (sIsShowing) {
+                dismiss();
+            } else {
+                show(context, deviceId);
+            }
+        }
+    }
+
+    public static void dismiss() {
+        synchronized (sLock) {
+            if (sInstance != null) {
+                sInstance.dismissKeyboardShortcuts();
+                sInstance = null;
+            }
+            sIsShowing = false;
+        }
     }
 
     private void loadResources(Context context) {
@@ -279,27 +320,6 @@ public final class KeyboardShortcuts {
                 KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
     }
 
-    public void toggleKeyboardShortcuts(int deviceId) {
-        retrieveKeyCharacterMap(deviceId);
-        if (mKeyboardShortcutsDialog == null) {
-            Recents.getSystemServices().requestKeyboardShortcuts(mContext,
-                new KeyboardShortcutsReceiver() {
-                    @Override
-                    public void onKeyboardShortcutsReceived(
-                            final List<KeyboardShortcutGroup> result) {
-                        result.add(getSystemShortcuts());
-                        final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
-                        if (appShortcuts != null) {
-                            result.add(appShortcuts);
-                        }
-                        showKeyboardShortcutsDialog(result);
-                    }
-                }, deviceId);
-        } else {
-            dismissKeyboardShortcutsDialog();
-        }
-    }
-
     /**
      * Retrieves a {@link KeyCharacterMap} and assigns it to mKeyCharacterMap. If the given id is an
      * existing device, that device's map is used. Otherwise, it checks first all available devices
@@ -329,7 +349,24 @@ public final class KeyboardShortcuts {
         mKeyCharacterMap = inputDevice.getKeyCharacterMap();
     }
 
-    public void dismissKeyboardShortcutsDialog() {
+    private void showKeyboardShortcuts(int deviceId) {
+        retrieveKeyCharacterMap(deviceId);
+        Recents.getSystemServices().requestKeyboardShortcuts(mContext,
+                new KeyboardShortcutsReceiver() {
+                    @Override
+                    public void onKeyboardShortcutsReceived(
+                            final List<KeyboardShortcutGroup> result) {
+                        result.add(getSystemShortcuts());
+                        final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
+                        if (appShortcuts != null) {
+                            result.add(appShortcuts);
+                        }
+                        showKeyboardShortcutsDialog(result);
+                    }
+                }, deviceId);
+    }
+
+    private void dismissKeyboardShortcuts() {
         if (mKeyboardShortcutsDialog != null) {
             mKeyboardShortcutsDialog.dismiss();
             mKeyboardShortcutsDialog = null;

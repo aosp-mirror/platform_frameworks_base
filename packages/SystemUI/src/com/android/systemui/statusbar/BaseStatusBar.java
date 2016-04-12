@@ -1315,7 +1315,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void toggleKeyboardShortcuts(int deviceId) {
-        getKeyboardShortcuts().toggleKeyboardShortcuts(deviceId);
+        KeyboardShortcuts.toggle(mContext, deviceId);
     }
 
     protected void cancelPreloadingRecents() {
@@ -1710,14 +1710,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 rebuilder.build(); // will rewrite n
             }
         }
-    }
-
-    protected KeyboardShortcuts getKeyboardShortcuts() {
-        if (mKeyboardShortcuts == null) {
-            mKeyboardShortcuts = new KeyboardShortcuts(mContext);
-        }
-
-        return mKeyboardShortcuts;
     }
 
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
