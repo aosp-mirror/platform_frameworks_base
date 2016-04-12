@@ -143,9 +143,9 @@ public class DocumentLoaderTest extends AndroidTestCase {
         }
     }
 
-    public void testCancelTask() throws IOException, InterruptedException {
+    public void testCancelTask() throws IOException, InterruptedException, TimeoutException {
         setUpDocument(mManager,
-                DocumentLoader.NUM_INITIAL_ENTRIES + DocumentLoader.NUM_LOADING_ENTRIES + 1);
+                DocumentLoader.NUM_INITIAL_ENTRIES + 1);
 
         // Block the first iteration in the background thread.
         mManager.blockDocument(
@@ -155,19 +155,24 @@ public class DocumentLoaderTest extends AndroidTestCase {
                 MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
             assertTrue(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
         }
-        Thread.sleep(DocumentLoader.NOTIFY_PERIOD_MS);
+
+        final Uri uri = DocumentsContract.buildChildDocumentsUri(
+                MtpDocumentsProvider.AUTHORITY, mParentIdentifier.mDocumentId);
+        assertEquals(0, mResolver.getChangeCount(uri));
 
         // Clear task while the first iteration is being blocked.
+        mLoader.cancelTask(mParentIdentifier);
         mManager.unblockDocument(
                 0, DocumentLoader.NUM_INITIAL_ENTRIES + 1);
-        mLoader.cancelTask(mParentIdentifier);
-
-        Thread.sleep(DocumentLoader.NOTIFY_PERIOD_MS * 2);
+        Thread.sleep(DocumentLoader.NOTIFY_PERIOD_MS);
+        assertEquals(0, mResolver.getChangeCount(uri));
 
         // Check if it's OK to query invalidated task.
         try (final Cursor cursor = mLoader.queryChildDocuments(
                 MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
+            assertTrue(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
         }
+        mResolver.waitForNotification(uri, 1);
     }
 
     private void setUpLoader() {
