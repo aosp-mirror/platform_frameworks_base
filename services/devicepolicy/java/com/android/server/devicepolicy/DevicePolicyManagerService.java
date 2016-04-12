@@ -8657,7 +8657,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setOrganizationName(@NonNull ComponentName who, String text) {
+    public void setOrganizationName(@NonNull ComponentName who, CharSequence text) {
         if (!mHasFeature) {
             return;
         }
@@ -8668,14 +8668,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (!TextUtils.equals(admin.organizationName, text)) {
-                admin.organizationName = TextUtils.nullIfEmpty(text);
+                admin.organizationName = (text == null || text.length() == 0)
+                        ? null : text.toString();
                 saveSettingsLocked(userHandle);
             }
         }
     }
 
     @Override
-    public String getOrganizationName(@NonNull ComponentName who) {
+    public CharSequence getOrganizationName(@NonNull ComponentName who) {
         if (!mHasFeature) {
             return null;
         }
@@ -8689,7 +8690,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getOrganizationNameForUser(int userHandle) {
+    public CharSequence getOrganizationNameForUser(int userHandle) {
         if (!mHasFeature) {
             return null;
         }
