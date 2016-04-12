@@ -75,7 +75,8 @@ public class RecentsTvImpl extends RecentsImpl{
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptionsForTV(topTask);
+            ActivityOptions opts = getThumbnailTransitionActivityOptionsForTV(topTask,
+                    stack.getTaskCount());
             if (opts != null) {
                 startRecentsActivity(topTask, opts, false /* fromHome */, true /* fromThumbnail */);
             } else {
@@ -118,8 +119,8 @@ public class RecentsTvImpl extends RecentsImpl{
      * Creates the activity options for an app->recents transition on TV.
      */
     private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
-            ActivityManager.RunningTaskInfo topTask) {
-        Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext);
+            ActivityManager.RunningTaskInfo topTask, int numTasks) {
+        Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext, numTasks);
         SystemServicesProxy ssp = Recents.getSystemServices();
         ThumbnailData thumbnailData = ssp.getTaskThumbnail(topTask.id);
         if (thumbnailData.thumbnail != null) {
