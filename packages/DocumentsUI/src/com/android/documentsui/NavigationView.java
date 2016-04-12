@@ -147,17 +147,13 @@ class NavigationView {
         }
     }
 
-    // Hamburger if drawer is present, else root icon, or sad nullness.
+    // Hamburger if drawer is present, else sad nullness.
     private @Nullable Drawable getActionBarIcon() {
         if (mDrawer.isPresent()) {
             return mToolbar.getContext().getDrawable(R.drawable.ic_hamburger);
         } else {
-            RootInfo root = mEnv.getCurrentRoot();
-            if (root != null) {
-                return root.loadToolbarIcon(mToolbar.getContext());
-            }
+            return null;
         }
-        return null;
     }
 
     void revealRootsDrawer(boolean open) {
