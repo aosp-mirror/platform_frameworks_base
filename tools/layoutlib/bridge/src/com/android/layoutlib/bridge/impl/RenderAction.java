@@ -286,7 +286,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         return mParams;
     }
 
-    protected BridgeContext getContext() {
+    public BridgeContext getContext() {
         return mContext;
     }
 
