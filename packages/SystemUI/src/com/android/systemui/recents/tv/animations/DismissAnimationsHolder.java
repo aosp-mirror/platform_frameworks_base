@@ -26,13 +26,13 @@ import com.android.systemui.R;
 
 public class DismissAnimationsHolder {
     private LinearLayout mDismissArea;
-    private LinearLayout mTaskCardView;
+    private LinearLayout mRecentsTvCard;
     private int mCardYDelta;
     private long mShortDuration;
     private long mLongDuration;
 
     public DismissAnimationsHolder(TaskCardView taskCardView) {
-        mTaskCardView = (LinearLayout) taskCardView.findViewById(R.id.recents_tv_card);
+        mRecentsTvCard = (LinearLayout) taskCardView.findViewById(R.id.recents_tv_card);
         mDismissArea = (LinearLayout) taskCardView.findViewById(R.id.card_dismiss);
 
         Resources res = taskCardView.getResources();
@@ -47,7 +47,7 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1.0f);
 
-        mTaskCardView.animate()
+        mRecentsTvCard.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(mCardYDelta)
@@ -60,7 +60,7 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
 
-        mTaskCardView.animate()
+        mRecentsTvCard.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(-mCardYDelta)
@@ -73,11 +73,17 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
 
-        mTaskCardView.animate()
+        mRecentsTvCard.animate()
                 .setDuration(mLongDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(mCardYDelta)
                 .alpha(0.0f)
                 .setListener(listener);
+    }
+
+    public void reset() {
+        mRecentsTvCard.setAlpha(1.0f);
+        mRecentsTvCard.setTranslationY(0);
+        mRecentsTvCard.animate().setListener(null);
     }
 }
