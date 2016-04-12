@@ -401,7 +401,8 @@ class LockSettingsStorage {
         return getLockCredentialFilePathForUser(userId, BASE_ZERO_LOCK_PATTERN_FILE);
     }
 
-    private String getChildProfileLockFile(int userId) {
+    @VisibleForTesting
+    String getChildProfileLockFile(int userId) {
         return getLockCredentialFilePathForUser(userId, CHILD_PROFILE_LOCK_FILE);
     }
 
