@@ -1384,6 +1384,11 @@ toc:
     path_attributes:
     - name: description
       value: How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app.
+  - title: Checking URLs with the Safe Browsing API
+    path: /training/safebrowsing/index.html
+    path_attributes:
+    - name: description
+      value: How to use the SafetyNet service to determine if a URL is designated as a known threat.
   - title: Verifying Hardware-backed Key Pairs with Key Attestation
     path: /training/articles/security-key-attestation.html
     path_attributes:
