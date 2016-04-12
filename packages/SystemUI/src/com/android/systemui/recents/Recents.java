@@ -435,7 +435,7 @@ public class Recents extends SystemUI
                 mDraggingInRecentsCurrentUser = currentUser;
                 return true;
             } else {
-                Toast.makeText(mContext, R.string.recents_drag_non_dockable_task_message,
+                Toast.makeText(mContext, R.string.recents_incompatible_app_message,
                         Toast.LENGTH_SHORT).show();
                 return false;
             }

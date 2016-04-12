@@ -20,19 +20,17 @@ import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
-import android.widget.Toast;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
+import com.android.systemui.recents.events.ui.HideIncompatibleAppOverlayEvent;
+import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -166,8 +164,7 @@ public class RecentsViewTouchHandler {
         if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()
                 && mDividerSnapAlgorithm.isSplitScreenFeasible()) {
             if (!event.task.isDockable) {
-                Toast.makeText(mRv.getContext(), R.string.recents_drag_non_dockable_task_message,
-                        Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().send(new ShowIncompatibleAppOverlayEvent());
             } else {
                 // Add the dock state drop targets (these take priority)
                 TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
@@ -184,6 +181,9 @@ public class RecentsViewTouchHandler {
     }
 
     public final void onBusEvent(DragEndEvent event) {
+        if (!mDragTask.isDockable) {
+            EventBus.getDefault().send(new HideIncompatibleAppOverlayEvent());
+        }
         mDragRequested = false;
         mDragTask = null;
         mTaskView = null;

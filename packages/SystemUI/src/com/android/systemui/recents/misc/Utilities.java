@@ -19,6 +19,7 @@ package com.android.systemui.recents.misc;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.annotation.FloatRange;
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -30,6 +31,7 @@ import android.util.Property;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewParent;
+import android.view.ViewStub;
 
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskViewTransform;
@@ -217,6 +219,20 @@ public class Utilities {
             }
         }
         animator.removeAllListeners();
+    }
+
+    /**
+     * Returns a view stub for the given view id.
+     */
+    public static ViewStub findViewStubById(View v, int stubId) {
+        return (ViewStub) v.findViewById(stubId);
+    }
+
+    /**
+     * Returns a view stub for the given view id.
+     */
+    public static ViewStub findViewStubById(Activity a, int stubId) {
+        return (ViewStub) a.findViewById(stubId);
     }
 
     /**

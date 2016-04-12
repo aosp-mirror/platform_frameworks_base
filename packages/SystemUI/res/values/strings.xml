@@ -735,10 +735,8 @@
     <string name="recents_launch_disabled_message"><xliff:g id="app" example="Calendar">%s</xliff:g> is disabled in safe-mode.</string>
     <!-- Recents: Stack action button string. [CHAR LIMIT=NONE] -->
     <string name="recents_stack_action_button_label">Clear all</string>
-    <!-- Recents: Non-dockable task drag message. [CHAR LIMIT=NONE] -->
-    <string name="recents_drag_non_dockable_task_message">This app does not support multi-window</string>
-    <!-- Recents: Non-dockable task launch sub header. [CHAR LIMIT=NONE] -->
-    <string name="recents_launch_non_dockable_task_label">App does not support multi-window</string>
+    <!-- Recents: Incompatible task message. [CHAR LIMIT=NONE] -->
+    <string name="recents_incompatible_app_message">App doesn\'t support split screen</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
