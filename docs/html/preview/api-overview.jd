@@ -19,6 +19,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#doze_on_the_go">Doze on the go</a></li>
         <li><a href="#background_optimizations">Background optimizations</a></li>
         <li><a href="#data_saver">Data Saver</a></li>
+        <li><a href="#vulkan">Vulkan API</a></li>
         <li><a href="#tile_api">Quick Settings Tile API</a></li>
         <li><a href="#number-blocking">Number-blocking</a></li>
         <li><a href="#call_screening">Call screening</a></li>
@@ -35,6 +36,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#apk_signature_v2">APK signature scheme v2</a></li>
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#launcher_shortcuts">Launcher shortcuts</a></li>
+        <li><a href="#print_svc">Print service enhancements</a></li>
       </ol>
 </div>
 </div>
@@ -306,6 +308,54 @@ preference changes</a>. All apps should check whether the user has enabled Data
 Saver and make an effort to limit foreground and background data usage.</p>
 
 
+<h2 id="vulkan">Vulkan API</h2>
+
+<p>
+  Android N integrates <a href="http://www.khronos.org/vulkan" class=
+  "external-link">Vulkan™</a>, a new 3D rendering API, into the platform. Like
+  <a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
+  ES</a>, Vulkan is an open standard for 3D graphics and rendering maintained
+  by the Khronos Group.
+</p>
+
+<p>
+  Vulkan is designed from the ground up to minimize CPU overhead in the driver,
+  and allow your application to control GPU operation more directly. Vulkan
+  also enables better parallelization by allowing multiple threads to perform
+  work such as command buffer construction at once.
+</p>
+
+<p>
+  Vulkan development tools and libraries are rolled into the Android NDK. They
+  include:
+</p>
+
+<ul>
+  <li>Headers
+  </li>
+
+  <li>Validation layers (debug libraries)
+  </li>
+
+  <li>SPIR-V shader compiler
+  </li>
+
+  <li>SPIR-V runtime shader compilation library
+  </li>
+</ul>
+
+<p>
+  Vulkan is only available to apps on devices with Vulkan-capable hardware,
+  such as Nexus 5X, Nexus 6P, and Nexus Player. We're working closely with our
+  partners to bring Vulkan to more devices as soon as possible.
+</p>
+
+<p>
+  For more information, see the <!-- TODO: Insert link to blog post -->Vulkan
+  Developer Tools blog post or the <a href=
+  "{@docRoot}ndk/guides/graphics/index.html">API documentation</a> itself.
+</p>
+
 <h2 id="tile_api">Quick Settings Tile API</h2>
 
 
@@ -483,7 +533,8 @@ Some highlights are below &mdash; for a complete list of changes, see
 <h3 id="work_profile_security_challenge">Work profile security challenge </h3>
 
 <p>
-  Profile owners can specify a separate security challenge for apps running in
+  Profile owners targeting the N SDK
+  can specify a separate security challenge for apps running in
   the work profile. The work challenge is shown when a user attempts to open
   any work apps. Successful completion of the security challenge unlocks the
   work profile and decrypts it if necessary. For profile owners,
@@ -493,7 +544,7 @@ Some highlights are below &mdash; for a complete list of changes, see
 </p>
 
 <p>
-  Profile owners can set distinct password policies for the work challenge
+  Profile owners can set distinct passcode policies for the work challenge
   (such as how long the PIN needs to be, or whether a fingerprint can be used
   to unlock the profile) using the <code>setPasswordQuality()</code>,
   <code>setPasswordMinimumLength()</code> and related methods. The profile
@@ -533,6 +584,16 @@ action <code>android.net.VpnService</code>. </p>
   Users can also manually set Always on VPN clients that implement
   <code>VPNService</code> methods in the primary user using
   <strong>Settings&gt;More&gt;Vpn</strong>.
+</p>
+
+<h3 id="custom_provisioning">Customized provisioning</h3>
+
+<p>
+  An application can customize the profile owner and device owner provisioning
+  flows with corporate colors and logos.
+  <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code> customizes
+  flow color. <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  customizes the flow with a corporate logo.
 </p>
 
 <h2 id="accessibility_enhancements">Accessibility enhancements</h2>
@@ -745,9 +806,51 @@ Directory Access</a> developer documentation.</p>
 <pre class="no-pretty-print">
 $ adb shell dumpsys shortcut
 </pre>
+
 <p>
   To update all shortcuts and to delete dynamic shortcuts, use the appropriate
   methods that the Launcher Shortcut API provides. For more details about this
   API, see <code>android.content.pm.ShortcutManager</code> in the downloadable
   <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+</p>
+
+<h2 id="print_svc">Print Service Enhancements</h2>
+
+<p>
+  In Android N, print service developers can now surface additional information
+  about individual printers and print jobs.
+</p>
+
+<p>
+  When listing individual printers, a print service can now set per-printer
+  icons in two ways:
+</p>
+
+<ul>
+  <li>You can set an icon from a resource ID by calling
+  <code>PrinterInfo.Builder.setResourceIconId()</code>
+  </li>
+
+  <li>You can show an icon from the network by calling
+  <code>PrinterInfo.Builder.setHasCustomPrinterIcon()</code>, and setting a
+  callback for when the icon is requested using
+  <code>android.printservice.PrinterDiscoverySession.onRequestCustomPrinterIcon()</code>
+  </li>
+</ul>
+
+<p>
+  In addition, you can provide a per-printer activity to display additional
+  information by calling <code>PrinterInfo.Builder.setInfoIntent()</code>.
+</p>
+
+<p>
+  You can indicate the progress and status of print jobs in the print job
+  notification by calling
+  <code>android.printservice.PrintJob.setProgress()</code> and
+  <code>android.printservice.PrintJob.setStatus()</code>, respectively.
+</p>
+
+<p>
+  For more information about these methods, see the downloadable <a href=
+  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
 </p>
