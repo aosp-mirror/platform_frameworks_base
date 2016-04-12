@@ -23,6 +23,7 @@ import android.annotation.StringRes;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1113,6 +1114,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         mHost.onStartActivityFromFragment(this, intent, requestCode, options);
+    }
+
+    /**
+     * Call {@link Activity#startIntentSenderForResult(IntentSender, int, Intent, int, int, int,
+     * Bundle)} from the fragment's containing Activity.
+     */
+    public void startIntentSenderForResult(IntentSender intent, int requestCode,
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            Bundle options) throws IntentSender.SendIntentException {
+        if (mHost == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
+        mHost.onStartIntentSenderFromFragment(this, intent, requestCode, fillInIntent, flagsMask,
+                flagsValues, extraFlags, options);
     }
 
     /**

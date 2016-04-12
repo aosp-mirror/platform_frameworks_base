@@ -4405,8 +4405,8 @@ public class Activity extends ContextThemeWrapper
             @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
             Bundle options) throws IntentSender.SendIntentException {
         if (mParent == null) {
-            startIntentSenderForResultInner(intent, requestCode, fillInIntent,
-                    flagsMask, flagsValues, this, options);
+            startIntentSenderForResultInner(intent, mEmbeddedID, requestCode, fillInIntent,
+                    flagsMask, flagsValues, options);
         } else if (options != null) {
             mParent.startIntentSenderFromChild(this, intent, requestCode,
                     fillInIntent, flagsMask, flagsValues, extraFlags, options);
@@ -4418,8 +4418,8 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    private void startIntentSenderForResultInner(IntentSender intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues, Activity activity,
+    private void startIntentSenderForResultInner(IntentSender intent, String who, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues,
             Bundle options)
             throws IntentSender.SendIntentException {
         try {
@@ -4431,7 +4431,7 @@ public class Activity extends ContextThemeWrapper
             }
             int result = ActivityManagerNative.getDefault()
                 .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
-                        fillInIntent, resolvedType, mToken, activity.mEmbeddedID,
+                        fillInIntent, resolvedType, mToken, who,
                         requestCode, flagsMask, flagsValues, options);
             if (result == ActivityManager.START_CANCELED) {
                 throw new IntentSender.SendIntentException();
@@ -4888,8 +4888,23 @@ public class Activity extends ContextThemeWrapper
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
             int extraFlags, @Nullable Bundle options)
             throws IntentSender.SendIntentException {
-        startIntentSenderForResultInner(intent, requestCode, fillInIntent,
-                flagsMask, flagsValues, child, options);
+        startIntentSenderForResultInner(intent, child.mEmbeddedID, requestCode, fillInIntent,
+                flagsMask, flagsValues, options);
+    }
+
+    /**
+     * Like {@link #startIntentSenderFromChild}, but taking a Fragment; see
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
+     * for more information.
+     *
+     * @hide
+     */
+    public void startIntentSenderFromChildFragment(Fragment child, IntentSender intent,
+            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags, @Nullable Bundle options)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResultInner(intent, child.mWho, requestCode, fillInIntent,
+                flagsMask, flagsValues, options);
     }
 
     /**
@@ -7032,6 +7047,19 @@ public class Activity extends ContextThemeWrapper
         public void onStartActivityFromFragment(Fragment fragment, Intent intent, int requestCode,
                 Bundle options) {
             Activity.this.startActivityFromFragment(fragment, intent, requestCode, options);
+        }
+
+        @Override
+        public void onStartIntentSenderFromFragment(Fragment fragment, IntentSender intent,
+                int requestCode, @Nullable Intent fillInIntent, int flagsMask, int flagsValues,
+                int extraFlags, Bundle options) throws IntentSender.SendIntentException {
+            if (mParent == null) {
+                startIntentSenderForResultInner(intent, fragment.mWho, requestCode, fillInIntent,
+                        flagsMask, flagsValues, options);
+            } else if (options != null) {
+                mParent.startIntentSenderFromChildFragment(fragment, intent, requestCode,
+                        fillInIntent, flagsMask, flagsValues, extraFlags, options);
+            }
         }
 
         @Override
