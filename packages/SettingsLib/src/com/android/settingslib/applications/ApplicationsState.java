@@ -534,6 +534,7 @@ public class ApplicationsState {
         Comparator<AppEntry> mRebuildComparator;
         ArrayList<AppEntry> mRebuildResult;
         ArrayList<AppEntry> mLastAppList;
+        boolean mRebuildForeground;
 
         Session(Callbacks callbacks) {
             mCallbacks = callbacks;
@@ -572,6 +573,11 @@ public class ApplicationsState {
 
         // Creates a new list of app entries with the given filter and comparator.
         public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator) {
+            return rebuild(filter, comparator, true);
+        }
+
+        public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator,
+                boolean foreground) {
             synchronized (mRebuildSync) {
                 synchronized (mEntriesMap) {
                     mRebuildingSessions.add(this);
@@ -579,6 +585,7 @@ public class ApplicationsState {
                     mRebuildAsync = false;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
+                    mRebuildForeground = foreground;
                     mRebuildResult = null;
                     if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_REBUILD_LIST)) {
                         Message msg = mBackgroundHandler.obtainMessage(
@@ -620,9 +627,11 @@ public class ApplicationsState {
                 mRebuildRequested = false;
                 mRebuildFilter = null;
                 mRebuildComparator = null;
+                if (mRebuildForeground) {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+                    mRebuildForeground = false;
+                }
             }
-
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
             if (filter != null) {
                 filter.init();
@@ -640,7 +649,10 @@ public class ApplicationsState {
                 if (filter == null || filter.filterApp(entry)) {
                     synchronized (mEntriesMap) {
                         if (DEBUG_LOCKING) Log.v(TAG, "rebuild acquired lock");
-                        entry.ensureLabel(mContext);
+                        if (comparator != null) {
+                            // Only need the label if we are going to be sorting.
+                            entry.ensureLabel(mContext);
+                        }
                         if (DEBUG) Log.i(TAG, "Using " + entry.info.packageName + ": " + entry);
                         filteredApps.add(entry);
                         if (DEBUG_LOCKING) Log.v(TAG, "rebuild releasing lock");
@@ -648,7 +660,9 @@ public class ApplicationsState {
                 }
             }
 
-            Collections.sort(filteredApps, comparator);
+            if (comparator != null) {
+                Collections.sort(filteredApps, comparator);
+            }
 
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
