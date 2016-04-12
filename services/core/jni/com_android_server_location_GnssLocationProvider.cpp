@@ -562,7 +562,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportNavigationMessages = env->GetMethodID(
             clazz,
             "reportNavigationMessage",
-            "(Landroid/location/GnssNavigationMessageEvent;)V");
+            "(Landroid/location/GnssNavigationMessage;)V");
 
     err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
     if (err == 0) {
@@ -1486,26 +1486,6 @@ static jobject translate_gnss_navigation_message(
     return object.get();
 }
 
-static void set_navigation_message(jobject navigationMessage) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jclass navigationMessageEventClass =
-            env->FindClass("android/location/GnssNavigationMessageEvent");
-    jmethodID navigationMessageEventCtor = env->GetMethodID(
-            navigationMessageEventClass,
-            "<init>",
-            "(Landroid/location/GnssNavigationMessage;)V");
-    jobject navigationMessageEvent = env->NewObject(
-            navigationMessageEventClass,
-            navigationMessageEventCtor,
-            navigationMessage);
-    env->CallVoidMethod(mCallbacksObj,
-                        method_reportNavigationMessages,
-                        navigationMessageEvent);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(navigationMessageEventClass);
-    env->DeleteLocalRef(navigationMessageEvent);
-}
-
 static void navigation_message_callback(GpsNavigationMessage* message) {
     if (message == NULL) {
         ALOGE("Invalid Navigation Message provided to callback");
@@ -1517,7 +1497,9 @@ static void navigation_message_callback(GpsNavigationMessage* message) {
     }
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject navigationMessage = translate_gps_navigation_message(env, message);
-    set_navigation_message(navigationMessage);
+    env->CallVoidMethod(mCallbacksObj,
+                        method_reportNavigationMessages,
+                        navigationMessage);
     env->DeleteLocalRef(navigationMessage);
 }
 
@@ -1532,7 +1514,9 @@ static void gnss_navigation_message_callback(GnssNavigationMessage* message) {
     }
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject navigationMessage = translate_gnss_navigation_message(env, message);
-    set_navigation_message(navigationMessage);
+    env->CallVoidMethod(mCallbacksObj,
+                        method_reportNavigationMessages,
+                        navigationMessage);
     env->DeleteLocalRef(navigationMessage);
 }
 
