@@ -189,6 +189,7 @@ public class TaskCardView extends LinearLayout {
     }
 
     public void startDismissTaskAnimation(Animator.AnimatorListener listener) {
+        mDismissState = false;
         mDismissAnimationsHolder.startDismissAnimation(listener);
     }
 
@@ -200,5 +201,11 @@ public class TaskCardView extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         setDismissState(false);
+    }
+
+    public void reset() {
+        mDismissState = false;
+        mRecentsRowFocusAnimationHolder.reset();
+        mDismissAnimationsHolder.reset();
     }
 }
