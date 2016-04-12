@@ -133,6 +133,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mGrowRecents;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
+    private boolean mExitAnimationRunning;
+    private int mExitStartPosition;
     private GestureDetector mGestureDetector;
     private boolean mDockedStackMinimized;
 
@@ -445,6 +447,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mDockSide = WindowManager.DOCKED_INVALID;
                 mCurrentAnimator = null;
                 mEntranceAnimationRunning = false;
+                mExitAnimationRunning = false;
                 EventBus.getDefault().send(new StoppedDragingEvent());
             }
         });
@@ -652,6 +655,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             }
             calculateBoundsForPosition(taskPosition, DockedDividerUtils.invertDockSide(mDockSide),
                     mOtherTaskRect);
+            mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, null,
+                    mOtherTaskRect, null);
+        } else if (mExitAnimationRunning && taskPosition != TASK_POSITION_SAME) {
+            calculateBoundsForPosition(taskPosition,
+                    mDockSide, mDockedTaskRect);
+            calculateBoundsForPosition(mExitStartPosition,
+                    DockedDividerUtils.invertDockSide(mDockSide), mOtherTaskRect);
             mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, null,
                     mOtherTaskRect, null);
         } else if (taskPosition != TASK_POSITION_SAME) {
@@ -895,7 +905,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     : mSnapAlgorithm.getDismissStartTarget();
 
             // Don't start immediately - give a little bit time to settle the drag resize change.
-            stopDragging(getCurrentPosition(), target, 336 /* duration */, 100 /* startDelay */,
+            mExitAnimationRunning = true;
+            mExitStartPosition = getCurrentPosition();
+            stopDragging(mExitStartPosition, target, 336 /* duration */, 100 /* startDelay */,
                     Interpolators.TOUCH_RESPONSE);
 
             // Vibrate after undocking
