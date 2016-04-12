@@ -16,6 +16,8 @@
 
 package com.android.systemui.tv.pip;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -50,9 +52,11 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     private ImageView mGuideButtonPlayPauseImageView;
     private final Runnable mHideGuideOverlayRunnable = new Runnable() {
         public void run() {
-            mGuideOverlayView.setVisibility(View.GONE);
+            mFadeOutAnimation.start();
         }
     };
+    private Animator mFadeInAnimation;
+    private Animator mFadeOutAnimation;
 
     /**
      * Shows PIP overlay UI only if it's not there.
@@ -74,11 +78,18 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         setContentView(R.layout.tv_pip_overlay);
         mGuideOverlayView = findViewById(R.id.guide_overlay);
         mPipManager.addListener(this);
+        mFadeInAnimation = AnimatorInflater.loadAnimator(
+                this, R.anim.tv_pip_overlay_fade_in_animation);
+        mFadeInAnimation.setTarget(mGuideOverlayView);
+        mFadeOutAnimation = AnimatorInflater.loadAnimator(
+                this, R.anim.tv_pip_overlay_fade_out_animation);
+        mFadeOutAnimation.setTarget(mGuideOverlayView);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mFadeInAnimation.start();
         mHandler.removeCallbacks(mHideGuideOverlayRunnable);
         mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
     }
