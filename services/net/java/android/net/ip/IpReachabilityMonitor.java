@@ -26,6 +26,7 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.metrics.IpReachabilityMonitorMessageEvent;
 import android.net.metrics.IpReachabilityMonitorProbeEvent;
+import android.net.metrics.IpReachabilityMonitorLostEvent;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
@@ -353,6 +354,7 @@ public class IpReachabilityMonitor {
         }
 
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
+            IpReachabilityMonitorLostEvent.logEvent(mInterfaceName);
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + msg;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
@@ -521,7 +523,7 @@ public class IpReachabilityMonitor {
 
             final short msgType = neighMsg.getHeader().nlmsg_type;
             final short nudState = ndMsg.ndm_state;
-            IpReachabilityMonitorMessageEvent.logEvent(maybeGetInterfaceName(mInterfaceIndex),
+            IpReachabilityMonitorMessageEvent.logEvent(mInterfaceName,
                     destination.getHostAddress(), msgType, nudState);
             final String eventMsg = "NeighborEvent{"
                     + "elapsedMs=" + whenMs + ", "
@@ -552,12 +554,5 @@ public class IpReachabilityMonitor {
                 handleNeighborLost(eventMsg);
             }
         }
-    }
-
-    private String maybeGetInterfaceName(int index) {
-        if (index == mInterfaceIndex) {
-            return mInterfaceName;
-        }
-        return "ifindex-" + index;
     }
 }
