@@ -306,8 +306,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         for (int i = 0; i < N; i++) {
             View v = mAllViews.get(i);
             v.setAlpha(1);
-            v.setTranslationX(1);
-            v.setTranslationY(1);
+            v.setTranslationX(0);
+            v.setTranslationY(0);
         }
         final int N2 = mTopFiveQs.size();
         for (int i = 0; i < N2; i++) {
