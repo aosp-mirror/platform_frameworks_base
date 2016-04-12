@@ -17,7 +17,8 @@
 package com.android.shell;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static com.android.shell.BugreportPrefs.STATE_SHOW;
+import static com.android.shell.BugreportPrefs.STATE_HIDE;
+import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
 
 import java.io.BufferedOutputStream;
@@ -927,7 +928,7 @@ public class BugreportProgressService extends Service {
         final Intent notifIntent;
 
         // Send through warning dialog by default
-        if (getWarningState(mContext, STATE_SHOW) == STATE_SHOW) {
+        if (getWarningState(mContext, STATE_UNKNOWN) != STATE_HIDE) {
             notifIntent = buildWarningIntent(mContext, sendIntent);
         } else {
             notifIntent = sendIntent;
