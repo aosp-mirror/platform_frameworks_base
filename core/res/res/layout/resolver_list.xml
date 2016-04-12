@@ -72,7 +72,9 @@
 
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/white"
+              android:elevation="8dp"
               android:layout_alwaysShow="true"
               android:text="@string/noApplications"
               android:padding="32dp"
