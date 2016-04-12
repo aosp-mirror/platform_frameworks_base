@@ -192,6 +192,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.BitmapFactory#setDensityFromOptions",
         "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#useLastSeenTarget",
         "android.graphics.drawable.GradientDrawable#buildRing",
+        "android.graphics.FontFamily#addFont",
         "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.graphics.Typeface#makeFamilyFromParsed",
         "android.os.Handler#sendMessageAtTime",
