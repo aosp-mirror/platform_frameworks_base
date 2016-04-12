@@ -39,6 +39,7 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -490,43 +491,24 @@ public class LauncherApps {
     }
 
     /**
-     * Return the icon resource ID, if {@code shortcut} has one
-     * (i.e. when {@link ShortcutInfo#hasIconResource()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param shortcut The target shortcut.
+     * @hide kept for testing.
      */
     public int getShortcutIconResId(@NonNull ShortcutInfo shortcut) {
-        return getShortcutIconResId(shortcut.getPackageName(), shortcut.getId(),
-                shortcut.getUserId());
+        return shortcut.getIconResourceId();
     }
 
     /**
-     * Return the icon resource ID, if {@code shortcut} has one
-     * (i.e. when {@link ShortcutInfo#hasIconResource()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param packageName The target package name.
-     * @param shortcutId The ID of the shortcut to lad rom.
-     * @param user The UserHandle of the profile.
+     * @hide kept for testing.
      */
     public int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
             @NonNull UserHandle user) {
-        return getShortcutIconResId(packageName, shortcutId, user.getIdentifier());
-    }
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setPackage(packageName);
+        q.setShortcutIds(Arrays.asList(shortcutId));
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        final List<ShortcutInfo> shortcuts = getShortcuts(q, user);
 
-    private int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
-            int userId) {
-        try {
-            return mService.getShortcutIconResId(mContext.getPackageName(),
-                    packageName, shortcutId, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return shortcuts.size() > 0 ? shortcuts.get(0).getIconResourceId() : 0;
     }
 
     /**
