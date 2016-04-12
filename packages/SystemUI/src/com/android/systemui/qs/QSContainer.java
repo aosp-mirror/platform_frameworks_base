@@ -70,8 +70,8 @@ public class QSContainer extends FrameLayout {
         super.onFinishInflate();
         mQSPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
         mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
-        mQSDetail.setQsPanel(mQSPanel);
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
+        mQSDetail.setQsPanel(mQSPanel, mHeader);
         mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
                 mQSPanel);
         mQSCustomizer = (QSCustomizer) findViewById(R.id.qs_customize);
