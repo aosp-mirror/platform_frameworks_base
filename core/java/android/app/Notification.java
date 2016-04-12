@@ -1419,7 +1419,7 @@ public class Notification implements Parcelable
              * an activity and transitions should be generated, false otherwise.
              * @return this object for method chaining
              */
-            public WearableExtender setHintContentIntentLaunchesActivity(
+            public WearableExtender setHintLaunchesActivity(
                     boolean hintLaunchesActivity) {
                 setFlag(FLAG_HINT_LAUNCHES_ACTIVITY, hintLaunchesActivity);
                 return this;
@@ -1432,7 +1432,7 @@ public class Notification implements Parcelable
              * should be generated, false otherwise. The default value is {@code false} if this was
              * never set.
              */
-            public boolean getHintContentIntentLaunchesActivity() {
+            public boolean getHintLaunchesActivity() {
                 return (mFlags & FLAG_HINT_LAUNCHES_ACTIVITY) != 0;
             }
         }
