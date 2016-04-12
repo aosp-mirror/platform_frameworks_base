@@ -90,6 +90,15 @@ public class LocaleHelper {
         return str.toUpperCase();
     }
 
+    // For some locales we want to use a "dialect" form, for instance
+    // "Dari" instead of "Persian (Afghanistan)", or "Moldavian" instead of "Romanian (Moldova)"
+    private static boolean shouldUseDialectName(Locale locale) {
+        final String lang = locale.getLanguage();
+        return "fa".equals(lang) // Persian
+                || "ro".equals(lang) // Romanian
+                || "zh".equals(lang); // Chinese
+    }
+
     /**
      * Returns the locale localized for display in the provided locale.
      *
@@ -99,8 +108,10 @@ public class LocaleHelper {
      * @return the localized name of the locale.
      */
     public static String getDisplayName(Locale locale, Locale displayLocale, boolean sentenceCase) {
-        String result = ULocale.getDisplayNameWithDialect(locale.toLanguageTag(),
-                ULocale.forLocale(displayLocale));
+        final ULocale displayULocale = ULocale.forLocale(displayLocale);
+        String result = shouldUseDialectName(locale)
+                ? ULocale.getDisplayNameWithDialect(locale.toLanguageTag(), displayULocale)
+                : ULocale.getDisplayName(locale.toLanguageTag(), displayULocale);
         return sentenceCase ? toSentenceCase(result, displayLocale) : result;
     }
 
@@ -112,9 +123,7 @@ public class LocaleHelper {
      * @return the localized name of the locale.
      */
     public static String getDisplayName(Locale locale, boolean sentenceCase) {
-        String result = ULocale.getDisplayNameWithDialect(locale.toLanguageTag(),
-                ULocale.getDefault());
-        return sentenceCase ? toSentenceCase(result, Locale.getDefault()) : result;
+        return getDisplayName(locale, Locale.getDefault(), sentenceCase);
     }
 
     /**
