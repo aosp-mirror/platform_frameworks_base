@@ -70,23 +70,6 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
-    public Map<String, String> getDefaultProperties(Object viewObject) {
-        return mSession.getDefaultProperties(viewObject);
-    }
-
-    @Override
-    public Result getProperty(Object objectView, String propertyName) {
-        // pass
-        return super.getProperty(objectView, propertyName);
-    }
-
-    @Override
-    public Result setProperty(Object objectView, String propertyName, String propertyValue) {
-        // pass
-        return super.setProperty(objectView, propertyName, propertyValue);
-    }
-
-    @Override
     public Result render(long timeout, boolean forceMeasure) {
         try {
             Bridge.prepareThread();
@@ -211,6 +194,10 @@ public class BridgeRenderSession extends RenderSession {
         if (mSession != null) {
             mSession.dispose();
         }
+    }
+
+    public RenderSessionImpl getSessionImpl() {
+        return mSession;
     }
 
     /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {
