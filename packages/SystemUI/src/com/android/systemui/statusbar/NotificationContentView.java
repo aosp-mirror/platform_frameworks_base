@@ -348,6 +348,12 @@ public class NotificationContentView extends FrameLayout {
         setVisible(isShown());
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getViewTreeObserver().removeOnPreDrawListener(mEnableAnimationPredrawListener);
+    }
+
     private void setVisible(final boolean isVisible) {
         if (isVisible) {
 

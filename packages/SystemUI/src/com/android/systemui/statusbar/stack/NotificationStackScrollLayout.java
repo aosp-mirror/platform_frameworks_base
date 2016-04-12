@@ -3799,6 +3799,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             } else {
                 getViewTreeObserver().removeOnPreDrawListener(mShadowUpdater);
             }
+            mContinuousShadowUpdate = continuousShadowUpdate;
         }
     }
 
