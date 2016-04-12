@@ -148,4 +148,15 @@ public class RootTrustManager extends X509ExtendedTrustManager {
         NetworkSecurityConfig config = mConfig.getConfigForHostname("");
         return config.getTrustManager().getAcceptedIssuers();
     }
+
+    /**
+     * Returns {@code true} if this trust manager uses the same trust configuration for the provided
+     * hostnames.
+     *
+     * <p>This is required by android.net.http.X509TrustManagerExtensions.
+     */
+    public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
+        return mConfig.getConfigForHostname(hostname1)
+                .equals(mConfig.getConfigForHostname(hostname2));
+    }
 }
