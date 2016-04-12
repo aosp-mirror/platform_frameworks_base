@@ -227,6 +227,8 @@ public class SettingsDrawerActivity extends Activity {
         if (sDashboardCategories == null) {
             sTileCache = new HashMap<>();
             sConfigTracker = new InterestingConfigChanges();
+            // Apply initial current config.
+            sConfigTracker.applyNewConfig(getResources());
             sDashboardCategories = TileUtils.getCategories(this, sTileCache);
         }
         return sDashboardCategories;
