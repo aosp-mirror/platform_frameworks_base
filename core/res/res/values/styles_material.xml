@@ -456,6 +456,14 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
+    <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Light.TextView">
+        <item name="layout_width">match_parent</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="ellipsize">end</item>
+        <item name="visibility">gone</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+    </style>
+
     <!-- Widget Styles -->
 
     <style name="Material"/>

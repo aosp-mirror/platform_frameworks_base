@@ -2494,6 +2494,8 @@
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
   <java-symbol type="layout" name="app_anr_dialog" />
+  <java-symbol type="layout" name="notification_template_material_messaging" />
+
   <java-symbol type="id" name="aerr_wait" />
 
   <java-symbol type="id" name="notification_content_container" />
@@ -2523,11 +2525,15 @@
   <java-symbol type="string" name="carrier_app_notification_text" />
   <java-symbol type="string" name="negative_duration" />
 
+  <java-symbol type="dimen" name="notification_messaging_spacing" />
+
   <!-- WallpaperManager config -->
   <java-symbol type="string" name="config_wallpaperCropperPackage" />
 
   <java-symbol type="id" name="textSpacerNoTitle" />
   <java-symbol type="id" name="titleDividerNoCustom" />
+
+  <java-symbol type="id" name="notification_messaging" />
 
   <java-symbol type="bool" name="config_sustainedPerformanceModeSupported" />
 
