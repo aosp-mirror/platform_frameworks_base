@@ -34,11 +34,11 @@ import java.util.List;
  * <h3>Dynamic shortcuts and pinned shortcuts</h3>
  *
  * An application can publish shortcuts with {@link #setDynamicShortcuts(List)} and
- * {@link #addDynamicShortcut(ShortcutInfo)}.  There can be at most
+ * {@link #addDynamicShortcuts(List)}.  There can be at most
  * {@link #getMaxDynamicShortcutCount()} number of dynamic shortcuts at a time from the same
  * application.
- * A dynamic shortcut can be deleted with {@link #deleteDynamicShortcut(String)}, and apps
- * can also use {@link #deleteAllDynamicShortcuts()} to delete all dynamic shortcuts.
+ * A dynamic shortcut can be deleted with {@link #removeDynamicShortcuts(List)}, and apps
+ * can also use {@link #removeAllDynamicShortcuts()} to delete all dynamic shortcuts.
  *
  * <p>The shortcuts that are currently published by the above APIs are called "dynamic", because
  * they can be removed by the creator application at any time.  The user may "pin" dynamic shortcuts
@@ -61,11 +61,11 @@ import java.util.List;
  *
  * <h3>Rate limiting</h3>
  *
- * Calls to {@link #setDynamicShortcuts(List)}, {@link #addDynamicShortcut(ShortcutInfo)},
+ * Calls to {@link #setDynamicShortcuts(List)}, {@link #addDynamicShortcuts(List)},
  * and {@link #updateShortcuts(List)} will be
  * rate-limited.  An application can call these methods at most
  * {@link #getRemainingCallCount()} times until the rate-limiting counter is reset,
- * which happens at a certain time every day.
+ * which happens every hour.
  *
  * <p>An application can use {@link #getRateLimitResetTime()} to get the next reset time.
  *
@@ -153,10 +153,10 @@ public class ShortcutManager {
      * @throws IllegalArgumentException if the caller application has already published the
      * max number of dynamic shortcuts.
      */
-    public boolean addDynamicShortcut(@NonNull ShortcutInfo shortcutInfo) {
+    public boolean addDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
-            return mService.addDynamicShortcut(
-                    mContext.getPackageName(), shortcutInfo, injectMyUserId());
+            return mService.addDynamicShortcuts(mContext.getPackageName(),
+                    new ParceledListSlice(shortcutInfoList), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -165,9 +165,10 @@ public class ShortcutManager {
     /**
      * Delete a single dynamic shortcut by ID.
      */
-    public void deleteDynamicShortcut(@NonNull String shortcutId) {
+    public void removeDynamicShortcuts(@NonNull List<String> shortcutIds) {
         try {
-            mService.deleteDynamicShortcut(mContext.getPackageName(), shortcutId, injectMyUserId());
+            mService.removeDynamicShortcuts(mContext.getPackageName(), shortcutIds,
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -176,9 +177,9 @@ public class ShortcutManager {
     /**
      * Delete all dynamic shortcuts from the caller application.
      */
-    public void deleteAllDynamicShortcuts() {
+    public void removeAllDynamicShortcuts() {
         try {
-            mService.deleteAllDynamicShortcuts(mContext.getPackageName(), injectMyUserId());
+            mService.removeAllDynamicShortcuts(mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
