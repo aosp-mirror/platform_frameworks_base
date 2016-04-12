@@ -1,0 +1,159 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "Readback.h"
+
+#include "Caches.h"
+#include "Image.h"
+#include "GlopBuilder.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/EglManager.h"
+#include "utils/GLUtils.h"
+
+#include <GLES2/gl2.h>
+#include <ui/Fence.h>
+#include <ui/GraphicBuffer.h>
+
+namespace android {
+namespace uirenderer {
+
+bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
+        Surface& surface, SkBitmap* bitmap) {
+    // TODO: Clean this up and unify it with LayerRenderer::copyLayer,
+    // of which most of this is copied from.
+    renderThread.eglManager().initialize();
+
+    Caches& caches = Caches::getInstance();
+    RenderState& renderState = renderThread.renderState();
+    int destWidth = bitmap->width();
+    int destHeight = bitmap->height();
+    if (destWidth > caches.maxTextureSize
+                || destHeight > caches.maxTextureSize) {
+        ALOGW("Can't copy surface into bitmap, %dx%d exceeds max texture size %d",
+                destWidth, destHeight, caches.maxTextureSize);
+        return false;
+    }
+    GLuint fbo = renderState.createFramebuffer();
+    if (!fbo) {
+        ALOGW("Could not obtain an FBO");
+        return false;
+    }
+
+    SkAutoLockPixels alp(*bitmap);
+
+    GLuint texture;
+
+    GLenum format;
+    GLenum type;
+
+    switch (bitmap->colorType()) {
+        case kAlpha_8_SkColorType:
+            format = GL_ALPHA;
+            type = GL_UNSIGNED_BYTE;
+            break;
+        case kRGB_565_SkColorType:
+            format = GL_RGB;
+            type = GL_UNSIGNED_SHORT_5_6_5;
+            break;
+        case kARGB_4444_SkColorType:
+            format = GL_RGBA;
+            type = GL_UNSIGNED_SHORT_4_4_4_4;
+            break;
+        case kN32_SkColorType:
+        default:
+            format = GL_RGBA;
+            type = GL_UNSIGNED_BYTE;
+            break;
+    }
+
+    renderState.bindFramebuffer(fbo);
+
+    // TODO: Use layerPool or something to get this maybe? But since we
+    // need explicit format control we can't currently.
+
+    // Setup the rendertarget
+    glGenTextures(1, &texture);
+    caches.textureState().activateTexture(0);
+    caches.textureState().bindTexture(texture);
+    glPixelStorei(GL_PACK_ALIGNMENT, bitmap->bytesPerPixel());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, destWidth, destHeight,
+            0, format, type, nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D, texture, 0);
+
+    // Setup the source
+    sp<GraphicBuffer> sourceBuffer;
+    sp<Fence> sourceFence;
+    // FIXME: Waiting on an API from libgui for this
+    // surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence);
+    if (!sourceBuffer.get()) {
+        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
+        return false;
+    }
+    int err = sourceFence->wait(500 /* ms */);
+    if (err != NO_ERROR) {
+        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+        return false;
+    }
+    Image sourceImage(sourceBuffer);
+    if (!sourceImage.getTexture()) {
+        ALOGW("Failed to make an EGLImage from the GraphicBuffer");
+        return false;
+    }
+    Texture sourceTexture(caches);
+    sourceTexture.wrap(sourceImage.getTexture(),
+            sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0 /* total lie */);
+
+    {
+        // Draw & readback
+        renderState.setViewport(destWidth, destHeight);
+        renderState.scissor().setEnabled(false);
+        renderState.blend().syncEnabled();
+        renderState.stencil().disable();
+
+        Rect destRect(destWidth, destHeight);
+        Glop glop;
+        GlopBuilder(renderState, caches, &glop)
+                .setRoundRectClipState(nullptr)
+                .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
+                .setFillLayer(sourceTexture, nullptr, 1.0f, SkXfermode::kSrc_Mode,
+                        Blend::ModeOrderSwap::NoSwap)
+                .setTransform(Matrix4::identity(), TransformFlags::None)
+                .setModelViewMapUnitToRect(destRect)
+                .build();
+        Matrix4 ortho;
+        ortho.loadOrtho(destWidth, destHeight);
+        renderState.render(glop, ortho);
+
+        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
+                type, bitmap->getPixels());
+    }
+
+    // Cleanup
+    caches.textureState().deleteTexture(texture);
+    renderState.deleteFramebuffer(fbo);
+
+    GL_CHECKPOINT(MODERATE);
+
+    return true;
+}
+
+} // namespace uirenderer
+} // namespace android

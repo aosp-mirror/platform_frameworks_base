@@ -84,6 +84,7 @@ hwui_src_files := \
     Properties.cpp \
     PropertyValuesHolder.cpp \
     PropertyValuesAnimatorSet.cpp \
+    Readback.cpp \
     RenderBufferCache.cpp \
     RenderNode.cpp \
     RenderProperties.cpp \
