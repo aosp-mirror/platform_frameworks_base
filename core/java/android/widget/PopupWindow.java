@@ -1514,6 +1514,24 @@ public class PopupWindow {
         outParams.x = drawingLocation[0] + xOffset;
         outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
+        // Let the window manager know to align the top to y.
+        outParams.gravity = Gravity.LEFT | Gravity.TOP;
+        outParams.width = width;
+        outParams.height = height;
+
+        // If width or height is unspecified. We can leave it to the window manager to match
+        // to the parent size, but for our local purposes of calculating positioning, we need
+        // to fill in real width and height values.
+        final Rect displayFrame = new Rect();
+        anchor.getWindowVisibleDisplayFrame(displayFrame);
+        if (width < 0) {
+            width = displayFrame.right - displayFrame.left;
+        }
+        if (height < 0) {
+            height = displayFrame.bottom - displayFrame.top;
+        }
+
+
         // If we need to adjust for gravity RIGHT, align to the bottom-right
         // corner of the anchor (still accounting for offsets).
         final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection())
@@ -1522,16 +1540,8 @@ public class PopupWindow {
             outParams.x -= width - anchorWidth;
         }
 
-        // Let the window manager know to align the top to y.
-        outParams.gravity = Gravity.LEFT | Gravity.TOP;
-        outParams.width = width;
-        outParams.height = height;
-
         final int[] screenLocation = mTmpScreenLocation;
         anchor.getLocationOnScreen(screenLocation);
-
-        final Rect displayFrame = new Rect();
-        anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         // First, attempt to fit the popup vertically without resizing.
         final boolean fitsVertical = tryFitVertical(outParams, yOffset, height,
@@ -2116,10 +2126,10 @@ public class PopupWindow {
 
         // If an explicit width/height has not specified, use the most recent
         // explicitly specified value (either from setWidth/Height or update).
-        if (width == -1) {
+        if (width < 0) {
             width = mWidth;
         }
-        if (height == -1) {
+        if (height < 0) {
             height = mHeight;
         }
 
