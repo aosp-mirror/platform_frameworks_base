@@ -37,6 +37,7 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -403,11 +404,18 @@ public class Model {
 
     public @Nullable Cursor getItem(String modelId) {
         Integer pos = mPositions.get(modelId);
-        if (pos != null) {
-            mCursor.moveToPosition(pos);
-            return mCursor;
+        if (pos == null) {
+            if (DEBUG) Log.d(TAG, "Unabled to find cursor position for modelId: " + modelId);
+            return null;
         }
-        return null;
+
+        if (!mCursor.moveToPosition(pos)) {
+            if (DEBUG) Log.d(TAG,
+                    "Unabled to move cursor to position " + pos + " for modelId: " + modelId);
+            return null;
+        }
+
+        return mCursor;
     }
 
     boolean isEmpty() {
@@ -424,8 +432,11 @@ public class Model {
         final List<DocumentInfo> docs =  new ArrayList<>(size);
         for (String modelId: items.getAll()) {
             final Cursor cursor = getItem(modelId);
-            assert(cursor != null);
-
+            if (cursor == null) {
+                Log.w(TAG,
+                        "Skipping document. Unabled to obtain cursor for modelId: " + modelId);
+                continue;
+            }
             docs.add(DocumentInfo.fromDirectoryCursor(cursor));
         }
         return docs;
