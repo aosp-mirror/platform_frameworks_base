@@ -50,6 +50,8 @@ import com.android.server.vr.EnabledComponentsObserver.EnabledComponentChangeLis
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.StringBuilder;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -184,6 +186,32 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public boolean getVrModeState() {
             return VrManagerService.this.getVrMode();
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("permission denied: can't dump VrManagerService from pid="
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+                return;
+            }
+            pw.print("mVrModeEnabled=");
+            pw.println(mVrModeEnabled);
+            pw.print("mCurrentVrModeUser=");
+            pw.println(mCurrentVrModeUser);
+            pw.print("mRemoteCallbacks=");
+            int i=mRemoteCallbacks.beginBroadcast(); // create the broadcast item array
+            while(i-->0) {
+                pw.print(mRemoteCallbacks.getBroadcastItem(i));
+                if (i>0) pw.print(", ");
+            }
+            mRemoteCallbacks.finishBroadcast();
+            pw.println();
+            pw.print("mCurrentVrService=");
+            pw.println(mCurrentVrService != null ? mCurrentVrService.getComponent() : "(none)");
+            pw.print("mCurrentVrModeComponent=");
+            pw.println(mCurrentVrModeComponent);
         }
 
     };

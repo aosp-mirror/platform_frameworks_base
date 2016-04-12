@@ -27,8 +27,11 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -45,6 +48,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
+import com.android.server.vr.VrManagerService;
 
 /**
  *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
@@ -66,6 +70,7 @@ public class ImmersiveModeConfirmation {
     private long mPanicTime;
     private WindowManager mWindowManager;
     private int mCurrentUserId;
+    private IVrManager mVrManager;
 
     public ImmersiveModeConfirmation(Context context) {
         mContext = context;
@@ -75,6 +80,8 @@ public class ImmersiveModeConfirmation {
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
+        mVrManager = (IVrManager) IVrManager.Stub.asInterface(
+                ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
     }
 
     private long getNavBarExitDuration() {
@@ -112,6 +119,14 @@ public class ImmersiveModeConfirmation {
         }
     }
 
+    private boolean getVrMode() {
+        boolean vrMode = false;
+        try {
+            vrMode = mVrManager.getVrModeState();
+        } catch (RemoteException ex) { }
+        return vrMode;
+    }        
+
     public void immersiveModeChanged(String pkg, boolean isImmersiveMode,
             boolean userSetupComplete) {
         mHandler.removeMessages(H.SHOW);
@@ -119,7 +134,10 @@ public class ImmersiveModeConfirmation {
             final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
             if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s mConfirmed=%s",
                     disabled, mConfirmed));
-            if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed) && userSetupComplete) {
+            if (!disabled
+                    && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
+                    && userSetupComplete
+                    && !getVrMode()) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
