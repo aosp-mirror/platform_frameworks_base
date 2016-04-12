@@ -2009,7 +2009,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ComponentName getEffectsSuppressor() {
             enforceSystemOrSystemUIOrVolume("INotificationManager.getEffectsSuppressor");
-            return mEffectsSuppressors.get(0);
+            return !mEffectsSuppressors.isEmpty() ? mEffectsSuppressors.get(0) : null;
         }
 
         @Override
