@@ -65,8 +65,6 @@ import java.util.List;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
-import com.google.android.collect.Lists;
-
 /**
  * Contains functionality for handling keyboard shortcuts.
  */
@@ -371,7 +369,7 @@ public final class KeyboardShortcuts {
 
     private KeyboardShortcutGroup getDefaultApplicationShortcuts() {
         final int userId = mContext.getUserId();
-        List<KeyboardShortcutInfo> keyboardShortcutInfoAppItems = Lists.newArrayList();
+        List<KeyboardShortcutInfo> keyboardShortcutInfoAppItems = new ArrayList<>();
 
         // Assist.
         final AssistUtils assistUtils = new AssistUtils(mContext);
