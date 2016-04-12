@@ -291,7 +291,7 @@ public class LauncherApps {
         }
         ArrayList<LauncherActivityInfo> lais = new ArrayList<LauncherActivityInfo>();
         for (ResolveInfo ri : activities.getList()) {
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user);
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri.activityInfo, user);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -299,10 +299,6 @@ public class LauncherApps {
             lais.add(lai);
         }
         return lais;
-    }
-
-    static ComponentName getComponentName(ResolveInfo ri) {
-        return new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
     }
 
     /**
@@ -315,9 +311,9 @@ public class LauncherApps {
      */
     public LauncherActivityInfo resolveActivity(Intent intent, UserHandle user) {
         try {
-            ResolveInfo ri = mService.resolveActivity(intent, user);
-            if (ri != null) {
-                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ri, user);
+            ActivityInfo ai = mService.resolveActivity(intent.getComponent(), user);
+            if (ai != null) {
+                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ai, user);
                 return info;
             }
         } catch (RemoteException re) {
@@ -389,6 +385,7 @@ public class LauncherApps {
      *
      * @return An {@link ApplicationInfo} containing information about the package or
      *         null of the package isn't found.
+     * @hide
      */
     public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,
             UserHandle user) {
