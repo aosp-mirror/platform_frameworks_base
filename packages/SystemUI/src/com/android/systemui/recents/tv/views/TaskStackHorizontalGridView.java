@@ -179,13 +179,14 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
 
     @Override
     public void onStackTaskAdded(TaskStack stack, Task newTask) {
-        getAdapter().notifyItemInserted(stack.getStackTasks().indexOf(newTask));
+        ((TaskStackHorizontalViewAdapter) getAdapter()).addTaskAt(newTask,
+                stack.indexOfStackTask(newTask));
     }
 
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
             Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture) {
-        getAdapter().notifyItemRemoved(stack.getStackTasks().indexOf(removedTask));
+        ((TaskStackHorizontalViewAdapter) getAdapter()).removeTask(removedTask);
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
         }

@@ -55,6 +55,7 @@ import com.android.systemui.recents.tv.animations.HomeRecentsEnterExitAnimationH
 import com.android.systemui.recents.tv.views.RecentsTvView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
+import com.android.systemui.recents.views.AnimationProps;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.tv.pip.PipManager;
 import com.android.systemui.tv.pip.PipRecentsOverlayManager;
@@ -246,7 +247,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
         dismissEvent.addPostAnimationCallback(closeSystemWindows);
 
-        if(mTaskStackHorizontalGridView.getChildCount() > 0) {
+        if(mTaskStackHorizontalGridView.getChildCount() > 0 && animateTaskViews) {
             mHomeRecentsEnterExitAnimationHolder.startExitAnimation(dismissEvent);
         } else {
             closeSystemWindows.run();
@@ -494,12 +495,10 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.hasDockedTask()) {
+        if (mPipManager.isPipShown()) {
             mRecentsView.showEmptyView();
         } else {
-            // Just go straight home (no animation necessary because there are no more task views)
-            dismissRecentsToHome(false /* animateTaskViews */);
+            dismissRecentsToHome(false);
         }
     }
 
