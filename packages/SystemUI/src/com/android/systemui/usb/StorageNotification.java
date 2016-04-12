@@ -16,6 +16,7 @@
 
 package com.android.systemui.usb;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
@@ -96,6 +97,11 @@ public class StorageNotification extends SystemUI {
         @Override
         public void onDiskScanned(DiskInfo disk, int volumeCount) {
             onDiskScannedInternal(disk, volumeCount);
+        }
+
+        @Override
+        public void onDiskDestroyed(DiskInfo disk) {
+            onDiskDestroyedInternal(disk);
         }
     };
 
@@ -236,6 +242,15 @@ public class StorageNotification extends SystemUI {
             // Yay, we have volumes!
             mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
         }
+    }
+
+    /**
+     * Remove all notifications for a disk when it goes away.
+     *
+     * @param disk The disk that went away.
+     */
+    private void onDiskDestroyedInternal(@NonNull DiskInfo disk) {
+        mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
     }
 
     private void onVolumeStateChangedInternal(VolumeInfo vol) {
