@@ -119,6 +119,8 @@ public class WebViewUpdateServiceImpl {
     }
 
     private void updateFallbackStateOnBoot() {
+        if (!mSystemInterface.isFallbackLogicEnabled()) return;
+
         WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
         updateFallbackState(webviewProviders, true);
     }
@@ -497,8 +499,15 @@ public class WebViewUpdateServiceImpl {
                     mWebViewPackageDirty = false;
                     // If we have changed provider since we started the relro creation we need to
                     // redo the whole process using the new package instead.
-                    PackageInfo newPackage = findPreferredWebViewPackage();
-                    onWebViewProviderChanged(newPackage);
+                    try {
+                        PackageInfo newPackage = findPreferredWebViewPackage();
+                        onWebViewProviderChanged(newPackage);
+                    } catch (WebViewFactory.MissingWebViewPackageException e) {
+                        // If we can't find any valid WebView package we are now in a state where
+                        // mAnyWebViewInstalled is false, so loading WebView will be blocked and we
+                        // should simply wait until we receive an intent declaring a new package was
+                        // installed.
+                    }
                 } else {
                     mLock.notifyAll();
                 }
