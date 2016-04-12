@@ -196,9 +196,10 @@ class DocumentLoader implements AutoCloseable {
                 }
                 task.loadObjectInfoList(NUM_LOADING_ENTRIES);
                 final boolean shouldNotify =
-                        task.mLastNotified.getTime() <
-                        new Date().getTime() - NOTIFY_PERIOD_MS ||
-                        task.getState() != LoaderTask.STATE_LOADING;
+                        task.getState() != LoaderTask.STATE_CANCELLED &&
+                        (task.mLastNotified.getTime() <
+                         new Date().getTime() - NOTIFY_PERIOD_MS ||
+                         task.getState() != LoaderTask.STATE_LOADING);
                 if (shouldNotify) {
                     task.notify(mResolver);
                 }
