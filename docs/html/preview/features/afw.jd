@@ -142,13 +142,15 @@ Android N.</p>
 
 <p>
   Device owners and profile owners can temporarily suspend access to packages
-  by calling the new <code>DevicePolicyManager.getPackagesSuspended()</code>
-  method.Owners can use the same method to re-enable those packages.
+  by calling the new <code>DevicePolicyManager.setPackagesSuspended()</code>
+  method. Owners can use the same method to re-enable those packages.
 </p>
 
 <p>
-  While a package is suspended, it cannot start activities, and notifications
-  to the package are suppressed. Suspended packages do not show in the <a href=
+  While a package is suspended, it cannot start activities, notifications to
+  the package are suppressed, and the app's entry in the <a
+  href="{@docRoot}guide/components/recents.html">overview screen</a> is hidden.
+  Suspended packages do not show in the <a href=
   "{@docRoot}guide/components/recents.html">overview screen</a>, and they
   cannot show dialogs (including toasts and snackbars). They also cannot play
   audio or vibrate the device.
@@ -157,18 +159,21 @@ Android N.</p>
 <p>
   Launchers should apply a distinctive UI to suspended apps to show that the
   apps aren't currently available; for example, they might render the app icon
-  in gray. Launchers can find out which apps are suspended by calling the new
-  <code>DevicePolicyManager.getPackagesSuspended()</code> method.
+  in gray. Launchers can find out if an app is suspended by calling the new
+  <code>DevicePolicyManager.getPackageSuspended()</code> method.
 </p>
 
 <h2 id="toggle-work">Toggle Work Mode</h2>
 
-<p>On dual-profile devices, users can toggle work mode on and off. While work
-  mode is turned off, the managed profile is temporarily shut down. Work profile apps, background sync, and notifications are all disabled, including the profile
-  owner app. While the work profile is disabled, the system  displays a persistent status icon to remind users that they can't launch work apps. The system launcher
-  indicates that work apps and widgets are not accessible.
+<p>
+  On dual-profile devices, users can toggle work mode on and off. While work
+  mode is turned off, the managed profile is temporarily shut down. Work
+  profile apps, background sync, and notifications are all disabled, including
+  the profile owner app. While the work profile is disabled, the system
+  displays a persistent status icon to remind users that they can't launch work
+  apps. The system launcher indicates that work apps and widgets are not
+  accessible.
 </p>
-
 
 <h2 id="always-on-vpn">Always-On VPN</h2>
 
@@ -270,29 +275,36 @@ Android N.</p>
   Device owners can identify suspicious activity by remotely tracking device
   activity, including app launches, adb activity, and screen unlocks. Process
   logs don’t require user consent. To retrieve logs, device owners enable
-  device logging using <code>setDeviceLoggingEnabled()</code>.
+  device logging using <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>.
 </p>
 
 <p>
-  The new <code>android.auditing.SecurityLog</code> class includes these
-  methods:
+  API changes include:
 </p>
 
 <ul>
+
   <li>
-    <code>void DevicePolicyManager.setDeviceLoggingEnabled()</code>
+    The new class <code>android.app.admin.SecurityLog</code> and its
+    methods
   </li>
 
   <li>
-    <code>boolean DevicePolicyManager.getDeviceLoggingEnabled()</code>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
   </li>
 
   <li>
-    <code>List DevicePolicyManager.retrieveDeviceLogs()</code>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
   </li>
 
   <li>
-    <code>List DevicePolicyManager.retrievePreviousDeviceLogs()</code>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
   </li>
 
   <li>
@@ -475,7 +487,7 @@ Android N.</p>
 
 <p>
   Device owners can provide owner information to be shownon the lockscreen.
-  This information takes precedence the user lock screen message (if one is
+  This information takes precedence over the user lock screen message (if one is
   set). New {@link android.app.admin.DevicePolicyManager} methods are:
 </p>
 
