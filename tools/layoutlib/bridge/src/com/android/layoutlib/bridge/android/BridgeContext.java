@@ -27,6 +27,7 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.android.PropertiesMap.Property;
 import com.android.layoutlib.bridge.android.view.WindowManagerImpl;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.Stack;
@@ -275,7 +276,7 @@ public final class BridgeContext extends Context {
         return mRenderResources;
     }
 
-    public Map<String, String> getDefaultPropMap(Object key) {
+    public PropertiesMap getDefaultPropMap(Object key) {
         return mDefaultPropMaps.get(key);
     }
 
@@ -731,16 +732,10 @@ public final class BridgeContext extends Context {
                 Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
                         "Failed to find the style corresponding to the id " + defStyleAttr, null);
             } else {
-                if (defaultPropMap != null) {
-                    String defStyleName = defStyleAttribute.getFirst();
-                    if (defStyleAttribute.getSecond()) {
-                        defStyleName = "android:" + defStyleName;
-                    }
-                    defaultPropMap.put("style", defStyleName);
-                }
+                String defStyleName = defStyleAttribute.getFirst();
 
                 // look for the style in the current theme, and its parent:
-                ResourceValue item = mRenderResources.findItemInTheme(defStyleAttribute.getFirst(),
+                ResourceValue item = mRenderResources.findItemInTheme(defStyleName,
                         defStyleAttribute.getSecond());
 
                 if (item != null) {
@@ -749,6 +744,12 @@ public final class BridgeContext extends Context {
                     item = mRenderResources.resolveResValue(item);
                     if (item instanceof StyleResourceValue) {
                         defStyleValues = (StyleResourceValue) item;
+                    }
+                    if (defaultPropMap != null) {
+                        if (defStyleAttribute.getSecond()) {
+                            defStyleName = "android:" + defStyleName;
+                        }
+                        defaultPropMap.put("style", new Property(defStyleName, item.getValue()));
                     }
                 } else {
                     Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
@@ -776,7 +777,8 @@ public final class BridgeContext extends Context {
                         item = mRenderResources.getStyle(value.getSecond(), isFrameworkRes);
                         if (item != null) {
                             if (defaultPropMap != null) {
-                                defaultPropMap.put("style", item.getName());
+                                String name = item.getName();
+                                defaultPropMap.put("style", new Property(name, name));
                             }
 
                             defStyleValues = item;
@@ -855,12 +857,13 @@ public final class BridgeContext extends Context {
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (resValue != null) {
-                        // put the first default value, before the resolution.
-                        if (defaultPropMap != null) {
-                            defaultPropMap.put(attrName, resValue.getValue());
-                        }
-
+                        String preResolve = resValue.getValue();
                         resValue = mRenderResources.resolveResValue(resValue);
+
+                        if (defaultPropMap != null) {
+                            defaultPropMap.put(attrName,
+                                    new Property(preResolve, resValue.getValue()));
+                        }
 
                         // If the value is a reference to another theme attribute that doesn't
                         // exist, we should log a warning and omit it.
@@ -949,10 +952,11 @@ public final class BridgeContext extends Context {
 
                 if (resValue != null) {
                     // Add it to defaultPropMap before resolving
-                    defaultPropMap.put(attrName, resValue.getValue());
+                    String preResolve = resValue.getValue();
                     // resolve it to make sure there are no references left.
-                    ta.bridgeSetValue(i, attrName, attribute.getSecond(),
-                            mRenderResources.resolveResValue(resValue));
+                    resValue = mRenderResources.resolveResValue(resValue);
+                    ta.bridgeSetValue(i, attrName, attribute.getSecond(), resValue);
+                    defaultPropMap.put(attrName, new Property(preResolve, resValue.getValue()));
                 }
             }
         }
@@ -1915,11 +1919,4 @@ public final class BridgeContext extends Context {
         }
 
     }
-
-    /**
-     * An alias used for the value in {@code {@link #mDefaultPropMaps}}
-     */
-    private static class PropertiesMap extends HashMap<String, String> {
-    }
-
 }
