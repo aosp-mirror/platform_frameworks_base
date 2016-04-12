@@ -824,7 +824,9 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Return the {@link StorageVolume} that contains the given file, or {@code null} if none.
+     */
     public @Nullable StorageVolume getStorageVolume(File file) {
         return getStorageVolume(getVolumeList(), file);
     }
@@ -836,9 +838,13 @@ public class StorageManager {
 
     /** {@hide} */
     private static @Nullable StorageVolume getStorageVolume(StorageVolume[] volumes, File file) {
+        if (file == null) {
+            return null;
+        }
         try {
             file = file.getCanonicalFile();
         } catch (IOException ignored) {
+            Slog.d(TAG, "Could not get canonical path for " + file);
             return null;
         }
         for (StorageVolume volume : volumes) {
