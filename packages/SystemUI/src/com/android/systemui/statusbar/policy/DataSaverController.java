@@ -33,24 +33,29 @@ public class DataSaverController {
     }
 
     private void handleRestrictBackgroundChanged(boolean isDataSaving) {
-        final int N = mListeners.size();
-        for (int i = 0; i < N; i++) {
-            mListeners.get(i).onDataSaverChanged(isDataSaving);
+        synchronized (mListeners) {
+            for (int i = 0; i < mListeners.size(); i++) {
+                mListeners.get(i).onDataSaverChanged(isDataSaving);
+            }
         }
     }
 
     public void addListener(Listener listener) {
-        mListeners.add(listener);
-        if (mListeners.size() == 1) {
-            mPolicyManager.registerListener(mPolicyListener);
+        synchronized (mListeners) {
+            mListeners.add(listener);
+            if (mListeners.size() == 1) {
+                mPolicyManager.registerListener(mPolicyListener);
+            }
         }
         listener.onDataSaverChanged(isDataSaverEnabled());
     }
 
     public void remListener(Listener listener) {
-        mListeners.remove(listener);
-        if (mListeners.size() == 0) {
-            mPolicyManager.unregisterListener(mPolicyListener);
+        synchronized (mListeners) {
+            mListeners.remove(listener);
+            if (mListeners.size() == 0) {
+                mPolicyManager.unregisterListener(mPolicyListener);
+            }
         }
     }
 
