@@ -597,7 +597,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         ArrayList<Callback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
         synchronized (this) {
-            UidState uidState = getUidStateLocked(uid, false);
             Op op = getOpLocked(code, uid, packageName, true);
             if (op != null) {
                 if (op.mode != mode) {
@@ -1536,8 +1535,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     void writeState() {
         synchronized (mFile) {
-            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
-
             FileOutputStream stream;
             try {
                 stream = mFile.startWrite();
@@ -1546,15 +1543,33 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
+            SparseArray<UidState> outUidStates = null;
+            synchronized (this) {
+                final int uidStateCount = mUidStates.size();
+                for (int i = 0; i < uidStateCount; i++) {
+                    UidState uidState = mUidStates.valueAt(i);
+                    SparseIntArray opModes = uidState.opModes;
+                    if (opModes != null && opModes.size() > 0) {
+                        UidState outUidState = new UidState(uidState.uid);
+                        outUidState.opModes = opModes.clone();
+                        if (outUidStates == null) {
+                            outUidStates = new SparseArray<>();
+                        }
+                        outUidStates.put(mUidStates.keyAt(i), outUidState);
+                    }
+                }
+            }
+            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
+
             try {
                 XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
 
-                final int uidStateCount = mUidStates.size();
+                final int uidStateCount = outUidStates != null ? outUidStates.size() : 0;
                 for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = mUidStates.valueAt(i);
+                    UidState uidState = outUidStates.valueAt(i);
                     if (uidState.opModes != null && uidState.opModes.size() > 0) {
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(uidState.uid));
