@@ -16098,11 +16098,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.getAppSize(ps.volumeUuid, packageName, userId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE,
                     ps.getCeDataInode(userId), ps.codePathString, stats);
-            return true;
         } catch (InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
             return false;
         }
+
+        // For now, ignore code size of packages on system partition
+        if (isSystemApp(ps) && !isUpdatedSystemApp(ps)) {
+            stats.codeSize = 0;
+        }
+
+        return true;
     }
 
     private int getUidTargetSdkVersionLockedLPr(int uid) {
