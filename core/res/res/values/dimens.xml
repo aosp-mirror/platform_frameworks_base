@@ -162,9 +162,9 @@
     <dimen name="notification_min_height">92dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_width">64dp</dimen>
+    <dimen name="notification_large_icon_width">40dp</dimen>
     <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_height">64dp</dimen>
+    <dimen name="notification_large_icon_height">40dp</dimen>
 
     <!-- The minimum width of the app name in the header if it shrinks -->
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
@@ -180,6 +180,9 @@
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
+
+    <!-- The spacing between messages in Notification.MessagingStyle -->
+    <dimen name="notification_messaging_spacing">6dp</dimen>
 
     <!-- Preferred width of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
