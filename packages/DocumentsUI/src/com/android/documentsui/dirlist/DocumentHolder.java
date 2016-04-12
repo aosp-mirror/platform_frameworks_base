@@ -139,11 +139,13 @@ public abstract class DocumentHolder
             }
 
             // Do everything in global coordinates - it makes things simpler.
-            Rect rect = new Rect();
-            mSelectionHotspot.getGlobalVisibleRect(rect);
+            int[] coords = new int[2];
+            mSelectionHotspot.getLocationOnScreen(coords);
+            Rect rect = new Rect(coords[0], coords[1], coords[0] + mSelectionHotspot.getWidth(),
+                    coords[1] + mSelectionHotspot.getHeight());
 
             // If the tap occurred within the icon rect, consider it a selection.
-            if (rect.contains((int)event.getRawX(), (int)event.getRawY())) {
+            if (rect.contains((int) event.getRawX(), (int) event.getRawY())) {
                 return mEventListener.onSelect(this);
             } else {
                 return mEventListener.onActivate(this);
