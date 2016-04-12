@@ -41,7 +41,6 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 
-
 /**
  * Represents the dock regions for each orientation.
  */
@@ -163,6 +162,7 @@ public class RecentsViewTouchHandler {
         mVisibleDockStates.clear();
         if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()
                 && mDividerSnapAlgorithm.isSplitScreenFeasible()) {
+            Recents.logDockAttempt(mRv.getContext(), event.task.topActivity, event.task.resizeMode);
             if (!event.task.isDockable) {
                 EventBus.getDefault().send(new ShowIncompatibleAppOverlayEvent());
             } else {

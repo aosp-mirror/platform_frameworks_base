@@ -102,8 +102,8 @@ public class ShortcutKeyDispatcher extends SystemUI
                 int dockMode = (shortcutCode == SC_DOCK_LEFT)
                         ? ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
                         : ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-                recents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE, dockMode, null);
-                MetricsLogger.action(mContext, MetricsEvent.WINDOW_DOCK_SHORTCUTS);
+                recents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE, dockMode, null,
+                        MetricsEvent.WINDOW_DOCK_SHORTCUTS);
             } else {
                 // If there is already a docked window, we respond by resizing the docking pane.
                 DividerView dividerView = getComponent(Divider.class).getView();
@@ -115,7 +115,8 @@ public class ShortcutKeyDispatcher extends SystemUI
                 DividerSnapAlgorithm.SnapTarget target = snapAlgorithm.cycleNonDismissTarget(
                         currentTarget, increment);
                 dividerView.startDragging(true /* animate */, false /* touching */);
-                dividerView.stopDragging(target.position, 0f, true /* avoidDismissStart */);
+                dividerView.stopDragging(target.position, 0f, true /* avoidDismissStart */,
+                        true /* logMetrics */);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "handleDockKey() failed.");

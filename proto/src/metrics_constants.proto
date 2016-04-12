@@ -2138,6 +2138,20 @@ message MetricsEvent {
     // Settings > Apps > Gear > Special Access > Premium SMS access
     PREMIUM_SMS_ACCESS = 388;
 
+    // Logged when the user resizes the docked stack. Arguments:
+    // 0: Split 50:50
+    // 1: Docked smaller
+    // 2: Docked larger
+    ACTION_WINDOW_DOCK_RESIZE = 389;
+
+    // User exits split-screen by dragging the divider to the side of the screen. Arguments
+    // 0: Docked gets maximized
+    // 1: Fullscreen gets maximized
+    ACTION_WINDOW_UNDOCK_MAX = 390;
+
+    // User tried to dock an unresizable app.
+    ACTION_WINDOW_DOCK_UNRESIZABLE = 391;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

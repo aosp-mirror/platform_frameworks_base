@@ -127,8 +127,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected boolean toggleSplitScreenMode() {
-        return false;
+    protected void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
     }
 
     @Override

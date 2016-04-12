@@ -1177,31 +1177,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 return false;
             }
 
-            boolean initiallyDocked = WindowManagerProxy.getInstance().getDockSide()
-                    == WindowManager.DOCKED_INVALID;
-            boolean dockedAtEnd = toggleSplitScreenMode();
-            if (dockedAtEnd != initiallyDocked) {
-                int logAction = dockedAtEnd ? MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS
-                        : MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS;
-                MetricsLogger.action(mContext, logAction);
-                return true;
-            }
-            return false;
+            toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
+                    MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
+            return true;
         }
     };
 
     @Override
-    protected boolean toggleSplitScreenMode() {
+    protected void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
         if (mRecents == null) {
-            return false;
+            return;
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null);
+            mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
         } else {
             EventBus.getDefault().send(new UndockingTaskEvent());
-            return false;
+            if (metricsUndockAction != -1) {
+                MetricsLogger.action(mContext, metricsUndockAction);
+            }
         }
     }
 

@@ -54,11 +54,14 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.Constants.Metrics;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
@@ -80,7 +83,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     static final long TOUCH_ANIMATION_DURATION = 150;
     static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
-    private static final String TAG = "DividerView";
+    private static final int LOG_VALUE_RESIZE_50_50 = 0;
+    private static final int LOG_VALUE_RESIZE_DOCKED_SMALLER = 1;
+    private static final int LOG_VALUE_RESIZE_DOCKED_LARGER = 2;
+
+    private static final int LOG_VALUE_UNDOCK_MAX_DOCKED = 0;
+    private static final int LOG_VALUE_UNDOCK_MAX_OTHER = 1;
+
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
     private static final boolean SWAPPING_ENABLED = false;
@@ -313,9 +322,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mDockSide != WindowManager.DOCKED_INVALID;
     }
 
-    public void stopDragging(int position, float velocity, boolean avoidDismissStart) {
+    public void stopDragging(int position, float velocity, boolean avoidDismissStart,
+            boolean logMetrics) {
         mHandle.setTouching(false, true /* animate */);
-        fling(position, velocity, avoidDismissStart);
+        fling(position, velocity, avoidDismissStart, logMetrics);
         mWindowManager.setSlippery(true);
         releaseBackground();
     }
@@ -413,21 +423,53 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
-                        : mVelocityTracker.getXVelocity(), false /* avoidDismissStart */);
+                        : mVelocityTracker.getXVelocity(), false /* avoidDismissStart */,
+                        true /* log */);
                 mMoving = false;
                 break;
         }
         return true;
     }
 
+    private void logResizeEvent(SnapTarget snapTarget) {
+        if (snapTarget == mSnapAlgorithm.getDismissStartTarget()) {
+            MetricsLogger.action(
+                    mContext, MetricsEvent.ACTION_WINDOW_UNDOCK_MAX, dockSideTopLeft(mDockSide)
+                            ? LOG_VALUE_UNDOCK_MAX_OTHER
+                            : LOG_VALUE_UNDOCK_MAX_DOCKED);
+        } else if (snapTarget == mSnapAlgorithm.getDismissEndTarget()) {
+            MetricsLogger.action(
+                    mContext, MetricsEvent.ACTION_WINDOW_UNDOCK_MAX, dockSideBottomRight(mDockSide)
+                            ? LOG_VALUE_UNDOCK_MAX_OTHER
+                            : LOG_VALUE_UNDOCK_MAX_DOCKED);
+        } else if (snapTarget == mSnapAlgorithm.getMiddleTarget()) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_RESIZE,
+                    LOG_VALUE_RESIZE_50_50);
+        } else if (snapTarget == mSnapAlgorithm.getFirstSplitTarget()) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_RESIZE,
+                    dockSideTopLeft(mDockSide)
+                            ? LOG_VALUE_RESIZE_DOCKED_SMALLER
+                            : LOG_VALUE_RESIZE_DOCKED_LARGER);
+        } else if (snapTarget == mSnapAlgorithm.getLastSplitTarget()) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_RESIZE,
+                    dockSideTopLeft(mDockSide)
+                            ? LOG_VALUE_RESIZE_DOCKED_LARGER
+                            : LOG_VALUE_RESIZE_DOCKED_SMALLER);
+        }
+    }
+
     private void convertToScreenCoordinates(MotionEvent event) {
         event.setLocation(event.getRawX(), event.getRawY());
     }
 
-    private void fling(int position, float velocity, boolean avoidDismissStart) {
+    private void fling(int position, float velocity, boolean avoidDismissStart,
+            boolean logMetrics) {
         SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position, velocity);
         if (avoidDismissStart && snapTarget == mSnapAlgorithm.getDismissStartTarget()) {
             snapTarget = mSnapAlgorithm.getFirstSplitTarget();
+        }
+        if (logMetrics) {
+            logResizeEvent(snapTarget);
         }
         ValueAnimator anim = getFlingAnimator(position, snapTarget);
         mFlingAnimationUtils.apply(anim, position, snapTarget.position, velocity);

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -1305,6 +1306,12 @@ public class ActivityManager {
          */
         public boolean isDockable;
 
+        /**
+         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
+         * @hide
+         */
+        public int resizeMode;
+
         public RecentTaskInfo() {
         }
 
@@ -1349,6 +1356,7 @@ public class ActivityManager {
                 dest.writeInt(0);
             }
             dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(resizeMode);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1372,6 +1380,7 @@ public class ActivityManager {
             bounds = source.readInt() > 0 ?
                     Rect.CREATOR.createFromParcel(source) : null;
             isDockable = source.readInt() == 1;
+            resizeMode = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -1560,6 +1569,12 @@ public class ActivityManager {
          */
         public boolean isDockable;
 
+        /**
+         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
+         * @hide
+         */
+        public int resizeMode;
+
         public RunningTaskInfo() {
         }
 
@@ -1583,6 +1598,7 @@ public class ActivityManager {
             dest.writeInt(numActivities);
             dest.writeInt(numRunning);
             dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(resizeMode);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1599,6 +1615,7 @@ public class ActivityManager {
             numActivities = source.readInt();
             numRunning = source.readInt();
             isDockable = source.readInt() != 0;
+            resizeMode = source.readInt();
         }
 
         public static final Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
