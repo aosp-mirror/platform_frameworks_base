@@ -1374,6 +1374,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
+        if (isDeviceInVrMode()) {
+            return true;
+        }
+
         if (mPowerManager.isInteractive()) {
             return mNotificationData.shouldSuppressScreenOn(key);
         } else {
