@@ -1386,7 +1386,6 @@
 
   <java-symbol type="xml" name="password_kbd_qwerty" />
   <java-symbol type="xml" name="autotext" />
-  <java-symbol type="xml" name="eri" />
   <java-symbol type="xml" name="password_kbd_numeric" />
   <java-symbol type="xml" name="password_kbd_qwerty_shifted" />
   <java-symbol type="xml" name="password_kbd_symbols" />
