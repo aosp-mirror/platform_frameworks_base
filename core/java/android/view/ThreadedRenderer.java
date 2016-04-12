@@ -893,6 +893,10 @@ public final class ThreadedRenderer {
         nSerializeDisplayListTree(mNativeProxy);
     }
 
+    public static boolean copySurfaceInto(Surface surface, Bitmap bitmap) {
+        return nCopySurfaceInto(surface, bitmap);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -1029,4 +1033,6 @@ public final class ThreadedRenderer {
 
     private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
+
+    private static native boolean nCopySurfaceInto(Surface surface, Bitmap bitmap);
 }

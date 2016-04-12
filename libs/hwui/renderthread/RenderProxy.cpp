@@ -19,6 +19,7 @@
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "LayerRenderer.h"
+#include "Readback.h"
 #include "Rect.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/RenderTask.h"
@@ -602,6 +603,20 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
         observer->incStrong(mContext);
     }
     post(task);
+}
+
+CREATE_BRIDGE3(copySurfaceInto, RenderThread* thread,
+        Surface* surface, SkBitmap* bitmap) {
+    return (void*) Readback::copySurfaceInto(*args->thread,
+            *args->surface, args->bitmap);
+}
+
+bool RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
+    SETUP_TASK(copySurfaceInto);
+    args->bitmap = bitmap;
+    args->surface = surface.get();
+    args->thread = &RenderThread::getInstance();
+    return (bool) staticPostAndWait(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

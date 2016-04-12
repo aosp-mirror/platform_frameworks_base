@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,31 +18,27 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PixelCopy;
 import android.graphics.PixelCopy.OnPixelCopyFinished;
 import android.graphics.PixelCopy.Response;
-import android.graphics.PorterDuff;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.Surface;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class HardwareCanvasSurfaceViewActivity extends Activity implements Callback {
+public class GetBitmapSurfaceViewActivity extends Activity implements SurfaceHolder.Callback {
+    private Camera mCamera;
     private SurfaceView mSurfaceView;
-    private HardwareCanvasSurfaceViewActivity.RenderingThread mThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +60,10 @@ public class HardwareCanvasSurfaceViewActivity extends Activity implements Callb
                     mOnCopyFinished, mSurfaceView.getHandler());
         });
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(button, LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        layout.addView(mSurfaceView, LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-
-        content.addView(layout, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT));
+        content.addView(mSurfaceView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
+        content.addView(button, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
         setContentView(content);
     }
 
@@ -81,7 +71,7 @@ public class HardwareCanvasSurfaceViewActivity extends Activity implements Callb
         @Override
         public void onPixelCopyFinished(Response response) {
             if (!response.success) {
-                Toast.makeText(HardwareCanvasSurfaceViewActivity.this,
+                Toast.makeText(GetBitmapSurfaceViewActivity.this,
                         "Failed to copy", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -98,74 +88,24 @@ public class HardwareCanvasSurfaceViewActivity extends Activity implements Callb
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mThread = new RenderingThread(holder.getSurface());
-        mThread.start();
+        mCamera = Camera.open();
+
+        try {
+            mCamera.setPreviewSurface(holder.getSurface());
+        } catch (IOException t) {
+            android.util.Log.e("TextureView", "Cannot set preview texture target!", t);
+        }
+
+        mCamera.startPreview();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mThread.setSize(width, height);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        if (mThread != null) mThread.stopRendering();
-    }
-
-    private static class RenderingThread extends Thread {
-        private final Surface mSurface;
-        private volatile boolean mRunning = true;
-        private int mWidth, mHeight;
-
-        public RenderingThread(Surface surface) {
-            mSurface = surface;
-        }
-
-        void setSize(int width, int height) {
-            mWidth = width;
-            mHeight = height;
-        }
-
-        @Override
-        public void run() {
-            float x = 0.0f;
-            float y = 0.0f;
-            float speedX = 5.0f;
-            float speedY = 3.0f;
-
-            Paint paint = new Paint();
-            paint.setColor(0xff00ff00);
-
-            while (mRunning && !Thread.interrupted()) {
-                final Canvas canvas = mSurface.lockHardwareCanvas();
-                try {
-                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
-                    canvas.drawRect(x, y, x + 20.0f, y + 20.0f, paint);
-                } finally {
-                    mSurface.unlockCanvasAndPost(canvas);
-                }
-
-                if (x + 20.0f + speedX >= mWidth || x + speedX <= 0.0f) {
-                    speedX = -speedX;
-                }
-                if (y + 20.0f + speedY >= mHeight || y + speedY <= 0.0f) {
-                    speedY = -speedY;
-                }
-
-                x += speedX;
-                y += speedY;
-
-                try {
-                    Thread.sleep(15);
-                } catch (InterruptedException e) {
-                    // Interrupted
-                }
-            }
-        }
-
-        void stopRendering() {
-            interrupt();
-            mRunning = false;
-        }
+        mCamera.stopPreview();
+        mCamera.release();
     }
 }
