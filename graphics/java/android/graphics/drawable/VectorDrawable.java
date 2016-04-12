@@ -534,13 +534,17 @@ public class VectorDrawable extends Drawable {
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        if (mVectorState.mRootGroup != null || mVectorState.mNativeRendererRefBase != null) {
+        if (mVectorState.mRootGroup != null || mVectorState.mNativeTree != null) {
             // This VD has been used to display other VD resource content, clean up.
-            mVectorState.mRootGroup = new VGroup();
-            if (mVectorState.mNativeRendererRefBase != null) {
-                mVectorState.mNativeRendererRefBase.release();
+            if (mVectorState.mRootGroup != null) {
+                // Remove child nodes' reference to tree
+                mVectorState.mRootGroup.setTree(null);
             }
-            mVectorState.createNativeRenderer(mVectorState.mRootGroup.mNativePtr);
+            mVectorState.mRootGroup = new VGroup();
+            if (mVectorState.mNativeTree != null) {
+                mVectorState.mNativeTree.release();
+            }
+            mVectorState.createNativeTree(mVectorState.mRootGroup);
         }
         final VectorDrawableState state = mVectorState;
         state.setDensity(Drawable.resolveDensity(r, 0));
@@ -734,7 +738,7 @@ public class VectorDrawable extends Drawable {
         Insets mOpticalInsets = Insets.NONE;
         String mRootName = null;
         VGroup mRootGroup;
-        VirtualRefBasePtr mNativeRendererRefBase = null;
+        VirtualRefBasePtr mNativeTree = null;
 
         int mDensity = DisplayMetrics.DENSITY_DEFAULT;
         final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<>();
@@ -755,7 +759,7 @@ public class VectorDrawable extends Drawable {
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
                 mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
-                createNativeRenderer(mRootGroup.mNativePtr);
+                createNativeTree(mRootGroup);
 
                 mBaseWidth = copy.mBaseWidth;
                 mBaseHeight = copy.mBaseHeight;
@@ -770,15 +774,16 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        private void createNativeRenderer(long rootGroupPtr) {
-            mNativeRendererRefBase = new VirtualRefBasePtr(nCreateRenderer(rootGroupPtr));
+        private void createNativeTree(VGroup rootGroup) {
+            mNativeTree = new VirtualRefBasePtr(nCreateTree(rootGroup.mNativePtr));
+            mRootGroup.setTree(mNativeTree);
         }
 
         long getNativeRenderer() {
-            if (mNativeRendererRefBase == null) {
+            if (mNativeTree == null) {
                 return 0;
             }
-            return mNativeRendererRefBase.get();
+            return mNativeTree.get();
         }
 
         public boolean canReuseCache() {
@@ -817,7 +822,7 @@ public class VectorDrawable extends Drawable {
 
         public VectorDrawableState() {
             mRootGroup = new VGroup();
-            createNativeRenderer(mRootGroup.mNativePtr);
+            createNativeTree(mRootGroup);
         }
 
         @Override
@@ -881,16 +886,16 @@ public class VectorDrawable extends Drawable {
          * has changed.
          */
         public boolean setAlpha(float alpha) {
-            return nSetRootAlpha(mNativeRendererRefBase.get(), alpha);
+            return nSetRootAlpha(mNativeTree.get(), alpha);
         }
 
         @SuppressWarnings("unused")
         public float getAlpha() {
-            return nGetRootAlpha(mNativeRendererRefBase.get());
+            return nGetRootAlpha(mNativeTree.get());
         }
     }
 
-    static class VGroup implements VObject {
+    static class VGroup extends VObject {
         private static final int ROTATE_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
         private static final int PIVOT_Y_INDEX = 2;
@@ -984,8 +989,15 @@ public class VectorDrawable extends Drawable {
         public void addChild(VObject child) {
             nAddChild(mNativePtr, child.getNativePtr());
             mChildren.add(child);
-
             mIsStateful |= child.isStateful();
+        }
+
+        @Override
+        public void setTree(VirtualRefBasePtr treeRoot) {
+            super.setTree(treeRoot);
+            for (int i = 0; i < mChildren.size(); i++) {
+                mChildren.get(i).setTree(treeRoot);
+            }
         }
 
         @Override
@@ -1101,79 +1113,93 @@ public class VectorDrawable extends Drawable {
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         @SuppressWarnings("unused")
         public float getRotation() {
-            return nGetRotation(mNativePtr);
+            return isTreeValid() ? nGetRotation(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setRotation(float rotation) {
-            nSetRotation(mNativePtr, rotation);
+            if (isTreeValid()) {
+                nSetRotation(mNativePtr, rotation);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getPivotX() {
-            return nGetPivotX(mNativePtr);
+            return isTreeValid() ? nGetPivotX(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setPivotX(float pivotX) {
-            nSetPivotX(mNativePtr, pivotX);
+            if (isTreeValid()) {
+                nSetPivotX(mNativePtr, pivotX);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getPivotY() {
-            return nGetPivotY(mNativePtr);
+            return isTreeValid() ? nGetPivotY(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setPivotY(float pivotY) {
-            nSetPivotY(mNativePtr, pivotY);
+            if (isTreeValid()) {
+                nSetPivotY(mNativePtr, pivotY);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getScaleX() {
-            return nGetScaleX(mNativePtr);
+            return isTreeValid() ? nGetScaleX(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setScaleX(float scaleX) {
-            nSetScaleX(mNativePtr, scaleX);
+            if (isTreeValid()) {
+                nSetScaleX(mNativePtr, scaleX);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getScaleY() {
-            return nGetScaleY(mNativePtr);
+            return isTreeValid() ? nGetScaleY(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setScaleY(float scaleY) {
-            nSetScaleY(mNativePtr, scaleY);
+            if (isTreeValid()) {
+                nSetScaleY(mNativePtr, scaleY);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getTranslateX() {
-            return nGetTranslateX(mNativePtr);
+            return isTreeValid() ? nGetTranslateX(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setTranslateX(float translateX) {
-            nSetTranslateX(mNativePtr, translateX);
+            if (isTreeValid()) {
+                nSetTranslateX(mNativePtr, translateX);
+            }
         }
 
         @SuppressWarnings("unused")
         public float getTranslateY() {
-            return nGetTranslateY(mNativePtr);
+            return isTreeValid() ? nGetTranslateY(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         public void setTranslateY(float translateY) {
-            nSetTranslateY(mNativePtr, translateY);
+            if (isTreeValid()) {
+                nSetTranslateY(mNativePtr, translateY);
+            }
         }
     }
 
     /**
      * Common Path information for clip path and normal path.
      */
-    static abstract class VPath implements VObject {
+    static abstract class VPath extends VObject {
         protected PathParser.PathData mPathData = null;
 
         String mPathName;
@@ -1203,7 +1229,9 @@ public class VectorDrawable extends Drawable {
         @SuppressWarnings("unused")
         public void setPathData(PathParser.PathData pathData) {
             mPathData.setPathData(pathData);
-            nSetPathData(getNativePtr(), mPathData.getNativePtr());
+            if (isTreeValid()) {
+                nSetPathData(getNativePtr(), mPathData.getNativePtr());
+            }
         }
     }
 
@@ -1549,97 +1577,120 @@ public class VectorDrawable extends Drawable {
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         @SuppressWarnings("unused")
         int getStrokeColor() {
-            return nGetStrokeColor(mNativePtr);
+            return isTreeValid() ? nGetStrokeColor(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setStrokeColor(int strokeColor) {
             mStrokeColors = null;
-            nSetStrokeColor(mNativePtr, strokeColor);
+            if (isTreeValid()) {
+                nSetStrokeColor(mNativePtr, strokeColor);
+            }
         }
 
         @SuppressWarnings("unused")
         float getStrokeWidth() {
-            return nGetStrokeWidth(mNativePtr);
+            return isTreeValid() ? nGetStrokeWidth(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setStrokeWidth(float strokeWidth) {
-            nSetStrokeWidth(mNativePtr, strokeWidth);
+            if (isTreeValid()) {
+                nSetStrokeWidth(mNativePtr, strokeWidth);
+            }
         }
 
         @SuppressWarnings("unused")
         float getStrokeAlpha() {
-            return nGetStrokeAlpha(mNativePtr);
+            return isTreeValid() ? nGetStrokeAlpha(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setStrokeAlpha(float strokeAlpha) {
-            nSetStrokeAlpha(mNativePtr, strokeAlpha);
+            if (isTreeValid()) {
+                nSetStrokeAlpha(mNativePtr, strokeAlpha);
+            }
         }
 
         @SuppressWarnings("unused")
         int getFillColor() {
-            return nGetFillColor(mNativePtr);
+            return isTreeValid() ? nGetFillColor(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setFillColor(int fillColor) {
             mFillColors = null;
-            nSetFillColor(mNativePtr, fillColor);
+            if (isTreeValid()) {
+                nSetFillColor(mNativePtr, fillColor);
+            }
         }
 
         @SuppressWarnings("unused")
         float getFillAlpha() {
-            return nGetFillAlpha(mNativePtr);
+            return isTreeValid() ? nGetFillAlpha(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setFillAlpha(float fillAlpha) {
-            nSetFillAlpha(mNativePtr, fillAlpha);
+            if (isTreeValid()) {
+                nSetFillAlpha(mNativePtr, fillAlpha);
+            }
         }
 
         @SuppressWarnings("unused")
         float getTrimPathStart() {
-            return nGetTrimPathStart(mNativePtr);
+            return isTreeValid() ? nGetTrimPathStart(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setTrimPathStart(float trimPathStart) {
-            nSetTrimPathStart(mNativePtr, trimPathStart);
+            if (isTreeValid()) {
+                nSetTrimPathStart(mNativePtr, trimPathStart);
+            }
         }
 
         @SuppressWarnings("unused")
         float getTrimPathEnd() {
-            return nGetTrimPathEnd(mNativePtr);
+            return isTreeValid() ? nGetTrimPathEnd(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setTrimPathEnd(float trimPathEnd) {
-            nSetTrimPathEnd(mNativePtr, trimPathEnd);
+            if (isTreeValid()) {
+                nSetTrimPathEnd(mNativePtr, trimPathEnd);
+            }
         }
 
         @SuppressWarnings("unused")
         float getTrimPathOffset() {
-            return nGetTrimPathOffset(mNativePtr);
+            return isTreeValid() ? nGetTrimPathOffset(mNativePtr) : 0;
         }
 
         @SuppressWarnings("unused")
         void setTrimPathOffset(float trimPathOffset) {
-            nSetTrimPathOffset(mNativePtr, trimPathOffset);
+            if (isTreeValid()) {
+                nSetTrimPathOffset(mNativePtr, trimPathOffset);
+            }
         }
     }
 
-    interface VObject {
-        long getNativePtr();
-        void inflate(Resources r, AttributeSet attrs, Theme theme);
-        boolean canApplyTheme();
-        void applyTheme(Theme t);
-        boolean onStateChange(int[] state);
-        boolean isStateful();
+    abstract static class VObject {
+        VirtualRefBasePtr mTreePtr = null;
+        boolean isTreeValid() {
+            return mTreePtr != null && mTreePtr.get() != 0;
+        }
+        void setTree(VirtualRefBasePtr ptr) {
+            mTreePtr = ptr;
+        }
+        abstract long getNativePtr();
+        abstract void inflate(Resources r, AttributeSet attrs, Theme theme);
+        abstract boolean canApplyTheme();
+        abstract void applyTheme(Theme t);
+        abstract boolean onStateChange(int[] state);
+        abstract boolean isStateful();
     }
 
-    private static native long nCreateRenderer(long rootGroupPtr);
+    private static native long nCreateTree(long rootGroupPtr);
     private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
             float viewportHeight);
     private static native boolean nSetRootAlpha(long rendererPtr, float alpha);

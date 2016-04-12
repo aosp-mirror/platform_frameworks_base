@@ -340,7 +340,7 @@ static void setTrimPathOffset(JNIEnv*, jobject, jlong fullPathPtr, jfloat trimPa
 }
 
 static const JNINativeMethod gMethods[] = {
-        {"nCreateRenderer", "!(J)J", (void*)createTree},
+        {"nCreateTree", "!(J)J", (void*)createTree},
         {"nSetRendererViewportSize", "!(JFF)V", (void*)setTreeViewportSize},
         {"nSetRootAlpha", "!(JF)Z", (void*)setRootAlpha},
         {"nGetRootAlpha", "!(J)F", (void*)getRootAlpha},
