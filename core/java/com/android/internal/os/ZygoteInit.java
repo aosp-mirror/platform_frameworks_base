@@ -43,6 +43,7 @@ import com.android.internal.os.InstallerConnection.InstallerException;
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
+import dalvik.system.ZygoteHooks;
 
 import libcore.io.IoUtils;
 
@@ -597,6 +598,10 @@ public class ZygoteInit {
     }
 
     public static void main(String argv[]) {
+        // Mark zygote start. This ensures that thread creation will throw
+        // an error.
+        ZygoteHooks.startZygoteNoThreadCreation();
+
         try {
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygoteInit");
             RuntimeInit.enableDdms();
@@ -647,6 +652,8 @@ public class ZygoteInit {
 
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
+
+            ZygoteHooks.stopZygoteNoThreadCreation();
 
             if (startSystemServer) {
                 startSystemServer(abiList, socketName);
