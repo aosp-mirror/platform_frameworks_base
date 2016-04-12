@@ -58,8 +58,8 @@ public class RadialTimePickerView extends View {
 
     private static final String TAG = "RadialTimePickerView";
 
-    private static final int HOURS = 0;
-    private static final int MINUTES = 1;
+    public static final int HOURS = 0;
+    public static final int MINUTES = 1;
     private static final int HOURS_INNER = 2;
 
     private static final int SELECTOR_CIRCLE = 0;
