@@ -23,13 +23,13 @@ import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArraySet;
+import android.util.MutableFloat;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.ViewDebug;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -628,22 +628,24 @@ public class TaskStackLayoutAlgorithm {
 
     /**
      * Updates this stack when a scroll happens.
+     *
      */
-    public void updateFocusStateOnScroll(float stackScroll, float deltaScroll) {
-        if (deltaScroll == 0f) {
-            return;
+    public float updateFocusStateOnScroll(float lastTargetStackScroll, float targetStackScroll,
+            float lastStackScroll) {
+        if (targetStackScroll == lastStackScroll) {
+            return targetStackScroll;
         }
 
+        float deltaScroll = targetStackScroll - lastStackScroll;
+        float deltaTargetScroll = targetStackScroll - lastTargetStackScroll;
+        float newScroll = targetStackScroll;
+        mUnfocusedRange.offset(targetStackScroll);
         for (int i = mTaskIndexOverrideMap.size() - 1; i >= 0; i--) {
             int taskId = mTaskIndexOverrideMap.keyAt(i);
             float x = mTaskIndexMap.get(taskId);
             float overrideX = mTaskIndexOverrideMap.get(taskId, 0f);
             float newOverrideX = overrideX + deltaScroll;
-            mUnfocusedRange.offset(stackScroll);
-            boolean outOfBounds = mUnfocusedRange.getNormalizedX(newOverrideX) < 0f ||
-                    mUnfocusedRange.getNormalizedX(newOverrideX) > 1f;
-            if (outOfBounds || (overrideX >= x && x >= newOverrideX) ||
-                    (overrideX <= x && x <= newOverrideX)) {
+            if (isInvalidOverrideX(x, overrideX, newOverrideX)) {
                 // Remove the override once we reach the original task index
                 mTaskIndexOverrideMap.removeAt(i);
             } else if ((overrideX >= x && deltaScroll <= 0f) ||
@@ -652,11 +654,23 @@ public class TaskStackLayoutAlgorithm {
                 mTaskIndexOverrideMap.put(taskId, newOverrideX);
             } else {
                 // Scrolling override x away from x, we should still move the scroll towards x
-                float deltaX = overrideX - x;
-                newOverrideX = Math.signum(deltaX) * (Math.abs(deltaX) - Math.abs(deltaScroll));
-                mTaskIndexOverrideMap.put(taskId, x + newOverrideX);
+                newScroll = lastStackScroll;
+                newOverrideX = overrideX - deltaTargetScroll;
+                if (isInvalidOverrideX(x, overrideX, newOverrideX)) {
+                    mTaskIndexOverrideMap.removeAt(i);
+                } else{
+                    mTaskIndexOverrideMap.put(taskId, newOverrideX);
+                }
             }
         }
+        return newScroll;
+    }
+
+    private boolean isInvalidOverrideX(float x, float overrideX, float newOverrideX) {
+        boolean outOfBounds = mUnfocusedRange.getNormalizedX(newOverrideX) < 0f ||
+                mUnfocusedRange.getNormalizedX(newOverrideX) > 1f;
+        return outOfBounds || (overrideX >= x && x >= newOverrideX) ||
+                (overrideX <= x && x <= newOverrideX);
     }
 
     /**

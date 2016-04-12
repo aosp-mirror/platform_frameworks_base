@@ -200,6 +200,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Stop the current scroll if it is still flinging
                 mScroller.stopScroller();
                 mScroller.stopBoundScrollAnimation();
+                mScroller.resetDeltaScroll();
                 Utilities.cancelAnimationWithoutCallbacks(mScrollFlingAnimator);
 
                 // Finish any existing task animations from the delete
@@ -223,6 +224,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mDownY = (int) ev.getY(index);
                 mLastY = mDownY;
                 mDownScrollP = mScroller.getStackScroll();
+                mScroller.resetDeltaScroll();
                 mVelocityTracker.addMovement(ev);
                 break;
             }
@@ -256,20 +258,21 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // If we just move linearly on the screen, then that would map to 1/arclength
                     // of the curve, so just move the scroll proportional to that
                     float deltaP = layoutAlgorithm.getDeltaPForY(mDownY, y);
-                    float curScrollP = mDownScrollP + deltaP;
 
                     // Modulate the overscroll to prevent users from pulling the stack too far
                     float minScrollP = layoutAlgorithm.mMinScrollP;
                     float maxScrollP = layoutAlgorithm.mMaxScrollP;
+                    float curScrollP = mDownScrollP + deltaP;
                     if (curScrollP < minScrollP || curScrollP > maxScrollP) {
                         float clampedScrollP = Utilities.clamp(curScrollP, minScrollP, maxScrollP);
                         float overscrollP = (curScrollP - clampedScrollP);
                         float overscrollX = Math.abs(overscrollP) / MAX_OVERSCROLL;
-                        curScrollP = clampedScrollP + (Math.signum(overscrollP) *
-                                (OVERSCROLL_INTERP.getInterpolation(overscrollX) * MAX_OVERSCROLL));
+                        float interpX = OVERSCROLL_INTERP.getInterpolation(overscrollX);
+                        curScrollP = clampedScrollP + Math.signum(overscrollP) *
+                                (interpX * MAX_OVERSCROLL);
                     }
-
-                    mScroller.setStackScroll(curScrollP);
+                    mDownScrollP += mScroller.setDeltaStackScroll(mDownScrollP,
+                            curScrollP - mDownScrollP);
                     mStackViewScrolledEvent.updateY(y - mLastY);
                     EventBus.getDefault().send(mStackViewScrolledEvent);
                 }
