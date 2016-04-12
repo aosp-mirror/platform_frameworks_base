@@ -5762,7 +5762,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public void setShortSupportMessage(@NonNull ComponentName admin,
-            @Nullable String message) {
+            @Nullable CharSequence message) {
         if (mService != null) {
             try {
                 mService.setShortSupportMessage(admin, message);
@@ -5776,11 +5776,11 @@ public class DevicePolicyManager {
      * Called by a device admin to get the short support message.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)} or null if
-     *         no message has been set.
+     * @return The message set by {@link #setShortSupportMessage(ComponentName, CharSequence)} or
+     *         null if no message has been set.
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
-    public String getShortSupportMessage(@NonNull ComponentName admin) {
+    public CharSequence getShortSupportMessage(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
                 return mService.getShortSupportMessage(admin);
@@ -5806,7 +5806,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public void setLongSupportMessage(@NonNull ComponentName admin,
-            @Nullable String message) {
+            @Nullable CharSequence message) {
         if (mService != null) {
             try {
                 mService.setLongSupportMessage(admin, message);
@@ -5820,11 +5820,11 @@ public class DevicePolicyManager {
      * Called by a device admin to get the long support message.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)} or null if
-     *         no message has been set.
+     * @return The message set by {@link #setLongSupportMessage(ComponentName, CharSequence)} or
+     *         null if no message has been set.
      * @throws SecurityException if {@code admin} is not an active administrator.
      */
-    public String getLongSupportMessage(@NonNull ComponentName admin) {
+    public CharSequence getLongSupportMessage(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
                 return mService.getLongSupportMessage(admin);
@@ -5840,11 +5840,12 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle user id the admin is running as.
-     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)}
+     * @return The message set by {@link #setShortSupportMessage(ComponentName, CharSequence)}
      *
      * @hide
      */
-    public String getShortSupportMessageForUser(@NonNull ComponentName admin, int userHandle) {
+    public CharSequence getShortSupportMessageForUser(@NonNull ComponentName admin,
+            int userHandle) {
         if (mService != null) {
             try {
                 return mService.getShortSupportMessageForUser(admin, userHandle);
@@ -5861,11 +5862,11 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle user id the admin is running as.
-     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)}
+     * @return The message set by {@link #setLongSupportMessage(ComponentName, CharSequence)}
      *
      * @hide
      */
-    public String getLongSupportMessageForUser(@NonNull ComponentName admin, int userHandle) {
+    public CharSequence getLongSupportMessageForUser(@NonNull ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
                 return mService.getLongSupportMessageForUser(admin, userHandle);

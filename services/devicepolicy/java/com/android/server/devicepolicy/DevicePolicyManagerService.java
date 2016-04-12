@@ -655,8 +655,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Bundle userRestrictions;
 
         // Support text provided by the admin to display to the user.
-        String shortSupportMessage = null;
-        String longSupportMessage = null;
+        CharSequence shortSupportMessage = null;
+        CharSequence longSupportMessage = null;
 
         // Background color of confirm credentials screen. Default: teal.
         static final int DEF_ORGANIZATION_COLOR = Color.parseColor("#00796B");
@@ -870,12 +870,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (!TextUtils.isEmpty(shortSupportMessage)) {
                 out.startTag(null, TAG_SHORT_SUPPORT_MESSAGE);
-                out.text(shortSupportMessage);
+                out.text(shortSupportMessage.toString());
                 out.endTag(null, TAG_SHORT_SUPPORT_MESSAGE);
             }
             if (!TextUtils.isEmpty(longSupportMessage)) {
                 out.startTag(null, TAG_LONG_SUPPORT_MESSAGE);
-                out.text(longSupportMessage);
+                out.text(longSupportMessage.toString());
                 out.endTag(null, TAG_LONG_SUPPORT_MESSAGE);
             }
             if (parentAdmin != null) {
@@ -8501,7 +8501,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setShortSupportMessage(@NonNull ComponentName who, String message) {
+    public void setShortSupportMessage(@NonNull ComponentName who, CharSequence message) {
         if (!mHasFeature) {
             return;
         }
@@ -8518,7 +8518,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getShortSupportMessage(@NonNull ComponentName who) {
+    public CharSequence getShortSupportMessage(@NonNull ComponentName who) {
         if (!mHasFeature) {
             return null;
         }
@@ -8531,7 +8531,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setLongSupportMessage(@NonNull ComponentName who, String message) {
+    public void setLongSupportMessage(@NonNull ComponentName who, CharSequence message) {
         if (!mHasFeature) {
             return;
         }
@@ -8548,7 +8548,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getLongSupportMessage(@NonNull ComponentName who) {
+    public CharSequence getLongSupportMessage(@NonNull ComponentName who) {
         if (!mHasFeature) {
             return null;
         }
@@ -8561,7 +8561,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getShortSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
+    public CharSequence getShortSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
         if (!mHasFeature) {
             return null;
         }
@@ -8579,7 +8579,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getLongSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
+    public CharSequence getLongSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
         if (!mHasFeature) {
             return null;
         }
