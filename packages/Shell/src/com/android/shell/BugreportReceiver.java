@@ -20,6 +20,7 @@ import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.EXTRA_ORIGINAL_INTENT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
 import static com.android.shell.BugreportProgressService.getFileExtra;
+import static com.android.shell.BugreportProgressService.dumpIntent;
 
 import java.io.File;
 
@@ -51,7 +52,7 @@ public class BugreportReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "onReceive: " + intent);
+        Log.d(TAG, "onReceive(): " + dumpIntent(intent));
         // Clean up older bugreports in background
         cleanupOldFiles(this, intent, INTENT_BUGREPORT_FINISHED, MIN_KEEP_COUNT, MIN_KEEP_AGE);
 
