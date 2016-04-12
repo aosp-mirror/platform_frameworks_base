@@ -37,7 +37,7 @@ import android.provider.Settings;
 
 import com.android.systemui.statusbar.policy.BatteryController;
 
-public class BatteryMeterDrawable extends Drawable implements DemoMode,
+public class BatteryMeterDrawable extends Drawable implements
         BatteryController.BatteryStateChangeCallback {
 
     private static final float ASPECT_RATIO = 9.5f / 14.5f;
@@ -184,14 +184,12 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
         updateShowPercent();
-        if (mDemoMode) return;
         mBatteryController.addStateChangedCallback(this);
     }
 
     public void stopListening() {
         mListening = false;
         mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
-        if (mDemoMode) return;
         mBatteryController.removeStateChangedCallback(this);
     }
 
@@ -505,35 +503,6 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     @Override
     public int getOpacity() {
         return 0;
-    }
-
-    private boolean mDemoMode;
-
-    @Override
-    public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mBatteryController.removeStateChangedCallback(this);
-            mDemoMode = true;
-            if (mListening) {
-                mBatteryController.removeStateChangedCallback(this);
-            }
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            postInvalidate();
-            if (mListening) {
-                mBatteryController.addStateChangedCallback(this);
-            }
-        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
-           String level = args.getString("level");
-           String plugged = args.getString("plugged");
-           if (level != null) {
-               mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
-           }
-           if (plugged != null) {
-               mPluggedIn = Boolean.parseBoolean(plugged);
-           }
-           postInvalidate();
-        }
     }
 
     private final class SettingObserver extends ContentObserver {

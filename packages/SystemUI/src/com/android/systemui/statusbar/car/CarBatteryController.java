@@ -240,6 +240,11 @@ public class CarBatteryController extends BroadcastReceiver implements BatteryCo
     }
 
     @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        // TODO: Car demo mode.
+    }
+
+    @Override
     public boolean isPowerSave() {
         // Power save is not valid for the car, so always return false.
         return false;

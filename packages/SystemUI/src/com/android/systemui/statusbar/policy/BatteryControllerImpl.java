@@ -21,9 +21,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
+import com.android.systemui.DemoMode;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -43,6 +45,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mHandler;
+    private final Context mContext;
 
     protected int mLevel;
     protected boolean mPluggedIn;
@@ -52,17 +55,21 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mTestmode = false;
 
     public BatteryControllerImpl(Context context) {
+        mContext = context;
         mHandler = new Handler();
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
+        registerReceiver();
+        updatePowerSave();
+    }
+
+    private void registerReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         filter.addAction(ACTION_LEVEL_TEST);
-        context.registerReceiver(this, filter);
-
-        updatePowerSave();
+        mContext.registerReceiver(this, filter);
     }
 
     @Override
@@ -174,6 +181,30 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         final int N = mChangeCallbacks.size();
         for (int i = 0; i < N; i++) {
             mChangeCallbacks.get(i).onPowerSaveChanged(mPowerSave);
+        }
+    }
+
+    private boolean mDemoMode;
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+            mContext.unregisterReceiver(this);
+        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            registerReceiver();
+            updatePowerSave();
+        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
+           String level = args.getString("level");
+           String plugged = args.getString("plugged");
+           if (level != null) {
+               mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+           }
+           if (plugged != null) {
+               mPluggedIn = Boolean.parseBoolean(plugged);
+           }
+            fireBatteryLevelChanged();
         }
     }
 }

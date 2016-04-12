@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.DemoMode;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public interface BatteryController {
+public interface BatteryController extends DemoMode {
     /**
      * Prints the current state of the {@link BatteryController} to the given {@link PrintWriter}.
      */
