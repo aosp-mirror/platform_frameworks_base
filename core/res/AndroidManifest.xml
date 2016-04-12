@@ -3008,6 +3008,12 @@
     <permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES"
         android:protectionLevel="signature|setup" />
 
+    <!-- @SystemApi Allows an application to replace the app name displayed alongside notifications
+         in the N-release and later.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
+                android:protectionLevel="signature|privileged" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
