@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
+import android.icu.text.DisplayContext;
+import android.icu.text.LocaleDisplayNames;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -421,39 +424,97 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     /**
-     * @param context Context will be used for getting Locale and PackageManager.
-     * @param packageName The package name of the IME
-     * @param appInfo The application info of the IME
-     * @return a display name for this subtype. The string resource of the label (mSubtypeNameResId)
-     * may have exactly one %s in it. If there is, the %s part will be replaced with the locale's
-     * display name by the formatter. If there is not, this method returns the string specified by
-     * mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the framework to
-     * generate an appropriate display name.
+     * Returns a display name for this subtype.
+     *
+     * <p>If {@code subtypeNameResId} is specified (!= 0) text generated from that resource will
+     * be returned. The localized string resource of the label should be capitalized for inclusion
+     * in UI lists. The string resource may contain at most one {@code %s}. If present, the
+     * {@code %s} will be replaced with the display name of the subtype locale in the user's locale.
+     *
+     * <p>If {@code subtypeNameResId} is not specified (== 0) the framework returns the display name
+     * of the subtype locale, as capitalized for use in UI lists, in the user's locale.
+     *
+     * @param context {@link Context} will be used for getting {@link Locale} and
+     * {@link android.content.pm.PackageManager}.
+     * @param packageName The package name of the input method.
+     * @param appInfo The {@link ApplicationInfo} of the input method.
+     * @return a display name for this subtype.
      */
+    @NonNull
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final Locale locale = getLocaleObject();
-        final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
-            return localeStr;
+            return getLocaleDisplayName(getLocaleFromContext(context), getLocaleObject(),
+                    DisplayContext.CAPITALIZATION_FOR_UI_LIST_OR_MENU);
         }
+
         final CharSequence subtypeName = context.getPackageManager().getText(
                 packageName, mSubtypeNameResId, appInfo);
-        if (!TextUtils.isEmpty(subtypeName)) {
-            final String replacementString =
-                    containsExtraValueKey(EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME)
-                            ? getExtraValueOf(EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME)
-                            : localeStr;
-            try {
-                return String.format(
-                        subtypeName.toString(), replacementString != null ? replacementString : "");
-            } catch (IllegalFormatException e) {
-                Slog.w(TAG, "Found illegal format in subtype name("+ subtypeName + "): " + e);
-                return "";
-            }
-        } else {
-            return localeStr;
+        if (TextUtils.isEmpty(subtypeName)) {
+            return "";
         }
+        final String subtypeNameString = subtypeName.toString();
+        String replacementString;
+        if (containsExtraValueKey(EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME)) {
+            replacementString = getExtraValueOf(
+                    EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME);
+        } else {
+            final DisplayContext displayContext;
+            if (TextUtils.equals(subtypeNameString, "%s")) {
+                displayContext = DisplayContext.CAPITALIZATION_FOR_UI_LIST_OR_MENU;
+            } else if (subtypeNameString.startsWith("%s")) {
+                displayContext = DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE;
+            } else {
+                displayContext = DisplayContext.CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE;
+            }
+            replacementString = getLocaleDisplayName(getLocaleFromContext(context),
+                    getLocaleObject(), displayContext);
+        }
+        if (replacementString == null) {
+            replacementString = "";
+        }
+        try {
+            return String.format(subtypeNameString, replacementString);
+        } catch (IllegalFormatException e) {
+            Slog.w(TAG, "Found illegal format in subtype name("+ subtypeName + "): " + e);
+            return "";
+        }
+    }
+
+    @Nullable
+    private static Locale getLocaleFromContext(@Nullable final Context context) {
+        if (context == null) {
+            return null;
+        }
+        if (context.getResources() == null) {
+            return null;
+        }
+        final Configuration configuration = context.getResources().getConfiguration();
+        if (configuration == null) {
+            return null;
+        }
+        return configuration.getLocales().get(0);
+    }
+
+    /**
+     * @param displayLocale {@link Locale} to be used to display {@code localeToDisplay}
+     * @param localeToDisplay {@link Locale} to be displayed in {@code displayLocale}
+     * @param displayContext context parameter to be used to display {@code localeToDisplay} in
+     * {@code displayLocale}
+     * @return Returns the name of the {@code localeToDisplay} in the user's current locale.
+     */
+    @NonNull
+    private static String getLocaleDisplayName(
+            @Nullable Locale displayLocale, @Nullable Locale localeToDisplay,
+            final DisplayContext displayContext) {
+        if (localeToDisplay == null) {
+            return "";
+        }
+        final Locale nonNullDisplayLocale =
+                displayLocale != null ? displayLocale : Locale.getDefault();
+        return LocaleDisplayNames
+                .getInstance(nonNullDisplayLocale, displayContext)
+                .localeDisplayName(localeToDisplay);
     }
 
     private HashMap<String, String> getExtraValueHashMap() {
