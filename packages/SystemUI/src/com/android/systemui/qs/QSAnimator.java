@@ -87,6 +87,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     public void setOnKeyguard(boolean onKeyguard) {
         mOnKeyguard = onKeyguard;
+        mQuickQsPanel.setVisibility(mOnKeyguard ? View.INVISIBLE : View.VISIBLE);
         if (mOnKeyguard) {
             clearAnimationState();
         }
@@ -290,7 +291,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationStarted() {
-        mQuickQsPanel.setVisibility(View.VISIBLE);
+        mQuickQsPanel.setVisibility(mOnKeyguard ? View.INVISIBLE : View.VISIBLE);
         if (mOnFirstPage) {
             final int N = mTopFiveQs.size();
             for (int i = 0; i < N; i++) {
@@ -302,7 +303,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private void clearAnimationState() {
         final int N = mAllViews.size();
         mQuickQsPanel.setAlpha(0);
-        mQuickQsPanel.setVisibility(View.VISIBLE);
         for (int i = 0; i < N; i++) {
             View v = mAllViews.get(i);
             v.setAlpha(1);
