@@ -2206,6 +2206,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mLegacyTypeTracker.remove(nai, wasDefault);
             rematchAllNetworksAndRequests(null, 0);
+            if (wasDefault && getDefaultNetwork() == null) {
+                // Log that we lost the default network and there is no replacement.
+                final int[] transportTypes = new int[0];
+                ConnectivityServiceChangeEvent.logEvent(NETID_UNSET, nai.network.netId,
+                        transportTypes);
+            }
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
                 // (routing rules, DNS, etc).
