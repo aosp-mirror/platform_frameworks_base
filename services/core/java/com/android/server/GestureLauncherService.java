@@ -58,7 +58,6 @@ public class GestureLauncherService extends SystemService {
      * as a camera launch.
      */
     private static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
-    private static final long CAMERA_POWER_DOUBLE_TAP_MIN_TIME_MS = 120;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -260,8 +259,7 @@ public class GestureLauncherService extends SystemService {
         synchronized (this) {
             doubleTapInterval = event.getEventTime() - mLastPowerDown;
             if (mCameraDoubleTapPowerEnabled
-                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS
-                    && doubleTapInterval > CAMERA_POWER_DOUBLE_TAP_MIN_TIME_MS) {
+                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
                 launched = true;
                 intercept = interactive;
             }
