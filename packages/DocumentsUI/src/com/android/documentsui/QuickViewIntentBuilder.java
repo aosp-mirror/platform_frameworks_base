@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.ClipData;
@@ -45,6 +44,8 @@ import java.util.List;
  * Provides support for gather a list of quick-viewable files into a quick view intent.
  */
 final class QuickViewIntentBuilder {
+
+    private static final String TAG = "QuickViewIntentBuilder";
     private static final int MAX_CLIP_ITEMS = 1000;
 
     private final DocumentInfo mDocument;
@@ -127,8 +128,18 @@ final class QuickViewIntentBuilder {
         for (int i = 0; i < siblingIds.length; i++) {
             cursor = mModel.getItem(siblingIds[i]);
 
+            if (cursor == null) {
+                if (DEBUG) Log.d(TAG,
+                        "Unable to obtain cursor for sibling document, modelId: "
+                        + siblingIds[i]);
+                continue;
+            }
+
             mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
             if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+                if (DEBUG) Log.d(TAG,
+                        "Skipping directory, not supported by quick view. modelId: "
+                        + siblingIds[i]);
                 continue;
             }
 

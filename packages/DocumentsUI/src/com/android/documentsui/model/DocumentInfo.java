@@ -139,11 +139,13 @@ public class DocumentInfo implements Durable, Parcelable {
     };
 
     public static DocumentInfo fromDirectoryCursor(Cursor cursor) {
+        assert(cursor != null);
         final String authority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
         return fromCursor(cursor, authority);
     }
 
     public static DocumentInfo fromCursor(Cursor cursor, String authority) {
+        assert(cursor != null);
         final DocumentInfo info = new DocumentInfo();
         info.updateFromCursor(cursor, authority);
         return info;

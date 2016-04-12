@@ -20,6 +20,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -476,9 +477,9 @@ class FocusManager implements View.OnFocusChangeListener {
             List<String> index = new ArrayList<>(itemCount);
             for (int i = 0; i < itemCount; i++) {
                 String modelId = mAdapter.getModelId(i);
-                if (modelId != null) {
-                    String title =
-                            getCursorString(mModel.getItem(modelId), Document.COLUMN_DISPLAY_NAME);
+                Cursor cursor = mModel.getItem(modelId);
+                if (modelId != null && cursor != null) {
+                    String title = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
                     // Perform case-insensitive search.
                     index.add(title.toLowerCase());
                 } else {
