@@ -3094,14 +3094,8 @@ public abstract class BatteryStats implements Parcelable {
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
                     u.getWifiControllerActivity(), which);
 
-            // Dump Bluetooth scan data, per UID.
-            final long bleScanTimeUs = u.getBluetoothScanTimer().getTotalTimeLocked(
+            dumpTimer(pw, uid, category, BLUETOOTH_MISC_DATA, u.getBluetoothScanTimer(),
                     rawRealtime, which);
-            final int bleScanCount = u.getBluetoothScanTimer().getCountLocked(which);
-            if (bleScanTimeUs != 0 || bleScanCount != 0) {
-                dumpLine(pw, uid, category, BLUETOOTH_MISC_DATA,
-                        bleScanTimeUs / 1000, bleScanCount);
-            }
 
             dumpControllerActivityLine(pw, uid, category, BLUETOOTH_CONTROLLER_DATA,
                     u.getBluetoothControllerActivity(), which);
