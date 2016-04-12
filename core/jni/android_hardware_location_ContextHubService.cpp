@@ -370,10 +370,6 @@ int handle_os_message(uint32_t msgType, uint32_t hubHandle,
             retVal = 0;
             break;
 
-        case CONTEXT_HUB_LOAD_OS:
-            retVal = 0;
-            break;
-
         default:
             retVal = -1;
             break;
