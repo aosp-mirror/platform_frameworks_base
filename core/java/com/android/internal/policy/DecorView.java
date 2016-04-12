@@ -210,7 +210,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Drawable mResizingBackgroundDrawable;
     private Drawable mCaptionBackgroundDrawable;
     private Drawable mUserCaptionBackgroundDrawable;
-    private Drawable mOriginalBackgroundDrawable;
 
     private float mAvailableWidth;
 
@@ -891,11 +890,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 mBackgroundPadding.setEmpty();
             }
             drawableChanged();
-
-            // Make sure we don't reset to the old drawable when finishing resizing.
-            if (mResizeMode != RESIZE_MODE_INVALID) {
-                mOriginalBackgroundDrawable = null;
-            }
         }
     }
 
@@ -1960,9 +1954,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             updateElevation();
 
             updateColorViews(null /* insets */, false);
-
-            mOriginalBackgroundDrawable = getBackground();
-            setBackgroundDrawable(null);
         }
         mResizeMode = resizeMode;
         getViewRootImpl().requestInvalidateRootRenderNode();
@@ -1974,10 +1965,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         updateColorViews(null /* insets */, false);
         mResizeMode = RESIZE_MODE_INVALID;
         getViewRootImpl().requestInvalidateRootRenderNode();
-        if (mOriginalBackgroundDrawable != null) {
-            setBackgroundDrawable(mOriginalBackgroundDrawable);
-            mOriginalBackgroundDrawable = null;
-        }
     }
 
     @Override
