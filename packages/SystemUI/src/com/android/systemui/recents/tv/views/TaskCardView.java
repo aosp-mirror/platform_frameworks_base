@@ -95,7 +95,38 @@ public class TaskCardView extends LinearLayout {
         return r;
     }
 
-    public static Rect getStartingCardThumbnailRect(Context context) {
+    public static Rect getStartingCardThumbnailRect(Context context, int numberOfTasks) {
+        if(numberOfTasks > 1) {
+            return getStartingCardThumbnailRectForStartPosition(context);
+        } else {
+            return getStartingCardThumbnailRectForFocusedPosition(context);
+        }
+    }
+
+    private static Rect getStartingCardThumbnailRectForStartPosition(Context context) {
+        Resources res = context.getResources();
+
+        int width = res.getDimensionPixelOffset(R.dimen.recents_tv_card_width);
+        int totalSpacing = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_card_spacing) * 2
+                + res.getDimensionPixelOffset(R.dimen.recents_tv_gird_focused_card_delta);
+        int height = res.getDimensionPixelOffset(R.dimen.recents_tv_screenshot_height);
+        int topMargin = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_row_top_margin);
+        int headerHeight = res.getDimensionPixelOffset(R.dimen.recents_tv_card_extra_badge_size) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_icon_padding_bottom);
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenWidth = size.x;
+
+        return new Rect(screenWidth / 2 + width / 2 + totalSpacing,
+                topMargin + headerHeight,
+                screenWidth / 2 + width / 2 + totalSpacing + width,
+                topMargin + headerHeight + height);
+    }
+
+    private static Rect getStartingCardThumbnailRectForFocusedPosition(Context context) {
         Resources res = context.getResources();
 
         TypedValue out = new TypedValue();
@@ -127,7 +158,6 @@ public class TaskCardView extends LinearLayout {
         Point size = new Point();
         display.getSize(size);
         int screenWidth = size.x;
-        int screenHeight = size.y;
 
         return new Rect(screenWidth / 2 - width / 2 - widthDelta / 2,
                 topMargin - totalHeightDelta / 2 + (int) (headerHeight * scale),
