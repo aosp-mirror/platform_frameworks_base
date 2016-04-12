@@ -472,6 +472,8 @@ from {@link android.content.pm.ApplicationInfo#flags ApplicationInfo.flags} or
 {@link android.os.StrictMode.VmPolicy.Builder#detectCleartextNetwork() StrictMode.VmPolicy.Builder.detectCleartextNetwork()}.
 
 <p>This attribute was added in API level 23.</p>
+
+<p>This flag is ignored on Android N and above if an Android Network Security Config is present.</p>
 </dd>
 
 <dt><a name="vmSafeMode"></a>{@code android:vmSafeMode}</dt>
