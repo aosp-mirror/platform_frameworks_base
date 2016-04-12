@@ -760,7 +760,7 @@ public class ResolverActivity extends Activity {
                 } else {
                     try {
                         AppGlobals.getPackageManager().setLastChosenActivity(intent,
-                                intent.resolveTypeIfNeeded(getContentResolver()),
+                                intent.resolveType(getContentResolver()),
                                 PackageManager.MATCH_DEFAULT_ONLY,
                                 filter, bestMatch, intent.getComponent());
                     } catch (RemoteException re) {
