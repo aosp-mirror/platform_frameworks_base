@@ -38,6 +38,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
@@ -58,8 +59,10 @@ import com.android.systemui.recents.events.component.RecentsVisibilityChangedEve
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.events.ui.HideIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
+import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
@@ -68,12 +71,12 @@ import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.AnimationProps;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -90,6 +93,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private final static boolean DEBUG = false;
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
+    public final static int INCOMPATIBLE_APP_ALPHA_DURATION = 150;
 
     private RecentsPackageMonitor mPackageMonitor;
     private long mLastTabKeyEventTime;
@@ -101,6 +105,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     // Top level views
     private RecentsView mRecentsView;
     private SystemBarScrimViews mScrimViews;
+    private View mIncompatibleAppOverlay;
 
     // Runnables to finish the Recents activity
     private Intent mHomeIntent;
@@ -672,6 +677,30 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Keep track of app-info invocations
         MetricsLogger.count(this, "overview_app_info", 1);
+    }
+
+    public final void onBusEvent(ShowIncompatibleAppOverlayEvent event) {
+        if (mIncompatibleAppOverlay == null) {
+            mIncompatibleAppOverlay = Utilities.findViewStubById(this,
+                    R.id.incompatible_app_overlay_stub).inflate();
+            mIncompatibleAppOverlay.setWillNotDraw(false);
+            mIncompatibleAppOverlay.setVisibility(View.VISIBLE);
+        }
+        mIncompatibleAppOverlay.animate()
+                .alpha(1f)
+                .setDuration(INCOMPATIBLE_APP_ALPHA_DURATION)
+                .setInterpolator(Interpolators.ALPHA_IN)
+                .start();
+    }
+
+    public final void onBusEvent(HideIncompatibleAppOverlayEvent event) {
+        if (mIncompatibleAppOverlay != null) {
+            mIncompatibleAppOverlay.animate()
+                    .alpha(0f)
+                    .setDuration(INCOMPATIBLE_APP_ALPHA_DURATION)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .start();
+        }
     }
 
     public final void onBusEvent(DeleteTaskDataEvent event) {
