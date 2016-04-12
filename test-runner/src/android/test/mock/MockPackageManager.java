@@ -691,6 +691,15 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void deleteApplicationCacheFilesAsUser(String packageName, int userId,
+            IPackageDataObserver observer) {
+        throw new UnsupportedOperationException();
+    }
+
     /** {@hide} */
     @Override
     public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
