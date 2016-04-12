@@ -68,11 +68,8 @@ public class SparseMappingTable {
      * A table of data as stored in a SparseMappingTable.
      */
     public static class Table {
-        // When mSequence is this this our data better be empty
-        private static final int UNINITIALIZED_SEQUENCE = -1;
-
         private SparseMappingTable mParent;
-        private int mSequence = UNINITIALIZED_SEQUENCE;
+        private int mSequence = 1;
         private int[] mTable;
         private int mSize;
 
@@ -119,12 +116,6 @@ public class SparseMappingTable {
          *         but should be considered opaque to the caller.
          */
         public int getOrAddKey(byte id, int count) {
-            // This is the only place we add data to mParent.mLongs, so this is the time
-            // to update our sequence to match there.
-            if (mSequence == UNINITIALIZED_SEQUENCE) {
-                mSequence = mParent.mSequence;
-            }
-
             assertConsistency();
 
             final int idx = binarySearch(id);
@@ -311,7 +302,7 @@ public class SparseMappingTable {
             // Reset our sequence number.  This will make all read/write calls
             // start to fail, and then when we re-allocate it will be re-synced
             // to that of mParent.
-            mSequence = UNINITIALIZED_SEQUENCE;
+            mSequence = mParent.mSequence;
         }
 
         /**
@@ -377,27 +368,19 @@ public class SparseMappingTable {
             //   Original bug: b/27045736
             //   New bug: b/27960286
             if (false) {
-                // Assert that our sequence number has been initialized. If it hasn't
-                // that means someone tried to read or write data without allocating it
-                // since we were created or reset.
-                if (mSequence == UNINITIALIZED_SEQUENCE) {
-                    logOrThrow("mSequence == UNINITIALIZED_SEQUENCE in"
-                            + " SparseMappingTable.Table.  -- "
-                            + dumpInternalState());
-                    return;
-                }
-
                 // Assert that our sequence number matches mParent's.  If it isn't that means
-                // we have been reset and our
+                // we have been reset and our.  If our sequence is UNITIALIZED_SEQUENCE, then 
+                // it's possible that everything is working fine and we just haven't been
+                // written to since the last resetTable().
                 if (mSequence != mParent.mSequence) {
                     if (mSequence < mParent.mSequence) {
-                        logOrThrow("Sequence mismatch. SparseMappingTable.resetTable()"
+                        logOrThrow("Sequence mismatch. SparseMappingTable.reset()"
                                 + " called but not Table.resetTable() -- "
                                 + dumpInternalState());
                         return;
                     } else if (mSequence > mParent.mSequence) {
                         logOrThrow("Sequence mismatch. Table.resetTable()"
-                                + " called but not SparseMappingTable.resetTable() -- "
+                                + " called but not SparseMappingTable.reset() -- "
                                 + dumpInternalState());
                         return;
                     }
@@ -494,6 +477,10 @@ public class SparseMappingTable {
         }
     }
 
+    public SparseMappingTable() {
+        mLongs.add(new long[ARRAY_SIZE]);
+    }
+
     /**
      * Wipe out all the data.
      */
@@ -545,6 +532,35 @@ public class SparseMappingTable {
     }
 
     /**
+     * Return a string for debugging.
+     */
+    public String dumpInternalState(boolean includeData) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SparseMappingTable{");
+        sb.append("mSequence=");
+        sb.append(mSequence);
+        sb.append(" mNextIndex=");
+        sb.append(mNextIndex);
+        sb.append(" mLongs.size=");
+        final int N = mLongs.size();
+        sb.append(N);
+        sb.append("\n");
+        if (includeData) {
+            for (int i=0; i<N; i++) {
+                final long[] array = mLongs.get(i);
+                for (int j=0; j<array.length; j++) {
+                    if (i == N-1 && j == mNextIndex) {
+                        break;
+                    }
+                    sb.append(String.format(" %4d %d 0x%016x %-19d\n", i, j, array[j], array[j]));
+                }
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
      * Write the long array to the parcel in a compacted form.  Does not allow negative
      * values in the array.
      */
@@ -559,7 +575,7 @@ public class SparseMappingTable {
                 out.writeInt((int)val);
             } else {
                 int top = ~((int)((val>>32)&0x7fffffff));
-                int bottom = (int)(val&0xfffffff);
+                int bottom = (int)(val&0x0ffffffffL);
                 out.writeInt(top);
                 out.writeInt(bottom);
             }
