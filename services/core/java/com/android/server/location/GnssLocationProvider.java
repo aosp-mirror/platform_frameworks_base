@@ -40,7 +40,6 @@ import android.location.IGnssStatusListener;
 import android.location.IGnssStatusProvider;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
-import android.location.GnssNavigationMessageEvent;
 import android.location.IGpsGeofenceHardware;
 import android.location.ILocationManager;
 import android.location.INetInitiatedListener;
@@ -1665,16 +1664,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
      */
     private void reportNavigationMessage(GnssNavigationMessage event) {
         mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
-    }
-
-    /**
-     * called from native code - GPS navigation message callback
-     */
-    private void reportNavigationMessage(GnssNavigationMessageEvent event) {
-        if (event != null) {
-            mGnssNavigationMessageProvider
-                    .onNavigationMessageAvailable(event.getNavigationMessage());
-        }
     }
 
     /**
