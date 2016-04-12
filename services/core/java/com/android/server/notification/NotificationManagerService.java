@@ -1496,7 +1496,7 @@ public class NotificationManagerService extends SystemService {
                     final StatusBarNotification sbn = mNotificationList.get(i).sbn;
                     if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
                             && (sbn.getNotification().flags
-                            & Notification.FLAG_AUTOGROUP_SUMMARY) != 0) {
+                            & Notification.FLAG_AUTOGROUP_SUMMARY) == 0) {
                         // We could pass back a cloneLight() but clients might get confused and
                         // try to send this thing back to notify() again, which would not work
                         // very well.
