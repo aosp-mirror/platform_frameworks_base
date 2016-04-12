@@ -129,12 +129,15 @@ public class BoundsAnimationController {
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mReplacement=" + mReplacement);
-            if (animatingToLargerSize()) {
-                mTarget.setPinnedStackSize(mFrom, mTo);
-            }
-
             if (!mReplacement) {
                 mTarget.onAnimationStart();
+            }
+
+            // Ensure that we have prepared the target for animation before
+            // we trigger any size changes, so it can swap surfaces
+            // in to appropriate modes, or do as it wishes otherwise.
+            if (animatingToLargerSize()) {
+                mTarget.setPinnedStackSize(mFrom, mTo);
             }
         }
 

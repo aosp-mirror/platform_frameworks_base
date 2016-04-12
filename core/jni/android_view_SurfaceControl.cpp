@@ -597,6 +597,13 @@ static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong nativeO
     ctrl->deferTransactionUntil(handle, frameNumber);
 }
 
+static void nativeSetOverrideScalingMode(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jint scalingMode) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+
+    ctrl->setOverrideScalingMode(scalingMode);
+}
+
 static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
 
@@ -676,6 +683,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeDeferTransactionUntil", "(JLandroid/os/IBinder;J)V",
             (void*)nativeDeferTransactionUntil },
+    {"nativeSetOverrideScalingMode", "(JI)V",
+            (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle }
 };

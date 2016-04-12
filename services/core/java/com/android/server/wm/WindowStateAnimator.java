@@ -562,6 +562,7 @@ class WindowStateAnimator {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
                     + drawStateToString());
         }
+
         if (mWin.mAppToken != null && mWin.mAppToken.mAnimatingWithSavedSurface) {
             // App has drawn something to its windows, we're no longer animating with
             // the saved surfaces. If the user exits now, we only want to save again
