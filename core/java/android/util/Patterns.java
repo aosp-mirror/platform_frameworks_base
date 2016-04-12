@@ -253,7 +253,7 @@ public class Patterns {
     /**
      * Valid UCS characters defined in RFC 3987. Excludes space characters.
      */
-    private static final String UCS_CHAR =
+    private static final String UCS_CHAR = "[" +
             "\u00A0-\uD7FF" +
             "\uF900-\uFDCF" +
             "\uFDF0-\uFFEF" +
@@ -271,7 +271,7 @@ public class Patterns {
             "\uDAC0\uDC00-\uDAFF\uDFFD" +
             "\uDB00\uDC00-\uDB3F\uDFFD" +
             "\uDB44\uDC00-\uDB7F\uDFFD" +
-            "&&[^\u00A0[\u2000-\u200A]\u2028\u2029\u202F\u3000]";
+            "&&[^\u00A0[\u2000-\u200A]\u2028\u2029\u202F\u3000]]";
 
     /**
      * Valid characters for IRI label defined in RFC 3987.
