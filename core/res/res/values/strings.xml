@@ -245,16 +245,19 @@
 
     <!-- Displayed when WFC registration fails -->
     <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
-    <!-- WFC Operator Error Codes -->
-    <string-array name="wfcOperatorErrorCodes" translatable="false" />
     <!-- WFC Operator Error Messages showed as alerts -->
-    <string-array name="wfcOperatorErrorAlertMessages" />
+    <string-array name="wfcOperatorErrorAlertMessages">
+        <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings.</item>
+    </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
-    <string-array name="wfcOperatorErrorNotificationMessages" />
+    <string-array name="wfcOperatorErrorNotificationMessages">
+        <item>Register with your carrier</item>
+    </string-array>
     <!-- Template for showing cellular network operator name while WFC is active -->
-    <string name="wfcSpnFormat">%s</string>
-    <!-- Template for showing operator name for data connection while WFC is active -->
-    <string name="wfcDataSpnFormat">%s</string>
+    <string-array name="wfcSpnFormats">
+        <item>%s</item>
+        <item>%s Wi-Fi Calling</item>
+    </string-array>
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
