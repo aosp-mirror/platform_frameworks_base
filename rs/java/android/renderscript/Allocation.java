@@ -58,6 +58,7 @@ public class Allocation extends BaseObj {
     private static final int MAX_NUMBER_IO_INPUT_ALLOC = 16;
 
     Type mType;
+    boolean mOwningType = false;
     Bitmap mBitmap;
     int mUsage;
     Allocation mAdaptedAllocation;
@@ -383,13 +384,16 @@ public class Allocation extends BaseObj {
         guard.open("destroy");
     }
 
-    Allocation(long id, RenderScript rs, Type t, int usage, MipmapControl mips) {
+    Allocation(long id, RenderScript rs, Type t, boolean owningType, int usage, MipmapControl mips) {
         this(id, rs, t, usage);
+        mOwningType = owningType;
         mMipmapControl = mips;
     }
 
     protected void finalize() throws Throwable {
         RenderScript.registerNativeFree.invoke(RenderScript.sRuntime, mSize);
+        // Set mType null to avoid double-destroying it in case its finalizer races ahead
+        mType = null;
         super.finalize();
     }
 
@@ -1578,6 +1582,9 @@ public class Allocation extends BaseObj {
         mRS.finish();  // Necessary because resize is fifoed and update is async.
 
         long typeID = mRS.nAllocationGetType(getID(mRS));
+        // Sets zero the mID so that the finalizer of the old mType value won't
+        // destroy the native object that is being reused.
+        mType.setID(0);
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
         updateCacheInfo(mType);
@@ -1921,7 +1928,7 @@ public class Allocation extends BaseObj {
             if (id == 0) {
                 throw new RSRuntimeException("Allocation creation failed.");
             }
-            return new Allocation(id, rs, type, usage, mips);
+            return new Allocation(id, rs, type, false, usage, mips);
         } finally {
             Trace.traceEnd(RenderScript.TRACE_TAG);
         }
@@ -1979,7 +1986,7 @@ public class Allocation extends BaseObj {
             if (id == 0) {
                 throw new RSRuntimeException("Allocation creation failed.");
             }
-            return new Allocation(id, rs, t, usage, MipmapControl.MIPMAP_NONE);
+            return new Allocation(id, rs, t, true, usage, MipmapControl.MIPMAP_NONE);
         } finally {
             Trace.traceEnd(RenderScript.TRACE_TAG);
         }
@@ -2068,7 +2075,7 @@ public class Allocation extends BaseObj {
                 }
 
                 // keep a reference to the Bitmap around to prevent GC
-                Allocation alloc = new Allocation(id, rs, t, usage, mips);
+                Allocation alloc = new Allocation(id, rs, t, true, usage, mips);
                 alloc.setBitmap(b);
                 return alloc;
             }
@@ -2078,7 +2085,7 @@ public class Allocation extends BaseObj {
             if (id == 0) {
                 throw new RSRuntimeException("Load failed.");
             }
-            return new Allocation(id, rs, t, usage, mips);
+            return new Allocation(id, rs, t, true, usage, mips);
         } finally {
             Trace.traceEnd(RenderScript.TRACE_TAG);
         }
@@ -2152,7 +2159,7 @@ public class Allocation extends BaseObj {
             }
 
             for (int i=1; i<numAlloc; i++) {
-                mAllocationArray[i] = createFromAllcation(rs, mAllocationArray[0]);
+                mAllocationArray[i] = createFromAllocation(rs, mAllocationArray[0]);
             }
             return mAllocationArray;
         } finally {
@@ -2171,7 +2178,7 @@ public class Allocation extends BaseObj {
      * @param alloc RenderScript Allocation describing data layout.
      * @return Allocation sharing the same data structure.
      */
-    static Allocation createFromAllcation(RenderScript rs, Allocation alloc) {
+    static Allocation createFromAllocation(RenderScript rs, Allocation alloc) {
         try {
             Trace.traceBegin(RenderScript.TRACE_TAG, "createFromAllcation");
             rs.validate();
@@ -2186,7 +2193,7 @@ public class Allocation extends BaseObj {
             if (id == 0) {
                 throw new RSRuntimeException("Allocation creation failed.");
             }
-            Allocation outAlloc = new Allocation(id, rs, type, usage, mips);
+            Allocation outAlloc = new Allocation(id, rs, type, false, usage, mips);
             if ((usage & USAGE_IO_INPUT) != 0) {
                 outAlloc.shareBufferQueue(alloc);
             }
@@ -2364,7 +2371,7 @@ public class Allocation extends BaseObj {
         if(id == 0) {
             throw new RSRuntimeException("Load failed for bitmap " + b + " element " + e);
         }
-        return new Allocation(id, rs, t, usage, mips);
+        return new Allocation(id, rs, t, true, usage, mips);
     }
 
     /**
@@ -2609,6 +2616,13 @@ public class Allocation extends BaseObj {
         if((mUsage & USAGE_IO_OUTPUT) != 0) {
             setSurface(null);
         }
+
+        if (mType != null && mOwningType) {
+            mType.destroy();
+            mType = null;
+        }
+
         super.destroy();
     }
+
 }
