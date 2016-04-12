@@ -1581,6 +1581,8 @@ public final class Settings {
     public static final class System extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
+        private static final float DEFAULT_FONT_SCALE = 1.0f;
+
         /** @hide */
         public static interface Validator {
             public boolean validate(String value);
@@ -2089,9 +2091,9 @@ public final class Settings {
         public static void getConfigurationForUser(ContentResolver cr, Configuration outConfig,
                 int userHandle) {
             outConfig.fontScale = Settings.System.getFloatForUser(
-                cr, FONT_SCALE, outConfig.fontScale, userHandle);
+                    cr, FONT_SCALE, DEFAULT_FONT_SCALE, userHandle);
             if (outConfig.fontScale < 0) {
-                outConfig.fontScale = 1;
+                outConfig.fontScale = DEFAULT_FONT_SCALE;
             }
             outConfig.setLocales(LocaleList.forLanguageTags(
                     Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle)));
