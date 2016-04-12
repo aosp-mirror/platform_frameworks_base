@@ -823,7 +823,7 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                 mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                 mSystemServiceManager.startService(
-                            "com.android.server.wifi.WifiScanningService");
+                            "com.android.server.wifi.scanner.WifiScanningService");
 
                 if (!disableRtt) {
                     mSystemServiceManager.startService("com.android.server.wifi.RttService");
