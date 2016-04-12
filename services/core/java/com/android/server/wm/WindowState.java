@@ -1390,6 +1390,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return configChanged;
     }
 
+    boolean isAdjustedForMinimizedDock() {
+        return mAppToken != null && mAppToken.mTask != null
+                && mAppToken.mTask.mStack.isAdjustedForMinimizedDock();
+    }
+
     void removeLocked() {
         disposeInputChannel();
 
@@ -1776,7 +1781,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE)
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
-                && (mAppToken == null || mAppToken.windowsAreFocusable());
+                && (mAppToken == null || mAppToken.windowsAreFocusable())
+                && !isAdjustedForMinimizedDock();
     }
 
     @Override
