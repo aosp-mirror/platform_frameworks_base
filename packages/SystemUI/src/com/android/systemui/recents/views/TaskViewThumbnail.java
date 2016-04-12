@@ -143,43 +143,28 @@ public class TaskViewThumbnail extends View {
 
         int viewWidth = mTaskViewRect.width();
         int viewHeight = mTaskViewRect.height();
-        if (mBitmapShader != null) {
-
-            // We are drawing the thumbnail in the same orientation, so just fit the width
-            int thumbnailWidth = (int) (mThumbnailRect.width() * mThumbnailScale);
-            int thumbnailHeight = (int) (mThumbnailRect.height() * mThumbnailScale);
-
-            if (thumbnailWidth >= viewWidth && thumbnailHeight >= viewHeight) {
-                // Thumbnail fills the full task view bounds, so just draw it
-                canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
-                        mDrawPaint);
-            } else {
-                // Thumbnail does not fill the full task view bounds, so just draw it and fill the
-                // empty areas with the background color
-                int count = canvas.save();
-
-                // Since we only want the top corners to be rounded, draw slightly beyond the
-                // thumbnail height, but clip to the thumbnail height
-                canvas.clipRect(0, 0, thumbnailWidth, thumbnailHeight, Region.Op.REPLACE);
-                canvas.drawRoundRect(0, 0,
-                        thumbnailWidth + (thumbnailWidth < viewWidth ? mCornerRadius : 0),
-                        thumbnailHeight + (thumbnailHeight < viewHeight ? mCornerRadius : 0),
-                        mCornerRadius, mCornerRadius, mDrawPaint);
-
-                // In the remaining space, draw the background color
-                if (thumbnailWidth < viewWidth) {
-                    canvas.clipRect(thumbnailWidth, 0, viewWidth, viewHeight, Region.Op.REPLACE);
-                    canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), 0,
-                            viewWidth, viewHeight, mCornerRadius, mCornerRadius, mBgFillPaint);
-                }
-                if (thumbnailWidth > 0 && thumbnailHeight < viewHeight) {
-                    canvas.clipRect(0, thumbnailHeight, viewWidth, viewHeight, Region.Op.REPLACE);
-                    canvas.drawRoundRect(0, Math.max(0, thumbnailHeight - mCornerRadius),
-                            viewWidth, viewHeight, mCornerRadius, mCornerRadius, mBgFillPaint);
-                }
-
-                canvas.restoreToCount(count);
+        int thumbnailWidth = Math.min(viewWidth,
+                (int) (mThumbnailRect.width() * mThumbnailScale));
+        int thumbnailHeight = Math.min(viewHeight,
+                (int) (mThumbnailRect.height() * mThumbnailScale));
+        if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+            // Draw the background, there will be some small overdraw with the thumbnail
+            if (thumbnailWidth < viewWidth) {
+                // Portrait thumbnail on a landscape task view
+                canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), 0,
+                        viewWidth, viewHeight,
+                        mCornerRadius, mCornerRadius, mBgFillPaint);
             }
+            if (thumbnailHeight < viewHeight) {
+                // Landscape thumbnail on a portrait task view
+                canvas.drawRoundRect(0, Math.max(0, thumbnailHeight - mCornerRadius),
+                        viewWidth, viewHeight,
+                        mCornerRadius, mCornerRadius, mBgFillPaint);
+            }
+
+            // Draw the thumbnail
+            canvas.drawRoundRect(0, 0, thumbnailWidth, thumbnailHeight,
+                    mCornerRadius, mCornerRadius, mDrawPaint);
         } else {
             canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
                     mBgFillPaint);
