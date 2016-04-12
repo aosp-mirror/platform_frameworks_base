@@ -3591,11 +3591,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             dispatchDemoCommandToView(command, args, R.id.clock);
         }
         if (modeChange || command.equals(COMMAND_BATTERY)) {
-            dispatchDemoCommandToView(command, args, R.id.battery);
+            mBatteryController.dispatchDemoCommand(command, args);
         }
         if (modeChange || command.equals(COMMAND_STATUS)) {
             mIconController.dispatchDemoCommand(command, args);
-
         }
         if (mNetworkController != null && (modeChange || command.equals(COMMAND_NETWORK))) {
             mNetworkController.dispatchDemoCommand(command, args);
