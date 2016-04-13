@@ -16,6 +16,9 @@
 
 package android.animation;
 
+import android.app.ActivityThread;
+import android.app.Application;
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -133,10 +136,25 @@ public final class AnimatorSet extends Animator {
     // The total duration of finishing all the Animators in the set.
     private long mTotalDuration = 0;
 
+    // In pre-N releases, calling end() before start() on an animator set is no-op. But that is not
+    // consistent with the behavior for other animator types. In order to keep the behavior
+    // consistent within Animation framework, when end() is called without start(), we will start
+    // the animator set and immediately end it for N and forward.
+    private final boolean mShouldIgnoreEndWithoutStart;
+
     public AnimatorSet() {
         super();
         mNodeMap.put(mDelayAnim, mRootNode);
         mNodes.add(mRootNode);
+        // Set the flag to ignore calling end() without start() for pre-N releases
+        Application app = ActivityThread.currentApplication();
+        if (app == null || app.getApplicationInfo() == null) {
+            mShouldIgnoreEndWithoutStart = true;
+        } else if (app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+            mShouldIgnoreEndWithoutStart = true;
+        } else {
+            mShouldIgnoreEndWithoutStart = false;
+        }
     }
 
     /**
@@ -365,6 +383,9 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public void end() {
+        if (mShouldIgnoreEndWithoutStart && !isStarted()) {
+            return;
+        }
         mTerminated = true;
         if (isStarted()) {
             endRemainingAnimations();
