@@ -613,22 +613,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 }
             }
+            for (int j = 0; j < widgetCount; j++) {
+                Widget widget = provider.widgets.get(j);
+                if (targetWidget != null && targetWidget != widget) continue;
+                PendingIntent intent = null;
+                if (onClickIntent != null) {
+                    intent = PendingIntent.getActivity(mContext, widget.appWidgetId,
+                            onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                }
+                RemoteViews views = createMaskedWidgetRemoteViews(iconBitmap, showBadge, intent);
+                if (widget.replaceWithMaskedViewsLocked(views)) {
+                    scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
+                }
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-
-        for (int j = 0; j < widgetCount; j++) {
-            Widget widget = provider.widgets.get(j);
-            if (targetWidget != null && targetWidget != widget) continue;
-            PendingIntent intent = null;
-            if (onClickIntent != null) {
-                intent = PendingIntent.getActivity(mContext, widget.appWidgetId,
-                        onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
-            RemoteViews views = createMaskedWidgetRemoteViews(iconBitmap, showBadge, intent);
-            if (widget.replaceWithMaskedViewsLocked(views)) {
-                scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
-            }
         }
     }
 
@@ -1062,8 +1061,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             widget.provider = provider;
             widget.options = (options != null) ? cloneIfLocalBinder(options) : new Bundle();
 
-            onWidgetProviderAddedOrChangedLocked(widget);
-
             // We need to provide a default value for the widget category if it is not specified
             if (!widget.options.containsKey(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)) {
                 widget.options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
@@ -1071,6 +1068,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             provider.widgets.add(widget);
+
+            onWidgetProviderAddedOrChangedLocked(widget);
 
             final int widgetCount = provider.widgets.size();
             if (widgetCount == 1) {
