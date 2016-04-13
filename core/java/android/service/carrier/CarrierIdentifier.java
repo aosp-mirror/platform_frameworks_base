@@ -105,6 +105,18 @@ public class CarrierIdentifier implements Parcelable {
         out.writeString(mGid2);
     }
 
+    @Override
+    public String toString() {
+      return "CarrierIdentifier{"
+          + "mcc=" + mMcc
+          + ",mnc=" + mMnc
+          + ",spn=" + mSpn
+          + ",imsi=" + mImsi
+          + ",gid1=" + mGid1
+          + ",gid2=" + mGid2
+          + "}";
+    }
+
     /** @hide */
     public void readFromParcel(Parcel in) {
         mMcc = in.readString();
