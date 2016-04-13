@@ -283,7 +283,7 @@ public final class MediaStore {
      *
      * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M} and above
      * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
-     * is not granted, then atempting to use this action will result in a {@link
+     * is not granted, then attempting to use this action will result in a {@link
      * java.lang.SecurityException}.
      *
      *  @see #EXTRA_OUTPUT
