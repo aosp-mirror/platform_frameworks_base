@@ -31,4 +31,8 @@
         <item name="android:layout_height">96dp</item>
     </style>
 
+    <style name="DockedDividerMinimizedShadow">
+        <item name="android:layout_width">8dp</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
 </resources>

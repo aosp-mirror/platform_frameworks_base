@@ -308,6 +308,11 @@
         <item name="android:layout_gravity">center_vertical</item>
     </style>
 
+    <style name="DockedDividerMinimizedShadow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">8dp</item>
+    </style>
+
     <style name="DockedDividerHandle">
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:layout_width">96dp</item>

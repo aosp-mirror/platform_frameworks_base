@@ -270,6 +270,19 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.finishBroadcast();
     }
 
+    void notifyDockSideChanged(int newDockSide) {
+        final int size = mDockedStackListeners.beginBroadcast();
+        for (int i = 0; i < size; ++i) {
+            final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
+            try {
+                listener.onDockSideChanged(newDockSide);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering dock side changed event.", e);
+            }
+        }
+        mDockedStackListeners.finishBroadcast();
+    }
+
     void registerDockedStackListener(IDockedStackListener listener) {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());

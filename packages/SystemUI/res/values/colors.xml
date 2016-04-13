@@ -151,7 +151,9 @@
 
     <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
-    <drawable name="forced_resizable_background">#40000000</drawable>
+    <drawable name="forced_resizable_background">#59000000</drawable>
+    <color name="minimize_dock_shadow_start">#60000000</color>
+    <color name="minimize_dock_shadow_end">#00000000</color>
 
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
     <color name="remote_input_hint">#99ffffff</color>
