@@ -2315,24 +2315,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             // For security and version matching reason, only consider
             // overlay packages if they reside in VENDOR_OVERLAY_DIR.
             File vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
-            scanDirTracedLI(vendorOverlayDir, PackageParser.PARSE_IS_SYSTEM
-                    | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
+            scanDirTracedLI(vendorOverlayDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                    | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
 
             // Find base frameworks (resource packages without code).
-            scanDirTracedLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(frameworkDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED,
                     scanFlags | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            scanDirTracedLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(privilegedAppDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_IS_PRIVILEGED, scanFlags, 0);
 
             // Collect ordinary system packages.
             final File systemAppDir = new File(Environment.getRootDirectory(), "app");
-            scanDirTracedLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(systemAppDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Collect all vendor packages.
@@ -2342,12 +2347,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (IOException e) {
                 // failed to look up canonical path, continue with original one
             }
-            scanDirTracedLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(vendorAppDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Collect all OEM packages.
             final File oemAppDir = new File(Environment.getOemDirectory(), "app");
-            scanDirTracedLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirTracedLI(oemAppDir, mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
             // Prune any system packages that no longer exist.
@@ -2428,10 +2435,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         SystemClock.uptimeMillis());
                 scanDirTracedLI(mAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
-                scanDirTracedLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
+                scanDirTracedLI(mDrmAppPrivateInstallDir, mDefParseFlags
+                        | PackageParser.PARSE_FORWARD_LOCK,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
-                scanDirLI(mEphemeralInstallDir, PackageParser.PARSE_IS_EPHEMERAL,
+                scanDirLI(mEphemeralInstallDir, mDefParseFlags
+                        | PackageParser.PARSE_IS_EPHEMERAL,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 /**
@@ -2476,7 +2485,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         logCriticalInfo(Log.WARN, "Expected better " + packageName
                                 + " but never showed up; reverting to system");
 
-                        final int reparseFlags;
+                        int reparseFlags = mDefParseFlags;
                         if (FileUtils.contains(privilegedAppDir, scanFile)) {
                             reparseFlags = PackageParser.PARSE_IS_SYSTEM
                                     | PackageParser.PARSE_IS_SYSTEM_DIR
@@ -6501,7 +6510,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private void scanDirTracedLI(File dir, int parseFlags, int scanFlags, long currentTime) {
+    private void scanDirTracedLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir");
         try {
             scanDirLI(dir, parseFlags, scanFlags, currentTime);
@@ -6510,7 +6519,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void scanDirLI(File dir, int parseFlags, int scanFlags, long currentTime) {
+    private void scanDirLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
         final File[] files = dir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + dir);
@@ -6576,7 +6585,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg, File srcFile,
-            int parseFlags) throws PackageManagerException {
+            final int policyFlags) throws PackageManagerException {
         if (ps != null
                 && ps.codePath.equals(srcFile)
                 && ps.timeStamp == srcFile.lastModified()
@@ -6605,7 +6614,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         try {
-            PackageParser.collectCertificates(pkg, parseFlags);
+            PackageParser.collectCertificates(pkg, policyFlags);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         }
@@ -6615,8 +6624,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
-    private PackageParser.Package scanPackageTracedLI(File scanFile, int parseFlags, int scanFlags,
-            long currentTime, UserHandle user) throws PackageManagerException {
+    private PackageParser.Package scanPackageTracedLI(File scanFile, final int parseFlags,
+            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
         try {
             return scanPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
@@ -6632,7 +6641,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
-        parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setOnlyCoreApps(mOnlyCore);
@@ -6642,11 +6650,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             parseFlags |= PackageParser.PARSE_TRUSTED_OVERLAY;
         }
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final PackageParser.Package pkg;
         try {
             pkg = pp.parsePackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         return scanPackageLI(pkg, scanFile, parseFlags, scanFlags, currentTime, user);
@@ -6657,7 +6668,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  @throws PackageManagerException on a parse error.
      */
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg, File scanFile,
-            int parseFlags, int scanFlags, long currentTime, UserHandle user)
+            final int policyFlags, int scanFlags, long currentTime, UserHandle user)
             throws PackageManagerException {
         // If the package has children and this is the first dive in the function
         // we scan the package with the SCAN_CHECK_ONLY flag set to see whether all
@@ -6673,20 +6684,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Scan the parent
-        PackageParser.Package scannedPkg = scanPackageInternalLI(pkg, scanFile, parseFlags,
+        PackageParser.Package scannedPkg = scanPackageInternalLI(pkg, scanFile, policyFlags,
                 scanFlags, currentTime, user);
 
         // Scan the children
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             PackageParser.Package childPackage = pkg.childPackages.get(i);
-            scanPackageInternalLI(childPackage, scanFile, parseFlags, scanFlags,
+            scanPackageInternalLI(childPackage, scanFile, policyFlags, scanFlags,
                     currentTime, user);
         }
 
 
         if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
-            return scanPackageLI(pkg, scanFile, parseFlags, scanFlags, currentTime, user);
+            return scanPackageLI(pkg, scanFile, policyFlags, scanFlags, currentTime, user);
         }
 
         return scannedPkg;
@@ -6697,7 +6708,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  @throws PackageManagerException on a parse error.
      */
     private PackageParser.Package scanPackageInternalLI(PackageParser.Package pkg, File scanFile,
-            int parseFlags, int scanFlags, long currentTime, UserHandle user)
+            int policyFlags, int scanFlags, long currentTime, UserHandle user)
             throws PackageManagerException {
         PackageSetting ps = null;
         PackageSetting updatedPkg;
@@ -6724,7 +6735,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // may need to remove disabled child packages on the system partition
             // or may need to not add child packages if the parent apk is updated
             // on the data partition and no longer defines this child package.
-            if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) != 0) {
+            if ((policyFlags & PackageParser.PARSE_IS_SYSTEM) != 0) {
                 // If this is a parent package for an updated system app and this system
                 // app got an OTA update which no longer defines some of the child packages
                 // we have to prune them from the disabled system packages.
@@ -6754,7 +6765,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean updatedPkgBetter = false;
         // First check if this is a system package that may involve an update
-        if (updatedPkg != null && (parseFlags & PackageParser.PARSE_IS_SYSTEM) != 0) {
+        if (updatedPkg != null && (policyFlags & PackageParser.PARSE_IS_SYSTEM) != 0) {
             // If new package is not located in "/system/priv-app" (e.g. due to an OTA),
             // it needs to drop FLAG_PRIVILEGED.
             if (locationIsPrivileged(scanFile)) {
@@ -6836,17 +6847,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (updatedPkg != null) {
             // An updated system app will not have the PARSE_IS_SYSTEM flag set
             // initially
-            parseFlags |= PackageParser.PARSE_IS_SYSTEM;
+            policyFlags |= PackageParser.PARSE_IS_SYSTEM;
 
             // An updated privileged app will not have the PARSE_IS_PRIVILEGED
             // flag set initially
             if ((updatedPkg.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
-                parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+                policyFlags |= PackageParser.PARSE_IS_PRIVILEGED;
             }
         }
 
         // Verify certificates against what was last scanned
-        collectCertificatesLI(ps, pkg, scanFile, parseFlags);
+        collectCertificatesLI(ps, pkg, scanFile, policyFlags);
 
         /*
          * A new system app appeared, but we already had a non-system one of the
@@ -6854,7 +6865,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         boolean shouldHideSystemApp = false;
         if (updatedPkg == null && ps != null
-                && (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0 && !isSystemApp(ps)) {
+                && (policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0 && !isSystemApp(ps)) {
             /*
              * Check to make sure the signatures match first. If they don't,
              * wipe the installed application and its data.
@@ -6902,16 +6913,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         // are kept in different files. (except for app in either system or
         // vendor path).
         // TODO grab this value from PackageSettings
-        if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+        if ((policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
             if (ps != null && !ps.codePath.equals(ps.resourcePath)) {
-                parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
+                policyFlags |= PackageParser.PARSE_FORWARD_LOCK;
             }
         }
 
         // TODO: extend to support forward-locked splits
         String resourcePath = null;
         String baseResourcePath = null;
-        if ((parseFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
+        if ((policyFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
             if (ps != null && ps.resourcePathString != null) {
                 resourcePath = ps.resourcePathString;
                 baseResourcePath = ps.resourcePathString;
@@ -6934,7 +6945,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.setApplicationInfoSplitResourcePaths(pkg.splitCodePaths);
 
         // Note that we invoke the following method only if we are about to unpack an application
-        PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanFlags
+        PackageParser.Package scannedPkg = scanPackageLI(pkg, policyFlags, scanFlags
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
 
         /*
@@ -7576,8 +7587,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return cpuAbiOverride;
     }
 
-    private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg, int parseFlags,
-            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+    private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg,
+            final int policyFlags, int scanFlags, long currentTime, UserHandle user)
+                    throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
         // If the package has children and this is the first dive in the function
         // we recursively scan the package with the SCAN_CHECK_ONLY flag set to see
@@ -7595,12 +7607,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageParser.Package scannedPkg;
         try {
             // Scan the parent
-            scannedPkg = scanPackageLI(pkg, parseFlags, scanFlags, currentTime, user);
+            scannedPkg = scanPackageLI(pkg, policyFlags, scanFlags, currentTime, user);
             // Scan the children
             final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
-                scanPackageLI(childPkg, parseFlags,
+                scanPackageLI(childPkg, policyFlags,
                         scanFlags, currentTime, user);
             }
         } finally {
@@ -7608,17 +7620,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
-            return scanPackageTracedLI(pkg, parseFlags, scanFlags, currentTime, user);
+            return scanPackageTracedLI(pkg, policyFlags, scanFlags, currentTime, user);
         }
 
         return scannedPkg;
     }
 
-    private PackageParser.Package scanPackageLI(PackageParser.Package pkg, int parseFlags,
+    private PackageParser.Package scanPackageLI(PackageParser.Package pkg, final int policyFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         boolean success = false;
         try {
-            final PackageParser.Package res = scanPackageDirtyLI(pkg, parseFlags, scanFlags,
+            final PackageParser.Package res = scanPackageDirtyLI(pkg, policyFlags, scanFlags,
                     currentTime, user);
             success = true;
             return res;
@@ -7632,8 +7644,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg, int parseFlags,
-            int scanFlags, long currentTime, UserHandle user)
+    private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg,
+            final int policyFlags, final int scanFlags, long currentTime, UserHandle user)
             throws PackageManagerException {
         final File scanFile = new File(pkg.codePath);
         if (pkg.applicationInfo.getCodePath() == null ||
@@ -7643,14 +7655,36 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "Code and resource paths haven't been set correctly");
         }
 
-        if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
+        // Apply policy
+        if ((policyFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+            if (pkg.applicationInfo.isDirectBootAware()) {
+                // we're direct boot aware; set for all components
+                for (PackageParser.Service s : pkg.services) {
+                    s.info.encryptionAware = s.info.directBootAware = true;
+                }
+                for (PackageParser.Provider p : pkg.providers) {
+                    p.info.encryptionAware = p.info.directBootAware = true;
+                }
+                for (PackageParser.Activity a : pkg.activities) {
+                    a.info.encryptionAware = a.info.directBootAware = true;
+                }
+                for (PackageParser.Activity r : pkg.receivers) {
+                    r.info.encryptionAware = r.info.directBootAware = true;
+                }
+            }
         } else {
             // Only allow system apps to be flagged as core apps.
             pkg.coreApp = false;
+            // clear flags not applicable to regular apps
+            pkg.applicationInfo.privateFlags &=
+                    ~ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
+            pkg.applicationInfo.privateFlags &=
+                    ~ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
         }
+        pkg.mTrustedOverlay = (policyFlags&PackageParser.PARSE_TRUSTED_OVERLAY) != 0;
 
-        if ((parseFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
+        if ((policyFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
 
@@ -7699,7 +7733,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (DEBUG_PACKAGE_SCANNING) {
-            if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+            if ((policyFlags & PackageParser.PARSE_CHATTY) != 0)
                 Log.d(TAG, "Scanning package " + pkg.packageName);
         }
 
@@ -7774,7 +7808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " for shared user failed");
                 }
                 if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                    if ((policyFlags & PackageParser.PARSE_CHATTY) != 0)
                         Log.d(TAG, "Shared UserID " + pkg.mSharedUserId + " (uid=" + suid.userId
                                 + "): packages=" + suid.packages);
                 }
@@ -7820,6 +7854,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     origPackage = null;
                                     continue;
                                 }
+                                // TODO: Add case when shared user id is added [b/28144775]
                             } else {
                                 if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
                                         + pkg.packageName + " to old name " + origPackage.name);
@@ -7886,7 +7921,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
 
-            if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+            if ((policyFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                 // Check all shared libraries and map to their actual file path.
                 // We only do this here for apps not on a system dir, because those
                 // are the only ones that can fail an install due to this.  We
@@ -7907,7 +7942,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 } else {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if ((policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                 "Package " + pkg.packageName + " upgrade keys do not match the "
                                 + "previously installed version");
@@ -7925,7 +7960,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 } catch (PackageManagerException e) {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if ((policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw e;
                     }
                     // The signature has changed, but this package is in the system
@@ -8114,7 +8149,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Only privileged apps and updated privileged apps can add child packages.
         if (pkg.childPackages != null && !pkg.childPackages.isEmpty()) {
-            if ((parseFlags & PARSE_IS_PRIVILEGED) == 0) {
+            if ((policyFlags & PARSE_IS_PRIVILEGED) == 0) {
                 throw new PackageManagerException("Only privileged apps and updated "
                         + "privileged apps can add child packages. Ignoring package "
                         + pkg.packageName);
@@ -8240,7 +8275,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else if (pkgSetting.firstInstallTime == 0) {
                 // We need *something*.  Take time time stamp of the file.
                 pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
-            } else if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+            } else if ((policyFlags&PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
                 if (scanFileTime != pkgSetting.timeStamp) {
                     // A package on the system image has changed; consider this
                     // to be an update.
@@ -8283,7 +8318,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 p.info.authority = p.info.authority + ";" + names[j];
                             }
                             if (DEBUG_PACKAGE_SCANNING) {
-                                if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                                if ((policyFlags & PackageParser.PARSE_CHATTY) != 0)
                                     Log.d(TAG, "Registered content provider: " + names[j]
                                             + ", className = " + p.info.name + ", isSyncable = "
                                             + p.info.isSyncable);
@@ -8298,7 +8333,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 }
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -8318,7 +8353,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 s.info.processName = fixProcessName(pkg.applicationInfo.processName,
                         s.info.processName, pkg.applicationInfo.uid);
                 mServices.addService(s);
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -8338,7 +8373,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.processName = fixProcessName(pkg.applicationInfo.processName,
                         a.info.processName, pkg.applicationInfo.uid);
                 mReceivers.addActivity(a, "receiver");
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -8358,7 +8393,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.processName = fixProcessName(pkg.applicationInfo.processName,
                         a.info.processName, pkg.applicationInfo.uid);
                 mActivities.addActivity(a, "activity");
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -8378,7 +8413,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.PermissionGroup cur = mPermissionGroups.get(pg.info.name);
                 if (cur == null) {
                     mPermissionGroups.put(pg.info.name, pg);
-                    if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                    if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                         if (r == null) {
                             r = new StringBuilder(256);
                         } else {
@@ -8390,7 +8425,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Permission group " + pg.info.name + " from package "
                             + pg.info.packageName + " ignored: original from "
                             + cur.info.packageName);
-                    if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                    if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                         if (r == null) {
                             r = new StringBuilder(256);
                         } else {
@@ -8469,7 +8504,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             bp.uid = pkg.applicationInfo.uid;
                             bp.sourcePackage = p.info.packageName;
                             p.info.flags |= PermissionInfo.FLAG_INSTALLED;
-                            if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                            if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                                 if (r == null) {
                                     r = new StringBuilder(256);
                                 } else {
@@ -8488,7 +8523,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + p.info.packageName + " ignored: original from "
                                 + bp.sourcePackage);
                     }
-                } else if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                } else if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -8523,7 +8558,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // need other information about the application, like the ABI and what not ?
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {
                         r = new StringBuilder(256);
                     } else {
@@ -13538,8 +13573,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Install a non-existing package.
      */
-    private void installNewPackageLIF(PackageParser.Package pkg, int parseFlags, int scanFlags,
-            UserHandle user, String installerPackageName, String volumeUuid,
+    private void installNewPackageLIF(PackageParser.Package pkg, final int policyFlags,
+            int scanFlags, UserHandle user, String installerPackageName, String volumeUuid,
             PackageInstalledInfo res) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installNewPackage");
 
@@ -13568,7 +13603,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         try {
-            PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags,
+            PackageParser.Package newPackage = scanPackageTracedLI(pkg, policyFlags, scanFlags,
                     System.currentTimeMillis(), user);
 
             updateSettingsLI(newPackage, installerPackageName, null, res, user);
@@ -13625,9 +13660,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
-    private void replacePackageLIF(PackageParser.Package pkg, int parseFlags, int scanFlags,
+    private void replacePackageLIF(PackageParser.Package pkg, final int policyFlags, int scanFlags,
             UserHandle user, String installerPackageName, PackageInstalledInfo res) {
-        final boolean isEphemeral = (parseFlags & PackageParser.PARSE_IS_EPHEMERAL) != 0;
+        final boolean isEphemeral = (policyFlags & PackageParser.PARSE_IS_EPHEMERAL) != 0;
 
         final PackageParser.Package oldPackage;
         final String pkgName = pkg.packageName;
@@ -13715,10 +13750,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            replaceSystemPackageLIF(oldPackage, pkg, parseFlags, scanFlags,
+            // Set the system/privileged flags as needed
+            final boolean privileged =
+                    (oldPackage.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+            final int systemPolicyFlags = policyFlags
+                    | PackageParser.PARSE_IS_SYSTEM
+                    | (privileged ? PackageParser.PARSE_IS_PRIVILEGED : 0);
+
+            replaceSystemPackageLIF(oldPackage, pkg, systemPolicyFlags, scanFlags,
                     user, allUsers, installerPackageName, res);
         } else {
-            replaceNonSystemPackageLIF(oldPackage, pkg, parseFlags, scanFlags,
+            replaceNonSystemPackageLIF(oldPackage, pkg, policyFlags, scanFlags,
                     user, allUsers, installerPackageName, res);
         }
     }
@@ -13733,7 +13776,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void replaceNonSystemPackageLIF(PackageParser.Package deletedPackage,
-            PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
+            PackageParser.Package pkg, final int policyFlags, int scanFlags, UserHandle user,
             int[] allUsers, String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceNonSystemPackageLI: new=" + pkg + ", old="
                 + deletedPackage);
@@ -13775,7 +13818,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             clearAppProfilesLIF(pkg);
 
             try {
-                final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
+                final PackageParser.Package newPackage = scanPackageTracedLI(pkg, policyFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user);
 
@@ -13872,19 +13915,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void replaceSystemPackageLIF(PackageParser.Package deletedPackage,
-            PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
+            PackageParser.Package pkg, final int policyFlags, int scanFlags, UserHandle user,
             int[] allUsers, String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
 
         final boolean disabledSystem;
-
-        // Set the system/privileged flags as needed
-        parseFlags |= PackageParser.PARSE_IS_SYSTEM;
-        if ((deletedPackage.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                != 0) {
-            parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
-        }
 
         // Remove existing system package
         removePackageLI(deletedPackage, true);
@@ -13914,7 +13950,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser.Package newPackage = null;
         try {
             // Add the package to the internal data structures
-            newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
+            newPackage = scanPackageTracedLI(pkg, policyFlags, scanFlags, 0, user);
 
             // Set the update and install times
             PackageSetting deletedPkgSetting = (PackageSetting) deletedPackage.mExtras;
@@ -13967,7 +14003,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Add back the old system package
             try {
-                scanPackageTracedLI(deletedPackage, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                scanPackageTracedLI(deletedPackage, policyFlags, SCAN_UPDATE_SIGNATURE, 0, user);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
@@ -15296,7 +15332,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        int parseFlags = PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM;
+        int parseFlags = mDefParseFlags
+                | PackageParser.PARSE_MUST_BE_APK
+                | PackageParser.PARSE_IS_SYSTEM
+                | PackageParser.PARSE_IS_SYSTEM_DIR;
         if (locationIsPrivileged(disabledPs.codePath)) {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
         }

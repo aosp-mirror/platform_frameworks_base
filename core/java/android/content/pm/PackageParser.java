@@ -1210,7 +1210,7 @@ public class PackageParser {
             // For those APKs we only care about extracting signer certificates, and don't care
             // about verifying integrity.
             boolean signatureSchemeRollbackProtectionsEnforced =
-                    (parseFlags & PARSE_IS_SYSTEM) == 0;
+                    (parseFlags & PARSE_IS_SYSTEM_DIR) == 0;
             jarFile = new StrictJarFile(
                     apkPath,
                     !verified, // whether to verify JAR signature
@@ -1239,7 +1239,7 @@ public class PackageParser {
             toVerify.add(manifestEntry);
 
             // If we're parsing an untrusted package, verify all contents
-            if ((parseFlags & PARSE_IS_SYSTEM) == 0) {
+            if ((parseFlags & PARSE_IS_SYSTEM_DIR) == 0) {
                 final Iterator<ZipEntry> i = jarFile.iterator();
                 while (i.hasNext()) {
                     final ZipEntry entry = i.next();
@@ -1679,7 +1679,6 @@ public class PackageParser {
     private Package parseBaseApkCommon(Package pkg, Set<String> acceptedTags, Resources res,
             XmlResourceParser parser, int flags, String[] outError) throws XmlPullParserException,
             IOException {
-        final boolean trustedOverlay = (flags & PARSE_TRUSTED_OVERLAY) != 0;
         mParseInstrumentationArgs = null;
         mParseActivityArgs = null;
         mParseServiceArgs = null;
@@ -1769,8 +1768,6 @@ public class PackageParser {
                     return null;
                 }
             } else if (tagName.equals(TAG_OVERLAY)) {
-                pkg.mTrustedOverlay = trustedOverlay;
-
                 sa = res.obtainAttributes(parser,
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay);
                 pkg.mOverlayTarget = sa.getString(
@@ -2924,12 +2921,14 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 
-        if (sa.getBoolean(R.styleable.AndroidManifestApplication_defaultToDeviceProtectedStorage,
-                false) && (flags & PARSE_IS_SYSTEM) != 0) {
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_defaultToDeviceProtectedStorage,
+                false)) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
         }
-        if (sa.getBoolean(R.styleable.AndroidManifestApplication_directBootAware, false)
-                && (flags & PARSE_IS_SYSTEM) != 0) {
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_directBootAware,
+                false)) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
         }
 
@@ -3554,7 +3553,7 @@ public class PackageParser {
 
             a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_directBootAware,
-                    owner.applicationInfo.isDirectBootAware());
+                    false);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -3572,7 +3571,7 @@ public class PackageParser {
 
             a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_directBootAware,
-                    owner.applicationInfo.isDirectBootAware());
+                    false);
         }
 
         if (a.info.directBootAware) {
@@ -3985,7 +3984,7 @@ public class PackageParser {
 
         p.info.encryptionAware = p.info.directBootAware = sa.getBoolean(
                 R.styleable.AndroidManifestProvider_directBootAware,
-                owner.applicationInfo.isDirectBootAware());
+                false);
         if (p.info.directBootAware) {
             owner.applicationInfo.privateFlags |=
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
@@ -4277,7 +4276,7 @@ public class PackageParser {
 
         s.info.encryptionAware = s.info.directBootAware = sa.getBoolean(
                 R.styleable.AndroidManifestService_directBootAware,
-                owner.applicationInfo.isDirectBootAware());
+                false);
         if (s.info.directBootAware) {
             owner.applicationInfo.privateFlags |=
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
