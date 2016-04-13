@@ -1482,6 +1482,16 @@ public interface WindowManager extends ViewManager {
         public boolean hasManualSurfaceInsets;
 
         /**
+         * Whether the previous surface insets should be used vs. what is currently set. When set
+         * to {@code true}, the view root will ignore surfaces insets in this object and use what
+         * it currently has.
+         *
+         * @see #surfaceInsets
+         * @hide
+         */
+        public boolean preservePreviousSurfaceInsets = true;
+
+        /**
          * The desired bitmap format.  May be one of the constants in
          * {@link android.graphics.PixelFormat}.  Default is OPAQUE.
          */
@@ -1771,6 +1781,17 @@ public interface WindowManager extends ViewManager {
             return mTitle != null ? mTitle : "";
         }
 
+        /**
+         * Sets the surface insets based on the elevation (visual z position) of the input view.
+         * @hide
+         */
+        public final void setSurfaceInsets(View view, boolean manual, boolean preservePrevious) {
+            final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
+            surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+            hasManualSurfaceInsets = manual;
+            preservePreviousSurfaceInsets = preservePrevious;
+        }
+
         /** @hide */
         @SystemApi
         public final void setUserActivityTimeout(long timeout) {
@@ -1822,6 +1843,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(surfaceInsets.right);
             out.writeInt(surfaceInsets.bottom);
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
+            out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
             out.writeInt(needsMenuKey);
             out.writeInt(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
@@ -1874,6 +1896,7 @@ public interface WindowManager extends ViewManager {
             surfaceInsets.right = in.readInt();
             surfaceInsets.bottom = in.readInt();
             hasManualSurfaceInsets = in.readInt() != 0;
+            preservePreviousSurfaceInsets = in.readInt() != 0;
             needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readInt();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -2075,6 +2098,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SURFACE_INSETS_CHANGED;
             }
 
+            if (preservePreviousSurfaceInsets != o.preservePreviousSurfaceInsets) {
+                preservePreviousSurfaceInsets = o.preservePreviousSurfaceInsets;
+                changes |= SURFACE_INSETS_CHANGED;
+            }
+
             if (needsMenuKey != o.needsMenuKey) {
                 needsMenuKey = o.needsMenuKey;
                 changes |= NEEDS_MENU_KEY_CHANGED;
@@ -2200,10 +2228,14 @@ public interface WindowManager extends ViewManager {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
             }
             if (surfaceInsets.left != 0 || surfaceInsets.top != 0 || surfaceInsets.right != 0 ||
-                    surfaceInsets.bottom != 0 || hasManualSurfaceInsets) {
+                    surfaceInsets.bottom != 0 || hasManualSurfaceInsets
+                    || !preservePreviousSurfaceInsets) {
                 sb.append(" surfaceInsets=").append(surfaceInsets);
                 if (hasManualSurfaceInsets) {
                     sb.append(" (manual)");
+                }
+                if (!preservePreviousSurfaceInsets) {
+                    sb.append(" (!preservePreviousSurfaceInsets)");
                 }
             }
             if (needsMenuKey != NEEDS_MENU_UNSET) {

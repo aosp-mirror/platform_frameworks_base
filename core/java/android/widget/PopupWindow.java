@@ -1290,9 +1290,7 @@ public class PopupWindow {
 
         // We may wrap that in another view, so we'll need to manually specify
         // the surface insets.
-        final int surfaceInset = (int) Math.ceil(mBackgroundView.getZ() * 2);
-        p.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
-        p.hasManualSurfaceInsets = true;
+        p.setSurfaceInsets(mBackgroundView, true /*manual*/, true /*preservePrevious*/);
 
         mPopupViewInitialLayoutDirectionInherited =
                 (mContentView.getRawLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT);
