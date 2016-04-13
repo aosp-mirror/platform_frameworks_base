@@ -169,8 +169,8 @@ public final class MtpDevice {
      * @param objectHandle handle of the object to read
      * @param offset Start index of reading range. It must be a non-negative value at most
      *     0xffffffff.
-     * @param size Size of reading range. It must be a non-negative value at most 0xffffffff. If
-     *     0xffffffff is specified, the method obtains the full bytes of object.
+     * @param size Size of reading range. It must be a non-negative value at most Integer.MAX_VALUE
+     *     or 0xffffffff. If 0xffffffff is specified, the method obtains the full bytes of object.
      * @param buffer Array to write data.
      * @return Size of bytes that are actually read.
      */
@@ -190,7 +190,7 @@ public final class MtpDevice {
      *
      * @param objectHandle handle of the object to read
      * @param offset Start index of reading range. It must be a non-negative value.
-     * @param size Size of reading range. It must be a non-negative value at most 0xffffffff.
+     * @param size Size of reading range. It must be a non-negative value at most Integer.MAX_VALUE.
      * @param buffer Array to write data.
      * @return Size of bytes that are actually read.
      * @see MtpConstants#OPERATION_GET_PARTIAL_OBJECT_64
@@ -317,7 +317,7 @@ public final class MtpDevice {
      * The returned {@link MtpObjectInfo} has the new object handle field filled in.
      *
      * @param info metadata of the entry
-     * @return object info of the created entry
+     * @return object info of the created entry or null if the operation failed.
      */
     public MtpObjectInfo sendObjectInfo(MtpObjectInfo info) {
         return native_send_object_info(info);
