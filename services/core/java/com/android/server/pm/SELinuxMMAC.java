@@ -92,7 +92,7 @@ public final class SELinuxMMAC {
      * MAC_PERMISSIONS class variable which is set at class load time which itself
      * is based on the USE_OVERRIDE_POLICY class variable. For further guidance on
      * the proper structure of a mac_permissions.xml file consult the source code
-     * located at external/sepolicy/mac_permissions.xml.
+     * located at system/sepolicy/mac_permissions.xml.
      *
      * @return boolean indicating if policy was correctly loaded. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
@@ -373,7 +373,7 @@ public final class SELinuxMMAC {
  * {@link Policy#getMatchedSeinfo} method. To create an instance of this use the
  * {@link PolicyBuilder} pattern class, where each instance is validated against a set
  * of invariants before being built and returned. Each instance can be guaranteed to
- * hold one valid policy stanza as outlined in the external/sepolicy/mac_permissions.xml
+ * hold one valid policy stanza as outlined in the system/sepolicy/mac_permissions.xml
  * file.
  * <p>
  * The following is an example of how to use {@link Policy.PolicyBuilder} to create a
@@ -519,7 +519,7 @@ final class Policy {
      * A nested builder class to create {@link Policy} instances. A {@link Policy}
      * class instance represents one valid policy stanza found in a mac_permissions.xml
      * file. A valid policy stanza is defined to be a signer stanza which obeys the rules
-     * outlined in external/sepolicy/mac_permissions.xml. The {@link #build} method
+     * outlined in system/sepolicy/mac_permissions.xml. The {@link #build} method
      * ensures a set of invariants are upheld enforcing the correct stanza structure
      * before returning a valid Policy object.
      */
