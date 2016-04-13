@@ -294,7 +294,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 final WindowState child = windows.get(winNdx);
                 final InputChannel inputChannel = child.mInputChannel;
                 final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
-                if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
+                if (inputChannel == null || inputWindowHandle == null || child.mRemoved
+                        || child.isAdjustedForMinimizedDock()) {
                     // Skip this window because it cannot possibly receive input.
                     continue;
                 }
