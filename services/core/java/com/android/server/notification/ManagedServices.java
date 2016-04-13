@@ -126,7 +126,8 @@ abstract public class ManagedServices {
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
                 String element = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                if (Objects.equals(element, mConfig.secureSettingName)) {
+                if (Objects.equals(element, mConfig.secureSettingName)
+                        || Objects.equals(element, mConfig.secondarySettingName)) {
                     String prevValue = intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE);
                     String newValue = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
                     settingRestored(element, prevValue, newValue, getSendingUserId());
@@ -186,8 +187,8 @@ abstract public class ManagedServices {
 
     // By convention, restored settings are replicated to another settings
     // entry, named similarly but with a disambiguation suffix.
-    public static String restoredSettingName(Config config) {
-        return config.secureSettingName + ":restored";
+    public static String restoredSettingName(String setting) {
+        return setting + ":restored";
     }
 
     // The OS has done a restore of this service's saved state.  We clone it to the
@@ -197,14 +198,14 @@ abstract public class ManagedServices {
     public void settingRestored(String element, String oldValue, String newValue, int userid) {
         if (DEBUG) Slog.d(TAG, "Restored managed service setting: " + element
                 + " ovalue=" + oldValue + " nvalue=" + newValue);
-        if (mConfig.secureSettingName.equals(element)) {
+        if (mConfig.secureSettingName.equals(element) ||
+                mConfig.secondarySettingName.equals(element)) {
             if (element != null) {
-                mRestored = null;
                 Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        restoredSettingName(mConfig),
+                        restoredSettingName(element),
                         newValue,
                         userid);
-                updateSettingsAccordingToInstalledServices(userid);
+                updateSettingsAccordingToInstalledServices(element, userid);
                 rebuildRestoredPackages();
             }
         }
@@ -343,21 +344,25 @@ abstract public class ManagedServices {
     private void rebuildRestoredPackages() {
         mRestoredPackages.clear();
         mSnoozingForCurrentProfiles.clear();
-        String settingName = restoredSettingName(mConfig);
+        String secureSettingName = restoredSettingName(mConfig.secureSettingName);
+        String secondarySettingName = mConfig.secondarySettingName == null
+                ? null : restoredSettingName(mConfig.secondarySettingName);
         int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int N = userIds.length;
         for (int i = 0; i < N; ++i) {
-            ArraySet<ComponentName> names = loadComponentNamesFromSetting(settingName, userIds[i]);
-            if (names == null)
-                continue;
-            for (ComponentName name: names) {
+            ArraySet<ComponentName> names =
+                    loadComponentNamesFromSetting(secureSettingName, userIds[i]);
+            if (secondarySettingName != null) {
+                names.addAll(loadComponentNamesFromSetting(secondarySettingName, userIds[i]));
+            }
+            for (ComponentName name : names) {
                 mRestoredPackages.add(name.getPackageName());
             }
         }
     }
 
 
-    protected ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
+    protected @NonNull ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
             int userId) {
         final ContentResolver cr = mContext.getContentResolver();
         String settingValue = Settings.Secure.getStringForUser(
@@ -365,7 +370,7 @@ abstract public class ManagedServices {
             settingName,
             userId);
         if (TextUtils.isEmpty(settingValue))
-            return null;
+            return new ArraySet<>();
         String[] restored = settingValue.split(ENABLED_SERVICES_SEPARATOR);
         ArraySet<ComponentName> result = new ArraySet<>(restored.length);
         for (int i = 0; i < restored.length; i++) {
@@ -405,7 +410,11 @@ abstract public class ManagedServices {
         int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int N = userIds.length;
         for (int i = 0; i < N; ++i) {
-            updateSettingsAccordingToInstalledServices(userIds[i]);
+            updateSettingsAccordingToInstalledServices(mConfig.secureSettingName, userIds[i]);
+            if (mConfig.secondarySettingName != null) {
+                updateSettingsAccordingToInstalledServices(
+                        mConfig.secondarySettingName, userIds[i]);
+            }
         }
         rebuildRestoredPackages();
     }
@@ -442,13 +451,13 @@ abstract public class ManagedServices {
         return installed;
     }
 
-    private void updateSettingsAccordingToInstalledServices(int userId) {
+    private void updateSettingsAccordingToInstalledServices(String setting, int userId) {
         boolean restoredChanged = false;
         boolean currentChanged = false;
         Set<ComponentName> restored =
-                loadComponentNamesFromSetting(restoredSettingName(mConfig), userId);
+                loadComponentNamesFromSetting(restoredSettingName(setting), userId);
         Set<ComponentName> current =
-                loadComponentNamesFromSetting(mConfig.secureSettingName, userId);
+                loadComponentNamesFromSetting(setting, userId);
         // Load all services for all packages.
         Set<ComponentName> installed = queryPackageForServices(null, userId);
 
@@ -478,13 +487,13 @@ abstract public class ManagedServices {
 
         if (currentChanged) {
             if (DEBUG) Slog.v(TAG, "List of  " + getCaption() + " services was updated " + current);
-            storeComponentsToSetting(retained, mConfig.secureSettingName, userId);
+            storeComponentsToSetting(retained, setting, userId);
         }
 
         if (restoredChanged) {
             if (DEBUG) Slog.v(TAG,
                     "List of  " + getCaption() + " restored services was updated " + restored);
-            storeComponentsToSetting(restored, restoredSettingName(mConfig), userId);
+            storeComponentsToSetting(restored, restoredSettingName(setting), userId);
         }
     }
 
@@ -502,6 +511,10 @@ abstract public class ManagedServices {
         for (int i = 0; i < nUserIds; ++i) {
             componentsByUser.put(userIds[i],
                     loadComponentNamesFromSetting(mConfig.secureSettingName, userIds[i]));
+            if (mConfig.secondarySettingName != null) {
+                componentsByUser.get(userIds[i]).addAll(
+                        loadComponentNamesFromSetting(mConfig.secondarySettingName, userIds[i]));
+            }
         }
 
         final ArrayList<ManagedServiceInfo> removableBoundServices = new ArrayList<>();
@@ -522,7 +535,7 @@ abstract public class ManagedServices {
                 // decode the list of components
                 final ArraySet<ComponentName> userComponents = componentsByUser.get(userIds[i]);
                 if (null == userComponents) {
-                    toAdd.put(userIds[i], new HashSet<ComponentName>());
+                    toAdd.put(userIds[i], new ArraySet<ComponentName>());
                     continue;
                 }
 
@@ -775,15 +788,25 @@ abstract public class ManagedServices {
 
     private class SettingsObserver extends ContentObserver {
         private final Uri mSecureSettingsUri = Settings.Secure.getUriFor(mConfig.secureSettingName);
+        private final Uri mSecondarySettingsUri;
 
         private SettingsObserver(Handler handler) {
             super(handler);
+            if (mConfig.secondarySettingName != null) {
+                mSecondarySettingsUri = Settings.Secure.getUriFor(mConfig.secondarySettingName);
+            } else {
+                mSecondarySettingsUri = null;
+            }
         }
 
         private void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(mSecureSettingsUri,
                     false, this, UserHandle.USER_ALL);
+            if (mSecondarySettingsUri != null) {
+                resolver.registerContentObserver(mSecondarySettingsUri,
+                        false, this, UserHandle.USER_ALL);
+            }
             update(null);
         }
 
@@ -793,9 +816,9 @@ abstract public class ManagedServices {
         }
 
         private void update(Uri uri) {
-            if (uri == null || mSecureSettingsUri.equals(uri)) {
-                if (DEBUG) Slog.d(TAG, "Setting changed: mSecureSettingsUri=" + mSecureSettingsUri +
-                        " / uri=" + uri);
+            if (uri == null || mSecureSettingsUri.equals(uri)
+                    || uri.equals(mSecondarySettingsUri)) {
+                if (DEBUG) Slog.d(TAG, "Setting changed: uri=" + uri);
                 rebindServices(false);
                 rebuildRestoredPackages();
             }
@@ -917,6 +940,7 @@ abstract public class ManagedServices {
         public String caption;
         public String serviceInterface;
         public String secureSettingName;
+        public String secondarySettingName;
         public String bindPermission;
         public String settingsAction;
         public int clientLabel;
