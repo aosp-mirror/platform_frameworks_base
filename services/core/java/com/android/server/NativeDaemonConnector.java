@@ -243,7 +243,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                             log("Problem parsing message " + e);
                         } finally {
                             if (releaseWl) {
-                                mWakeLock.acquire();
+                                mWakeLock.release();
                             }
                         }
 
