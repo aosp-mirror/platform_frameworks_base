@@ -39,12 +39,12 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
     private final int mAnimDuration;
     private final Interpolator mFocusInterpolator;
 
-    protected View mTargetView;
+    protected TaskCardView mTargetView;
     private float mFocusProgress;
 
     ObjectAnimator mFocusAnimation;
 
-    public ViewFocusAnimator(View view) {
+    public ViewFocusAnimator(TaskCardView view) {
         mTargetView = view;
         final Resources res = view.getResources();
 
@@ -99,9 +99,8 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         mTargetView.setPadding((int) spacing, mTargetView.getPaddingTop(),
                 (int) spacing, mTargetView.getPaddingBottom());
 
-        if (mTargetView instanceof TaskCardView) {
-            ((TaskCardView) mTargetView).getThumbnailView().setZ(z);
-        }
+
+        mTargetView.getThumbnailView().setZ(z);
     }
 
     public float getFocusProgress() {

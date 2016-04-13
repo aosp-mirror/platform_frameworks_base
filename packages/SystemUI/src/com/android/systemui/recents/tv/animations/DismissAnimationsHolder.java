@@ -15,38 +15,64 @@
  */
 package com.android.systemui.recents.tv.animations;
 
-
-import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.content.res.Resources;
+import android.graphics.drawable.TransitionDrawable;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.recents.tv.views.TaskCardView;
 
 import com.android.systemui.R;
 
 public class DismissAnimationsHolder {
-    private LinearLayout mDismissArea;
     private LinearLayout mInfoField;
     private View mThumbnailView;
+
     private int mDismissEnterYDelta;
     private int mDismissStartYDelta;
+
+    private ImageView mCardDismissIcon;
+    private TransitionDrawable mDismissDrawable;
+    private TextView mDismissText;
+
+    private float mDismissUnselectedAlpha;
     private long mShortDuration;
     private long mLongDuration;
 
     public DismissAnimationsHolder(TaskCardView taskCardView) {
+
         mInfoField = (LinearLayout) taskCardView.findViewById(R.id.card_info_field);
-        mDismissArea = (LinearLayout) taskCardView.findViewById(R.id.card_dismiss);
         mThumbnailView = taskCardView.findViewById(R.id.card_view_thumbnail);
+        mCardDismissIcon = (ImageView) taskCardView.findViewById(R.id.dismiss_icon);
+        mDismissDrawable = (TransitionDrawable) mCardDismissIcon.getDrawable();
+        mDismissDrawable.setCrossFadeEnabled(true);
+        mDismissText = (TextView) taskCardView.findViewById(R.id.card_dismiss_text);
+
         Resources res = taskCardView.getResources();
         mDismissEnterYDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_shift_down);
         mDismissStartYDelta = mDismissEnterYDelta * 2;
         mShortDuration =  res.getInteger(R.integer.dismiss_short_duration);
         mLongDuration =  res.getInteger(R.integer.dismiss_long_duration);
+        mDismissUnselectedAlpha = res.getFloat(R.integer.dismiss_unselected_alpha);
     }
 
     public void startEnterAnimation() {
-        mDismissArea.animate()
+        mCardDismissIcon.animate()
+                .setDuration(mShortDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .alpha(1.0f)
+                .withStartAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDismissDrawable.startTransition(0);
+                    }
+                });
+
+        mDismissText.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1.0f);
@@ -65,7 +91,18 @@ public class DismissAnimationsHolder {
     }
 
     public void startExitAnimation() {
-        mDismissArea.animate()
+        mCardDismissIcon.animate()
+                .setDuration(mShortDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .alpha(mDismissUnselectedAlpha)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDismissDrawable.reverseTransition(0);
+                    }
+                });
+
+        mDismissText.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
@@ -83,8 +120,19 @@ public class DismissAnimationsHolder {
                 .alpha(1.0f);
     }
 
-    public void startDismissAnimation(Animator.AnimatorListener listener) {
-        mDismissArea.animate()
+    public void startDismissAnimation(AnimatorListener listener) {
+        mCardDismissIcon.animate()
+                .setDuration(mShortDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .alpha(0.0f)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDismissDrawable.reverseTransition(0);
+                    }
+                });
+
+        mDismissText.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
@@ -109,5 +157,7 @@ public class DismissAnimationsHolder {
         mInfoField.animate().setListener(null);
         mThumbnailView.setAlpha(1.0f);
         mThumbnailView.setTranslationY(0);
+        mCardDismissIcon.setAlpha(mDismissUnselectedAlpha);
+        mDismissText.setAlpha(0.0f);
     }
 }
