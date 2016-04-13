@@ -117,6 +117,10 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 return R.string.kg_prompt_reason_restart_password;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_password;
+            case PROMPT_REASON_DEVICE_ADMIN:
+                return R.string.kg_prompt_reason_device_admin;
+            case PROMPT_REASON_USER_REQUEST:
+                return R.string.kg_prompt_reason_user_request;
             case PROMPT_REASON_NONE:
                 return 0;
             default:

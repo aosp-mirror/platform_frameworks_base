@@ -339,6 +339,14 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern,
                         true /* important */);
                 break;
+            case PROMPT_REASON_DEVICE_ADMIN:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_device_admin,
+                        true /* important */);
+                break;
+            case PROMPT_REASON_USER_REQUEST:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_user_request,
+                        true /* important */);
+                break;
             case PROMPT_REASON_NONE:
                 break;
             default:
