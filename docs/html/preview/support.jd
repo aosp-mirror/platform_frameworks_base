@@ -137,6 +137,12 @@ page.image=images/cards/card-n-support_2x.png
   Nexus 6P, Nexus 9, and Pixel C, as well as General Mobile 4G
   (Android One). Support for Nexus Player is coming soon.
   </li>
+
+
+  <li><a href=
+  "https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> has
+  been updated to handle API changes between DP1 and DP2.
+  </li>
 </ul>
 
 <h3 id="ki">Known Issues</h3>
@@ -182,7 +188,6 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-
 <h4>Setup wizard</h4>
 
 <ul>
@@ -190,6 +195,61 @@ page.image=images/cards/card-n-support_2x.png
   "Your Google Account" is not actionable in the setup wizard. You must restore
   data from an existing device by selecting "another Android device" in the
   setup wizard, or else set it up as a new device.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Work Security Challenge
+    <ul>
+      <li>After migration to N, or after the user creates work profiles, work
+      profiles can't create keys in the keystore until the user changes their
+      pattern, PIN, or password, or sets up a Work Challenge.
+      </li>
+
+      <li>In Direct boot mode, applying the passcode restrictions to the device
+      causes the work profile to be unlocked, even though the device is locked.
+      This makes the work profile accessible even though it should be protected
+      by the device lock screen.
+      </li>
+    </ul>
+  </li>
+
+  <li>Always On VPN
+    <ul>
+      <li>If Always On VPN mode is turned on, but VPN is not available, apps
+      connect over the ordinary network. Apps should be offline if they have no
+      VPN connection available.
+      </li>
+
+      <li>When Always On mode is on, a VPN connection is not established after
+      a device reboots into Direct boot mode, even after the user unlocks the
+      secure lock screen.
+      </li>
+    </ul>
+  </li>
+
+  <li>Suspend Packages
+    <ul>
+      <li>Device admins can suspend critical system packages, which may lead to
+      unexpected behavior, such as placing calls despite the "Telephone
+      disabled" dialog being displayed.
+      </li>
+    </ul>
+  </li>
+
+  <li>Other
+    <ul>
+      <li>The Settings app crashes on launch if {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} is set to true when
+      the user inserts physical media such as an SD card.
+      </li>
+
+      <li>The first check-in in a Work Profile takes several minutes to
+      complete.
+      </li>
+    </ul>
   </li>
 </ul>
 
@@ -346,7 +406,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="afw">Android for Work</h4>
+<h4>Android for Work</h4>
 
 <ul>
   <li>Work Security Challenge
@@ -449,11 +509,6 @@ page.image=images/cards/card-n-support_2x.png
       not display Notifications as expected.
       </li>
 
-      <li>The version of Google Apps Device Policy that is bundled with N
-      Developer Preview does not yet support the Work Profile Security
-      Challenge feature. Developers should instead use TestDPC to test this
-      feature.
-      </li>
     </ul>
   </li>
 </ul>
