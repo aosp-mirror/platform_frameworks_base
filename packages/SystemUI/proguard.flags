@@ -13,6 +13,7 @@
 -keep class com.android.systemui.statusbar.car.CarStatusBar
 -keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
+-keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
 
 -keepclassmembers class ** {

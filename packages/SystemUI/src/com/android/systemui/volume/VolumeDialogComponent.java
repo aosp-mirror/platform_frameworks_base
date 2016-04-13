@@ -16,30 +16,38 @@
 
 package com.android.systemui.volume;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.VolumePolicy;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.volume.car.CarVolumeDialogController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 
 /**
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
-public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable {
+public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable,
+        VolumeDialogController.UserActivityListener{
 
     public static final String VOLUME_DOWN_SILENT = "sysui_volume_down_silent";
     public static final String VOLUME_UP_SILENT = "sysui_volume_up_silent";
@@ -65,12 +73,8 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
             ZenModeController zen) {
         mSysui = sysui;
         mContext = context;
-        mController = new VolumeDialogController(context, null) {
-            @Override
-            protected void onUserActivityW() {
-                sendUserActivity();
-            }
-        };
+        mController = SystemUIFactory.getInstance().createVolumeDialogController(context, null);
+        mController.setUserActivityListener(this);
         mZenModeController = zen;
         mDialog = new VolumeDialog(context, WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY,
                 mController, zen, mVolumeDialogCallback);
@@ -112,7 +116,8 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         mController.setVolumePolicy(mVolumePolicy);
     }
 
-    private void sendUserActivity() {
+    @Override
+    public void onUserActivity() {
         final KeyguardViewMediator kvm = mSysui.getComponent(KeyguardViewMediator.class);
         if (kvm != null) {
             kvm.userActivity();

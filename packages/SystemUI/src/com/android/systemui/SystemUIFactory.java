@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +47,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.volume.VolumeDialogController;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -91,6 +93,11 @@ public class SystemUIFactory {
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
             View headsUpScrim) {
         return new ScrimController(scrimBehind, scrimInFront, headsUpScrim);
+    }
+
+    public VolumeDialogController createVolumeDialogController(Context context,
+            ComponentName name) {
+        return new VolumeDialogController(context, name);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
