@@ -334,6 +334,14 @@
     <!-- An explanation text that the password needs to be entered since profiles have just been switched. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_switch_profiles_password">Password required when you switch profiles</string>
 
+    <!-- An explanation text that the credential needs to be entered because a device admin has
+    locked the device. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_device_admin">Device administrator locked device</string>
+
+    <!-- An explanation text that the credential needs to be entered because the user has clicked
+     the force lock button. [CHAR LIMIT=80] -->
+    <string name="kg_prompt_reason_user_request">Device was locked manually</string>
+
     <!-- An explanation text that the pattern needs to be solved since it hasn't been solved in a while. [CHAR LIMIT=80]-->
     <plurals name="kg_prompt_reason_time_pattern">
         <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="number">%d</xliff:g> hour. Confirm pattern.</item>
