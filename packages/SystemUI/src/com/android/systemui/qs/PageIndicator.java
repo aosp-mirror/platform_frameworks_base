@@ -60,6 +60,8 @@ public class PageIndicator extends ViewGroup {
 
     public void setLocation(float location) {
         int index = (int) location;
+        setContentDescription(getContext().getString(R.string.accessibility_quick_settings_page,
+                (index + 1), getChildCount()));
         int position = index << 1 | ((location != index) ? 1 : 0);
         if (DEBUG) Log.d(TAG, "setLocation " + location + " " + index + " " + position);
 
