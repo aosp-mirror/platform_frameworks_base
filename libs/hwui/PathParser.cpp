@@ -162,7 +162,7 @@ bool PathParser::isVerbValid(char verb) {
             || verb == 's' || verb == 't' || verb == 'v' || verb == 'z';
 }
 
-void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
+void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
         const char* pathStr, size_t strLen) {
     if (pathStr == NULL) {
         result->failureOccurred = true;
@@ -171,7 +171,16 @@ void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
     }
 
     size_t start = 0;
-    size_t end = 1;
+    // Skip leading spaces.
+    while (isspace(pathStr[start]) && start < strLen) {
+        start++;
+    }
+    if (start == strLen) {
+        result->failureOccurred = true;
+        result->failureMessage = "Path string cannot be empty.";
+        return;
+    }
+    size_t end = start + 1;
 
     while (end < strLen) {
         end = nextStart(pathStr, strLen, end);
@@ -226,9 +235,9 @@ void PathParser::dump(const PathData& data) {
     ALOGD("points are : %s", os.str().c_str());
 }
 
-void PathParser::parseStringForSkPath(SkPath* skPath, ParseResult* result, const char* pathStr, size_t strLen) {
+void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, const char* pathStr, size_t strLen) {
     PathData pathData;
-    getPathDataFromString(&pathData, result, pathStr, strLen);
+    getPathDataFromAsciiString(&pathData, result, pathStr, strLen);
     if (result->failureOccurred) {
         return;
     }

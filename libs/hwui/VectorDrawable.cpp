@@ -96,7 +96,7 @@ float Path::getMatrixScale(const SkMatrix& groupStackedMatrix) {
 Path::Path(const char* pathStr, size_t strLength) {
     PathParser::ParseResult result;
     Data data;
-    PathParser::getPathDataFromString(&data, &result, pathStr, strLength);
+    PathParser::getPathDataFromAsciiString(&data, &result, pathStr, strLength);
     mStagingProperties.setData(data);
 }
 
