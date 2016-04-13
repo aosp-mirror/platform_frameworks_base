@@ -14,8 +14,21 @@
      limitations under the License.
 -->
 
-<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:propertyName="translationY"
-    android:valueTo="-57dp"
-    android:interpolator="@android:interpolator/fast_out_slow_in"
-    android:duration="@integer/recents_tv_pip_focus_anim_duration" />
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <objectAnimator
+        android:propertyName="translationY"
+        android:valueTo="-57dp"
+        android:interpolator="@android:interpolator/fast_out_slow_in"
+        android:duration="@integer/recents_tv_pip_focus_anim_duration" />
+    <objectAnimator
+        android:propertyName="scaleX"
+        android:valueTo="0.7"
+        android:interpolator="@android:interpolator/fast_out_slow_in"
+        android:duration="@integer/recents_tv_pip_focus_anim_duration" />
+    <objectAnimator
+        android:propertyName="scaleY"
+        android:valueTo="0.7"
+        android:interpolator="@android:interpolator/fast_out_slow_in"
+        android:duration="@integer/recents_tv_pip_focus_anim_duration" />
+</set>
