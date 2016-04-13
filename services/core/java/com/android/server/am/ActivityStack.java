@@ -4776,6 +4776,7 @@ final class ActivityStack {
             ci.numActivities = numActivities;
             ci.numRunning = numRunning;
             ci.isDockable = task.canGoInDockedStack();
+            ci.resizeMode = task.mResizeMode;
             list.add(ci);
         }
     }

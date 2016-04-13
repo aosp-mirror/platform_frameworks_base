@@ -214,15 +214,14 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
                     createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                boolean docked = mRecentsComponent.dockTopTask(dragMode, createMode, initialBounds);
+                boolean docked = mRecentsComponent.dockTopTask(dragMode, createMode, initialBounds,
+                        MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
                 if (docked) {
                     mDragMode = dragMode;
                     if (mDragMode == DRAG_MODE_DIVIDER) {
                         mDivider.getView().startDragging(false /* animate */, true /* touching*/);
                     }
                     mDockWindowTouchSlopExceeded = true;
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
-
                     return true;
                 }
             }
@@ -250,7 +249,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                         mIsVertical
                                 ? mVelocityTracker.getXVelocity()
                                 : mVelocityTracker.getYVelocity(),
-                        true /* avoidDismissStart */);
+                        true /* avoidDismissStart */, false /* logMetrics */);
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecentsEnded(mVelocityTracker.getYVelocity());
             }

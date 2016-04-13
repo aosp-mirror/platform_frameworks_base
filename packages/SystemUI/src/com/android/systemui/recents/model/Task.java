@@ -19,6 +19,7 @@ package com.android.systemui.recents.model;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -174,6 +175,15 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isDockable;
 
+    /**
+     * Resize mode. See {@link ActivityInfo#resizeMode}.
+     */
+    @ViewDebug.ExportedProperty(category="recents")
+    public int resizeMode;
+
+    @ViewDebug.ExportedProperty(category="recents")
+    public ComponentName topActivity;
+
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
     public Task() {
@@ -184,7 +194,8 @@ public class Task {
                 Bitmap thumbnail, String title, String titleDescription, String dismissDescription,
                 String appInfoDescription, int colorPrimary, int colorBackground,
                 boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
-                boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription) {
+                boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
+                int resizeMode, ComponentName topActivity) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -206,6 +217,8 @@ public class Task {
         this.isStackTask = isStackTask;
         this.isSystemApp = isSystemApp;
         this.isDockable = isDockable;
+        this.resizeMode = resizeMode;
+        this.topActivity = topActivity;
     }
 
     /**
@@ -231,6 +244,8 @@ public class Task {
         this.isStackTask = o.isStackTask;
         this.isSystemApp = o.isSystemApp;
         this.isDockable = o.isDockable;
+        this.resizeMode = o.resizeMode;
+        this.topActivity = o.topActivity;
     }
 
     /**
