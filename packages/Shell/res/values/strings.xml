@@ -20,8 +20,6 @@
     <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
     <string name="bugreport_finished_title">Bug report <xliff:g id="id">#%d</xliff:g> captured</string>
-    <!-- Title of notification indicating a bugreport has been successfully captured, but screenshot is not finished yet. [CHAR LIMIT=50] -->
-    <string name="bugreport_finished_pending_screenshot_title">Bug report <xliff:g id="id">#%d</xliff:g> captured but screenshot pending</string>
     <!-- Title of notification indicating a bugreport is being updated before it can be shared. [CHAR LIMIT=50] -->
     <string name="bugreport_updating_title">Adding details to the bug report</string>
     <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
