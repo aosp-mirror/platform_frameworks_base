@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.TAG;
+import static com.android.documentsui.State.ACTION_CREATE;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -107,8 +108,9 @@ public class RecentsCreateFragment extends Fragment {
                 mAdapter.update(data);
 
                 // When launched into empty recents, show drawer
-                if (mAdapter.isEmpty() && !state.hasLocationChanged() &&
-                        context instanceof DocumentsActivity) {
+                if (mAdapter.isEmpty() && !state.hasLocationChanged()
+                        && state.action != ACTION_CREATE
+                        && context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
             }
