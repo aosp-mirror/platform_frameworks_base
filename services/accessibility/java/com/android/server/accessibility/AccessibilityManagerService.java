@@ -1311,6 +1311,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (userState.mIsDisplayMagnificationEnabled) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
             }
+            if (userHasMagnificationServicesLocked(userState)) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER;
+            }
             // Touch exploration without accessibility makes no sense.
             if (userState.isHandlingAccessibilityEvents()
                     && userState.mIsTouchExplorationEnabled) {

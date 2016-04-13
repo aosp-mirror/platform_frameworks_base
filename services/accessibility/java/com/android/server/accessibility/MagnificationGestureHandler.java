@@ -80,7 +80,6 @@ class MagnificationGestureHandler implements EventStreamTransformation {
     private static final boolean DEBUG_STATE_TRANSITIONS = false;
     private static final boolean DEBUG_DETECTING = false;
     private static final boolean DEBUG_PANNING = false;
-    private static final boolean DEBUG_SCALING = false;
 
     private static final int STATE_DELEGATING = 1;
     private static final int STATE_DETECTING = 2;
@@ -95,6 +94,9 @@ class MagnificationGestureHandler implements EventStreamTransformation {
     private final MagnifiedContentInteractionStateHandler mMagnifiedContentInteractionStateHandler;
     private final StateViewportDraggingHandler mStateViewportDraggingHandler;
 
+
+    private final boolean mDetectControlGestures;
+
     private EventStreamTransformation mNext;
 
     private int mCurrentState;
@@ -107,12 +109,14 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
     private long mDelegatingStateDownTime;
 
-    public MagnificationGestureHandler(Context context, AccessibilityManagerService ams) {
+    public MagnificationGestureHandler(Context context, AccessibilityManagerService ams,
+            boolean detectControlGestures) {
         mMagnificationController = ams.getMagnificationController();
         mDetectingStateHandler = new DetectingStateHandler(context);
         mStateViewportDraggingHandler = new StateViewportDraggingHandler();
         mMagnifiedContentInteractionStateHandler =
                 new MagnifiedContentInteractionStateHandler(context);
+        mDetectControlGestures = detectControlGestures;
 
         transitionToState(STATE_DETECTING);
     }
@@ -122,6 +126,12 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
             if (mNext != null) {
                 mNext.onMotionEvent(event, rawEvent, policyFlags);
+            }
+            return;
+        }
+        if (!mDetectControlGestures) {
+            if (mNext != null) {
+                dispatchTransformedEvent(event, rawEvent, policyFlags);
             }
             return;
         }
@@ -140,7 +150,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             }
             break;
             case STATE_MAGNIFIED_INTERACTION: {
-                // mMagnifiedContentInteractonStateHandler handles events only
+                // mMagnifiedContentInteractionStateHandler handles events only
                 // if this is the current state since it uses ScaleGestureDetecotr
                 // and a GestureDetector which need well formed event stream.
             }
@@ -208,31 +218,6 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             break;
         }
         if (mNext != null) {
-            // If the event is within the magnified portion of the screen we have
-            // to change its location to be where the user thinks he is poking the
-            // UI which may have been magnified and panned.
-            final float eventX = event.getX();
-            final float eventY = event.getY();
-            if (mMagnificationController.isMagnifying()
-                    && mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
-                final float scale = mMagnificationController.getScale();
-                final float scaledOffsetX = mMagnificationController.getOffsetX();
-                final float scaledOffsetY = mMagnificationController.getOffsetY();
-                final int pointerCount = event.getPointerCount();
-                PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
-                PointerProperties[] properties = getTempPointerPropertiesWithMinSize(
-                        pointerCount);
-                for (int i = 0; i < pointerCount; i++) {
-                    event.getPointerCoords(i, coords[i]);
-                    coords[i].x = (coords[i].x - scaledOffsetX) / scale;
-                    coords[i].y = (coords[i].y - scaledOffsetY) / scale;
-                    event.getPointerProperties(i, properties[i]);
-                }
-                event = MotionEvent.obtain(event.getDownTime(),
-                        event.getEventTime(), event.getAction(), pointerCount, properties,
-                        coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
-                        event.getFlags());
-            }
             // We cache some events to see if the user wants to trigger magnification.
             // If no magnification is triggered we inject these events with adjusted
             // time and down time to prevent subsequent transformations being confused
@@ -240,8 +225,38 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             // injected we need to also update the down time of all subsequent non cached
             // events. All delegated events cached and non-cached are delivered here.
             event.setDownTime(mDelegatingStateDownTime);
-            mNext.onMotionEvent(event, rawEvent, policyFlags);
+            dispatchTransformedEvent(event, rawEvent, policyFlags);
         }
+    }
+
+    private void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
+            int policyFlags) {
+        // If the event is within the magnified portion of the screen we have
+        // to change its location to be where the user thinks he is poking the
+        // UI which may have been magnified and panned.
+        final float eventX = event.getX();
+        final float eventY = event.getY();
+        if (mMagnificationController.isMagnifying()
+                && mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
+            final float scale = mMagnificationController.getScale();
+            final float scaledOffsetX = mMagnificationController.getOffsetX();
+            final float scaledOffsetY = mMagnificationController.getOffsetY();
+            final int pointerCount = event.getPointerCount();
+            PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
+            PointerProperties[] properties = getTempPointerPropertiesWithMinSize(
+                    pointerCount);
+            for (int i = 0; i < pointerCount; i++) {
+                event.getPointerCoords(i, coords[i]);
+                coords[i].x = (coords[i].x - scaledOffsetX) / scale;
+                coords[i].y = (coords[i].y - scaledOffsetY) / scale;
+                event.getPointerProperties(i, properties[i]);
+            }
+            event = MotionEvent.obtain(event.getDownTime(),
+                    event.getEventTime(), event.getAction(), pointerCount, properties,
+                    coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
+                    event.getFlags());
+        }
+        mNext.onMotionEvent(event, rawEvent, policyFlags);
     }
 
     private PointerCoords[] getTempPointerCoordsWithMinSize(int size) {
