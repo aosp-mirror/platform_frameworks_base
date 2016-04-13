@@ -70,11 +70,21 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     static final int FLAG_FEATURE_AUTOCLICK = 0x00000008;
 
     /**
-     * Flag for enabling motion event injectsion
+     * Flag for enabling motion event injection.
      *
      * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_FEATURE_INJECT_MOTION_EVENTS = 0x00000010;
+
+    /**
+     * Flag for enabling the feature to control the screen magnifier. If
+     * {@link #FLAG_FEATURE_SCREEN_MAGNIFIER} is set this flag is ignored
+     * as the screen magnifier feature performs a super set of the work
+     * performed by this feature.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER = 0x00000020;
 
     private final Runnable mProcessBatchedEventsRunnable = new Runnable() {
         @Override
@@ -373,8 +383,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             addFirstEventHandler(mTouchExplorer);
         }
 
-        if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
-            mMagnificationGestureHandler = new MagnificationGestureHandler(mContext, mAms);
+        if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
+                || (mEnabledFeatures  & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
+            final boolean detectControlGestures = (mEnabledFeatures
+                    & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
+            mMagnificationGestureHandler = new MagnificationGestureHandler(
+                    mContext, mAms, detectControlGestures);
             addFirstEventHandler(mMagnificationGestureHandler);
         }
 
