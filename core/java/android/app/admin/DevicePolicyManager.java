@@ -6050,11 +6050,13 @@ public class DevicePolicyManager {
      * {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param color The 32bit representation of the color to be used.
+     * @param color The 24bit (0xRRGGBB) representation of the color to be used.
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setOrganizationColor(@NonNull ComponentName admin, int color) {
         try {
+            // always enforce alpha channel to have 100% opacity
+            color |= 0xFF000000;
             mService.setOrganizationColor(admin, color);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -6066,7 +6068,7 @@ public class DevicePolicyManager {
      *
      * Sets the color used for customization.
      *
-     * @param color The 32bit representation of the color to be used.
+     * @param color The 24bit (0xRRGGBB) representation of the color to be used.
      * @param userId which user to set the color to.
      * @RequiresPermission(allOf = {
      *       Manifest.permission.MANAGE_USERS,
@@ -6074,6 +6076,8 @@ public class DevicePolicyManager {
      */
     public void setOrganizationColorForUser(@ColorInt int color, @UserIdInt int userId) {
         try {
+            // always enforce alpha channel to have 100% opacity
+            color |= 0xFF000000;
             mService.setOrganizationColorForUser(color, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -6085,10 +6089,10 @@ public class DevicePolicyManager {
      * This color is used as background color of the confirm credentials screen for that user.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The 32bit representation of the color to be used.
+     * @return The 24bit (0xRRGGBB) representation of the color to be used.
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
-    public int getOrganizationColor(@NonNull ComponentName admin) {
+    public @ColorInt int getOrganizationColor(@NonNull ComponentName admin) {
         try {
             return mService.getOrganizationColor(admin);
         } catch (RemoteException re) {
@@ -6101,9 +6105,9 @@ public class DevicePolicyManager {
      * Retrieve the customization color for a given user.
      *
      * @param userHandle The user id of the user we're interested in.
-     * @return The 32bit representation of the color to be used.
+     * @return The 24bit (0xRRGGBB) representation of the color to be used.
      */
-    public int getOrganizationColorForUser(int userHandle) {
+    public @ColorInt int getOrganizationColorForUser(int userHandle) {
         try {
             return mService.getOrganizationColorForUser(userHandle);
         } catch (RemoteException re) {
@@ -6123,7 +6127,7 @@ public class DevicePolicyManager {
      * @param title The organization name or {@code null} to clear a previously set name.
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
-    public void setOrganizationName(@NonNull ComponentName admin, @Nullable String title) {
+    public void setOrganizationName(@NonNull ComponentName admin, @Nullable CharSequence title) {
         try {
             mService.setOrganizationName(admin, title);
         } catch (RemoteException re) {
@@ -6139,7 +6143,7 @@ public class DevicePolicyManager {
      * @return The organization name or {@code null} if none is set.
      * @throws SecurityException if {@code admin} is not a profile owner.
      */
-    public String getOrganizationName(@NonNull ComponentName admin) {
+    public CharSequence getOrganizationName(@NonNull ComponentName admin) {
         try {
             return mService.getOrganizationName(admin);
         } catch (RemoteException re) {
@@ -6155,7 +6159,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    public String getOrganizationNameForUser(int userHandle) {
+    public CharSequence getOrganizationNameForUser(int userHandle) {
         try {
             return mService.getOrganizationNameForUser(userHandle);
         } catch (RemoteException re) {
