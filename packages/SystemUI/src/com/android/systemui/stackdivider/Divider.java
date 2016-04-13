@@ -146,5 +146,10 @@ public class Divider extends SystemUI {
                 throws RemoteException {
             updateMinimizedDockedStack(minimized, animDuration);
         }
+
+        @Override
+        public void onDockSideChanged(final int newDockSide) throws RemoteException {
+            mView.post(() -> mView.notifyDockSideChanged(newDockSide));
+        }
     }
 }

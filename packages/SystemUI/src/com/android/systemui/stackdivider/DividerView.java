@@ -88,7 +88,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     /**
      * How much the background gets scaled when we are in the minimized dock state.
      */
-    private static final float MINIMIZE_DOCK_SCALE = 0.375f;
+    private static final float MINIMIZE_DOCK_SCALE = 0f;
 
     private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
@@ -97,6 +97,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private DividerHandleView mHandle;
     private View mBackground;
+    private MinimizedDockShadow mMinimizedShadow;
     private int mStartX;
     private int mStartY;
     private int mStartPosition;
@@ -203,6 +204,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         super.onFinishInflate();
         mHandle = (DividerHandleView) findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
+        mMinimizedShadow = (MinimizedDockShadow) findViewById(R.id.minimized_dock_shadow);
         mHandle.setOnTouchListener(this);
         mDividerWindowWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
@@ -269,6 +271,18 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        int minimizeLeft = 0;
+        int minimizeTop = 0;
+        if (mDockSide == WindowManager.DOCKED_TOP) {
+            minimizeTop = mBackground.getTop();
+        } else if (mDockSide == WindowManager.DOCKED_LEFT) {
+            minimizeLeft = mBackground.getLeft();
+        } else if (mDockSide == WindowManager.DOCKED_RIGHT) {
+            minimizeLeft = mBackground.getRight() - mMinimizedShadow.getWidth();
+        }
+        mMinimizedShadow.layout(minimizeLeft, minimizeTop,
+                minimizeLeft + mMinimizedShadow.getMeasuredWidth(),
+                minimizeTop + mMinimizedShadow.getMeasuredHeight());
         if (changed) {
             mWindowManagerProxy.setTouchRegion(new Rect(mHandle.getLeft(), mHandle.getTop(),
                     mHandle.getRight(), mHandle.getBottom()));
@@ -327,6 +341,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private void updateDockSide() {
         mDockSide = mWindowManagerProxy.getDockSide();
+        mMinimizedShadow.setDockSide(mDockSide);
     }
 
     private void initializeSnapAlgorithm() {
@@ -541,6 +556,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     : mBackground.getWidth());
             mBackground.setScaleX(MINIMIZE_DOCK_SCALE);
         }
+        mMinimizedShadow.setAlpha(minimized ? 1f : 0f);
         mDockedStackMinimized = minimized;
     }
 
@@ -566,6 +582,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (!minimized) {
             mBackground.animate().withEndAction(mResetBackgroundRunnable);
         }
+        mMinimizedShadow.animate()
+                .alpha(minimized ? 1f : 0f)
+                .setInterpolator(Interpolators.ALPHA_IN)
+                .setDuration(animDuration)
+                .start();
         mBackground.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(animDuration)
@@ -578,12 +599,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mBackground.setPivotY(mBackground.getHeight() / 2);
         mBackground.setScaleX(1f);
         mBackground.setScaleY(1f);
+        mMinimizedShadow.setAlpha(0f);
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateDisplayInfo();
+    }
+
+
+    public void notifyDockSideChanged(int newDockSide) {
+        mDockSide = newDockSide;
+        mMinimizedShadow.setDockSide(mDockSide);
+        requestLayout();
     }
 
     private void updateDisplayInfo() {
