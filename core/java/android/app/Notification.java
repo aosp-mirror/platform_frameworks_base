@@ -3308,7 +3308,16 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
-            RemoteViews big = applyStandardTemplate(layoutId);
+            final Bundle ex = mN.extras;
+
+            CharSequence title = processLegacyText(ex.getCharSequence(EXTRA_TITLE));
+            CharSequence text = processLegacyText(ex.getCharSequence(EXTRA_TEXT));
+            return applyStandardTemplateWithActions(layoutId, true /* hasProgress */, title, text);
+        }
+
+        private RemoteViews applyStandardTemplateWithActions(int layoutId, boolean hasProgress,
+                CharSequence title, CharSequence text) {
+            RemoteViews big = applyStandardTemplate(layoutId, hasProgress, title, text);
 
             resetStandardTemplateWithActions(big);
 
@@ -4429,7 +4438,7 @@ public class Notification implements Parcelable
                     : mConversationTitle;
             boolean hasTitle = !TextUtils.isEmpty(title);
 
-            RemoteViews contentView = mBuilder.applyStandardTemplate(
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
                     false /* hasProgress */,
                     title,
