@@ -290,7 +290,7 @@ class DisplayContent {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
             stack.getBounds(mTmpRect);
-            if (!mTmpRect.contains(x, y)) {
+            if (!mTmpRect.contains(x, y) || stack.isAdjustedForMinimizedDockedStack()) {
                 continue;
             }
             final ArrayList<Task> tasks = stack.getTasks();
