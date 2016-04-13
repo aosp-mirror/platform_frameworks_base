@@ -876,22 +876,24 @@ public class AudioRecord implements AudioRouting
      * Calling {@link #startRecording()} following a {@link #stop()} will reset
      * the frame count to 0.
      *
-     * @param timestamp a reference to a non-null AudioTimestamp instance.
+     * @param outTimestamp a caller provided non-null AudioTimestamp instance,
+     *        which is updated with the AudioRecord frame delivery information upon success.
      * @param timebase one of
      *        {@link AudioTimestamp#TIMEBASE_BOOTTIME AudioTimestamp.TIMEBASE_BOOTTIME} or
-     *        {@link AudioTimestamp#TIMEBASE_MONOTONIC AudioTimestamp.TIMEBASE_MONOTONIC}.
+     *        {@link AudioTimestamp#TIMEBASE_MONOTONIC AudioTimestamp.TIMEBASE_MONOTONIC},
+     *        used to select the clock for the AudioTimestamp time.
      * @return {@link #SUCCESS} if a timestamp is available,
      *         or {@link #ERROR_INVALID_OPERATION} if a timestamp not available.
      */
-     public int getTimestamp(@NonNull AudioTimestamp timestamp,
+     public int getTimestamp(@NonNull AudioTimestamp outTimestamp,
              @AudioTimestamp.Timebase int timebase)
      {
-         if (timestamp == null ||
+         if (outTimestamp == null ||
                  (timebase != AudioTimestamp.TIMEBASE_BOOTTIME
                  && timebase != AudioTimestamp.TIMEBASE_MONOTONIC)) {
              throw new IllegalArgumentException();
          }
-         return native_get_timestamp(timestamp, timebase);
+         return native_get_timestamp(outTimestamp, timebase);
      }
 
     /**
@@ -1725,7 +1727,7 @@ public class AudioRecord implements AudioRouting
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
 
-    private native final int native_get_timestamp(@NonNull AudioTimestamp timestamp,
+    private native final int native_get_timestamp(@NonNull AudioTimestamp outTimestamp,
             @AudioTimestamp.Timebase int timebase);
 
     //---------------------------------------------------------
