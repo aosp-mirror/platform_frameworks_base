@@ -7085,9 +7085,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
         }
 
-        UsageStatsManager usageMgr =
-                (UsageStatsManager) mContext.getSystemService(Context.USAGE_STATS_SERVICE);
-
         int curr = 0;
         int total = pkgs.size();
         for (PackageParser.Package pkg : pkgs) {
@@ -7096,13 +7093,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping update of of non-optimizable app " + pkg.packageName);
-                }
-                continue;
-            }
-
-            if (!causeFirstBoot && usageMgr.isAppInactive(pkg.packageName)) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Skipping update of of idle app " + pkg.packageName);
                 }
                 continue;
             }
