@@ -260,6 +260,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
                 : mMaxHeadsUpHeight;
         layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
+        if (mSettingsIconRow != null) {
+            mSettingsIconRow.updateVerticalLocation();
+        }
     }
 
     public StatusBarNotification getStatusBarNotification() {
