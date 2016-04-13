@@ -2191,6 +2191,33 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
 
+    // ------- Begin N App Disambig Shade -----
+    // Application disambig shade opened or closed with a featured app.
+    // These are actually visibility events, but visible/hidden doesn't
+    // take a package, so these are being logged as actions.
+    // Package: Calling app on open, called app on close
+    ACTION_SHOW_APP_DISAMBIG_APP_FEATURED = 402;
+    ACTION_HIDE_APP_DISAMBIG_APP_FEATURED = 403;
+
+    // Application disambig shade opened or closed without a featured app.
+    // These are actually visibility events, but visible/hidden doesn't
+    // take a package, so these are being logged as actions.
+    // Package: Calling app on open, called app on close
+    ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED = 404;
+    ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED = 405;
+
+    // User opens in an app by pressing “Always” in the application disambig shade.
+    // Subtype: Index of selection
+    ACTION_APP_DISAMBIG_ALWAYS = 406;
+
+    // User opens in an app by pressing “Just Once” in the application disambig shade.
+    // Subtype: Index of selection
+    ACTION_APP_DISAMBIG_JUST_ONCE = 407;
+
+    // User opens in an app by tapping on its name in the application disambig shade.
+    // Subtype: Index of selection
+    ACTION_APP_DISAMBIG_TAP = 408;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

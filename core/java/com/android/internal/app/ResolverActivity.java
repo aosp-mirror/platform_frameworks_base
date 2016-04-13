@@ -69,9 +69,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -359,6 +363,11 @@ public class ResolverActivity extends Activity {
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
+        MetricsLogger.action(this, mAdapter.hasFilteredItem()
+                ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
+                : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
+                intent.getAction() + ":" + intent.getType() + ":"
+                        + Arrays.toString(intent.getCategories().toArray()));
     }
 
     public final void setFilteredComponents(ComponentName[] components) {
@@ -649,6 +658,19 @@ public class ResolverActivity extends Activity {
 
         TargetInfo target = mAdapter.targetInfoForPosition(which, filtered);
         if (onTargetSelected(target, always)) {
+            if (always && filtered) {
+                MetricsLogger.action(
+                        this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_ALWAYS);
+            } else if (filtered) {
+                MetricsLogger.action(
+                        this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_JUST_ONCE);
+            } else {
+                MetricsLogger.action(
+                        this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_TAP);
+            }
+            MetricsLogger.action(this, mAdapter.hasFilteredItem()
+                            ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
+                            : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
             finish();
         }
     }
