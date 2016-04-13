@@ -1268,6 +1268,11 @@ public final class MultiSelectManager {
             notifySelectionChanged();
         }
 
+        @Override
+        public boolean onBeforeItemStateChange(String id, boolean nextState) {
+            return notifyBeforeItemStateChange(id, nextState);
+        }
+
         private class ViewScroller implements Runnable {
             /**
              * The number of milliseconds of scrolling at which scroll speed continues to increase.
@@ -1655,7 +1660,9 @@ public final class MultiSelectManager {
                         if (id != null) {
                             // The adapter inserts items for UI layout purposes that aren't associated
                             // with files.  Those will have a null model ID.  Don't select them.
-                            mSelection.add(id);
+                            if (canSelect(id)) {
+                                mSelection.add(id);
+                            }
                         }
                         if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
                                 row, rowStartIndex, rowEndIndex)) {
@@ -1666,6 +1673,21 @@ public final class MultiSelectManager {
                     }
                 }
             }
+        }
+
+        /**
+         * @return True if the item is selectable.
+         */
+        private boolean canSelect(String id) {
+            // TODO: Simplify the logic, so the check whether we can select is done in one place.
+            // Consider injecting FragmentTuner, or move the checks from MultiSelectManager to
+            // Selection.
+            for (OnSelectionChangedListener listener : mOnSelectionChangedListeners) {
+                if (!listener.onBeforeItemStateChange(id, true)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /**
@@ -1700,6 +1722,7 @@ public final class MultiSelectManager {
          */
         static interface OnSelectionChangedListener {
             public void onSelectionChanged(Set<String> updatedSelection);
+            public boolean onBeforeItemStateChange(String id, boolean nextState);
         }
 
         void addOnSelectionChangedListener(OnSelectionChangedListener listener) {
