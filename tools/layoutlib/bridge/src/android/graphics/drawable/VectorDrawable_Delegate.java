@@ -90,7 +90,7 @@ public class VectorDrawable_Delegate {
     }
 
     @LayoutlibDelegate
-    static long nCreateRenderer(long rootGroupPtr) {
+    static long nCreateTree(long rootGroupPtr) {
         VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
         return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroup));
     }
