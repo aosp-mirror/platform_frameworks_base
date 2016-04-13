@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.TimeUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -46,12 +47,17 @@ public class ContentObserverController extends StateController {
      */
     private static final int MAX_URIS_REPORTED = 50;
 
+    /**
+     * At this point we consider it urgent to schedule the job ASAP.
+     */
+    private static final int URIS_URGENT_THRESHOLD = 40;
+
     private static final Object sCreationLock = new Object();
     private static volatile ContentObserverController sController;
 
     final private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     ArrayMap<Uri, ObserverInstance> mObservers = new ArrayMap<>();
-    final Handler mHandler = new Handler();
+    final Handler mHandler;
 
     public static ContentObserverController get(JobSchedulerService taskManagerService) {
         synchronized (sCreationLock) {
@@ -72,6 +78,7 @@ public class ContentObserverController extends StateController {
     private ContentObserverController(StateChangedListener stateChangedListener, Context context,
                 Object lock) {
         super(stateChangedListener, context, lock);
+        mHandler = new Handler(context.getMainLooper());
     }
 
     @Override
@@ -113,6 +120,11 @@ public class ContentObserverController extends StateController {
             taskStatus.changedUris = null;
             taskStatus.setContentTriggerConstraintSatisfied(havePendingUris);
         }
+        if (lastJob != null && lastJob.contentObserverJobInstance != null) {
+            // And now we can detach the instance state from the last job.
+            lastJob.contentObserverJobInstance.detachLocked();
+            lastJob.contentObserverJobInstance = null;
+        }
     }
 
     @Override
@@ -133,30 +145,33 @@ public class ContentObserverController extends StateController {
             boolean forUpdate) {
         if (taskStatus.hasContentTriggerConstraint()) {
             if (taskStatus.contentObserverJobInstance != null) {
-                if (incomingJob != null && taskStatus.contentObserverJobInstance != null
-                        && taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
-                    // We are stopping this job, but it is going to be replaced by this given
-                    // incoming job.  We want to propagate our state over to it, so we don't
-                    // lose any content changes that had happend since the last one started.
-                    // If there is a previous job associated with the new job, propagate over
-                    // any pending content URI trigger reports.
-                    if (incomingJob.contentObserverJobInstance == null) {
-                        incomingJob.contentObserverJobInstance = new JobInstance(incomingJob);
+                taskStatus.contentObserverJobInstance.unscheduleLocked();
+                if (incomingJob != null) {
+                    if (taskStatus.contentObserverJobInstance != null
+                            && taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
+                        // We are stopping this job, but it is going to be replaced by this given
+                        // incoming job.  We want to propagate our state over to it, so we don't
+                        // lose any content changes that had happend since the last one started.
+                        // If there is a previous job associated with the new job, propagate over
+                        // any pending content URI trigger reports.
+                        if (incomingJob.contentObserverJobInstance == null) {
+                            incomingJob.contentObserverJobInstance = new JobInstance(incomingJob);
+                        }
+                        incomingJob.contentObserverJobInstance.mChangedAuthorities
+                                = taskStatus.contentObserverJobInstance.mChangedAuthorities;
+                        incomingJob.contentObserverJobInstance.mChangedUris
+                                = taskStatus.contentObserverJobInstance.mChangedUris;
+                        taskStatus.contentObserverJobInstance.mChangedAuthorities = null;
+                        taskStatus.contentObserverJobInstance.mChangedUris = null;
                     }
-                    incomingJob.contentObserverJobInstance.mChangedAuthorities
-                            = taskStatus.contentObserverJobInstance.mChangedAuthorities;
-                    incomingJob.contentObserverJobInstance.mChangedUris
-                            = taskStatus.contentObserverJobInstance.mChangedUris;
-                    taskStatus.contentObserverJobInstance.mChangedAuthorities = null;
-                    taskStatus.contentObserverJobInstance.mChangedUris = null;
+                    // We won't detach the content observers here, because we want to
+                    // allow them to continue monitoring so we don't miss anything...  and
+                    // since we are giving an incomingJob here, we know this will be
+                    // immediately followed by a start tracking of that job.
                 } else {
-                    // We won't do this reset if being called for an update, because
-                    // we know it will be immediately followed by maybeStartTrackingJobLocked...
-                    // and we don't want to lose any content changes in-between.
-                    if (taskStatus.contentObserverJobInstance != null) {
-                        taskStatus.contentObserverJobInstance.detach();
-                        taskStatus.contentObserverJobInstance = null;
-                    }
+                    // But here there is no incomingJob, so nothing coming up, so time to detach.
+                    taskStatus.contentObserverJobInstance.detachLocked();
+                    taskStatus.contentObserverJobInstance = null;
                 }
             }
             mTrackedTasks.remove(taskStatus);
@@ -177,9 +192,9 @@ public class ContentObserverController extends StateController {
         }
     }
 
-    class ObserverInstance extends ContentObserver {
+    final class ObserverInstance extends ContentObserver {
         final Uri mUri;
-        final ArrayList<JobInstance> mJobs = new ArrayList<>();
+        final ArraySet<JobInstance> mJobs = new ArraySet<>();
 
         public ObserverInstance(Handler handler, Uri uri) {
             super(handler);
@@ -188,11 +203,10 @@ public class ContentObserverController extends StateController {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            boolean reportChange = false;
             synchronized (mLock) {
                 final int N = mJobs.size();
                 for (int i=0; i<N; i++) {
-                    JobInstance inst = mJobs.get(i);
+                    JobInstance inst = mJobs.valueAt(i);
                     if (inst.mChangedUris == null) {
                         inst.mChangedUris = new ArraySet<>();
                     }
@@ -203,26 +217,38 @@ public class ContentObserverController extends StateController {
                         inst.mChangedAuthorities = new ArraySet<>();
                     }
                     inst.mChangedAuthorities.add(uri.getAuthority());
-                    if (inst.mJobStatus.setContentTriggerConstraintSatisfied(true)) {
-                        reportChange = true;
-                    }
+                    inst.scheduleLocked();
                 }
-            }
-            // Let the scheduler know that state has changed. This may or may not result in an
-            // execution.
-            if (reportChange) {
-                mStateChangedListener.onControllerStateChanged();
             }
         }
     }
 
-    class JobInstance extends ArrayList<ObserverInstance> {
-        private final JobStatus mJobStatus;
-        private ArraySet<Uri> mChangedUris;
-        private ArraySet<String> mChangedAuthorities;
+    static final class TriggerRunnable implements Runnable {
+        final JobInstance mInstance;
+
+        TriggerRunnable(JobInstance instance) {
+            mInstance = instance;
+        }
+
+        @Override public void run() {
+            mInstance.trigger();
+        }
+    }
+
+    final class JobInstance {
+        final ArrayList<ObserverInstance> mMyObservers = new ArrayList<>();
+        final JobStatus mJobStatus;
+        final Runnable mExecuteRunner;
+        final Runnable mTimeoutRunner;
+        ArraySet<Uri> mChangedUris;
+        ArraySet<String> mChangedAuthorities;
+
+        boolean mTriggerPending;
 
         JobInstance(JobStatus jobStatus) {
             mJobStatus = jobStatus;
+            mExecuteRunner = new TriggerRunnable(this);
+            mTimeoutRunner = new TriggerRunnable(this);
             final JobInfo.TriggerContentUri[] uris = jobStatus.getJob().getTriggerContentUris();
             if (uris != null) {
                 for (JobInfo.TriggerContentUri uri : uris) {
@@ -238,15 +264,54 @@ public class ContentObserverController extends StateController {
                                 obs);
                     }
                     obs.mJobs.add(this);
-                    add(obs);
+                    mMyObservers.add(obs);
                 }
             }
         }
 
-        void detach() {
-            final int N = size();
+        void trigger() {
+            boolean reportChange = false;
+            synchronized (mLock) {
+                if (mTriggerPending) {
+                    if (mJobStatus.setContentTriggerConstraintSatisfied(true)) {
+                        reportChange = true;
+                    }
+                    unscheduleLocked();
+                }
+            }
+            // Let the scheduler know that state has changed. This may or may not result in an
+            // execution.
+            if (reportChange) {
+                mStateChangedListener.onControllerStateChanged();
+            }
+        }
+
+        void scheduleLocked() {
+            if (!mTriggerPending) {
+                mTriggerPending = true;
+                mHandler.postDelayed(mTimeoutRunner, mJobStatus.getTriggerContentMaxDelay());
+            }
+            mHandler.removeCallbacks(mExecuteRunner);
+            if (mChangedUris.size() >= URIS_URGENT_THRESHOLD) {
+                // If we start getting near the limit, GO NOW!
+                mHandler.post(mExecuteRunner);
+            } else {
+                mHandler.postDelayed(mExecuteRunner, mJobStatus.getTriggerContentUpdateDelay());
+            }
+        }
+
+        void unscheduleLocked() {
+            if (mTriggerPending) {
+                mHandler.removeCallbacks(mExecuteRunner);
+                mHandler.removeCallbacks(mTimeoutRunner);
+                mTriggerPending = false;
+            }
+        }
+
+        void detachLocked() {
+            final int N = mMyObservers.size();
             for (int i=0; i<N; i++) {
-                final ObserverInstance obs = get(i);
+                final ObserverInstance obs = mMyObservers.get(i);
                 obs.mJobs.remove(this);
                 if (obs.mJobs.size() == 0) {
                     mContext.getContentResolver().unregisterContentObserver(obs);
@@ -259,39 +324,54 @@ public class ContentObserverController extends StateController {
     @Override
     public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("Content.");
+        boolean printed = false;
         Iterator<JobStatus> it = mTrackedTasks.iterator();
-        if (it.hasNext()) {
-            pw.print(String.valueOf(it.next().hashCode()));
-        }
         while (it.hasNext()) {
-            pw.print("," + String.valueOf(it.next().hashCode()));
+            if (!printed) {
+                pw.print("  ");
+                printed = true;
+            } else {
+                pw.print(",");
+            }
+            pw.print(System.identityHashCode(it.next()));
         }
-        pw.println();
+        if (printed) {
+            pw.println();
+        }
         int N = mObservers.size();
         if (N > 0) {
-            pw.println("URIs:");
+            pw.println("  Observers:");
             for (int i = 0; i < N; i++) {
                 ObserverInstance obs = mObservers.valueAt(i);
-                pw.print("  ");
-                pw.print(mObservers.keyAt(i));
-                pw.println(":");
                 pw.print("    ");
-                pw.println(obs);
-                pw.println("    Jobs:");
+                pw.print(mObservers.keyAt(i));
+                pw.print(" (");
+                pw.print(System.identityHashCode(obs));
+                pw.println("):");
+                pw.println("      Jobs:");
                 int M = obs.mJobs.size();
                 for (int j=0; j<M; j++) {
-                    JobInstance inst = obs.mJobs.get(j);
-                    pw.print("      ");
-                    pw.print(inst.hashCode());
+                    JobInstance inst = obs.mJobs.valueAt(j);
+                    pw.print("        ");
+                    pw.print(System.identityHashCode(inst.mJobStatus));
                     if (inst.mChangedAuthorities != null) {
                         pw.println(":");
-                        pw.println("        Changed Authorities:");
+                        if (inst.mTriggerPending) {
+                            pw.print("          Trigger pending: update=");
+                            TimeUtils.formatDuration(
+                                    inst.mJobStatus.getTriggerContentUpdateDelay(), pw);
+                            pw.print(", max=");
+                            TimeUtils.formatDuration(
+                                    inst.mJobStatus.getTriggerContentMaxDelay(), pw);
+                            pw.println();
+                        }
+                        pw.println("          Changed Authorities:");
                         for (int k=0; k<inst.mChangedAuthorities.size(); k++) {
                             pw.print("          ");
                             pw.println(inst.mChangedAuthorities.valueAt(k));
                         }
                         if (inst.mChangedUris != null) {
-                            pw.println("        Changed URIs:");
+                            pw.println("          Changed URIs:");
                             for (int k = 0; k<inst.mChangedUris.size(); k++) {
                                 pw.print("          ");
                                 pw.println(inst.mChangedUris.valueAt(k));

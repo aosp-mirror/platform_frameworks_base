@@ -28,6 +28,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobStore;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
@@ -45,9 +46,9 @@ public class DeviceIdleJobsController extends StateController {
 
     // Singleton factory
     private static Object sCreationLock = new Object();
-    final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     private static DeviceIdleJobsController sController;
 
+    private final JobSchedulerService mJobSchedulerService;
     private final PowerManager mPowerManager;
     private final DeviceIdleController.LocalService mLocalDeviceIdleController;
 
@@ -56,6 +57,12 @@ public class DeviceIdleJobsController extends StateController {
      */
     private boolean mDeviceIdleMode;
     private int[] mDeviceIdleWhitelistAppIds;
+
+    final JobStore.JobStatusFunctor mUpdateFunctor = new JobStore.JobStatusFunctor() {
+        @Override public void process(JobStatus jobStatus) {
+            updateTaskStateLocked(jobStatus);
+        }
+    };
 
     /**
      * Returns a singleton for the DeviceIdleJobsController
@@ -87,10 +94,11 @@ public class DeviceIdleJobsController extends StateController {
         }
     };
 
-    private DeviceIdleJobsController(StateChangedListener stateChangedListener, Context context,
+    private DeviceIdleJobsController(JobSchedulerService jobSchedulerService, Context context,
             Object lock) {
-        super(stateChangedListener, context, lock);
+        super(jobSchedulerService, context, lock);
 
+        mJobSchedulerService = jobSchedulerService;
         // Register for device idle mode changes
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mLocalDeviceIdleController =
@@ -115,9 +123,7 @@ public class DeviceIdleJobsController extends StateController {
             }
             mDeviceIdleMode = enabled;
             if (LOG_DEBUG) Slog.d(LOG_TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
-            for (JobStatus task : mTrackedTasks) {
-                updateTaskStateLocked(task);
-            }
+            mJobSchedulerService.getJobStore().forEachJob(mUpdateFunctor);
         }
         // Inform the job scheduler service about idle mode changes
         if (changed) {
@@ -160,25 +166,26 @@ public class DeviceIdleJobsController extends StateController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         synchronized (mLock) {
-            mTrackedTasks.add(jobStatus);
             updateTaskStateLocked(jobStatus);
         }
     }
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
-        mTrackedTasks.remove(jobStatus);
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(final PrintWriter pw) {
         pw.println("DeviceIdleJobsController");
-        for (JobStatus task : mTrackedTasks) {
-            pw.print(task.getSourcePackageName());
-            pw.print(":runnable="
-                    + ((task.satisfiedConstraints & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0));
-            pw.print(", ");
-        }
+        mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
+            @Override public void process(JobStatus jobStatus) {
+                pw.print("  ");
+                pw.print(jobStatus.getSourcePackageName());
+                pw.print(": runnable=");
+                pw.println((jobStatus.satisfiedConstraints
+                        & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
+            }
+        });
         pw.println();
     }
 }
