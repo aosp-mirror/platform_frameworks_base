@@ -48,6 +48,9 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         implements KeyListener {
     /* package */ static final Object OLD_SEL_START = new NoCopySpan.Concrete();
 
+    private static final int LINE_FEED = 0x0A;
+    private static final int CARRIAGE_RETURN = 0x0D;
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -110,34 +113,37 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         // Initial state
         final int STATE_START = 0;
 
+        // The offset is immediately before line feed.
+        final int STATE_LF = 1;
+
         // The offset is immediately before a KEYCAP.
-        final int STATE_BEFORE_KEYCAP = 1;
+        final int STATE_BEFORE_KEYCAP = 2;
         // The offset is immediately before a variation selector and a KEYCAP.
-        final int STATE_BEFORE_VS_AND_KEYCAP = 2;
+        final int STATE_BEFORE_VS_AND_KEYCAP = 3;
 
         // The offset is immediately before an emoji modifier.
-        final int STATE_BEFORE_EMOJI_MODIFIER = 3;
+        final int STATE_BEFORE_EMOJI_MODIFIER = 4;
         // The offset is immediately before a variation selector and an emoji modifier.
-        final int STATE_BEFORE_VS_AND_EMOJI_MODIFIER = 4;
+        final int STATE_BEFORE_VS_AND_EMOJI_MODIFIER = 5;
 
         // The offset is immediately before a variation selector.
-        final int STATE_BEFORE_VS = 5;
+        final int STATE_BEFORE_VS = 6;
 
         // The offset is immediately before a ZWJ emoji.
-        final int STATE_BEFORE_ZWJ_EMOJI = 6;
+        final int STATE_BEFORE_ZWJ_EMOJI = 7;
         // The offset is immediately before a ZWJ that were seen before a ZWJ emoji.
-        final int STATE_BEFORE_ZWJ = 7;
+        final int STATE_BEFORE_ZWJ = 8;
         // The offset is immediately before a variation selector and a ZWJ that were seen before a
         // ZWJ emoji.
-        final int STATE_BEFORE_VS_AND_ZWJ = 8;
+        final int STATE_BEFORE_VS_AND_ZWJ = 9;
 
         // The number of following RIS code points is odd.
-        final int STATE_ODD_NUMBERED_RIS = 9;
+        final int STATE_ODD_NUMBERED_RIS = 10;
         // The number of following RIS code points is even.
-        final int STATE_EVEN_NUMBERED_RIS = 10;
+        final int STATE_EVEN_NUMBERED_RIS = 11;
 
         // The state machine has been stopped.
-        final int STATE_FINISHED = 11;
+        final int STATE_FINISHED = 12;
 
         int deleteCharCount = 0;  // Char count to be deleted by backspace.
         int lastSeenVSCharCount = 0;  // Char count of previous variation selector.
@@ -152,7 +158,9 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
             switch (state) {
                 case STATE_START:
                     deleteCharCount = Character.charCount(codePoint);
-                    if (isVariationSelector(codePoint)) {
+                    if (codePoint == LINE_FEED) {
+                        state = STATE_LF;
+                    } else if (isVariationSelector(codePoint)) {
                         state = STATE_BEFORE_VS;
                     } else if (Emoji.isZwjEmoji(codePoint)) {
                         state = STATE_BEFORE_ZWJ_EMOJI;
@@ -166,6 +174,11 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                         state = STATE_FINISHED;
                     }
                     break;
+                case STATE_LF:
+                    if (codePoint == CARRIAGE_RETURN) {
+                        ++deleteCharCount;
+                    }
+                    state = STATE_FINISHED;
                 case STATE_ODD_NUMBERED_RIS:
                     if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
                         deleteCharCount += 2; /* Char count of RIS */
