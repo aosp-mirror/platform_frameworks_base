@@ -334,15 +334,6 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         }
     }
 
-    public Drawable loadToolbarIcon(Context context) {
-        if (derivedIcon != 0) {
-            return IconUtils.applyTintAttr(context, derivedIcon,
-                    android.R.attr.colorControlNormal);
-        } else {
-            return IconUtils.loadPackageIcon(context, authority, icon);
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null) {
