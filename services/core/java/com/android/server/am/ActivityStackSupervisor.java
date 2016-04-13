@@ -1759,8 +1759,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void findTaskToMoveToFrontLocked(
-            TaskRecord task, int flags, ActivityOptions options, String reason) {
+    void findTaskToMoveToFrontLocked(TaskRecord task, int flags, ActivityOptions options,
+            String reason, boolean forceNonResizeable) {
         if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
             mUserLeaving = true;
         }
@@ -1811,7 +1811,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
 
-        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId);
+        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId,
+                forceNonResizeable);
     }
 
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
@@ -3360,19 +3361,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    void handleNonResizableTaskIfNeeded(TaskRecord task, int preferredStackId, int actualStackId) {
+        handleNonResizableTaskIfNeeded(task, preferredStackId, actualStackId,
+                false /* forceNonResizable */);
+    }
+
     void handleNonResizableTaskIfNeeded(
-            TaskRecord task, int preferredStackId, int actualStackId) {
+            TaskRecord task, int preferredStackId, int actualStackId, boolean forceNonResizable) {
         if ((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
                 || task.isHomeTask()) {
             return;
         }
 
-        if (!task.canGoInDockedStack()) {
+        if (!task.canGoInDockedStack() || forceNonResizable) {
             // Display a warning toast that we tried to put a non-dockable task in the docked stack.
             mService.mHandler.sendEmptyMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
 
-            // Dismiss docked stack.
-            mService.moveTasksToFullscreenStack(DOCKED_STACK_ID, false);
+            // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
+            // we need to move it to top of fullscreen stack, otherwise it will be covered.
+            mService.moveTasksToFullscreenStack(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
         } else if (task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
             String packageName = task.getTopActivity() != null
                     ? task.getTopActivity().appInfo.packageName : null;
@@ -3443,8 +3450,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (andResume) {
-            findTaskToMoveToFrontLocked(task, 0, null, reason);
+            findTaskToMoveToFrontLocked(task, 0, null, reason,
+                    lockTaskModeState != LOCK_TASK_MODE_NONE);
             resumeFocusedStackTopActivityLocked();
+        } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
+            handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId,
+                    true /* forceNonResizable */);
         }
     }
 
