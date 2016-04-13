@@ -16,7 +16,9 @@
 
 package com.android.internal.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
@@ -24,6 +26,7 @@ import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
 import android.content.pm.ComponentInfo;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -119,37 +122,62 @@ public class ResolverActivity extends Activity {
         }
     };
 
+    /**
+     * Get the string resource to be used as a label for the link to the resolver activity for an
+     * action.
+     *
+     * @param action The action to resolve
+     *
+     * @return The string resource to be used as a label
+     */
+    public static @StringRes int getLabelRes(String action) {
+        return ActionTitle.forAction(action).labelRes;
+    }
+
     private enum ActionTitle {
         VIEW(Intent.ACTION_VIEW,
                 com.android.internal.R.string.whichViewApplication,
-                com.android.internal.R.string.whichViewApplicationNamed),
+                com.android.internal.R.string.whichViewApplicationNamed,
+                com.android.internal.R.string.whichViewApplicationLabel),
         EDIT(Intent.ACTION_EDIT,
                 com.android.internal.R.string.whichEditApplication,
-                com.android.internal.R.string.whichEditApplicationNamed),
+                com.android.internal.R.string.whichEditApplicationNamed,
+                com.android.internal.R.string.whichEditApplicationLabel),
         SEND(Intent.ACTION_SEND,
                 com.android.internal.R.string.whichSendApplication,
-                com.android.internal.R.string.whichSendApplicationNamed),
+                com.android.internal.R.string.whichSendApplicationNamed,
+                com.android.internal.R.string.whichSendApplicationLabel),
         SENDTO(Intent.ACTION_SENDTO,
                 com.android.internal.R.string.whichSendToApplication,
-                com.android.internal.R.string.whichSendToApplicationNamed),
+                com.android.internal.R.string.whichSendToApplicationNamed,
+                com.android.internal.R.string.whichSendToApplicationLabel),
         SEND_MULTIPLE(Intent.ACTION_SEND_MULTIPLE,
                 com.android.internal.R.string.whichSendApplication,
-                com.android.internal.R.string.whichSendApplicationNamed),
+                com.android.internal.R.string.whichSendApplicationNamed,
+                com.android.internal.R.string.whichSendApplicationLabel),
+        CAPTURE_IMAGE(MediaStore.ACTION_IMAGE_CAPTURE,
+                com.android.internal.R.string.whichImageCaptureApplication,
+                com.android.internal.R.string.whichImageCaptureApplicationNamed,
+                com.android.internal.R.string.whichImageCaptureApplicationLabel),
         DEFAULT(null,
                 com.android.internal.R.string.whichApplication,
-                com.android.internal.R.string.whichApplicationNamed),
+                com.android.internal.R.string.whichApplicationNamed,
+                com.android.internal.R.string.whichApplicationLabel),
         HOME(Intent.ACTION_MAIN,
                 com.android.internal.R.string.whichHomeApplication,
-                com.android.internal.R.string.whichHomeApplicationNamed);
+                com.android.internal.R.string.whichHomeApplicationNamed,
+                com.android.internal.R.string.whichHomeApplicationLabel);
 
         public final String action;
         public final int titleRes;
         public final int namedTitleRes;
+        public final @StringRes int labelRes;
 
-        ActionTitle(String action, int titleRes, int namedTitleRes) {
+        ActionTitle(String action, int titleRes, int namedTitleRes, @StringRes int labelRes) {
             this.action = action;
             this.titleRes = titleRes;
             this.namedTitleRes = namedTitleRes;
+            this.labelRes = labelRes;
         }
 
         public static ActionTitle forAction(String action) {
