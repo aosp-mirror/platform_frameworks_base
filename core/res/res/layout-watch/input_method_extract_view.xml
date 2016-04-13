@@ -34,7 +34,6 @@
         android:textColor="@color/primary_text_default_material_dark"
         android:textColorHighlight="@color/accent_material_dark"
         android:textSize="18dp"
-        android:cursorVisible="false"
         android:gravity="bottom|right"
         />
 
