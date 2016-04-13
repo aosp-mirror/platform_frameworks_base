@@ -67,23 +67,23 @@ page.image=images/cards/card-n-support_2x.png
 </p>
 
 <ul>
-  <li>Can’t connect to hidden SSID or non-broadcast Wi-Fi (bug <a href=
+  <li>Can’t connect to hidden SSID or non-broadcast Wi-Fi. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
   </li>
 
-  <li>Microphone mute state persists across activities (bug <a href=
+  <li>Microphone mute state persists across activities. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
   </li>
 
-  <li>Changing Multiwindow focus pauses YouTube (bug <a href=
+  <li>Changing multi-window focus pauses YouTube. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
   </li>
 
-  <li>Direct Reply may close open activity (bug <a href=
+  <li>Direct Reply may close open activity. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
   </li>
 
-  <li>Various stability fixes
+  <li>Various stability fixes.
   </li>
 </ul>
 
@@ -96,6 +96,14 @@ page.image=images/cards/card-n-support_2x.png
 </p>
 
 <ul>
+
+  <li>The development tool components and support libraries have been updated
+  for the DP2 release. Make sure to update your preview development environment
+  before developing for DP2. For instructions on setting up your development
+  environment, see
+  <a href="{@docRoot}preview/setup-sdk.html">Set Up the Preview</a>.
+  </li>
+
   <li>This release has various stability and performance issues on all devices
   that make it <strong>not suitable for daily use on phone or tablet</strong>,
   especially for non-developers.
@@ -180,29 +188,12 @@ page.image=images/cards/card-n-support_2x.png
 <ul>
   <li>The option to restore data on a new device (or newly reset device) from
   "Your Google Account" is not actionable in the setup wizard. You must restore
-  data from an existing device using NFC or set it up as a new device.
-  </li>
-</ul>
-
-<h4>App compatibility</h4>
-
-<ul>
-  <li>Tapping on the image of a product in the Amazon app to enlarge it causes
-  the app to crash.
-  </li>
-
-  <li>"The Spectator" app crashes on launch.
-  </li>
-
-  <li>May be unable to open downloaded archives in the Downloads app.
-  </li>
-
-  <li>Calendar app crashes on docking to multi-window.
+  data from an existing device by selecting "another Android device" in the
+  setup wizard, or else set it up as a new device.
   </li>
 </ul>
 
 <h4>Device-specific issues</h4>
-
 
 <dl>
   <dt>
@@ -228,6 +219,23 @@ page.image=images/cards/card-n-support_2x.png
   <dd>
     Camera pictures in portrait orientation are corrupted, except for HDR+
     photos.
+  </dd>
+
+  <dt>
+    <strong>Fugu</strong>
+  </dt>
+
+  <dd>
+    Playback of Netflix HD content is known to fail on Nexus Player.
+  </dd>
+
+  <dd>
+    Any application that relies on dynamic video resolution changes may fail on
+    Nexus Player.
+  </dd>
+
+  <dd>
+    Any application that use the VP9 video codec may fail on Nexus Player.
   </dd>
 </dl>
 
