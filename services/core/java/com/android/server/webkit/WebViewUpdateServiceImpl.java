@@ -245,8 +245,16 @@ public class WebViewUpdateServiceImpl {
                     synchronized(mLock) {
                         try {
                             newPackage = findPreferredWebViewPackage();
-                            if (mCurrentWebViewPackage != null)
+                            if (mCurrentWebViewPackage != null) {
                                 oldProviderName = mCurrentWebViewPackage.packageName;
+                                if (changedState == WebViewUpdateService.PACKAGE_CHANGED
+                                        && newPackage.packageName.equals(oldProviderName)) {
+                                    // If we don't change package name we should only rerun the
+                                    // preparation phase if the current package has been replaced
+                                    // (not if it has been enabled/disabled).
+                                    return;
+                                }
+                            }
                             // Only trigger update actions if the updated package is the one
                             // that will be used, or the one that was in use before the
                             // update, or if we haven't seen a valid WebView package before.
