@@ -3373,6 +3373,16 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
+        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+            if (msg.what == MSG_REQUEST_KEYBOARD_SHORTCUTS && msg.obj == null) {
+                // Debugging for b/27963013
+                throw new NullPointerException(
+                        "Attempted to call MSG_REQUEST_KEYBOARD_SHORTCUTS with null receiver:");
+            }
+            return super.sendMessageAtTime(msg, uptimeMillis);
+        }
+
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case MSG_INVALIDATE:
