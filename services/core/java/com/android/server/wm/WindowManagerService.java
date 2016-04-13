@@ -6021,7 +6021,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
-        return screenshotApplicationsInner(appToken, displayId, width, height, false, frameScale);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotApplications");
+            return screenshotApplicationsInner(appToken, displayId, width, height, false,
+                    frameScale);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     Bitmap screenshotApplicationsInner(IBinder appToken, int displayId, int width, int height,
