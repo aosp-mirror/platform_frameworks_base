@@ -19,6 +19,7 @@ package android.graphics;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.LruCache;
 import android.util.SparseArray;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -62,6 +63,11 @@ public class Typeface {
     static Typeface[] sDefaults;
     private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
             new LongSparseArray<SparseArray<Typeface>>(3);
+
+    /**
+     * Cache for Typeface objects dynamically loaded from assets. Currently max size is 16.
+     */
+    private static final LruCache<String, Typeface> sDynamicTypefaceCache = new LruCache<>(16);
 
     static Typeface sDefaultTypeface;
     static Map<String, Typeface> sSystemFontMap;
@@ -176,19 +182,47 @@ public class Typeface {
 
     /**
      * Create a new typeface from the specified font data.
-     * @param mgr The application's asset manager
-     * @param path  The file name of the font data in the assets directory
+     *
+     * @param mgr  The application's asset manager
+     * @param path The file name of the font data in the assets directory
      * @return The new typeface.
      */
     public static Typeface createFromAsset(AssetManager mgr, String path) {
         if (sFallbackFonts != null) {
-            FontFamily fontFamily = new FontFamily();
-            if (fontFamily.addFontFromAsset(mgr, path)) {
-                FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families);
+            synchronized (sDynamicTypefaceCache) {
+                final String key = createAssetUid(mgr, path);
+                Typeface typeface = sDynamicTypefaceCache.get(key);
+                if (typeface != null) return typeface;
+
+                FontFamily fontFamily = new FontFamily();
+                if (fontFamily.addFontFromAsset(mgr, path)) {
+                    FontFamily[] families = { fontFamily };
+                    typeface = createFromFamiliesWithDefault(families);
+                    sDynamicTypefaceCache.put(key, typeface);
+                    return typeface;
+                }
             }
         }
         throw new RuntimeException("Font asset not found " + path);
+    }
+
+    /**
+     * Creates a unique id for a given AssetManager and asset path.
+     *
+     * @param mgr  AssetManager instance
+     * @param path The path for the asset.
+     * @return Unique id for a given AssetManager and asset path.
+     */
+    private static String createAssetUid(final AssetManager mgr, String path) {
+        final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
+        final StringBuilder builder = new StringBuilder();
+        final int size = pkgs.size();
+        for (int i = 0; i < size; i++) {
+            builder.append(pkgs.valueAt(i));
+            builder.append("-");
+        }
+        builder.append(path);
+        return builder.toString();
     }
 
     /**
