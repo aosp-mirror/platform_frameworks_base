@@ -139,6 +139,20 @@ public class JobInfo implements Parcelable {
      */
     public static final int PRIORITY_TOP_APP = 40;
 
+    /**
+     * Adjustment of {@link #getPriority} if the app has often (50% or more of the time)
+     * been running jobs.
+     * @hide
+     */
+    public static final int PRIORITY_ADJ_OFTEN_RUNNING = -40;
+
+    /**
+     * Adjustment of {@link #getPriority} if the app has always (90% or more of the time)
+     * been running jobs.
+     * @hide
+     */
+    public static final int PRIORITY_ADJ_ALWAYS_RUNNING = -80;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;

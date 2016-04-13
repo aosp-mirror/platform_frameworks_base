@@ -105,6 +105,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private final Context mContext;
     private final Object mLock;
     private final IBatteryStats mBatteryStats;
+    private final JobPackageTracker mJobPackageTracker;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
@@ -136,16 +137,18 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     /** Track when job will timeout. */
     private long mTimeoutElapsed;
 
-    JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats, Looper looper) {
-        this(service.getContext(), service.getLock(), batteryStats, service, looper);
+    JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats,
+            JobPackageTracker tracker, Looper looper) {
+        this(service.getContext(), service.getLock(), batteryStats, tracker, service, looper);
     }
 
     @VisibleForTesting
     JobServiceContext(Context context, Object lock, IBatteryStats batteryStats,
-                      JobCompletedListener completedListener, Looper looper) {
+            JobPackageTracker tracker, JobCompletedListener completedListener, Looper looper) {
         mContext = context;
         mLock = lock;
         mBatteryStats = batteryStats;
+        mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
         mCompletedListener = completedListener;
         mAvailable = true;
@@ -209,6 +212,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             } catch (RemoteException e) {
                 // Whatever.
             }
+            mJobPackageTracker.noteActive(job);
             mAvailable = false;
             return true;
         }
@@ -581,6 +585,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     return;
                 }
                 completedJob = mRunningJob;
+                mJobPackageTracker.noteInactive(completedJob);
                 try {
                     mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
                             mRunningJob.getSourceUid());
