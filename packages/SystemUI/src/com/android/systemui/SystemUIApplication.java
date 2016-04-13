@@ -63,7 +63,8 @@ public class SystemUIApplication extends Application {
      * above.
      */
     private final Class<?>[] SERVICES_PER_USER = new Class[] {
-            com.android.systemui.recents.Recents.class
+            com.android.systemui.recents.Recents.class,
+            com.android.systemui.tv.pip.PipUI.class
     };
 
     /**
