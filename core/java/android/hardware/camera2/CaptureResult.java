@@ -3599,10 +3599,20 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     /**
      * <p>The shading map is a low-resolution floating-point map
-     * that lists the coefficients used to correct for vignetting, for each
-     * Bayer color channel of RAW image data.</p>
-     * <p>The least shaded section of the image should have a gain factor
-     * of 1; all other sections should have gains above 1.</p>
+     * that lists the coefficients used to correct for vignetting and color shading,
+     * for each Bayer color channel of RAW image data.</p>
+     * <p>The lens shading correction is defined as a full shading correction that
+     * corrects both color shading for the output non-RAW images. After the
+     * shading map is applied, the output non-RAW images will be flat-field images
+     * for flat scenes under uniform illumination.</p>
+     * <p>When there is no lens shading correction applied to RAW output images
+     * ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} <code>==</code> false), this map is a full lens
+     * shading correction map; when there is some lens shading correction applied
+     * to the RAW output image ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} <code>==</code> true),
+     * this map reports the remaining lens shading correction map that needs to be
+     * applied to get fully shading corrected images.</p>
+     * <p>For a full shading correction map, the least shaded section of the image
+     * should have a gain factor of 1; all other sections should have gains above 1.</p>
      * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
      * must take into account the colorCorrection settings.</p>
      * <p>The shading map is for the entire active pixel array, and is not
