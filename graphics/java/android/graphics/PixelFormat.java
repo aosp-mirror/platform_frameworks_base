@@ -16,8 +16,18 @@
 
 package android.graphics;
 
-public class PixelFormat
-{
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+public class PixelFormat {
+
+    /** @hide */
+    @IntDef({UNKNOWN, TRANSLUCENT, TRANSPARENT, OPAQUE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Opacity {}
+
     /* these constants need to match those in hardware/hardware.h */
 
     public static final int UNKNOWN     = 0;
