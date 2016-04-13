@@ -805,6 +805,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setLockPattern(String pattern, String savedCredential, int userId)
             throws RemoteException {
+        checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
             setLockPatternInternal(pattern, savedCredential, userId);
             setSeparateProfileChallengeEnabled(userId, true, null);
@@ -862,6 +863,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setLockPassword(String password, String savedCredential, int userId)
             throws RemoteException {
+        checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
             setLockPasswordInternal(password, savedCredential, userId);
             setSeparateProfileChallengeEnabled(userId, true, null);
