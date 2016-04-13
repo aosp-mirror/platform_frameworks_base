@@ -1110,7 +1110,7 @@ public class DirectoryFragment extends Fragment
         List<String> enabled = new ArrayList<String>();
         for (String id : mAdapter.getModelIds()) {
             Cursor cursor = getModel().getItem(id);
-            if (cursor != null) {
+            if (cursor == null) {
                 Log.w(TAG, "Skipping selection. Can't obtain cursor for modeId: " + id);
                 continue;
             }
@@ -1202,7 +1202,7 @@ public class DirectoryFragment extends Fragment
             String id = getModelId(v);
             if (id != null) {
                 Cursor dstCursor = mModel.getItem(id);
-                if (dstCursor != null) {
+                if (dstCursor == null) {
                     Log.w(TAG, "Invalid destination. Can't obtain cursor for modelId: " + id);
                     return null;
                 }
