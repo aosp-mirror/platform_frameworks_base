@@ -1176,14 +1176,23 @@ public class DirectoryFragment extends Fragment
                 case DragEvent.ACTION_DROP:
                     // After a drop event, always stop highlighting the target.
                     setDropTargetHighlight(v, false);
+
+                    ClipData clipData = event.getClipData();
+                    if (clipData == null) {
+                        Log.w(TAG, "Received invalid drop event with null clipdata. Ignoring.");
+                        return false;
+                    }
+
                     // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
                     // multi-window drag, because localState isn't carried over from one process to
                     // another.
                     Object src = event.getLocalState();
                     DocumentInfo dst = getDestination(v);
                     if (Objects.equals(src, dst)) {
+                        if (DEBUG) Log.d(TAG, "Drop target same as source. Ignoring.");
                         return false;
                     }
+
                     // Recognize multi-window drag and drop based on the fact that localState is not
                     // carried between processes. It will stop working when the localsState behavior
                     // is changed. The info about window should be passed in the localState then.
@@ -1192,7 +1201,8 @@ public class DirectoryFragment extends Fragment
                     Metrics.logUserAction(getContext(),
                             src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
                                     : Metrics.USER_ACTION_DRAG_N_DROP);
-                    copyFromClipData(event.getClipData(), dst);
+
+                    copyFromClipData(clipData, dst);
                     return true;
             }
             return false;

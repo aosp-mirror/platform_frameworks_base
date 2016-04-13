@@ -32,6 +32,7 @@ import com.android.documentsui.model.DocumentInfo;
 import libcore.io.IoUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -76,7 +77,8 @@ public final class DocumentClipper {
      * This should be run from inside an AsyncTask.
      */
     public List<DocumentInfo> getClippedDocuments() {
-        return getDocumentsFromClipData(mClipboard.getPrimaryClip());
+        ClipData data = mClipboard.getPrimaryClip();
+        return data == null ? Collections.EMPTY_LIST : getDocumentsFromClipData(data);
     }
 
     /**
