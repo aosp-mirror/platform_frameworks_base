@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -36,10 +37,13 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -77,6 +81,10 @@ public class Recents extends SystemUI
     private final static String ACTION_SHOW_RECENTS = "com.android.systemui.recents.ACTION_SHOW";
     private final static String ACTION_HIDE_RECENTS = "com.android.systemui.recents.ACTION_HIDE";
     private final static String ACTION_TOGGLE_RECENTS = "com.android.systemui.recents.ACTION_TOGGLE";
+
+    private static final String COUNTER_WINDOW_SUPPORTED = "window_enter_supported";
+    private static final String COUNTER_WINDOW_UNSUPPORTED = "window_enter_unsupported";
+    private static final String COUNTER_WINDOW_INCOMPATIBLE = "window_enter_incompatible";
 
     private static SystemServicesProxy sSystemServicesProxy;
     private static RecentsDebugFlags sDebugFlags;
@@ -393,7 +401,8 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds) {
+    public boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds,
+            int metricsDockAction) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -413,7 +422,12 @@ public class Recents extends SystemUI
         boolean screenPinningActive = ssp.isScreenPinningActive();
         boolean isTopTaskHome = topTask != null && SystemServicesProxy.isHomeStack(topTask.stackId);
         if (topTask != null && !isTopTaskHome && !screenPinningActive) {
+            logDockAttempt(mContext, topTask.topActivity, topTask.resizeMode);
             if (topTask.isDockable) {
+                if (metricsDockAction != -1) {
+                    MetricsLogger.action(mContext, metricsDockAction,
+                            topTask.topActivity.flattenToShortString());
+                }
                 if (sSystemServicesProxy.isSystemUser(currentUser)) {
                     mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
                 } else {
@@ -441,6 +455,26 @@ public class Recents extends SystemUI
             }
         } else {
             return false;
+        }
+    }
+
+    public static void logDockAttempt(Context ctx, ComponentName activity, int resizeMode) {
+        if (resizeMode == ActivityInfo.RESIZE_MODE_UNRESIZEABLE) {
+            MetricsLogger.action(ctx, MetricsEvent.ACTION_WINDOW_DOCK_UNRESIZABLE,
+                    activity.flattenToShortString());
+        }
+        MetricsLogger.count(ctx, getMetricsCounterForResizeMode(resizeMode), 1);
+    }
+
+    private static String getMetricsCounterForResizeMode(int resizeMode) {
+        switch (resizeMode) {
+            case ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE:
+                return COUNTER_WINDOW_UNSUPPORTED;
+            case ActivityInfo.RESIZE_MODE_RESIZEABLE:
+            case ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
+                return COUNTER_WINDOW_SUPPORTED;
+            default:
+                return COUNTER_WINDOW_INCOMPATIBLE;
         }
     }
 
