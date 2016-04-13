@@ -320,6 +320,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 mFileProvider, new RemotePrintDocument.RemoteAdapterDeathObserver() {
             @Override
             public void onDied() {
+                Log.w(LOG_TAG, "Printing app died unexpectedly");
+
                 // If we are finishing or we are in a state that we do not need any
                 // data from the printing app, then no need to finish.
                 if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
