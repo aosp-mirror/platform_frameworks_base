@@ -378,8 +378,8 @@ public final class MultiSelectManager {
      * @param pos The anchor position for the selection range.
      */
     void startRangeSelection(int pos) {
-      attemptSelect(mAdapter.getModelId(pos));
-      setSelectionRangeBegin(pos);
+        attemptSelect(mAdapter.getModelId(pos));
+        setSelectionRangeBegin(pos);
     }
 
     /**
