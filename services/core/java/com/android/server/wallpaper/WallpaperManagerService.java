@@ -128,6 +128,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mService.systemReady();
+            } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+                mService.switchUser(UserHandle.USER_SYSTEM, null);
             }
         }
 
@@ -850,9 +852,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 Slog.i(TAG, "Nondefault wallpaper component; gracefully ignoring");
             }
         }
-        switchWallpaper(wallpaper, null);
-        wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
-        wallpaper.wallpaperObserver.startWatching();
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
