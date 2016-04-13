@@ -3790,7 +3790,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             Set<ComponentName> rankerComponents = queryPackageForServices(
-                    mRankerServicePackageName, UserHandle.USER_SYSTEM, null);
+                    mRankerServicePackageName, UserHandle.USER_SYSTEM);
             Iterator<ComponentName> iterator = rankerComponents.iterator();
             if (iterator.hasNext()) {
                 ComponentName rankerComponent = iterator.next();
