@@ -536,6 +536,16 @@ public class IpManager extends StateMachine {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
 
+        // Additionally:
+        //
+        // If the previous link properties had a global IPv6 address and an
+        // IPv6 default route then also consider the loss of that default route
+        // to be a loss of provisioning. See b/27962810.
+        if (oldLp.hasGlobalIPv6Address() && oldLp.hasIPv6DefaultRoute() &&
+                !newLp.hasIPv6DefaultRoute()) {
+            delta = ProvisioningChange.LOST_PROVISIONING;
+        }
+
         return delta;
     }
 
