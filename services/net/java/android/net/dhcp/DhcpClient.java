@@ -336,17 +336,17 @@ public class DhcpClient extends StateMachine {
     class ReceiveThread extends Thread {
 
         private final byte[] mPacket = new byte[DhcpPacket.MAX_LENGTH];
-        private boolean stopped = false;
+        private volatile boolean mStopped = false;
 
         public void halt() {
-            stopped = true;
+            mStopped = true;
             closeSockets();  // Interrupts the read() call the thread is blocked in.
         }
 
         @Override
         public void run() {
             if (DBG) Log.d(TAG, "Receive thread started");
-            while (!stopped) {
+            while (!mStopped) {
                 int length = 0;  // Or compiler can't tell it's initialized if a parse error occurs.
                 try {
                     length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
@@ -355,7 +355,7 @@ public class DhcpClient extends StateMachine {
                     if (DBG) Log.d(TAG, "Received packet: " + packet);
                     sendMessage(CMD_RECEIVED_PACKET, packet);
                 } catch (IOException|ErrnoException e) {
-                    if (!stopped) {
+                    if (!mStopped) {
                         Log.e(TAG, "Read error", e);
                     }
                     DhcpClientEvent.logEvent(IpConnectivityEvent.IPCE_DHCP_RECV_ERROR,
