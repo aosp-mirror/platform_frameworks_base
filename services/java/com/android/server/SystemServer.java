@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
-import android.app.IAlarmManager;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -55,13 +54,11 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.ZygoteInit;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
-import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.MetricsLoggerService;
-import com.android.server.content.ContentService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
@@ -97,7 +94,6 @@ import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
-import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.WindowManagerService;
 
@@ -157,8 +153,12 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_BLUETOOTH_SERVICE_CLASS =
             "com.google.android.clockwork.bluetooth.WearBluetoothService";
+    private static final String ACCOUNT_SERVICE_CLASS =
+            "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
             "com.android.server.content.ContentService$Lifecycle";
+    private static final String WALLPAPER_SERVICE_CLASS =
+            "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -187,6 +187,7 @@ public final class SystemServer {
     private PackageManagerService mPackageManagerService;
     private PackageManager mPackageManager;
     private ContentResolver mContentResolver;
+    private EntropyMixer mEntropyMixer;
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
@@ -497,10 +498,7 @@ public final class SystemServer {
      */
     private void startOtherServices() {
         final Context context = mSystemContext;
-        AccountManagerService accountManager = null;
-        ContentService contentService = null;
         VibratorService vibrator = null;
-        IAlarmManager alarm = null;
         IMountService mountService = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
@@ -516,8 +514,6 @@ public final class SystemServer {
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
         MmsServiceBroker mmsService = null;
-        EntropyMixer entropyMixer = null;
-        VrManagerService vrManagerService = null;
         HardwarePropertiesManagerService hardwarePropertiesService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
@@ -556,7 +552,7 @@ public final class SystemServer {
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("StartEntropyMixer");
-            entropyMixer = new EntropyMixer(context);
+            mEntropyMixer = new EntropyMixer(context);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             mContentResolver = context.getContentResolver();
@@ -566,13 +562,7 @@ public final class SystemServer {
 
             // The AccountManager must come before the ContentService
             traceBeginAndSlog("StartAccountManagerService");
-            try {
-                // TODO: seems like this should be disable-able, but req'd by ContentService
-                accountManager = new AccountManagerService(context);
-                ServiceManager.addService(Context.ACCOUNT_SERVICE, accountManager);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Account Manager", e);
-            }
+            mSystemServiceManager.startService(ACCOUNT_SERVICE_CLASS);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("StartContentService");
@@ -593,9 +583,9 @@ public final class SystemServer {
             ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
+            traceBeginAndSlog("StartAlarmManagerService");
             mSystemServiceManager.startService(AlarmManagerService.class);
-            alarm = IAlarmManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ALARM_SERVICE));
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("InitWatchdog");
             final Watchdog watchdog = Watchdog.getInstance();
@@ -652,7 +642,6 @@ public final class SystemServer {
 
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
-        WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
         ILockSettings lockSettings = null;
@@ -886,24 +875,6 @@ public final class SystemServer {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 
-            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "MakeAccountManagerServiceReady");
-            try {
-                if (accountManager != null)
-                    accountManager.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making Account Manager Service ready", e);
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-
-            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "MakeContentServiceReady");
-            try {
-                if (contentService != null)
-                    contentService.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making Content Service ready", e);
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-
             mSystemServiceManager.startService(NotificationManagerService.class);
             notification = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
@@ -946,12 +917,7 @@ public final class SystemServer {
             if (!disableNonCoreServices && context.getResources().getBoolean(
                         R.bool.config_enableWallpaperService)) {
                 traceBeginAndSlog("StartWallpaperManagerService");
-                try {
-                    wallpaper = new WallpaperManagerService(context);
-                    ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
-                } catch (Throwable e) {
-                    reportWtf("starting Wallpaper Service", e);
-                }
+                mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 
@@ -1278,12 +1244,10 @@ public final class SystemServer {
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
         final NetworkScoreService networkScoreF = networkScore;
-        final WallpaperManagerService wallpaperF = wallpaper;
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
         final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
-        final StatusBarManagerService statusBarF = statusBar;
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
@@ -1370,11 +1334,6 @@ public final class SystemServer {
                 mSystemServiceManager.startBootPhase(
                         SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
-                try {
-                    if (wallpaperF != null) wallpaperF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying WallpaperService running", e);
-                }
                 try {
                     if (locationF != null) locationF.systemRunning();
                 } catch (Throwable e) {

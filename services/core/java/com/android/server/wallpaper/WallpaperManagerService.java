@@ -16,9 +16,12 @@
 
 package com.android.server.wallpaper;
 
-import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.FLAG_LOCK;
-import static android.os.ParcelFileDescriptor.*;
+import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.os.ParcelFileDescriptor.MODE_CREATE;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
+import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -41,27 +44,26 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.RemoteException;
-import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -79,34 +81,61 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
-import java.io.BufferedOutputStream;
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import com.android.internal.R;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
+import com.android.server.EventLogTags;
+import com.android.server.SystemService;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.JournaledFile;
-import com.android.internal.R;
-import com.android.server.EventLogTags;
-
-import libcore.io.IoUtils;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
     static final boolean DEBUG = false;
+
+    public static class Lifecycle extends SystemService {
+        private WallpaperManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mService = new WallpaperManagerService(getContext());
+            publishBinderService(Context.WALLPAPER_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemReady();
+            }
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mService.onUnlockUser(userHandle);
+        }
+    }
 
     final Object mLock = new Object();
 
@@ -417,6 +446,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final AppOpsManager mAppOpsManager;
     WallpaperData mLastWallpaper;
     IWallpaperManagerCallback mKeyguardListener;
+    boolean mWaitingForUnlock;
 
     /**
      * ID of the current wallpaper, changed every time anything sets a wallpaper.
@@ -744,8 +774,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (wallpaper.wallpaperComponent != null
                     && isPackageModified(wallpaper.wallpaperComponent.getPackageName())) {
                 try {
-                    mContext.getPackageManager().getServiceInfo(
-                            wallpaper.wallpaperComponent, 0);
+                    mContext.getPackageManager().getServiceInfo(wallpaper.wallpaperComponent,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 } catch (NameNotFoundException e) {
                     Slog.w(TAG, "Wallpaper component gone, removing: "
                             + wallpaper.wallpaperComponent);
@@ -755,8 +786,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (wallpaper.nextWallpaperComponent != null
                     && isPackageModified(wallpaper.nextWallpaperComponent.getPackageName())) {
                 try {
-                    mContext.getPackageManager().getServiceInfo(
-                            wallpaper.nextWallpaperComponent, 0);
+                    mContext.getPackageManager().getServiceInfo(wallpaper.nextWallpaperComponent,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 } catch (NameNotFoundException e) {
                     wallpaper.nextWallpaperComponent = null;
                 }
@@ -793,7 +825,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    public void systemRunning() {
+    void systemReady() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
         // If we think we're going to be using the system image wallpaper imagery, make
@@ -828,7 +860,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
+                final String action = intent.getAction();
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     onRemoveUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                             UserHandle.USER_NULL));
@@ -892,6 +924,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mLockWallpaperMap.remove(userId);
     }
 
+    void onUnlockUser(int userId) {
+        synchronized (mLock) {
+            if (mCurrentUserId == userId && mWaitingForUnlock) {
+                switchUser(userId, null);
+            }
+        }
+    }
+
     void onRemoveUser(int userId) {
         if (userId < 1) return;
 
@@ -919,18 +959,34 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
         synchronized (mLock) {
-            RuntimeException e = null;
-            try {
-                ComponentName cname = wallpaper.wallpaperComponent != null ?
-                        wallpaper.wallpaperComponent : wallpaper.nextWallpaperComponent;
-                if (bindWallpaperComponentLocked(cname, true, false, wallpaper, reply)) {
-                    return;
+            mWaitingForUnlock = false;
+            final ComponentName cname = wallpaper.wallpaperComponent != null ?
+                    wallpaper.wallpaperComponent : wallpaper.nextWallpaperComponent;
+            if (!bindWallpaperComponentLocked(cname, true, false, wallpaper, reply)) {
+                // We failed to bind the desired wallpaper, but that might
+                // happen if the wallpaper isn't direct-boot aware
+                ServiceInfo si = null;
+                try {
+                    si = mIPackageManager.getServiceInfo(cname,
+                            PackageManager.MATCH_DIRECT_BOOT_UNAWARE, wallpaper.userId);
+                } catch (RemoteException ignored) {
                 }
-            } catch (RuntimeException e1) {
-                e = e1;
+
+                if (si == null) {
+                    Slog.w(TAG, "Failure starting previous wallpaper; clearing");
+                    clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, reply);
+                } else {
+                    Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
+                    // We might end up persisting the current wallpaper data
+                    // while locked, so pretend like the component was actually
+                    // bound into place
+                    wallpaper.wallpaperComponent = wallpaper.nextWallpaperComponent;
+                    final WallpaperData fallback = new WallpaperData(wallpaper.userId,
+                            WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
+                    bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
+                    mWaitingForUnlock = true;
+                }
             }
-            Slog.w(TAG, "Failure starting previous wallpaper", e);
-            clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, reply);
         }
     }
 
