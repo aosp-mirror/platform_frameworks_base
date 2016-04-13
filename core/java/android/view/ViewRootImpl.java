@@ -549,8 +549,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Compute surface insets required to draw at specified Z value.
                 // TODO: Use real shadow insets for a constant max Z.
                 if (!attrs.hasManualSurfaceInsets) {
-                    final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
-                    attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+                    attrs.setSurfaceInsets(view, false /*manual*/, true /*preservePrevious*/);
                 }
 
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
@@ -883,10 +882,12 @@ public final class ViewRootImpl implements ViewParent,
             }
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
-            // Restore old surface insets.
-            mWindowAttributes.surfaceInsets.set(
-                    oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom);
-            mWindowAttributes.hasManualSurfaceInsets = oldHasManualSurfaceInsets;
+            if (mWindowAttributes.preservePreviousSurfaceInsets) {
+                // Restore old surface insets.
+                mWindowAttributes.surfaceInsets.set(
+                        oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom);
+                mWindowAttributes.hasManualSurfaceInsets = oldHasManualSurfaceInsets;
+            }
 
             applyKeepScreenOnFlag(mWindowAttributes);
 
