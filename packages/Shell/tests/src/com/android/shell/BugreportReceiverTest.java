@@ -17,7 +17,14 @@
 package com.android.shell;
 
 import static android.test.MoreAsserts.assertContainsRegex;
+
 import static com.android.shell.ActionSendMultipleConsumerActivity.UI_NAME;
+import static com.android.shell.BugreportPrefs.PREFS_BUGREPORT;
+import static com.android.shell.BugreportPrefs.STATE_HIDE;
+import static com.android.shell.BugreportPrefs.STATE_SHOW;
+import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
+import static com.android.shell.BugreportPrefs.getWarningState;
+import static com.android.shell.BugreportPrefs.setWarningState;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.EXTRA_ID;
 import static com.android.shell.BugreportProgressService.EXTRA_MAX;
@@ -48,12 +55,12 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -62,7 +69,6 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.UiSelector;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
@@ -70,7 +76,6 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
-import com.android.shell.BugreportProgressService;
 
 /**
  * Integration tests for {@link BugreportReceiver}.
@@ -168,7 +173,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
         mDescription = sb.toString();
 
-        BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_HIDE);
+        setWarningState(mContext, STATE_HIDE);
     }
 
     public void testProgress() throws Exception {
@@ -500,9 +505,29 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
-    public void testBugreportFinished_withWarning() throws Exception {
-        // Explicitly shows the warning.
-        BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
+    public void testBugreportFinished_withWarningFirstTime() throws Exception {
+        bugreportFinishedWithWarningTest(null);
+    }
+
+    public void testBugreportFinished_withWarningUnknownState() throws Exception {
+        bugreportFinishedWithWarningTest(STATE_UNKNOWN);
+    }
+
+    public void testBugreportFinished_withWarningShowAgain() throws Exception {
+        bugreportFinishedWithWarningTest(STATE_SHOW);
+    }
+
+    private void bugreportFinishedWithWarningTest(Integer propertyState) throws Exception {
+        if (propertyState == null) {
+            // Clear properties
+            mContext.getSharedPreferences(PREFS_BUGREPORT, Context.MODE_PRIVATE)
+                    .edit().clear().commit();
+            // Sanity check...
+            assertEquals("Did not reset properties", STATE_UNKNOWN,
+                    getWarningState(mContext, STATE_UNKNOWN));
+        } else {
+            setWarningState(mContext, propertyState);
+        }
 
         // Send notification and click on share.
         sendBugreportFinished(NO_ID, mPlainTextPath, null);
@@ -510,10 +535,16 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // Handle the warning
         mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
-        // TODO: get ok and showMessageAgain from the dialog reference above
-        UiObject showMessageAgain =
-                mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_repeat));
-        mUiBot.click(showMessageAgain, "show-message-again");
+        // TODO: get ok and dontShowAgain from the dialog reference above
+        UiObject dontShowAgain =
+                mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_dont_repeat));
+        final boolean firstTime = propertyState == null || propertyState == STATE_UNKNOWN;
+        if (firstTime) {
+            assertTrue("Checkbox should be checked by default", dontShowAgain.isChecked());
+        } else {
+            assertFalse("Checkbox should not be checked", dontShowAgain.isChecked());
+            mUiBot.click(dontShowAgain, "dont-show-again");
+        }
         UiObject ok = mUiBot.getVisibleObject(mContext.getString(com.android.internal.R.string.ok));
         mUiBot.click(ok, "ok");
 
@@ -523,8 +554,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
 
         // Make sure it's hidden now.
-        int newState = BugreportPrefs.getWarningState(mContext, BugreportPrefs.STATE_UNKNOWN);
-        assertEquals("Didn't change state", BugreportPrefs.STATE_HIDE, newState);
+        int newState = getWarningState(mContext, STATE_UNKNOWN);
+        assertEquals("Didn't change state", STATE_HIDE, newState);
     }
 
     public void testShareBugreportAfterServiceDies() throws Exception {
@@ -876,8 +907,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     private String getPath(String file) {
-        File rootDir = new ContextWrapper(mContext).getFilesDir();
-        File dir = new File(rootDir, BUGREPORTS_DIR);
+        final File rootDir = mContext.getFilesDir();
+        final File dir = new File(rootDir, BUGREPORTS_DIR);
         if (!dir.exists()) {
             Log.i(TAG, "Creating directory " + dir);
             assertTrue("Could not create directory " + dir, dir.mkdir());

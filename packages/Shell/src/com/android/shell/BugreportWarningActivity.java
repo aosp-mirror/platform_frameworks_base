@@ -59,7 +59,7 @@ public class BugreportWarningActivity extends AlertActivity
         ap.mNegativeButtonListener = this;
 
         mConfirmRepeat = (CheckBox) ap.mView.findViewById(android.R.id.checkbox);
-        mConfirmRepeat.setChecked(getWarningState(this, STATE_UNKNOWN) == STATE_SHOW);
+        mConfirmRepeat.setChecked(getWarningState(this, STATE_UNKNOWN) != STATE_SHOW);
 
         setupAlert();
     }
@@ -68,7 +68,7 @@ public class BugreportWarningActivity extends AlertActivity
     public void onClick(DialogInterface dialog, int which) {
         if (which == AlertDialog.BUTTON_POSITIVE) {
             // Remember confirm state, and launch target
-            setWarningState(this, mConfirmRepeat.isChecked() ? STATE_SHOW : STATE_HIDE);
+            setWarningState(this, mConfirmRepeat.isChecked() ? STATE_HIDE : STATE_SHOW);
             startActivity(mSendIntent);
         }
 
