@@ -501,11 +501,8 @@ public class CameraDeviceImpl extends CameraDevice
             Log.d(TAG, "createCaptureSessionByOutputConfiguration");
         }
 
-        // OutputConfiguration objects aren't immutable, make a copy before using.
-        List<OutputConfiguration> currentOutputs = new ArrayList<OutputConfiguration>();
-        for (OutputConfiguration output : outputConfigurations) {
-            currentOutputs.add(new OutputConfiguration(output));
-        }
+        // OutputConfiguration objects are immutable, but need to have our own array
+        List<OutputConfiguration> currentOutputs = new ArrayList<>(outputConfigurations);
 
         createCaptureSessionInternal(null, currentOutputs, callback, handler,
                 /*isConstrainedHighSpeed*/false);
