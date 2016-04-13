@@ -123,6 +123,7 @@ public class TaskViewThumbnail extends View {
         }
 
         mTaskViewRect.set(0, 0, width, height);
+        setLeftTopRightBottom(0, 0, width, height);
         updateThumbnailScale();
     }
 
@@ -148,22 +149,26 @@ public class TaskViewThumbnail extends View {
         int thumbnailHeight = Math.min(viewHeight,
                 (int) (mThumbnailRect.height() * mThumbnailScale));
         if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+            int topOffset = mTaskBar != null
+                    ? mTaskBar.getHeight() - mCornerRadius
+                    : 0;
+
             // Draw the background, there will be some small overdraw with the thumbnail
             if (thumbnailWidth < viewWidth) {
                 // Portrait thumbnail on a landscape task view
-                canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), 0,
+                canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), topOffset,
                         viewWidth, viewHeight,
                         mCornerRadius, mCornerRadius, mBgFillPaint);
             }
             if (thumbnailHeight < viewHeight) {
                 // Landscape thumbnail on a portrait task view
-                canvas.drawRoundRect(0, Math.max(0, thumbnailHeight - mCornerRadius),
+                canvas.drawRoundRect(0, Math.max(topOffset, thumbnailHeight - mCornerRadius),
                         viewWidth, viewHeight,
                         mCornerRadius, mCornerRadius, mBgFillPaint);
             }
 
             // Draw the thumbnail
-            canvas.drawRoundRect(0, 0, thumbnailWidth, thumbnailHeight,
+            canvas.drawRoundRect(0, topOffset, thumbnailWidth, thumbnailHeight,
                     mCornerRadius, mCornerRadius, mDrawPaint);
         } else {
             canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
@@ -274,10 +279,7 @@ public class TaskViewThumbnail extends View {
     /** Updates the clip rect based on the given task bar. */
     void updateClipToTaskBar(View taskBar) {
         mTaskBar = taskBar;
-        int top = (int) Math.max(0, taskBar.getTranslationY() +
-                taskBar.getMeasuredHeight() - 1);
-        mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
-        setClipBounds(mClipRect);
+        invalidate();
     }
 
     /** Updates the visibility of the the thumbnail. */

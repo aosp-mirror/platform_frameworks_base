@@ -28,11 +28,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -104,12 +102,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         ViewPool.ViewPoolConsumer<TaskView, Task> {
 
     private static final String TAG = "TaskStackView";
-
-    private final static String KEY_SAVED_STATE_SUPER = "saved_instance_state_super";
-    private final static String KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE =
-            "saved_instance_state_layout_focused_state";
-    private final static String KEY_SAVED_STATE_LAYOUT_STACK_SCROLL =
-            "saved_instance_state_layout_stack_scroll";
 
     // The thresholds at which to show/hide the stack action button.
     private static final float SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
@@ -350,11 +342,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Updates this TaskStackView to the initial state.
      */
-    public void updateToInitialState(boolean scrollToInitialState) {
-        if (scrollToInitialState) {
-            mStackScroller.setStackScrollToInitialState();
-            mLayoutAlgorithm.updateToInitialState(mStack.getStackTasks());
-        }
+    public void updateToInitialState() {
+        mStackScroller.setStackScrollToInitialState();
+        mLayoutAlgorithm.setTaskOverridesForInitialState(mStack);
     }
 
     /** Updates the list of task views */
@@ -638,15 +628,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>, boolean)
      */
-    void relayoutTaskViews(AnimationProps animation) {
+    public void relayoutTaskViews(AnimationProps animation) {
         relayoutTaskViews(animation, mIgnoreTasks, false /* ignoreTaskOverrides */);
-    }
-
-    /**
-     * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>, boolean)
-     */
-    void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet) {
-        relayoutTaskViews(animation, ignoreTasksSet, false /* ignoreTaskOverrides */);
     }
 
     /**
@@ -657,7 +640,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet,
+    private void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet,
             boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
         mDeferredTaskViewLayoutAnimation = null;
@@ -841,7 +824,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
+    private void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
             ArraySet<Task.TaskKey> ignoreTasksSet) {
         // Compute the min and max scroll values
         mLayoutAlgorithm.update(mStack, ignoreTasksSet);
@@ -1098,24 +1081,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    protected Parcelable onSaveInstanceState() {
-        Bundle savedState = new Bundle();
-        savedState.putParcelable(KEY_SAVED_STATE_SUPER, super.onSaveInstanceState());
-        savedState.putInt(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE, mLayoutAlgorithm.getFocusState());
-        savedState.putFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL, mStackScroller.getStackScroll());
-        return super.onSaveInstanceState();
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        Bundle savedState = (Bundle) state;
-        super.onRestoreInstanceState(savedState.getParcelable(KEY_SAVED_STATE_SUPER));
-
-        mLayoutAlgorithm.setFocusState(savedState.getInt(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE));
-        mStackScroller.setStackScroll(savedState.getFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL));
-    }
-
-    @Override
     public CharSequence getAccessibilityClassName() {
         return TaskStackView.class.getName();
     }
@@ -1181,9 +1146,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Updates the system insets.
      */
     public void setSystemInsets(Rect systemInsets) {
-        if (!systemInsets.equals(mLayoutAlgorithm.mSystemInsets)) {
-            mStableLayoutAlgorithm.setSystemInsets(systemInsets);
-            mLayoutAlgorithm.setSystemInsets(systemInsets);
+        boolean changed = false;
+        changed |= mStableLayoutAlgorithm.setSystemInsets(systemInsets);
+        changed |= mLayoutAlgorithm.setSystemInsets(systemInsets);
+        if (changed) {
             requestLayout();
         }
     }
@@ -1215,12 +1181,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
-        updateLayoutAlgorithm(false /* boundScroll */, mIgnoreTasks);
+        updateLayoutAlgorithm(false /* boundScroll */);
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
         if (mAwaitingFirstLayout || mInitialState != INITIAL_STATE_UPDATE_NONE) {
-            updateToInitialState(mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY);
+            if (mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY) {
+                updateToInitialState();
+            }
             if (!mAwaitingFirstLayout) {
                 mInitialState = INITIAL_STATE_UPDATE_NONE;
             }
@@ -1247,16 +1215,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Measures a TaskView.
      */
     private void measureTaskView(TaskView tv) {
+        Rect padding = new Rect();
         if (tv.getBackground() != null) {
-            tv.getBackground().getPadding(mTmpRect);
-        } else {
-            mTmpRect.setEmpty();
+            tv.getBackground().getPadding(padding);
         }
-        Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
+        mTmpRect.set(mStableLayoutAlgorithm.mTaskRect);
+        mTmpRect.union(mLayoutAlgorithm.mTaskRect);
         tv.measure(
-                MeasureSpec.makeMeasureSpec(taskRect.width() + mTmpRect.left + mTmpRect.right,
+                MeasureSpec.makeMeasureSpec(mTmpRect.width() + padding.left + padding.right,
                         MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(taskRect.height() + mTmpRect.top + mTmpRect.bottom,
+                MeasureSpec.makeMeasureSpec(mTmpRect.height() + padding.top + padding.bottom,
                         MeasureSpec.EXACTLY));
     }
 
@@ -1278,7 +1246,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Relayout all of the task views including the ignored ones
-        relayoutTaskViews(AnimationProps.IMMEDIATE, mIgnoreTasks);
+        relayoutTaskViews(AnimationProps.IMMEDIATE);
         clipTaskViews();
 
         if (mAwaitingFirstLayout || !mEnterAnimationComplete) {
@@ -1293,15 +1261,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private void layoutTaskView(boolean changed, TaskView tv) {
         if (changed) {
+            Rect padding = new Rect();
             if (tv.getBackground() != null) {
-                tv.getBackground().getPadding(mTmpRect);
-            } else {
-                mTmpRect.setEmpty();
+                tv.getBackground().getPadding(padding);
             }
-            Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
+            mTmpRect.set(mStableLayoutAlgorithm.mTaskRect);
+            mTmpRect.union(mLayoutAlgorithm.mTaskRect);
             tv.cancelTransformAnimation();
-            tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
-                    taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
+            tv.layout(mTmpRect.left - padding.left, mTmpRect.top - padding.top,
+                    mTmpRect.right + padding.right, mTmpRect.bottom + padding.bottom);
         } else {
             // If the layout has not changed, then just lay it out again in-place
             tv.layout(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
@@ -1847,7 +1815,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             height -= systemInsets.bottom;
             systemInsets.bottom = 0;
             mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
-                    height, mDividerSize, mLayoutAlgorithm.mSystemInsets,
+                    height, mDividerSize, systemInsets,
                     mLayoutAlgorithm, getResources(), mWindowRect));
             mLayoutAlgorithm.setSystemInsets(systemInsets);
             mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
@@ -1982,17 +1950,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         if (!event.inMultiWindow) {
-            // Scroll the stack to the front to see the undocked task
-            mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP, new Runnable() {
+            // Defer until the next frame to ensure that we have received all the system insets, and
+            // initial layout updates
+            post(new Runnable() {
                 @Override
                 public void run() {
-                    List<TaskView> taskViews = getTaskViews();
-                    int taskViewCount = taskViews.size();
-                    for (int i = 0; i < taskViewCount; i++) {
-                        TaskView tv = taskViews.get(i);
-                        tv.getHeaderView().rebindToTask(tv.getTask(), tv.mTouchExplorationEnabled,
-                                tv.mIsDisabledInSafeMode);
-                    }
+                    // Scroll the stack to the front to see the undocked task
+                    mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP, new Runnable() {
+                        @Override
+                        public void run() {
+                            List<TaskView> taskViews = getTaskViews();
+                            int taskViewCount = taskViews.size();
+                            for (int i = 0; i < taskViewCount; i++) {
+                                TaskView tv = taskViews.get(i);
+                                tv.getHeaderView().rebindToTask(tv.getTask(),
+                                        tv.mTouchExplorationEnabled, tv.mIsDisabledInSafeMode);
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -2013,8 +1988,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Trigger a new layout and update to the initial state if necessary
-        if (event.fromMultiWindow || event.fromOrientationChange) {
+        if (event.fromMultiWindow) {
             mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+            requestLayout();
+        } else if (event.fromDeviceOrientationChange) {
+            mInitialState = INITIAL_STATE_UPDATE_ALL;
             requestLayout();
         }
     }
@@ -2110,7 +2088,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mFocusedTask != null) {
             writer.print(innerPrefix);
             writer.print("Focused task: ");
-            mFocusedTask.dump(innerPrefix, writer);
+            mFocusedTask.dump("", writer);
         }
 
         mLayoutAlgorithm.dump(innerPrefix, writer);

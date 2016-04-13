@@ -299,7 +299,7 @@ public class TaskStack {
                 if (bounds != null && !dockAreaOverlay.getBounds().equals(bounds)) {
                     if (animateBounds) {
                         PropertyValuesHolder prop = PropertyValuesHolder.ofObject(
-                                Utilities.DRAWABLE_RECT, new RectEvaluator(new Rect()),
+                                Utilities.DRAWABLE_RECT, Utilities.RECT_EVALUATOR,
                                 dockAreaOverlay.getBounds(), bounds);
                         animators.add(ObjectAnimator.ofPropertyValuesHolder(dockAreaOverlay, prop));
                     } else {
