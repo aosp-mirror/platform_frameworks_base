@@ -16,7 +16,14 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import android.annotation.AttrRes;
 import android.annotation.ColorInt;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.Config;
@@ -47,16 +54,11 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.View;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
-
-import com.android.internal.R;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -148,7 +150,7 @@ public abstract class Drawable {
      *
      * @param canvas The canvas to draw into
      */
-    public abstract void draw(Canvas canvas);
+    public abstract void draw(@NonNull Canvas canvas);
 
     /**
      * Specify a bounding rectangle for the Drawable. This is where the drawable
@@ -176,7 +178,7 @@ public abstract class Drawable {
      * Specify a bounding rectangle for the Drawable. This is where the drawable
      * will draw when its draw() method is called.
      */
-    public void setBounds(Rect bounds) {
+    public void setBounds(@NonNull Rect bounds) {
         setBounds(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
 
@@ -188,7 +190,7 @@ public abstract class Drawable {
      * @param bounds Rect to receive the drawable's bounds (allocated by the
      *               caller).
      */
-    public final void copyBounds(Rect bounds) {
+    public final void copyBounds(@NonNull Rect bounds) {
         bounds.set(mBounds);
     }
 
@@ -200,6 +202,7 @@ public abstract class Drawable {
      *
      * @return A copy of the drawable's bounds
      */
+    @NonNull
     public final Rect copyBounds() {
         return new Rect(mBounds);
     }
@@ -219,6 +222,7 @@ public abstract class Drawable {
      * @see #copyBounds()
      * @see #copyBounds(android.graphics.Rect)
      */
+    @NonNull
     public final Rect getBounds() {
         if (mBounds == ZERO_BOUNDS_RECT) {
             mBounds = new Rect();
@@ -237,6 +241,7 @@ public abstract class Drawable {
      *
      * @return The dirty bounds of this drawable
      */
+    @NonNull
     public Rect getDirtyBounds() {
         return getBounds();
     }
@@ -354,8 +359,8 @@ public abstract class Drawable {
      *
      * @see #getCallback()
      */
-    public final void setCallback(Callback cb) {
-        mCallback = new WeakReference<Callback>(cb);
+    public final void setCallback(@Nullable Callback cb) {
+        mCallback = cb != null ? new WeakReference<>(cb) : null;
     }
 
     /**
@@ -366,11 +371,9 @@ public abstract class Drawable {
      *
      * @see #setCallback(android.graphics.drawable.Drawable.Callback)
      */
+    @Nullable
     public Callback getCallback() {
-        if (mCallback != null) {
-            return mCallback.get();
-        }
-        return null;
+        return mCallback != null ? mCallback.get() : null;
     }
 
     /**
@@ -399,7 +402,7 @@ public abstract class Drawable {
      *
      * @see Callback#scheduleDrawable
      */
-    public void scheduleSelf(Runnable what, long when) {
+    public void scheduleSelf(@NonNull Runnable what, long when) {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.scheduleDrawable(this, what, when);
@@ -415,7 +418,7 @@ public abstract class Drawable {
      *
      * @see Callback#unscheduleDrawable
      */
-    public void unscheduleSelf(Runnable what) {
+    public void unscheduleSelf(@NonNull Runnable what) {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.unscheduleDrawable(this, what);
@@ -429,7 +432,7 @@ public abstract class Drawable {
      *         {@link android.view.View#LAYOUT_DIRECTION_RTL}
      * @see #setLayoutDirection(int)
      */
-    public int getLayoutDirection() {
+    public @View.ResolvedLayoutDir int getLayoutDirection() {
         return mLayoutDirection;
     }
 
@@ -467,7 +470,7 @@ public abstract class Drawable {
      * Specify an alpha value for the drawable. 0 means fully transparent, and
      * 255 means fully opaque.
      */
-    public abstract void setAlpha(int alpha);
+    public abstract void setAlpha(@IntRange(from=0,to=255) int alpha);
 
     /**
      * Gets the current alpha value for the drawable. 0 means fully transparent,
@@ -476,6 +479,7 @@ public abstract class Drawable {
      * The default return value is 255 if the class does not override this method to return a value
      * specific to its use of alpha.
      */
+    @IntRange(from=0,to=255)
     public int getAlpha() {
         return 0xFF;
     }
@@ -489,7 +493,7 @@ public abstract class Drawable {
      * Drawables draw is private implementation detail, and not something apps
      * should rely upon.
      */
-    public void setXfermode(Xfermode mode) {
+    public void setXfermode(@Nullable Xfermode mode) {
         // Base implementation drops it on the floor for compatibility. Whee!
     }
 
@@ -592,7 +596,7 @@ public abstract class Drawable {
      *
      * @return the current color filter, or {@code null} if none set
      */
-    public ColorFilter getColorFilter() {
+    public @Nullable ColorFilter getColorFilter() {
         return null;
     }
 
@@ -629,7 +633,7 @@ public abstract class Drawable {
      * @param outRect the rect to populate with the hotspot bounds
      * @see #setHotspotBounds(int, int, int, int)
      */
-    public void getHotspotBounds(Rect outRect) {
+    public void getHotspotBounds(@NonNull Rect outRect) {
         outRect.set(getBounds());
     }
 
@@ -677,7 +681,7 @@ public abstract class Drawable {
      * of the Drawable to change (hence requiring an invalidate), otherwise
      * returns false.
      */
-    public boolean setState(final int[] stateSet) {
+    public boolean setState(@NonNull final int[] stateSet) {
         if (!Arrays.equals(mStateSet, stateSet)) {
             mStateSet = stateSet;
             return onStateChange(stateSet);
@@ -692,7 +696,7 @@ public abstract class Drawable {
      * Some drawables may modify their imagery based on the selected state.
      * @return An array of resource Ids describing the current state.
      */
-    public int[] getState() {
+    public @NonNull int[] getState() {
         return mStateSet;
     }
 
@@ -709,7 +713,7 @@ public abstract class Drawable {
      *         {@link StateListDrawable} and {@link LevelListDrawable} this will be the child drawable
      *         currently in use.
      */
-    public Drawable getCurrent() {
+    public @NonNull Drawable getCurrent() {
         return this;
     }
 
@@ -729,7 +733,7 @@ public abstract class Drawable {
      * of the Drawable to change (hence requiring an invalidate), otherwise
      * returns false.
      */
-    public final boolean setLevel(int level) {
+    public final boolean setLevel(@IntRange(from=0,to=10000) int level) {
         if (mLevel != level) {
             mLevel = level;
             return onLevelChange(level);
@@ -742,7 +746,7 @@ public abstract class Drawable {
      *
      * @return int Current level, from 0 (minimum) to 10000 (maximum).
      */
-    public final int getLevel() {
+    public final @IntRange(from=0,to=10000) int getLevel() {
         return mLevel;
     }
 
@@ -839,7 +843,7 @@ public abstract class Drawable {
      *
      * @see android.graphics.PixelFormat
      */
-    public abstract int getOpacity();
+    public abstract @PixelFormat.Opacity int getOpacity();
 
     /**
      * Return the appropriate opacity value for two source opacities.  If
@@ -856,7 +860,8 @@ public abstract class Drawable {
      *
      * @see #getOpacity
      */
-    public static int resolveOpacity(int op1, int op2) {
+    public static @PixelFormat.Opacity int resolveOpacity(@PixelFormat.Opacity int op1,
+            @PixelFormat.Opacity int op2) {
         if (op1 == op2) {
             return op1;
         }
@@ -885,7 +890,7 @@ public abstract class Drawable {
      * report, else a Region holding the parts of the Drawable's bounds that
      * are transparent.
      */
-    public Region getTransparentRegion() {
+    public @Nullable Region getTransparentRegion() {
         return null;
     }
 
@@ -898,7 +903,10 @@ public abstract class Drawable {
      * if it looks the same and there is no need to redraw it since its
      * last state.
      */
-    protected boolean onStateChange(int[] state) { return false; }
+    protected boolean onStateChange(int[] state) {
+        return false;
+    }
+
     /** Override this in your subclass to change appearance if you vary based
      *  on level.
      * @return Returns true if the level change has caused the appearance of
@@ -906,12 +914,17 @@ public abstract class Drawable {
      * if it looks the same and there is no need to redraw it since its
      * last level.
      */
-    protected boolean onLevelChange(int level) { return false; }
+    protected boolean onLevelChange(int level) {
+        return false;
+    }
+
     /**
      * Override this in your subclass to change appearance if you vary based on
      * the bounds.
      */
-    protected void onBoundsChange(Rect bounds) {}
+    protected void onBoundsChange(Rect bounds) {
+        // Stub method.
+    }
 
     /**
      * Returns the drawable's intrinsic width.
@@ -986,7 +999,7 @@ public abstract class Drawable {
      *
      * @hide
      */
-    public Insets getOpticalInsets() {
+    public @NonNull Insets getOpticalInsets() {
         return Insets.NONE;
     }
 
@@ -1020,7 +1033,7 @@ public abstract class Drawable {
      * @see ConstantState
      * @see #getConstantState()
      */
-    public Drawable mutate() {
+    public @NonNull Drawable mutate() {
         return this;
     }
 
@@ -1126,9 +1139,10 @@ public abstract class Drawable {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         int type;
-        while ((type=parser.next()) != XmlPullParser.START_TAG &&
-                type != XmlPullParser.END_DOCUMENT) {
-            // Empty loop
+        //noinspection StatementWithEmptyBody
+        while ((type=parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+            // Empty loop.
         }
 
         if (type != XmlPullParser.START_TAG) {
@@ -1222,8 +1236,9 @@ public abstract class Drawable {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    void inflateWithAttributes(@NonNull Resources r, @NonNull XmlPullParser parser,
-            @NonNull TypedArray attrs, int visibleAttr) throws XmlPullParserException, IOException {
+    void inflateWithAttributes(@NonNull @SuppressWarnings("unused") Resources r,
+            @NonNull @SuppressWarnings("unused") XmlPullParser parser, @NonNull TypedArray attrs,
+            @AttrRes int visibleAttr) throws XmlPullParserException, IOException {
         mVisible = attrs.getBoolean(visibleAttr, mVisible);
     }
 
@@ -1254,8 +1269,7 @@ public abstract class Drawable {
          * @return a new drawable object based on this constant state
          * @see {@link #newDrawable(Resources)}
          */
-        @NonNull
-        public abstract Drawable newDrawable();
+        public abstract @NonNull Drawable newDrawable();
 
         /**
          * Creates a new Drawable instance from its constant state using the
@@ -1269,8 +1283,7 @@ public abstract class Drawable {
          *            be displayed
          * @return a new drawable object based on this constant state
          */
-        @NonNull
-        public Drawable newDrawable(@Nullable Resources res) {
+        public @NonNull Drawable newDrawable(@Nullable Resources res) {
             return newDrawable();
         }
 
@@ -1288,8 +1301,8 @@ public abstract class Drawable {
          *              displayed
          * @return a new drawable object based on this constant state
          */
-        @NonNull
-        public Drawable newDrawable(@Nullable Resources res, @Nullable Theme theme) {
+        public @NonNull Drawable newDrawable(@Nullable Resources res,
+                @Nullable @SuppressWarnings("unused") Theme theme) {
             return newDrawable(res);
         }
 
@@ -1303,12 +1316,12 @@ public abstract class Drawable {
          * @return Total pixel count
          * @hide
          */
-        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+        public int addAtlasableBitmaps(@NonNull Collection<Bitmap> atlasList) {
             return 0;
         }
 
         /** @hide */
-        protected final boolean isAtlasable(Bitmap bitmap) {
+        protected final boolean isAtlasable(@Nullable Bitmap bitmap) {
             return bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888;
         }
 
@@ -1327,7 +1340,7 @@ public abstract class Drawable {
      * @see ConstantState
      * @see Drawable#mutate()
      */
-    public ConstantState getConstantState() {
+    public @Nullable ConstantState getConstantState() {
         return null;
     }
 
@@ -1345,8 +1358,8 @@ public abstract class Drawable {
      * Ensures the tint filter is consistent with the current tint color and
      * mode.
      */
-    PorterDuffColorFilter updateTintFilter(PorterDuffColorFilter tintFilter, ColorStateList tint,
-            PorterDuff.Mode tintMode) {
+    @Nullable PorterDuffColorFilter updateTintFilter(@Nullable PorterDuffColorFilter tintFilter,
+            @Nullable ColorStateList tint, @Nullable PorterDuff.Mode tintMode) {
         if (tint == null || tintMode == null) {
             return null;
         }
@@ -1365,8 +1378,8 @@ public abstract class Drawable {
      * Obtains styled attributes from the theme, if available, or unstyled
      * resources if the theme is null.
      */
-    static TypedArray obtainAttributes(
-            Resources res, Theme theme, AttributeSet set, int[] attrs) {
+    static @NonNull TypedArray obtainAttributes(@NonNull Resources res, @Nullable Theme theme,
+            @NonNull AttributeSet set, @NonNull int[] attrs) {
         if (theme == null) {
             return res.obtainAttributes(set, attrs);
         }
@@ -1418,8 +1431,6 @@ public abstract class Drawable {
         final int rounded = Math.round(result);
         if (rounded != 0) {
             return rounded;
-        } else if (pixels == 0) {
-            return 0;
         } else if (pixels > 0) {
             return 1;
         } else {
@@ -1440,7 +1451,7 @@ public abstract class Drawable {
      * @param cause the exception to re-throw
      * @throws RuntimeException
      */
-    static void rethrowAsRuntimeException(Exception cause) throws RuntimeException {
+    static void rethrowAsRuntimeException(@NonNull Exception cause) throws RuntimeException {
         final RuntimeException e = new RuntimeException(cause);
         e.setStackTrace(new StackTraceElement[0]);
         throw e;
