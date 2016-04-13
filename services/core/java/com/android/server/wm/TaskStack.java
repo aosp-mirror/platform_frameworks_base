@@ -16,6 +16,20 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
+
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -34,20 +48,6 @@ import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
-import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 public class TaskStack implements DimLayer.DimLayerUser,
         BoundsAnimationController.AnimateBoundsUser {
@@ -379,10 +379,15 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return false;
         }
 
+        final int oldDockSide = mStackId == DOCKED_STACK_ID ? getDockSide() : DOCKED_INVALID;
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
             repositionDockedStackAfterRotation(mTmpRect2);
             snapDockedStackAfterRotation(mTmpRect2);
+            final int newDockSide = getDockSide(mTmpRect2);
+            if (oldDockSide != newDockSide) {
+                mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
+            }
         }
 
         if (scheduleResize) {

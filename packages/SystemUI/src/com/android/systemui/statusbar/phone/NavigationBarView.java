@@ -526,6 +526,10 @@ public class NavigationBarView extends LinearLayout {
                 public void onDockedStackMinimizedChanged(boolean minimized, long animDuration)
                         throws RemoteException {
                 }
+
+                @Override
+                public void onDockSideChanged(int newDockSide) throws RemoteException {
+                }
             });
         } catch (RemoteException e) {
             Log.e(TAG, "Failed registering docked stack exists listener", e);
