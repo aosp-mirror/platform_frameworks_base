@@ -2737,7 +2737,7 @@ public class ConnectivityManager {
     private void incCallbackHandlerRefCount() {
         synchronized(sCallbackRefCount) {
             if (sCallbackRefCount.incrementAndGet() == 1) {
-                // TODO - switch this over to a ManagerThread or expire it when done
+                // TODO: switch this to ConnectivityThread
                 HandlerThread callbackThread = new HandlerThread("ConnectivityManager");
                 callbackThread.start();
                 sCallbackHandler = new CallbackHandler(callbackThread.getLooper(),
@@ -3095,6 +3095,10 @@ public class ConnectivityManager {
             mService.releaseNetworkRequest(networkCallback.networkRequest);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+
+        synchronized (sNetworkCallback) {
+            sNetworkCallback.remove(networkCallback.networkRequest);
         }
     }
 
