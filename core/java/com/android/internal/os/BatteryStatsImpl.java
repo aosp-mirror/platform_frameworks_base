@@ -1745,6 +1745,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void add(String name, T obj) {
+            if (name == null) {
+                name = "";
+            }
             mMap.put(name, obj);
             if (OVERFLOW_NAME.equals(name)) {
                 mCurOverflow = obj;
@@ -1776,6 +1779,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public T startObject(String name) {
+            if (name == null) {
+                name = "";
+            }
             T obj = mMap.get(name);
             if (obj != null) {
                 return obj;
@@ -1825,6 +1831,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public T stopObject(String name) {
+            if (name == null) {
+                name = "";
+            }
             T obj = mMap.get(name);
             if (obj != null) {
                 return obj;
