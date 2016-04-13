@@ -226,7 +226,7 @@ void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
         // Set to 0 so that the animate() basically instantly finishes
         mStartTime = 0;
     }
-    if (mDuration < 0 || mDuration > 50000) {
+    if (mDuration < 0) {
         ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);
     }
 }
