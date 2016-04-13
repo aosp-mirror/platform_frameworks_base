@@ -16063,16 +16063,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
-                try (PackageFreezer freezer = freezePackage(packageName,
-                        "deleteApplicationCacheFiles")) {
-                    synchronized (mInstallLock) {
-                        final int flags = StorageManager.FLAG_STORAGE_DE
-                                | StorageManager.FLAG_STORAGE_CE;
-                        clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CACHE_ONLY);
-                        clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    }
-                    clearExternalStorageDataSync(packageName, userId, false);
+                synchronized (mInstallLock) {
+                    final int flags = StorageManager.FLAG_STORAGE_DE
+                            | StorageManager.FLAG_STORAGE_CE;
+                    // We're only clearing cache files, so we don't care if the
+                    // app is unfrozen and still able to run
+                    clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CACHE_ONLY);
+                    clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
+                clearExternalStorageDataSync(packageName, userId, false);
                 if (observer != null) {
                     try {
                         observer.onRemoveCompleted(packageName, true);
