@@ -70,6 +70,7 @@ import android.util.LogPrinter;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
 
 import java.net.InetAddress;
@@ -223,11 +224,15 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private final NetworkCapabilities mNetworkCapabilities;
         private final IdleableHandlerThread mHandlerThread;
         private final ConditionVariable mDisconnected = new ConditionVariable();
+        private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
         private int mStartKeepaliveError = PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
         private int mStopKeepaliveError = PacketKeepalive.NO_KEEPALIVE;
         private Integer mExpectedKeepaliveSlot = null;
+        // Contains the redirectUrl from networkStatus(). Before reading, wait for
+        // mNetworkStatusReceived.
+        private String mRedirectUrl;
 
         MockNetworkAgent(int transport) {
             final int type = transportToLegacyType(transport);
@@ -265,6 +270,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 @Override
                 public void stopPacketKeepalive(Message msg) {
                     onPacketKeepaliveEvent(msg.arg1, mStopKeepaliveError);
+                }
+
+                @Override
+                public void networkStatus(int status, String redirectUrl) {
+                    mRedirectUrl = redirectUrl;
+                    mNetworkStatusReceived.open();
                 }
             };
             // Waits for the NetworkAgent to be registered, which includes the creation of the
@@ -340,13 +351,15 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             if (callback != null) mCm.unregisterNetworkCallback(callback);
         }
 
-        public void connectWithCaptivePortal() {
+        public void connectWithCaptivePortal(String redirectUrl) {
             mWrappedNetworkMonitor.gen204ProbeResult = 200;
+            mWrappedNetworkMonitor.gen204ProbeRedirectUrl = redirectUrl;
             connect(false);
             waitFor(new Criteria() { public boolean get() {
                 NetworkCapabilities caps = mCm.getNetworkCapabilities(getNetwork());
                 return caps != null && caps.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL);} });
             mWrappedNetworkMonitor.gen204ProbeResult = 500;
+            mWrappedNetworkMonitor.gen204ProbeRedirectUrl = null;
         }
 
         public void disconnect() {
@@ -380,6 +393,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public void setExpectedKeepaliveSlot(Integer slot) {
             mExpectedKeepaliveSlot = slot;
+        }
+
+        public String waitForRedirectUrl() {
+            assertTrue(mNetworkStatusReceived.block(TIMEOUT_MS));
+            return mRedirectUrl;
         }
     }
 
@@ -543,6 +561,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private class WrappedNetworkMonitor extends NetworkMonitor {
         // HTTP response code fed back to NetworkMonitor for Internet connectivity probe.
         public int gen204ProbeResult = 500;
+        public String gen204ProbeRedirectUrl = null;
 
         public WrappedNetworkMonitor(Context context, Handler handler,
             NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest) {
@@ -550,8 +569,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        protected int isCaptivePortal() {
-            return gen204ProbeResult;
+        protected CaptivePortalProbeResult isCaptivePortal() {
+            return new CaptivePortalProbeResult(gen204ProbeResult, gen204ProbeRedirectUrl);
         }
 
         @Override
@@ -1344,8 +1363,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Bring up a network with a captive portal.
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.connectWithCaptivePortal();
+        String firstRedirectUrl = "http://example.com/firstPath";
+        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl);
         captivePortalCallback.expectCallback(CallbackState.AVAILABLE);
+        assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), firstRedirectUrl);
 
         // Take down network.
         // Expect onLost callback.
@@ -1355,8 +1376,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Bring up a network with a captive portal.
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.connectWithCaptivePortal();
+        String secondRedirectUrl = "http://example.com/secondPath";
+        mWiFiNetworkAgent.connectWithCaptivePortal(secondRedirectUrl);
         captivePortalCallback.expectCallback(CallbackState.AVAILABLE);
+        assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), secondRedirectUrl);
 
         // Make captive portal disappear then revalidate.
         // Expect onLost callback because network no longer provides NET_CAPABILITY_CAPTIVE_PORTAL.

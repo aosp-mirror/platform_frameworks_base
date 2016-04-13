@@ -120,8 +120,9 @@ public class NetworkMonitor extends StateMachine {
 
     /**
      * Inform ConnectivityService that the network has been tested.
-     * obj = NetworkAgentInfo
+     * obj = String representing URL that Internet probe was redirect to, if it was redirected.
      * arg1 = One of the NETWORK_TESTED_RESULT_* constants.
+     * arg2 = NetID.
      */
     public static final int EVENT_NETWORK_TESTED = BASE + 2;
 
@@ -334,8 +335,8 @@ public class NetworkMonitor extends StateMachine {
                             mDontDisplaySigninNotification = true;
                             mUserDoesNotWant = true;
                             mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
-                                    mNetworkAgentInfo));
+                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID,
+                                    mNetworkAgentInfo.network.netId, null));
                             // TODO: Should teardown network.
                             mUidResponsibleForReeval = 0;
                             transitionTo(mEvaluatingState);
@@ -358,7 +359,7 @@ public class NetworkMonitor extends StateMachine {
             CaptivePortalStateChangeEvent.logEvent(
                    CaptivePortalStateChangeEvent.NETWORK_MONITOR_VALIDATED);
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                    NETWORK_TEST_RESULT_VALID, 0, mNetworkAgentInfo));
+                    NETWORK_TEST_RESULT_VALID, mNetworkAgentInfo.network.netId, null));
         }
 
         @Override
@@ -409,6 +410,21 @@ public class NetworkMonitor extends StateMachine {
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0,
                     mNetworkAgentInfo.network.netId, null);
             mConnectivityServiceHandler.sendMessage(message);
+        }
+    }
+
+    /**
+     * Result of calling isCaptivePortal().
+     * @hide
+     */
+    @VisibleForTesting
+    public static final class CaptivePortalProbeResult {
+        final int mHttpResponseCode; // HTTP response code returned from Internet probe.
+        final String mRedirectUrl;   // Redirect destination returned from Internet probe.
+
+        public CaptivePortalProbeResult(int httpResponseCode, String redirectUrl) {
+            mHttpResponseCode = httpResponseCode;
+            mRedirectUrl = redirectUrl;
         }
     }
 
@@ -464,19 +480,23 @@ public class NetworkMonitor extends StateMachine {
                     // IPv6) could each take SOCKET_TIMEOUT_MS.  During this time this StateMachine
                     // will be unresponsive. isCaptivePortal() could be executed on another Thread
                     // if this is found to cause problems.
-                    int httpResponseCode = isCaptivePortal();
+                    CaptivePortalProbeResult probeResult = isCaptivePortal();
                     CaptivePortalCheckResultEvent.logEvent(mNetworkAgentInfo.network.netId,
-                            httpResponseCode);
-                    if (httpResponseCode == 204) {
+                            probeResult.mHttpResponseCode);
+                    if (probeResult.mHttpResponseCode == 204) {
                         transitionTo(mValidatedState);
-                    } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
+                    } else if (probeResult.mHttpResponseCode >= 200 &&
+                            probeResult.mHttpResponseCode <= 399) {
+                        mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
+                                NETWORK_TEST_RESULT_INVALID, mNetworkAgentInfo.network.netId,
+                                probeResult.mRedirectUrl));
                         transitionTo(mCaptivePortalState);
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
                         mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
-                                mNetworkAgentInfo));
+                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID,
+                                mNetworkAgentInfo.network.netId, probeResult.mRedirectUrl));
                         if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
                             // Don't continue to blame UID forever.
                             TrafficStats.clearThreadStatsUid();
@@ -533,8 +553,6 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
-            mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                    NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
             // Don't annoy user with sign-in notifications.
             if (mDontDisplaySigninNotification) return;
             // Create a CustomIntentReceiver that sends us a
@@ -639,11 +657,12 @@ public class NetworkMonitor extends StateMachine {
      * Returns HTTP response code.
      */
     @VisibleForTesting
-    protected int isCaptivePortal() {
-        if (!mIsCaptivePortalCheckEnabled) return 204;
+    protected CaptivePortalProbeResult isCaptivePortal() {
+        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204, null);
 
         HttpURLConnection urlConnection = null;
         int httpResponseCode = 599;
+        String redirectUrl = null;
         try {
             URL url = new URL(getCaptivePortalServerUrl(mContext));
             // On networks with a PAC instead of fetching a URL that should result in a 204
@@ -699,6 +718,7 @@ public class NetworkMonitor extends StateMachine {
             long requestTimestamp = SystemClock.elapsedRealtime();
 
             httpResponseCode = urlConnection.getResponseCode();
+            redirectUrl = urlConnection.getHeaderField("location");
 
             // Time how long it takes to get a response to our request
             long responseTimestamp = SystemClock.elapsedRealtime();
@@ -739,7 +759,7 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.disconnect();
             }
         }
-        return httpResponseCode;
+        return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
     }
 
     /**
