@@ -444,6 +444,9 @@ public abstract class Drawable {
      * @param layoutDirection the resolved layout direction for the drawable,
      *                        either {@link android.view.View#LAYOUT_DIRECTION_LTR}
      *                        or {@link android.view.View#LAYOUT_DIRECTION_RTL}
+     * @return {@code true} if the layout direction change has caused the
+     *         appearance of the drawable to change such that it needs to be
+     *         re-drawn, {@code false} otherwise
      * @see #getLayoutDirection()
      */
     public final boolean setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
@@ -458,8 +461,9 @@ public abstract class Drawable {
      * Called when the drawable's resolved layout direction changes.
      *
      * @param layoutDirection the new resolved layout direction
-     * @return true if the layout direction change has caused the appearance of
-     *         the drawable to change and it needs to be re-drawn
+     * @return {@code true} if the layout direction change has caused the
+     *         appearance of the drawable to change such that it needs to be
+     *         re-drawn, {@code false} otherwise
      * @see #setLayoutDirection(int)
      */
     public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
