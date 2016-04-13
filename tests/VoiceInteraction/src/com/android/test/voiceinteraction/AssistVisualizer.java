@@ -37,6 +37,8 @@ public class AssistVisualizer extends View {
         final int parentLeft, parentTop;
         final Matrix matrix;
         final String className;
+        final float textSize;
+        final int textColor;
         final CharSequence text;
         final int scrollY;
         final int[] lineCharOffsets;
@@ -50,6 +52,8 @@ public class AssistVisualizer extends View {
             this.parentTop = parentTop;
             this.matrix = new Matrix(matrix);
             this.className = node.getClassName();
+            this.textSize = node.getTextSize();
+            this.textColor = node.getTextColor();
             this.text = node.getText() != null ? node.getText() : node.getContentDescription();
             this.scrollY = node.getScrollY();
             this.lineCharOffsets = node.getTextLineCharOffsets();
@@ -113,7 +117,9 @@ public class AssistVisualizer extends View {
             TextEntry te = mTextRects.get(i);
             Log.d(TAG, "View " + te.className + " " + te.bounds.toShortString()
                     + " in " + te.parentLeft + "," + te.parentTop
-                    + " matrix=" + te.matrix.toShortString() + ": "
+                    + " matrix=" + te.matrix.toShortString()
+                    + " size=" + te.textSize + " color=#" + Integer.toHexString(te.textColor)
+                    + ": "
                     + te.text);
             if (te.lineCharOffsets != null && te.lineBaselines != null) {
                 final int num = te.lineCharOffsets.length < te.lineBaselines.length
