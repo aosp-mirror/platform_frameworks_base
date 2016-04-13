@@ -269,13 +269,13 @@ interface IDevicePolicyManager {
     String getWifiMacAddress(in ComponentName admin);
     void reboot(in ComponentName admin);
 
-    void setShortSupportMessage(in ComponentName admin, in String message);
-    String getShortSupportMessage(in ComponentName admin);
-    void setLongSupportMessage(in ComponentName admin, in String message);
-    String getLongSupportMessage(in ComponentName admin);
+    void setShortSupportMessage(in ComponentName admin, in CharSequence message);
+    CharSequence getShortSupportMessage(in ComponentName admin);
+    void setLongSupportMessage(in ComponentName admin, in CharSequence message);
+    CharSequence getLongSupportMessage(in ComponentName admin);
 
-    String getShortSupportMessageForUser(in ComponentName admin, int userHandle);
-    String getLongSupportMessageForUser(in ComponentName admin, int userHandle);
+    CharSequence getShortSupportMessageForUser(in ComponentName admin, int userHandle);
+    CharSequence getLongSupportMessageForUser(in ComponentName admin, int userHandle);
 
     boolean isSeparateProfileChallengeAllowed(int userHandle);
 
