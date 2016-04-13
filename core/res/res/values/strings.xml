@@ -2552,21 +2552,29 @@
     <!-- Title of intent resolver dialog when selecting an application to run
          and a previously used application is known. -->
     <string name="whichApplicationNamed">Complete action using %1$s</string>
+    <!-- Generic label for a link to a intent resolver. -->
+    <string name="whichApplicationLabel">Complete action</string>
     <!-- Title of intent resolver dialog when selecting a viewer application to run. -->
     <string name="whichViewApplication">Open with</string>
     <!-- Title of intent resolver dialog when selecting a viewer application to run
          and a previously used application is known. -->
     <string name="whichViewApplicationNamed">Open with %1$s</string>
+    <!-- Label for a link to a intent resolver dialog to view something -->
+    <string name="whichViewApplicationLabel">Open</string>
     <!-- Title of intent resolver dialog when selecting an editor application to run. -->
     <string name="whichEditApplication">Edit with</string>
     <!-- Title of intent resolver dialog when selecting an editor application to run
          and a previously used application is known. -->
     <string name="whichEditApplicationNamed">Edit with %1$s</string>
+    <!-- Label for a link to a intent resolver dialog when selecting an editor application -->
+    <string name="whichEditApplicationLabel">Edit</string>
     <!-- Title of intent resolver dialog when selecting a sharing application to run. -->
     <string name="whichSendApplication">Share with</string>
     <!-- Title of intent resolver dialog when selecting a sharing application to run
          and a previously used application is known. -->
     <string name="whichSendApplicationNamed">Share with %1$s</string>
+    <!-- Label for a link to a intent resolver dialog to sharing something -->
+    <string name="whichSendApplicationLabel">Share</string>
     <!-- Title of intent resolver dialog when selecting an application to run to
          send content to a specific recipient. Often used for email. -->
     <string name="whichSendToApplication">Send using</string>
@@ -2574,11 +2582,23 @@
          send content to a specific recipient and a previously used application is known.
          Often used for email. -->
     <string name="whichSendToApplicationNamed">Send using %1$s</string>
+    <!-- Label for a link to a intent resolver dialog to send content to a specific recipient. -->
+    <string name="whichSendToApplicationLabel">Send</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
     <string name="whichHomeApplication">Select a Home app</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run
          and a previously used application is known. -->
     <string name="whichHomeApplicationNamed">Use %1$s as Home</string>
+    <!-- Label for a link to a intent resolver dialog when selecting a HOME -->
+    <string name="whichHomeApplicationLabel">Capture image</string>
+    <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
+    <!-- Title of intent resolver dialog when capturing an image. -->
+    <string name="whichImageCaptureApplication">Capture image with</string>
+    <!-- Title of intent resolver dialog when capturing an image
+         and a previously used application is known. -->
+    <string name="whichImageCaptureApplicationNamed">Capture image with %1$s</string>
+    <!-- Label for a link to a intent resolver dialog when capturing an image -->
+    <string name="whichImageCaptureApplicationLabel">Capture image</string>
     <!-- Option to always use the selected application resolution in the future. See the "Complete action using" dialog title-->
     <string name="alwaysUse">Use by default for this action.</string>
     <!-- Title of the list of alternate options to complete an action shown when the

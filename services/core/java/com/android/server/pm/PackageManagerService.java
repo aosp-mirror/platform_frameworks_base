@@ -4928,6 +4928,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 ri = new ResolveInfo(mResolveInfo);
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
+                ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
                 ri.activityInfo.applicationInfo = new ApplicationInfo(
                         ri.activityInfo.applicationInfo);
                 if (userId != 0) {
