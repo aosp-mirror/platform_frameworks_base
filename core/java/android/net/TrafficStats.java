@@ -228,7 +228,6 @@ public class TrafficStats {
      * statistics parameters.
      *
      * @see #setThreadStatsTag(int)
-     * @see #setThreadStatsUid(int)
      */
     public static void tagSocket(Socket socket) throws SocketException {
         SocketTagger.get().tag(socket);
@@ -249,7 +248,6 @@ public class TrafficStats {
      * parameters.
      *
      * @see #setThreadStatsTag(int)
-     * @see #setThreadStatsUid(int)
      */
     public static void tagDatagramSocket(DatagramSocket socket) throws SocketException {
         SocketTagger.get().tag(socket);

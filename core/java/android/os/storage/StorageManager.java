@@ -1062,8 +1062,8 @@ public class StorageManager {
     }
 
     /**
-     * Return if data stored at the given path will be encrypted while at rest.
-     * This can help apps avoid the overhead of double-encrypting data.
+     * Return if data stored at or under the given path will be encrypted while
+     * at rest. This can help apps avoid the overhead of double-encrypting data.
      */
     public boolean isEncrypted(File file) {
         if (FileUtils.contains(Environment.getDataDirectory(), file)) {
