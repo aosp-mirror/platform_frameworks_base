@@ -93,16 +93,24 @@ public final class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG = false;
 
     /** The maximum number of concurrent jobs we run at one time. */
-    private static final int MAX_JOB_CONTEXTS_COUNT = 8;
+    private static final int MAX_JOB_CONTEXTS_COUNT = 12;
+    /** The number of MAX_JOB_CONTEXTS_COUNT we reserve for the foreground app. */
+    private static final int FG_JOB_CONTEXTS_COUNT = 4;
     /** Enforce a per-app limit on scheduled jobs? */
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
+    /** This is the job execution factor that is considered to be heavy use of the system. */
+    private static final float HEAVY_USE_FACTOR = .9f;
+    /** This is the job execution factor that is considered to be moderate use of the system. */
+    private static final float MODERATE_USE_FACTOR = .5f;
 
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
     /** Master list of jobs. */
     final JobStore mJobs;
+    /** Tracking amount of time each package runs for. */
+    final JobPackageTracker mJobPackageTracker = new JobPackageTracker();
 
     static final int MSG_JOB_EXPIRED = 0;
     static final int MSG_CHECK_JOB = 1;
@@ -173,7 +181,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * Current limit on the number of concurrent JobServiceContext entries we want to
      * keep actively running a job.
      */
-    int mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - 2;
+    int mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT;
 
     /**
      * Which uids are currently in the foreground.
@@ -386,7 +394,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         stopTrackingJob(cancelled, incomingJob, true /* writeBack */);
         synchronized (mLock) {
             // Remove from pending queue.
-            mPendingJobs.remove(cancelled);
+            if (mPendingJobs.remove(cancelled)) {
+                mJobPackageTracker.noteNonpending(cancelled);
+            }
             // Cancel if running.
             stopJobOnServiceContextLocked(cancelled, JobParameters.REASON_CANCELED);
             reportActive();
@@ -518,7 +528,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // Create the "runners".
                 for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
                     mActiveServices.add(
-                            new JobServiceContext(this, mBatteryStats,
+                            new JobServiceContext(this, mBatteryStats, mJobPackageTracker,
                                     getContext().getMainLooper()));
                 }
                 // Attach jobs to their controllers.
@@ -602,6 +612,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         }
         return false;
+    }
+
+    void noteJobsPending(List<JobStatus> jobs) {
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            JobStatus job = jobs.get(i);
+            mJobPackageTracker.notePending(job);
+        }
+    }
+
+    void noteJobsNonpending(List<JobStatus> jobs) {
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            JobStatus job = jobs.get(i);
+            mJobPackageTracker.noteNonpending(job);
+        }
     }
 
     /**
@@ -759,6 +783,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         // state is such that all ready jobs should be run immediately.
                         if (runNow != null && !mPendingJobs.contains(runNow)
                                 && mJobs.containsJob(runNow)) {
+                            mJobPackageTracker.notePending(runNow);
                             mPendingJobs.add(runNow);
                         }
                         queueReadyJobsForExecutionLockedH();
@@ -797,6 +822,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "queuing all ready jobs for execution:");
             }
+            noteJobsNonpending(mPendingJobs);
             mPendingJobs.clear();
             mJobs.forEachJob(mReadyQueueFunctor);
             mReadyQueueFunctor.postProcess();
@@ -832,6 +858,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             public void postProcess() {
                 if (newReadyJobs != null) {
+                    noteJobsPending(newReadyJobs);
                     mPendingJobs.addAll(newReadyJobs);
                 }
                 newReadyJobs = null;
@@ -910,6 +937,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
                     }
+                    noteJobsPending(runnableJobs);
                     mPendingJobs.addAll(runnableJobs);
                 } else {
                     if (DEBUG) {
@@ -935,6 +963,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private void maybeQueueReadyJobsForExecutionLockedH() {
             if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
 
+            noteJobsNonpending(mPendingJobs);
             mPendingJobs.clear();
             mJobs.forEachJob(mMaybeQueueFunctor);
             mMaybeQueueFunctor.postProcess();
@@ -998,16 +1027,28 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private int adjustJobPriority(int curPriority, JobStatus job) {
+        if (curPriority < JobInfo.PRIORITY_TOP_APP) {
+            float factor = mJobPackageTracker.getLoadFactor(job);
+            if (factor >= HEAVY_USE_FACTOR) {
+                curPriority += JobInfo.PRIORITY_ADJ_ALWAYS_RUNNING;
+            } else if (factor >= MODERATE_USE_FACTOR) {
+                curPriority += JobInfo.PRIORITY_ADJ_OFTEN_RUNNING;
+            }
+        }
+        return curPriority;
+    }
+
     private int evaluateJobPriorityLocked(JobStatus job) {
         int priority = job.getPriority();
         if (priority >= JobInfo.PRIORITY_FOREGROUND_APP) {
-            return priority;
+            return adjustJobPriority(priority, job);
         }
         int override = mUidPriorityOverride.get(job.getSourceUid(), 0);
         if (override != 0) {
-            return override;
+            return adjustJobPriority(override, job);
         }
-        return priority;
+        return adjustJobPriority(priority, job);
     }
 
     /**
@@ -1029,16 +1070,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         switch (memLevel) {
             case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                mMaxActiveJobs = ((MAX_JOB_CONTEXTS_COUNT - 2) * 2) / 3;
+                mMaxActiveJobs = ((MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT) * 2) / 3;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                mMaxActiveJobs = (MAX_JOB_CONTEXTS_COUNT - 2) / 3;
+                mMaxActiveJobs = (MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT) / 3;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
                 mMaxActiveJobs = 1;
                 break;
             default:
-                mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - 2;
+                mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT;
                 break;
         }
 
@@ -1134,7 +1175,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (!mActiveServices.get(i).executeRunnableJob(pendingJob)) {
                         Slog.d(TAG, "Error executing " + pendingJob);
                     }
-                    mPendingJobs.remove(pendingJob);
+                    if (mPendingJobs.remove(pendingJob)) {
+                        mJobPackageTracker.noteNonpending(pendingJob);
+                    }
                 }
             }
             if (!preservePreferredUid) {
@@ -1443,6 +1486,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 pw.print("  "); pw.print(UserHandle.formatUid(mUidPriorityOverride.keyAt(i)));
                 pw.print(": "); pw.println(mUidPriorityOverride.valueAt(i));
             }
+            pw.println();
+            mJobPackageTracker.dump(pw, "");
             pw.println();
             pw.println("Pending queue:");
             for (int i=0; i<mPendingJobs.size(); i++) {
