@@ -156,10 +156,10 @@ class MagnificationController {
             final float offsetY = sentSpec.offsetY;
 
             // Compute the new center and update spec as needed.
-            final float centerX = (mMagnifiedBounds.width() / 2.0f - offsetX) / scale
-                    + mMagnifiedBounds.left;
-            final float centerY = (mMagnifiedBounds.height() / 2.0f - offsetY) / scale
-                    + mMagnifiedBounds.top;
+            final float centerX = (mMagnifiedBounds.width() / 2.0f
+                    + mMagnifiedBounds.left - offsetX) / scale;
+            final float centerY = (mMagnifiedBounds.height() / 2.0f
+                    + mMagnifiedBounds.top - offsetY) / scale;
             if (updateSpec) {
                 setScaleAndCenter(scale, centerX, centerY, false);
             } else {
@@ -256,7 +256,7 @@ class MagnificationController {
     public float getCenterX() {
         synchronized (mLock) {
             return  (mMagnifiedBounds.width() / 2.0f
-                   - getOffsetX()) / getScale() + mMagnifiedBounds.left;
+                    + mMagnifiedBounds.left - getOffsetX()) / getScale();
         }
     }
 
@@ -279,7 +279,7 @@ class MagnificationController {
     public float getCenterY() {
         synchronized (mLock) {
             return (mMagnifiedBounds.height() / 2.0f
-                    - getOffsetY()) / getScale() + mMagnifiedBounds.top;
+                    + mMagnifiedBounds.top - getOffsetY()) / getScale();
         }
     }
 
