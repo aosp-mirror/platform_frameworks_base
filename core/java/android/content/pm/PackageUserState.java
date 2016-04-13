@@ -87,6 +87,11 @@ public class PackageUserState {
     /**
      * Test if the given component is considered installed, enabled and a match
      * for the given flags.
+     *
+     * <p>
+     * Expects at least one of {@link PackageManager#MATCH_DIRECT_BOOT_AWARE} and
+     * {@link PackageManager#MATCH_DIRECT_BOOT_UNAWARE} are specified in {@code flags}.
+     * </p>
      */
     public boolean isMatch(ComponentInfo componentInfo, int flags) {
         if (!isInstalled(flags)) return false;
