@@ -1200,13 +1200,17 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     boolean animateBasedOnTime(long currentTime) {
         boolean done = false;
         if (mRunning) {
-            final float fraction = getScaledDuration() > 0 ?
-                    (float)(currentTime - mStartTime) / getScaledDuration() : 1f;
+            final long scaledDuration = getScaledDuration();
+            final float fraction = scaledDuration > 0 ?
+                    (float)(currentTime - mStartTime) / scaledDuration : 1f;
             final float lastFraction = mOverallFraction;
             final boolean newIteration = (int) fraction > (int) lastFraction;
             final boolean lastIterationFinished = (fraction >= mRepeatCount + 1) &&
                     (mRepeatCount != INFINITE);
-            if (newIteration && !lastIterationFinished) {
+            if (scaledDuration == 0) {
+                // 0 duration animator, ignore the repeat count and skip to the end
+                done = true;
+            } else if (newIteration && !lastIterationFinished) {
                 // Time to repeat
                 if (mListeners != null) {
                     int numListeners = mListeners.size();
