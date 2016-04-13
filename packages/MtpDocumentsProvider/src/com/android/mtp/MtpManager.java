@@ -16,6 +16,7 @@
 
 package com.android.mtp;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -27,6 +28,7 @@ import android.mtp.MtpDevice;
 import android.mtp.MtpDeviceInfo;
 import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
+import android.mtp.MtpStorageInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -80,9 +82,7 @@ class MtpManager {
             }
         }
 
-        if (rawDevice == null) {
-            throw new IOException("Not found USB device: " + deviceId);
-        }
+        ensureNotNull(rawDevice, "Not found USB device: " + deviceId);
 
         if (!mManager.hasPermission(rawDevice)) {
             mManager.grantPermission(rawDevice);
@@ -93,10 +93,9 @@ class MtpManager {
 
         final MtpDevice device = new MtpDevice(rawDevice);
 
-        final UsbDeviceConnection connection = mManager.openDevice(rawDevice);
-        if (connection == null) {
-            throw new IOException("Failed to open a USB connection.");
-        }
+        final UsbDeviceConnection connection = ensureNotNull(
+                mManager.openDevice(rawDevice),
+                "Failed to open a USB connection.");
 
         if (!device.open(connection)) {
             // We cannot open connection when another application use the device.
@@ -104,13 +103,11 @@ class MtpManager {
         }
 
         // Handle devices that fail to obtain storages just after opening a MTP session.
-        final int[] storageIds = device.getStorageIds();
-        if (storageIds == null) {
-            throw new IOException("Not found MTP storages in the device.");
-        }
+        final int[] storageIds = ensureNotNull(
+                device.getStorageIds(),
+                "Not found MTP storages in the device.");
 
         mDevices.put(deviceId, device);
-
         return createDeviceRecord(rawDevice);
     }
 
@@ -133,11 +130,9 @@ class MtpManager {
     MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            final MtpObjectInfo info = device.getObjectInfo(objectHandle);
-            if (info == null) {
-                throw new IOException("Failed to get object info: " + objectHandle);
-            }
-            return info;
+            return ensureNotNull(
+                    device.getObjectInfo(objectHandle),
+                    "Failed to get object info: " + objectHandle);
         }
     }
 
@@ -145,12 +140,9 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            final int[] handles =
-                    device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
-            if (handles == null) {
-                throw new IOException("Failed to fetch object handles.");
-            }
-            return handles;
+            return ensureNotNull(
+                    device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle),
+                    "Failed to fetch object handles.");
         }
     }
 
@@ -158,7 +150,9 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            return device.getObject(objectHandle, expectedSize);
+            return ensureNotNull(
+                    device.getObject(objectHandle, expectedSize),
+                    "Failed to fetch object bytes");
         }
     }
 
@@ -181,7 +175,9 @@ class MtpManager {
     byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            return device.getThumbnail(objectHandle);
+            return ensureNotNull(
+                    device.getThumbnail(objectHandle),
+                    "Failed to obtain thumbnail bytes");
         }
     }
 
@@ -216,7 +212,7 @@ class MtpManager {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
             final int result = (int) device.getParent(objectHandle);
-            if (result < 0) {
+            if (result == 0xffffffff) {
                 throw new FileNotFoundException("Not found parent object");
             }
             return result;
@@ -227,7 +223,9 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            device.importFile(objectHandle, target);
+            if (!device.importFile(objectHandle, target)) {
+                throw new IOException("Failed to import file to FD");
+            }
         }
     }
 
@@ -243,26 +241,25 @@ class MtpManager {
     }
 
     private synchronized MtpDevice getDevice(int deviceId) throws IOException {
-        final MtpDevice device = mDevices.get(deviceId);
-        if (device == null) {
-            throw new IOException("USB device " + deviceId + " is not opened.");
-        }
-        return device;
+        return ensureNotNull(
+                mDevices.get(deviceId),
+                "USB device " + deviceId + " is not opened.");
     }
 
     private MtpRoot[] getRoots(int deviceId) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            final int[] storageIds = device.getStorageIds();
-            if (storageIds == null) {
-                throw new IOException("Failed to obtain storage IDs.");
-            }
-            final MtpRoot[] results = new MtpRoot[storageIds.length];
+            final int[] storageIds =
+                    ensureNotNull(device.getStorageIds(), "Failed to obtain storage IDs.");
+            final ArrayList<MtpRoot> roots = new ArrayList<>();
             for (int i = 0; i < storageIds.length; i++) {
-                results[i] = new MtpRoot(
-                        device.getDeviceId(), device.getStorageInfo(storageIds[i]));
+                final MtpStorageInfo info = device.getStorageInfo(storageIds[i]);
+                if (info == null) {
+                    continue;
+                }
+                roots.add(new MtpRoot(device.getDeviceId(), info));
             }
-            return results;
+            return roots.toArray(new MtpRoot[roots.size()]);
         }
     }
 
@@ -312,5 +309,13 @@ class MtpManager {
             }
         }
         return false;
+    }
+
+    private static <T> T ensureNotNull(@Nullable T t, String errorMessage) throws IOException {
+        if (t != null) {
+            return t;
+        } else {
+            throw new IOException(errorMessage);
+        }
     }
 }
