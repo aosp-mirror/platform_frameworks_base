@@ -39,9 +39,9 @@ public:
     /**
      * Parse the string literal and create a Skia Path. Return true on success.
      */
-    ANDROID_API static void parseStringForSkPath(SkPath* outPath, ParseResult* result,
+    ANDROID_API static void parseAsciiStringForSkPath(SkPath* outPath, ParseResult* result,
             const char* pathStr, size_t strLength);
-    ANDROID_API static void getPathDataFromString(PathData* outData, ParseResult* result,
+    ANDROID_API static void getPathDataFromAsciiString(PathData* outData, ParseResult* result,
             const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
     static bool isVerbValid(char verb);

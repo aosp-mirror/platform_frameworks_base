@@ -31,7 +31,7 @@ void BM_PathParser_parseStringPathForSkPath(benchmark::State& state) {
     size_t length = strlen(sPathString);
     PathParser::ParseResult result;
     while (state.KeepRunning()) {
-        PathParser::parseStringForSkPath(&skPath, &result, sPathString, length);
+        PathParser::parseAsciiStringForSkPath(&skPath, &result, sPathString, length);
         benchmark::DoNotOptimize(&result);
         benchmark::DoNotOptimize(&skPath);
     }
@@ -43,7 +43,7 @@ void BM_PathParser_parseStringPathForPathData(benchmark::State& state) {
     PathData outData;
     PathParser::ParseResult result;
     while (state.KeepRunning()) {
-        PathParser::getPathDataFromString(&outData, &result, sPathString, length);
+        PathParser::getPathDataFromAsciiString(&outData, &result, sPathString, length);
         benchmark::DoNotOptimize(&result);
         benchmark::DoNotOptimize(&outData);
     }
