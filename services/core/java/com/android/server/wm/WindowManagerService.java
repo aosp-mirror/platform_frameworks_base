@@ -3940,16 +3940,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (transferStartingWindow(transferFrom, wtoken)) {
-                return;
-            }
-
-            // There is no existing starting window, and the caller doesn't
-            // want us to create one, so that's it!
-            if (!createIfNeeded) {
-                return;
-            }
-
             // If this is a translucent window, then don't
             // show a starting window -- the current effect (a full-screen
             // opaque starting window that fades away to the real contents
@@ -3993,6 +3983,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         return;
                     }
                 }
+            }
+
+            if (transferStartingWindow(transferFrom, wtoken)) {
+                return;
+            }
+
+            // There is no existing starting window, and the caller doesn't
+            // want us to create one, so that's it!
+            if (!createIfNeeded) {
+                return;
             }
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
