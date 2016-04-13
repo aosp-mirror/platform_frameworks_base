@@ -9425,7 +9425,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (prev != null && prev.isRecentsActivity()) {
                 task.setTaskToReturnTo(ActivityRecord.RECENTS_ACTIVITY_TYPE);
             }
-            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront");
+            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront",
+                    false /* forceNonResizable */);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
