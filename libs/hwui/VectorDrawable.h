@@ -40,11 +40,11 @@ namespace android {
 namespace uirenderer {
 
 namespace VectorDrawable {
-#define VD_SET_PROP_WITH_FLAG(field, value, flag) (VD_SET_PROP_AND_NOTIFY(field, value) ? (flag = true, true) : false)
-#define VD_SET_PROP(field, value) (value != field ? (field = value, true) : false)
-#define VD_SET_PROP_AND_NOTIFY(field, value) ({ bool retVal = VD_SET_PROP(field, value);\
+#define VD_SET_PRIMITIVE_FIELD_WITH_FLAG(field, value, flag) (VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(field, (value)) ? ((flag) = true, true) : false)
+#define VD_SET_PROP(field, value) ((value) != (field) ? ((field) = (value), true) : false)
+#define VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(field, value) ({ bool retVal = VD_SET_PROP((mPrimitiveFields.field), (value));\
     onPropertyChanged(); retVal;})
-#define UPDATE_SKPROP(field, value) ({bool retVal = (field != value); if (field != value) SkRefCnt_SafeAssign(field, value); retVal;})
+#define UPDATE_SKPROP(field, value) ({bool retVal = ((field) != (value)); if ((field) != (value)) SkRefCnt_SafeAssign((field), (value)); retVal;})
 
 /* A VectorDrawable is composed of a tree of nodes.
  * Each node can be a group node, or a path.
@@ -248,49 +248,49 @@ public:
             return mPrimitiveFields.strokeWidth;
         }
         void setStrokeWidth(float strokeWidth) {
-            VD_SET_PROP_AND_NOTIFY(strokeWidth, strokeWidth);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(strokeWidth, strokeWidth);
         }
         SkColor getStrokeColor() const{
             return mPrimitiveFields.strokeColor;
         }
         void setStrokeColor(SkColor strokeColor) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.strokeColor, strokeColor);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(strokeColor, strokeColor);
         }
         float getStrokeAlpha() const{
             return mPrimitiveFields.strokeAlpha;
         }
         void setStrokeAlpha(float strokeAlpha) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.strokeAlpha, strokeAlpha);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(strokeAlpha, strokeAlpha);
         }
         SkColor getFillColor() const {
             return mPrimitiveFields.fillColor;
         }
         void setFillColor(SkColor fillColor) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.fillColor, fillColor);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(fillColor, fillColor);
         }
         float getFillAlpha() const{
             return mPrimitiveFields.fillAlpha;
         }
         void setFillAlpha(float fillAlpha) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.fillAlpha, fillAlpha);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(fillAlpha, fillAlpha);
         }
         float getTrimPathStart() const{
             return mPrimitiveFields.trimPathStart;
         }
         void setTrimPathStart(float trimPathStart) {
-            VD_SET_PROP_WITH_FLAG(mPrimitiveFields.trimPathStart, trimPathStart, mTrimDirty);
+            VD_SET_PRIMITIVE_FIELD_WITH_FLAG(trimPathStart, trimPathStart, mTrimDirty);
         }
         float getTrimPathEnd() const{
             return mPrimitiveFields.trimPathEnd;
         }
         void setTrimPathEnd(float trimPathEnd) {
-            VD_SET_PROP_WITH_FLAG(mPrimitiveFields.trimPathEnd, trimPathEnd, mTrimDirty);
+            VD_SET_PRIMITIVE_FIELD_WITH_FLAG(trimPathEnd, trimPathEnd, mTrimDirty);
         }
         float getTrimPathOffset() const{
             return mPrimitiveFields.trimPathOffset;
         }
         void setTrimPathOffset(float trimPathOffset) {
-            VD_SET_PROP_WITH_FLAG(mPrimitiveFields.trimPathOffset, trimPathOffset, mTrimDirty);
+            VD_SET_PRIMITIVE_FIELD_WITH_FLAG(trimPathOffset, trimPathOffset, mTrimDirty);
         }
 
         float getStrokeMiterLimit() const {
@@ -425,43 +425,43 @@ public:
             return mPrimitiveFields.rotate;
         }
         void setRotation(float rotation) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.rotate, rotation);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(rotate, rotation);
         }
         float getPivotX() const {
             return mPrimitiveFields.pivotX;
         }
         void setPivotX(float pivotX) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.pivotX, pivotX);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(pivotX, pivotX);
         }
         float getPivotY() const {
             return mPrimitiveFields.pivotY;
         }
         void setPivotY(float pivotY) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.pivotY, pivotY);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(pivotY, pivotY);
         }
         float getScaleX() const {
             return mPrimitiveFields.scaleX;
         }
         void setScaleX(float scaleX) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.scaleX, scaleX);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(scaleX, scaleX);
         }
         float getScaleY() const {
             return mPrimitiveFields.scaleY;
         }
         void setScaleY(float scaleY) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.scaleY, scaleY);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(scaleY, scaleY);
         }
         float getTranslateX() const {
             return mPrimitiveFields.translateX;
         }
         void setTranslateX(float translateX) {
-            VD_SET_PROP_AND_NOTIFY(mPrimitiveFields.translateX, translateX);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(translateX, translateX);
         }
         float getTranslateY() const {
             return mPrimitiveFields.translateY;
         }
         void setTranslateY(float translateY) {
-            VD_SET_PROP_AND_NOTIFY(translateY, translateY);
+            VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(translateY, translateY);
         }
         void updateProperties(float rotate, float pivotX, float pivotY,
                 float scaleX, float scaleY, float translateX, float translateY) {
