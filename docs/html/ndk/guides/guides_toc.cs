@@ -74,9 +74,20 @@
    </li>
 
       <li class="nav-section">
-      <div class="nav-section-header empty">
+      <div class="nav-section-header">
       <a href="<?cs var:toroot ?>ndk/guides/graphics/index.html">
-      <span class="en">Graphics</span></a></div>
+      <span class="en">Vulkan</span></a></div>
+      <ul>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/getting-started.html">
+      Getting Started</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/design-notes.html">
+      Design Guidelines</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/shader-compilers.html">
+      Shader Compilers</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/validation-layer.html">
+      Validation Layers</a></li>
+      </ul>
+      </ul>
    </li>
 
 
