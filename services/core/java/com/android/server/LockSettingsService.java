@@ -229,7 +229,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_STARTING);
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         mStorage = new LockSettingsStorage(context, new LockSettingsStorage.Callback() {
@@ -369,8 +368,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             } else if (Intent.ACTION_USER_STARTING.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 mStorage.prefetchUser(userHandle);
-            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-                mStrongAuth.reportUnlock(getSendingUserId());
             } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (userHandle > 0) {
@@ -1345,6 +1342,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void requireStrongAuth(int strongAuthReason, int userId) {
         checkWritePermission(userId);
         mStrongAuth.requireStrongAuth(strongAuthReason, userId);
+    }
+
+    @Override
+    public void userPresent(int userId) {
+        checkWritePermission(userId);
+        mStrongAuth.reportUnlock(userId);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
