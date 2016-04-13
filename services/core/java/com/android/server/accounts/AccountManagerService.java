@@ -91,6 +91,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -127,8 +129,33 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AccountManagerService
         extends IAccountManager.Stub
         implements RegisteredServicesCacheListener<AuthenticatorDescription> {
-
     private static final String TAG = "AccountManagerService";
+
+    public static class Lifecycle extends SystemService {
+        private AccountManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mService = new AccountManagerService(getContext());
+            publishBinderService(Context.ACCOUNT_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemReady();
+            }
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mService.onUnlockUser(userHandle);
+        }
+    }
 
     private static final String DATABASE_NAME = "accounts.db";
     private static final int PRE_N_DATABASE_VERSION = 9;
@@ -340,15 +367,12 @@ public class AccountManagerService
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     onUserRemoved(intent);
-                } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
-                    onUserUnlocked(intent);
                 }
             }
         }, UserHandle.ALL, userFilter, null, null);
@@ -654,7 +678,10 @@ public class AccountManagerService
 
     @VisibleForTesting
     void onUserUnlocked(Intent intent) {
-        int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+        onUnlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
+    }
+
+    void onUnlockUser(int userId) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "onUserUnlocked " + userId);
         }
