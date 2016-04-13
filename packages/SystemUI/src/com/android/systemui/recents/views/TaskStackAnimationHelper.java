@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
@@ -77,7 +78,7 @@ public class TaskStackAnimationHelper {
 
     public static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
     public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 333;
-    public static final int ENTER_WHILE_DOCKING_DURATION = 150;
+    public static final int ENTER_WHILE_DOCKING_DURATION = 250;
 
     private static final PathInterpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
             new PathInterpolator(0, 0, 0, 1f);
@@ -135,6 +136,8 @@ public class TaskStackAnimationHelper {
                 R.dimen.recents_task_stack_animation_affiliate_enter_offset);
         int launchedWhileDockingOffset = res.getDimensionPixelSize(
                 R.dimen.recents_task_stack_animation_launched_while_docking_offset);
+        boolean isLandscape = mStackView.getContext().getApplicationContext().getResources()
+                .getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 
         // Prepare each of the task views for their enter animation from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -169,7 +172,10 @@ public class TaskStackAnimationHelper {
                 mTmpTransform.alpha = 0f;
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
             } else if (launchState.launchedViaDockGesture) {
-                mTmpTransform.rect.offset(0, launchedWhileDockingOffset);
+                int offset = isLandscape
+                        ? launchedWhileDockingOffset
+                        : (int) (offscreenYOffset * 0.9f);
+                mTmpTransform.rect.offset(0, offset);
                 mTmpTransform.alpha = 0f;
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
             }
