@@ -296,7 +296,8 @@ public final class Settings {
      * monitoring of encrypted network traffic.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
+     * safeguard against this. Add {@link #EXTRA_NUMBER_OF_CERTIFICATES} extra to indicate the
+     * number of certificates.
      * <p>
      * Input: Nothing.
      * <p>
@@ -1368,6 +1369,16 @@ public final class Settings {
      */
     public static final String EXTRA_DO_NOT_DISTURB_MODE_MINUTES =
             "android.settings.extra.do_not_disturb_mode_minutes";
+
+    /**
+     * Activity Extra: Number of certificates
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_MONITORING_CERT_INFO}
+     * intent to indicate the number of certificates
+     * @hide
+     */
+    public static final String EXTRA_NUMBER_OF_CERTIFICATES =
+            "android.settings.extra.number_of_certificates";
 
     private static final String JID_RESOURCE_PREFIX = "android";
 

@@ -349,18 +349,18 @@
     <!-- SSL CA cert notification --> <skip />
     <!-- Shows up when there is a user SSL CA Cert installed on the
          device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE] -->
-    <string name="ssl_ca_cert_warning">Network may be monitored</string>
-    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
-         i.e. "Network may be monitored". This says that an unknown party is doing the monitoring.
-         [CHAR LIMIT=100]-->
+    <plurals name="ssl_ca_cert_warning">
+        <item quantity="one">Certificate authority installed</item>
+        <item quantity="other">Certificate authorities installed</item>
+    </plurals>
+    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
+         This says that an unknown party is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_by_unknown">By an unknown third party</string>
-    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
-        i.e. "Network may be monitored". This indicates that an unspecified administrator is doing
-        the monitoring. [CHAR LIMIT=100]-->
+    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
+         This indicates that an unspecified administrator is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_by_administrator">By your work profile administrator</string>
-    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
-         i.e. "Network may be monitored". This indicates who is doing the monitoring.
-         [CHAR LIMIT=100]-->
+    <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
+         This indicates who is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_managed">By <xliff:g id="managing_domain">%s</xliff:g></string>
 
     <!-- Work profile deleted notification--> <skip />
