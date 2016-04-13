@@ -77,7 +77,7 @@ public final class ContentService extends IContentService.Stub {
     static final boolean DEBUG = false;
 
     public static class Lifecycle extends SystemService {
-        private ContentService mContentService;
+        private ContentService mService;
 
         public Lifecycle(Context context) {
             super(context);
@@ -87,14 +87,21 @@ public final class ContentService extends IContentService.Stub {
         public void onStart() {
             final boolean factoryTest = (FactoryTest
                     .getMode() == FactoryTest.FACTORY_TEST_LOW_LEVEL);
-            mContentService = new ContentService(getContext(), factoryTest);
-            publishBinderService(ContentResolver.CONTENT_SERVICE_NAME, mContentService);
+            mService = new ContentService(getContext(), factoryTest);
+            publishBinderService(ContentResolver.CONTENT_SERVICE_NAME, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemReady();
+            }
         }
 
         @Override
         public void onCleanupUser(int userHandle) {
-            synchronized (mContentService.mCache) {
-                mContentService.mCache.remove(userHandle);
+            synchronized (mService.mCache) {
+                mService.mCache.remove(userHandle);
             }
         }
     }
@@ -265,7 +272,7 @@ public final class ContentService extends IContentService.Stub {
                 localeFilter, null, null);
     }
 
-    public void systemReady() {
+    void systemReady() {
         getSyncManager();
     }
 
