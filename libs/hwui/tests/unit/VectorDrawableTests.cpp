@@ -390,5 +390,40 @@ TEST(VectorDrawable, matrixScale) {
         EXPECT_EQ(matrixAndScale.matrixScale, actualMatrixScale);
     }
 }
+
+TEST(VectorDrawable, groupProperties) {
+    //TODO: Also need to test property sync and dirty flag when properties change.
+    VectorDrawable::Group group;
+    VectorDrawable::Group::GroupProperties* properties = group.mutateProperties();
+    // Test default values, change values through setters and verify the change through getters.
+    EXPECT_EQ(0.0f, properties->getTranslateX());
+    properties->setTranslateX(1.0f);
+    EXPECT_EQ(1.0f, properties->getTranslateX());
+
+    EXPECT_EQ(0.0f, properties->getTranslateY());
+    properties->setTranslateY(1.0f);
+    EXPECT_EQ(1.0f, properties->getTranslateY());
+
+    EXPECT_EQ(0.0f, properties->getRotation());
+    properties->setRotation(1.0f);
+    EXPECT_EQ(1.0f, properties->getRotation());
+
+    EXPECT_EQ(1.0f, properties->getScaleX());
+    properties->setScaleX(0.0f);
+    EXPECT_EQ(0.0f, properties->getScaleX());
+
+    EXPECT_EQ(1.0f, properties->getScaleY());
+    properties->setScaleY(0.0f);
+    EXPECT_EQ(0.0f, properties->getScaleY());
+
+    EXPECT_EQ(0.0f, properties->getPivotX());
+    properties->setPivotX(1.0f);
+    EXPECT_EQ(1.0f, properties->getPivotX());
+
+    EXPECT_EQ(0.0f, properties->getPivotY());
+    properties->setPivotY(1.0f);
+    EXPECT_EQ(1.0f, properties->getPivotY());
+
+}
 }; // namespace uirenderer
 }; // namespace android
