@@ -1324,6 +1324,9 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static void appendSettingToCursor(MatrixCursor cursor, Setting setting) {
+        if (setting == null) {
+            return;
+        }
         final int columnCount = cursor.getColumnCount();
 
         String[] values =  new String[columnCount];
