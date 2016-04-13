@@ -97,8 +97,6 @@ abstract public class ManagedServices {
     // List of packages in restored setting across all mUserProfiles, for quick
     // filtering upon package updates.
     private ArraySet<String> mRestoredPackages = new ArraySet<>();
-    // State of current service categories
-    private ArrayMap<String, Boolean> mCategoryEnabled = new ArrayMap<>();
     // List of enabled packages that have nevertheless asked not to be run
     private ArraySet<ComponentName> mSnoozingForCurrentProfiles = new ArraySet<>();
 
@@ -342,47 +340,6 @@ abstract public class ManagedServices {
         }
     }
 
-    public void setCategoryState(String category, boolean enabled) {
-        synchronized (mMutex) {
-            final Boolean previous = mCategoryEnabled.put(category, enabled);
-            if (!(previous == null || previous != enabled)) {
-                return;
-            }
-
-            // State changed
-            if (DEBUG) {
-                Slog.d(TAG, ((enabled) ? "Enabling " : "Disabling ") + "category " + category);
-            }
-
-            final int[] userIds = mUserProfiles.getCurrentProfileIds();
-            for (int userId : userIds) {
-                final Set<ComponentName> componentNames = queryPackageForServices(null,
-                        userId, category);
-
-                // Disallow services not enabled in Settings
-                final ArraySet<ComponentName> userComponents =
-                        loadComponentNamesFromSetting(mConfig.secureSettingName, userId);
-                if (userComponents == null) {
-                    componentNames.clear();
-                } else {
-                    componentNames.retainAll(userComponents);
-                }
-
-                if (DEBUG) {
-                    Slog.d(TAG, "Components for category " + category + ": " + componentNames);
-                }
-                for (ComponentName c : componentNames) {
-                    if (enabled) {
-                        registerServiceLocked(c, userId);
-                    } else {
-                        unregisterServiceLocked(c, userId);
-                    }
-                }
-            }
-
-        }
-    }
-
     private void rebuildRestoredPackages() {
         mRestoredPackages.clear();
         mSnoozingForCurrentProfiles.clear();
@@ -454,19 +411,11 @@ abstract public class ManagedServices {
     }
 
     protected Set<ComponentName> queryPackageForServices(String packageName, int userId) {
-        return queryPackageForServices(packageName, userId, null);
-    }
-
-    public Set<ComponentName> queryPackageForServices(String packageName, int userId,
-            String category) {
         Set<ComponentName> installed = new ArraySet<>();
         final PackageManager pm = mContext.getPackageManager();
         Intent queryIntent = new Intent(mConfig.serviceInterface);
         if (!TextUtils.isEmpty(packageName)) {
             queryIntent.setPackage(packageName);
-        }
-        if (category != null) {
-            queryIntent.addCategory(category);
         }
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
                 queryIntent,
@@ -578,15 +527,6 @@ abstract public class ManagedServices {
                 }
 
                 final Set<ComponentName> add = new HashSet<>(userComponents);
-
-                // Remove components from disabled categories so that those services aren't run.
-                for (Entry<String, Boolean> e : mCategoryEnabled.entrySet()) {
-                    if (!e.getValue()) {
-                        Set<ComponentName> c = queryPackageForServices(null, userIds[i],
-                            e.getKey());
-                        add.removeAll(c);
-                    }
-                }
                 add.removeAll(mSnoozingForCurrentProfiles);
 
                 toAdd.put(userIds[i], add);
