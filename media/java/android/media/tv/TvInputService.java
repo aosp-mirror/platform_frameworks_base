@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FloatRange;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -823,7 +824,7 @@ public abstract class TvInputService extends Service {
          *
          * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
          */
-        public abstract void onSetStreamVolume(float volume);
+        public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
          * Tunes to a given channel.

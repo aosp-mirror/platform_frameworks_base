@@ -16,7 +16,9 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,6 +50,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -61,6 +65,12 @@ import java.util.Set;
 public final class TvInputInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputInfo";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TYPE_TUNER, TYPE_OTHER, TYPE_COMPOSITE, TYPE_SVIDEO, TYPE_SCART, TYPE_COMPONENT,
+            TYPE_VGA, TYPE_DVI, TYPE_HDMI, TYPE_DISPLAY_PORT})
+    public @interface Type {}
 
     // Should be in sync with frameworks/base/core/res/res/values/attrs.xml
     /**
@@ -343,6 +353,7 @@ public final class TvInputInfo implements Parcelable {
     /**
      * Returns the type of this TV input.
      */
+    @Type
     public int getType() {
         return mType;
     }
@@ -768,7 +779,7 @@ public final class TvInputInfo implements Parcelable {
          * @hide
          */
         @SystemApi
-        public Builder setLabel(int resId) {
+        public Builder setLabel(@StringRes int resId) {
             if (mLabel != null) {
                 throw new IllegalStateException("Label text is already set.");
             }
