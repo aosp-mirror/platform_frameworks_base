@@ -1234,7 +1234,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     public void toggleSplitScreen() {
-        toggleSplitScreenMode();
+        toggleSplitScreenMode(-1 /* metricsDockAction */, -1 /* metricsUndockAction */);
     }
 
     @Override
@@ -1310,9 +1310,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     /**
      * Toggle docking the app window
      *
-     * @return {@code true} if the app window is docked after the toggle, {@code false} otherwise.
+     * @param metricsDockAction the action to log when docking is successful, or -1 to not log
+     *                          anything on successful docking
+     * @param metricsUndockAction the action to log when undocking, or -1 to not log anything when
+     *                            undocking
      */
-    protected abstract boolean toggleSplitScreenMode();
+    protected abstract void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction);
 
     /** Proxy for RecentsComponent */
 

@@ -32,7 +32,8 @@ public interface RecentsComponent {
     /**
      * Docks the top-most task and opens recents.
      */
-    boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds);
+    boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds,
+            int metricsDockAction);
 
     /**
      * Called during a drag-from-navbar-in gesture.

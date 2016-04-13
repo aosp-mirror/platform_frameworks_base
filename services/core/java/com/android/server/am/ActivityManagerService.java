@@ -8792,6 +8792,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             rti.bounds = new Rect(tr.mBounds);
         }
         rti.isDockable = tr.canGoInDockedStack();
+        rti.resizeMode = tr.mResizeMode;
 
         ActivityRecord base = null;
         ActivityRecord top = null;
