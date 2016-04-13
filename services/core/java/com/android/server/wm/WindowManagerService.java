@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -153,6 +154,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -331,6 +334,14 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final float DRAG_SHADOW_ALPHA_TRANSPARENT = .7071f;
 
     private static final String PROPERTY_BUILD_DATE_UTC = "ro.build.date.utc";
+
+    // Enums for animation scale update types.
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
+    private @interface UpdateAnimationScaleMode {};
+    private static final int WINDOW_ANIMATION_SCALE = 0;
+    private static final int TRANSITION_ANIMATION_SCALE = 1;
+    private static final int ANIMATION_DURATION_SCALE = 2;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
@@ -613,11 +624,23 @@ public class WindowManagerService extends IWindowManager.Stub
     private final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+        private final Uri mWindowAnimationScaleUri =
+                Settings.Global.getUriFor(Settings.Global.WINDOW_ANIMATION_SCALE);
+        private final Uri mTransitionAnimationScaleUri =
+                Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
+        private final Uri mAnimationDurationScaleUri =
+                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE);
 
         public SettingsObserver() {
             super(new Handler());
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(mDisplayInversionEnabledUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mWindowAnimationScaleUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mTransitionAnimationScaleUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mAnimationDurationScaleUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -625,6 +648,18 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onChange(boolean selfChange, Uri uri) {
             if (mDisplayInversionEnabledUri.equals(uri)) {
                 updateCircularDisplayMaskIfNeeded();
+            } else {
+                @UpdateAnimationScaleMode
+                final int mode;
+                if (uri.equals(mWindowAnimationScaleUri)) {
+                    mode = WINDOW_ANIMATION_SCALE;
+                } else if (uri.equals(mTransitionAnimationScaleUri)) {
+                    mode = TRANSITION_ANIMATION_SCALE;
+                } else { // uri.equals(mAnimationDurationScaleUri)
+                    mode = ANIMATION_DURATION_SCALE;
+                }
+                Message m = mH.obtainMessage(H.UPDATE_ANIMATION_SCALE, mode, 0);
+                mH.sendMessage(m);
             }
         }
     }
@@ -7748,6 +7783,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
 
+        public static final int UPDATE_ANIMATION_SCALE = 51;
+
         /**
          * Used to denote that an integer field in a message will not be used.
          */
@@ -8027,6 +8064,36 @@ public class WindowManagerService extends IWindowManager.Stub
                             mTransitionAnimationScaleSetting);
                     Settings.Global.putFloat(mContext.getContentResolver(),
                             Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting);
+                    break;
+                }
+
+                case UPDATE_ANIMATION_SCALE: {
+                    @UpdateAnimationScaleMode
+                    final int mode = msg.arg1;
+                    switch (mode) {
+                        case WINDOW_ANIMATION_SCALE: {
+                            mWindowAnimationScaleSetting = Settings.Global.getFloat(
+                                    mContext.getContentResolver(),
+                                    Settings.Global.WINDOW_ANIMATION_SCALE,
+                                    mWindowAnimationScaleSetting);
+                            break;
+                        }
+                        case TRANSITION_ANIMATION_SCALE: {
+                            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
+                                    mContext.getContentResolver(),
+                                    Settings.Global.TRANSITION_ANIMATION_SCALE,
+                                    mTransitionAnimationScaleSetting);
+                            break;
+                        }
+                        case ANIMATION_DURATION_SCALE: {
+                            mAnimatorDurationScaleSetting = Settings.Global.getFloat(
+                                    mContext.getContentResolver(),
+                                    Settings.Global.ANIMATOR_DURATION_SCALE,
+                                    mAnimatorDurationScaleSetting);
+                            dispatchNewAnimatorScaleLocked(null);
+                            break;
+                        }
+                    }
                     break;
                 }
 
