@@ -956,15 +956,10 @@ public class BugreportProgressService extends Service {
         shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title, content;
-        if (takingScreenshot) {
-            title = context.getString(R.string.bugreport_finished_pending_screenshot_title,
-                    info.id);
-            content = context.getString(R.string.bugreport_finished_pending_screenshot_text);
-        } else {
-            title = context.getString(R.string.bugreport_finished_title, info.id);
-            content = context.getString(R.string.bugreport_finished_text);
-        }
+        final String title = context.getString(R.string.bugreport_finished_title, info.id);
+        final String content = takingScreenshot ?
+                context.getString(R.string.bugreport_finished_pending_screenshot_text)
+                : context.getString(R.string.bugreport_finished_text);
         final Notification.Builder builder = newBaseNotification(context)
                 .setContentTitle(title)
                 .setTicker(title)
