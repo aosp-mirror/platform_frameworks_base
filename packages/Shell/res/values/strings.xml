@@ -35,9 +35,9 @@
     <string name="bugreport_finished_pending_screenshot_text" product="default">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
 
     <!-- Body of dialog informing user about contents of a bugreport. [CHAR LIMIT=NONE] -->
-    <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, including personal and private information.  Only share bug reports with apps and people you trust.</string>
-    <!-- Checkbox that indicates this dialog should be shown again when the next bugreport is taken. [CHAR LIMIT=50] -->
-    <string name="bugreport_confirm_repeat">Show this message next time</string>
+    <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, which may include data you consider sensitive (such as app-usage and location data). Only share bug reports with people and apps you trust.</string>
+    <!-- Checkbox that indicates this dialog should not be shown again when the next bugreport is taken. [CHAR LIMIT=50] -->
+    <string name="bugreport_confirm_dont_repeat">Don\'t show again</string>
 
     <!-- Title for documents backend that offers bugreports. -->
     <string name="bugreport_storage_title">Bug reports</string>
