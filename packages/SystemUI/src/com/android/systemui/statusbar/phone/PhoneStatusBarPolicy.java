@@ -139,6 +139,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // listen for user / profile change.
@@ -509,7 +510,8 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
             } else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
                 updateTTY(intent);
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABLE) ||
-                    action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
+                    action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE) ||
+                    action.equals(Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
                 updateQuietState();
                 updateManagedProfile();
             } else if (action.equals(AudioManager.ACTION_HEADSET_PLUG)) {
