@@ -1579,7 +1579,7 @@ public class PopupWindow {
             return true;
         }
 
-        final int spaceAbove = displayFrameTop + anchorTopInScreen - anchorHeight;
+        final int spaceAbove = anchorTopInScreen - anchorHeight - displayFrameTop;
         if (height <= spaceAbove) {
             // Move everything up.
             if (mOverlapAnchor) {
