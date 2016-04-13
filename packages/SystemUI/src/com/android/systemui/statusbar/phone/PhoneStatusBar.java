@@ -893,6 +893,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     qsContainer.setHost(qsh);
                     mQSPanel = qsContainer.getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mKeyguardStatusBar.setQSPanel(mQSPanel);
                     mHeader = qsContainer.getHeader();
                     initSignalCluster(mHeader);
                     mHeader.setActivityStarter(PhoneStatusBar.this);
