@@ -80,8 +80,6 @@ public class ImmersiveModeConfirmation {
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
-        mVrManager = (IVrManager) IVrManager.Stub.asInterface(
-                ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
     }
 
     private long getNavBarExitDuration() {
@@ -121,11 +119,18 @@ public class ImmersiveModeConfirmation {
 
     private boolean getVrMode() {
         boolean vrMode = false;
-        try {
-            vrMode = mVrManager.getVrModeState();
-        } catch (RemoteException ex) { }
+        if (mVrManager == null) {
+            // lazily grab this service since it may not be available at construction time
+            mVrManager = (IVrManager) IVrManager.Stub.asInterface(
+                ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
+        }
+        if (mVrManager != null) {
+            try {
+                vrMode = mVrManager.getVrModeState();
+            } catch (RemoteException ex) { }
+        }
         return vrMode;
-    }        
+    }
 
     public void immersiveModeChanged(String pkg, boolean isImmersiveMode,
             boolean userSetupComplete) {
