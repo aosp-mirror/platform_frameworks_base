@@ -388,6 +388,15 @@ interface IPackageManager {
     void deleteApplicationCacheFiles(in String packageName, IPackageDataObserver observer);
 
     /**
+     * Delete all the cache files in an applications cache directory
+     * @param packageName The package name of the application whose cache
+     * files need to be deleted
+     * @param userId the user to delete application cache for
+     * @param observer a callback used to notify when the deletion is finished.
+     */
+    void deleteApplicationCacheFilesAsUser(in String packageName, int userId, IPackageDataObserver observer);
+
+    /**
      * Clear the user data directory of an application.
      * @param packageName The package name of the application whose cache
      * files need to be deleted

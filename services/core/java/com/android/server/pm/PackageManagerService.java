@@ -16042,16 +16042,25 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void deleteApplicationCacheFiles(final String packageName,
             final IPackageDataObserver observer) {
+        final int userId = UserHandle.getCallingUserId();
+        deleteApplicationCacheFilesAsUser(packageName, userId, observer);
+    }
+
+    @Override
+    public void deleteApplicationCacheFilesAsUser(final String packageName, final int userId,
+            final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_CACHE_FILES, null);
-        // Queue up an async operation since the package deletion may take a little while.
-        final int userId = UserHandle.getCallingUserId();
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                /* requireFullPermission= */ true, /* checkShell= */ false,
+                "delete application cache files");
 
         final PackageParser.Package pkg;
         synchronized (mPackages) {
             pkg = mPackages.get(packageName);
         }
 
+        // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
                 try (PackageFreezer freezer = freezePackage(packageName,

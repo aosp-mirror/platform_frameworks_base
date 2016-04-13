@@ -4972,6 +4972,27 @@ public abstract class PackageManager {
             IPackageDataObserver observer);
 
     /**
+     * Attempts to delete the cache files associated with an application for a given user. Since
+     * this may take a little while, the result will be posted back to the given observer. A
+     * deletion will fail if the calling context lacks the
+     * {@link android.Manifest.permission#DELETE_CACHE_FILES} permission, if the named package
+     * cannot be found, or if the named package is a "system package". If {@code userId} does not
+     * belong to the calling user, the caller must have
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     *
+     * @param packageName The name of the package to delete
+     * @param userId the user for which the cache files needs to be deleted
+     * @param observer An observer callback to get notified when the cache file deletion is
+     *            complete.
+     *            {@link android.content.pm.IPackageDataObserver#onRemoveCompleted(String, boolean)}
+     *            will be called when that happens. observer may be null to indicate that no
+     *            callback is desired.
+     * @hide
+     */
+    public abstract void deleteApplicationCacheFilesAsUser(String packageName, int userId,
+            IPackageDataObserver observer);
+
+    /**
      * Free storage by deleting LRU sorted list of cache files across
      * all applications. If the currently available free storage
      * on the device is greater than or equal to the requested
