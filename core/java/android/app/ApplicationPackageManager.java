@@ -1921,6 +1921,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void deleteApplicationCacheFilesAsUser(String packageName, int userId,
+            IPackageDataObserver observer) {
+        try {
+            mPM.deleteApplicationCacheFilesAsUser(packageName, userId, observer);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
             IPackageDataObserver observer) {
         try {

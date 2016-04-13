@@ -645,6 +645,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void deleteApplicationCacheFilesAsUser(String packageName, int userId,
+            IPackageDataObserver observer) {
+    }
+
+    @Override
     public void freeStorageAndNotify(String volumeUuid, long freeStorageSize,
             IPackageDataObserver observer) {
     }
