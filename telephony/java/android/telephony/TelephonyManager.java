@@ -717,16 +717,11 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getDeviceSoftwareVersion(int slotId) {
-        // FIXME methods taking slot id should not use subscription, instead us Uicc directly
-        int[] subId = SubscriptionManager.getSubId(slotId);
-        if (subId == null || subId.length == 0) {
-            return null;
-        }
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return null;
+
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
-            if (info == null)
-                return null;
-            return info.getDeviceSvnUsingSubId(subId[0], mContext.getOpPackageName());
+            return telephony.getDeviceSoftwareVersionForSlot(slotId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -798,12 +793,11 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getImei(int slotId) {
-        int[] subId = SubscriptionManager.getSubId(slotId);
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return null;
+
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
-            if (info == null)
-                return null;
-            return info.getImeiForSubscriber(subId[0], mContext.getOpPackageName());
+            return telephony.getImeiForSlot(slotId, getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1014,22 +1008,32 @@ public class TelephonyManager {
         } else {
             phoneId = SubscriptionManager.getPhoneId(subId);
         }
+
+        return getCurrentPhoneTypeForSlot(phoneId);
+    }
+
+    /**
+     * See getCurrentPhoneType.
+     *
+     * @hide
+     */
+    public int getCurrentPhoneTypeForSlot(int slotId) {
         try{
             ITelephony telephony = getITelephony();
-            if (telephony != null && subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-                return telephony.getActivePhoneTypeForSubscriber(subId);
+            if (telephony != null) {
+                return telephony.getActivePhoneTypeForSlot(slotId);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
-                return getPhoneTypeFromProperty(phoneId);
+                return getPhoneTypeFromProperty(slotId);
             }
         } catch (RemoteException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty(phoneId);
+            return getPhoneTypeFromProperty(slotId);
         } catch (NullPointerException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
-            return getPhoneTypeFromProperty(phoneId);
+            return getPhoneTypeFromProperty(slotId);
         }
     }
 
@@ -2555,19 +2559,30 @@ public class TelephonyManager {
      * @param subId whose call state is returned
      */
     public int getCallState(int subId) {
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+        return getCallStateForSlot(phoneId);
+    }
+
+    /**
+     * See getCallState.
+     *
+     * @hide
+     */
+    public int getCallStateForSlot(int slotId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return CALL_STATE_IDLE;
-            return telephony.getCallStateForSubscriber(subId);
+            return telephony.getCallStateForSlot(slotId);
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
         } catch (NullPointerException ex) {
           // the phone process is restarting.
           return CALL_STATE_IDLE;
-      }
+        }
     }
+
 
     /** Data connection activity: No traffic. */
     public static final int DATA_ACTIVITY_NONE = 0x00000000;

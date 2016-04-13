@@ -360,9 +360,9 @@ interface ITelephony {
      int getCallState();
 
     /**
-     * Returns the call state for a subId.
+     * Returns the call state for a slot.
      */
-     int getCallStateForSubscriber(int subId);
+     int getCallStateForSlot(int slotId);
 
      int getDataActivity();
      int getDataState();
@@ -375,12 +375,12 @@ interface ITelephony {
     int getActivePhoneType();
 
     /**
-     * Returns the current active phone type as integer for particular subId.
+     * Returns the current active phone type as integer for particular slot.
      * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
-     * @param subId user preferred subId.
+     * @param slotId - slot to query.
      */
-    int getActivePhoneTypeForSubscriber(int subId);
+    int getActivePhoneTypeForSlot(int slotId);
 
     /**
      * Returns the CDMA ERI icon index to display
@@ -990,6 +990,26 @@ interface ITelephony {
       *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
       */
     String getDeviceId(String callingPackage);
+
+    /**
+     * Returns the IMEI for the given slot.
+     *
+     * @param slotId - device slot.
+     * @param callingPackage The package making the call.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    String getImeiForSlot(int slotId, String callingPackage);
+
+    /**
+     * Returns the device software version.
+     *
+     * @param slotId - device slot.
+     * @param callingPackage The package making the call.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    String getDeviceSoftwareVersionForSlot(int slotId, String callingPackage);
 
     /**
      * Returns the subscription ID associated with the specified PhoneAccount.
