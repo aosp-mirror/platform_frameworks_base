@@ -36,7 +36,7 @@
 
 // ----------------------------------------------------------------------------
 
-#define EGL_QCOM_PROTECTED_CONTENT 0x32E0
+#define EGL_PROTECTED_CONTENT_EXT 0x32C0
 
 namespace android {
 
@@ -64,19 +64,12 @@ static bool isProtectedContext() {
     EGLDisplay dpy = eglGetCurrentDisplay();
     EGLContext ctx = eglGetCurrentContext();
 
-    if (dpy == EGL_NO_DISPLAY) {
-        ALOGI("isProtectedSurface: invalid current EGLDisplay");
-        return false;
-    }
-
-    if (ctx == EGL_NO_CONTEXT) {
-        ALOGI("isProtectedSurface: invalid current EGLContext");
+    if (dpy == EGL_NO_DISPLAY || ctx == EGL_NO_CONTEXT) {
         return false;
     }
 
     EGLint isProtected = EGL_FALSE;
-    // TODO: Change the enum value below when an extension is ratified.
-    eglQueryContext(dpy, ctx, EGL_QCOM_PROTECTED_CONTENT, &isProtected);
+    eglQueryContext(dpy, ctx, EGL_PROTECTED_CONTENT_EXT, &isProtected);
 
     return isProtected;
 }
