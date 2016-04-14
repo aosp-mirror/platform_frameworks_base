@@ -24,13 +24,13 @@ import com.android.systemui.recents.events.EventBus;
 public class ConfigurationChangedEvent extends EventBus.AnimatedEvent {
 
     public final boolean fromMultiWindow;
-    public final boolean fromOrientationChange;
+    public final boolean fromDeviceOrientationChange;
     public final boolean hasStackTasks;
 
-    public ConfigurationChangedEvent(boolean fromMultiWindow, boolean fromOrientationChange,
+    public ConfigurationChangedEvent(boolean fromMultiWindow, boolean fromDeviceOrientationChange,
             boolean hasStackTasks) {
         this.fromMultiWindow = fromMultiWindow;
-        this.fromOrientationChange = fromOrientationChange;
+        this.fromDeviceOrientationChange = fromDeviceOrientationChange;
         this.hasStackTasks = hasStackTasks;
     }
 }

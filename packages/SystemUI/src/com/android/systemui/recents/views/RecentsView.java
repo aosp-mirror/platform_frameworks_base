@@ -519,7 +519,9 @@ public class RecentsView extends FrameLayout {
                 @Override
                 public void onAnimationStarted() {
                     EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
-                    mTaskStackView.getStack().removeTask(event.task, AnimationProps.IMMEDIATE,
+                    // Remove the task and don't bother relaying out, as all the tasks will be
+                    // relaid out when the stack changes on the multiwindow change event
+                    mTaskStackView.getStack().removeTask(event.task, null,
                             true /* fromDockGesture */);
                 }
             };

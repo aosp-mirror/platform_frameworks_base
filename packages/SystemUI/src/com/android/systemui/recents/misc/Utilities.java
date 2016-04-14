@@ -18,8 +18,11 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.RectEvaluator;
 import android.annotation.FloatRange;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -71,7 +74,7 @@ public class Utilities {
             };
 
     public static final RectFEvaluator RECTF_EVALUATOR = new RectFEvaluator();
-
+    public static final RectEvaluator RECT_EVALUATOR = new RectEvaluator(new Rect());
     public static final Rect EMPTY_RECT = new Rect();
 
     /**
@@ -267,6 +270,14 @@ public class Utilities {
     public static void addTraceEvent(String event) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, event);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+
+    /**
+     * Returns the application configuration, which is independent of the activity's current
+     * configuration in multiwindow.
+     */
+    public static Configuration getAppConfiguration(Context context) {
+        return context.getApplicationContext().getResources().getConfiguration();
     }
 
     /**

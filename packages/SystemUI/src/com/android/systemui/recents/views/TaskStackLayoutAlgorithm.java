@@ -297,9 +297,6 @@ public class TaskStackLayoutAlgorithm {
     private FreePathInterpolator mUnfocusedDimCurveInterpolator;
     private FreePathInterpolator mFocusedDimCurveInterpolator;
 
-    // Indexed from the front of the stack, the normalized x in the unfocused range for each task
-    private float[] mInitialNormX;
-
     // The state of the stack focus (0..1), which controls the transition of the stack from the
     // focused to non-focused state
     @ViewDebug.ExportedProperty(category="recents")
@@ -406,8 +403,10 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Sets the system insets.
      */
-    public void setSystemInsets(Rect systemInsets) {
+    public boolean setSystemInsets(Rect systemInsets) {
+        boolean changed = mSystemInsets.equals(systemInsets);
         mSystemInsets.set(systemInsets);
+        return changed;
     }
 
     /**
@@ -545,13 +544,11 @@ public class TaskStackLayoutAlgorithm {
             } else {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
             }
-            mInitialNormX = null;
         } else if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
             // If there is one stack task, ignore the min/max/initial scroll positions
             mMinScrollP = 0;
             mMaxScrollP = 0;
             mInitialScrollP = 0;
-            mInitialNormX = null;
         } else {
             // Set the max scroll to be the point where the front most task is visible with the
             // stack bottom offset
@@ -565,42 +562,50 @@ public class TaskStackLayoutAlgorithm {
                     launchState.launchedViaDockGesture;
             if (launchState.launchedWithAltTab) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
-                mInitialNormX = null;
             } else if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
-                mInitialNormX = null;
             } else {
                 // We are overriding the initial two task positions, so set the initial scroll
                 // position to match the second task (aka focused task) position
                 float initialTopNormX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
                 mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, (mNumStackTasks - 2))
                         - Math.max(0, mUnfocusedRange.getAbsoluteX(initialTopNormX)));
-
-                // Set the initial scroll to the predefined state (which differs from the stack)
-                mInitialNormX = new float[] {
-                        getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
-                                FROM_BOTTOM),
-                        initialTopNormX
-                };
             }
         }
     }
 
-    public void updateToInitialState(List<Task> tasks) {
-        if (mInitialNormX == null) {
-            return;
-        }
+    /**
+     * Creates task overrides to ensure the initial stack layout if necessary.
+     */
+    public void setTaskOverridesForInitialState(TaskStack stack) {
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
-        mUnfocusedRange.offset(0f);
-        int taskCount = tasks.size();
-        for (int i = taskCount - 1; i >= 0; i--) {
-            int indexFromFront = taskCount - i - 1;
-            if (indexFromFront >= mInitialNormX.length) {
-                break;
+        mTaskIndexOverrideMap.clear();
+
+        boolean scrollToFront = launchState.launchedFromHome ||
+                launchState.launchedViaDockGesture;
+        if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
+            if (!launchState.launchedWithAltTab && !scrollToFront) {
+                // Set the initial scroll to the predefined state (which differs from the stack)
+                float [] initialNormX = new float[] {
+                        getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
+                                FROM_BOTTOM),
+                        getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP)
+                };
+
+                mUnfocusedRange.offset(0f);
+                List<Task> tasks = stack.getStackTasks();
+                int taskCount = tasks.size();
+                for (int i = taskCount - 1; i >= 0; i--) {
+                    int indexFromFront = taskCount - i - 1;
+                    if (indexFromFront >= initialNormX.length) {
+                        break;
+                    }
+                    float newTaskProgress = mInitialScrollP +
+                            mUnfocusedRange.getAbsoluteX(initialNormX[indexFromFront]);
+                    mTaskIndexOverrideMap.put(tasks.get(i).key.id, newTaskProgress);
+                }
             }
-            float newTaskProgress = mInitialScrollP +
-                    mUnfocusedRange.getAbsoluteX(mInitialNormX[indexFromFront]);
-            mTaskIndexOverrideMap.put(tasks.get(i).key.id, newTaskProgress);
         }
     }
 

@@ -19,10 +19,13 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
+
+import com.android.systemui.recents.misc.Utilities;
 
 import java.util.ArrayList;
 
@@ -31,55 +34,20 @@ import java.util.ArrayList;
  */
 public class TaskViewTransform {
 
-    public static final Property<View, Integer> LEFT =
-            new IntProperty<View>("left") {
+    public static final Property<View, Rect> LTRB =
+            new Property<View, Rect>(Rect.class, "leftTopRightBottom") {
+
+                private Rect mTmpRect = new Rect();
+
                 @Override
-                public void setValue(View object, int v) {
-                    object.setLeft(v);
+                public void set(View v, Rect ltrb) {
+                    v.setLeftTopRightBottom(ltrb.left, ltrb.top, ltrb.right, ltrb.bottom);
                 }
 
                 @Override
-                public Integer get(View object) {
-                    return object.getLeft();
-                }
-            };
-
-    public static final Property<View, Integer> TOP =
-            new IntProperty<View>("top") {
-                @Override
-                public void setValue(View object, int v) {
-                    object.setTop(v);
-                }
-
-                @Override
-                public Integer get(View object) {
-                    return object.getTop();
-                }
-            };
-
-    public static final Property<View, Integer> RIGHT =
-            new IntProperty<View>("right") {
-                @Override
-                public void setValue(View object, int v) {
-                    object.setRight(v);
-                }
-
-                @Override
-                public Integer get(View object) {
-                    return object.getRight();
-                }
-            };
-
-    public static final Property<View, Integer> BOTTOM =
-            new IntProperty<View>("bottom") {
-                @Override
-                public void setValue(View object, int v) {
-                    object.setBottom(v);
-                }
-
-                @Override
-                public Integer get(View object) {
-                    return object.getBottom();
+                public Rect get(View v) {
+                    mTmpRect.set(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+                    return mTmpRect;
                 }
             };
 
@@ -205,11 +173,12 @@ public class TaskViewTransform {
                 animators.add(animation.apply(AnimationProps.ALPHA, anim));
             }
             if (hasRectChangedFrom(v)) {
+                Rect fromViewRect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+                Rect toViewRect = new Rect();
+                rect.round(toViewRect);
                 ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(v,
-                        PropertyValuesHolder.ofInt(LEFT, v.getLeft(), (int) rect.left),
-                        PropertyValuesHolder.ofInt(TOP, v.getTop(), (int) rect.top),
-                        PropertyValuesHolder.ofInt(RIGHT, v.getRight(), (int) rect.right),
-                        PropertyValuesHolder.ofInt(BOTTOM, v.getBottom(), (int) rect.bottom));
+                        PropertyValuesHolder.ofObject(LTRB, Utilities.RECT_EVALUATOR,
+                                fromViewRect, toViewRect));
                 animators.add(animation.apply(AnimationProps.BOUNDS, anim));
             }
         }

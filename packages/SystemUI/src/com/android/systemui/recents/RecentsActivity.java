@@ -98,7 +98,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     private RecentsPackageMonitor mPackageMonitor;
     private long mLastTabKeyEventTime;
-    private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mLastDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
@@ -276,7 +276,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
-        mLastOrientation = getResources().getConfiguration().orientation;
+        mLastDeviceOrientation = Utilities.getAppConfiguration(this).orientation;
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
         mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
             @Override
@@ -426,13 +426,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-
         // Notify of the config change
-        int newOrientation = getResources().getConfiguration().orientation;
+        int newDeviceOrientation = Utilities.getAppConfiguration(this).orientation;
         int numStackTasks = mRecentsView.getStack().getStackTaskCount();
         EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
-                (mLastOrientation != newOrientation), numStackTasks > 0));
-        mLastOrientation = newOrientation;
+                (mLastDeviceOrientation != newDeviceOrientation), numStackTasks > 0));
+        mLastDeviceOrientation = newDeviceOrientation;
     }
 
     @Override
@@ -455,7 +454,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         int numStackTasks = stack.getStackTaskCount();
 
         EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
-                false /* fromOrientationChange */, numStackTasks > 0));
+                false /* fromDeviceOrientationChange */, numStackTasks > 0));
 
         if (mRecentsView != null) {
             mRecentsView.updateStack(stack);
@@ -777,6 +776,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         super.dump(prefix, fd, writer, args);
+        EventBus.getDefault().dump(prefix, writer);
+
         String id = Integer.toHexString(System.identityHashCode(this));
 
         writer.print(prefix); writer.print(TAG);
@@ -787,6 +788,5 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (mRecentsView != null) {
             mRecentsView.dump(prefix, writer);
         }
-        EventBus.getDefault().dump(prefix, writer);
     }
 }
