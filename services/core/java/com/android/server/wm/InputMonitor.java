@@ -306,8 +306,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 }
 
                 if (addWallpaperInputConsumerHandle) {
-                    if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
-                        // Add the wallpaper input consumer above the first wallpaper window.
+                    if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER &&
+                            child.isVisibleLw()) {
+                        // Add the wallpaper input consumer above the first visible wallpaper.
                         addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
                         addWallpaperInputConsumerHandle = false;
                     }
@@ -341,7 +342,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         if (addWallpaperInputConsumerHandle) {
-            // No wallpaper found, add the wallpaper input consumer at the end.
+            // No visible wallpaper found, add the wallpaper input consumer at the end.
             addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
         }
 
