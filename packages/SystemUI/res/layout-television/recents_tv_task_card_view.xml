@@ -30,7 +30,7 @@
             android:layout_height="@dimen/recents_tv_screenshot_height"
             android:gravity="center"
             android:orientation="vertical"
-            android:background="@color/recents_tv_card_background_color"
+            android:background="@drawable/recents_tv_card_thumbnail_background"
             android:layout_centerHorizontal="true" >
 
         <ImageView
