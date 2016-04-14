@@ -457,8 +457,17 @@ public abstract class TextToSpeechService extends Service {
     private class SynthHandler extends Handler {
         private SpeechItem mCurrentSpeechItem = null;
 
-        private ArrayList<Object> mFlushedObjects = new ArrayList<Object>();
-        private boolean mFlushAll;
+        // When a message with QUEUE_FLUSH arrives we add the caller identity to the List and when a
+        // message with QUEUE_DESTROY arrives we increment mFlushAll. Then a message is added to the
+        // handler queue that removes the caller identify from the list and decrements the mFlushAll
+        // counter. This is so that when a message is processed and the caller identity is in the
+        // list or mFlushAll is not zero, we know that the message should be flushed.
+        // It's important that mFlushedObjects is a List and not a Set, and that mFlushAll is an
+        // int and not a bool. This is because when multiple messages arrive with QUEUE_FLUSH or
+        // QUEUE_DESTROY, we want to keep flushing messages until we arrive at the last QUEUE_FLUSH
+        // or QUEUE_DESTROY message.
+        private List<Object> mFlushedObjects = new ArrayList<>();
+        private int mFlushAll = 0;
 
         public SynthHandler(Looper looper) {
             super(looper);
@@ -467,7 +476,7 @@ public abstract class TextToSpeechService extends Service {
         private void startFlushingSpeechItems(Object callerIdentity) {
             synchronized (mFlushedObjects) {
                 if (callerIdentity == null) {
-                    mFlushAll = true;
+                    mFlushAll += 1;
                 } else {
                     mFlushedObjects.add(callerIdentity);
                 }
@@ -476,7 +485,7 @@ public abstract class TextToSpeechService extends Service {
         private void endFlushingSpeechItems(Object callerIdentity) {
             synchronized (mFlushedObjects) {
                 if (callerIdentity == null) {
-                    mFlushAll = false;
+                    mFlushAll -= 1;
                 } else {
                     mFlushedObjects.remove(callerIdentity);
                 }
@@ -484,7 +493,7 @@ public abstract class TextToSpeechService extends Service {
         }
         private boolean isFlushed(SpeechItem speechItem) {
             synchronized (mFlushedObjects) {
-                return mFlushAll || mFlushedObjects.contains(speechItem.getCallerIdentity());
+                return mFlushAll > 0 || mFlushedObjects.contains(speechItem.getCallerIdentity());
             }
         }
 
