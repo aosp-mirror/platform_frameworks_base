@@ -1774,7 +1774,6 @@ public interface WindowManager extends ViewManager {
                 title = "";
 
             mTitle = TextUtils.stringOrSpannedString(title);
-            accessibilityTitle = mTitle;
         }
 
         public final CharSequence getTitle() {
