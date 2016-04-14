@@ -2713,11 +2713,14 @@
     <public type="attr" name="forceHasOverlappingRendering" />
     <public type="attr" name="contentInsetStartWithNavigation" />
     <public type="attr" name="contentInsetEndWithActions" />
+    <public type="attr" name="numberPickerStyle" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
     <public type="style" name="Widget.Material.CompoundButton.Switch" />
     <public type="style" name="Widget.Material.Light.CompoundButton.Switch" />
+    <public type="style" name="Widget.Material.NumberPicker" />
+    <public type="style" name="Widget.Material.Light.NumberPicker" />
 
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="id" name="icon_frame" />
