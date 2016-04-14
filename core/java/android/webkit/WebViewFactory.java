@@ -18,13 +18,14 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.XmlResourceParser;
+import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -32,26 +33,20 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
+import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
 import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Top level factory, used creating all the main WebView implementation classes.
@@ -192,52 +187,126 @@ public final class WebViewFactory {
         }
     }
 
+    /**
+     * Returns true if the signatures match, false otherwise
+     */
+    private static boolean signaturesEquals(Signature[] s1, Signature[] s2) {
+        if (s1 == null) {
+            return s2 == null;
+        }
+        if (s2 == null) return false;
+
+        ArraySet<Signature> set1 = new ArraySet<>();
+        for(Signature signature : s1) {
+            set1.add(signature);
+        }
+        ArraySet<Signature> set2 = new ArraySet<>();
+        for(Signature signature : s2) {
+            set2.add(signature);
+        }
+        return set1.equals(set2);
+    }
+
+    // Throws MissingWebViewPackageException on failure
+    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse) {
+        if (!chosen.packageName.equals(toUse.packageName)) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "packageName mismatch, expected: "
+                    + chosen.packageName + " actual: " + toUse.packageName);
+        }
+        if (chosen.versionCode > toUse.versionCode) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "version code mismatch, expected: " + chosen.versionCode
+                    + " actual: " + toUse.versionCode);
+        }
+        if (getWebViewLibrary(toUse.applicationInfo) == null) {
+            throw new MissingWebViewPackageException("Tried to load an invalid WebView provider: "
+                    + toUse.packageName);
+        }
+        if (!signaturesEquals(chosen.signatures, toUse.signatures)) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "signature mismatch");
+        }
+    }
+
+    private static Context getWebViewContextAndSetProvider() {
+        Application initialApplication = AppGlobals.getInitialApplication();
+        try {
+            WebViewProviderResponse response = null;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "WebViewUpdateService.waitForAndGetProvider()");
+            try {
+                response = getUpdateService().waitForAndGetProvider();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+            if (response.status != LIBLOAD_SUCCESS) {
+                throw new MissingWebViewPackageException("Failed to load WebView provider: "
+                        + getWebViewPreparationErrorReason(response.status));
+            }
+            // Register to be killed before fetching package info - so that we will be
+            // killed if the package info goes out-of-date.
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "ActivityManager.addPackageDependency()");
+            try {
+                ActivityManagerNative.getDefault().addPackageDependency(
+                        response.packageInfo.packageName);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+            // Fetch package info and verify it against the chosen package
+            PackageInfo newPackageInfo = null;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getPackageInfo()");
+            try {
+                newPackageInfo = initialApplication.getPackageManager().getPackageInfo(
+                    response.packageInfo.packageName,
+                    PackageManager.GET_SHARED_LIBRARY_FILES
+                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                    // Make sure that we fetch the current provider even if its not
+                    // installed for the current user
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    // Fetch signatures for verification
+                    | PackageManager.GET_SIGNATURES
+                    // Get meta-data for meta data flag verification
+                    | PackageManager.GET_META_DATA);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+
+            // Validate the newly fetched package info, throws MissingWebViewPackageException on
+            // failure
+            verifyPackageInfo(response.packageInfo, newPackageInfo);
+
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "initialApplication.createApplicationContext");
+            try {
+                // Construct an app context to load the Java code into the current app.
+                Context webViewContext = initialApplication.createApplicationContext(
+                        newPackageInfo.applicationInfo,
+                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                sPackageInfo = response.packageInfo;
+                return webViewContext;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+        } catch (RemoteException | PackageManager.NameNotFoundException e) {
+            throw new MissingWebViewPackageException("Failed to load WebView provider: " + e);
+        }
+    }
+
     private static Class<WebViewFactoryProvider> getProviderClass() {
+        Context webViewContext = null;
+        Application initialApplication = AppGlobals.getInitialApplication();
+
         try {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
-                    "WebViewFactory.waitForProviderAndSetPackageInfo()");
+                    "WebViewFactory.getWebViewContextAndSetProvider()");
             try {
-                // First fetch the package info so we can log the webview package version.
-                int res = waitForProviderAndSetPackageInfo();
-                if (res != LIBLOAD_SUCCESS) {
-                    throw new MissingWebViewPackageException(
-                            "Failed to load WebView provider, error: "
-                            + getWebViewPreparationErrorReason(res));
-                }
+                webViewContext = getWebViewContextAndSetProvider();
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
             Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
-                sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
-
-            Application initialApplication = AppGlobals.getInitialApplication();
-            Context webViewContext = null;
-            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getApplicationInfo()");
-            try {
-                // Construct a package context to load the Java code into the current app.
-                // This is done as early as possible since by constructing a package context we
-                // register the WebView package as a dependency for the current application so that
-                // when the WebView package is updated this application will be killed.
-                ApplicationInfo applicationInfo =
-                    initialApplication.getPackageManager().getApplicationInfo(
-                        sPackageInfo.packageName, PackageManager.GET_SHARED_LIBRARY_FILES
-                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
-                        // make sure that we fetch the current provider even if its not installed
-                        // for the current user
-                        | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
-                        "initialApplication.createApplicationContext");
-                try {
-                    webViewContext = initialApplication.createApplicationContext(applicationInfo,
-                            Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new MissingWebViewPackageException(e);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-            }
+                    sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
