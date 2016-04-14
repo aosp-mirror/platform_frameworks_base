@@ -59,13 +59,19 @@ public class SystemImpl implements SystemInterface {
     private static final String TAG_AVAILABILITY = "availableByDefault";
     private static final String TAG_SIGNATURE = "signature";
     private static final String TAG_FALLBACK = "isFallback";
+    private final WebViewProviderInfo[] mWebViewProviderPackages;
 
-    /**
-     * Returns all packages declared in the framework resources as potential WebView providers.
-     * @hide
-     * */
-    @Override
-    public WebViewProviderInfo[] getWebViewPackages() {
+    // Initialization-on-demand holder idiom for getting the WebView provider packages once and
+    // for all in a thread-safe manner.
+    private static class LazyHolder {
+        private static final SystemImpl INSTANCE = new SystemImpl();
+    }
+
+    public static SystemImpl getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+    private SystemImpl() {
         int numFallbackPackages = 0;
         int numAvailableByDefaultPackages = 0;
         int numAvByDefaultAndNotFallback = 0;
@@ -135,7 +141,16 @@ public class SystemImpl implements SystemInterface {
             throw new AndroidRuntimeException("There must be at least one WebView package "
                     + "that is available by default and not a fallback");
         }
-        return webViewProviders.toArray(new WebViewProviderInfo[webViewProviders.size()]);
+        mWebViewProviderPackages =
+                webViewProviders.toArray(new WebViewProviderInfo[webViewProviders.size()]);
+    }
+    /**
+     * Returns all packages declared in the framework resources as potential WebView providers.
+     * @hide
+     * */
+    @Override
+    public WebViewProviderInfo[] getWebViewPackages() {
+        return mWebViewProviderPackages;
     }
 
     public int getFactoryPackageVersion(String packageName) throws NameNotFoundException {
