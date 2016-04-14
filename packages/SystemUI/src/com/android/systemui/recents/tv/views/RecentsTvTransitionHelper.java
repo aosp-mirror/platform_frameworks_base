@@ -121,11 +121,13 @@ public class RecentsTvTransitionHelper {
         }
         try {
             Rect taskRect = taskView.getFocusedThumbnailRect();
-            Bitmap thumbnail = Bitmap.createScaledBitmap(task.thumbnail, taskRect.width(),
-                    taskRect.height(), false);
-            WindowManagerGlobal.getWindowManagerService()
-                    .overridePendingAppTransitionAspectScaledThumb(thumbnail, taskRect.left,
-                            taskRect.top, taskRect.width(), taskRect.height(), callback, true);
+            if (taskRect != null) {
+                Bitmap thumbnail = Bitmap.createScaledBitmap(task.thumbnail, taskRect.width(),
+                        taskRect.height(), false);
+                WindowManagerGlobal.getWindowManagerService()
+                        .overridePendingAppTransitionAspectScaledThumb(thumbnail, taskRect.left,
+                                taskRect.top, taskRect.width(), taskRect.height(), callback, true);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
