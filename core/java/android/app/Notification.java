@@ -25,6 +25,8 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -959,6 +961,12 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final String EXTRA_CONTAINS_CUSTOM_VIEW = "android.contains.customView";
+
+    /**
+     * @SystemApi
+     * @hide
+     */
+    public static final String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
 
     private Icon mSmallIcon;
     private Icon mLargeIcon;
@@ -3269,14 +3277,38 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindHeaderAppName(RemoteViews contentView) {
-            CharSequence appName = mContext.getPackageManager()
-                    .getApplicationLabel(mContext.getApplicationInfo());
-
-            if (TextUtils.isEmpty(appName)) {
-                return;
+        private String loadHeaderAppName() {
+            CharSequence name = null;
+            final PackageManager pm = mContext.getPackageManager();
+            if (mN.extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
+                // only system packages which lump together a bunch of unrelated stuff
+                // may substitute a different name to make the purpose of the
+                // notification more clear. the correct package label should always
+                // be accessible via SystemUI.
+                final String pkg = mContext.getPackageName();
+                final String subName = mN.extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
+                if (PackageManager.PERMISSION_GRANTED == pm.checkPermission(
+                        android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg)) {
+                    name = subName;
+                } else {
+                    Log.w(TAG, "warning: pkg "
+                            + pkg + " attempting to substitute app name '" + subName
+                            + "' without holding perm "
+                            + android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME);
+                }
             }
-            contentView.setTextViewText(R.id.app_name_text, appName);
+            if (TextUtils.isEmpty(name)) {
+                name = pm.getApplicationLabel(mContext.getApplicationInfo());
+            }
+            if (TextUtils.isEmpty(name)) {
+                // still nothing?
+                return null;
+            }
+
+            return String.valueOf(name);
+        }
+        private void bindHeaderAppName(RemoteViews contentView) {
+            contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
             contentView.setTextColor(R.id.app_name_text, resolveContrastColor());
         }
 
