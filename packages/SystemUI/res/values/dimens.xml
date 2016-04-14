@@ -606,8 +606,8 @@
     <dimen name="recents_layout_z_min">3dp</dimen>
     <dimen name="recents_layout_z_max">24dp</dimen>
 
-    <!-- The margin between the freeform and stack.  We also don't want this to change across 
-         configurations that Recents can be opened in, so we define them statically for all 
+    <!-- The margin between the freeform and stack.  We also don't want this to change across
+         configurations that Recents can be opened in, so we define them statically for all
          display sizes. -->
     <dimen name="recents_freeform_layout_bottom_margin">16dp</dimen>
 
@@ -651,4 +651,7 @@
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
+
+    <!-- The alpha to apply to the recents row when it doesn't have focus -->
+    <item name="recents_recents_row_dim_alpha" format="float" type="dimen">0.5</item>
 </resources>

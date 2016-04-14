@@ -107,7 +107,9 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         public void onMoveToFullscreen() {
             // Recents should be dismissed when PIP moves to fullscreen. If not, Recents will
             // be unnecessarily shown in the scenario: PIP->Fullscreen->PIP.
-            dismissRecentsToLaunchTargetTaskOrHome();
+            // Do not show Recents close animation because PIP->Fullscreen animation will be shown
+            // instead.
+            dismissRecentsToLaunchTargetTaskOrHome(false);
         }
 
         @Override
@@ -118,7 +120,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             new PipRecentsOverlayManager.Callback() {
                 @Override
                 public void onClosed() {
-                    dismissRecentsToLaunchTargetTaskOrHome();
+                    dismissRecentsToLaunchTargetTaskOrHome(true);
                 }
 
                 @Override
@@ -211,13 +213,15 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         }
     }
 
-    boolean dismissRecentsToLaunchTargetTaskOrHome() {
+    boolean dismissRecentsToLaunchTargetTaskOrHome(boolean animate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we have a focused Task, launch that Task now
-            if (mRecentsView.launchPreviousTask()) return true;
+            if (mRecentsView.launchPreviousTask(animate)) {
+              return true;
+            }
             // If none of the other cases apply, then just go Home
-            dismissRecentsToHome(true /* animateTaskViews */);
+            dismissRecentsToHome(animate /* animateTaskViews */);
         }
         return false;
     }
@@ -247,7 +251,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
         dismissEvent.addPostAnimationCallback(closeSystemWindows);
 
-        if(mTaskStackHorizontalGridView.getChildCount() > 0 && animateTaskViews) {
+        if (mTaskStackHorizontalGridView.getChildCount() > 0 && animateTaskViews) {
             mHomeRecentsEnterExitAnimationHolder.startExitAnimation(dismissEvent);
         } else {
             closeSystemWindows.run();
@@ -374,7 +378,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         if(mLaunchedFromHome) {
-            mHomeRecentsEnterExitAnimationHolder.startEnterAnimation();
+            mHomeRecentsEnterExitAnimationHolder.startEnterAnimation(mPipManager.isPipShown());
         }
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
     }
@@ -463,7 +467,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if (launchState.launchedFromHome) {
             dismissRecentsToHome(true /* animateTaskViews */);
         } else {
-            dismissRecentsToLaunchTargetTaskOrHome();
+            dismissRecentsToLaunchTargetTaskOrHome(true);
         }
     }
 
@@ -561,6 +565,8 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             // as if it's the part of the Recents UI.
             mPipRecentsOverlayManager.requestFocus(
                     mTaskStackViewAdapter.getItemCount() > 0);
+        } else {
+            mPipRecentsOverlayManager.clearFocus();
         }
     }
 }

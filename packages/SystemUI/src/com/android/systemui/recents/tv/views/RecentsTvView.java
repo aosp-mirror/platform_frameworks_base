@@ -112,7 +112,7 @@ public class RecentsTvView extends FrameLayout {
         if (mTaskStackHorizontalView != null) {
             Task task = mTaskStackHorizontalView.getFocusedTask();
             if (task != null) {
-                launchTaskFomRecents(task);
+                launchTaskFomRecents(task, true);
                 return true;
             }
         }
@@ -120,12 +120,12 @@ public class RecentsTvView extends FrameLayout {
     }
 
     /** Launches the task that recents was launched from if possible */
-    public boolean launchPreviousTask() {
+    public boolean launchPreviousTask(boolean animate) {
         if (mTaskStackHorizontalView != null) {
             TaskStack stack = mTaskStackHorizontalView.getStack();
             Task task = stack.getLaunchTarget();
             if (task != null) {
-                launchTaskFomRecents(task);
+                launchTaskFomRecents(task, animate);
                 return true;
             }
         }
@@ -137,18 +137,25 @@ public class RecentsTvView extends FrameLayout {
      * attempt to scroll to focus the task before launching.
      * @param task
      */
-    private void launchTaskFomRecents(final Task task) {
-        if(task != mTaskStackHorizontalView.getFocusedTask()) {
-            if(mScrollListener != null) {
+    private void launchTaskFomRecents(final Task task, boolean animate) {
+        if (!animate) {
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+            return;
+        }
+        mTaskStackHorizontalView.requestFocus();
+        Task focusedTask = mTaskStackHorizontalView.getFocusedTask();
+        if (focusedTask != null && task != focusedTask) {
+            if (mScrollListener != null) {
                 mTaskStackHorizontalView.removeOnScrollListener(mScrollListener);
             }
             mScrollListener = new OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
-                    if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         TaskCardView cardView = mTaskStackHorizontalView.getChildViewForTask(task);
-                        if(cardView != null) {
+                        if (cardView != null) {
                             mTransitionHelper.launchTaskFromRecents(mStack, task,
                                     mTaskStackHorizontalView, cardView, null, INVALID_STACK_ID);
                         } else {

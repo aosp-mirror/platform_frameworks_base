@@ -29,7 +29,8 @@ public class DismissAnimationsHolder {
     private LinearLayout mDismissArea;
     private LinearLayout mInfoField;
     private View mThumbnailView;
-    private int mCardYDelta;
+    private int mDismissEnterYDelta;
+    private int mDismissStartYDelta;
     private long mShortDuration;
     private long mLongDuration;
 
@@ -38,7 +39,8 @@ public class DismissAnimationsHolder {
         mDismissArea = (LinearLayout) taskCardView.findViewById(R.id.card_dismiss);
         mThumbnailView = taskCardView.findViewById(R.id.card_view_thumbnail);
         Resources res = taskCardView.getResources();
-        mCardYDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_shift_down);
+        mDismissEnterYDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_shift_down);
+        mDismissStartYDelta = mDismissEnterYDelta * 2;
         mShortDuration =  res.getInteger(R.integer.dismiss_short_duration);
         mLongDuration =  res.getInteger(R.integer.dismiss_long_duration);
     }
@@ -52,13 +54,13 @@ public class DismissAnimationsHolder {
         mInfoField.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(mCardYDelta)
+                .translationY(mDismissEnterYDelta)
                 .alpha(0.5f);
 
         mThumbnailView.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(mCardYDelta)
+                .translationY(mDismissEnterYDelta)
                 .alpha(0.5f);
     }
 
@@ -71,13 +73,13 @@ public class DismissAnimationsHolder {
         mInfoField.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(-mCardYDelta)
+                .translationY(0)
                 .alpha(1.0f);
 
         mThumbnailView.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(-mCardYDelta)
+                .translationY(0)
                 .alpha(1.0f);
     }
 
@@ -90,14 +92,14 @@ public class DismissAnimationsHolder {
         mInfoField.animate()
                 .setDuration(mLongDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(mCardYDelta)
+                .translationY(mDismissStartYDelta)
                 .alpha(0.0f)
                 .setListener(listener);
 
         mThumbnailView.animate()
                 .setDuration(mLongDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .translationYBy(mCardYDelta)
+                .translationY(mDismissStartYDelta)
                 .alpha(0.0f);
     }
 

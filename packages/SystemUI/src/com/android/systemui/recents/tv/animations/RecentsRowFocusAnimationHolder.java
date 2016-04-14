@@ -29,8 +29,6 @@ import com.android.systemui.recents.tv.views.TaskCardView;
  * Recents row's focus animation with PIP controls.
  */
 public class RecentsRowFocusAnimationHolder {
-    private static final float DIM_ALPHA = 0.5f;
-
     private View mView;
     private View mTitleView;
 
@@ -43,6 +41,7 @@ public class RecentsRowFocusAnimationHolder {
 
         Resources res = view.getResources();
         int duration = res.getInteger(R.integer.recents_tv_pip_focus_anim_duration);
+        float dimAlpha = res.getFloat(R.dimen.recents_recents_row_dim_alpha);
 
         mFocusGainAnimatorSet = new AnimatorSet();
         mFocusGainAnimatorSet.playTogether(
@@ -53,7 +52,7 @@ public class RecentsRowFocusAnimationHolder {
 
         mFocusLoseAnimatorSet = new AnimatorSet();
         mFocusLoseAnimatorSet.playTogether(
-                ObjectAnimator.ofFloat(mView, "alpha", DIM_ALPHA),
+                ObjectAnimator.ofFloat(mView, "alpha", dimAlpha),
                 ObjectAnimator.ofFloat(mTitleView, "alpha", 0f));
         mFocusLoseAnimatorSet.setDuration(duration);
         mFocusLoseAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
