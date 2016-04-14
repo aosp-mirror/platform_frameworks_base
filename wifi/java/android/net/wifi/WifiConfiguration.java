@@ -1636,6 +1636,9 @@ public class WifiConfiguration implements Parcelable {
             if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
                 keyMgmt = KeyMgmt.strings[KeyMgmt.WPA_EAP];
             }
+            if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
+                keyMgmt = KeyMgmt.strings[KeyMgmt.OSEN];
+            }
             if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
                 keyMgmt += KeyMgmt.strings[KeyMgmt.IEEE8021X];
             }
