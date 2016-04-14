@@ -28,6 +28,7 @@ public class HomeRecentsEnterExitAnimationHolder {
 
     private Context mContext;
     private TaskStackHorizontalGridView mGridView;
+    private float mDimAlpha;
     private long mDelay;
     private int mDuration;
     private int mTranslationX;
@@ -36,18 +37,19 @@ public class HomeRecentsEnterExitAnimationHolder {
             TaskStackHorizontalGridView gridView) {
         mContext = context;
         mGridView = gridView;
+        mDimAlpha = mContext.getResources().getFloat(R.dimen.recents_recents_row_dim_alpha);
         mTranslationX = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.recents_tv_home_recents_shift);
         mDelay = mContext.getResources().getInteger(R.integer.recents_home_delay);
         mDuration =  mContext.getResources().getInteger(R.integer.recents_home_duration);
     }
 
-    public void startEnterAnimation() {
+    public void startEnterAnimation(boolean isPipShown) {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
             view.setTranslationX(-mTranslationX);
             view.animate()
-                    .alpha(1.0f)
+                    .alpha(isPipShown ? mDimAlpha : 1.0f)
                     .translationX(0)
                     .setDuration(mDuration)
                     .setStartDelay(mDelay * i)
