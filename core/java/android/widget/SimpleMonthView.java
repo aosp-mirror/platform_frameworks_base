@@ -849,10 +849,12 @@ class SimpleMonthView extends View {
         mEnabledDayStart = MathUtils.constrain(enabledDayStart, 1, mDaysInMonth);
         mEnabledDayEnd = MathUtils.constrain(enabledDayEnd, mEnabledDayStart, mDaysInMonth);
 
+        updateMonthYearLabel();
+        updateDayOfWeekLabels();
+
         // Invalidate cached accessibility information.
         mTouchHelper.invalidateRoot();
-
-        updateMonthYearLabel();
+        invalidate();
 
         if (DEBUG_WRONG_DATE) {
             Log.d(LOG_TAG, "mMonth = " + mMonth);
