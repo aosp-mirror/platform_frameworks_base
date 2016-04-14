@@ -31,8 +31,10 @@
     <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
     <!-- Picture-in-Picture (PIP) onboarding screen -->
     <eat-comment />
+    <!-- Title for picture-in-picture (PIP) onboarding screen to indicate that an user is in PIP mode. [CHAR LIMIT=NONE] -->
+    <string name="pip_onboarding_title">PIP mode</string>
     <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_description">Press and hold the HOME button to control PIP</string>
+    <string name="pip_onboarding_description">To control PIP press and hold the <b>HOME</b> button on the remote</string>
     <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
     <string name="pip_onboarding_button">Got it</string>
     <!-- Dismiss icon description -->
