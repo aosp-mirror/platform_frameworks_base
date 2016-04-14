@@ -253,7 +253,9 @@ void ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
     path.transform(skTransform, &transformed);
     SkRegion region;
     regionFromPath(transformed, region);
-    clipRegion(region, op);
+    enterRegionMode();
+    mClipRegion.op(region, op);
+    onClipRegionUpdated();
 }
 
 /*
