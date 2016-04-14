@@ -43,6 +43,7 @@ import android.graphics.Rect;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
 import android.provider.MediaStore;
@@ -164,6 +165,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         c.drawColor(overlayColor);
         c.setBitmap(null);
 
+        // swap "System UI" out for "Android System"
+        final Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                context.getString(com.android.internal.R.string.android_system_label));
+
         // Show the intermediate notification
         mTickerAddSpace = !mTickerAddSpace;
         mNotificationManager = nManager;
@@ -180,6 +186,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .setSmallIcon(R.drawable.stat_notify_image)
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setWhen(now)
+                .setShowWhen(true)
+                .addExtras(extras)
                 .setColor(r.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
 
@@ -190,6 +198,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             .setContentText(r.getString(R.string.screenshot_saving_text))
             .setSmallIcon(R.drawable.stat_notify_image)
             .setWhen(now)
+            .setShowWhen(true)
+            .addExtras(extras)
             .setColor(r.getColor(com.android.internal.R.color.system_notification_accent_color))
             .setStyle(mNotificationStyle)
             .setPublicVersion(mPublicNotificationBuilder.build());
