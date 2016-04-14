@@ -99,6 +99,13 @@ public final class TvInputManager {
      */
     public static final int DVB_DEVICE_FRONTEND = DVB_DEVICE_END;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({VIDEO_UNAVAILABLE_REASON_UNKNOWN, VIDEO_UNAVAILABLE_REASON_TUNING,
+            VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
+            VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY})
+    public @interface VideoUnavailableReason {}
+
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
     static final int VIDEO_UNAVAILABLE_REASON_END = 4;
 
@@ -135,10 +142,9 @@ public final class TvInputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({VIDEO_UNAVAILABLE_REASON_UNKNOWN, VIDEO_UNAVAILABLE_REASON_TUNING,
-            VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
-            VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY})
-    public @interface VideoUnavailableReason {}
+    @IntDef({TIME_SHIFT_STATUS_UNKNOWN, TIME_SHIFT_STATUS_UNSUPPORTED,
+            TIME_SHIFT_STATUS_UNAVAILABLE, TIME_SHIFT_STATUS_AVAILABLE})
+    public @interface TimeShiftStatus {}
 
     /**
      * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
@@ -169,18 +175,18 @@ public final class TvInputManager {
      */
     public static final int TIME_SHIFT_STATUS_AVAILABLE = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TIME_SHIFT_STATUS_UNKNOWN, TIME_SHIFT_STATUS_UNSUPPORTED,
-            TIME_SHIFT_STATUS_UNAVAILABLE, TIME_SHIFT_STATUS_AVAILABLE})
-    public @interface TimeShiftStatus {}
-
     /**
      * Value returned by {@link TvInputService.Session#onTimeShiftGetCurrentPosition()} and
      * {@link TvInputService.Session#onTimeShiftGetStartPosition()} when time shifting has not
      * yet started.
      */
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_INSUFFICIENT_SPACE,
+            RECORDING_ERROR_RESOURCE_BUSY})
+    public @interface RecordingError {}
 
     /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
@@ -205,9 +211,8 @@ public final class TvInputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_INSUFFICIENT_SPACE,
-            RECORDING_ERROR_RESOURCE_BUSY})
-    public @interface RecordingError {}
+    @IntDef({INPUT_STATE_CONNECTED, INPUT_STATE_CONNECTED_STANDBY, INPUT_STATE_DISCONNECTED})
+    public @interface InputState {}
 
     /**
      * State for {@link #getInputState(String)} and
@@ -239,11 +244,6 @@ public final class TvInputManager {
      *
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({INPUT_STATE_CONNECTED, INPUT_STATE_CONNECTED_STANDBY, INPUT_STATE_DISCONNECTED})
-    public @interface InputState {}
 
     /**
      * Broadcast intent action when the user blocked content ratings change. For use with the

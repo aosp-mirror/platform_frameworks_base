@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,12 +25,20 @@ import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
  * Encapsulates the format of tracks played in {@link TvInputService}.
  */
 public final class TvTrackInfo implements Parcelable {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TYPE_AUDIO, TYPE_VIDEO, TYPE_SUBTITLE})
+    public @interface Type {}
+
     /**
      * The type value for audio tracks.
      */
@@ -96,6 +105,7 @@ public final class TvTrackInfo implements Parcelable {
      * Returns the type of the track. The type should be one of the followings:
      * {@link #TYPE_AUDIO}, {@link #TYPE_VIDEO} and {@link #TYPE_SUBTITLE}.
      */
+    @Type
     public final int getType() {
         return mType;
     }
@@ -319,7 +329,7 @@ public final class TvTrackInfo implements Parcelable {
          * @throws IllegalArgumentException if the type is not any of {@link #TYPE_AUDIO},
          *                                  {@link #TYPE_VIDEO} and {@link #TYPE_SUBTITLE}
          */
-        public Builder(int type, @NonNull String id) {
+        public Builder(@Type int type, @NonNull String id) {
             if (type != TYPE_AUDIO
                     && type != TYPE_VIDEO
                     && type != TYPE_SUBTITLE) {
