@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Puno na ang storage ng relo. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Puno na ang storage ng TV. Mag-delete ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puno na ang storage ng telepono. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Maaaring sinusubaybayan ang network"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ng isang di-kilalang third party"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Ng administrator sa iyong profile sa trabaho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Ng <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"I-OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Kumpletuhin ang pagkilos gamit ang"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Tapusin ang pagkilos gamit ang %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Gawin ang pagkilos"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Buksan gamit ang"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Buksan gamit ang %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Buksan"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"I-edit gamit ang"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"I-edit gamit ang %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"I-edit"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Ibahagi gamit ang"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Ibahagi gamit ang %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Ibahagi"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ipadala gamit ang"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Ipadala gamit ang %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Ipadala"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Pumili ng app sa Home"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Gamitin ang %1$s bilang Home"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Kunan ng larawan"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Kunan ng larawan gamit ang"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Kunan ng larawan gamit ang %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Kunan ng larawan"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gamitin bilang default para sa pagkilos na ito."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Gumamit ng ibang app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"I-clear ang default sa mga setting ng System &gt; Apps &gt; Na-download."</string>

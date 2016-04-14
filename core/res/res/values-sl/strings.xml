@@ -166,7 +166,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Shramba ure je polna. Izbrišite nekaj datotek, da sprostite prostor."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Shramba televizorja je polna. Izbrišite nekaj datotek, da sprostite prostor."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pomnilnik telefona je poln. Izbrišite nekaj datotek, da sprostite prostor."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Omrežje je lahko nadzorovano"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Neznana tretja oseba"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Skrbnik delovnega profila"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Nadzira: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -905,16 +905,25 @@
     <string name="capital_off" msgid="6815870386972805832">"IZKLOPLJENO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončanje dejanja z"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Dokončanje dejanja z aplikacijo %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Izvedba dejanja"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Odpiranje z aplikacijo"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Odpiranje z aplikacijo %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Odpiranje"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Urejanje z aplikacijo"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Urejanje z aplikacijo %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Urejanje"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Skupna raba z aplikacijo"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Skupna raba z aplikacijo %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Skupna raba"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Pošiljanje z aplikacijo"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Pošiljanje z aplikacijo %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Pošiljanje"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Izbira aplikacije na začetnem zaslonu"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Uporaba aplikacije %1$s na začetnem zaslonu"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Snemanje slike"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Snemanje slike z aplikacijo"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Snemanje slike z aplikacijo %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Snemanje slike"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Uporaba druge aplikacije"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Izbrišite privzet aplikacijo v sistemskih nastavitvah &gt; Aplikacije &gt; Preneseno."</string>

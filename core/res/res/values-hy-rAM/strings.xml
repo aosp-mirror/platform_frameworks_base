@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Ժամացույցի ֆայլերի պահեստը լիքն է: Ջնջեք որոշ ֆայլեր՝ տարածք ազատելու համար:"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Հեռուստացույցի պահեստը լիքն է: Ջնջեք որոշ ֆայլեր՝ տեղ ազատելու համար:"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Հեռախոսի պահոցը լիքն է: Ջնջեք մի քանի ֆայլեր` տարածություն ազատելու համար:"</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Ցանցը կարող է վերահսկվել"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Անհայտ երրորդ կողմի կողմից"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Ձեր աշխատանքային պրոֆիլի ադմինիստրատորի կողմից"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>-ի կողմից"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ավարտել գործողությունը` օգտագործելով"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Ավարտել գործողությունը"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Բացել հետևյալ ծրագրով՝"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել հետևյալով՝ %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Բացել"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Խմբագրել հետևյալ ծրագրով՝"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Խմբագրել հետևյալով՝ %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Փոփոխել"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Տարածել"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Տարածել ըստ %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Տրամադրել"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ուղարկել այս հավելվածով"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Ուղարկել %1$s հավելվածով"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Ուղարկել"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Ընտրեք Հիմնական հավելվածը"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Օգտագործել %1$s-ը՝ որպես Հիմնական"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Լուսանկարել"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Լուսանկարել այս հավելվածի օգնությամբ"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Լուսանկարել %1$s հավելվածի օգնությամբ"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Լուսանկարել"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել լռելյայն այս գործողության համար:"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Օգտագործել այլ հավելված"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>

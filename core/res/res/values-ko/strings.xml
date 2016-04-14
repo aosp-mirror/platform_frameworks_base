@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"시계 저장공간이 가득 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 확보하세요."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"네트워크가 모니터링될 수 있음"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자의 모니터링"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"직장 프로필 관리자에 의해 모니터링될 수 있음"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"작업을 수행할 때 사용하는 애플리케이션"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s을(를) 사용하여 작업 완료"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"작업 완료"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"연결 프로그램"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s(으)로 열기"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"열기"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"편집 프로그램:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s(으)로 수정"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"수정"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"공유 대상"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s와(과) 공유"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"공유"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"전송 시 사용할 앱"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"전송 시 사용할 앱: %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"전송"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"홈 앱 선택"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s을(를) 홈 앱으로 사용"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"이미지 캡처"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"이미지 캡처에 사용할 앱:"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"이미지 캡처에 %1$s 사용"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"이미지 캡처"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"다른 앱 사용"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 기본 설정을 지웁니다."</string>

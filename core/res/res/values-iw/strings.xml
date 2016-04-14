@@ -166,7 +166,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"שטח האחסון של השעון מלא. מחק כמה קבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"האחסון בטלוויזיה מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"שטח האחסון של הטלפון מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ייתכן שהרשת מנוטרת"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"על ידי צד שלישי לא מוכר"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"על ידי המנהל של פרופיל העבודה שלך"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"על ידי <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -905,16 +905,25 @@
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"‏השלם את הפעולה באמצעות %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"השלם פעולה"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"פתח באמצעות"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏פתח באמצעות %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"פתח"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ערוך באמצעות"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ערוך באמצעות %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ערוך"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"שתף באמצעות"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏שתף באמצעות %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"שתף"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"שליחה באמצעות"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"‏שליחה באמצעות %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"שלח"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"בחר אפליקציה שתשמש כדף הבית"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏השתמש ב-%1$s כדף הבית"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"צלם תמונה"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"צלם תמונה באמצעות"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"‏צילום תמונה באמצעות %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"צלם תמונה"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"השתמש כברירת מחדל עבור פעולה זו."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"השתמש באפליקציה אחרת"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏נקה את הגדרת המחדל ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>

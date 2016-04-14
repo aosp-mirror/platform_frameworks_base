@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"حافظه ساعت پر است. برای آزادسازی فضا، چند فایل را حذف کنید."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"فضای ذخیره‌سازی تلویزیون پر است. برای آزاد کردن فضا، برخی از فایل‌ها را حذف کنید."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"حافظه تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ممکن است شبکه نظارت شده باشد"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"توسط یک شخص ثالث ناشناس"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"توسط سرپرست نمایه کار شما"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"توسط <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -388,9 +388,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"‏به برنامه اجازه می‎دهد منطقه زمانی تلویزیون را تغییر دهد."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"‏به برنامه اجازه می‎دهد تا منطقهٔ زمانی تلفن را تغییر دهد."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"یافتن حساب‌ها در دستگاه"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"به برنامه اجازه می‌دهد به لیست حساب‌های شناخته شده توسط رایانهٔ لوحی دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"به برنامه اجازه می‌دهد به فهرست حساب‌های شناخته شده توسط رایانهٔ لوحی دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"به برنامه اجازه می‌دهد تا فهرست حساب‌هایی را دریافت کند که تلویزیون می‌شناسد. شاید شامل حساب‌هایی باشد که توسط برنامه‌هایی که نصب کرده‌اید، ایجاد شده باشد."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"به برنامه اجازه می‌دهد به لیست حساب‌های شناخته شده توسط تلفن دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"به برنامه اجازه می‌دهد به فهرست حساب‌های شناخته شده توسط تلفن دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"مشاهدهٔ اتصالات شبکه"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"به برنامه امکان می‌دهد اطلاعات مربوط به اتصالات شبکه مانند شبکه‌های موجود و متصل را مشاهده کند."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"دسترسی کامل به شبکه"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"خاموش"</string>
     <string name="whichApplication" msgid="4533185947064773386">"تکمیل عملکرد با استفاده از"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"‏تکمیل عملکرد با استفاده از %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"تکمیل عملکرد"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"باز کردن با"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏باز کردن با %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"باز کردن"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ویرایش با"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ویرایش با %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ویرایش"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"اشتراک‌گذاری با"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏اشتراک‌گذاری با %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"اشتراک‌گذاری"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ارسال با استفاده از"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"‏ارسال با استفاده از %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ارسال"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"انتخاب یک برنامه صفحه اصلی"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏استفاده از %1$s به عنوان برنامه صفحه اصلی"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"تصویربرداری"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"تصویربرداری با"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"‏تصویربرداری با %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"تصویربرداری"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"استتفاده از یک برنامه دیگر"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد بارگیری شده پاک کنید."</string>
