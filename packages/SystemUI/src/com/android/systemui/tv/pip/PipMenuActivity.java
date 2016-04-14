@@ -16,10 +16,14 @@
 
 package com.android.systemui.tv.pip;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.Interpolators;
 
 /**
  * Activity to show the PIP menu to control PIP.
@@ -29,7 +33,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     private final PipManager mPipManager = PipManager.getInstance();
 
-    private PipControlsView mPipControlsView;
+    private Animator mFadeInAnimation;
+    private Animator mFadeOutAnimation;
+    private View mPipControlsView;
     private boolean mRestorePipSizeWhenClose;
 
     @Override
@@ -38,8 +44,14 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         setContentView(R.layout.tv_pip_menu);
         mPipManager.addListener(this);
 
-        mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
         mRestorePipSizeWhenClose = true;
+        mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
+        mFadeInAnimation = AnimatorInflater.loadAnimator(
+                this, R.anim.tv_pip_menu_fade_in_animation);
+        mFadeInAnimation.setTarget(mPipControlsView);
+        mFadeOutAnimation = AnimatorInflater.loadAnimator(
+                this, R.anim.tv_pip_menu_fade_out_animation);
+        mFadeOutAnimation.setTarget(mPipControlsView);
     }
 
     private void restorePipAndFinish() {
@@ -51,8 +63,15 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mFadeInAnimation.start();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+        mFadeOutAnimation.start();
         restorePipAndFinish();
     }
 

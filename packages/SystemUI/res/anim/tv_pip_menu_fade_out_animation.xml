@@ -14,5 +14,8 @@
      limitations under the License.
 -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#9AFFFFFF" android:radius="17dp" />
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:propertyName="alpha"
+    android:valueTo="0"
+    android:interpolator="@android:interpolator/fast_out_slow_in"
+    android:duration="100" />

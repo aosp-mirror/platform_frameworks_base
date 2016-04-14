@@ -18,4 +18,4 @@
     android:propertyName="alpha"
     android:valueTo="1"
     android:interpolator="@android:interpolator/fast_out_slow_in"
-    android:duration="@integer/recents_tv_pip_focus_anim_duration" />
+    android:duration="100" />
