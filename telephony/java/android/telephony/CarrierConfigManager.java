@@ -548,6 +548,27 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_WFC_MODE_BOOL = "editable_wfc_mode_bool";
 
     /**
+     * List operator-specific error codes and indices of corresponding error strings in
+     * wfcOperatorErrorAlertMessages and wfcOperatorErrorNotificationMessages.
+     *
+     * Example: "REG09|0" specifies error code "REG09" and index "0". This index will be
+     * used to find alert and notification messages in wfcOperatorErrorAlertMessages and
+     * wfcOperatorErrorNotificationMessages.
+     *
+     * @hide
+     */
+    public static final String KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY =
+            "wfc_operator_error_codes_string_array";
+
+    /**
+     * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     * @hide
+     */
+    public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
+    /** @hide */
+    public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -693,8 +714,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
         sDefaults.putInt(KEY_VVM_PORT_NUMBER_INT, 0);
         sDefaults.putString(KEY_VVM_TYPE_STRING, "");
-        sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN,false);
-        sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOLEAN,true);
+        sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN, false);
+        sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOLEAN, true);
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
@@ -731,6 +752,9 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_VIDEO_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
+        sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
+        sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
