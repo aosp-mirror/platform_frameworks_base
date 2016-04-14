@@ -34,7 +34,9 @@
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
-#include <utils/Trace.h>
+#ifdef __ANDROID__
+#include <cutils/trace.h>
+#endif
 
 #include <assert.h>
 #include <dirent.h>
@@ -50,6 +52,14 @@
         _rc = (exp);                       \
     } while (_rc == -1 && errno == EINTR); \
     _rc; })
+#endif
+
+#ifdef __ANDROID__
+#define MY_TRACE_BEGIN(x) ATRACE_BEGIN(x)
+#define MY_TRACE_END() ATRACE_END()
+#else
+#define MY_TRACE_BEGIN(x)
+#define MY_TRACE_END()
 #endif
 
 using namespace android;
@@ -613,7 +623,7 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
     ResTable* sharedRes = NULL;
     bool shared = true;
     bool onlyEmptyResources = true;
-    ATRACE_NAME(ap.path.string());
+    MY_TRACE_BEGIN(ap.path.string());
     Asset* idmap = openIdmapLocked(ap);
     size_t nextEntryIdx = mResources->getTableCount();
     ALOGV("Looking for resource asset in '%s'\n", ap.path.string());
@@ -693,6 +703,8 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
     if (idmap != NULL) {
         delete idmap;
     }
+    MY_TRACE_END();
+
     return onlyEmptyResources;
 }
 
@@ -740,7 +752,6 @@ const ResTable* AssetManager::getResTable(bool required) const
 
 void AssetManager::updateResourceParamsLocked() const
 {
-    ATRACE_CALL();
     ResTable* res = mResources;
     if (!res) {
         return;

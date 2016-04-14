@@ -21,7 +21,7 @@ namespace android {
 enum { MAY_NOT_BE_BAG = false };
 
 static inline bool operator==(const android::ResTable_config& a, const android::ResTable_config& b) {
-    return a.compare(b) == 0;
+    return memcmp(&a, &b, sizeof(a)) == 0;
 }
 
 static inline ::std::ostream& operator<<(::std::ostream& out, const android::ResTable_config& c) {
