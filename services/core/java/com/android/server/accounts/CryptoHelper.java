@@ -10,15 +10,12 @@ import com.android.internal.util.Preconditions;
 
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * A crypto helper for encrypting and decrypting bundle with in-memory symmetric
@@ -30,15 +27,15 @@ import javax.crypto.spec.SecretKeySpec;
     private static final String KEY_CIPHER = "cipher";
     private static final String KEY_MAC = "mac";
     private static final String KEY_ALGORITHM = "AES";
+    private static final String KEY_IV = "iv";
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String MAC_ALGORITHM = "HMACSHA256";
     private static final int IV_LENGTH = 16;
 
     private static CryptoHelper sInstance;
     // Keys used for encrypting and decrypting data returned in a Bundle.
-    private final SecretKeySpec mCipherKeySpec;
-    private final SecretKeySpec mMacKeySpec;
-    private final IvParameterSpec mIv;
+    private final SecretKey mEncryptionKey;
+    private final SecretKey mMacKey;
 
     /* default */ synchronized static CryptoHelper getInstance() throws NoSuchAlgorithmException {
         if (sInstance == null) {
@@ -49,18 +46,10 @@ import javax.crypto.spec.SecretKeySpec;
 
     private CryptoHelper() throws NoSuchAlgorithmException {
         KeyGenerator kgen = KeyGenerator.getInstance(KEY_ALGORITHM);
-        SecretKey skey = kgen.generateKey();
-        mCipherKeySpec = new SecretKeySpec(skey.getEncoded(), KEY_ALGORITHM);
-
+        mEncryptionKey = kgen.generateKey();
+        // Use a different key for mac-ing than encryption/decryption.
         kgen = KeyGenerator.getInstance(MAC_ALGORITHM);
-        skey = kgen.generateKey();
-        mMacKeySpec = new SecretKeySpec(skey.getEncoded(), MAC_ALGORITHM);
-
-        // Create random iv
-        byte[] iv = new byte[IV_LENGTH];
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.nextBytes(iv);
-        mIv = new IvParameterSpec(iv);
+        mMacKey = kgen.generateKey();
     }
 
     @NonNull
@@ -68,16 +57,19 @@ import javax.crypto.spec.SecretKeySpec;
         Preconditions.checkNotNull(bundle, "Cannot encrypt null bundle.");
         Parcel parcel = Parcel.obtain();
         bundle.writeToParcel(parcel, 0);
-        byte[] bytes = parcel.marshall();
+        byte[] clearBytes = parcel.marshall();
         parcel.recycle();
 
+        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, mEncryptionKey);
+        byte[] encryptedBytes = cipher.doFinal(clearBytes);
+        byte[] iv = cipher.getIV();
+        byte[] mac = createMac(encryptedBytes, iv);
+
         Bundle encryptedBundle = new Bundle();
-
-        byte[] cipher = encrypt(bytes);
-        byte[] mac = createMac(cipher);
-
-        encryptedBundle.putByteArray(KEY_CIPHER, cipher);
+        encryptedBundle.putByteArray(KEY_CIPHER, encryptedBytes);
         encryptedBundle.putByteArray(KEY_MAC, mac);
+        encryptedBundle.putByteArray(KEY_IV, iv);
 
         return encryptedBundle;
     }
@@ -85,19 +77,18 @@ import javax.crypto.spec.SecretKeySpec;
     @Nullable
     /* default */ Bundle decryptBundle(@NonNull Bundle bundle) throws GeneralSecurityException {
         Preconditions.checkNotNull(bundle, "Cannot decrypt null bundle.");
-        byte[] cipherArray = bundle.getByteArray(KEY_CIPHER);
-        byte[] macArray = bundle.getByteArray(KEY_MAC);
-
-        if (!verifyMac(cipherArray, macArray)) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Escrow mac mismatched!");
-            }
+        byte[] iv = bundle.getByteArray(KEY_IV);
+        byte[] encryptedBytes = bundle.getByteArray(KEY_CIPHER);
+        byte[] mac = bundle.getByteArray(KEY_MAC);
+        if (!verifyMac(encryptedBytes, iv, mac)) {
+            Log.w(TAG, "Escrow mac mismatched!");
             return null;
         }
 
+        IvParameterSpec ivSpec = new IvParameterSpec(iv);
         Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, mCipherKeySpec, mIv);
-        byte[] decryptedBytes = cipher.doFinal(cipherArray);
+        cipher.init(Cipher.DECRYPT_MODE, mEncryptionKey, ivSpec);
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
 
         Parcel decryptedParcel = Parcel.obtain();
         decryptedParcel.unmarshall(decryptedBytes, 0, decryptedBytes.length);
@@ -108,9 +99,8 @@ import javax.crypto.spec.SecretKeySpec;
         return decryptedBundle;
     }
 
-    private boolean verifyMac(@Nullable byte[] cipherArray, @Nullable byte[] macArray)
+    private boolean verifyMac(@Nullable byte[] cipherArray, @Nullable byte[] iv, @Nullable byte[] macArray)
             throws GeneralSecurityException {
-
         if (cipherArray == null || cipherArray.length == 0 || macArray == null
                 || macArray.length == 0) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -118,23 +108,29 @@ import javax.crypto.spec.SecretKeySpec;
             }
             return false;
         }
-        Mac mac = Mac.getInstance(MAC_ALGORITHM);
-        mac.init(mMacKeySpec);
-        mac.update(cipherArray);
-        return Arrays.equals(macArray, mac.doFinal());
+        return constantTimeArrayEquals(macArray, createMac(cipherArray, iv));
     }
 
     @NonNull
-    private byte[] encrypt(@NonNull byte[] data) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, mCipherKeySpec, mIv);
-        return cipher.doFinal(data);
+    private byte[] createMac(@NonNull byte[] cipher, @NonNull byte[] iv) throws GeneralSecurityException {
+        Mac mac = Mac.getInstance(MAC_ALGORITHM);
+        mac.init(mMacKey);
+        mac.update(cipher);
+        mac.update(iv);
+        return mac.doFinal();
     }
 
-    @NonNull
-    private byte[] createMac(@NonNull byte[] cipher) throws GeneralSecurityException {
-        Mac mac = Mac.getInstance(MAC_ALGORITHM);
-        mac.init(mMacKeySpec);
-        return mac.doFinal(cipher);
+    private static boolean constantTimeArrayEquals(byte[] a, byte[] b) {
+        if (a == null || b == null) {
+            return a == b;
+        }
+        if (a.length != b.length) {
+            return false;
+        }
+        boolean isEqual = true;
+        for (int i = 0; i < b.length; i++) {
+            isEqual &= (a[i] == b[i]);
+        }
+        return isEqual;
     }
 }
