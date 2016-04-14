@@ -257,6 +257,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
         return mLock;
     }
 
+    public JobStore getJobStore() {
+        return mJobs;
+    }
+
     @Override
     public void onStartUser(int userHandle) {
         mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);

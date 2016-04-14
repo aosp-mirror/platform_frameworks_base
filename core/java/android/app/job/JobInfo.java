@@ -160,6 +160,8 @@ public class JobInfo implements Parcelable {
     private final boolean requireCharging;
     private final boolean requireDeviceIdle;
     private final TriggerContentUri[] triggerContentUris;
+    private final long triggerContentUpdateDelay;
+    private final long triggerContentMaxDelay;
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
     private final int networkType;
@@ -228,6 +230,22 @@ public class JobInfo implements Parcelable {
     @Nullable
     public TriggerContentUri[] getTriggerContentUris() {
         return triggerContentUris;
+    }
+
+    /**
+     * When triggering on content URI changes, this is the delay from when a change
+     * is detected until the job is scheduled.
+     */
+    public long getTriggerContentUpdateDelay() {
+        return triggerContentUpdateDelay;
+    }
+
+    /**
+     * When triggering on content URI changes, this is the maximum delay we will
+     * use before scheduling the job.
+     */
+    public long getTriggerContentMaxDelay() {
+        return triggerContentMaxDelay;
     }
 
     /**
@@ -332,6 +350,8 @@ public class JobInfo implements Parcelable {
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
         triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
+        triggerContentUpdateDelay = in.readLong();
+        triggerContentMaxDelay = in.readLong();
         networkType = in.readInt();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
@@ -356,6 +376,8 @@ public class JobInfo implements Parcelable {
         triggerContentUris = b.mTriggerContentUris != null
                 ? b.mTriggerContentUris.toArray(new TriggerContentUri[b.mTriggerContentUris.size()])
                 : null;
+        triggerContentUpdateDelay = b.mTriggerContentUpdateDelay;
+        triggerContentMaxDelay = b.mTriggerContentMaxDelay;
         networkType = b.mNetworkType;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
@@ -384,6 +406,8 @@ public class JobInfo implements Parcelable {
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
         out.writeTypedArray(triggerContentUris, flags);
+        out.writeLong(triggerContentUpdateDelay);
+        out.writeLong(triggerContentMaxDelay);
         out.writeInt(networkType);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
@@ -496,6 +520,8 @@ public class JobInfo implements Parcelable {
         private boolean mRequiresDeviceIdle;
         private int mNetworkType;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
+        private long mTriggerContentUpdateDelay = -1;
+        private long mTriggerContentMaxDelay = -1;
         private boolean mIsPersisted;
         // One-off parameters.
         private long mMinLatencyMillis;
@@ -608,6 +634,27 @@ public class JobInfo implements Parcelable {
                 mTriggerContentUris = new ArrayList<>();
             }
             mTriggerContentUris.add(uri);
+            return this;
+        }
+
+        /**
+         * Set the delay (in milliseconds) from when a content change is detected until
+         * the job is scheduled.  If there are more changes during that time, the delay
+         * will be reset to start at the time of the most recent change.
+         * @param durationMs Delay after most recent content change, in milliseconds.
+         */
+        public Builder setTriggerContentUpdateDelay(long durationMs) {
+            mTriggerContentUpdateDelay = durationMs;
+            return this;
+        }
+
+        /**
+         * Set the maximum total delay (in milliseconds) that is allowed from the first
+         * time a content change is detected until the job is scheduled.
+         * @param durationMs Delay after initial content change, in milliseconds.
+         */
+        public Builder setTriggerContentMaxDelay(long durationMs) {
+            mTriggerContentMaxDelay = durationMs;
             return this;
         }
 

@@ -62,6 +62,18 @@ public final class JobStatus {
     // Full override: ignore all constraints including API-affecting like connectivity
     public static final int OVERRIDE_FULL = 2;
 
+    /** If not specified, trigger update delay is 10 seconds. */
+    public static final long DEFAULT_TRIGGER_UPDATE_DELAY = 10*1000;
+
+    /** The minimum possible update delay is 1/2 second. */
+    public static final long MIN_TRIGGER_UPDATE_DELAY = 500;
+
+    /** If not specified, trigger maxumum delay is 2 minutes. */
+    public static final long DEFAULT_TRIGGER_MAX_DELAY = 2*60*1000;
+
+    /** The minimum possible update delay is 1 second. */
+    public static final long MIN_TRIGGER_MAX_DELAY = 1000;
+
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
@@ -325,6 +337,22 @@ public final class JobStatus {
         return (requiredConstraints&CONSTRAINT_CONTENT_TRIGGER) != 0;
     }
 
+    public long getTriggerContentUpdateDelay() {
+        long time = job.getTriggerContentUpdateDelay();
+        if (time < 0) {
+            return DEFAULT_TRIGGER_UPDATE_DELAY;
+        }
+        return Math.max(time, MIN_TRIGGER_UPDATE_DELAY);
+    }
+
+    public long getTriggerContentMaxDelay() {
+        long time = job.getTriggerContentMaxDelay();
+        if (time < 0) {
+            return DEFAULT_TRIGGER_MAX_DELAY;
+        }
+        return Math.max(time, MIN_TRIGGER_MAX_DELAY);
+    }
+
     public boolean isPersisted() {
         return job.isPersisted();
     }
@@ -544,6 +572,16 @@ public final class JobStatus {
                     pw.print(prefix); pw.print("    ");
                     pw.print(Integer.toHexString(trig.getFlags()));
                     pw.print(' '); pw.println(trig.getUri());
+                }
+                if (job.getTriggerContentUpdateDelay() >= 0) {
+                    pw.print(prefix); pw.print("  Trigger update delay: ");
+                    TimeUtils.formatDuration(job.getTriggerContentUpdateDelay(), pw);
+                    pw.println();
+                }
+                if (job.getTriggerContentMaxDelay() >= 0) {
+                    pw.print(prefix); pw.print("  Trigger max delay: ");
+                    TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
+                    pw.println();
                 }
             }
             if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
