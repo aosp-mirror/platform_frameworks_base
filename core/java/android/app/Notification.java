@@ -781,6 +781,16 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: this is the remote input history, as supplied to
      * {@link Builder#setRemoteInputHistory(CharSequence[])}.
+     *
+     * Apps can fill this through {@link Builder#setRemoteInputHistory(CharSequence[])}
+     * with the most recent inputs that have been sent through a {@link RemoteInput} of this
+     * Notification and are expected to clear it once the it is no longer relevant (e.g. for chat
+     * notifications once the other party has responded).
+     *
+     * The extra with this key is of type CharSequence[] and contains the most recent entry at
+     * the 0 index, the second most recent at the 1 index, etc.
+     *
+     * @see Builder#setRemoteInputHistory(CharSequence[])
      */
     public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
 
