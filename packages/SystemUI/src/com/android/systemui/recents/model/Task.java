@@ -315,6 +315,15 @@ public class Task {
         return key.id != affiliationTaskId;
     }
 
+    /**
+     * Returns the top activity component.
+     */
+    public ComponentName getTopComponent() {
+        return topActivity != null
+                ? topActivity
+                : key.baseIntent.getComponent();
+    }
+
     @Override
     public boolean equals(Object o) {
         // Check that the id matches
