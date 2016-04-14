@@ -387,7 +387,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 }
             }
         }
-        if (mTiles.get(mTiles.size() - 1) == null) {
+        if (mTiles.size() - 1 == mTileDividerIndex) {
             mTiles.remove(mTiles.size() - 1);
         }
     }
