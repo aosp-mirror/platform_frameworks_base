@@ -229,31 +229,32 @@ public class FileOperationService extends Service implements Job.Listener {
             @OpType int operationType, String id, List<DocumentInfo> srcs, DocumentInfo srcParent,
             DocumentStack stack) {
 
+        if (srcs.isEmpty()) {
+            Log.w(TAG, "Ignoring job request with empty srcs list. Id: " + id);
+            return null;
+        }
+
         if (mRunning.containsKey(id)) {
             Log.w(TAG, "Duplicate job id: " + id
                     + ". Ignoring job request for srcs: " + srcs + ", stack: " + stack + ".");
             return null;
         }
 
-        Job job = null;
         switch (operationType) {
             case OPERATION_COPY:
-                job = jobFactory.createCopy(this, getApplicationContext(), this, id, stack, srcs);
-                break;
+                return jobFactory.createCopy(
+                        this, getApplicationContext(), this, id, stack, srcs);
             case OPERATION_MOVE:
-                job = jobFactory.createMove(this, getApplicationContext(), this, id, stack, srcs,
+                return jobFactory.createMove(
+                        this, getApplicationContext(), this, id, stack, srcs,
                         srcParent);
-                break;
             case OPERATION_DELETE:
-                job = jobFactory.createDelete(this, getApplicationContext(), this, id, stack, srcs,
+                return jobFactory.createDelete(
+                        this, getApplicationContext(), this, id, stack, srcs,
                         srcParent);
-                break;
             default:
                 throw new UnsupportedOperationException();
         }
-
-        assert(job != null);
-        return job;
     }
 
     @GuardedBy("mRunning")
