@@ -1080,13 +1080,16 @@ public final class ViewRootImpl implements ViewParent,
     void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
+            final ThreadedRenderer renderer = mAttachInfo.mHardwareRenderer;
+            if (renderer != null) {
+                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
+                renderer.setStopped(mStopped);
+            }
             if (!mStopped) {
                 scheduleTraversals();
             } else {
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle());
-                    mAttachInfo.mHardwareRenderer.updateSurface(null);
-                    mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
+                if (renderer != null) {
+                    renderer.destroyHardwareResources(mView);
                 }
             }
         }
@@ -2556,6 +2559,7 @@ public final class ViewRootImpl implements ViewParent,
 
             if (mAttachInfo.mHardwareRenderer != null) {
                 mAttachInfo.mHardwareRenderer.fence();
+                mAttachInfo.mHardwareRenderer.setStopped(mStopped);
             }
 
             if (LOCAL_LOGV) {
@@ -2704,6 +2708,13 @@ public final class ViewRootImpl implements ViewParent,
                 // Stage the content drawn size now. It will be transferred to the renderer
                 // shortly before the draw commands get send to the renderer.
                 final boolean updated = updateContentDrawBounds();
+
+                if (mReportNextDraw) {
+                    // report next draw overrides setStopped()
+                    // This value is re-sync'd to the value of mStopped
+                    // in the handling of mReportNextDraw post-draw.
+                    mAttachInfo.mHardwareRenderer.setStopped(false);
+                }
 
                 mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
 

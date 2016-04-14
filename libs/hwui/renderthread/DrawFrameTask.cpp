@@ -115,7 +115,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
     mRenderThread->timeLord().vsyncReceived(vsync);
-    mContext->makeCurrent();
+    bool canDraw = mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse(mContext);
 
     for (size_t i = 0; i < mLayers.size(); i++) {
@@ -126,8 +126,9 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
 
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.
-    if (CC_UNLIKELY(!mContext->hasSurface())) {
+    if (CC_UNLIKELY(!mContext->hasSurface() || !canDraw)) {
         mSyncResult |= kSync_LostSurfaceRewardIfFound;
+        info.out.canDrawThisFrame = false;
     }
 
     if (info.out.hasAnimations) {
