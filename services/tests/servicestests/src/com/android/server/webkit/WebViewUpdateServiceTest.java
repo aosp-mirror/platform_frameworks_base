@@ -269,14 +269,27 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
     }
 
     public void testFailListingInvalidWebviewPackage() {
-        WebViewProviderInfo wpi = new WebViewProviderInfo("", "", true, true, null);
+        WebViewProviderInfo wpi = new WebViewProviderInfo("package", "", true, true, null);
         WebViewProviderInfo[] packages = new WebViewProviderInfo[] {wpi};
         setupWithPackages(packages);
-        mTestSystemImpl.setPackageInfo(createPackageInfo(wpi.packageName, true, false));
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(wpi.packageName, true /* enabled */, false /* valid */));
 
         mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
+
+        Mockito.verify(mTestSystemImpl, Mockito.never()).onWebViewProviderChanged(
+                Matchers.anyObject());
+
         WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
         assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
+
+        // Verify that we can recover from failing to list webview packages.
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(wpi.packageName, true /* enabled */, true /* valid */));
+        mWebViewUpdateServiceImpl.packageStateChanged(wpi.packageName,
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED);
+
+        checkPreparationPhasesForPackage(wpi.packageName, 1);
     }
 
     // Test that switching provider using changeProviderAndSetting works.
@@ -463,7 +476,7 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         mTestSystemImpl.setPackageInfo(
                 createPackageInfo(primaryPackage, true /* enabled */ , true /* valid */));
         mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_ADDED);
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED);
 
         // Verify fallback disabled, primary package used as provider, and fallback package killed
         Mockito.verify(mTestSystemImpl).uninstallAndDisablePackageForAllUsers(
@@ -490,16 +503,22 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
                 Mockito.eq(fallbackPackage), Mockito.eq(false) /* enable */,
                 Matchers.anyInt());
 
+        checkPreparationPhasesForPackage(primaryPackage, 1);
+
+        // Disable primary package and ensure fallback becomes enabled and used
         mTestSystemImpl.setPackageInfo(
                 createPackageInfo(primaryPackage, false /* enabled */, true /* valid */));
         mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
                 WebViewUpdateService.PACKAGE_CHANGED);
 
-        // Verify fallback becomes enabled when primary package becomes disabled
         Mockito.verify(mTestSystemImpl).enablePackageForUser(
                 Mockito.eq(fallbackPackage), Mockito.eq(true) /* enable */,
                 Matchers.anyInt());
 
+        checkPreparationPhasesForPackage(fallbackPackage, 1);
+
+
+        // Again enable primary package and verify primary is used and fallback becomes disabled
         mTestSystemImpl.setPackageInfo(
                 createPackageInfo(primaryPackage, true /* enabled */, true /* valid */));
         mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
@@ -509,6 +528,8 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         Mockito.verify(mTestSystemImpl, Mockito.times(2)).enablePackageForUser(
                 Mockito.eq(fallbackPackage), Mockito.eq(false) /* enable */,
                 Matchers.anyInt());
+
+        checkPreparationPhasesForPackage(primaryPackage, 2);
     }
 
     public void testAddUserWhenFallbackLogicEnabled() {
@@ -565,6 +586,9 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
                 Mockito.argThat(new IsPackageInfoWithName(firstPackage)));
 
+        // Change provider during relro creation to enter a state where we are
+        // waiting for relro creation to complete just to re-run relro creation.
+        // (so that in next notifyRelroCreationCompleted() call we have to list webview packages)
         mWebViewUpdateServiceImpl.changeProviderAndSetting(secondPackage);
 
         // Make packages invalid to cause exception to be thrown
@@ -584,7 +608,7 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
                     true /* valid */));
 
         mWebViewUpdateServiceImpl.packageStateChanged(firstPackage,
-                WebViewUpdateService.PACKAGE_ADDED);
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED);
 
         // Ensure we use firstPackage
         checkPreparationPhasesForPackage(firstPackage, 2 /* second preparation for this package */);
@@ -654,5 +678,143 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         checkPreparationPhasesForPackage(nonChosenPackage, 1);
     }
 
-    // TODO (gsennton) add more tests for ensuring killPackageDependents is called / not called
+    public void testRecoverFailedListingWebViewPackagesSettingsChange() {
+        checkRecoverAfterFailListingWebviewPackages(true);
+    }
+
+    public void testRecoverFailedListingWebViewPackagesAddedPackage() {
+        checkRecoverAfterFailListingWebviewPackages(false);
+    }
+
+    /**
+     * Test that we can recover correctly from failing to list WebView packages.
+     * settingsChange: whether to fail during changeProviderAndSetting or packageStateChanged
+     */
+    public void checkRecoverAfterFailListingWebviewPackages(boolean settingsChange) {
+        String firstPackage = "first";
+        String secondPackage = "second";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(secondPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+        checkCertainPackageUsedAfterWebViewBootPreparation(firstPackage, packages);
+
+        // Make both packages invalid so that we fail listing WebView packages
+        mTestSystemImpl.setPackageInfo(createPackageInfo(firstPackage, true /* enabled */,
+                    false /* valid */));
+        mTestSystemImpl.setPackageInfo(createPackageInfo(secondPackage, true /* enabled */,
+                    false /* valid */));
+
+        // Change package to hit the webview packages listing problem.
+        if (settingsChange) {
+            mWebViewUpdateServiceImpl.changeProviderAndSetting(secondPackage);
+        } else {
+            mWebViewUpdateServiceImpl.packageStateChanged(secondPackage,
+                    WebViewUpdateService.PACKAGE_ADDED_REPLACED);
+        }
+
+        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
+        assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
+
+        // Make second package valid and verify that we can load it again
+        mTestSystemImpl.setPackageInfo(createPackageInfo(secondPackage, true /* enabled */,
+                    true /* valid */));
+
+        mWebViewUpdateServiceImpl.packageStateChanged(secondPackage,
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED);
+
+
+        checkPreparationPhasesForPackage(secondPackage, 1);
+    }
+
+    public void testDontKillIfPackageReplaced() {
+        checkDontKillIfPackageRemoved(true);
+    }
+
+    public void testDontKillIfPackageRemoved() {
+        checkDontKillIfPackageRemoved(false);
+    }
+
+    public void checkDontKillIfPackageRemoved(boolean replaced) {
+        String firstPackage = "first";
+        String secondPackage = "second";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(secondPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+        checkCertainPackageUsedAfterWebViewBootPreparation(firstPackage, packages);
+
+        // Replace or remove the current webview package
+        if (replaced) {
+            mTestSystemImpl.setPackageInfo(
+                    createPackageInfo(firstPackage, true /* enabled */, false /* valid */));
+            mWebViewUpdateServiceImpl.packageStateChanged(firstPackage,
+                    WebViewUpdateService.PACKAGE_ADDED_REPLACED);
+        } else {
+            mTestSystemImpl.removePackageInfo(firstPackage);
+            mWebViewUpdateServiceImpl.packageStateChanged(firstPackage,
+                    WebViewUpdateService.PACKAGE_REMOVED);
+        }
+
+        checkPreparationPhasesForPackage(secondPackage, 1);
+
+        Mockito.verify(mTestSystemImpl, Mockito.never()).killPackageDependents(
+                Mockito.anyObject());
+    }
+
+    public void testKillIfSettingChanged() {
+        String firstPackage = "first";
+        String secondPackage = "second";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(secondPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+        checkCertainPackageUsedAfterWebViewBootPreparation(firstPackage, packages);
+
+        mWebViewUpdateServiceImpl.changeProviderAndSetting(secondPackage);
+
+        checkPreparationPhasesForPackage(secondPackage, 1);
+
+        Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(firstPackage));
+    }
+
+    /**
+     * Test that we kill apps using an old provider when we change the provider setting, even if the
+     * new provider is not the one we intended to change to.
+     */
+    public void testKillIfChangeProviderIncorrectly() {
+        String firstPackage = "first";
+        String secondPackage = "second";
+        String thirdPackage = "third";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(secondPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(thirdPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+        setupWithPackages(packages);
+        setEnabledAndValidPackageInfos(packages);
+
+        // Start with the setting pointing to the third package
+        mTestSystemImpl.updateUserSetting(null, thirdPackage);
+
+        mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
+        checkPreparationPhasesForPackage(thirdPackage, 1);
+
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(secondPackage, true /* enabled */, false /* valid */));
+
+        // Try to switch to the invalid second package, this should result in switching to the first
+        // package, since that is more preferred than the third one.
+        assertEquals(firstPackage,
+                mWebViewUpdateServiceImpl.changeProviderAndSetting(secondPackage));
+
+        checkPreparationPhasesForPackage(firstPackage, 1);
+
+        Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(thirdPackage));
+    }
 }
