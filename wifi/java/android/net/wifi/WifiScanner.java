@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -31,13 +30,11 @@ import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -1143,7 +1140,6 @@ public class WifiScanner {
     private final Object mListenerMapLock = new Object();
 
     private AsyncChannel mAsyncChannel;
-    private final CountDownLatch mConnected;
     private final Handler mInternalHandler;
 
     /**
@@ -1157,22 +1153,6 @@ public class WifiScanner {
      * @hide
      */
     public WifiScanner(Context context, IWifiScanner service, Looper looper) {
-        this(context, service, looper, true);
-    }
-
-    /**
-     * Create a new WifiScanner instance.
-     *
-     * @param context The application context.
-     * @param service The IWifiScanner Binder interface
-     * @param looper the Looper used to deliver callbacks
-     * @param waitForConnection If true, this will not return until a connection to Wifi Scanner
-     *          service is established.
-     * @hide
-     */
-    @VisibleForTesting
-    public WifiScanner(Context context, IWifiScanner service, Looper looper,
-            boolean waitForConnection) {
         mContext = context;
         mService = service;
 
@@ -1188,17 +1168,12 @@ public class WifiScanner {
         }
 
         mAsyncChannel = new AsyncChannel();
-        mConnected = new CountDownLatch(1);
 
         mInternalHandler = new ServiceHandler(looper);
-        mAsyncChannel.connect(mContext, mInternalHandler, messenger);
-        if (waitForConnection) {
-            try {
-                mConnected.await();
-            } catch (InterruptedException e) {
-                Log.e(TAG, "interrupted wait at init");
-            }
-        }
+        mAsyncChannel.connectSync(mContext, mInternalHandler, messenger);
+        // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
+        // synchronously, which causes WifiScanningService to receive the wrong replyTo value.
+        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
     }
 
     private void validateChannel() {
@@ -1326,17 +1301,6 @@ public class WifiScanner {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    } else {
-                        Log.e(TAG, "Failed to set up channel connection");
-                        // This will cause all further async API calls on the WifiManager
-                        // to fail and throw an exception
-                        mAsyncChannel = null;
-                    }
-                    mConnected.countDown();
-                    return;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
                     return;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
