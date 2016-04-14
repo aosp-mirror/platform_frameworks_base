@@ -3396,7 +3396,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             IShortcutService shortcutService = mShortcutKeyServices.get(shortcutCode);
             if (shortcutService != null) {
                 try {
-                    shortcutService.notifyShortcutKeyPressed(shortcutCode);
+                    if (isUserSetupComplete()) {
+                        shortcutService.notifyShortcutKeyPressed(shortcutCode);
+                    }
                 } catch (RemoteException e) {
                     mShortcutKeyServices.delete(shortcutCode);
                 }
