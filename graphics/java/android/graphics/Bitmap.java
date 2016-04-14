@@ -25,13 +25,13 @@ import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-
-import libcore.util.NativeAllocationRegistry;
 
 public final class Bitmap implements Parcelable {
     private static final String TAG = "Bitmap";
@@ -606,6 +606,22 @@ public final class Bitmap implements Parcelable {
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
         Bitmap b = nativeCopyAshmem(mNativePtr);
+        if (b != null) {
+            b.setPremultiplied(mRequestPremultiplied);
+            b.mDensity = mDensity;
+        }
+        return b;
+    }
+
+    /**
+     * Creates a new immutable bitmap backed by ashmem which can efficiently
+     * be passed between processes.
+     *
+     * @hide
+     */
+    public Bitmap createAshmemBitmap(Config config) {
+        checkRecycled("Can't copy a recycled bitmap");
+        Bitmap b = nativeCopyAshmemConfig(mNativePtr, config.nativeInt);
         if (b != null) {
             b.setPremultiplied(mRequestPremultiplied);
             b.mDensity = mDensity;
@@ -1675,6 +1691,7 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCopy(long nativeSrcBitmap, int nativeConfig,
                                             boolean isMutable);
     private static native Bitmap nativeCopyAshmem(long nativeSrcBitmap);
+    private static native Bitmap nativeCopyAshmemConfig(long nativeSrcBitmap, int nativeConfig);
     private static native long nativeGetNativeFinalizer();
     private static native boolean nativeRecycle(long nativeBitmap);
     private static native void nativeReconfigure(long nativeBitmap, int width, int height,
