@@ -16,7 +16,6 @@
 package com.android.systemui.recents.tv.views;
 
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.graphics.Bitmap;
