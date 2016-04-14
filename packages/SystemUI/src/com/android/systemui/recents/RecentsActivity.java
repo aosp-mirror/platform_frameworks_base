@@ -66,6 +66,7 @@ import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
@@ -750,6 +751,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Once the user has scrolled while holding alt-tab, then we should ignore the release of
         // the key
         mIgnoreAltTabRelease = true;
+    }
+
+    public final void onBusEvent(final DragEndEvent event) {
+        // Handle the case where we drop onto a dock region
+        if (event.dropTarget instanceof TaskStack.DockState) {
+            mScrimViews.animateScrimToCurrentNavBarState(false /* hasStackTasks */);
+        }
     }
 
     @Override

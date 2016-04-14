@@ -353,8 +353,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void updateToInitialState(boolean scrollToInitialState) {
         if (scrollToInitialState) {
             mStackScroller.setStackScrollToInitialState();
+            mLayoutAlgorithm.updateToInitialState(mStack.getStackTasks());
         }
-        mLayoutAlgorithm.updateToInitialState(mStack.getStackTasks());
     }
 
     /** Updates the list of task views */
@@ -1221,7 +1221,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // TaskViews with the stack so that we can lay them out
         if (mAwaitingFirstLayout || mInitialState != INITIAL_STATE_UPDATE_NONE) {
             updateToInitialState(mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY);
-            mInitialState = INITIAL_STATE_UPDATE_NONE;
+            if (!mAwaitingFirstLayout) {
+                mInitialState = INITIAL_STATE_UPDATE_NONE;
+            }
         }
 
         // Rebind all the views, including the ignore ones
@@ -1281,6 +1283,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         if (mAwaitingFirstLayout || !mEnterAnimationComplete) {
             mAwaitingFirstLayout = false;
+            mInitialState = INITIAL_STATE_UPDATE_NONE;
             onFirstLayout();
         }
     }
@@ -1836,9 +1839,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            Rect systemInsets = new Rect(mStableLayoutAlgorithm.mSystemInsets);
+            // When docked, the nav bar insets are consumed and the activity is measured without
+            // insets.  However, the window bounds include the insets, so we need to subtract them
+            // here to make them identical.
+            int height = getMeasuredHeight();
+            height -= systemInsets.bottom;
+            systemInsets.bottom = 0;
             mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
-                    getMeasuredHeight(), mDividerSize, mLayoutAlgorithm.mSystemInsets,
+                    height, mDividerSize, mLayoutAlgorithm.mSystemInsets,
                     mLayoutAlgorithm, getResources(), mWindowRect));
+            mLayoutAlgorithm.setSystemInsets(systemInsets);
             mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
@@ -1849,6 +1860,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mWindowRect.set(mStableWindowRect);
             mStackBounds.set(mStableStackBounds);
             removeIgnoreTask(event.task);
+            mLayoutAlgorithm.setSystemInsets(mStableLayoutAlgorithm.mSystemInsets);
             mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
@@ -1987,8 +1999,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
-        mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
-        mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
+        reloadOnConfigurationChange();
 
         // Notify the task views of the configuration change so they can reload their resources
         if (!event.fromMultiWindow) {
@@ -2002,12 +2013,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Trigger a new layout and update to the initial state if necessary
-        if (event.fromMultiWindow) {
-            mInitialState = INITIAL_STATE_UPDATE_ALL;
-        } else if (event.fromOrientationChange) {
+        if (event.fromMultiWindow || event.fromOrientationChange) {
             mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+            requestLayout();
         }
-        requestLayout();
+    }
+
+    public void reloadOnConfigurationChange() {
+        mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
+        mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
     }
 
     /**

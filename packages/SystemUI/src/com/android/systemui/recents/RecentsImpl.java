@@ -175,7 +175,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         ssp.registerTaskStackListener(mTaskStackListener);
 
         // Initialize the static configuration resources
-        reloadHeaderBarLayout();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mDummyStackView = new TaskStackView(mContext);
+        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
+                null, false);
+        reloadResources();
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -194,7 +198,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void onConfigurationChanged() {
-        reloadHeaderBarLayout();
+        reloadResources();
+        mDummyStackView.reloadOnConfigurationChange();
+        mHeaderBar.onConfigurationChanged();
     }
 
     /**
@@ -542,11 +548,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     /**
-     * Reloads all the layouts for the header bar transition.
+     * Reloads all the resources for the current configuration.
      */
-    private void reloadHeaderBarLayout() {
+    private void reloadResources() {
         Resources res = mContext.getResources();
-        LayoutInflater inflater = LayoutInflater.from(mContext);
 
         mStatusBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
@@ -561,9 +566,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land);
-        mDummyStackView = new TaskStackView(mContext);
-        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
-                null, false);
     }
 
     /**
