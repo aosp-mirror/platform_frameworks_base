@@ -20,14 +20,14 @@
 <!-- Layout for {@link com.android.systemui.tv.pip.PipControlsView}. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.systemui.tv.pip.PipControlsButtonView
+    <com.android.systemui.tv.pip.PipControlButtonView
         android:id="@+id/full_button"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_fullscreen_white_24dp"
         android:text="@string/pip_fullscreen" />
 
-    <com.android.systemui.tv.pip.PipControlsButtonView
+    <com.android.systemui.tv.pip.PipControlButtonView
         android:id="@+id/close_button"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         android:src="@drawable/ic_close_white"
         android:text="@string/pip_close" />
 
-    <com.android.systemui.tv.pip.PipControlsButtonView
+    <com.android.systemui.tv.pip.PipControlButtonView
         android:id="@+id/play_pause_button"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
