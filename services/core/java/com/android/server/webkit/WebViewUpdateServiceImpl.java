@@ -308,38 +308,42 @@ public class WebViewUpdateServiceImpl {
 
         /**
          * Change WebView provider and provider setting and kill packages using the old provider.
-         * Return the new provider (in case we are in the middle of creating relro files this new
-         * provider will not be in use directly, but will when the relros are done).
+         * Return the new provider (in case we are in the middle of creating relro files, or
+         * replacing that provider it will not be in use directly, but will be used when the relros
+         * or the replacement are done).
          */
         public String changeProviderAndSetting(String newProviderName) {
             PackageInfo oldPackage = null;
             PackageInfo newPackage = null;
+            boolean providerChanged = false;
             synchronized(mLock) {
                 oldPackage = mCurrentWebViewPackage;
                 mSystemInterface.updateUserSetting(mContext, newProviderName);
 
                 try {
                     newPackage = findPreferredWebViewPackage();
-                    if (oldPackage != null
-                            && newPackage.packageName.equals(oldPackage.packageName)) {
-                        // If we don't perform the user change, revert the settings change.
-                        mSystemInterface.updateUserSetting(mContext, newPackage.packageName);
-                        return newPackage.packageName;
-                    }
+                    providerChanged = (oldPackage == null)
+                            || !newPackage.packageName.equals(oldPackage.packageName);
                 } catch (WebViewFactory.MissingWebViewPackageException e) {
                     Slog.e(TAG, "Tried to change WebView provider but failed to fetch WebView " +
                             "package " + e);
                     // If we don't perform the user change but don't have an installed WebView
                     // package, we will have changed the setting and it will be used when a package
                     // is available.
-                    return newProviderName;
+                    return "";
                 }
-                onWebViewProviderChanged(newPackage);
+                // Perform the provider change if we chose a new provider
+                if (providerChanged) {
+                    onWebViewProviderChanged(newPackage);
+                }
             }
-            // Kill apps using the old provider
-            if (oldPackage != null) {
+            // Kill apps using the old provider only if we changed provider
+            if (providerChanged && oldPackage != null) {
                 mSystemInterface.killPackageDependents(oldPackage.packageName);
             }
+            // Return the new provider, this is not necessarily the one we were asked to switch to
+            // But the persistent setting will now be pointing to the provider we were asked to
+            // switch to anyway
             return newPackage.packageName;
         }
 
