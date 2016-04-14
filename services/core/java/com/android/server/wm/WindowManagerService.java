@@ -646,17 +646,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            if (uri == null) {
+                return;
+            }
+
             if (mDisplayInversionEnabledUri.equals(uri)) {
                 updateCircularDisplayMaskIfNeeded();
             } else {
                 @UpdateAnimationScaleMode
                 final int mode;
-                if (uri.equals(mWindowAnimationScaleUri)) {
+                if (mWindowAnimationScaleUri.equals(uri)) {
                     mode = WINDOW_ANIMATION_SCALE;
-                } else if (uri.equals(mTransitionAnimationScaleUri)) {
+                } else if (mTransitionAnimationScaleUri.equals(uri)) {
                     mode = TRANSITION_ANIMATION_SCALE;
-                } else { // uri.equals(mAnimationDurationScaleUri)
+                } else if (mAnimationDurationScaleUri.equals(uri)) {
                     mode = ANIMATION_DURATION_SCALE;
+                } else {
+                    // Ignoring unrecognized content changes
+                    return;
                 }
                 Message m = mH.obtainMessage(H.UPDATE_ANIMATION_SCALE, mode, 0);
                 mH.sendMessage(m);
