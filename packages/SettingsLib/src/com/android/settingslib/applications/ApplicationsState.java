@@ -839,8 +839,18 @@ public class ApplicationsState {
 
                     for (int i = 0; i < mEntriesMap.size(); i++) {
                         int userId = mEntriesMap.keyAt(i);
-                        List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(launchIntent,
-                                PackageManager.GET_DISABLED_COMPONENTS, userId);
+                        // If we do not specify MATCH_DIRECT_BOOT_AWARE or
+                        // MATCH_DIRECT_BOOT_UNAWARE, system will derive and update the flags
+                        // according to the user's lock state. When the user is locked, components
+                        // with ComponentInfo#directBootAware == false will be filtered. We should
+                        // explicitly include both direct boot aware and unaware components here.
+                        List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
+                                launchIntent,
+                                PackageManager.GET_DISABLED_COMPONENTS
+                                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                userId
+                        );
                         synchronized (mEntriesMap) {
                             if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER acquired lock");
                             HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
@@ -1116,6 +1126,10 @@ public class ApplicationsState {
 
         public boolean mounted;
 
+        /**
+         * Setting this to {@code true} prevents the entry to be filtered by
+         * {@link #FILTER_DOWNLOADED_AND_LAUNCHER}.
+         */
         public boolean hasLauncherEntry;
 
         public String getNormalizedLabel() {
@@ -1286,6 +1300,9 @@ public class ApplicationsState {
         }
     };
 
+    /**
+     * Displays a combined list with "downloaded" and "visible in launcher" apps only.
+     */
     public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER = new AppFilter() {
         public void init() {
         }
