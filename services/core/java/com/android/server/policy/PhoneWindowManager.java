@@ -318,6 +318,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     AccessibilityManager mAccessibilityManager;
     BurnInProtectionHelper mBurnInProtectionHelper;
     AppOpsManager mAppOpsManager;
+    private boolean mHasFeatureWatch;
 
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
@@ -693,6 +694,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             = new LogDecelerateInterpolator(100, 0);
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -1501,6 +1503,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
 
         // Init display burn-in protection
         boolean burnInProtectionEnabled = context.getResources().getBoolean(
@@ -5780,9 +5783,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldDispatchInputWhenNonInteractive() {
-        // Send events to keyguard while the screen is on.
-        if (isKeyguardShowingAndNotOccluded() && mDisplay != null
-                && mDisplay.getState() != Display.STATE_OFF) {
+        final boolean displayOff = (mDisplay == null || mDisplay.getState() == Display.STATE_OFF);
+
+        if (displayOff && !mHasFeatureWatch) {
+            return false;
+        }
+
+        // Send events to keyguard while the screen is on and it's showing.
+        if (isKeyguardShowingAndNotOccluded() && !displayOff) {
             return true;
         }
 
@@ -6695,7 +6703,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
-                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH)) {
+                    if (mHasFeatureWatch) {
                         theme = com.android.internal.R.style.Theme_Micro_Dialog_Alert;
                     } else if (mContext.getPackageManager().hasSystemFeature(FEATURE_TELEVISION)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
