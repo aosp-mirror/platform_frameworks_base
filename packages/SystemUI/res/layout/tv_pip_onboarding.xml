@@ -17,47 +17,81 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pip_onboarding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C00288D1"
-    android:gravity="top|center_horizontal"
+    android:background="#B3000000"
     android:orientation="vertical">
 
-    <!-- A rectangle arounds the PIP.
-         Size and positions will be programatically set up
-         to comply with config_defaultPictureInPictureBounds. -->
     <ImageView
-        android:id="@+id/pip_outline"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@drawable/tv_pip_outline" />
+        android:id="@+id/remote"
+        android:layout_width="72dp"
+        android:layout_height="273dp"
+        android:layout_marginTop="136dp"
+        android:layout_marginStart="304dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:adjustViewBounds="true"
+        android:src="@drawable/remote"
+        android:alpha="0" />
+    <ImageView
+        android:id="@+id/remote_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="256dp"
+        android:layout_marginStart="315dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/tv_pip_onboarding_remote"
+        android:alpha="0" />
     <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
+        android:layout_marginTop="188dp"
+        android:layout_marginStart="406dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
         android:fontFamily="sans-serif"
-        android:textSize="16sp"
+        android:textSize="24sp"
         android:textColor="#EEEEEE"
-        android:lineSpacingMultiplier="1.28"
-        android:gravity="top|center_horizontal"
-        android:text="@string/pip_onboarding_description" />
+        android:text="@string/pip_onboarding_title"
+        android:alpha="0" />
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="408dp"
+        android:layout_below="@id/title"
+        android:layout_alignParentStart="true"
+        android:fontFamily="sans-serif"
+        android:textSize="14sp"
+        android:textColor="#EEEEEE"
+        android:lineSpacingMultiplier="1.46286"
+        android:text="@string/pip_onboarding_description"
+        android:alpha="0" />
     <Button
-        android:id="@+id/close"
+        android:id="@+id/button"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="24dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="408dp"
+        android:layout_below="@id/description"
+        android:layout_alignParentStart="true"
         android:gravity="center"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:fontFamily="sans-serif-condensed"
         android:textSize="16sp"
-        android:textColor="#026089"
+        android:textColor="#FFFFFF"
         android:textAllCaps="true"
         android:text="@string/pip_onboarding_button"
-        android:background="#EEEEEE"
+        android:alpha="0"
+        android:background="#009688"
         android:elevation="4dp" />
-</LinearLayout>
+</RelativeLayout>
