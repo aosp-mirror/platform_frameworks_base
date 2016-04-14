@@ -1217,6 +1217,18 @@ public final class TvContract {
         public static final String COLUMN_SEARCHABLE = "searchable";
 
         /**
+         * The flag indicating whether recording of this program is prohibited.
+         *
+         * <p>A value of 1 indicates that recording of this program is prohibited and application
+         * will not schedule any recording for this program. A value of 0 indicates that the
+         * recording is not prohibited. If not specified, this value is set to 0 (not prohibited) by
+         * default.
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
+
+        /**
          * Internal data used by individual TV input services.
          *
          * <p>This is internal to the provider that inserted it, and should not be decoded by other
