@@ -2211,9 +2211,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             rematchAllNetworksAndRequests(null, 0);
             if (wasDefault && getDefaultNetwork() == null) {
                 // Log that we lost the default network and there is no replacement.
-                final int[] transportTypes = new int[0];
-                ConnectivityServiceChangeEvent.logEvent(NETID_UNSET, nai.network.netId,
-                        transportTypes);
+                logConnectivityServiceChangeEvent(null, nai);
             }
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
@@ -4437,7 +4435,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void makeDefault(NetworkAgentInfo newNetwork, NetworkAgentInfo prevNetwork) {
-        int prevNetId = (prevNetwork == null) ? NETID_UNSET : prevNetwork.network.netId;
         if (DBG) log("Switching to new default network: " + newNetwork);
         setupDataActivityTracking(newNetwork);
         try {
@@ -4449,8 +4446,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
-        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId, prevNetId,
-                newNetwork.networkCapabilities.getTransportTypes());
+
+        logConnectivityServiceChangeEvent(newNetwork, prevNetwork);
     }
 
     // Handles a network appearing or improving its score.
@@ -5070,5 +5067,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkMonitor createNetworkMonitor(Context context, Handler handler,
             NetworkAgentInfo nai, NetworkRequest defaultRequest) {
         return new NetworkMonitor(context, handler, nai, defaultRequest);
+    }
+
+    private static void logConnectivityServiceChangeEvent(
+            NetworkAgentInfo next, NetworkAgentInfo prev) {
+        final int newNetId = (next == null) ? NETID_UNSET : next.network.netId;
+        final int[] newTransportTypes = (next == null)
+                ? new int[0]
+                : next.networkCapabilities.getTransportTypes();
+
+        final int oldNetId = (prev == null) ? NETID_UNSET : prev.network.netId;
+        final boolean hadIPv4 = (prev != null) &&
+                prev.linkProperties.hasIPv4Address() &&
+                prev.linkProperties.hasIPv4DefaultRoute();
+        final boolean hadIPv6 = (prev != null) &&
+                prev.linkProperties.hasGlobalIPv6Address() &&
+                prev.linkProperties.hasIPv6DefaultRoute();
+        ConnectivityServiceChangeEvent.logEvent(newNetId, newTransportTypes,
+                oldNetId, hadIPv4, hadIPv6);
     }
 }
