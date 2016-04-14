@@ -524,6 +524,7 @@ public class DirectoryFragment extends Fragment
             }
 
             if (mActionMode != null) {
+                assert(!mSelected.isEmpty());
                 final String title = Shared.getQuantityString(getActivity(),
                         R.plurals.elements_selected, mSelected.size());
                 mActionMode.setTitle(title);
@@ -809,6 +810,8 @@ public class DirectoryFragment extends Fragment
                                 // the user cancels the delete.
                                 if (mActionMode != null) {
                                     mActionMode.finish();
+                                } else {
+                                    Log.w(TAG, "Action mode is null before deleting documents.");
                                 }
                                 // Hide the files in the UI...since the operation
                                 // might be queued up on FileOperationService.
@@ -1436,7 +1439,8 @@ public class DirectoryFragment extends Fragment
                     // This has to be handled here instead of in a keyboard shortcut, because
                     // keyboard shortcuts all have to be modified with the 'Ctrl' key.
                     if (mSelectionManager.hasSelection()) {
-                        deleteDocuments(mSelectionManager.getSelection());
+                        Selection selection = mSelectionManager.getSelection(new Selection());
+                        deleteDocuments(selection);
                     }
                     // Always handle the key, even if there was nothing to delete. This is a
                     // precaution to prevent other handlers from potentially picking up the event
