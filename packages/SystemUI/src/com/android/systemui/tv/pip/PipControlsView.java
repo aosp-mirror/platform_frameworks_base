@@ -57,13 +57,9 @@ public class PipControlsView extends LinearLayout {
     final PipManager mPipManager = PipManager.getInstance();
     Listener mListener;
 
-    View mFullButtonView;
-    View mFullDescriptionView;
-    View mPlayPauseView;
-    ImageView mPlayPauseButtonImageView;
-    TextView mPlayPauseDescriptionTextView;
-    View mCloseButtonView;
-    View mCloseDescriptionView;
+    PipControlButtonView mFullButtonView;
+    PipControlButtonView mCloseButtonView;
+    PipControlButtonView mPlayPauseButtonView;
 
     private boolean mHasFocus;
     private OnFocusChangeListener mOnChildFocusChangeListener;
@@ -75,10 +71,17 @@ public class PipControlsView extends LinearLayout {
         }
     };
 
-    private PipManager.MediaListener mPipMediaListener = new PipManager.MediaListener() {
+    private final PipManager.MediaListener mPipMediaListener = new PipManager.MediaListener() {
         @Override
         public void onMediaControllerChanged() {
             updateMediaController();
+        }
+    };
+
+    private final OnFocusChangeListener mFocusChangeListener = new OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            onChildViewFocusChanged();
         }
     };
 
@@ -108,26 +111,30 @@ public class PipControlsView extends LinearLayout {
     public void onFinishInflate() {
         super.onFinishInflate();
 
-        mFullButtonView = findViewById(R.id.full_button);
-        mFullDescriptionView = findViewById(R.id.full_desc);
+        mFullButtonView = (PipControlButtonView) findViewById(R.id.full_button);
+        mFullButtonView.setOnFocusChangeListener(mFocusChangeListener);
         mFullButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPipManager.movePipToFullscreen();
             }
         });
-        mFullButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+        mCloseButtonView = (PipControlButtonView) findViewById(R.id.close_button);
+        mCloseButtonView.setOnFocusChangeListener(mFocusChangeListener);
+        mCloseButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                mFullDescriptionView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
-                onChildViewFocusChanged();
+            public void onClick(View v) {
+                mPipManager.closePip();
+                if (mListener != null) {
+                    mListener.onClosed();
+                }
             }
         });
 
-        mPlayPauseView = findViewById(R.id.play_pause);
-        mPlayPauseButtonImageView = (ImageView) findViewById(R.id.play_pause_button);
-        mPlayPauseDescriptionTextView = (TextView) findViewById(R.id.play_pause_desc);
-        mPlayPauseButtonImageView.setOnClickListener(new View.OnClickListener() {
+        mPlayPauseButtonView = (PipControlButtonView) findViewById(R.id.play_pause_button);
+        mPlayPauseButtonView.setOnFocusChangeListener(mFocusChangeListener);
+        mPlayPauseButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mMediaController == null || mMediaController.getPlaybackState() == null) {
@@ -141,33 +148,6 @@ public class PipControlsView extends LinearLayout {
                     mMediaController.getTransportControls().pause();
                 }
                 // View will be updated later in {@link mMediaControllerCallback}
-            }
-        });
-        mPlayPauseButtonImageView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                mPlayPauseDescriptionTextView.setVisibility(
-                        hasFocus ? View.VISIBLE : View.INVISIBLE);
-                onChildViewFocusChanged();
-            }
-        });
-
-        mCloseButtonView = findViewById(R.id.close_button);
-        mCloseDescriptionView = findViewById(R.id.close_desc);
-        mCloseButtonView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPipManager.closePip();
-                if (mListener != null) {
-                    mListener.onClosed();
-                }
-            }
-        });
-        mCloseButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                mCloseDescriptionView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
-                onChildViewFocusChanged();
             }
         });
     }
@@ -206,15 +186,15 @@ public class PipControlsView extends LinearLayout {
     private void updatePlayPauseView() {
         int state = mPipManager.getPlaybackState();
         if (state == PLAYBACK_STATE_UNAVAILABLE) {
-            mPlayPauseView.setVisibility(View.GONE);
+            mPlayPauseButtonView.setVisibility(View.GONE);
         } else {
-            mPlayPauseView.setVisibility(View.VISIBLE);
+            mPlayPauseButtonView.setVisibility(View.VISIBLE);
             if (state == PLAYBACK_STATE_PLAYING) {
-                mPlayPauseButtonImageView.setImageResource(R.drawable.tv_pip_pause_button);
-                mPlayPauseDescriptionTextView.setText(R.string.pip_pause);
+                mPlayPauseButtonView.setImageResource(R.drawable.ic_pause_white_24dp);
+                mPlayPauseButtonView.setText(R.string.pip_pause);
             } else {
-                mPlayPauseButtonImageView.setImageResource(R.drawable.tv_pip_play_button);
-                mPlayPauseDescriptionTextView.setText(R.string.pip_play);
+                mPlayPauseButtonView.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                mPlayPauseButtonView.setText(R.string.pip_play);
             }
         }
     }
@@ -229,7 +209,7 @@ public class PipControlsView extends LinearLayout {
     private void onChildViewFocusChanged() {
         // At this moment, hasFocus() returns true although there's no focused child.
         boolean hasFocus = (mFullButtonView != null && mFullButtonView.isFocused())
-                || (mPlayPauseButtonImageView != null && mPlayPauseButtonImageView.isFocused())
+                || (mPlayPauseButtonView != null && mPlayPauseButtonView.isFocused())
                 || (mCloseButtonView != null && mCloseButtonView.isFocused());
         if (mHasFocus != hasFocus) {
             mHasFocus = hasFocus;
