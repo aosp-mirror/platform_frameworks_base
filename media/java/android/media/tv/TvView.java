@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -271,7 +272,7 @@ public class TvView extends ViewGroup {
      *
      * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
      */
-    public void setStreamVolume(float volume) {
+    public void setStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume) {
         if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
         mStreamVolume = volume;
         if (mSession == null) {
