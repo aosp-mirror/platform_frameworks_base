@@ -152,7 +152,7 @@ public class SystemBarScrimViews {
     /**
      * Animates the scrim to match the state of the current nav bar.
      */
-    private void animateScrimToCurrentNavBarState(boolean hasStackTasks) {
+    public void animateScrimToCurrentNavBarState(boolean hasStackTasks) {
         boolean hasNavBarScrim = isNavBarScrimRequired(hasStackTasks);
         if (mHasNavBarScrim != hasNavBarScrim) {
             AnimationProps animation = hasNavBarScrim

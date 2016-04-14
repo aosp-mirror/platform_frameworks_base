@@ -280,27 +280,31 @@ public class TaskViewHeader extends FrameLayout
     /**
      * Update the header view when the configuration changes.
      */
-    void onConfigurationChanged() {
+    public void onConfigurationChanged() {
         // Update the dimensions of everything in the header. We do this because we need to use
         // resources for the display, and not the current configuration.
         Resources res = getResources();
-        mHeaderBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+        int headerBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land);
-        mHeaderButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+        int headerButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding_tablet_land,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding_tablet_land);
-        updateLayoutParams(mIconView, mTitleView, mMoveTaskButton, mDismissButton);
-        if (mAppOverlayView != null) {
-            updateLayoutParams(mAppIconView, mAppTitleView, null, mAppInfoView);
+        if (headerBarHeight != mHeaderBarHeight || headerButtonPadding != mHeaderButtonPadding) {
+            mHeaderBarHeight = headerBarHeight;
+            mHeaderButtonPadding = headerButtonPadding;
+            updateLayoutParams(mIconView, mTitleView, mMoveTaskButton, mDismissButton);
+            if (mAppOverlayView != null) {
+                updateLayoutParams(mAppIconView, mAppTitleView, null, mAppInfoView);
+            }
         }
     }
 
@@ -434,7 +438,6 @@ public class TaskViewHeader extends FrameLayout
 
     /** Binds the bar view to the task */
     public void rebindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         mTask = t;
 
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
