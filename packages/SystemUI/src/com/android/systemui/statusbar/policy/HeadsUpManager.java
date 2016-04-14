@@ -674,6 +674,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             } else if (!selfFullscreen && otherFullscreen) {
                 return 1;
             }
+
+            if (remoteInputActive && !o.remoteInputActive) {
+                return -1;
+            } else if (!remoteInputActive && o.remoteInputActive) {
+                return 1;
+            }
+
             return postTime < o.postTime ? 1
                     : postTime == o.postTime ? entry.key.compareTo(o.entry.key)
                             : -1;
