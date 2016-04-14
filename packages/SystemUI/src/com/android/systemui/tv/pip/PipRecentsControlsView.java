@@ -72,28 +72,20 @@ public class PipRecentsControlsView extends PipControlsView {
         super.onFinishInflate();
 
         int buttonsFocusGainAnim = R.anim.tv_pip_controls_buttons_in_recents_focus_gain_animation;
-        int textFocusGainAnim = R.anim.tv_pip_controls_text_in_recents_focus_gain_animation;
         mFocusGainAnimatorSet = new AnimatorSet();
         mFocusGainAnimatorSet.playTogether(
                 loadAnimator(this, R.anim.tv_pip_controls_in_recents_focus_gain_animation),
                 loadAnimator(mFullButtonView,buttonsFocusGainAnim),
-                loadAnimator(mPlayPauseButtonImageView, buttonsFocusGainAnim),
-                loadAnimator(mCloseButtonView, buttonsFocusGainAnim),
-                loadAnimator(mFullDescriptionView, textFocusGainAnim),
-                loadAnimator(mPlayPauseDescriptionTextView, textFocusGainAnim),
-                loadAnimator(mCloseDescriptionView, textFocusGainAnim));
+                loadAnimator(mPlayPauseButtonView, buttonsFocusGainAnim),
+                loadAnimator(mCloseButtonView, buttonsFocusGainAnim));
 
         int buttonsFocusLoseAnim = R.anim.tv_pip_controls_buttons_in_recents_focus_lose_animation;
-        int textFocusLoseAnim = R.anim.tv_pip_controls_text_in_recents_focus_lose_animation;
         mFocusLoseAnimatorSet = new AnimatorSet();
         mFocusLoseAnimatorSet.playTogether(
                 loadAnimator(this, R.anim.tv_pip_controls_in_recents_focus_lose_animation),
                 loadAnimator(mFullButtonView, buttonsFocusLoseAnim),
-                loadAnimator(mPlayPauseButtonImageView, buttonsFocusLoseAnim),
-                loadAnimator(mCloseButtonView, buttonsFocusLoseAnim),
-                loadAnimator(mFullDescriptionView, textFocusLoseAnim),
-                loadAnimator(mPlayPauseDescriptionTextView, textFocusLoseAnim),
-                loadAnimator(mCloseDescriptionView, textFocusLoseAnim));
+                loadAnimator(mPlayPauseButtonView, buttonsFocusLoseAnim),
+                loadAnimator(mCloseButtonView, buttonsFocusLoseAnim));
 
         Rect pipBounds = mPipManager.getRecentsFocusedPipBounds();
         int pipControlsMarginTop = getContext().getResources().getDimensionPixelSize(
@@ -142,11 +134,8 @@ public class PipRecentsControlsView extends PipControlsView {
         requestFocus();
         setTranslationY(0);
         setScaleXY(mFullButtonView, 1);
-        setScaleXY(mPlayPauseButtonImageView, 1);
+        setScaleXY(mPlayPauseButtonView, 1);
         setScaleXY(mCloseButtonView, 1);
-        mFullDescriptionView.setAlpha(1);
-        mPlayPauseDescriptionTextView.setAlpha(1);
-        mCloseDescriptionView.setAlpha(1);
     }
 
     private void setScaleXY(View view, float scale) {

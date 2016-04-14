@@ -29,5 +29,6 @@
     <com.android.systemui.tv.pip.PipControlsView
         android:id="@+id/pip_controls"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:alpha="0" />
 </LinearLayout>
