@@ -483,26 +483,19 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the start playback position is changed.
-         *
-         * <p>The start playback position of the time shifted program should be adjusted when the TV
-         * input cannot retain the whole recorded program due to some reason (e.g. limitation on
-         * storage space). This is necessary to prevent the application from allowing the user to
-         * seek to a time position that is not reachable.
+         * This is called when the start position for time shifting has changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
-         * @param timeMs The start playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The start position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftStartPositionChanged(Session session, long timeMs) {
         }
 
         /**
-         * This is called when the current playback position is changed.
+         * This is called when the current position for time shifting is changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
-         * @param timeMs The current playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The current position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }

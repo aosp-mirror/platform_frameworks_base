@@ -847,32 +847,34 @@ public class TvView extends ViewGroup {
     public abstract static class TimeShiftPositionCallback {
 
         /**
-         * This is called when the start playback position is changed.
+         * This is called when the start position for time shifting has changed.
          *
-         * <p>The start playback position of the time shifted program can be adjusted by the TV
-         * input when it cannot retain the whole recorded program due to some reason (e.g.
-         * limitation on storage space). The application should not allow the user to seek to a
-         * position earlier than the start position.
+         * <p>The start position for time shifting indicates the earliest possible time the user can
+         * seek to. Initially this is equivalent to the time when the underlying TV input starts
+         * recording. Later it may be adjusted because there is insufficient space or the duration
+         * of recording is limited. The application must not allow the user to seek to a position
+         * earlier than the start position.
          *
-         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
-         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         * <p>For playback of a recorded program initiated by {@link #timeShiftPlay(String, Uri)},
+         * the start position is the time when playback starts. It does not change.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs The start playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The start position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftStartPositionChanged(String inputId, long timeMs) {
         }
 
         /**
-         * This is called when the current playback position is changed.
+         * This is called when the current position for time shifting has changed.
          *
-         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
-         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         * <p>The current position for time shifting is the same as the current position of
+         * playback. During playback, the current position changes continuously. When paused, it
+         * does not change.
+         *
+         * <p>Note that {@code timeMs} is wall-clock time.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs The current playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The current position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(String inputId, long timeMs) {
         }

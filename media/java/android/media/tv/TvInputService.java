@@ -995,15 +995,18 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Returns the start playback position for time shifting, in milliseconds since the epoch.
+         * Returns the start position for time shifting, in milliseconds since the epoch.
          * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
          * moment.
          *
-         * <p>The start playback position of the time shifted program should be adjusted when the
-         * implementation cannot retain the whole recorded program due to some reason (e.g.
-         * limitation on storage space). It is the earliest possible time position that the user can
-         * seek to, thus failure to notifying its change immediately might result in bad experience
-         * where the application allows the user to seek to an invalid time position.
+         * <p>The start position for time shifting indicates the earliest possible time the user can
+         * seek to. Initially this is equivalent to the time when the implementation starts
+         * recording. Later it may be adjusted because there is insufficient space or the duration
+         * of recording is limited by the implementation. The application does not allow the user to
+         * seek to a position earlier than the start position.
+         *
+         * <p>For playback of a recorded program initiated by {@link #onTimeShiftPlay(Uri)}, the
+         * start position is the time when playback starts. It does not change.
          *
          * @see #onTimeShiftPlay(Uri)
          * @see #onTimeShiftResume()
@@ -1017,13 +1020,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Returns the current playback position for time shifting, in milliseconds since the epoch.
+         * Returns the current position for time shifting, in milliseconds since the epoch.
          * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
          * moment.
          *
-         * <p>Note that the current playback position should be equal to or greater than the start
-         * playback position reported by {@link #onTimeShiftGetStartPosition}. Failure to notifying
-         * the correct current position might lead to bad user experience.
+         * <p>The current position for time shifting is the same as the current position of
+         * playback. It should be equal to or greater than the start position reported by
+         * {@link #onTimeShiftGetStartPosition()}.
          *
          * @see #onTimeShiftPlay(Uri)
          * @see #onTimeShiftResume()
