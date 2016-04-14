@@ -59,7 +59,8 @@ public:
 
     virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(RenderNode* renderNode) override;
-    virtual void callDrawGLFunction(Functor* functor) override;
+    virtual void callDrawGLFunction(Functor* functor,
+            GlFunctorLifecycleListener* listener) override;
 
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
