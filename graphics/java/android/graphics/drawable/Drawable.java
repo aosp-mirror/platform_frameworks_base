@@ -121,6 +121,47 @@ import java.util.Collection;
  *     whose overall size is modified based on the current level.
  * </ul>
  *
+ * <a name="Custom"></a>
+ * <h3>Custom drawables</h3>
+ *
+ * <p>
+ * All versions of Android allow the Drawable class to be extended and used at
+ * run time in place of framework-provided drawable classes. Starting in
+ * {@link android.os.Build.VERSION_CODES#N API 24}, custom drawables classes
+ * may also be used in XML.
+ * <p>
+ * <strong>Note:</strong> Custom drawable classes are only accessible from
+ * within your application package. Other applications will not be able to load
+ * them.
+ * <p>
+ * At a minimum, custom drawable classes must implement the abstract methods on
+ * Drawable and should override the {@link Drawable#draw(Canvas)} method to
+ * draw content.
+ * <p>
+ * Custom drawables classes may be used in XML in multiple ways:
+ * <ul>
+ *     <li>
+ *         Using the fully-qualified class name as the XML element name. For
+ *         this method, the custom drawable class must be a public top-level
+ *         class.
+ * <pre>
+ * &lt;com.myapp.MyCustomDrawable xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:color="#ffff0000" /&gt;
+ * </pre>
+ *     </li>
+ *     <li>
+ *         Using <em>drawable</em> as the XML element name and specifying the
+ *         fully-qualified class name from the <em>class</em> attribute. This
+ *         method may be used for both public top-level classes and public
+ *         static inner classes.
+ * <pre>
+ * &lt;drawable xmlns:android="http://schemas.android.com/apk/res/android"
+ *     class="com.myapp.MyTopLevelClass$InnerCustomDrawable"
+ *     android:color="#ffff0000" /&gt;
+ * </pre>
+ *     </li>
+ * </ul>
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about how to use drawables, read the
