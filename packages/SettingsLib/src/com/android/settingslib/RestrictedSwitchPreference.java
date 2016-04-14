@@ -17,12 +17,14 @@
 package com.android.settingslib;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.UserHandle;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.support.v14.preference.SwitchPreference;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -34,12 +36,28 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
  */
 public class RestrictedSwitchPreference extends SwitchPreference {
     RestrictedPreferenceHelper mHelper;
+    boolean mUseAdditionalSummary = false;
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setWidgetLayoutResource(R.layout.restricted_switch_widget);
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
+        if (attrs != null) {
+            final TypedArray attributes = context.obtainStyledAttributes(attrs,
+                    R.styleable.RestrictedPreference);
+            final TypedValue useAdditionalSummary =
+                    attributes.peekValue(R.styleable.RestrictedPreference_useAdditionalSummary);
+            if (useAdditionalSummary != null) {
+                mUseAdditionalSummary =
+                        (useAdditionalSummary.type == TypedValue.TYPE_INT_BOOLEAN
+                                && useAdditionalSummary.data != 0);
+            }
+        }
+        if (mUseAdditionalSummary) {
+            setLayoutResource(R.layout.restricted_switch_preference);
+            useAdminDisabledSummary(false);
+        }
     }
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -67,11 +85,29 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         if (switchWidget != null) {
             switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
         }
-        final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
-        if (summaryView != null && isDisabledByAdmin()) {
-            summaryView.setText(
-                    isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
-            summaryView.setVisibility(View.VISIBLE);
+        if (mUseAdditionalSummary) {
+            final TextView additionalSummaryView = (TextView) holder.findViewById(
+                    R.id.additional_summary);
+            if (additionalSummaryView != null) {
+                if (isDisabledByAdmin()) {
+                    additionalSummaryView.setText(
+                            isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+                    additionalSummaryView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                additionalSummaryView.setVisibility(View.GONE);
+            }
+        } else {
+            final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
+            if (summaryView != null) {
+                if (isDisabledByAdmin()) {
+                    summaryView.setText(
+                            isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+                    summaryView.setVisibility(View.VISIBLE);
+                }
+            }
+            // No need to change the visibility to GONE in the else case here since Preference class
+            // would have already changed it if there is no summary to display.
         }
     }
 

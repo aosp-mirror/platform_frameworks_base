@@ -15,10 +15,18 @@
 -->
 
 <resources>
+
     <declare-styleable name="RestrictedPreference">
+        <!-- The user restriction on which the preference disabled by admin state will be based on. -->
         <attr name="userRestriction" format="string" />
+        <!-- If true then we can use enabled/disabled by admin strings for summary (android.R.id.summary). -->
         <attr name="useAdminDisabledSummary" format="boolean" />
+        <!-- If true, an additional summary will be added in addition to the existing summary and
+        this will be used for enabled/disabled by admin strings leaving android.R.id.summary untouched.
+        As such when this is true, useAdminDisabledSummary will be overwritten to false. -->
+        <attr name="useAdditionalSummary" format="boolean" />
     </declare-styleable>
+
     <declare-styleable name="WifiEncryptionState">
         <attr name="state_encrypted" format="boolean" />
     </declare-styleable>
