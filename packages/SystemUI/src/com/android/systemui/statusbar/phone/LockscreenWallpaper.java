@@ -21,8 +21,12 @@ import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.DrawableWrapper;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -150,5 +154,58 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mCache = null;
         getBitmap();
         mBar.updateMediaMetaData(true /* metaDataChanged */, true /* allowEnterAnimation */);
+    }
+
+    /**
+     * Drawable that aligns left horizontally and center vertically (like ImageWallpaper).
+     */
+    public static class WallpaperDrawable extends DrawableWrapper {
+
+        private Bitmap mBackground;
+        private Rect mTmpRect = new Rect();
+
+        public WallpaperDrawable(Resources r, Bitmap b) {
+            super(new BitmapDrawable(r, b));
+            mBackground = b;
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return -1;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return -1;
+        }
+
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            int vwidth = getBounds().width();
+            int vheight = getBounds().height();
+            int dwidth = mBackground.getWidth();
+            int dheight = mBackground.getHeight();
+            float scale;
+            float dx = 0, dy = 0;
+
+            if (dwidth * vheight > vwidth * dheight) {
+                scale = (float) vheight / (float) dheight;
+            } else {
+                scale = (float) vwidth / (float) dwidth;
+            }
+
+            if (scale <= 1f) {
+                scale = 1f;
+            }
+            dy = (vheight - dheight * scale) * 0.5f;
+
+            mTmpRect.set(
+                    bounds.left,
+                    bounds.top + Math.round(dy),
+                    bounds.left + Math.round(dwidth * scale),
+                    bounds.top + Math.round(dheight * scale + dy));
+
+            super.onBoundsChange(mTmpRect);
+        }
     }
 }
