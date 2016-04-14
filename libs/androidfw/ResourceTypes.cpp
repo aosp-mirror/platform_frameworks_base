@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <algorithm>
 #include <limits>
 #include <memory>
 #include <type_traits>
@@ -5811,10 +5810,6 @@ const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) con
     return NULL;
 }
 
-static bool compareResTableConfig(const ResTable_config& a, const ResTable_config& b) {
-    return a.compare(b) < 0;
-}
-
 void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap,
         bool ignoreAndroidPackage, bool includeSystemConfigs) const {
     const size_t packageCount = mPackageGroups.size();
@@ -5845,20 +5840,22 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMi
                     ResTable_config cfg;
                     memset(&cfg, 0, sizeof(ResTable_config));
                     cfg.copyFromDtoH(config->config);
-
-                    auto iter = std::lower_bound(configs->begin(), configs->end(), cfg,
-                                                 compareResTableConfig);
-                    if (iter == configs->end() || iter->compare(cfg) != 0) {
-                        configs->insertAt(cfg, std::distance(configs->begin(), iter));
+                    // only insert unique
+                    const size_t N = configs->size();
+                    size_t n;
+                    for (n = 0; n < N; n++) {
+                        if (0 == (*configs)[n].compare(cfg)) {
+                            break;
+                        }
+                    }
+                    // if we didn't find it
+                    if (n == N) {
+                        configs->add(cfg);
                     }
                 }
             }
         }
     }
-}
-
-static bool compareString8AndCString(const String8& str, const char* cStr) {
-    return strcmp(str.string(), cStr) < 0;
 }
 
 void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) const
@@ -5875,11 +5872,15 @@ void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) c
     char locale[RESTABLE_MAX_LOCALE_LEN];
     for (size_t i=0; i<I; i++) {
         configs[i].getBcp47Locale(locale);
-
-        auto iter = std::lower_bound(locales->begin(), locales->end(), locale,
-                                     compareString8AndCString);
-        if (iter == locales->end() || strcmp(iter->string(), locale) != 0) {
-            locales->insertAt(String8(locale), std::distance(locales->begin(), iter));
+        const size_t J = locales->size();
+        size_t j;
+        for (j=0; j<J; j++) {
+            if (0 == strcmp(locale, (*locales)[j].string())) {
+                break;
+            }
+        }
+        if (j == J) {
+            locales->add(String8(locale));
         }
     }
 }
