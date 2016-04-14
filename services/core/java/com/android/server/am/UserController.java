@@ -895,7 +895,10 @@ final class UserController {
         synchronized (mService) {
             // Bail if already running unlocked, or if not running at all
             final UserState uss = mStartedUsers.get(userId);
-            if (uss == null) return false;
+            if (uss == null) {
+                progress.finish();
+                return false;
+            }
             switch (uss.state) {
                 case STATE_RUNNING_UNLOCKING:
                 case STATE_RUNNING_UNLOCKED:
