@@ -162,7 +162,8 @@ public class RecentsViewTouchHandler {
         mVisibleDockStates.clear();
         if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()
                 && mDividerSnapAlgorithm.isSplitScreenFeasible()) {
-            Recents.logDockAttempt(mRv.getContext(), event.task.topActivity, event.task.resizeMode);
+            Recents.logDockAttempt(mRv.getContext(), event.task.getTopComponent(),
+                    event.task.resizeMode);
             if (!event.task.isDockable) {
                 EventBus.getDefault().send(new ShowIncompatibleAppOverlayEvent());
             } else {

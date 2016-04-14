@@ -541,7 +541,7 @@ public class RecentsView extends FrameLayout {
                     true /* scaleUp */);
 
             MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
-                    event.task.topActivity.flattenToShortString());
+                    event.task.getTopComponent().flattenToShortString());
         } else {
             // Animate the overlay alpha back to 0
             updateVisibleDockRegions(null, true /* isDefaultDockState */, -1,
