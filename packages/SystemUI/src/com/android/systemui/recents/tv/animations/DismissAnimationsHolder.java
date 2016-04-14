@@ -18,6 +18,7 @@ package com.android.systemui.recents.tv.animations;
 
 import android.animation.Animator;
 import android.content.res.Resources;
+import android.view.View;
 import android.widget.LinearLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.recents.tv.views.TaskCardView;
@@ -26,15 +27,16 @@ import com.android.systemui.R;
 
 public class DismissAnimationsHolder {
     private LinearLayout mDismissArea;
-    private LinearLayout mRecentsTvCard;
+    private LinearLayout mInfoField;
+    private View mThumbnailView;
     private int mCardYDelta;
     private long mShortDuration;
     private long mLongDuration;
 
     public DismissAnimationsHolder(TaskCardView taskCardView) {
-        mRecentsTvCard = (LinearLayout) taskCardView.findViewById(R.id.recents_tv_card);
+        mInfoField = (LinearLayout) taskCardView.findViewById(R.id.card_info_field);
         mDismissArea = (LinearLayout) taskCardView.findViewById(R.id.card_dismiss);
-
+        mThumbnailView = taskCardView.findViewById(R.id.card_view_thumbnail);
         Resources res = taskCardView.getResources();
         mCardYDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_shift_down);
         mShortDuration =  res.getInteger(R.integer.dismiss_short_duration);
@@ -47,7 +49,13 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1.0f);
 
-        mRecentsTvCard.animate()
+        mInfoField.animate()
+                .setDuration(mShortDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .translationYBy(mCardYDelta)
+                .alpha(0.5f);
+
+        mThumbnailView.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(mCardYDelta)
@@ -60,7 +68,13 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
 
-        mRecentsTvCard.animate()
+        mInfoField.animate()
+                .setDuration(mShortDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .translationYBy(-mCardYDelta)
+                .alpha(1.0f);
+
+        mThumbnailView.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(-mCardYDelta)
@@ -73,17 +87,25 @@ public class DismissAnimationsHolder {
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(0.0f);
 
-        mRecentsTvCard.animate()
+        mInfoField.animate()
                 .setDuration(mLongDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .translationYBy(mCardYDelta)
                 .alpha(0.0f)
                 .setListener(listener);
+
+        mThumbnailView.animate()
+                .setDuration(mLongDuration)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .translationYBy(mCardYDelta)
+                .alpha(0.0f);
     }
 
     public void reset() {
-        mRecentsTvCard.setAlpha(1.0f);
-        mRecentsTvCard.setTranslationY(0);
-        mRecentsTvCard.animate().setListener(null);
+        mInfoField.setAlpha(1.0f);
+        mInfoField.setTranslationY(0);
+        mInfoField.animate().setListener(null);
+        mThumbnailView.setAlpha(1.0f);
+        mThumbnailView.setTranslationY(0);
     }
 }

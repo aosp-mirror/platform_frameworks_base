@@ -21,11 +21,13 @@
     <dimen name="recents_tv_card_width">240dip</dimen>
     <dimen name="recents_tv_screenshot_height">135dip</dimen>
     <dimen name="recents_tv_card_extra_badge_size">20dip</dimen>
-    <dimen name="recents_tv_banner_width">114dip</dimen>
-    <dimen name="recents_tv_banner_height">64dip</dimen>
+    <dimen name="recents_tv_banner_width">130dip</dimen>
+    <dimen name="recents_tv_banner_height">72dip</dimen>
+    <dimen name="recents_tv_fallback_icon_width">40dip</dimen>
+    <dimen name="recents_tv_fallback_icon_height">40dip</dimen>
     <dimen name="recents_tv_banner_margin_top">16dip</dimen>
     <dimen name="recents_tv_icon_padding_bottom">8dip</dimen>
-    <dimen name="recents_tv_icon_padding_end">12dip</dimen>
+    <dimen name="recents_tv_text_padding_start">12dip</dimen>
     <dimen name="recents_tv_text_padding_bottom">12dip</dimen>
 
     <!-- Padding for grid view in recents view on tv -->
