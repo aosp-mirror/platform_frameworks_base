@@ -3842,7 +3842,15 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static RangeInfo obtain(int type, float min, float max, float current) {
             RangeInfo info = sPool.acquire();
-            return (info != null) ? info : new RangeInfo(type, min, max, current);
+            if (info == null) {
+                return new RangeInfo(type, min, max, current);
+            }
+
+            info.mType = type;
+            info.mMin = min;
+            info.mMax = max;
+            info.mCurrent = current;
+            return info;
         }
 
         /**
