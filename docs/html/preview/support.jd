@@ -198,6 +198,22 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
+<h4>OEM unlock</h4>
+
+<ul>
+  <li>On some devices, <strong>Enable OEM unlock</strong> is grayed out in
+  "Developer Options" while running DP2.<br>
+  <strong>Workaround:</strong> Opt in to
+  the Android Beta Program (if you are not already opted in) by visiting
+  <a href="https://www.google.com/android/beta" class=
+  "external-link">www.google.com/android/beta</a>. Then, opt out and accept the
+  downgrade OTA. Opting out causes the device to downgrade to Android 6.0. You
+  should now be able to choose <strong>Enable OEM unlock</strong> in
+  "Developer Options". Personal data is erased when you downgrade the
+  device; however, unlocking the bootloader would have erased this data anyway.
+  </li>
+</ul>
+
 <h4>Android for Work</h4>
 
 <ul>
