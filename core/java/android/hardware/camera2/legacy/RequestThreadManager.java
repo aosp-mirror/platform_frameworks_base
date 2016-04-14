@@ -710,6 +710,7 @@ public class RequestThreadManager {
                     break;
                 case MSG_SUBMIT_CAPTURE_REQUEST:
                     Handler handler = RequestThreadManager.this.mRequestThread.getHandler();
+                    boolean anyRequestOutputAbandoned = false;
 
                     // Get the next burst from the request queue.
                     Pair<BurstHolder, Long> nextBurst = mRequestQueue.getNext();
@@ -910,7 +911,22 @@ public class RequestThreadManager {
                         if (!holder.requestFailed()) {
                             mDeviceState.setCaptureResult(holder, result);
                         }
+
+                        if (holder.isOutputAbandoned()) {
+                            anyRequestOutputAbandoned = true;
+                        }
                     }
+
+                    // Stop the repeating request if any of its output surfaces is abandoned.
+                    if (anyRequestOutputAbandoned && nextBurst.first.isRepeating()) {
+                        long lastFrameNumber = cancelRepeating(nextBurst.first.getRequestId());
+                        if (DEBUG) {
+                            Log.d(TAG, "Stopped repeating request. Last frame number is " +
+                                    lastFrameNumber);
+                        }
+                        mDeviceState.setRepeatingRequestError(lastFrameNumber);
+                    }
+
                     if (DEBUG) {
                         long totalTime = SystemClock.elapsedRealtimeNanos() - startTime;
                         Log.d(TAG, "Capture request took " + totalTime + " ns");

@@ -205,6 +205,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         private static final int CAPTURE_STARTED = 2;
         private static final int RESULT_RECEIVED = 3;
         private static final int PREPARED = 4;
+        private static final int REPEATING_REQUEST_ERROR = 5;
 
         private final HandlerThread mHandlerThread;
         private Handler mHandler;
@@ -261,6 +262,15 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             getHandler().sendMessage(msg);
         }
 
+
+        @Override
+        public void onRepeatingRequestError(long lastFrameNumber) {
+            Message msg = getHandler().obtainMessage(REPEATING_REQUEST_ERROR,
+                    /*arg1*/ (int) (lastFrameNumber & 0xFFFFFFFFL),
+                    /*arg2*/ (int) ( (lastFrameNumber >> 32) & 0xFFFFFFFFL));
+            getHandler().sendMessage(msg);
+        }
+
         @Override
         public IBinder asBinder() {
             // This is solely intended to be used for in-process binding.
@@ -309,6 +319,12 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                         case PREPARED: {
                             int streamId = msg.arg1;
                             mCallbacks.onPrepared(streamId);
+                            break;
+                        }
+                        case REPEATING_REQUEST_ERROR: {
+                            long lastFrameNumber = msg.arg2 & 0xFFFFFFFFL;
+                            lastFrameNumber = (lastFrameNumber << 32) | (msg.arg1 & 0xFFFFFFFFL);
+                            mCallbacks.onRepeatingRequestError(lastFrameNumber);
                             break;
                         }
                         default:

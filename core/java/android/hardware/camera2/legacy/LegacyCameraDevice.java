@@ -242,6 +242,25 @@ public class LegacyCameraDevice implements AutoCloseable {
                 }
             });
         }
+
+        @Override
+        public void onRepeatingRequestError(final long lastFrameNumber) {
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onRepeatingRequestError callback.");
+                    }
+                    try {
+                        mDeviceCallbacks.onRepeatingRequestError(lastFrameNumber);
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onRepeatingRequestError " +
+                                "callback: ", e);
+                    }
+                }
+            });
+        }
     };
 
     private final RequestThreadManager mRequestThreadManager;
@@ -397,8 +416,15 @@ public class LegacyCameraDevice implements AutoCloseable {
                     "submitRequestList - Empty/null requests are not allowed");
         }
 
-        List<Long> surfaceIds = (mConfiguredSurfaces == null) ? new ArrayList<Long>() :
-                getSurfaceIds(mConfiguredSurfaces);
+        List<Long> surfaceIds;
+
+        try {
+            surfaceIds = (mConfiguredSurfaces == null) ? new ArrayList<Long>() :
+                    getSurfaceIds(mConfiguredSurfaces);
+        } catch (BufferQueueAbandonedException e) {
+            throw new ServiceSpecificException(BAD_VALUE,
+                    "submitRequestList - configured surface is abandoned.");
+        }
 
         // Make sure that there all requests have at least 1 surface; all surfaces are non-null
         for (CaptureRequest request : requestList) {
@@ -674,12 +700,17 @@ public class LegacyCameraDevice implements AutoCloseable {
         LegacyExceptionUtils.throwOnError(nativeSetSurfaceDimens(surface, width, height));
     }
 
-    static long getSurfaceId(Surface surface) {
+    static long getSurfaceId(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
-        return nativeGetSurfaceId(surface);
+        try {
+            return nativeGetSurfaceId(surface);
+        } catch (IllegalArgumentException e) {
+            throw new BufferQueueAbandonedException();
+        }
     }
 
-    static List<Long> getSurfaceIds(SparseArray<Surface> surfaces) {
+    static List<Long> getSurfaceIds(SparseArray<Surface> surfaces)
+            throws BufferQueueAbandonedException {
         if (surfaces == null) {
             throw new NullPointerException("Null argument surfaces");
         }
@@ -696,7 +727,8 @@ public class LegacyCameraDevice implements AutoCloseable {
         return surfaceIds;
     }
 
-    static List<Long> getSurfaceIds(Collection<Surface> surfaces) {
+    static List<Long> getSurfaceIds(Collection<Surface> surfaces)
+            throws BufferQueueAbandonedException {
         if (surfaces == null) {
             throw new NullPointerException("Null argument surfaces");
         }
@@ -713,7 +745,13 @@ public class LegacyCameraDevice implements AutoCloseable {
     }
 
     static boolean containsSurfaceId(Surface s, Collection<Long> ids) {
-        long id = getSurfaceId(s);
+        long id = 0;
+        try {
+            id = getSurfaceId(s);
+        } catch (BufferQueueAbandonedException e) {
+            // If surface is abandoned, return false.
+            return false;
+        }
         return ids.contains(id);
     }
 
