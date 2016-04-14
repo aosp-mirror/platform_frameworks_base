@@ -98,6 +98,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -4281,5 +4282,32 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 setResizingDuringAnimation(task.taskId);
             }
             return result;
+    }
+
+    /**
+     * @return a list of activities which are the top ones in each visible stack. The first
+     * entry will be the focused activity.
+     */
+    public List<IBinder> getTopVisibleActivities() {
+        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
+        if (display == null) {
+            return Collections.EMPTY_LIST;
+        }
+        ArrayList<IBinder> topActivityTokens = new ArrayList<>();
+        final ArrayList<ActivityStack> stacks = display.mStacks;
+        for (int i = stacks.size() - 1; i >= 0; i--) {
+            ActivityStack stack = stacks.get(i);
+            if (stack.getStackVisibilityLocked(null) == ActivityStack.STACK_VISIBLE) {
+                ActivityRecord top = stack.topActivity();
+                if (top != null) {
+                    if (stack == mFocusedStack) {
+                        topActivityTokens.add(0, top.appToken);
+                    } else {
+                        topActivityTokens.add(top.appToken);
+                    }
+                }
+            }
+        }
+        return topActivityTokens;
     }
 }
