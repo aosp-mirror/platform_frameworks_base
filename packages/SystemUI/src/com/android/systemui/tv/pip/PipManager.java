@@ -35,6 +35,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -144,6 +145,7 @@ public class PipManager {
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
     private boolean mOnboardingShown;
+    private String[] mLastPackagesResourceGranted;
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
@@ -166,7 +168,7 @@ public class PipManager {
                 String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
                         INVALID_RESOURCE_TYPE);
-                if (mState != STATE_NO_PIP && packageNames != null && packageNames.length > 0
+                if (packageNames != null && packageNames.length > 0
                         && resourceType == Intent.EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC) {
                     handleMediaResourceGranted(packageNames);
                 }
@@ -446,41 +448,24 @@ public class PipManager {
     }
 
     private void handleMediaResourceGranted(String[] packageNames) {
-        StackInfo fullscreenStack = null;
-        try {
-            fullscreenStack = mActivityManager.getStackInfo(FULLSCREEN_WORKSPACE_STACK_ID);
-        } catch (RemoteException e) {
-            Log.e(TAG, "getStackInfo failed", e);
-        }
-        if (fullscreenStack == null) {
-            return;
-        }
-        int fullscreenTopTaskId = fullscreenStack.taskIds[fullscreenStack.taskIds.length - 1];
-        List<RunningTaskInfo> tasks = null;
-        try {
-            tasks = mActivityManager.getTasks(MAX_RUNNING_TASKS_COUNT, 0);
-        } catch (RemoteException e) {
-            Log.e(TAG, "getTasks failed", e);
-        }
-        if (tasks == null) {
-            return;
-        }
-        boolean wasGrantedInFullscreen = false;
-        boolean wasGrantedInPip = false;
-        for (int i = tasks.size() - 1; i >= 0; --i) {
-            RunningTaskInfo task = tasks.get(i);
-            for (int j = packageNames.length - 1; j >= 0; --j) {
-                if (task.topActivity.getPackageName().equals(packageNames[j])) {
-                    if (task.id == fullscreenTopTaskId) {
-                        wasGrantedInFullscreen = true;
-                    } else if (task.id == mPipTaskId) {
-                        wasGrantedInPip= true;
+        if (mState == STATE_NO_PIP) {
+            mLastPackagesResourceGranted = packageNames;
+        } else {
+            boolean requestedFromLastPackages = false;
+            if (mLastPackagesResourceGranted != null) {
+                for (String packageName : mLastPackagesResourceGranted) {
+                    for (String newPackageName : packageNames) {
+                        if (TextUtils.equals(newPackageName, packageName)) {
+                            requestedFromLastPackages = true;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        if (wasGrantedInFullscreen && !wasGrantedInPip) {
-            closePip();
+            mLastPackagesResourceGranted = packageNames;
+            if (!requestedFromLastPackages) {
+                closePip();
+            }
         }
     }
 
