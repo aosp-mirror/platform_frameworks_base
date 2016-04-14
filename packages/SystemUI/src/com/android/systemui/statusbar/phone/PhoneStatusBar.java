@@ -4313,7 +4313,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         try {
             IActivityManager activityManager = ActivityManagerNative.getDefault();
             if (activityManager.isInLockTaskMode()) {
-                activityManager.stopLockTaskModeOnCurrent();
+                activityManager.stopSystemLockTaskMode();
 
                 // When exiting refresh disabled flags.
                 mNavigationBarView.setDisabledFlags(mDisabled1, true);
@@ -4336,17 +4336,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void showScreenPinningRequest() {
+    public void showScreenPinningRequest(int taskId) {
         if (mKeyguardMonitor.isShowing()) {
             // Don't allow apps to trigger this from keyguard.
             return;
         }
         // Show screen pinning request, since this comes from an app, show 'no thanks', button.
-        showScreenPinningRequest(true);
+        showScreenPinningRequest(taskId, true);
     }
 
-    public void showScreenPinningRequest(boolean allowCancel) {
-        mScreenPinningRequest.showPrompt(allowCancel);
+    public void showScreenPinningRequest(int taskId, boolean allowCancel) {
+        mScreenPinningRequest.showPrompt(taskId, allowCancel);
     }
 
     public boolean hasActiveNotifications() {

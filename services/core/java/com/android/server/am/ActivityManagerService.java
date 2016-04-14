@@ -9870,7 +9870,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean isSystemInitiated = callingUid == Process.SYSTEM_UID;
         long ident = Binder.clearCallingIdentity();
         try {
-            final ActivityStack stack = mStackSupervisor.getFocusedStack();
             if (!isSystemInitiated) {
                 task.mLockTaskUid = callingUid;
                 if (task.mLockTaskAuth == LOCK_TASK_AUTH_PINNABLE) {
@@ -9879,11 +9878,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     StatusBarManagerInternal statusBarManager =
                             LocalServices.getService(StatusBarManagerInternal.class);
                     if (statusBarManager != null) {
-                        statusBarManager.showScreenPinningRequest();
+                        statusBarManager.showScreenPinningRequest(task.taskId);
                     }
                     return;
                 }
 
+                final ActivityStack stack = mStackSupervisor.getFocusedStack();
                 if (stack == null || task != stack.topTask()) {
                     throw new IllegalArgumentException("Invalid task, not in foreground");
                 }
@@ -9924,15 +9924,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void startLockTaskModeOnCurrent() throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startLockTaskModeOnCurrent");
+    public void startSystemLockTaskMode(int taskId) throws RemoteException {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startSystemLockTaskMode");
+        // This makes inner call to look as if it was initiated by system.
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                ActivityRecord r = mStackSupervisor.topRunningActivityLocked();
-                if (r != null) {
-                    startLockTaskModeLocked(r.task);
-                }
+                startLockTaskMode(taskId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -9976,8 +9974,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void stopLockTaskModeOnCurrent() throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "stopLockTaskModeOnCurrent");
+    public void stopSystemLockTaskMode() throws RemoteException {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "stopSystemLockTaskMode");
+        // This makes inner call to look as if it was initiated by system.
         long ident = Binder.clearCallingIdentity();
         try {
             stopLockTaskMode();

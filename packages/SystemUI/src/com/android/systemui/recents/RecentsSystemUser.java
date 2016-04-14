@@ -82,8 +82,8 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void startScreenPinning() {
-        mImpl.onStartScreenPinning(mContext);
+    public void startScreenPinning(int taskId) {
+        mImpl.onStartScreenPinning(mContext, taskId);
     }
 
     @Override

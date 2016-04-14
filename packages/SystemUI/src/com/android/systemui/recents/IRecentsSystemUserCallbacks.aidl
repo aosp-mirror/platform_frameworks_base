@@ -27,7 +27,7 @@ oneway interface IRecentsSystemUserCallbacks {
     void registerNonSystemUserCallbacks(IBinder nonSystemUserCallbacks, int userId);
 
     void updateRecentsVisibility(boolean visible);
-    void startScreenPinning();
+    void startScreenPinning(int taskId);
     void sendRecentsDrawnEvent();
     void sendDockingTopTaskEvent(int dragMode, in Rect initialRect);
     void sendLaunchRecentsEvent();

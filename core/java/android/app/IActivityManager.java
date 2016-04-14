@@ -554,7 +554,7 @@ public interface IActivityManager extends IInterface {
 
     public int getActivityDisplayId(IBinder activityToken) throws RemoteException;
 
-    public void startLockTaskModeOnCurrent() throws RemoteException;
+    public void startSystemLockTaskMode(int taskId) throws RemoteException;
 
     public void startLockTaskMode(int taskId) throws RemoteException;
 
@@ -562,7 +562,7 @@ public interface IActivityManager extends IInterface {
 
     public void stopLockTaskMode() throws RemoteException;
 
-    public void stopLockTaskModeOnCurrent() throws RemoteException;
+    public void stopSystemLockTaskMode() throws RemoteException;
 
     public boolean isInLockTaskMode() throws RemoteException;
 
@@ -948,8 +948,8 @@ public interface IActivityManager extends IInterface {
     int START_VOICE_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+218;
     int GET_ACTIVITY_OPTIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+219;
     int GET_APP_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+220;
-    int START_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+221;
-    int STOP_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+222;
+    int START_SYSTEM_LOCK_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+221;
+    int STOP_SYSTEM_LOCK_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+222;
     int FINISH_VOICE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+223;
     int IS_TOP_OF_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+224;
     int REQUEST_VISIBLE_BEHIND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+225;

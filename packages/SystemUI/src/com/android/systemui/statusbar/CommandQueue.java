@@ -114,7 +114,7 @@ public class CommandQueue extends IStatusBar.Stub {
         void buzzBeepBlinked();
         void notificationLightOff();
         void notificationLightPulse(int argb, int onMillis, int offMillis);
-        void showScreenPinningRequest();
+        void showScreenPinningRequest(int taskId);
         void appTransitionPending();
         void appTransitionCancelled();
         void appTransitionStarting(long startTime, long duration);
@@ -298,9 +298,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void showScreenPinningRequest() {
+    public void showScreenPinningRequest(int taskId) {
         synchronized (mLock) {
-            mHandler.sendEmptyMessage(MSG_SHOW_SCREEN_PIN_REQUEST);
+            mHandler.obtainMessage(MSG_SHOW_SCREEN_PIN_REQUEST, taskId, 0, null)
+                    .sendToTarget();
         }
     }
 
@@ -450,7 +451,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:
-                    mCallbacks.showScreenPinningRequest();
+                    mCallbacks.showScreenPinningRequest(msg.arg1);
                     break;
                 case MSG_APP_TRANSITION_PENDING:
                     mCallbacks.appTransitionPending();
