@@ -329,6 +329,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             final String ssid = removeDoubleQuotes(config.SSID);
             if (id.equals(ssid)) {
                 final NetworkPolicy policy = newPolicy(ssid);
+                policy.metered = true;
                 Log.i(TAG, "Creating new policy for " + ssid + ": " + policy);
                 final NetworkPolicy[] newPolicies = new NetworkPolicy[policies.length + 1];
                 System.arraycopy(policies, 0, newPolicies, 0, policies.length);
