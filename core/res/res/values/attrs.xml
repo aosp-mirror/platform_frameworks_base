@@ -8138,6 +8138,7 @@ i
         <attr name="layout_alwaysShow" format="boolean" />
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
+        <attr name="layout_hasNestedScrollIndicator" format="boolean" />
     </declare-styleable>
 
     <!-- @hide -->
