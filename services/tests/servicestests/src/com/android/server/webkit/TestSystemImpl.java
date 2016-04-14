@@ -24,7 +24,7 @@ import android.webkit.WebViewProviderInfo;
 import java.util.HashMap;
 
 public class TestSystemImpl implements SystemInterface {
-    private String mUserProvider = "";
+    private String mUserProvider = null;
     private final WebViewProviderInfo[] mPackageConfigs;
     HashMap<String, PackageInfo> mPackages = new HashMap();
     private boolean mFallbackLogicEnabled;
@@ -103,6 +103,10 @@ public class TestSystemImpl implements SystemInterface {
 
     public void setPackageInfo(PackageInfo pi) {
         mPackages.put(pi.packageName, pi);
+    }
+
+    public void removePackageInfo(String packageName) {
+        mPackages.remove(packageName);
     }
 
     @Override
