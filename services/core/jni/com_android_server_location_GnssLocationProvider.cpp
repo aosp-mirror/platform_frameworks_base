@@ -1165,7 +1165,7 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
 
 static jobject translate_gnss_clock(JNIEnv* env, GnssClock* clock) {
     JavaObject object(env, "android/location/GnssClock");
-    GpsClockFlags flags = clock->flags;
+    GnssClockFlags flags = clock->flags;
 
     SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND,
            LeapSecond,
@@ -1237,9 +1237,10 @@ static jobject translate_gps_measurement(JNIEnv* env,
 static jobject translate_gnss_measurement(JNIEnv* env,
                                           GnssMeasurement* measurement) {
     JavaObject object(env, "android/location/GnssMeasurement");
-    GpsMeasurementFlags flags = measurement->flags;
 
-    SET(Svid, measurement->svid);
+    GnssMeasurementFlags flags = measurement->flags;
+
+    SET(Svid, static_cast<int32_t>(measurement->svid));
     SET(ConstellationType, static_cast<int32_t>(measurement->constellation));
     SET(TimeOffsetNanos, measurement->time_offset_ns);
     SET(State, static_cast<int32_t>(measurement->state));
@@ -1379,8 +1380,8 @@ static void gnss_measurement_callback(GnssData* data) {
         ALOGE("Invalid data provided to gps_measurement_callback");
         return;
     }
-    if (data->size != sizeof(GpsData)) {
-        ALOGE("Invalid GpsData size found in gps_measurement_callback, "
+    if (data->size != sizeof(GnssData)) {
+        ALOGE("Invalid GnssData size found in gnss_measurement_callback, "
               "size=%zd",
               data->size);
         return;
