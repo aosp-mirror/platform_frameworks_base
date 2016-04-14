@@ -88,6 +88,10 @@ public class FixedSizeFrameLayout extends FrameLayout {
      */
     protected void layoutContents(Rect bounds, boolean changed) {
         super.onLayout(changed, bounds.left, bounds.top, bounds.right, bounds.bottom);
+
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
+        onSizeChanged(width, height, width, height);
     }
 
 }

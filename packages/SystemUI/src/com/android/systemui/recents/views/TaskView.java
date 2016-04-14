@@ -152,7 +152,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     private final TaskViewTransform mTargetAnimationTransform = new TaskViewTransform();
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
-    View mContent;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
     TaskViewThumbnail mThumbnailView;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
@@ -226,9 +225,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     protected void onFinishInflate() {
         // Bind the views
-        mContent = findViewById(R.id.task_view_content);
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
+        mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
         mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -255,6 +254,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         if (w > 0 && h > 0) {
             mHeaderView.onTaskViewSizeChanged(w, h);
             mThumbnailView.onTaskViewSizeChanged(w, h);
+
+            mActionButtonView.setTranslationX(w - getMeasuredWidth());
+            mActionButtonView.setTranslationY(h - getMeasuredHeight());
         }
     }
 
@@ -276,13 +278,11 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     protected void measureContents(int width, int height) {
         int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
         int heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
+        int widthSpec = MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY);
+        int heightSpec = MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY);
 
         // Measure the content
-        mContent.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
-
-        // Optimization: Prevent overdraw of the thumbnail under the header view
-        mThumbnailView.updateClipToTaskBar(mHeaderView);
+        measureChildren(widthSpec, heightSpec);
 
         setMeasuredDimension(width, height);
     }
@@ -346,6 +346,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mActionButtonView.setScaleX(1f);
         mActionButtonView.setScaleY(1f);
         mActionButtonView.setAlpha(0f);
+        mActionButtonView.setTranslationX(0f);
+        mActionButtonView.setTranslationY(0f);
         mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
         if (mIncompatibleAppToastView != null) {
             mIncompatibleAppToastView.setVisibility(View.INVISIBLE);

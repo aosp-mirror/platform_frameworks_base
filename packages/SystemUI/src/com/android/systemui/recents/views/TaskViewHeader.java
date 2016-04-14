@@ -350,6 +350,8 @@ public class TaskViewHeader extends FrameLayout
         }
         mDismissButton.setVisibility(showDismissIcon ? View.VISIBLE : View.INVISIBLE);
         mDismissButton.setTranslationX(rightInset);
+
+        setLeftTopRightBottom(0, 0, width, getMeasuredHeight());
     }
 
     @Override
