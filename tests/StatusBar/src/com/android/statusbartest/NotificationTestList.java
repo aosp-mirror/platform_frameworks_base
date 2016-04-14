@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.os.Handler;
@@ -86,6 +87,28 @@ public class NotificationTestList extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+            new Test("Phone call") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("phone call")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"),
+                                    new AudioAttributes.Builder().setUsage(
+                                            AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build())
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setVibrate(new long[] {
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 })
+                            .setFullScreenIntent(makeIntent2(), true)
+                            .build();
+                    mNM.notify(7001, n);
+                }
+            },
             new Test("Post a group") {
                 public void run()
                 {
