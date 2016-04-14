@@ -454,6 +454,12 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
 
+            if (vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE
+                    && Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) == 0) {
+                return;
+            }
+
             int mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
                     vib.mUsageHint, vib.mUid, vib.mOpPkg);
             if (mode == AppOpsManager.MODE_ALLOWED) {

@@ -2186,16 +2186,18 @@ public class NotificationManagerService extends SystemService {
 
     // Clears the 'fake' auto-bunding summary.
     private void maybeClearAutobundleSummaryLocked(Adjustment adjustment) {
-        if (adjustment.getSignals() != null
-                && adjustment.getSignals().containsKey(Adjustment.NEEDS_AUTOGROUPING_KEY)
+        if (adjustment.getSignals() != null) {
+            Bundle.setDefusable(adjustment.getSignals(), true);
+            if (adjustment.getSignals().containsKey(Adjustment.NEEDS_AUTOGROUPING_KEY)
                 && !adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
-            if (mAutobundledSummaries.containsKey(adjustment.getPackage())) {
-                // Clear summary.
-                final NotificationRecord removed = mNotificationsByKey.get(
-                        mAutobundledSummaries.remove(adjustment.getPackage()));
-                if (removed != null) {
-                    mNotificationList.remove(removed);
-                    cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED);
+                if (mAutobundledSummaries.containsKey(adjustment.getPackage())) {
+                    // Clear summary.
+                    final NotificationRecord removed = mNotificationsByKey.get(
+                            mAutobundledSummaries.remove(adjustment.getPackage()));
+                    if (removed != null) {
+                        mNotificationList.remove(removed);
+                        cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED);
+                    }
                 }
             }
         }
@@ -2203,47 +2205,50 @@ public class NotificationManagerService extends SystemService {
 
     // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
     private void maybeAddAutobundleSummary(Adjustment adjustment) {
-        if (adjustment.getSignals() != null
-                && adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
-            final String newAutoBundleKey =
-                    adjustment.getSignals().getString(Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
-            int userId = -1;
-            NotificationRecord summaryRecord = null;
-            synchronized (mNotificationList) {
-                if (!mAutobundledSummaries.containsKey(adjustment.getPackage())
-                        && newAutoBundleKey != null) {
-                    // Add summary
-                    final StatusBarNotification adjustedSbn
-                            = mNotificationsByKey.get(adjustment.getKey()).sbn;
+        if (adjustment.getSignals() != null) {
+            Bundle.setDefusable(adjustment.getSignals(), true);
+            if (adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
+                final String newAutoBundleKey =
+                        adjustment.getSignals().getString(Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
+                int userId = -1;
+                NotificationRecord summaryRecord = null;
+                synchronized (mNotificationList) {
+                    if (!mAutobundledSummaries.containsKey(adjustment.getPackage())
+                            && newAutoBundleKey != null) {
+                        // Add summary
+                        final StatusBarNotification adjustedSbn
+                                = mNotificationsByKey.get(adjustment.getKey()).sbn;
 
-                    final ApplicationInfo appInfo =
-                            adjustedSbn.getNotification().extras.getParcelable(
-                                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
-                    final Bundle extras = new Bundle();
-                    extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
-                    final Notification summaryNotification =
-                            new Notification.Builder(getContext()).setSmallIcon(
-                                    adjustedSbn.getNotification().getSmallIcon())
-                                    .setGroupSummary(true)
-                                    .setGroup(newAutoBundleKey)
-                                    .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)
-                                    .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
-                                    .build();
-                    summaryNotification.extras.putAll(extras);
-                    final StatusBarNotification summarySbn =
-                            new StatusBarNotification(adjustedSbn.getPackageName(),
-                                    adjustedSbn.getOpPkg(),
-                                    Integer.MAX_VALUE, Adjustment.GROUP_KEY_OVERRIDE_KEY,
-                                    adjustedSbn.getUid(), adjustedSbn.getInitialPid(),
-                                    summaryNotification, adjustedSbn.getUser(), newAutoBundleKey,
-                                    System.currentTimeMillis());
-                    summaryRecord = new NotificationRecord(getContext(), summarySbn);
-                    mAutobundledSummaries.put(adjustment.getPackage(), summarySbn.getKey());
-                    userId = adjustedSbn.getUser().getIdentifier();
+                        final ApplicationInfo appInfo =
+                                adjustedSbn.getNotification().extras.getParcelable(
+                                        Notification.EXTRA_BUILDER_APPLICATION_INFO);
+                        final Bundle extras = new Bundle();
+                        extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
+                        final Notification summaryNotification =
+                                new Notification.Builder(getContext()).setSmallIcon(
+                                        adjustedSbn.getNotification().getSmallIcon())
+                                        .setGroupSummary(true)
+                                        .setGroup(newAutoBundleKey)
+                                        .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)
+                                        .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
+                                        .build();
+                        summaryNotification.extras.putAll(extras);
+                        final StatusBarNotification summarySbn =
+                                new StatusBarNotification(adjustedSbn.getPackageName(),
+                                        adjustedSbn.getOpPkg(),
+                                        Integer.MAX_VALUE, Adjustment.GROUP_KEY_OVERRIDE_KEY,
+                                        adjustedSbn.getUid(), adjustedSbn.getInitialPid(),
+                                        summaryNotification, adjustedSbn.getUser(),
+                                        newAutoBundleKey,
+                                        System.currentTimeMillis());
+                        summaryRecord = new NotificationRecord(getContext(), summarySbn);
+                        mAutobundledSummaries.put(adjustment.getPackage(), summarySbn.getKey());
+                        userId = adjustedSbn.getUser().getIdentifier();
+                    }
                 }
-            }
-            if (summaryRecord != null) {
-                mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
+                if (summaryRecord != null) {
+                    mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
+                }
             }
         }
     }
