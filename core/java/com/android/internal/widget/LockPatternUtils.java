@@ -172,6 +172,14 @@ public class LockPatternUtils {
         }
     }
 
+    public void userPresent(int userId) {
+        try {
+            getLockSettings().userPresent(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     public static final class RequestThrottledException extends Exception {
         private int mTimeoutMs;
         public RequestThrottledException(int timeoutMs) {
