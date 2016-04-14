@@ -35,7 +35,7 @@ interface IFingerprintService {
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,
-            int flags);
+            int flags, String opPackageName);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);

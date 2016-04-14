@@ -517,7 +517,8 @@ public class FingerprintManager {
 
         if (mService != null) try {
             mEnrollmentCallback = callback;
-            mService.enroll(mToken, token, userId, mServiceReceiver, flags);
+            mService.enroll(mToken, token, userId, mServiceReceiver, flags,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception in enroll: ", e);
             if (callback != null) {
