@@ -194,6 +194,18 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
+    public void onHandleAssistSecondary(final Bundle data, final AssistStructure structure,
+            final AssistContent content, int index, int count) {
+        Log.i(TAG, "Got secondary activity assist data " + index + " of " + count);
+        Log.i(TAG, "Showing assist structure after a few seconds...");
+        mContentView.postDelayed(new Runnable() {
+            public void run() {
+                onHandleAssist(data, structure, content);
+            }
+        }, 2000 * index);
+    }
+
+    @Override
     public void onHandleScreenshot(Bitmap screenshot) {
         if (screenshot != null) {
             mScreenshot.setImageBitmap(screenshot);
