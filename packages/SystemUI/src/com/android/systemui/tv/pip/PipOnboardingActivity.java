@@ -16,12 +16,15 @@
 
 package com.android.systemui.tv.pip;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.app.Activity;
-import android.graphics.Rect;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 
 import com.android.systemui.R;
 
@@ -35,29 +38,47 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_onboarding);
-        View pipOnboardingView = findViewById(R.id.pip_onboarding);
-        View pipOutlineView = findViewById(R.id.pip_outline);
-        mPipManager.addListener(this);
-        findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
 
-        int pipOutlineSpace = getResources().getDimensionPixelSize(R.dimen.tv_pip_bounds_space);
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        Rect pipBounds = mPipManager.getPipBounds();
-        pipOnboardingView.setPadding(
-                pipBounds.left - pipOutlineSpace,
-                pipBounds.top - pipOutlineSpace,
-                screenWidth - pipBounds.right - pipOutlineSpace, 0);
+        mPipManager.addListener(this);
+    }
 
-        // Set width and height for outline view to enclose the PIP.
-        LayoutParams lp = pipOutlineView.getLayoutParams();
-        lp.width = pipBounds.width() + pipOutlineSpace * 2;
-        lp.height = pipBounds.height() + pipOutlineSpace * 2;
-        pipOutlineView.setLayoutParams(lp);
+    @Override
+    public void onResume() {
+        super.onResume();
+        AnimatorSet enterAnimator = new AnimatorSet();
+        enterAnimator.playTogether(
+                loadAnimator(R.id.remote, R.anim.tv_pip_onboarding_image_enter_animation),
+                loadAnimator(R.id.remote_button, R.anim.tv_pip_onboarding_image_enter_animation),
+                loadAnimator(R.id.title, R.anim.tv_pip_onboarding_title_enter_animation),
+                loadAnimator(R.id.description,
+                        R.anim.tv_pip_onboarding_description_enter_animation),
+                loadAnimator(R.id.button, R.anim.tv_pip_onboarding_button_enter_animation));
+        enterAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                ImageView button = (ImageView) findViewById(R.id.remote_button);
+                ((AnimationDrawable) button.getDrawable()).start();
+            }
+        });
+        enterAnimator.start();
+    }
+
+    private Animator loadAnimator(int viewResId, int animResId) {
+        Animator animator = AnimatorInflater.loadAnimator(this, animResId);
+        animator.setTarget(findViewById(viewResId));
+        return animator;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        finish();
     }
 
     @Override
