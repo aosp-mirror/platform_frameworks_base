@@ -131,15 +131,6 @@ public class RootTrustManager extends X509ExtendedTrustManager {
         return config.getTrustManager().checkServerTrusted(certs, authType, hostname);
     }
 
-    /**
-     * Check if the provided certificate is a user added certificate authority.
-     * This is required by android.net.http.X509TrustManagerExtensions.
-     */
-    public boolean isUserAddedCertificate(X509Certificate cert) {
-        // TODO: Figure out the right way to handle this, and if it is still even used.
-        return false;
-    }
-
     @Override
     public X509Certificate[] getAcceptedIssuers() {
         // getAcceptedIssuers is meant to be used to determine which trust anchors the server will
