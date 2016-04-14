@@ -270,15 +270,12 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             mLastXOffset = xOffset;
             mLastYOffset = yOffset;
 
-            // Only clip the content to the bounds if we are not fullscreen. In the other case, we
-            // actually need to draw outside these.
-            if (mResizeMode == RESIZE_MODE_FREEFORM) {
-                mRenderer.setContentDrawBounds(
-                        mLastXOffset,
-                        mLastYOffset,
-                        mLastXOffset + mLastContentWidth,
-                        mLastYOffset + mLastCaptionHeight + mLastContentHeight);
-            }
+            // Inform the renderer of the content's new bounds
+            mRenderer.setContentDrawBounds(
+                    mLastXOffset,
+                    mLastYOffset,
+                    mLastXOffset + mLastContentWidth,
+                    mLastYOffset + mLastCaptionHeight + mLastContentHeight);
 
             // If this was the first call and redrawLocked got already called prior
             // to us, we should re-issue a redrawLocked now.
