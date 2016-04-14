@@ -3510,7 +3510,16 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract @Nullable String getServicesSystemSharedLibraryPackageName();
+    public abstract @NonNull String getServicesSystemSharedLibraryPackageName();
+
+    /**
+     * Get the name of the package hosting the shared components shared library.
+     *
+     * @return The library host package.
+     *
+     * @hide
+     */
+    public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
 
     /**
      * Get a list of features that are available on the

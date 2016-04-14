@@ -441,9 +441,20 @@ public class ApplicationPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public @Nullable String getServicesSystemSharedLibraryPackageName() {
+    public @NonNull String getServicesSystemSharedLibraryPackageName() {
         try {
             return mPM.getServicesSystemSharedLibraryPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public @NonNull String getSharedSystemSharedLibraryPackageName() {
+        try {
+            return mPM.getSharedSystemSharedLibraryPackageName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
