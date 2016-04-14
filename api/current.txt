@@ -55698,6 +55698,7 @@ package java.util {
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
     method public boolean replace(K, V, V);
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
   }
 
   public class HashSet extends java.util.AbstractSet implements java.lang.Cloneable java.io.Serializable java.util.Set {
@@ -55741,6 +55742,7 @@ package java.util {
     method public synchronized boolean remove(java.lang.Object, java.lang.Object);
     method public synchronized boolean replace(K, V, V);
     method public synchronized V replace(K, V);
+    method public synchronized void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public synchronized int size();
     method public java.util.Collection<V> values();
   }
@@ -56734,6 +56736,7 @@ package java.util {
     method public java.util.NavigableSet<K> navigableKeySet();
     method public java.util.Map.Entry<K, V> pollFirstEntry();
     method public java.util.Map.Entry<K, V> pollLastEntry();
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public java.util.NavigableMap<K, V> subMap(K, boolean, K, boolean);
     method public java.util.SortedMap<K, V> subMap(K, K);
     method public java.util.NavigableMap<K, V> tailMap(K, boolean);
@@ -56835,6 +56838,7 @@ package java.util {
     ctor public WeakHashMap(java.util.Map<? extends K, ? extends V>);
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
   }
 
 }
