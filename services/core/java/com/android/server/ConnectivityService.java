@@ -2209,6 +2209,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mLegacyTypeTracker.remove(nai, wasDefault);
             rematchAllNetworksAndRequests(null, 0);
+            if (wasDefault && getDefaultNetwork() == null) {
+                // Log that we lost the default network and there is no replacement.
+                final int[] transportTypes = new int[0];
+                ConnectivityServiceChangeEvent.logEvent(NETID_UNSET, nai.network.netId,
+                        transportTypes);
+            }
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
                 // (routing rules, DNS, etc).
@@ -4430,9 +4436,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         teardownUnneededNetwork(oldNetwork);
     }
 
-    private void makeDefault(NetworkAgentInfo newNetwork) {
+    private void makeDefault(NetworkAgentInfo newNetwork, NetworkAgentInfo prevNetwork) {
+        int prevNetId = (prevNetwork == null) ? NETID_UNSET : prevNetwork.network.netId;
         if (DBG) log("Switching to new default network: " + newNetwork);
-        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId);
         setupDataActivityTracking(newNetwork);
         try {
             mNetd.setDefaultNetId(newNetwork.network.netId);
@@ -4443,6 +4449,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId, prevNetId,
+                newNetwork.networkCapabilities.getTransportTypes());
     }
 
     // Handles a network appearing or improving its score.
@@ -4593,7 +4601,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (isNewDefault) {
             // Notify system services that this network is up.
-            makeDefault(newNetwork);
+            makeDefault(newNetwork, oldDefaultNetwork);
             synchronized (ConnectivityService.this) {
                 // have a new default network, release the transition wakelock in
                 // a second if it's held.  The second pause is to allow apps
