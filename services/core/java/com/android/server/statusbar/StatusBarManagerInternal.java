@@ -37,6 +37,7 @@ public interface StatusBarManagerInternal {
 
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
 
+    void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
