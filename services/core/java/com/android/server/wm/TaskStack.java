@@ -26,6 +26,7 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
@@ -833,10 +834,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * @param imeWin The IME window.
      */
     void setAdjustedForIme(WindowState imeWin) {
-        mAdjustedForIme = true;
-        mAdjustImeAmount = 0f;
         mImeWin = imeWin;
         mImeGoingAway = false;
+        if (!mAdjustedForIme) {
+            mAdjustedForIme = true;
+            mAdjustImeAmount = 0f;
+            updateAdjustForIme(0f, true /* force */);
+        }
     }
 
     boolean isAdjustedForIme() {
@@ -855,8 +859,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
      *
      * @return true if a traversal should be performed after the adjustment.
      */
-    boolean updateAdjustForIme(float adjustAmount) {
-        if (adjustAmount != mAdjustImeAmount) {
+    boolean updateAdjustForIme(float adjustAmount, boolean force) {
+        if (adjustAmount != mAdjustImeAmount || force) {
             mAdjustImeAmount = adjustAmount;
             updateAdjustedBounds();
             return isVisibleForUserLocked();
@@ -903,6 +907,29 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mMinimizeAmount != 0f;
     }
 
+    /**
+     * Puts all visible tasks that are adjusted for IME into resizing mode and adds the windows
+     * to the list of to be drawn windows the service is waiting for.
+     */
+    void beginImeAdjustAnimation() {
+        for (int j = mTasks.size() - 1; j >= 0; j--) {
+            final Task task = mTasks.get(j);
+            if (task.isVisibleForUser()) {
+                task.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
+                task.addWindowsWaitingForDrawnIfResizingChanged();
+            }
+        }
+    }
+
+    /**
+     * Resets the resizing state of all windows.
+     */
+    void endImeAdjustAnimation() {
+        for (int j = mTasks.size() - 1; j >= 0; j--) {
+            mTasks.get(j).setDragResizing(false, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
+        }
+    }
+
     private boolean adjustForIME(final WindowState imeWin) {
         final int dockedSide = getDockSide();
         final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
@@ -946,7 +973,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.top =
                     (int) (mAdjustImeAmount * top + (1 - mAdjustImeAmount) * mBounds.top);
-            mTmpAdjustedBounds.bottom = mTmpAdjustedBounds.top + mBounds.height();
             mFullyAdjustedImeBounds.set(mBounds);
             mFullyAdjustedImeBounds.top = top;
             mFullyAdjustedImeBounds.bottom = top + mBounds.height();
@@ -1159,7 +1185,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mDragResizing;
     }
 
-    private void setDragResizingLocked(boolean resizing) {
+    void setDragResizingLocked(boolean resizing) {
         if (mDragResizing == resizing) {
             return;
         }

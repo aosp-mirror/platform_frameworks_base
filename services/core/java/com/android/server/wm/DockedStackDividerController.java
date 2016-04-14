@@ -24,6 +24,7 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -41,6 +42,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
+import com.android.server.wm.WindowManagerService.H;
 
 import java.util.ArrayList;
 
@@ -76,9 +78,11 @@ public class DockedStackDividerController implements DimLayerUser {
     private static final float CLIP_REVEAL_MEET_FRACTION_MAX = 0.8f;
 
     private static final Interpolator IME_ADJUST_ENTRY_INTERPOLATOR =
-            new PathInterpolator(0.1f, 0f, 0.1f, 1f);
+            new PathInterpolator(0.2f, 0f, 0.1f, 1f);
 
     private static final long IME_ADJUST_ANIM_DURATION = 280;
+
+    private static final long IME_ADJUST_DRAWN_TIMEOUT = 200;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -101,11 +105,13 @@ public class DockedStackDividerController implements DimLayerUser {
     private float mAnimationStart;
     private float mAnimationTarget;
     private long mAnimationDuration;
+    private boolean mAnimationStartDelayed;
     private final Interpolator mMinimizedDockInterpolator;
     private float mMaximizeMeetFraction;
     private final Rect mTouchRegion = new Rect();
     private boolean mAnimatingForIme;
     private boolean mAdjustedForIme;
+    private WindowState mDelayedImeWin;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -192,13 +198,16 @@ public class DockedStackDividerController implements DimLayerUser {
         return mLastVisibility;
     }
 
-    void setAdjustedForIme(boolean adjusted, boolean animate) {
+    void setAdjustedForIme(boolean adjusted, boolean animate, WindowState imeWin) {
         if (mAdjustedForIme != adjusted) {
             mAdjustedForIme = adjusted;
             if (animate) {
-                startImeAdjustAnimation(adjusted ? 0 : 1, adjusted ? 1 : 0);
+                startImeAdjustAnimation(adjusted, imeWin);
+            } else {
+
+                // Animation might be delayed, so only notify if we don't run an animation.
+                notifyAdjustedForImeChanged(adjusted, 0 /* duration */);
             }
-            notifyAdjustedForImeChanged(adjusted, animate ? IME_ADJUST_ANIM_DURATION : 0);
         }
     }
 
@@ -429,11 +438,46 @@ public class DockedStackDividerController implements DimLayerUser {
         mAnimationTarget = to;
     }
 
-    private void startImeAdjustAnimation(float from, float to) {
+    private void startImeAdjustAnimation(boolean adjusted, WindowState imeWin) {
         mAnimatingForIme = true;
         mAnimationStarted = false;
-        mAnimationStart = from;
-        mAnimationTarget = to;
+        mAnimationStart = adjusted ? 0 : 1;
+        mAnimationTarget = adjusted ? 1 : 0;
+
+        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
+        for (int i = stacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = stacks.get(i);
+            if (stack.isVisibleLocked() && stack.isAdjustedForIme()) {
+                stack.beginImeAdjustAnimation();
+            }
+        }
+
+        // We put all tasks into drag resizing mode - wait until all of them have completed the
+        // drag resizing switch.
+        if (!mService.mWaitingForDrawn.isEmpty()) {
+            mService.mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
+            mService.mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT,
+                    IME_ADJUST_DRAWN_TIMEOUT);
+            mAnimationStartDelayed = true;
+            if (imeWin != null) {
+
+                // There might be an old window delaying the animation start - clear it.
+                if (mDelayedImeWin != null) {
+                    mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
+                }
+                mDelayedImeWin = imeWin;
+                imeWin.mWinAnimator.startDelayingAnimationStart();
+            }
+            mService.mWaitingForDrawnCallback = () -> {
+                mAnimationStartDelayed = false;
+                if (mDelayedImeWin != null) {
+                    mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
+                }
+                notifyAdjustedForImeChanged(adjusted, IME_ADJUST_ANIM_DURATION);
+            };
+        } else {
+            notifyAdjustedForImeChanged(adjusted, IME_ADJUST_ANIM_DURATION);
+        }
     }
 
     private void setMinimizedDockedStack(boolean minimized) {
@@ -462,7 +506,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean animateForIme(long now) {
-        if (!mAnimationStarted) {
+        if (!mAnimationStarted || mAnimationStartDelayed) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
             mAnimationDuration = (long)
@@ -480,7 +524,11 @@ public class DockedStackDividerController implements DimLayerUser {
                     stack.resetAdjustedForIme(true /* adjustBoundsNow */);
                     updated = true;
                 } else {
-                    updated |= stack.updateAdjustForIme(getInterpolatedAnimationValue(t));
+                    updated |= stack.updateAdjustForIme(getInterpolatedAnimationValue(t),
+                            false /* force */);
+                }
+                if (t >= 1f) {
+                    stack.endImeAdjustAnimation();
                 }
             }
         }
