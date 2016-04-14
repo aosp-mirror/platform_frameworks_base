@@ -16,7 +16,7 @@
 
 package com.android.server.notification;
 
-import android.app.AutomaticZenRule;
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,7 +29,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
-import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -82,6 +81,7 @@ public class ConditionProviders extends ManagedServices {
         c.caption = "condition provider";
         c.serviceInterface = ConditionProviderService.SERVICE_INTERFACE;
         c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES;
+        c.secondarySettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
         c.bindPermission = android.Manifest.permission.BIND_CONDITION_PROVIDER_SERVICE;
         c.settingsAction = Settings.ACTION_CONDITION_PROVIDER_SETTINGS;
         c.clientLabel = R.string.condition_provider_service_binding_label;
@@ -257,7 +257,7 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    protected ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
+    protected @NonNull ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
             int userId) {
         final ContentResolver cr = mContext.getContentResolver();
         String settingValue = Settings.Secure.getStringForUser(
@@ -265,12 +265,17 @@ public class ConditionProviders extends ManagedServices {
                 settingName,
                 userId);
         if (TextUtils.isEmpty(settingValue))
-            return null;
+            return new ArraySet<>();
         String[] packages = settingValue.split(ENABLED_SERVICES_SEPARATOR);
         ArraySet<ComponentName> result = new ArraySet<>(packages.length);
         for (int i = 0; i < packages.length; i++) {
             if (!TextUtils.isEmpty(packages[i])) {
-                result.addAll(queryPackageForServices(packages[i], userId));
+                final ComponentName component = ComponentName.unflattenFromString(packages[i]);
+                if (component != null) {
+                    result.addAll(queryPackageForServices(component.getPackageName(), userId));
+                } else {
+                    result.addAll(queryPackageForServices(packages[i], userId));
+                }
             }
         }
         return result;
