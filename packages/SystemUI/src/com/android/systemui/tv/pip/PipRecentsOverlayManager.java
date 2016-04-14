@@ -132,6 +132,7 @@ public class PipRecentsOverlayManager {
      * @param allowRecentsFocusable {@code true} if Recents can have focus. (i.e. Has a recent task)
      */
     public void requestFocus(boolean allowRecentsFocusable) {
+        mRecentsView.setVisibility(allowRecentsFocusable ? View.VISIBLE : View.GONE);
         if (!mIsRecentsShown || mIsPipFocusedInRecent) {
             return;
         }
@@ -141,7 +142,6 @@ public class PipRecentsOverlayManager {
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
         mPipControlsView.requestFocus();
         mPipControlsView.startFocusGainAnimation();
-        mRecentsView.setVisibility(allowRecentsFocusable ? View.VISIBLE : View.GONE);
     }
 
     /**
