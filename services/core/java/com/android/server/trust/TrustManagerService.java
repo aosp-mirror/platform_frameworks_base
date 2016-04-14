@@ -974,7 +974,6 @@ public class TrustManagerService extends SystemService {
         public void register(Context context) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-            filter.addAction(Intent.ACTION_USER_PRESENT);
             filter.addAction(Intent.ACTION_USER_ADDED);
             filter.addAction(Intent.ACTION_USER_REMOVED);
             context.registerReceiverAsUser(this,
