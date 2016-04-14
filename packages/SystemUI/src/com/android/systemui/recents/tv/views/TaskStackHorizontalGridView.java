@@ -33,9 +33,6 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.TaskStack.TaskStackCallbacks;
 import com.android.systemui.recents.views.AnimationProps;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Horizontal Grid View Implementation to show the Task Stack for TV.
  */

@@ -46,7 +46,6 @@ public class HomeRecentsEnterExitAnimationHolder {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
             view.setTranslationX(-mTranslationX);
-            view.setAlpha(0.0f);
             view.animate()
                     .alpha(1.0f)
                     .translationX(0)
@@ -76,7 +75,7 @@ public class HomeRecentsEnterExitAnimationHolder {
     public void setEnterFromHomeStartingAnimationValues() {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
-            view.setTranslationX(-mTranslationX);
+            view.setTranslationX(0);
             view.setAlpha(0.0f);
         }
     }

@@ -17,10 +17,15 @@ package com.android.systemui.recents.tv.views;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -38,7 +43,8 @@ import com.android.systemui.recents.model.Task;
 
 public class TaskCardView extends LinearLayout {
 
-    private ImageView mThumbnailView;
+    private static final String TAG = "TaskCardView";
+    private View mThumbnailView;
     private TextView mTitleTextView;
     private ImageView mBadgeView;
     private Task mTask;
@@ -58,26 +64,28 @@ public class TaskCardView extends LinearLayout {
 
     public TaskCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mViewFocusAnimator = new ViewFocusAnimator(this);
         mDismissState = false;
+        Configuration config = getResources().getConfiguration();
+        setLayoutDirection(config.getLayoutDirection());
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mThumbnailView = (ImageView) findViewById(R.id.card_view_thumbnail);
+        mThumbnailView = findViewById(R.id.card_view_thumbnail);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
         mDismissAnimationsHolder = new DismissAnimationsHolder(this);
         View title = findViewById(R.id.card_info_field);
         mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
+        mViewFocusAnimator = new ViewFocusAnimator(this);
     }
 
     public void init(Task task) {
         mTask = task;
-        mThumbnailView.setImageBitmap(task.thumbnail);
         mTitleTextView.setText(task.title);
         mBadgeView.setImageDrawable(task.icon);
+        setThumbnailView();
     }
 
     public Task getTask() {
@@ -237,5 +245,65 @@ public class TaskCardView extends LinearLayout {
         mDismissState = false;
         mRecentsRowFocusAnimationHolder.reset();
         mDismissAnimationsHolder.reset();
+    }
+
+    private void setThumbnailView() {
+        ImageView screenshotView = (ImageView) findViewById(R.id.card_view_banner_icon);
+        PackageManager pm = getContext().getPackageManager();
+        if (mTask.thumbnail != null) {
+            setAsScreenShotView(mTask.thumbnail, screenshotView);
+        } else {
+            try {
+                Drawable banner = null;
+                if (mTask.key != null) {
+                    banner = pm.getActivityBanner(mTask.key.baseIntent);
+                }
+                if (banner != null) {
+                    setAsBannerView(banner, screenshotView);
+                } else {
+                    setAsIconView(mTask.icon, screenshotView);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Package not found : " + e);
+                setAsIconView(mTask.icon, screenshotView);
+            }
+        }
+    }
+
+    private void setAsScreenShotView(Bitmap screenshot, ImageView screenshotView) {
+        LayoutParams lp = (LayoutParams) screenshotView.getLayoutParams();
+        lp.width = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_card_width);
+        lp.height = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_screenshot_height);
+
+        screenshotView.setLayoutParams(lp);
+        screenshotView.setImageBitmap(screenshot);
+    }
+
+    private void setAsBannerView(Drawable banner, ImageView bannerView) {
+        LayoutParams lp = (LayoutParams) bannerView.getLayoutParams();
+        lp.width = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_banner_width);
+        lp.height = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_banner_height);
+
+        bannerView.setLayoutParams(lp);
+        bannerView.setImageDrawable(banner);
+    }
+
+    private void setAsIconView(Drawable icon, ImageView iconView) {
+        LayoutParams lp = (LayoutParams) iconView.getLayoutParams();
+        lp.width = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_fallback_icon_width);
+        lp.height = getResources()
+                .getDimensionPixelSize(R.dimen.recents_tv_fallback_icon_height);
+
+        iconView.setLayoutParams(lp);
+        iconView.setImageDrawable(icon);
+    }
+
+    public View getThumbnailView() {
+        return mThumbnailView;
     }
 }
