@@ -187,6 +187,11 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
     /**
      * Returns whether icon spacing needs to be preserved for the given menu, based on whether any
      * of its items contains an icon.
+     *
+     * NOTE: This should only be used for non-overflow-only menus, because this method does not
+     * take into account whether the menu items are being shown as part of the popup or or being
+     * shown as actions in the action bar.
+     *
      * @param menu
      * @return Whether to preserve icon spacing.
      */
