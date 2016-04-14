@@ -17,6 +17,7 @@
 package com.android.server.voiceinteraction;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
@@ -42,9 +43,11 @@ import android.view.IWindowManager;
 
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -148,8 +151,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
                     mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
+        List<IBinder> activityTokens = null;
+        if (activityToken == null) {
+            // Let's get top activities from all visible stacks
+            activityTokens = LocalServices.getService(ActivityManagerInternal.class)
+                    .getTopVisibleActivities();
+        }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
-                activityToken);
+                activityToken, activityTokens);
     }
 
     public boolean hideSessionLocked() {
