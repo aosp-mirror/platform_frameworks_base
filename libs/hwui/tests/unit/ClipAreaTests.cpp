@@ -132,6 +132,7 @@ TEST(ClipArea, serializeClip) {
         auto serializedClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::Rectangle, serializedClip->mode);
+        ASSERT_FALSE(serializedClip->intersectWithRoot) << "No replace, so no intersectWithRoot";
         EXPECT_EQ(Rect(200, 200), serializedClip->rect);
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
@@ -145,6 +146,7 @@ TEST(ClipArea, serializeClip) {
         auto serializedClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::RectangleList, serializedClip->mode);
+        ASSERT_FALSE(serializedClip->intersectWithRoot) << "No replace, so no intersectWithRoot";
         auto clipRectList = reinterpret_cast<const ClipRectList*>(serializedClip);
         EXPECT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
         EXPECT_EQ(Rect(37, 54, 145, 163), clipRectList->rect);
@@ -160,6 +162,7 @@ TEST(ClipArea, serializeClip) {
         auto serializedClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::Region, serializedClip->mode);
+        ASSERT_TRUE(serializedClip->intersectWithRoot) << "Replace op, so expect intersectWithRoot";
         auto clipRegion = reinterpret_cast<const ClipRegion*>(serializedClip);
         EXPECT_EQ(SkIRect::MakeWH(200, 200), clipRegion->region.getBounds())
                 << "Clip region should be 200x200";
@@ -167,6 +170,18 @@ TEST(ClipArea, serializeClip) {
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
+}
+
+TEST(ClipArea, serializeClip_pathIntersectWithRoot) {
+    ClipArea area(createClipArea());
+    LinearAllocator allocator;
+    SkPath circlePath;
+    circlePath.addCircle(100, 100, 100);
+    area.clipPathWithTransform(circlePath, &Matrix4::identity(), SkRegion::kIntersect_Op);
+
+    auto serializedClip = area.serializeClip(allocator);
+    ASSERT_NE(nullptr, serializedClip);
+    EXPECT_FALSE(serializedClip->intersectWithRoot) << "No replace, so no intersectWithRoot";
 }
 
 TEST(ClipArea, serializeIntersectedClip) {
