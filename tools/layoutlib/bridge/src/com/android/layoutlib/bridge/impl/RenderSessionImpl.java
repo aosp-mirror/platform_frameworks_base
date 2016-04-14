@@ -48,6 +48,7 @@ import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.util.Pair;
+import com.android.util.PropertiesMap;
 
 import android.animation.AnimationThread;
 import android.animation.Animator;
@@ -1413,6 +1414,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     public List<ViewInfo> getSystemViewInfos() {
         return mSystemViewInfoList;
+    }
+
+    public Map<Object, PropertiesMap> getDefaultProperties() {
+        return getContext().getDefaultProperties();
     }
 
     public void setScene(RenderSession session) {
