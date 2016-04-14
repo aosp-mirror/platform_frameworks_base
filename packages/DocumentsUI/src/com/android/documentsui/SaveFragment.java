@@ -84,6 +84,13 @@ public class SaveFragment extends Fragment {
                 new View.OnKeyListener() {
                     @Override
                     public boolean onKey(View v, int keyCode, KeyEvent event) {
+                        // Only handle key-down events. This is simpler, consistent with most other
+                        // UIs, and enables the handling of repeated key events from holding down a
+                        // key.
+                        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                            return false;
+                        }
+
                         if (keyCode == KeyEvent.KEYCODE_ENTER && mSave.isEnabled()) {
                             performSave();
                             return true;
