@@ -79,6 +79,16 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mJobFactory.assertAllJobsStarted();
     }
 
+    public void testRunsJobs_AfterExceptionInJobCreation() throws Exception {
+        startService(createCopyIntent(new ArrayList<DocumentInfo>(), BETA_DOC));
+        startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
+
+        mJobFactory.assertJobsCreated(1);
+
+        mExecutor.runAll();
+        mJobFactory.assertAllJobsStarted();
+    }
+
     public void testRunsJobs_AfterFailure() throws Exception {
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
@@ -182,9 +192,18 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
             }
         }
 
+        void assertJobsCreated(int expected) {
+            assertEquals(expected, jobs.size());
+        }
+
         @Override
         Job createCopy(Context service, Context appContext, Listener listener, String id,
                 DocumentStack stack, List<DocumentInfo> srcs) {
+
+            if (srcs.isEmpty()) {
+                throw new RuntimeException("Empty srcs not supported!");
+            }
+
             TestJob job = new TestJob(service, appContext, listener, OPERATION_COPY, id, stack);
             jobs.add(job);
             return job;

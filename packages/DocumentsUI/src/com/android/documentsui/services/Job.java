@@ -291,18 +291,24 @@ abstract public class Job implements Runnable {
 
         Job createCopy(Context service, Context appContext, Listener listener,
                 String id, DocumentStack stack, List<DocumentInfo> srcs) {
+            assert(!srcs.isEmpty());
+            assert(stack.peek().isCreateSupported());
             return new CopyJob(service, appContext, listener, id, stack, srcs);
         }
 
         Job createMove(Context service, Context appContext, Listener listener,
                 String id, DocumentStack stack, List<DocumentInfo> srcs,
                 DocumentInfo srcParent) {
+            assert(!srcs.isEmpty());
+            assert(stack.peek().isCreateSupported());
             return new MoveJob(service, appContext, listener, id, stack, srcs, srcParent);
         }
 
         Job createDelete(Context service, Context appContext, Listener listener,
                 String id, DocumentStack stack, List<DocumentInfo> srcs,
                 DocumentInfo srcParent) {
+            assert(!srcs.isEmpty());
+            assert(stack.peek().isDirectory());  // we can't currently delete from archives.
             return new DeleteJob(service, appContext, listener, id, stack, srcs, srcParent);
         }
     }
