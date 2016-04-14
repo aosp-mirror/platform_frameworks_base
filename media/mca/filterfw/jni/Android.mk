@@ -43,4 +43,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-unused-parameter
 
+LOCAL_SHARED_LIBRARIES := libmedia
+
 include $(BUILD_STATIC_LIBRARY)
