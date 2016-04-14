@@ -78,7 +78,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private static final Interpolator IME_ADJUST_ENTRY_INTERPOLATOR =
             new PathInterpolator(0.1f, 0f, 0.1f, 1f);
 
-    private static final long IME_ADJUST_DURATION = 280;
+    private static final long IME_ADJUST_ANIM_DURATION = 280;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -198,6 +198,7 @@ public class DockedStackDividerController implements DimLayerUser {
             if (animate) {
                 startImeAdjustAnimation(adjusted ? 0 : 1, adjusted ? 1 : 0);
             }
+            notifyAdjustedForImeChanged(adjusted, animate ? IME_ADJUST_ANIM_DURATION : 0);
         }
     }
 
@@ -291,12 +292,27 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.finishBroadcast();
     }
 
+    void notifyAdjustedForImeChanged(boolean adjustedForIme, long animDuration) {
+        final int size = mDockedStackListeners.beginBroadcast();
+        for (int i = 0; i < size; ++i) {
+            final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
+            try {
+                listener.onAdjustedForImeChanged(adjustedForIme, animDuration);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering adjusted for ime changed event.", e);
+            }
+        }
+        mDockedStackListeners.finishBroadcast();
+    }
+
     void registerDockedStackListener(IDockedStackListener listener) {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());
         notifyDockedStackExistsChanged(
                 mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID) != null);
         notifyDockedStackMinimizedChanged(mMinimizedDock, 0 /* animDuration */);
+        notifyAdjustedForImeChanged(mAdjustedForIme, 0 /* animDuration */);
+
     }
 
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
@@ -450,7 +466,7 @@ public class DockedStackDividerController implements DimLayerUser {
             mAnimationStarted = true;
             mAnimationStartTime = now;
             mAnimationDuration = (long)
-                    (IME_ADJUST_DURATION * mService.getWindowAnimationScaleLocked());
+                    (IME_ADJUST_ANIM_DURATION * mService.getWindowAnimationScaleLocked());
         }
         float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
         t = (mAnimationTarget == 1f ? IME_ADJUST_ENTRY_INTERPOLATOR : TOUCH_RESPONSE_INTERPOLATOR)

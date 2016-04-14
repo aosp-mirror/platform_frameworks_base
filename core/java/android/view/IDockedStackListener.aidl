@@ -44,6 +44,15 @@ oneway interface IDockedStackListener {
     void onDockedStackMinimizedChanged(boolean minimized, long animDuration);
 
     /**
+     * Called when window manager decides to adjust the divider for IME. Like the minimized state,
+     * the divider should make itself not interactable and shrink a bit, but in a different way.s
+     *
+     * @param minimized Whether the stacks are currently adjusted for the IME
+     * @param animDuration The duration of the animation for changing the adjusted state.
+     */
+    void onAdjustedForImeChanged(boolean adjustedForIme, long animDuration);
+
+    /**
      * Called when window manager repositioned the docked stack after a screen rotation change.
      */
     void onDockSideChanged(int newDockSide);
