@@ -1575,7 +1575,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
 
-            // Get the app name
+            // Get the app name.
+            // Note that Notification.Builder#bindHeaderAppName has similar logic
+            // but since this field is used in the guts, it must be accurate.
+            // Therefore we will only show the application label, or, failing that, the
+            // package name. No substitutions.
             final String pkg = sbn.getPackageName();
             String appname = pkg;
             try {
