@@ -2107,6 +2107,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
                 reportNewConfig = true;
             }
+            if (attrs.removeTimeoutMilliseconds > 0) {
+                mH.sendMessageDelayed(
+                        mH.obtainMessage(H.WINDOW_REMOVE_TIMEOUT, win),
+                        attrs.removeTimeoutMilliseconds);
+            }
         }
 
         if (reportNewConfig) {
@@ -7788,8 +7793,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_APP_TRANSITION_CANCELLED = 48;
         public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
-
         public static final int UPDATE_ANIMATION_SCALE = 51;
+        public static final int WINDOW_REMOVE_TIMEOUT = 52;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -8400,6 +8405,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case NOTIFY_STARTING_WINDOW_DRAWN: {
                     mAmInternal.notifyStartingWindowDrawn();
+                }
+                break;
+                case WINDOW_REMOVE_TIMEOUT: {
+                    final WindowState window = (WindowState) msg.obj;
+                    synchronized(mWindowMap) {
+                        // It's counterintuitive that we check that "mWindowRemovalAllowed"
+                        // is false. But in fact if it's true, it means a remove has already
+                        // been requested and we better just not do anything.
+                        if (!window.mRemoved && !window.mWindowRemovalAllowed) {
+                            removeWindowLocked(window);
+                        }
+                    }
                 }
                 break;
             }
