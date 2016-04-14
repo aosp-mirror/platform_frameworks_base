@@ -90,12 +90,13 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         }
     }
 
-    private void checkCertainPackageUsedAfterWebViewPreparation(String expectedProviderName,
+    private void checkCertainPackageUsedAfterWebViewBootPreparation(String expectedProviderName,
             WebViewProviderInfo[] webviewPackages) {
-        checkCertainPackageUsedAfterWebViewPreparation(expectedProviderName, webviewPackages, 1);
+        checkCertainPackageUsedAfterWebViewBootPreparation(
+                expectedProviderName, webviewPackages, 1);
     }
 
-    private void checkCertainPackageUsedAfterWebViewPreparation(String expectedProviderName,
+    private void checkCertainPackageUsedAfterWebViewBootPreparation(String expectedProviderName,
             WebViewProviderInfo[] webviewPackages, int numRelros) {
         setupWithPackages(webviewPackages, true, numRelros);
         // Add (enabled and valid) package infos for each provider
@@ -156,6 +157,19 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         return p;
     }
 
+    private void checkPreparationPhasesForPackage(String expectedPackage, int numPreparation) {
+        // Verify that onWebViewProviderChanged was called for the numPreparation'th time for the
+        // expected package
+        Mockito.verify(mTestSystemImpl, Mockito.times(numPreparation)).onWebViewProviderChanged(
+                Mockito.argThat(new IsPackageInfoWithName(expectedPackage)));
+
+        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
+
+        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
+        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
+        assertEquals(expectedPackage, response.packageInfo.packageName);
+    }
+
 
     // ****************
     // Tests
@@ -164,7 +178,7 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
 
     public void testWithSinglePackage() {
         String testPackageName = "test.package.name";
-        checkCertainPackageUsedAfterWebViewPreparation(testPackageName,
+        checkCertainPackageUsedAfterWebViewBootPreparation(testPackageName,
                 new WebViewProviderInfo[] {
                     new WebViewProviderInfo(testPackageName, "",
                             true /*default available*/, false /* fallback */, null)});
@@ -176,12 +190,12 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
             new WebViewProviderInfo(nonDefaultPackage, "", false, false, null),
             new WebViewProviderInfo(defaultPackage, "", true, false, null)};
-        checkCertainPackageUsedAfterWebViewPreparation(defaultPackage, packages);
+        checkCertainPackageUsedAfterWebViewBootPreparation(defaultPackage, packages);
     }
 
     public void testSeveralRelros() {
         String singlePackage = "singlePackage";
-        checkCertainPackageUsedAfterWebViewPreparation(
+        checkCertainPackageUsedAfterWebViewBootPreparation(
                 singlePackage,
                 new WebViewProviderInfo[] {
                     new WebViewProviderInfo(singlePackage, "", true /*def av*/, false, null)},
@@ -215,14 +229,8 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
 
         mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
 
-        Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(validPackage)));
 
-        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
-
-        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
-        assertEquals(validPackage, response.packageInfo.packageName);
+        checkPreparationPhasesForPackage(validPackage, 1 /* first preparation for this package */);
 
         WebViewProviderInfo[] validPackages = mWebViewUpdateServiceImpl.getValidWebViewPackages();
         assertEquals(1, validPackages.length);
@@ -292,18 +300,10 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
 
     private void checkSwitchingProvider(WebViewProviderInfo[] packages, String initialPackage,
             String finalPackage) {
-        checkCertainPackageUsedAfterWebViewPreparation(initialPackage, packages);
+        checkCertainPackageUsedAfterWebViewBootPreparation(initialPackage, packages);
 
         mWebViewUpdateServiceImpl.changeProviderAndSetting(finalPackage);
-
-        Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(finalPackage)));
-
-        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
-
-        WebViewProviderResponse secondResponse = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, secondResponse.status);
-        assertEquals(finalPackage, secondResponse.packageInfo.packageName);
+        checkPreparationPhasesForPackage(finalPackage, 1 /* first preparation for this package */);
 
         Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(initialPackage));
     }
@@ -455,14 +455,9 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
         Mockito.verify(mTestSystemImpl, Mockito.never()).uninstallAndDisablePackageForAllUsers(
                 Matchers.anyObject(), Matchers.anyObject());
-        Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(fallbackPackage)));
 
-        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
-
-        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
-        assertEquals(fallbackPackage, response.packageInfo.packageName);
+        checkPreparationPhasesForPackage(fallbackPackage,
+                1 /* first preparation for this package*/);
 
         // Install primary package
         mTestSystemImpl.setPackageInfo(
@@ -470,17 +465,10 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
                 WebViewUpdateService.PACKAGE_ADDED);
 
-        // Verify fallback disabled and primary package used as provider
+        // Verify fallback disabled, primary package used as provider, and fallback package killed
         Mockito.verify(mTestSystemImpl).uninstallAndDisablePackageForAllUsers(
                 Matchers.anyObject(), Mockito.eq(fallbackPackage));
-        Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(primaryPackage)));
-
-        // Finish the webview preparation and ensure primary package used and fallback killed
-        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
-        response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
-        assertEquals(primaryPackage, response.packageInfo.packageName);
+        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation for this package*/);
         Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(fallbackPackage));
     }
 
@@ -598,15 +586,72 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         mWebViewUpdateServiceImpl.packageStateChanged(firstPackage,
                 WebViewUpdateService.PACKAGE_ADDED);
 
-        // Second time we call onWebViewProviderChanged for firstPackage
-        Mockito.verify(mTestSystemImpl, Mockito.times(2)).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(firstPackage)));
+        // Ensure we use firstPackage
+        checkPreparationPhasesForPackage(firstPackage, 2 /* second preparation for this package */);
+    }
 
-        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
+    /**
+     * Verify that even if a user-chosen package is removed temporarily we start using it again when
+     * it is added back.
+     */
+    public void testTempRemovePackageDoesntSwitchProviderPermanently() {
+        String firstPackage = "first";
+        String secondPackage = "second";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(secondPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+        checkCertainPackageUsedAfterWebViewBootPreparation(firstPackage, packages);
 
-        response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
-        assertEquals(firstPackage, response.packageInfo.packageName);
+        // Explicitly use the second package
+        mWebViewUpdateServiceImpl.changeProviderAndSetting(secondPackage);
+        checkPreparationPhasesForPackage(secondPackage, 1 /* first time for this package */);
+
+        // Remove second package (invalidate it) and verify that first package is used
+        mTestSystemImpl.setPackageInfo(createPackageInfo(secondPackage, true /* enabled */,
+                    false /* valid */));
+        mWebViewUpdateServiceImpl.packageStateChanged(secondPackage,
+                WebViewUpdateService.PACKAGE_ADDED);
+        checkPreparationPhasesForPackage(firstPackage, 2 /* second time for this package */);
+
+        // Now make the second package valid again and verify that it is used again
+        mTestSystemImpl.setPackageInfo(createPackageInfo(secondPackage, true /* enabled */,
+                    true /* valid */));
+        mWebViewUpdateServiceImpl.packageStateChanged(secondPackage,
+                WebViewUpdateService.PACKAGE_ADDED);
+        checkPreparationPhasesForPackage(secondPackage, 2 /* second time for this package */);
+    }
+
+    /**
+     * Ensure that we update the user-chosen setting across boots if the chosen package is no
+     * longer installed and valid.
+     */
+    public void testProviderSettingChangedDuringBootIfProviderNotAvailable() {
+        String chosenPackage = "chosenPackage";
+        String nonChosenPackage = "non-chosenPackage";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(chosenPackage, "", true /* default available */,
+                    false /* fallback */, null),
+            new WebViewProviderInfo(nonChosenPackage, "", true /* default available */,
+                    false /* fallback */, null)};
+
+        setupWithPackages(packages);
+        // Only 'install' nonChosenPackage
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(nonChosenPackage, true /* enabled */, true /* valid */));
+
+        // Set user-chosen package
+        mTestSystemImpl.updateUserSetting(null, chosenPackage);
+
+        mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
+
+        // Verify that we switch the setting to point to the current package
+        Mockito.verify(mTestSystemImpl).updateUserSetting(
+                Mockito.anyObject(), Mockito.eq(nonChosenPackage));
+        assertEquals(nonChosenPackage, mTestSystemImpl.getUserChosenWebViewProvider(null));
+
+        checkPreparationPhasesForPackage(nonChosenPackage, 1);
     }
 
     // TODO (gsennton) add more tests for ensuring killPackageDependents is called / not called
