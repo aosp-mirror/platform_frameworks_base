@@ -26,8 +26,7 @@ public class KeyboardShortcutsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
-            final KeyboardShortcuts keyboardShortcuts = new KeyboardShortcuts(context);
-            keyboardShortcuts.toggleKeyboardShortcuts(-1 /* deviceId unknown */);
+            KeyboardShortcuts.show(context, -1 /* deviceId unknown */);
         }
     }
 }
