@@ -30,10 +30,12 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.dhcp.DhcpClient;
+import android.net.metrics.IpManagerEvent;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -51,6 +53,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Objects;
+
+import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_OK;
+import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_FAIL;
+import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_COMPLETE_LIFECYCLE;
 
 
 /**
@@ -264,6 +270,7 @@ public class IpManager extends StateMachine {
     private ProxyInfo mHttpProxy;
     private ApfFilter mApfFilter;
     private boolean mMulticastFiltering;
+    private long mStartTimeMillis;
 
     /**
      * Member variables accessed both from within the StateMachine thread
@@ -479,6 +486,12 @@ public class IpManager extends StateMachine {
         }
     }
 
+    private void recordMetric(final int type) {
+        if (mStartTimeMillis <= 0) { Log.wtf(mTag, "Start time undefined!"); }
+        IpManagerEvent.logEvent(type, mInterfaceName,
+                SystemClock.elapsedRealtime() - mStartTimeMillis);
+    }
+
     // For now: use WifiStateMachine's historical notion of provisioned.
     private static boolean isProvisioned(LinkProperties lp) {
         // For historical reasons, we should connect even if all we have is
@@ -554,11 +567,13 @@ public class IpManager extends StateMachine {
         switch (delta) {
             case GAINED_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
+                recordMetric(IPCE_IPMGR_PROVISIONING_OK);
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
             case LOST_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
+                recordMetric(IPCE_IPMGR_PROVISIONING_FAIL);
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
@@ -734,6 +749,10 @@ public class IpManager extends StateMachine {
             }
 
             resetLinkProperties();
+            if (mStartTimeMillis > 0) {
+                recordMetric(IPCE_IPMGR_COMPLETE_LIFECYCLE);
+                mStartTimeMillis = 0;
+            }
         }
 
         @Override
@@ -804,11 +823,16 @@ public class IpManager extends StateMachine {
     class StartedState extends State {
         @Override
         public void enter() {
+            mStartTimeMillis = SystemClock.elapsedRealtime();
+
             mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
                     mCallback, mMulticastFiltering);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
-            if (mApfFilter == null) mCallback.setFallbackMulticastFilter(mMulticastFiltering);
+            if (mApfFilter == null) {
+                mCallback.setFallbackMulticastFilter(mMulticastFiltering);
+            }
+
             // Set privacy extensions.
             try {
                 mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
@@ -839,6 +863,7 @@ public class IpManager extends StateMachine {
                     handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
                 } else {
                     if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
+                    recordMetric(IPCE_IPMGR_PROVISIONING_FAIL);
                     mCallback.onProvisioningFailure(getLinkProperties());
                     transitionTo(mStoppingState);
                 }
