@@ -1,0 +1,183 @@
+page.title=Java 8 の機能
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">Java 8 のサポート機能と API</a>
+      </li>
+      <li>
+        <a href="#configuration">Java 8 の機能と Jack ツールチェーンの有効化</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N 向けのアプリを開発する際は、Java 8 の機能をご利用いただけます。このページでは Android N Preview でサポートしている Java 8 の新機能や、それらを利用するためのプロジェクトの正しい設定方法、想定される既知の問題についてご紹介します。
+
+
+
+
+</p>
+
+<p>これらの機能を使うには、Android Studio 2.1（プレビュー版）と Android N Preview SDK をダウンロードしてセットアップし、Jack ツールチェーンと最新の Gradle 用の Android Plugin を準備する必要があります。Android N Preview SDK をお持ちでない方は、<a href="{@docRoot}preview/setup-sdk.html">Android N 向けの開発準備</a>の説明をご覧ください。
+
+
+</p>
+
+
+
+<p class="note">
+  <strong>注: </strong> Android N プラットフォーム向けのアプリを開発する際は、必ずしも Java 8 の新機能を使う必要はありません。Java 8 の機能を使用せずにコーディングしたい場合は、プロジェクトのソースコードを保持して、ターゲットの互換性の指定を Java 7 にしておくこともできます。ただし、Android N プラットフォームでビルドする時は、必ず JDK 8 を使用してコンパイルしてください。
+
+
+
+
+</p>
+
+<h2 id="supported-features">
+  Java 8 のサポート機能と API
+</h2>
+
+<p>
+  Android ではまだ Java 8 の全機能はサポートしておりません。現時点で Android N のプレビュー版向けにアプリを開発する際にご利用いただける機能は、以下のとおりです。
+
+
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">デフォルトおよび静的インターフェースのメソッド</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">ラムダ式</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">反復アノテーション</a>
+
+  </li>
+</ul>
+
+
+<p>
+  さらに以下の Java 8 機能の API もご利用いただけます。
+</p>
+
+<ul>
+  <li>リフレクションおよび言語関連の API
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface}
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable}
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()}
+      </li>
+
+      <li>以下のような反復アノテーション関連のリフレクション API
+      {@code AnnotatedElement.getAnnotationsByType(Class)}
+      </li>
+    </ul>
+  </li>
+  <li>ユーティリティ API
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>注:</strong> Android N の実装は匿名クラスのラムダ式に基づいているため下方互換性があり、前の Andoird バージョンで実行することができます。前のバージョンでラムダ式をテストする際は、必ず {@code
+  build.gradle} ファイルの {@code compileSdkVersion} と {@code
+  targetSdkVersion} の値を 23 以下に設定してください。
+
+
+
+</p>
+
+<h2 id="configuration">
+  Java 8 の機能と Jack ツールチェーンの有効化
+</h2>
+
+<p>
+  Java 8 の新機能を使うには、新しい <a class="external-link" href="https://source.android.com/source/jack.html">Jack ツールチェーン</a>も必要です。この新しい Android ツールチェーンは、Java のソースコードを Android で判別可能な dex バイトコードにコンパイルします。さらにこのツールには独自の {@code .jack} ライブラリ フォーマットがあり、再パッケージ化、縮小、難読化、Multidex など、ほとんどのツールチェーン機能に対応しています。
+
+
+
+
+
+</p>
+
+<p>以下は、Android の DEX ファイルのビルドに使用する 2 つのツールチェーンの比較です。</p>
+<ul>
+  <li>従来の javac ツールチェーン<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>新しい Jack ツールチェーン<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Gradle の設定
+</h3>
+
+<p>
+  プロジェクトで Java 8 の機能と Jack を使うには、モジュール固有の {@code build.gradle} ファイルに以下の内容を記載します。
+
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  既知の問題
+</h3>
+
+<p>
+  Android Studio 2.0（ベータ版）で導入された Instant Run は、現段階では Jack と併用できません。そのため新しいツールチェーンの使用中は、Instant Run が無効になります。
+
+</p>
+
+<p>Jack はアプリのコンパイル中に中間クラスファイルを生成しないため、中間ファイルに依存する以下のようなツールは現在 Jack と併用できません。
+
+</p>
+
+<ul>
+  <li>クラスファイルに作用する Lint Detector
+  </li>
+
+  <li>アプリのクラスファイルを必要とするツールやライブラリ（JaCoCo や Mockito など）
+</li>
+</ul>
+
+<p>その他の不具合がありましたら、<a href="http://tools.android.com/filing-bugs">バグの報告</a>をお願いします。</p>
