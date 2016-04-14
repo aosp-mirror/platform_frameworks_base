@@ -23,6 +23,7 @@
 #include <inttypes.h>
 
 #include <android_runtime/AndroidRuntime.h>
+#include <androidfw/DisplayEventDispatcher.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
@@ -35,11 +36,6 @@
 
 namespace android {
 
-// Number of events to read at a time from the DisplayEventReceiver pipe.
-// The value should be large enough that we can quickly drain the pipe
-// using just a few large reads.
-static const size_t EVENT_BUFFER_SIZE = 100;
-
 static struct {
     jclass clazz;
 
@@ -48,14 +44,12 @@ static struct {
 } gDisplayEventReceiverClassInfo;
 
 
-class NativeDisplayEventReceiver : public LooperCallback {
+class NativeDisplayEventReceiver : public DisplayEventDispatcher {
 public:
     NativeDisplayEventReceiver(JNIEnv* env,
             jobject receiverWeak, const sp<MessageQueue>& messageQueue);
 
-    status_t initialize();
     void dispose();
-    status_t scheduleVsync();
 
 protected:
     virtual ~NativeDisplayEventReceiver();
@@ -64,19 +58,17 @@ private:
     jobject mReceiverWeakGlobal;
     sp<MessageQueue> mMessageQueue;
     DisplayEventReceiver mReceiver;
-    bool mWaitingForVsync;
 
-    virtual int handleEvent(int receiveFd, int events, void* data);
-    bool processPendingEvents(nsecs_t* outTimestamp, int32_t* id, uint32_t* outCount);
-    void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
-    void dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected);
+    virtual void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
+    virtual void dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected);
 };
 
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
         jobject receiverWeak, const sp<MessageQueue>& messageQueue) :
+        DisplayEventDispatcher(messageQueue->getLooper()),
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
-        mMessageQueue(messageQueue), mWaitingForVsync(false) {
+        mMessageQueue(messageQueue) {
     ALOGV("receiver %p ~ Initializing display event receiver.", this);
 }
 
@@ -85,108 +77,12 @@ NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
     env->DeleteGlobalRef(mReceiverWeakGlobal);
 }
 
-status_t NativeDisplayEventReceiver::initialize() {
-    status_t result = mReceiver.initCheck();
-    if (result) {
-        ALOGW("Failed to initialize display event receiver, status=%d", result);
-        return result;
-    }
-
-    int rc = mMessageQueue->getLooper()->addFd(mReceiver.getFd(), 0, Looper::EVENT_INPUT,
-            this, NULL);
-    if (rc < 0) {
-        return UNKNOWN_ERROR;
-    }
-    return OK;
-}
-
 void NativeDisplayEventReceiver::dispose() {
     ALOGV("receiver %p ~ Disposing display event receiver.", this);
 
     if (!mReceiver.initCheck()) {
         mMessageQueue->getLooper()->removeFd(mReceiver.getFd());
     }
-}
-
-status_t NativeDisplayEventReceiver::scheduleVsync() {
-    if (!mWaitingForVsync) {
-        ALOGV("receiver %p ~ Scheduling vsync.", this);
-
-        // Drain all pending events.
-        nsecs_t vsyncTimestamp;
-        int32_t vsyncDisplayId;
-        uint32_t vsyncCount;
-        processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount);
-
-        status_t status = mReceiver.requestNextVsync();
-        if (status) {
-            ALOGW("Failed to request next vsync, status=%d", status);
-            return status;
-        }
-
-        mWaitingForVsync = true;
-    }
-    return OK;
-}
-
-int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* data) {
-    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
-        ALOGE("Display event receiver pipe was closed or an error occurred.  "
-                "events=0x%x", events);
-        return 0; // remove the callback
-    }
-
-    if (!(events & Looper::EVENT_INPUT)) {
-        ALOGW("Received spurious callback for unhandled poll event.  "
-                "events=0x%x", events);
-        return 1; // keep the callback
-    }
-
-    // Drain all pending events, keep the last vsync.
-    nsecs_t vsyncTimestamp;
-    int32_t vsyncDisplayId;
-    uint32_t vsyncCount;
-    if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        ALOGV("receiver %p ~ Vsync pulse: timestamp=%" PRId64 ", id=%d, count=%d",
-                this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
-        mWaitingForVsync = false;
-        dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
-    }
-
-    return 1; // keep the callback
-}
-
-bool NativeDisplayEventReceiver::processPendingEvents(
-        nsecs_t* outTimestamp, int32_t* outId, uint32_t* outCount) {
-    bool gotVsync = false;
-    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-    ssize_t n;
-    while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        ALOGV("receiver %p ~ Read %d events.", this, int(n));
-        for (ssize_t i = 0; i < n; i++) {
-            const DisplayEventReceiver::Event& ev = buf[i];
-            switch (ev.header.type) {
-            case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
-                // Later vsync events will just overwrite the info from earlier
-                // ones. That's fine, we only care about the most recent.
-                gotVsync = true;
-                *outTimestamp = ev.header.timestamp;
-                *outId = ev.header.id;
-                *outCount = ev.vsync.count;
-                break;
-            case DisplayEventReceiver::DISPLAY_EVENT_HOTPLUG:
-                dispatchHotplug(ev.header.timestamp, ev.header.id, ev.hotplug.connected);
-                break;
-            default:
-                ALOGW("receiver %p ~ ignoring unknown event type %#x", this, ev.header.type);
-                break;
-            }
-        }
-    }
-    if (n < 0) {
-        ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
-    }
-    return gotVsync;
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
