@@ -24,6 +24,7 @@ import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.tools.layoutlib.java.System_Delegate;
+import com.android.util.PropertiesMap;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,11 @@ public class BridgeRenderSession extends RenderSession {
     @Override
     public List<ViewInfo> getSystemRootViews() {
         return mSession.getSystemViewInfos();
+    }
+
+    @Override
+    public Map<Object, PropertiesMap> getDefaultProperties() {
+        return mSession.getDefaultProperties();
     }
 
     @Override
@@ -194,10 +200,6 @@ public class BridgeRenderSession extends RenderSession {
         if (mSession != null) {
             mSession.dispose();
         }
-    }
-
-    public RenderSessionImpl getSessionImpl() {
-        return mSession;
     }
 
     /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {

@@ -27,12 +27,13 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
-import com.android.layoutlib.bridge.android.PropertiesMap.Property;
 import com.android.layoutlib.bridge.android.view.WindowManagerImpl;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
+import com.android.util.PropertiesMap;
+import com.android.util.PropertiesMap.Property;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -152,7 +153,6 @@ public final class BridgeContext extends Context {
     private ClassLoader mClassLoader;
     private IBinder mBinder;
     private PackageManager mPackageManager;
-
 
     /**
      * Some applications that target both pre API 17 and post API 17, set the newer attrs to
@@ -276,8 +276,8 @@ public final class BridgeContext extends Context {
         return mRenderResources;
     }
 
-    public PropertiesMap getDefaultPropMap(Object key) {
-        return mDefaultPropMaps.get(key);
+    public Map<Object, PropertiesMap> getDefaultProperties() {
+        return mDefaultPropMaps;
     }
 
     public Configuration getConfiguration() {
@@ -1861,7 +1861,6 @@ public final class BridgeContext extends Context {
     public boolean isCredentialProtectedStorage() {
         return false;
     }
-
 
     /**
      * The cached value depends on
