@@ -109,7 +109,6 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
-import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17382,6 +17381,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 return true;
             }
         });
+
+        // Now that we're mostly running, clean up stale users and apps
+        reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
+        reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
     }
 
     @Override
@@ -18614,14 +18617,100 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     /**
+     * Prepare storage areas for given user on all mounted devices.
+     */
+    void prepareUserData(int userId, int userSerial, int flags) {
+        synchronized (mInstallLock) {
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                final String volumeUuid = vol.getFsUuid();
+                prepareUserDataLI(volumeUuid, userId, userSerial, flags, true);
+            }
+        }
+    }
+
+    private void prepareUserDataLI(String volumeUuid, int userId, int userSerial, int flags,
+            boolean allowRecover) {
+        // Prepare storage and verify that serial numbers are consistent; if
+        // there's a mismatch we need to destroy to avoid leaking data
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        try {
+            storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
+
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
+                UserManagerService.enforceSerialNumber(
+                        Environment.getDataUserDeDirectory(volumeUuid, userId), userSerial);
+            }
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
+                UserManagerService.enforceSerialNumber(
+                        Environment.getDataUserCeDirectory(volumeUuid, userId), userSerial);
+            }
+
+            synchronized (mInstallLock) {
+                mInstaller.createUserData(volumeUuid, userId, userSerial, flags);
+            }
+        } catch (Exception e) {
+            logCriticalInfo(Log.WARN, "Destroying user " + userId + " on volume " + volumeUuid
+                    + " because we failed to prepare: " + e);
+            destroyUserDataLI(volumeUuid, userId, flags);
+
+            if (allowRecover) {
+                // Try one last time; if we fail again we're really in trouble
+                prepareUserDataLI(volumeUuid, userId, userSerial, flags, false);
+            }
+        }
+    }
+
+    /**
+     * Destroy storage areas for given user on all mounted devices.
+     */
+    void destroyUserData(int userId, int flags) {
+        synchronized (mInstallLock) {
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                final String volumeUuid = vol.getFsUuid();
+                destroyUserDataLI(volumeUuid, userId, flags);
+            }
+        }
+    }
+
+    private void destroyUserDataLI(String volumeUuid, int userId, int flags) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        try {
+            // Clean up app data, profile data, and media data
+            mInstaller.destroyUserData(volumeUuid, userId, flags);
+
+            // Clean up system data
+            if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
+                if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
+                    FileUtils.deleteContentsAndDir(Environment.getUserSystemDirectory(userId));
+                    FileUtils.deleteContentsAndDir(Environment.getDataSystemDeDirectory(userId));
+                }
+                if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
+                    FileUtils.deleteContentsAndDir(Environment.getDataSystemCeDirectory(userId));
+                }
+            }
+
+            // Data with special labels is now gone, so finish the job
+            storage.destroyUserStorage(volumeUuid, userId, flags);
+
+        } catch (Exception e) {
+            logCriticalInfo(Log.WARN,
+                    "Failed to destroy user " + userId + " on volume " + volumeUuid + ": " + e);
+        }
+    }
+
+    /**
      * Examine all users present on given mounted volume, and destroy data
      * belonging to users that are no longer valid, or whose user ID has been
      * recycled.
      */
     private void reconcileUsers(String volumeUuid) {
-        // TODO: also reconcile DE directories
-        final File[] files = FileUtils
-                .listFilesOrEmpty(Environment.getDataUserCeDirectory(volumeUuid));
+        final List<File> files = new ArrayList<>();
+        Collections.addAll(files, FileUtils
+                .listFilesOrEmpty(Environment.getDataUserDeDirectory(volumeUuid)));
+        Collections.addAll(files, FileUtils
+                .listFilesOrEmpty(Environment.getDataUserCeDirectory(volumeUuid)));
         for (File file : files) {
             if (!file.isDirectory()) continue;
 
@@ -18652,11 +18741,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
             if (destroyUser) {
                 synchronized (mInstallLock) {
-                    try {
-                        mInstaller.removeUserDataDirs(volumeUuid, userId);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Failed to clean up user dirs", e);
-                    }
+                    destroyUserDataLI(volumeUuid, userId,
+                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
                 }
             }
         }
@@ -19451,21 +19537,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             mSettings.removeUserLPw(userHandle);
             mPendingBroadcasts.remove(userHandle);
             mEphemeralApplicationRegistry.onUserRemovedLPw(userHandle);
-        }
-        synchronized (mInstallLock) {
-            final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
-                try {
-                    mInstaller.removeUserDataDirs(volumeUuid, userHandle);
-                } catch (InstallerException e) {
-                    Slog.w(TAG, "Failed to remove user data", e);
-                }
-            }
-            synchronized (mPackages) {
-                removeUnusedPackagesLILPw(userManager, userHandle);
-            }
+            removeUnusedPackagesLPw(userManager, userHandle);
         }
     }
 
@@ -19474,7 +19546,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * that are no longer in use by any other user.
      * @param userHandle the user being removed
      */
-    private void removeUnusedPackagesLILPw(UserManagerService userManager, final int userHandle) {
+    private void removeUnusedPackagesLPw(UserManagerService userManager, final int userHandle) {
         final boolean DEBUG_CLEAN_APKS = false;
         int [] users = userManager.getUserIds();
         Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
@@ -19524,11 +19596,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     /** Called by UserManagerService */
     void createNewUser(int userHandle) {
         synchronized (mInstallLock) {
-            try {
-                mInstaller.createUserConfig(userHandle);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to create user config", e);
-            }
             mSettings.createNewUserLI(this, mInstaller, userHandle);
         }
         synchronized (mPackages) {

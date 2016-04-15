@@ -437,6 +437,14 @@ public class FileUtils {
         return filePath.startsWith(dirPath);
     }
 
+    public static boolean deleteContentsAndDir(File dir) {
+        if (deleteContents(dir)) {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
+
     public static boolean deleteContents(File dir) {
         File[] files = dir.listFiles();
         boolean success = true;

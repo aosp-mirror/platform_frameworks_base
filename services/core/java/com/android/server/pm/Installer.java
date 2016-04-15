@@ -174,12 +174,13 @@ public final class Installer extends SystemService {
         mInstaller.execute("destroy_app_profiles", pkgName);
     }
 
-    public void createUserConfig(int userid) throws InstallerException {
-        mInstaller.execute("mkuserconfig", userid);
+    public void createUserData(String uuid, int userId, int userSerial, int flags)
+            throws InstallerException {
+        mInstaller.execute("create_user_data", uuid, userId, userSerial, flags);
     }
 
-    public void removeUserDataDirs(String uuid, int userid) throws InstallerException {
-        mInstaller.execute("rmuser", uuid, userid);
+    public void destroyUserData(String uuid, int userId, int flags) throws InstallerException {
+        mInstaller.execute("destroy_user_data", uuid, userId, flags);
     }
 
     public void markBootComplete(String instructionSet) throws InstallerException {

@@ -60,7 +60,6 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -2024,7 +2023,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
-            prepareUserStorage(userId, userInfo.serialNumber,
+            mPm.prepareUserData(userId, userInfo.serialNumber,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             mPm.createNewUser(userId);
             userInfo.partial = false;
@@ -2264,9 +2263,9 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.i(LOG_TAG,
                 "Destroying key for user " + userHandle + " failed, continuing anyway", e);
         }
+
         // Cleanup package manager settings
         mPm.cleanUpUser(this, userHandle);
-
         // Remove this user from the list
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
@@ -2286,24 +2285,12 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
         updateUserIds();
-        File userDir = Environment.getUserSystemDirectory(userHandle);
-        File renamedUserDir = Environment.getUserSystemDirectory(UserHandle.USER_NULL - userHandle);
-        if (userDir.renameTo(renamedUserDir)) {
-            removeDirectoryRecursive(renamedUserDir);
-        } else {
-            removeDirectoryRecursive(userDir);
-        }
-    }
 
-    private void removeDirectoryRecursive(File parent) {
-        if (parent.isDirectory()) {
-            String[] files = parent.list();
-            for (String filename : files) {
-                File child = new File(parent, filename);
-                removeDirectoryRecursive(child);
-            }
-        }
-        parent.delete();
+        // Now that we've purged all the metadata above, destroy the actual data
+        // on disk; if we battery pull in here we'll finish cleaning up when
+        // reconciling after reboot.
+        mPm.destroyUserData(userHandle,
+                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
     }
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
@@ -2598,23 +2585,12 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Prepare storage areas for given user on all mounted devices.
-     */
-    private void prepareUserStorage(int userId, int userSerial, int flags) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-            final String volumeUuid = vol.getFsUuid();
-            storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
-        }
-    }
-
-    /**
      * Called right before a user is started. This gives us a chance to prepare
      * app storage and apply any user restrictions.
      */
     public void onBeforeStartUser(int userId) {
         final int userSerial = getUserSerialNumber(userId);
-        prepareUserStorage(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
+        mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE);
 
         if (userId != UserHandle.USER_SYSTEM) {
@@ -2630,7 +2606,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     public void onBeforeUnlockUser(@UserIdInt int userId) {
         final int userSerial = getUserSerialNumber(userId);
-        prepareUserStorage(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
+        mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE);
     }
 
