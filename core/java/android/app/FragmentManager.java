@@ -1114,7 +1114,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                             if (!f.mRetaining) {
                                 f.performDestroy();
                             } else {
-                                f.mState = Fragment.CREATED;
+                                f.mState = Fragment.INITIALIZING;
                             }
 
                             f.mCalled = false;
