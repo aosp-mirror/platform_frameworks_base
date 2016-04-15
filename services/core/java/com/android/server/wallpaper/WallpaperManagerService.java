@@ -982,6 +982,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     wallpaper.wallpaperComponent = wallpaper.nextWallpaperComponent;
                     final WallpaperData fallback = new WallpaperData(wallpaper.userId,
                             WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
+                    ensureSaneWallpaperData(fallback);
                     bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
                     mWaitingForUnlock = true;
                 }
@@ -1773,12 +1774,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     wallpaper = new WallpaperData(userId,
                             WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
                     mLockWallpaperMap.put(userId, wallpaper);
+                    ensureSaneWallpaperData(wallpaper);
                 } else {
                     // sanity fallback: we're in bad shape, but establishing a known
                     // valid system+lock WallpaperData will keep us from dying.
                     Slog.wtf(TAG, "Didn't find wallpaper in non-lock case!");
                     wallpaper = new WallpaperData(userId, WALLPAPER, WALLPAPER_CROP);
                     mWallpaperMap.put(userId, wallpaper);
+                    ensureSaneWallpaperData(wallpaper);
                 }
             }
         }
@@ -1871,6 +1874,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaper.cropHint.set(0, 0, 0, 0);
             wallpaper.padding.set(0, 0, 0, 0);
             wallpaper.name = "";
+
+            mLockWallpaperMap.remove(userId);
         } else {
             if (wallpaper.wallpaperId <= 0) {
                 wallpaper.wallpaperId = makeWallpaperIdLocked();
@@ -1881,6 +1886,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
         }
 
+        ensureSaneWallpaperData(wallpaper);
+        WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
+        if (lockWallpaper != null) {
+            ensureSaneWallpaperData(lockWallpaper);
+        }
+    }
+
+    private void ensureSaneWallpaperData(WallpaperData wallpaper) {
         // We always want to have some reasonable width hint.
         int baseSize = getMaximumSizeDimension();
         if (wallpaper.width < baseSize) {
@@ -2072,11 +2085,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         synchronized (mLock) {
-            pw.println("Current Wallpaper Service state:");
+            pw.println("System wallpaper state:");
             for (int i = 0; i < mWallpaperMap.size(); i++) {
                 WallpaperData wallpaper = mWallpaperMap.valueAt(i);
                 pw.print(" User "); pw.print(wallpaper.userId);
-                pw.print(": id="); pw.println(wallpaper.wallpaperId);
+                    pw.print(": id="); pw.println(wallpaper.wallpaperId);
                 pw.print("  mWidth=");
                     pw.print(wallpaper.width);
                     pw.print(" mHeight=");
@@ -2104,6 +2117,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     pw.println(wallpaper.lastDiedTime - SystemClock.uptimeMillis());
                 }
             }
+            pw.println("Lock wallpaper state:");
+            for (int i = 0; i < mLockWallpaperMap.size(); i++) {
+                WallpaperData wallpaper = mLockWallpaperMap.valueAt(i);
+                pw.print(" User "); pw.print(wallpaper.userId);
+                    pw.print(": id="); pw.println(wallpaper.wallpaperId);
+                pw.print("  mWidth="); pw.print(wallpaper.width);
+                    pw.print(" mHeight="); pw.println(wallpaper.height);
+                pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
+                pw.print("  mPadding="); pw.println(wallpaper.padding);
+                pw.print("  mName=");  pw.println(wallpaper.name);
+            }
+
         }
     }
 }
