@@ -156,7 +156,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
             showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */,
-                    false /* reloadTasks */);
+                    false /* reloadTasks */, false /* fromHome */);
         }
     });
 
@@ -230,7 +230,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
-            boolean animate, boolean launchedWhileDockingTask) {
+            boolean animate, boolean launchedWhileDockingTask, boolean fromHome) {
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
         mLaunchedWhileDocking = launchedWhileDockingTask;
@@ -260,7 +260,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask == null || !ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                startRecentsActivity(topTask, isTopTaskHome.value, animate);
+                startRecentsActivity(topTask, isTopTaskHome.value || fromHome, animate);
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentsActivity", e);
@@ -534,7 +534,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     false /* triggeredFromAltTab */,
                     dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,
                     false /* animate */,
-                    true /* launchedWhileDockingTask*/);
+                    true /* launchedWhileDockingTask*/,
+                    false /* fromHome */);
         }
     }
 
