@@ -839,8 +839,10 @@ public abstract class TvInputService extends Service {
         public abstract boolean onTune(Uri channelUri);
 
         /**
-         * Calls {@link #onTune(Uri)}. Override this method in order to handle domain-specific
+         * Tunes to a given channel. Override this method in order to handle domain-specific
          * features that are only known between certain TV inputs and their clients.
+         *
+         * <p>The default implementation calls {@link #onTune(Uri)}.
          *
          * @param channelUri The URI of the channel.
          * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
@@ -1693,11 +1695,12 @@ public abstract class TvInputService extends Service {
         public abstract void onTune(Uri channelUri);
 
         /**
-         * Calls {@link #onTune(Uri)}. Override this method in order to handle domain-specific
-         * features that are only known between certain TV inputs and their clients.
+         * Called when the application requests to tune to a given channel for TV program recording.
+         * Override this method in order to handle domain-specific features that are only known
+         * between certain TV inputs and their clients.
          *
          * <p>The application may call this method before starting or after stopping recording, but
-         * not during recording.
+         * not during recording. The default implementation calls {@link #onTune(Uri)}.
          *
          * <p>The session must call {@link #notifyTuned(Uri)} if the tune request was fulfilled, or
          * {@link #notifyError(int)} otherwise.
