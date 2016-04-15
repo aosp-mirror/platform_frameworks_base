@@ -217,6 +217,11 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_ECBM_NOT_SUPPORTED = 901;
 
     /**
+     * Fail code used to indicate that Multi-endpoint is not supported by the Ims framework.
+     */
+    public static final int CODE_MULTIENDPOINT_NOT_SUPPORTED = 902;
+
+    /**
      * Ims Registration error code
      */
     public static final int CODE_REGISTRATION_ERROR = 1000;
