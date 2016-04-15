@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
@@ -317,6 +318,12 @@ public class TrustManagerService extends SystemService {
         if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
             synchronized (mDeviceLockedForUser) {
                 mDeviceLockedForUser.put(userId, locked);
+            }
+            if (locked) {
+                try {
+                    ActivityManagerNative.getDefault().notifyLockedProfile(userId);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
