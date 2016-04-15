@@ -1131,7 +1131,8 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link #unregisterNetworkCallback} API.
+     * @deprecated Deprecated in favor of the cleaner
+     *             {@link #unregisterNetworkCallback(NetworkCallback)} API.
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
@@ -2811,7 +2812,7 @@ public class ConnectivityManager {
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
-     * {@link #unregisterNetworkCallback} or the calling application exits.
+     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -2848,7 +2849,7 @@ public class ConnectivityManager {
      * This function behaves identically to the non-timedout version, but if a suitable
      * network is not found within the given time (in milliseconds) the
      * {@link NetworkCallback#unavailable} callback is called.  The request must
-     * still be released normally by calling {@link unregisterNetworkCallback}.
+     * still be released normally by calling {@link unregisterNetworkCallback(NetworkCallback)}.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
@@ -2956,7 +2957,8 @@ public class ConnectivityManager {
     /**
      * Removes a request made via {@link #requestNetwork(NetworkRequest, android.app.PendingIntent)}
      * <p>
-     * This method has the same behavior as {@link #unregisterNetworkCallback} with respect to
+     * This method has the same behavior as
+     * {@link #unregisterNetworkCallback(android.app.PendingIntent)} with respect to
      * releasing network resources and disconnecting.
      *
      * @param operation A PendingIntent equal (as defined by {@link Intent#filterEquals}) to the
@@ -2982,7 +2984,7 @@ public class ConnectivityManager {
     /**
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or {@link #unregisterNetworkCallback} is called
+     * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
@@ -3035,9 +3037,9 @@ public class ConnectivityManager {
     }
 
     /**
-     * Registers to receive notifications about whichever network currently satisfies the
-     * system default {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or {@link #unregisterNetworkCallback} is called
+     * Registers to receive notifications about changes in the system default network. The callbacks
+     * will continue to be called until either the application exits or
+     * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
@@ -3060,8 +3062,9 @@ public class ConnectivityManager {
      * is accepted by ConnectivityService. Once accepted, ConnectivityService will poll underlying
      * network connection for updated bandwidth information. The caller will be notified via
      * {@link ConnectivityManager.NetworkCallback} if there is an update. Notice that this
-     * method assumes that the caller has previously called {@link #registerNetworkCallback} to
-     * listen for network changes.
+     * method assumes that the caller has previously called
+     * {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} to listen for network
+     * changes.
      *
      * @param network {@link Network} specifying which network you're interested.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
@@ -3076,8 +3079,9 @@ public class ConnectivityManager {
 
     /**
      * Unregisters callbacks about and possibly releases networks originating from
-     * {@link #requestNetwork(NetworkRequest, NetworkCallback)} and {@link #registerNetworkCallback}
-     * calls.  If the given {@code NetworkCallback} had previously been used with
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback)} and
+     * {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)} calls.
+     * If the given {@code NetworkCallback} had previously been used with
      * {@code #requestNetwork}, any networks that had been connected to only to satisfy that request
      * will be disconnected.
      *
