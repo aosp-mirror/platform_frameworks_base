@@ -17,6 +17,9 @@
 
 package com.android.server.pm;
 
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,10 +30,12 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
+import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -690,6 +695,37 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return info.isQuietModeEnabled();
         }
+    }
+
+    @Override
+    public boolean trySetQuietModeDisabled(int userHandle, IntentSender target) {
+        if (mContext.getSystemService(StorageManager.class).isUserKeyUnlocked(userHandle)
+                || !mLockPatternUtils.isSecure(userHandle)
+                || !mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
+            // if the user is already unlocked, no need to show a profile challenge
+            setQuietModeEnabled(userHandle, false);
+            return true;
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // otherwise, we show a profile challenge to trigger decryption of the user
+            final KeyguardManager km = (KeyguardManager) mContext.getSystemService(
+                    Context.KEYGUARD_SERVICE);
+            final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null,
+                    userHandle);
+            if (unlockIntent == null) {
+                return false;
+            }
+            if (target != null) {
+                unlockIntent.putExtra(Intent.EXTRA_INTENT, target);
+            }
+            unlockIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            mContext.startActivity(unlockIntent);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return false;
     }
 
     @Override

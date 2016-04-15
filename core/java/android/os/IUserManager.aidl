@@ -20,6 +20,7 @@ package android.os;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.content.pm.UserInfo;
+import android.content.IntentSender;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
@@ -70,6 +71,7 @@ interface IUserManager {
     boolean markGuestForDeletion(int userHandle);
     void setQuietModeEnabled(int userHandle, boolean enableQuietMode);
     boolean isQuietModeEnabled(int userHandle);
+    boolean trySetQuietModeDisabled(int userHandle, in IntentSender target);
     void setSeedAccountData(int userHandle, in String accountName,
             in String accountType, in PersistableBundle accountOptions, boolean persist);
     String getSeedAccountName();
