@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlosieberging is vol! Vee \'n paar lêers uit om plek te maak."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV-berging is vol. Vee \'n paar lêers uit om spasie beskikbaar te stel."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Foon se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan dalk gemonitor word"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Deur \'n onbekende derde party"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Deur jou werkprofieladministrateur"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Deur <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"AF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Voltooi handeling met"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Voltooi handeling met gebruik van %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Voltooi handeling"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Maak oop met"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Maak oop met %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Maak oop"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Redigeer met"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redigeer met %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Wysig"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Deel met"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Deel met %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Deel"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Stuur met"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Stuur met %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Stuur"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Kies \'n Tuis-program"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Gebruik %1$s as Tuis"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Vang prent vas"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Vang prent vas met"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Vang prent vas met %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Vang prent vas"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gebruik hierdie aksie by verstek."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Gebruik \'n ander program"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vee die verstek instelling uit in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Deur jou administrateur uitgevee"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Om batterylewe te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minute lank (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Een minuut lank (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Саат сактагычы толуп калды. Орун бошотуу үчүн айрым файлдарды жок кылыңыз."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Сыналгынын сактагычы толуп калды. Айрым файлдарды жок кылып орун бошотуңуз."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Телефондун сактагычы толуп калды. Орун бошотуш үчүн кээ бир файлдарды өчүрүңүз."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Тармак тинтилиши мүмкүн"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Аныкталбаган үчүнчү тараптардан"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Жумушуңуздун профайл администратору тарабынан"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> тарабынан"</string>
@@ -894,16 +894,25 @@
     <string name="capital_off" msgid="6815870386972805832">"ӨЧҮК"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Аракет колдонууну бүтүрүү"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s аркылуу аракетти аягына чейин чыгаруу"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Аракетти аягына чыгаруу"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Төмөнкү менен ачуу"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s менен ачуу"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ачуу"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Төмөнкү менен түзөтүү"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s менен түзөтүү"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Түзөтүү"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Төмөнкү менен бөлүшүү"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s менен бөлүшүү"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Бөлүшүү"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Колдонмо тандаңыз"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s аркылуу жөнөтүү"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Жөнөтүү"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Башкы бет колдонмосун тандаңыз"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Башкы бет колдонмосу катары %1$s пайдалануу"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Сүрөткө тартуу"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Сүрөткө төмөнкү параметрлер менен тартуу"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s менен сүрөткө тартуу"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Сүрөткө тартуу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Бул аракет үчүн демейки боюнча колдонулсун."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Башка колдонмону пайдалануу"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Тутум жөндөөлөрүндөгү демейкини тазалоо &gt; Колдонмолор &gt; Жүктөлүп алынды."</string>
@@ -1473,6 +1482,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
       <item quantity="one">Бир мүнөткө (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>

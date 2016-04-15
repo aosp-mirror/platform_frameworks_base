@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ඔරලෝසුවේ ආචනයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"රූපවාහිනී ගබඩාව පිරී ඇත. අවකාශය හිස් කිරීමට තව ගොනු මකා දමන්න."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"දුරකථන ආචයනය පිරී ඇත. ඉඩ නිදහස් කිරීමට සමහර ගොනු මකන්න."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"නොදන්නා තෙවෙනි පාර්ශවයකින්"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ඔබේ රාජකාරි පැතිකඩ පරිපාලක විසින්"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> වෙතින්"</string>
@@ -895,16 +895,25 @@
     <string name="capital_off" msgid="6815870386972805832">"අක්‍රිය කරන්න"</string>
     <string name="whichApplication" msgid="4533185947064773386">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"සමඟ විවෘත කරන්න"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s සමඟ විවෘත කරන්න"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"විවෘත කරන්න"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"සංස්කරණය කරන්න"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"බෙදා ගන්න"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"මෙය භාවිතයෙන් යවන්න"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s භාවිතයෙන් යවන්න"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"යවන්න"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"මුල් පිටු යෙදුම තෝරන්න"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"මුල් පිටු යෙදුම ලෙස %1$s න් භාවිතා කරන්න"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"රූපය ග්‍රහණය කර ගන්න"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"මෙය සමග රූපය ග්‍රහණය කර ගන්න"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s සමග රූපය ග්‍රහණය කර ගන්න"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"රූපය ග්‍රහණය කර ගන්න"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"මෙම ක්‍රියාව සඳහා සුපුරුද්දෙන් භාවිත කරන්න."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"වෙනත් යෙදුමක් භාවිතා කරන්න"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"පද්ධති සැකසීම් &gt; යෙදුම් &gt; බාගැනීම් තුළ ඇති සුපුරුද්ද හිස් කරන්න."</string>
@@ -1474,6 +1483,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
       <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>

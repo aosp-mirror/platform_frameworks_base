@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlogegeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Tv-opslag is vol. Verwijder een aantal bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefoongeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan worden gecontroleerd"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Door een onbekende derde partij"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Door je werkprofielbeheerder"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Door <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -271,7 +271,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Hiermee kan de app de statusbalk zijn."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"statusbalk uitvouwen/samenvouwen"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Hiermee kan de app de statusbalk uitvouwen of samenvouwen."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Snelkoppelingen instellen"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"Snelle links instellen"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Een app toestaan snelkoppelingen aan het startscherm toe te voegen zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"snelkoppelingen verwijderen"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"De app toestaan snelkoppelingen van het startscherm te verwijderen zonder tussenkomst van de gebruiker."</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"UIT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Actie voltooien met"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Actie voltooien via %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Actie voltooien"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Openen met"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Openen met %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Openen"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Bewerken met"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Bewerken met %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Bewerken"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Delen met"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Delen met %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Delen"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Verzenden met"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Verzenden met %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Verzenden"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Een startschermapp selecteren"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s gebruiken voor startscherm"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Afbeelding vastleggen"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Afbeelding vastleggen met"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Afbeelding vastleggen met %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Afbeelding vastleggen"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standaard gebruiken voor deze actie."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Een andere app gebruiken"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Standaardinstelling wissen via Systeeminstellingen &gt; Apps &gt; Gedownload."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Verwijderd door je beheerder"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Accubesparing beperkt de prestaties van je apparaat, de trilstand, locatieservices en de meeste achtergrondgegevens om de gebruiksduur van de accu te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld terwijl je apparaat wordt opgeladen."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minuten (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Eén minuut (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

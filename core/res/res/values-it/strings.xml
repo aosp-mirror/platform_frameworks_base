@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"La memoria dell\'orologio è piena. Elimina alcuni file per liberare spazio."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"La memoria della TV è piena. Elimina alcuni file per liberare spazio."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Spazio di archiviazione del telefono esaurito. Elimina alcuni file per liberare spazio."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"La rete potrebbe essere monitorata"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Da una terza parte sconosciuta"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Dall\'amministratore del profilo di lavoro"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Da <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"OFF"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completa l\'azione con"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Completamento azione con %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Completa azione"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Apri con"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Apri con %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Apri"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Modifica con"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifica con %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Modifica"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Condividi con"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Condividi con %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Condividi"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Invia tramite"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Invia tramite %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Invia"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Seleziona un\'app Home"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizza %1$s come Home"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Acquisisci immagine"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Acquisisci immagine con"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Acquisisci immagine con %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Acquisisci immagine"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usa come predefinita per questa azione."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utilizza un\'app diversa"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Cancella l\'applicazione predefinita in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminato dall\'amministratore"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per aumentare la durata della batteria, la funzione di risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione, servizi di geolocalizzazione e la maggior parte dei dati in background. App di email, messaggi e altre app che si basano sulla sincronizzazione potrebbero essere aggiornate soltanto all\'apertura.\n\nLa funzione di risparmio energetico viene disattivata automaticamente quando il dispositivo è in carica."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Per %1$d minuti (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Per un minuto (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
