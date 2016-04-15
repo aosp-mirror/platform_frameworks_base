@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ઘડિયાળ સ્ટોરેજ પૂર્ણ ભરેલું છે. સ્થાન ખાલી કરવા માટે કેટલીક ફાઇલો કાઢી નાખો."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV સ્ટોરેજ પૂર્ણ ભરેલું છે. સ્થાન ખાલી કરવા માટે કેટલીક ફાઇલો કાઢી નાખો."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ફોન સ્ટોરેજ પૂર્ણ ભરેલું છે. સ્થાન ખાલી કરવા માટે કેટલીક ફાઇલો કાઢી નાખો."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"નેટવર્ક મૉનિટર કરી શકાય છે"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"અજાણ તૃતીય પક્ષ દ્વારા"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"તમારા કાર્ય પ્રોફાઇલ વ્યવસ્થાપક દ્વારા"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> દ્વારા"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"બંધ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"આના ઉપયોગથી ક્રિયા પૂર્ણ કરો"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ઉપયોગથી ક્રિયા પૂર્ણ કરો"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"ક્રિયા પૂર્ણ કરો"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"આની સાથે ખોલો"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s સાથે ખોલો"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ખોલો"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"આનાથી સંપાદિત કરો"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s સાથે સંપાદિત કરો"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"સંપાદિત કરો"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"આની સાથે શેર કરો"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s સાથે શેર કરો"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"શેર કરો"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"આનો ઉપયોગ કરીને મોકલો"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s નો ઉપયોગ કરીને મોકલો"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"મોકલો"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"હોમ એપ્લિકેશન પસંદ કરો"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"હોમ તરીકે %1$s નો ઉપયોગ કરો"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"છબી કૅપ્ચર કરો"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"આની સાથે છબી કૅપ્ચર કરો"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s સાથે છબી કૅપ્ચર કરો"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"છબી કૅપ્ચર કરો"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"આ ક્રિયા માટે ડિફોલ્ટ તરીકે ઉપયોગમાં લો."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"અલગ એપ્લિકેશનનો ઉપયોગ કરો"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"સિસ્ટમ સેટિંગ્સ &gt; એપ્લિકેશનો &gt; ડાઉનલોડ કરેલમાં ડિફોલ્ટ સાફ કરો."</string>

@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Ο αποθηκευτικός χώρος της τηλεόρασης είναι πλήρης. Διαγράψτε ορισμένα αρχεία, για να ελευθερώσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Από ένα άγνωστο τρίτο μέρος"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Από το διαχειριστή του προφίλ εργασίας σας"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Από <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"Ανενεργό"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ολοκλήρωση ενέργειας με τη χρήση"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Ολοκληρωμένη ενέργεια με χρήση %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Ολοκλήρωση ενέργειας"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Άνοιγμα με"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Άνοιγμα με %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Άνοιγμα"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Επεξεργασία με"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Επεξεργασία με %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Επεξεργασία"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Κοινή χρήση με"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Κοινή χρήση με %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Κοινοποίηση"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Αποστολή μέσω"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Αποστολή μέσω %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Αποστολή"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Επιλέξτε μια εφαρμογή Αρχικής σελίδας"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Χρήση %1$s ως Αρχικής σελίδας"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Λήψη εικόνας"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Λήψη εικόνας με"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Λήψη εικόνας με %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Λήψη εικόνας"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Χρήση από προεπιλογή για αυτήν την ενέργεια."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Χρήση άλλης εφαρμογής"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Εκκθάριση προεπιλογής στις Ρυθμίσεις συστήματος &gt; Εφαρμογές &gt; Ληφθείσες."</string>

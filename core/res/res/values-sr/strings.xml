@@ -165,7 +165,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Меморија сата је пуна. Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Меморијски простор на ТВ-у је попуњен. Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Складиште телефона је пуно! Избришите неке датотеке како бисте ослободили простор."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежа се можда надгледа"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Од стране непознате треће стране"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Од стране администратора профила за посао"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Од стране <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -899,16 +899,25 @@
     <string name="capital_off" msgid="6815870386972805832">"НЕ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Довршавање радње помоћу"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Завршите радњу помоћу апликације %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Заврши радњу"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Отворите помоћу"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отворите помоћу апликације %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Отвори"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Измените помоћу"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измените помоћу апликације %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Измени"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Делите помоћу"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Делите помоћу апликације %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Дели"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Пошаљите помоћу:"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Пошаљите помоћу: %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Пошаљи"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Изаберите апликацију за почетну страницу"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Користите %1$s за почетну"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Снимите слику"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Снимите слику помоћу апликације"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Снимите слику помоћу апликације %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Снимите слику"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Користите другу апликацију"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Обришите подразумевано подешавање у менију Подешавања система &gt; Апликације &gt; Преузето."</string>

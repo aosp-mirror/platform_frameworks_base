@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ವಾಚ್‌ ಸಂಗ್ರಹಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ. ಸ್ಥಳವನ್ನು ಖಾಲಿಯಾಗಿಸಲು ಕೆಲವು ಫೈಲ್‍‍ಗಳನ್ನು ಅಳಿಸಿ."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ಟಿವಿ ಸಂಗ್ರಹಣೆ ತುಂಬಿದೆ. ಸ್ಥಳವನ್ನು ಮುಕ್ತಗೊಳಿಸಲು ಕೆಲವು ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಿ."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ಫೋನ್ ಸಂಗ್ರಹಣೆ ತಂಬಿದೆ. ಸ್ಥಳವನ್ನು ಖಾಲಿಯಾಗಿಸಲು ಕೆಲವು ಫೈಲ್‍‍ಗಳನ್ನು ಅಳಿಸಿ."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದಾಗಿರುತ್ತದೆ"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ಅಜ್ಞಾತ ಥರ್ಡ್ ಪಾರ್ಟಿಯ ಪ್ರಕಾರ"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ನಿರ್ವಾಹಕರಿಂದ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ಪ್ರಕಾರ"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"ಆಫ್ ಮಾಡು"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ತೆರೆ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ಇವರ ಜೊತೆಗೆ ಸಂಪಾದಿಸಿ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ಜೊತೆಗೆ ಸಂಪಾದಿಸಿ"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ಸಂಪಾದಿಸು"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ಕಳುಹಿಸು"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"ಹೋಮ್‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಹೋಮ್‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೆಯ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡೀಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>

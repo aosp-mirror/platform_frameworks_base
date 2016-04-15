@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ঘড়ির সঞ্চয়স্থানে আর জায়গা খালি নেই৷ স্থান খালি করতে কিছু ফাইল মুছে দিন৷"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"টিভির সঞ্চয়স্থান পূর্ণ হয়েছে৷ স্থান মুক্ত করতে কিছু ফাইল মুছে ফেলুন৷"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ফোনের সঞ্চয়স্থানে আর জায়গা খালি নেই৷ স্থান খালি করতে কিছু ফাইল মুছে দিন৷"</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"নেটওয়ার্ক নিরীক্ষণ করা হতে পারে"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"একটি অজানা তৃতীয় পক্ষের দ্বারা"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"আপনার কাজের প্রোফাইলের প্রশাসক দ্বারা"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> এর দ্বারা"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"বন্ধ করুন"</string>
     <string name="whichApplication" msgid="4533185947064773386">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"এর মাধ্যমে খুলুন"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s দিয়ে খুলুন"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"খুলুন"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"এর মাধ্যমে সম্পাদনা করুন"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s দিয়ে সম্পাদনা করুন"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"সম্পাদনা করুন"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"এর সাথে শেয়ার করুন"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s এর সাথে শেয়ার করুন"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"শেয়ার করুন"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"এটি ব্যবহার করে পাঠান"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ব্যবহার করে পাঠান"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"পাঠান"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"একটি হোম অ্যাপ্লিকেশন নির্বাচন করুন"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"হোম হিসাবে %1$s ব্যবহার করুন"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ছবি তুলুন"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"এই দিয়ে ছবি তুলুন"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s দিয়ে ছবি তুলুন"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ছবি তুলুন"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"আলাদা কোনো অ্যাপ্লিকেশান ব্যবহার করুন"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"সিস্টেম সেটিংস &gt; অ্যাপ্স &gt; ডাউনলোড করাগুলি এ গিয়ে ডিফল্ট সরিয়ে দিন৷"</string>
