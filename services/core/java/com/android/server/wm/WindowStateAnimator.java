@@ -22,7 +22,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.AppWindowAnimator.sDummyAnimation;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
@@ -183,6 +183,8 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
+    private boolean mAnimationStartDelayed;
+
     boolean mKeyguardGoingAwayAnimation;
     boolean mKeyguardGoingAwayWithWallpaper;
 
@@ -299,7 +301,7 @@ class WindowStateAnimator {
     /** Is the window animating the DummyAnimation? */
     boolean isDummyAnimation() {
         return mAppAnimator != null
-                && mAppAnimator.animation == AppWindowAnimator.sDummyAnimation;
+                && mAppAnimator.animation == sDummyAnimation;
     }
 
     /** Is this window currently set to animate or currently animating? */
@@ -323,8 +325,12 @@ class WindowStateAnimator {
         if ((mAnimation == null) || !mLocalAnimating) {
             return false;
         }
+        currentTime = getAnimationFrameTime(mAnimation, currentTime);
         mTransformation.clear();
         final boolean more = mAnimation.getTransformation(currentTime, mTransformation);
+        if (mAnimationStartDelayed && mAnimationIsEntrance) {
+            mTransformation.setAlpha(0f);
+        }
         if (false && DEBUG_ANIM) Slog.v(TAG, "Stepped animation in " + this + ": more=" + more
                 + ", xform=" + mTransformation);
         return more;
@@ -1841,6 +1847,9 @@ class WindowStateAnimator {
                     pw.print(" mDsDy="); pw.print(mDsDy);
                     pw.print(" mDtDy="); pw.println(mDtDy);
         }
+        if (mAnimationStartDelayed) {
+            pw.print(prefix); pw.print("mAnimationStartDelayed="); pw.print(mAnimationStartDelayed);
+        }
     }
 
     @Override
@@ -1918,5 +1927,26 @@ class WindowStateAnimator {
                     mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
                     mDeferTransactionUntilFrame);
         }
+    }
+
+    /**
+     * Sometimes we need to synchronize the first frame of animation with some external event.
+     * To achieve this, we prolong the start of the animation and keep producing the first frame of
+     * the animation.
+     */
+    private long getAnimationFrameTime(Animation animation, long currentTime) {
+        if (mAnimationStartDelayed) {
+            animation.setStartTime(currentTime);
+            return currentTime + 1;
+        }
+        return currentTime;
+    }
+
+    void startDelayingAnimationStart() {
+        mAnimationStartDelayed = true;
+    }
+
+    void endDelayingAnimationStart() {
+        mAnimationStartDelayed = false;
     }
 }

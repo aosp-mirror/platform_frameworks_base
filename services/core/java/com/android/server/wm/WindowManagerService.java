@@ -7459,14 +7459,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     stack.setAdjustedForIme(imeWin);
                 }
             }
-            displayContent.mDividerControllerLocked.setAdjustedForIme(true, true);
+            displayContent.mDividerControllerLocked.setAdjustedForIme(true, true, imeWin);
         } else {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
                 stack.resetAdjustedForIme(!dockVisible);
             }
-            displayContent.mDividerControllerLocked.setAdjustedForIme(false, dockVisible);
+            displayContent.mDividerControllerLocked.setAdjustedForIme(false, dockVisible, imeWin);
         }
     }
 
