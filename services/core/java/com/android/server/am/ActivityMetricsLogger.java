@@ -98,13 +98,16 @@ class ActivityMetricsLogger {
      *                   launch
      * @param componentName the component name of the activity being launched
      * @param processRunning whether the process that will contains the activity is already running
+     * @param processSwitch whether the process that will contain the activity didn't have any
+     *                      activity that was stopped, i.e. the started activity is "switching"
+     *                      processes
      */
     void notifyActivityLaunched(int resultCode, @Nullable String componentName,
-            boolean processRunning) {
+            boolean processRunning, boolean processSwitch) {
 
-        if (resultCode < 0 || componentName == null) {
+        if (resultCode < 0 || componentName == null || !processSwitch) {
 
-            // Failed to launch, don't track anything.
+            // Failed to launch or it was not a process switch, so we don't care about the timing.
             reset();
             return;
         }
