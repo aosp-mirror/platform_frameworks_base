@@ -721,6 +721,10 @@ class WindowSurfacePlacer {
 
                 // Moved from updateWindowsAndWallpaperLocked().
                 if (w.mHasSurface) {
+                    // If we have recently synchronized a previous transaction for this
+                    // window ensure we don't push through an unsynchronized one now.
+                    winAnimator.deferToPendingTransaction();
+
                     // Take care of the window being ready to display.
                     final boolean committed = winAnimator.commitFinishDrawingLocked();
                     if (isDefaultDisplay && committed) {
