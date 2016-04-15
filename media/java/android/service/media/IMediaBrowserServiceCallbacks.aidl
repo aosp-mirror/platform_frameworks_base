@@ -13,10 +13,6 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IMediaBrowserServiceCallbacks {
-
-    // Warning: DO NOT CHANGE the methods signature and order of methods.
-    // A change of the order or the method signatures could break the support library.
-
     /**
      * Invoked when the connected has been established.
      * @param root The root media id for browsing.
@@ -26,6 +22,5 @@ oneway interface IMediaBrowserServiceCallbacks {
      */
     void onConnect(String root, in MediaSession.Token session, in Bundle extras);
     void onConnectFailed();
-    void onLoadChildren(String mediaId, in ParceledListSlice list);
-    void onLoadChildrenWithOptions(String mediaId, in ParceledListSlice list, in Bundle options);
+    void onLoadChildren(String mediaId, in ParceledListSlice list, in Bundle options);
 }

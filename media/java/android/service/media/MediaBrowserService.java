@@ -39,6 +39,7 @@ import android.service.media.IMediaBrowserServiceCallbacks;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -108,7 +109,7 @@ public abstract class MediaBrowserService extends Service {
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
         BrowserRoot root;
-        HashMap<String, List<Bundle>> subscriptions = new HashMap<>();
+        HashMap<String, List<Pair<IBinder, Bundle>>> subscriptions = new HashMap<>();
     }
 
     /**
@@ -247,13 +248,7 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void addSubscription(final String id,
-                final IMediaBrowserServiceCallbacks callbacks) {
-            addSubscriptionWithOptions(id, null, callbacks);
-        }
-
-        @Override
-        public void addSubscriptionWithOptions(final String id, final Bundle options,
+        public void addSubscription(final String id, final IBinder token, final Bundle options,
                 final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                     @Override
@@ -268,19 +263,13 @@ public abstract class MediaBrowserService extends Service {
                             return;
                         }
 
-                        MediaBrowserService.this.addSubscription(id, connection, options);
+                        MediaBrowserService.this.addSubscription(id, connection, token, options);
                     }
                 });
         }
 
         @Override
-        public void removeSubscription(final String id,
-                final IMediaBrowserServiceCallbacks callbacks) {
-            removeSubscriptionWithOptions(id, null, callbacks);
-        }
-
-        @Override
-        public void removeSubscriptionWithOptions(final String id, final Bundle options,
+        public void removeSubscription(final String id, final IBinder token,
                 final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                 @Override
@@ -293,7 +282,7 @@ public abstract class MediaBrowserService extends Service {
                                 + id);
                         return;
                     }
-                    if (!MediaBrowserService.this.removeSubscription(id, connection, options)) {
+                    if (!MediaBrowserService.this.removeSubscription(id, connection, token)) {
                         Log.w(TAG, "removeSubscription called for " + id
                                 + " which is not subscribed");
                     }
@@ -519,11 +508,12 @@ public abstract class MediaBrowserService extends Service {
             public void run() {
                 for (IBinder binder : mConnections.keySet()) {
                     ConnectionRecord connection = mConnections.get(binder);
-                    List<Bundle> optionsList = connection.subscriptions.get(parentId);
-                    if (optionsList != null) {
-                        for (Bundle bundle : optionsList) {
-                            if (MediaBrowserUtils.hasDuplicatedItems(options, bundle)) {
-                                performLoadChildren(parentId, connection, bundle);
+                    List<Pair<IBinder, Bundle>> callbackList =
+                            connection.subscriptions.get(parentId);
+                    if (callbackList != null) {
+                        for (Pair<IBinder, Bundle> callback : callbackList) {
+                            if (MediaBrowserUtils.hasDuplicatedItems(options, callback.second)) {
+                                performLoadChildren(parentId, connection, callback.second);
                             }
                         }
                     }
@@ -553,19 +543,21 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Save the subscription and if it is a new subscription send the results.
      */
-    private void addSubscription(String id, ConnectionRecord connection, Bundle options) {
+    private void addSubscription(String id, ConnectionRecord connection, IBinder token,
+            Bundle options) {
         // Save the subscription
-        List<Bundle> optionsList = connection.subscriptions.get(id);
-        if (optionsList == null) {
-            optionsList = new ArrayList<>();
+        List<Pair<IBinder, Bundle>> callbackList = connection.subscriptions.get(id);
+        if (callbackList == null) {
+            callbackList = new ArrayList<>();
         }
-        for (Bundle bundle : optionsList) {
-            if (MediaBrowserUtils.areSameOptions(options, bundle)) {
+        for (Pair<IBinder, Bundle> callback : callbackList) {
+            if (token == callback.first
+                    && MediaBrowserUtils.areSameOptions(options, callback.second)) {
                 return;
             }
         }
-        optionsList.add(options);
-        connection.subscriptions.put(id, optionsList);
+        callbackList.add(new Pair<>(token, options));
+        connection.subscriptions.put(id, callbackList);
         // send the results
         performLoadChildren(id, connection, options);
     }
@@ -573,21 +565,20 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Remove the subscription.
      */
-    private boolean removeSubscription(String id, ConnectionRecord connection, Bundle options) {
-        if (options == null) {
+    private boolean removeSubscription(String id, ConnectionRecord connection, IBinder token) {
+        if (token == null) {
             return connection.subscriptions.remove(id) != null;
         }
         boolean removed = false;
-        List<Bundle> optionsList = connection.subscriptions.get(id);
-        if (optionsList != null) {
-            for (Bundle bundle : optionsList) {
-                if (MediaBrowserUtils.areSameOptions(options, bundle)) {
+        List<Pair<IBinder, Bundle>> callbackList = connection.subscriptions.get(id);
+        if (callbackList != null) {
+            for (Pair<IBinder, Bundle> callback : callbackList) {
+                if (token == callback.first) {
                     removed = true;
-                    optionsList.remove(bundle);
-                    break;
+                    callbackList.remove(callback);
                 }
             }
-            if (optionsList.size() == 0) {
+            if (callbackList.size() == 0) {
                 connection.subscriptions.remove(id);
             }
         }
@@ -619,14 +610,7 @@ public abstract class MediaBrowserService extends Service {
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
                         filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
-                    // NOTE: Do not call onLoadChildrenWithOptions when options are null. Otherwise,
-                    // it will break the action of support library which expects onLoadChildren will
-                    // be called when options are null.
-                    if (options == null) {
-                        connection.callbacks.onLoadChildren(parentId, pls);
-                    } else {
-                        connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
-                    }
+                    connection.callbacks.onLoadChildren(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
