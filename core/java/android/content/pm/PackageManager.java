@@ -2181,7 +2181,7 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device implements {@link #FEATURE_VR_MODE} but additionally meets all CTS requirements
+     * The device implements {@link #FEATURE_VR_MODE} but additionally meets all CDD requirements
      * to be certified as a "VR Ready" device, which guarantees that the device is capable of
      * delivering consistent performance at a high framerate over an extended period of time for
      * typical VR application CPU/GPU workloads with a minimal number of frame drops, implements
