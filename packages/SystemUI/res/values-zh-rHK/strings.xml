@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"無法啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」已在安全模式中停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"此應用程式不支援多視窗模式"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"應用程式不支援多視窗模式"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"應用程式不支援分割畫面"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸即可復原。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您正在使用工作設定檔"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕按即可取消靜音。"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕按即可設為震動。無障礙功能服務可能已經設為靜音。"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"系統使用者介面調諧器"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"顯示嵌入的電池百分比"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"非充電時，在狀態列圖示顯示電量百分比"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"快速設定編輯工具。"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"應用程式不支援分割畫面。"</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"展開快速設定。"</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

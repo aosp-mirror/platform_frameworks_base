@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Δεν ήταν δυνατή η εκκίνηση της εφαρμογής <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> έχει απενεργοποιηθεί στην ασφαλή λειτουργία."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Διαγραφή όλων"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Η εφαρμογή αυτή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Η εφαρμογή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Η εφαρμογή δεν υποστηρίζει τον διαχωρισμό οθόνης"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> αποτελεί το παράθυρο διαλόγου ελέγχου έντασης"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Αγγίξτε για επαναφορά αρχικού."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Χρησιμοποιείτε το προφίλ εργασίας σας"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Πατήστε για κατάργηση σίγασης."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Πατήστε για ενεργοποιήσετε τη δόνηση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Πατήστε για σίγαση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Εμφάνιση ποσοστού ενσωματωμένης μπαταρίας"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Εμφάνιση ποσοστού επιπέδου μπαταρίας μέσα στο εικονίδιο της γραμμής κατάστασης όταν δεν γίνεται φόρτιση"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Επεξεργασία γρήγορων ρυθμίσεων."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Δεν είναι δυνατή η λειτουργία της εφαρμογής με διαχωρισμό οθόνης."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Η εφαρμογή δεν υποστηρίζει διαχωρισμό οθόνης."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Ανάπτυξη γρήγορων ρυθμίσεων."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

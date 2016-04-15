@@ -311,8 +311,8 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>已在安全模式下停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"此应用不支持多窗口模式"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"应用不支持多窗口模式"</string>
+    <!-- no translation found for recents_incompatible_app_message (5075812958564082451) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -612,4 +612,8 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"快捷设置编辑器。"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"应用可能无法在分屏模式下正常运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"应用不支持分屏。"</string>
+    <!-- no translation found for accessibility_quick_settings_expand (4982484435775933070) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

@@ -20,12 +20,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Закрыць PIP"</string>
-    <!-- no translation found for pip_fullscreen (8604643018538487816) -->
-    <skip />
-    <!-- no translation found for pip_play (674145557658227044) -->
-    <skip />
-    <!-- no translation found for pip_pause (8412075640017218862) -->
-    <skip />
+    <string name="pip_fullscreen" msgid="8604643018538487816">"Ва ўвесь экран"</string>
+    <string name="pip_play" msgid="674145557658227044">"Прайграць"</string>
+    <string name="pip_pause" msgid="8412075640017218862">"Прыпыніць"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Утрым. "<b>"HOME"</b>" для кір. PIP"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"Націсніце і ўтрымлівайце кнопку HOME для кіравання PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Зразумела"</string>
