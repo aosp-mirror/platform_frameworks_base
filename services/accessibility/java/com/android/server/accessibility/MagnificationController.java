@@ -144,27 +144,35 @@ class MagnificationController {
      * @param updateSpec {@code true} to update the scale and center based on
      *                   the region bounds, {@code false} to leave them as-is
      */
-    public void setMagnifiedRegion(Region magnified, Region available, boolean updateSpec) {
+    private void setMagnifiedRegion(Region magnified, Region available, boolean updateSpec) {
         synchronized (mLock) {
-            mMagnifiedRegion.set(magnified);
-            mMagnifiedRegion.getBounds(mMagnifiedBounds);
+            boolean magnificationChanged = false;
+            boolean boundsChanged = false;
+
+            if (!mMagnifiedRegion.equals(magnified)) {
+                mMagnifiedRegion.set(magnified);
+                mMagnifiedRegion.getBounds(mMagnifiedBounds);
+                boundsChanged = true;
+            }
             mAvailableRegion.set(available);
-
-            final MagnificationSpec sentSpec = mSpecAnimationBridge.mSentMagnificationSpec;
-            final float scale = sentSpec.scale;
-            final float offsetX = sentSpec.offsetX;
-            final float offsetY = sentSpec.offsetY;
-
-            // Compute the new center and update spec as needed.
-            final float centerX = (mMagnifiedBounds.width() / 2.0f
-                    + mMagnifiedBounds.left - offsetX) / scale;
-            final float centerY = (mMagnifiedBounds.height() / 2.0f
-                    + mMagnifiedBounds.top - offsetY) / scale;
             if (updateSpec) {
-                setScaleAndCenter(scale, centerX, centerY, false);
-            } else {
-                mAms.onMagnificationStateChanged();
-                mAms.notifyMagnificationChanged(mMagnifiedRegion, scale, centerX, centerY);
+                final MagnificationSpec sentSpec = mSpecAnimationBridge.mSentMagnificationSpec;
+                final float scale = sentSpec.scale;
+                final float offsetX = sentSpec.offsetX;
+                final float offsetY = sentSpec.offsetY;
+
+                // Compute the new center and update spec as needed.
+                final float centerX = (mMagnifiedBounds.width() / 2.0f
+                        + mMagnifiedBounds.left - offsetX) / scale;
+                final float centerY = (mMagnifiedBounds.height() / 2.0f
+                        + mMagnifiedBounds.top - offsetY) / scale;
+                magnificationChanged = setScaleAndCenterLocked(
+                        scale, centerX, centerY, false);
+            }
+
+            // If magnification changed we already notified for the change.
+            if (boundsChanged && updateSpec && !magnificationChanged) {
+                onMagnificationChangedLocked();
             }
         }
     }
@@ -327,19 +335,15 @@ class MagnificationController {
      */
     public boolean reset(boolean animate) {
         synchronized (mLock) {
-            return resetLocked(animate);
+            final MagnificationSpec spec = mCurrentMagnificationSpec;
+            final boolean changed = !spec.isNop();
+            if (changed) {
+                spec.clear();
+                onMagnificationChangedLocked();
+            }
+            mSpecAnimationBridge.updateSentSpec(spec, animate);
+            return changed;
         }
-    }
-
-    private boolean resetLocked(boolean animate) {
-        final MagnificationSpec spec = mCurrentMagnificationSpec;
-        final boolean changed = !spec.isNop();
-        if (changed) {
-            spec.clear();
-        }
-
-        mSpecAnimationBridge.updateSentSpec(spec, animate);
-        return changed;
     }
 
     /**
@@ -416,8 +420,8 @@ class MagnificationController {
         }
     }
 
-    private boolean setScaleAndCenterLocked(
-            float scale, float centerX, float centerY, boolean animate) {
+    private boolean setScaleAndCenterLocked(float scale, float centerX, float centerY,
+            boolean animate) {
         final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
         mSpecAnimationBridge.updateSentSpec(mCurrentMagnificationSpec, animate);
         return changed;
@@ -438,6 +442,12 @@ class MagnificationController {
             currSpec.offsetY = MathUtils.constrain(nonNormOffsetY, getMinOffsetYLocked(), 0);
             mSpecAnimationBridge.updateSentSpec(currSpec, false);
         }
+    }
+
+    private void onMagnificationChangedLocked() {
+        mAms.onMagnificationStateChanged();
+        mAms.notifyMagnificationChanged(mMagnifiedRegion,
+                getScale(), getCenterX(), getCenterY());
     }
 
     /**
@@ -522,6 +532,10 @@ class MagnificationController {
         if (Float.compare(currSpec.offsetY, offsetY) != 0) {
             currSpec.offsetY = offsetY;
             changed = true;
+        }
+
+        if (changed) {
+            onMagnificationChangedLocked();
         }
 
         return changed;
