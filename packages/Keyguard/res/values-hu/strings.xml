@@ -54,7 +54,7 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-kód területe"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN-kód területe"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK kód területe"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"A következő riasztás beállított ideje: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"A következő ébresztés beállított ideje: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
@@ -119,6 +119,10 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Ha vált a profilok között, meg kell adni a mintát"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Ha vált a profilok között, meg kell adni a PIN-kódot"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Ha vált a profilok között, meg kell adni a jelszót"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
+    <skip />
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>
       <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>
