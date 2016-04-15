@@ -336,12 +336,27 @@ public class ImsCallProfile implements Parcelable {
      * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
      * video state values defined in {@link VideoProfile}.
      *
-     * @param callType The call type.
+     * @param callProfile The call profile.
      * @return The video state.
      */
     public static int getVideoStateFromImsCallProfile(ImsCallProfile callProfile) {
+        int videostate = getVideoStateFromCallType(callProfile.mCallType);
+        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
+            videostate |= VideoProfile.STATE_PAUSED;
+        } else {
+            videostate &= ~VideoProfile.STATE_PAUSED;
+        }
+        return videostate;
+    }
+
+    /**
+     * Translates a {@link ImsCallProfile} {@code CALL_TYPE_*} constant into a video state.
+     * @param callType The call type.
+     * @return The video state.
+     */
+    public static int getVideoStateFromCallType(int callType) {
         int videostate = VideoProfile.STATE_AUDIO_ONLY;
-        switch (callProfile.mCallType) {
+        switch (callType) {
             case CALL_TYPE_VT_TX:
                 videostate = VideoProfile.STATE_TX_ENABLED;
                 break;
@@ -357,11 +372,6 @@ public class ImsCallProfile implements Parcelable {
             default:
                 videostate = VideoProfile.STATE_AUDIO_ONLY;
                 break;
-        }
-        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
-            videostate |= VideoProfile.STATE_PAUSED;
-        } else {
-            videostate &= ~VideoProfile.STATE_PAUSED;
         }
         return videostate;
     }
