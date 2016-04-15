@@ -555,10 +555,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showRecentApps(boolean triggeredFromAltTab) {
+    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
         if (mBar != null) {
             try {
-                mBar.showRecentApps(triggeredFromAltTab);
+                mBar.showRecentApps(triggeredFromAltTab, fromHome);
             } catch (RemoteException ex) {}
         }
     }

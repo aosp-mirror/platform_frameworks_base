@@ -57,7 +57,7 @@ oneway interface IStatusBar
     void notificationLightOff();
     void notificationLightPulse(int argb, int millisOn, int millisOff);
 
-    void showRecentApps(boolean triggeredFromAltTab);
+    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void toggleSplitScreen();

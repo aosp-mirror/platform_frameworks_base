@@ -615,7 +615,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Returns true if the focus activity was adjusted to the home stack top activity. */
     boolean moveHomeStackTaskToTop(int homeStackTaskType, String reason) {
         if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps();
+            mWindowManager.showRecentApps(false /* fromHome */);
             return false;
         }
 
@@ -636,7 +636,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps();
+            mWindowManager.showRecentApps(false /* fromHome */);
             return false;
         }
 
