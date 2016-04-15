@@ -55,6 +55,8 @@ public class MetricsLoggerService extends SystemService {
             if (DBG) Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
             publishBinderService(ConnectivityMetricsLogger.CONNECTIVITY_METRICS_LOGGER_SERVICE,
                     mBinder);
+            mDnsListener = new DnsEventListenerService(getContext());
+            publishBinderService(mDnsListener.SERVICE_NAME, mDnsListener);
         }
     }
 
@@ -88,6 +90,8 @@ public class MetricsLoggerService extends SystemService {
     private long mThrottlingIntervalBoundaryMillis;
 
     private final ArrayDeque<ConnectivityMetricsEvent> mEvents = new ArrayDeque<>();
+
+    private DnsEventListenerService mDnsListener;
 
     private void enforceConnectivityInternalPermission() {
         getContext().enforceCallingOrSelfPermission(
@@ -159,10 +163,12 @@ public class MetricsLoggerService extends SystemService {
 
             synchronized (mEvents) {
                 pw.println("Number of events: " + mEvents.size());
-                pw.println("Time span: " +
-                        DateUtils.formatElapsedTime(
-                                (System.currentTimeMillis() - mEvents.peekFirst().timestamp)
-                                        / 1000));
+                if (mEvents.size() > 0) {
+                    pw.println("Time span: " +
+                            DateUtils.formatElapsedTime(
+                                    (System.currentTimeMillis() - mEvents.peekFirst().timestamp)
+                                            / 1000));
+                }
 
                 if (dumpSerializedSize) {
                     long dataSize = 0;
@@ -193,6 +199,9 @@ public class MetricsLoggerService extends SystemService {
                     pw.println(pi.toString());
                 }
             }
+
+            pw.println();
+            mDnsListener.dump(pw);
         }
 
         public long logEvent(ConnectivityMetricsEvent event) {
