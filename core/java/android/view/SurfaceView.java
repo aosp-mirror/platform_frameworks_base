@@ -648,13 +648,19 @@ public class SurfaceView extends View {
 
                 transformFromViewToWindowSpace(mLocation);
 
+                mWinFrame.set(mWindowSpaceLeft, mWindowSpaceTop,
+                        mLocation[0], mLocation[1]);
+
+                if (mTranslator != null) {
+                    mTranslator.translateRectInAppWindowToScreen(mWinFrame);
+                }
+
                 try {
                     Log.d(TAG, String.format("updateWindowPosition UI, " +
-                            "postion = [%d, %d, %d, %d]", mWindowSpaceLeft, mWindowSpaceTop,
-                            mLocation[0], mLocation[1]));
-                    mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
-                            mLocation[0], mLocation[1],
-                            -1, mWinFrame);
+                            "postion = [%d, %d, %d, %d]", mWinFrame.left, mWinFrame.top,
+                            mWinFrame.right, mWinFrame.bottom));
+                    mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
+                            mWinFrame.right, mWinFrame.bottom, -1, mWinFrame);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Exception from relayout", ex);
                 }
