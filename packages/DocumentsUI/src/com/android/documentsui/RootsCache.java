@@ -445,6 +445,18 @@ public class RootsCache {
         mCacheUpdateListener = cacheUpdateListener;
     }
 
+    /**
+     * Returns the default root for the specified state.
+     */
+    public RootInfo getDefaultRootBlocking(State state) {
+        for (RootInfo root : getMatchingRoots(getRootsBlocking(), state)) {
+            if (root.isDownloads()) {
+                return root;
+            }
+        }
+        return mRecentsRoot;
+    }
+
     @VisibleForTesting
     static List<RootInfo> getMatchingRoots(Collection<RootInfo> roots, State state) {
         final List<RootInfo> matching = new ArrayList<>();
