@@ -219,22 +219,24 @@ public:
             int fillType = 0; /* non-zero or kWinding_FillType in Skia */
         };
         FullPathProperties(Node* mNode) : Properties(mNode), mTrimDirty(false) {}
+        ~FullPathProperties() {
+            SkSafeUnref(fillGradient);
+            SkSafeUnref(strokeGradient);
+        }
         void syncProperties(const FullPathProperties& prop) {
             mPrimitiveFields = prop.mPrimitiveFields;
             mTrimDirty = true;
-            fillGradient.reset(prop.fillGradient);
-            strokeGradient.reset(prop.strokeGradient);
+            UPDATE_SKPROP(fillGradient, prop.fillGradient);
+            UPDATE_SKPROP(strokeGradient, prop.strokeGradient);
             onPropertyChanged();
         }
         void setFillGradient(SkShader* gradient) {
-            if(fillGradient != gradient){
-                fillGradient.reset(gradient);
+            if(UPDATE_SKPROP(fillGradient, gradient)) {
                 onPropertyChanged();
             }
         }
         void setStrokeGradient(SkShader* gradient) {
-            if(strokeGradient != gradient){
-                strokeGradient.reset(gradient);
+            if(UPDATE_SKPROP(strokeGradient, gradient)) {
                 onPropertyChanged();
             }
         }
@@ -346,8 +348,8 @@ public:
             count,
         };
         PrimitiveFields mPrimitiveFields;
-        SkAutoTUnref<SkShader> fillGradient;
-        SkAutoTUnref<SkShader> strokeGradient;
+        SkShader* fillGradient = nullptr;
+        SkShader* strokeGradient = nullptr;
     };
 
     // Called from UI thread
