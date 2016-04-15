@@ -22,25 +22,27 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class CaptivePortalCheckResultEvent extends IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "CaptivePortalCheckResultEvent";
+public final class CaptivePortalCheckResultEvent extends IpConnectivityEvent implements Parcelable {
+    public final int netId;
+    public final int result;
 
-    private int mNetId;
-    private int mResult;
-
-    public CaptivePortalCheckResultEvent(int netId, int result) {
-        mNetId = netId;
-        mResult = result;
+    private CaptivePortalCheckResultEvent(int netId, int result) {
+        this.netId = netId;
+        this.result = result;
     }
 
-    public CaptivePortalCheckResultEvent(Parcel in) {
-        mNetId = in.readInt();
-        mResult = in.readInt();
+    private CaptivePortalCheckResultEvent(Parcel in) {
+        this.netId = in.readInt();
+        this.result = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mNetId);
-        out.writeInt(mResult);
+        out.writeInt(netId);
+        out.writeInt(result);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<CaptivePortalCheckResultEvent> CREATOR
@@ -55,7 +57,6 @@ public class CaptivePortalCheckResultEvent extends IpConnectivityEvent implement
         };
 
     public static void logEvent(int netId, int result) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_NETMON_CHECK_RESULT,
-                new CaptivePortalCheckResultEvent(netId, result));
+        logEvent(IPCE_NETMON_CHECK_RESULT, new CaptivePortalCheckResultEvent(netId, result));
     }
 };

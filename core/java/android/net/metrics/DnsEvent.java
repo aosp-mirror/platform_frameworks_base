@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class DnsEvent extends IpConnectivityEvent implements Parcelable {
+final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
     public final int netId;
 
     // The event type is currently only 1 or 2, so we store it as a byte.
@@ -43,10 +43,10 @@ public class DnsEvent extends IpConnectivityEvent implements Parcelable {
     }
 
     private DnsEvent(Parcel in) {
-        netId = in.readInt();
-        eventTypes = in.createByteArray();
-        returnCodes = in.createByteArray();
-        latenciesMs = in.createIntArray();
+        this.netId = in.readInt();
+        this.eventTypes = in.createByteArray();
+        this.returnCodes = in.createByteArray();
+        this.latenciesMs = in.createIntArray();
     }
 
     @Override
@@ -55,6 +55,10 @@ public class DnsEvent extends IpConnectivityEvent implements Parcelable {
         out.writeByteArray(eventTypes);
         out.writeByteArray(returnCodes);
         out.writeIntArray(latenciesMs);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<DnsEvent> CREATOR = new Parcelable.Creator<DnsEvent>() {
@@ -71,7 +75,6 @@ public class DnsEvent extends IpConnectivityEvent implements Parcelable {
 
     public static void logEvent(
             int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
-        IpConnectivityEvent.logEvent(IPCE_DNS_LOOKUPS,
-                new DnsEvent(netId, eventTypes, returnCodes, latenciesMs));
+        logEvent(IPCE_DNS_LOOKUPS, new DnsEvent(netId, eventTypes, returnCodes, latenciesMs));
     }
 }

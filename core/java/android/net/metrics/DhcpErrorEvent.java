@@ -22,9 +22,7 @@ import android.os.Parcelable;
 /**
  * {@hide} Event class used to record error events when parsing DHCP response packets.
  */
-public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "DhcpErrorEvent";
-
+public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
     public static final int L2_ERROR   = 1;
     public static final int L3_ERROR   = 2;
     public static final int L4_ERROR   = 3;
@@ -73,6 +71,10 @@ public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
         out.writeInt(errorCode);
     }
 
+    public int describeContents() {
+        return 0;
+    }
+
     public static final Parcelable.Creator<DhcpErrorEvent> CREATOR
         = new Parcelable.Creator<DhcpErrorEvent>() {
         public DhcpErrorEvent createFromParcel(Parcel in) {
@@ -85,7 +87,7 @@ public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
     };
 
     public static void logParseError(String ifName, int errorCode) {
-        IpConnectivityEvent.logEvent(IPCE_DHCP_PARSE_ERROR, new DhcpErrorEvent(ifName, errorCode));
+        logEvent(IPCE_DHCP_PARSE_ERROR, new DhcpErrorEvent(ifName, errorCode));
     }
 
     public static void logReceiveError(String ifName) {
