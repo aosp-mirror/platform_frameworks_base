@@ -163,6 +163,7 @@ public abstract class Conference extends Conferenceable {
      * {@link Connection} for valid values.
      *
      * @return A bitmask of the properties of the conference call.
+     * @hide
      */
     public final int getConnectionProperties() {
         return mConnectionProperties;
@@ -394,6 +395,7 @@ public abstract class Conference extends Conferenceable {
      * {@link Connection} for valid values.
      *
      * @param connectionProperties A bitmask of the {@code Properties} of the conference call.
+     * @hide
      */
     public final void setConnectionProperties(int connectionProperties) {
         if (connectionProperties != mConnectionProperties) {
@@ -682,8 +684,6 @@ public abstract class Conference extends Conferenceable {
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with this {@code Conference}.
-     * @deprecated Use {@link #putExtras(Bundle)} to add extras.  Use {@link #removeExtras(List)}
-     * to remove extras.
      */
     public final void setExtras(@Nullable Bundle extras) {
         // Add/replace any new or changed extras values.
@@ -723,6 +723,7 @@ public abstract class Conference extends Conferenceable {
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras to add.
+     * @hide
      */
     public final void putExtras(@NonNull Bundle extras) {
         if (extras == null) {
@@ -782,6 +783,7 @@ public abstract class Conference extends Conferenceable {
      * Removes an extra from this {@link Conference}.
      *
      * @param keys The key of the extra key to remove.
+     * @hide
      */
     public final void removeExtras(List<String> keys) {
         if (keys == null || keys.isEmpty()) {
@@ -804,15 +806,6 @@ public abstract class Conference extends Conferenceable {
 
     /**
      * Returns the extras associated with this conference.
-     * <p>
-     * Extras should be updated using {@link #putExtras(Bundle)} and {@link #removeExtras(List)}.
-     * <p>
-     * Telecom or an {@link InCallService} can also update the extras via
-     * {@link android.telecom.Call#putExtras(Bundle)}, and
-     * {@link Call#removeExtras(List)}.
-     * <p>
-     * The conference is notified of changes to the extras made by Telecom or an
-     * {@link InCallService} by {@link #onExtrasChanged(Bundle)}.
      *
      * @return The extras associated with this connection.
      */
@@ -829,6 +822,7 @@ public abstract class Conference extends Conferenceable {
      * {@link Call#removeExtras(List)}.
      *
      * @param extras The new extras bundle.
+     * @hide
      */
     public void onExtrasChanged(Bundle extras) {}
 

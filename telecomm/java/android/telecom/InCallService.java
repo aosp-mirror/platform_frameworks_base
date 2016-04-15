@@ -457,6 +457,7 @@ public abstract class InCallService extends Service {
      * @param call The call the event is associated with.
      * @param event The event.
      * @param extras Any associated extras.
+     * @hide
      */
     public void onConnectionEvent(Call call, String event, Bundle extras) {
     }
