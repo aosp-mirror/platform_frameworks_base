@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -204,11 +205,15 @@ public class ScreenPinningRequest implements View.OnClickListener {
             // Status bar is always on the right.
             mLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             // Buttons and text do switch sides though.
-            View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
-            swapChildrenIfRtlAndVertical(buttons);
+            View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
+            if (Recents.getSystemServices().hasSoftNavigationBar()) {
+                buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
+                swapChildrenIfRtlAndVertical(buttons);
+            } else {
+                buttons.setVisibility(View.GONE);
+            }
 
             ((Button) mLayout.findViewById(R.id.screen_pinning_ok_button))
                     .setOnClickListener(ScreenPinningRequest.this);
