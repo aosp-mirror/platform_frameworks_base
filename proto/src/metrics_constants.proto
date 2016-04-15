@@ -2158,6 +2158,17 @@ message MetricsEvent {
     // System UI Tuner > Other > Power notification controls > Toggle on/off
     ACTION_TUNER_POWER_NOTIFICATION_CONTROLS = 393;
 
+    // Action: user enable / disabled data saver using Settings. Arguments:
+    // 0: Data Saver mode is disabled.
+    // 1: Data Saver mode is enabled.
+    ACTION_DATA_SAVER_MODE = 394;
+
+    // User whitelisted an app for Data Saver mode; action pass package name of app.
+    ACTION_DATA_SAVER_WHITELIST = 395;
+
+    // User blacklisted an app for Data Saver mode; action pass package name of app.
+    ACTION_DATA_SAVER_BLACKLIST = 396;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
