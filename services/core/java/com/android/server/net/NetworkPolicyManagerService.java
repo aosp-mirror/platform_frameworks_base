@@ -260,6 +260,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
     private static final int MSG_SCREEN_ON_CHANGED = 8;
     private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
+    private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
+    private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1275,8 +1277,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
 
                 for (String iface : ifaces) {
-                    removeInterfaceQuota(iface);
-                    setInterfaceQuota(iface, quotaBytes);
+                    // long quotaBytes split up into two ints to fit in message
+                    mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA,
+                            (int) (quotaBytes >> 32), (int) (quotaBytes & 0xFFFFFFFF), iface)
+                            .sendToTarget();
                     newMeteredIfaces.add(iface);
                 }
             }
@@ -1292,8 +1296,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         for (int i = connIfaces.size()-1; i >= 0; i--) {
             String iface = connIfaces.valueAt(i);
-            removeInterfaceQuota(iface);
-            setInterfaceQuota(iface, Long.MAX_VALUE);
+            // long quotaBytes split up into two ints to fit in message
+            mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA,
+                    (int) (Long.MAX_VALUE >> 32), (int) (Long.MAX_VALUE & 0xFFFFFFFF), iface)
+                    .sendToTarget();
             newMeteredIfaces.add(iface);
         }
 
@@ -1303,7 +1309,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
             final String iface = mMeteredIfaces.valueAt(i);
             if (!newMeteredIfaces.contains(iface)) {
-                removeInterfaceQuota(iface);
+                mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTA, iface)
+                        .sendToTarget();
             }
         }
         mMeteredIfaces = newMeteredIfaces;
@@ -2948,6 +2955,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_SCREEN_ON_CHANGED: {
                     updateScreenOn();
+                    return true;
+                }
+                case MSG_UPDATE_INTERFACE_QUOTA: {
+                    removeInterfaceQuota((String) msg.obj);
+                    // int params need to be stitched back into a long
+                    setInterfaceQuota((String) msg.obj,
+                            ((long) msg.arg1 << 32) | (msg.arg2 & 0xFFFFFFFFL));
+                    return true;
+                }
+                case MSG_REMOVE_INTERFACE_QUOTA: {
+                    removeInterfaceQuota((String) msg.obj);
                     return true;
                 }
                 default: {
