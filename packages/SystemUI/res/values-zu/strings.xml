@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ayikwazanga ukuqala i-<xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"I-<xliff:g id="APP">%s</xliff:g> ikhutshaziwe kumodi yokuphepha."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Sula konke"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Lolu hlelo lokusebenza alusekeli amawindi amaningi"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Uhlelo lokusebenza alusekeli amawindi amaningi"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Uhlelo lokusebenza alisekeli ukwehlukanisa kwezikrini"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Hlukanisa okuvundlile"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Hlukanisa okumile"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Hlukanisa kwezifiso"</string>
@@ -420,6 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yingxoxo yevolumu"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Thinta ukuze ubuyisele kokwangempela."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Usebenzisa iphrofayela yakho yomsebenzi"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Thepha ukuze ususe ukuthula."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Thepha ukuze usethe ukudlidliza. Amasevisi okufinyelela angathuliswa."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Thepha ukuze uthulise. Amasevisi okufinyelela angathuliswa."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Isishuni se-UI yesistimu"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Bonisa amaphesenti ebhethri elinamathiselwe"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Bonisa amaphesenti eleveli yebhethri ngaphakathi kwesithonjana sebha yesimo uma kungashajwa"</string>
@@ -606,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Isihleli sezilungiselelo ezisheshayo."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Izinhlelo zokusebenza kungenzeka zingasebenzi ngesikrini esihlukanisiwe."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Uhlelo lokusebenza alusekeli isikrini esihlukanisiwe."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Nwebisa izilungiselelo ezisheshayo."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

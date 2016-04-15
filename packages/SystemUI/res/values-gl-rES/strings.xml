@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Non foi posible iniciar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"A aplicación <xliff:g id="APP">%s</xliff:g> está desactivada no modo seguro"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Borrar todo"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Esta aplicación non é compatible con varias ventás"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"A aplicación non é compatible con varias ventás"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"A aplicación non é compatible coa pantalla dividida"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dividir en horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dividir en vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dividir de xeito personalizado"</string>
@@ -420,6 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é o cadro de diálogo de volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar o orixinal."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando o perfil de traballo"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca para activar o son."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca para establecer a vibración. Pódense silenciar os servizos de accesibilidade."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Configurador da IU do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaxe de batería inserida"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
@@ -606,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de configuración rápida."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Pode que a aplicación non funcione coa pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"A aplicación non é compatible coa función de pantalla dividida."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Ampliar configuración rápida"</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

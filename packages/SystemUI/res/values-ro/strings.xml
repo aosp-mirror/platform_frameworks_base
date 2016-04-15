@@ -312,8 +312,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> nu a putut porni."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplicația <xliff:g id="APP">%s</xliff:g> este dezactivată în modul sigur."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ștergeți-le pe toate"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Această aplicație nu acceptă ferestre multiple"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplicația nu acceptă ferestre multiple"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Aplicația nu acceptă ecranul împărțit"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divizare pe orizontală"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divizare pe verticală"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divizare personalizată"</string>
@@ -421,6 +420,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Atingeți pentru a activa sunetul."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Atingeți pentru a seta vibrarea. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Atingeți pentru a dezactiva sunetul. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afișați procentajul bateriei încorporat"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Afișați procentajul cu nivelul bateriei în interiorul pictogramei din bara de stare, atunci când nu se încarcă"</string>
@@ -607,4 +609,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editorul pentru setări rapide."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplicația nu acceptă ecranul împărțit."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Extindeți setările rapide."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>
