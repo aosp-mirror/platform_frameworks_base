@@ -63,7 +63,7 @@ oneway interface IStatusBar
     void toggleSplitScreen();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
-    void showScreenPinningRequest();
+    void showScreenPinningRequest(int taskId);
 
     void toggleKeyboardShortcutsMenu(int deviceId);
 

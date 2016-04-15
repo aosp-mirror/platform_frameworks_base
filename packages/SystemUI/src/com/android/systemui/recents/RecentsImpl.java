@@ -221,11 +221,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * visibility change events through to the system user via
      * {@link Recents#onBusEvent(ScreenPinningRequestEvent)}.
      */
-    public void onStartScreenPinning(Context context) {
+    public void onStartScreenPinning(Context context, int taskId) {
         SystemUIApplication app = (SystemUIApplication) context;
         PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
         if (statusBar != null) {
-            statusBar.showScreenPinningRequest(false);
+            statusBar.showScreenPinningRequest(taskId, false);
         }
     }
 

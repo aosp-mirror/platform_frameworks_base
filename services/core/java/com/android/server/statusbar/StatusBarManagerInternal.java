@@ -26,7 +26,7 @@ public interface StatusBarManagerInternal {
     void buzzBeepBlinked();
     void notificationLightPulse(int argb, int onMillis, int offMillis);
     void notificationLightOff();
-    void showScreenPinningRequest();
+    void showScreenPinningRequest(int taskId);
     void showAssistDisclosure();
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
