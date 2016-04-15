@@ -1225,6 +1225,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
 
             mRankingHelper.setPackagePeekable(pkg, uid, peekable);
+            savePolicyFile(); // save state if changed .
         }
 
         @Override
