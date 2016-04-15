@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.stack.StackScrollAlgorithm;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -114,5 +115,9 @@ public class SystemUIFactory {
 
     public <T> T createInstance(Class<T> classType) {
         return null;
+    }
+
+    public StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
+        return new StackScrollAlgorithm(context);
     }
 }
