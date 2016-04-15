@@ -136,7 +136,8 @@ static jobject getRawAttributes(JNIEnv* env, SkStream* stream, bool returnThumbn
 
     KeyedVector<String8, String8> map;
 
-    if (image_data.thumbnail.length > 0) {
+    if (image_data.thumbnail.length > 0
+            && image_data.thumbnail.format == ::piex::Image::kJpegCompressed) {
         map.add(String8("hasThumbnail"), String8("true"));
         map.add(String8("thumbnailOffset"), String8::format("%d", image_data.thumbnail.offset));
         map.add(String8("thumbnailLength"), String8::format("%d", image_data.thumbnail.length));
