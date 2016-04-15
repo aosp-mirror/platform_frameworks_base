@@ -53,7 +53,10 @@ import android.util.TypedValue;
 import android.view.CollapsibleActionView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.TouchDelegate;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
@@ -110,6 +113,12 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private final ImageView mCloseButton;
     private final ImageView mVoiceButton;
     private final View mDropDownAnchor;
+
+    private UpdatableTouchDelegate mTouchDelegate;
+    private Rect mSearchSrcTextViewBounds = new Rect();
+    private Rect mSearchSrtTextViewBoundsExpanded = new Rect();
+    private int[] mTemp = new int[2];
+    private int[] mTemp2 = new int[2];
 
     /** Icon optionally displayed when the SearchView is collapsed. */
     private final ImageView mCollapsedIcon;
@@ -801,12 +810,58 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             break;
         }
         widthMode = MeasureSpec.EXACTLY;
-        super.onMeasure(MeasureSpec.makeMeasureSpec(width, widthMode), heightMeasureSpec);
+
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        switch (heightMode) {
+            case MeasureSpec.AT_MOST:
+            case MeasureSpec.UNSPECIFIED:
+                height = Math.min(getPreferredHeight(), height);
+                break;
+        }
+        heightMode = MeasureSpec.EXACTLY;
+
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, widthMode),
+                MeasureSpec.makeMeasureSpec(height, heightMode));
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (changed) {
+            // Expand mSearchSrcTextView touch target to be the height of the parent in order to
+            // allow it to be up to 48dp.
+            getChildBoundsWithinSearchView(mSearchSrcTextView, mSearchSrcTextViewBounds);
+            mSearchSrtTextViewBoundsExpanded.set(
+                    mSearchSrcTextViewBounds.left, 0, mSearchSrcTextViewBounds.right, bottom - top);
+            if (mTouchDelegate == null) {
+                mTouchDelegate = new UpdatableTouchDelegate(mSearchSrtTextViewBoundsExpanded,
+                        mSearchSrcTextViewBounds, mSearchSrcTextView);
+                setTouchDelegate(mTouchDelegate);
+            } else {
+                mTouchDelegate.setBounds(mSearchSrtTextViewBoundsExpanded, mSearchSrcTextViewBounds);
+            }
+        }
+    }
+
+    private void getChildBoundsWithinSearchView(View view, Rect rect) {
+        view.getLocationInWindow(mTemp);
+        getLocationInWindow(mTemp2);
+        final int top = mTemp[1] - mTemp2[1];
+        final int left = mTemp[0] - mTemp2[0];
+        rect.set(left , top, left + view.getWidth(), top + view.getHeight());
     }
 
     private int getPreferredWidth() {
         return getContext().getResources()
                 .getDimensionPixelSize(R.dimen.search_view_preferred_width);
+    }
+
+    private int getPreferredHeight() {
+        return getContext().getResources()
+                .getDimensionPixelSize(R.dimen.search_view_preferred_height);
     }
 
     private void updateViewsVisibility(final boolean collapsed) {
@@ -1748,6 +1803,101 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         public void afterTextChanged(Editable s) {
         }
     };
+
+    private static class UpdatableTouchDelegate extends TouchDelegate {
+        /**
+         * View that should receive forwarded touch events
+         */
+        private final View mDelegateView;
+
+        /**
+         * Bounds in local coordinates of the containing view that should be mapped to the delegate
+         * view. This rect is used for initial hit testing.
+         */
+        private final Rect mTargetBounds;
+
+        /**
+         * Bounds in local coordinates of the containing view that are actual bounds of the delegate
+         * view. This rect is used for event coordinate mapping.
+         */
+        private final Rect mActualBounds;
+
+        /**
+         * mTargetBounds inflated to include some slop. This rect is to track whether the motion events
+         * should be considered to be be within the delegate view.
+         */
+        private final Rect mSlopBounds;
+
+        private final int mSlop;
+
+        /**
+         * True if the delegate had been targeted on a down event (intersected mTargetBounds).
+         */
+        private boolean mDelegateTargeted;
+
+        public UpdatableTouchDelegate(Rect targetBounds, Rect actualBounds, View delegateView) {
+            super(targetBounds, delegateView);
+            mSlop = ViewConfiguration.get(delegateView.getContext()).getScaledTouchSlop();
+            mTargetBounds = new Rect();
+            mSlopBounds = new Rect();
+            mActualBounds = new Rect();
+            setBounds(targetBounds, actualBounds);
+            mDelegateView = delegateView;
+        }
+
+        public void setBounds(Rect desiredBounds, Rect actualBounds) {
+            mTargetBounds.set(desiredBounds);
+            mSlopBounds.set(desiredBounds);
+            mSlopBounds.inset(-mSlop, -mSlop);
+            mActualBounds.set(actualBounds);
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            final int x = (int) event.getX();
+            final int y = (int) event.getY();
+            boolean sendToDelegate = false;
+            boolean hit = true;
+            boolean handled = false;
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (mTargetBounds.contains(x, y)) {
+                        mDelegateTargeted = true;
+                        sendToDelegate = true;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_MOVE:
+                    sendToDelegate = mDelegateTargeted;
+                    if (sendToDelegate) {
+                        if (!mSlopBounds.contains(x, y)) {
+                            hit = false;
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    sendToDelegate = mDelegateTargeted;
+                    mDelegateTargeted = false;
+                    break;
+            }
+            if (sendToDelegate) {
+                if (hit && !mActualBounds.contains(x, y)) {
+                    // Offset event coordinates to be in the center of the target view since we
+                    // are within the targetBounds, but not inside the actual bounds of
+                    // mDelegateView
+                    event.setLocation(mDelegateView.getWidth() / 2,
+                            mDelegateView.getHeight() / 2);
+                } else {
+                    // Offset event coordinates to the target view coordinates.
+                    event.setLocation(x - mActualBounds.left, y - mActualBounds.top);
+                }
+
+                handled = mDelegateView.dispatchTouchEvent(event);
+            }
+            return handled;
+        }
+    }
 
     /**
      * Local subclass for AutoCompleteTextView.
