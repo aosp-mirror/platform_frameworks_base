@@ -9819,8 +9819,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.lockNow(options);
     }
 
-    public void showRecentApps() {
-        mPolicy.showRecentApps();
+    public void showRecentApps(boolean fromHome) {
+        mPolicy.showRecentApps(fromHome);
     }
 
     @Override

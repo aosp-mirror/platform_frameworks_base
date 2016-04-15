@@ -557,7 +557,7 @@ class ActivityStarter {
                 // recents into docked stack. We don't want the launched activity to be alone in a
                 // docked stack, so we want to immediately launch recents too.
                 if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-                mWindowManager.showRecentApps();
+                mWindowManager.showRecentApps(true /* fromHome */);
                 return;
             }
         }

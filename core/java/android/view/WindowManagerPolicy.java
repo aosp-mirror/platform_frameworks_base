@@ -1304,7 +1304,7 @@ public interface WindowManagerPolicy {
      * Show the recents task list app.
      * @hide
      */
-    public void showRecentApps();
+    public void showRecentApps(boolean fromHome);
 
     /**
      * Show the global actions dialog.
