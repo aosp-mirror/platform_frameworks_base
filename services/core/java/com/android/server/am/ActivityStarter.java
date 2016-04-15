@@ -137,6 +137,7 @@ class ActivityStarter {
 
     // Share state variable among methods when starting an activity.
     private ActivityRecord mStartActivity;
+    private ActivityRecord mReusedActivity;
     private Intent mIntent;
     private int mCallingUid;
     private ActivityOptions mOptions;
@@ -785,13 +786,38 @@ class ActivityStarter {
 
             final String componentName = outRecord[0] != null ? outRecord[0].shortComponentName
                     : null;
-            final boolean processRunning = outRecord[0] != null &&
-                    mService.mProcessNames.get(outRecord[0].processName,
-                            outRecord[0].appInfo.uid) != null;
+            final ActivityRecord launchedActivity = mReusedActivity != null
+                    ? mReusedActivity : outRecord[0];
+            final ProcessRecord processRecord = launchedActivity != null
+                    ? mService.mProcessNames.get(launchedActivity.processName,
+                            launchedActivity.appInfo.uid)
+                    : null;
+            final boolean processRunning = processRecord != null;
+
+            // We consider this a "process switch" if the process of the activity that gets launched
+            // didn't have an activity that was in started state. In this case, we assume that lot
+            // of caches might be purged so the time until it produces the first frame is very
+            // interesting.
+            final boolean processSwitch = processRecord == null
+                    || !hasStartedActivity(processRecord, launchedActivity);
             mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, componentName,
-                    processRunning);
+                    processRunning, processSwitch);
             return res;
         }
+    }
+
+    final boolean hasStartedActivity(ProcessRecord record, ActivityRecord launchedActivity) {
+        final ArrayList<ActivityRecord> activities = record.activities;
+        for (int i = activities.size() - 1; i >= 0; i--) {
+            final ActivityRecord activity = activities.get(i);
+            if (launchedActivity == activity) {
+                continue;
+            }
+            if (!activity.stopped) {
+                return true;
+            }
+        }
+        return false;
     }
 
     final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
@@ -883,16 +909,16 @@ class ActivityStarter {
 
         mIntent.setFlags(mLaunchFlags);
 
-        ActivityRecord intentActivity = getReusableIntentActivity();
+        mReusedActivity = getReusableIntentActivity();
 
         final int preferredLaunchStackId =
                 (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
 
-        if (intentActivity != null) {
+        if (mReusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
             // the device would otherwise leave the locked task.
-            if (mSupervisor.isLockTaskModeViolation(intentActivity.task,
+            if (mSupervisor.isLockTaskModeViolation(mReusedActivity.task,
                     (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
                 mSupervisor.showLockTaskToast();
@@ -901,12 +927,12 @@ class ActivityStarter {
             }
 
             if (mStartActivity.task == null) {
-                mStartActivity.task = intentActivity.task;
+                mStartActivity.task = mReusedActivity.task;
             }
-            if (intentActivity.task.intent == null) {
+            if (mReusedActivity.task.intent == null) {
                 // This task was started because of movement of the activity based on affinity...
                 // Now that we are actually launching it, we can assign the base intent.
-                intentActivity.task.setIntent(mStartActivity);
+                mReusedActivity.task.setIntent(mStartActivity);
             }
 
             // This code path leads to delivering a new intent, we want to make sure we schedule it
@@ -917,7 +943,7 @@ class ActivityStarter {
                 // In this situation we want to remove all activities from the task up to the one
                 // being started. In most cases this means we are resetting the task to its initial
                 // state.
-                final ActivityRecord top = intentActivity.task.performClearTaskForReuseLocked(
+                final ActivityRecord top = mReusedActivity.task.performClearTaskForReuseLocked(
                         mStartActivity, mLaunchFlags);
                 if (top != null) {
                     if (top.frontOfTask) {
@@ -931,7 +957,7 @@ class ActivityStarter {
                 }
             }
 
-            intentActivity = setTargetStackAndMoveToFrontIfNeeded(intentActivity);
+            mReusedActivity = setTargetStackAndMoveToFrontIfNeeded(mReusedActivity);
 
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                 // We don't need to start a new activity, and the client said not to do anything
@@ -941,7 +967,7 @@ class ActivityStarter {
                 return START_RETURN_INTENT_TO_CALLER;
             }
 
-            setTaskFromIntentActivity(intentActivity);
+            setTaskFromIntentActivity(mReusedActivity);
 
             if (!mAddingToTask && mReuseTask == null) {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
