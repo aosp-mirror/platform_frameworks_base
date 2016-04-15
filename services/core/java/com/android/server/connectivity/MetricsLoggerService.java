@@ -300,14 +300,14 @@ public class MetricsLoggerService extends SystemService {
          */
         public ConnectivityMetricsEvent[] getEvents(ConnectivityMetricsEvent.Reference reference) {
             enforceDumpPermission();
-            long ref = reference.value;
+            long ref = reference.getValue();
             if (VDBG) Log.v(TAG, "getEvents(" + ref + ")");
 
             ConnectivityMetricsEvent[] result;
             synchronized (mEvents) {
                 if (ref > mLastEventReference) {
                     Log.e(TAG, "Invalid reference");
-                    reference.value = mLastEventReference;
+                    reference.setValue(mLastEventReference);
                     return null;
                 }
                 if (ref < mLastEventReference - mEvents.size()) {
@@ -329,7 +329,7 @@ public class MetricsLoggerService extends SystemService {
                 }
             }
 
-            reference.value = mLastEventReference;
+            reference.setValue(mLastEventReference);
 
             return result;
         }
