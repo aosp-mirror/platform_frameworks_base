@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"جارٍ إنشاء تقرير الخطأ <xliff:g id="ID">#%d</xliff:g>."</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"تم تسجيل تقرير الخطأ <xliff:g id="ID">#%d</xliff:g>."</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"تم التقاط تقرير الأخطاء <xliff:g id="ID">#%d</xliff:g> ولكن في انتظار لقطة الشاشة"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"إضافة تفاصيل إلى تقرير الخطأ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"الرجاء الانتظار…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"مرر بسرعة لليمين لمشاركة تقرير الخطأ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"انقر لمشاركة تقرير الخطأ."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"انقر لمشاركة تقرير الأخطاء بدون لقطة شاشة أو انتظر حتى انتهاء لقطة الشاشة"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"انقر لمشاركة تقرير الأخطاء بدون لقطة شاشة أو انتظر حتى انتهاء لقطة الشاشة"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"تحتوي تقارير الأخطاء على بيانات من ملفات سجلات النظام المتنوعة، بما في ذلك معلومات شخصية وخاصة. لا تشارك تقارير الأخطاء إلا مع التطبيقات والأشخاص الموثوق بهم."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"إظهار هذه الرسالة في المرة القادمة"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"تقارير الأخطاء"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"تعذرت قراءة ملف تقرير الخطأ."</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"بدون اسم"</string>
