@@ -18,6 +18,7 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -29,6 +30,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -103,8 +105,12 @@ class ShortcutUser {
         return mPackages;
     }
 
-    public ShortcutPackage removePackage(@NonNull String packageName) {
-        return mPackages.remove(packageName);
+    public ShortcutPackage removePackage(@NonNull ShortcutService s, @NonNull String packageName) {
+        final ShortcutPackage removed = mPackages.remove(packageName);
+
+        s.cleanupBitmapsForPackage(mUserId, packageName);
+
+        return removed;
     }
 
     public ArrayMap<PackageWithUser, ShortcutLauncher> getAllLaunchers() {
@@ -279,18 +285,51 @@ class ShortcutUser {
         pw.print(mUserId);
         pw.println();
 
+        prefix += prefix + "  ";
+
         pw.print(prefix);
-        pw.print("  ");
         pw.print("Default launcher: ");
         pw.print(mLauncherComponent);
         pw.println();
 
         for (int i = 0; i < mLaunchers.size(); i++) {
-            mLaunchers.valueAt(i).dump(s, pw, prefix + "  ");
+            mLaunchers.valueAt(i).dump(s, pw, prefix);
         }
 
         for (int i = 0; i < mPackages.size(); i++) {
-            mPackages.valueAt(i).dump(s, pw, prefix + "  ");
+            mPackages.valueAt(i).dump(s, pw, prefix);
         }
+
+        pw.println();
+        pw.print(prefix);
+        pw.println("Bitmap directories: ");
+        dumpDirectorySize(s, pw, prefix + "  ", s.getUserBitmapFilePath(mUserId));
+    }
+
+    private void dumpDirectorySize(@NonNull ShortcutService s, @NonNull PrintWriter pw,
+            @NonNull String prefix, File path) {
+        int numFiles = 0;
+        long size = 0;
+        final File[] children = path.listFiles();
+        if (children != null) {
+            for (File child : path.listFiles()) {
+                if (child.isFile()) {
+                    numFiles++;
+                    size += child.length();
+                } else if (child.isDirectory()) {
+                    dumpDirectorySize(s, pw, prefix + "  ", child);
+                }
+            }
+        }
+        pw.print(prefix);
+        pw.print("Path: ");
+        pw.print(path.getName());
+        pw.print("/ has ");
+        pw.print(numFiles);
+        pw.print(" files, size=");
+        pw.print(size);
+        pw.print(" (");
+        pw.print(Formatter.formatFileSize(s.mContext, size));
+        pw.println(")");
     }
 }

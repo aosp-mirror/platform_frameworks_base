@@ -15,9 +15,36 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamicOrPinned;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIcon;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconFile;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconResId;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIntents;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveTitle;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllKeyFieldsOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotHaveIntents;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotHaveTitle;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotKeyFieldsOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllPinned;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllUnique;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBitmapSize;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBundleEmpty;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertCallbackNotReceived;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertCallbackReceived;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertDynamicAndPinned;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertDynamicOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertShortcutIds;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.hashSet;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.pfdToBitmap;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.resetAll;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -27,7 +54,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.*;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -57,13 +83,11 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -71,7 +95,6 @@ import android.os.UserManager;
 import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -84,9 +107,6 @@ import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
-import com.android.server.testutis.TestUtils;
-
-import libcore.io.IoUtils;
 
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
@@ -98,8 +118,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -4018,24 +4036,33 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         checkCanRestoreTo(false, spi2, 11, "x", "sig2x", "sig1", "y");
     }
 
+    private boolean bitmapDirectoryExists(String packageName, int userId) {
+        final File path = new File(mService.getUserBitmapFilePath(userId), packageName);
+        return path.isDirectory();
+    }
+
     public void testHandlePackageDelete() {
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
         setCaller(CALLING_PACKAGE_1, USER_0);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(
+                makeShortcutWithIcon("s1", bmp32x32), makeShortcutWithIcon("s2", bmp32x32)
+        )));
 
         setCaller(CALLING_PACKAGE_2, USER_0);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
         setCaller(CALLING_PACKAGE_3, USER_0);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
         setCaller(CALLING_PACKAGE_1, USER_10);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
         setCaller(CALLING_PACKAGE_2, USER_10);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
         setCaller(CALLING_PACKAGE_3, USER_10);
-        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
@@ -4043,6 +4070,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
         uninstallPackage(USER_0, CALLING_PACKAGE_1);
         mService.mPackageMonitor.onReceive(getTestContext(),
@@ -4055,6 +4089,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+
         uninstallPackage(USER_10, CALLING_PACKAGE_2);
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_2, USER_10));
@@ -4065,6 +4106,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
         mInjectedPackages.remove(CALLING_PACKAGE_1);
         mInjectedPackages.remove(CALLING_PACKAGE_3);
@@ -4078,6 +4126,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+
         mService.handleUnlockUser(USER_10);
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
@@ -4086,6 +4141,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
     }
 
     private void backupAndRestore() {
