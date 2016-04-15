@@ -525,9 +525,16 @@ public class SurfaceTextureRenderer {
         checkEglError("makeCurrent");
     }
 
-    private boolean swapBuffers(EGLSurface surface) {
+    private boolean swapBuffers(EGLSurface surface)
+            throws LegacyExceptionUtils.BufferQueueAbandonedException {
         boolean result = EGL14.eglSwapBuffers(mEGLDisplay, surface);
-        checkEglError("swapBuffers");
+        int error = EGL14.eglGetError();
+        if (error == EGL14.EGL_BAD_SURFACE) {
+            throw new LegacyExceptionUtils.BufferQueueAbandonedException();
+        } else if (error != EGL14.EGL_SUCCESS) {
+            throw new IllegalStateException("swapBuffers: EGL error: 0x" +
+                    Integer.toHexString(error));
+        }
         return result;
     }
 
@@ -722,7 +729,14 @@ public class SurfaceTextureRenderer {
             addGlTimestamp(timestamp);
         }
 
-        List<Long> targetSurfaceIds = LegacyCameraDevice.getSurfaceIds(targetSurfaces);
+        List<Long> targetSurfaceIds = new ArrayList();
+        try {
+            targetSurfaceIds = LegacyCameraDevice.getSurfaceIds(targetSurfaces);
+        } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+            Log.w(TAG, "Surface abandoned, dropping frame. ", e);
+            request.setOutputAbandoned();
+        }
+
         for (EGLSurfaceHolder holder : mSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 try{
@@ -737,6 +751,7 @@ public class SurfaceTextureRenderer {
                     swapBuffers(holder.eglSurface);
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                     Log.w(TAG, "Surface abandoned, dropping frame. ", e);
+                    request.setOutputAbandoned();
                 }
             }
         }
@@ -761,6 +776,7 @@ public class SurfaceTextureRenderer {
                             holder.width, holder.height, format);
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                     Log.w(TAG, "Surface abandoned, dropping frame. ", e);
+                    request.setOutputAbandoned();
                 }
             }
         }

@@ -40,6 +40,7 @@ public class RequestHolder {
     private final int mNumJpegTargets;
     private final int mNumPreviewTargets;
     private volatile boolean mFailed = false;
+    private boolean mOutputAbandoned = false;
 
     private final Collection<Long> mJpegSurfaceIds;
 
@@ -266,4 +267,17 @@ public class RequestHolder {
         return mFailed;
     }
 
+    /**
+     * Mark at least one of this request's output surfaces is abandoned.
+     */
+    public void setOutputAbandoned() {
+        mOutputAbandoned = true;
+    }
+
+    /**
+     * Return if any of this request's output surface is abandoned.
+     */
+    public boolean isOutputAbandoned() {
+        return mOutputAbandoned;
+    }
 }

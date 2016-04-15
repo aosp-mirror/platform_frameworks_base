@@ -921,7 +921,16 @@ public class CameraDeviceImpl extends CameraDevice
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
 
-                long lastFrameNumber = mRemoteDevice.cancelRequest(requestId);
+                long lastFrameNumber;
+                try {
+                    lastFrameNumber = mRemoteDevice.cancelRequest(requestId);
+                } catch (IllegalArgumentException e) {
+                    if (DEBUG) {
+                        Log.v(TAG, "Repeating request was already stopped for request " + requestId);
+                    }
+                    // Repeating request was already stopped. Nothing more to do.
+                    return;
+                }
 
                 checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
             }
@@ -1682,6 +1691,24 @@ public class CameraDeviceImpl extends CameraDevice
                         onCaptureErrorLocked(errorCode, resultExtras);
                         break;
                 }
+            }
+        }
+
+        @Override
+        public void onRepeatingRequestError(long lastFrameNumber) {
+            if (DEBUG) {
+                Log.d(TAG, "Repeating request error received. Last frame number is " +
+                        lastFrameNumber);
+            }
+
+            synchronized(mInterfaceLock) {
+                // Camera is already closed or no repeating request is present.
+                if (mRemoteDevice == null || mRepeatingRequestId == REQUEST_ID_NONE) {
+                    return; // Camera already closed
+                }
+
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
+                mRepeatingRequestId = REQUEST_ID_NONE;
             }
         }
 
