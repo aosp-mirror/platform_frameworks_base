@@ -163,17 +163,33 @@ public class DisplayListCanvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Calls the function specified with the drawGLFunction function pointer. This is
-     * functionality used by webkit for calling into their renderer from our display lists.
-     * This function may return true if an invalidation is needed after the call.
+     * Records the functor specified with the drawGLFunction function pointer. This is
+     * functionality used by webview for calling into their renderer from our display lists.
      *
      * @param drawGLFunction A native function pointer
      */
     public void callDrawGLFunction2(long drawGLFunction) {
-        nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction);
+        nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction, null);
     }
 
-    private static native void nCallDrawGLFunction(long renderer, long drawGLFunction);
+    /**
+     * Records the functor specified with the drawGLFunction function pointer. This is
+     * functionality used by webview for calling into their renderer from our display lists.
+     *
+     * @param drawGLFunction A native function pointer
+     * @param releasedCallback Called when the display list is destroyed, and thus
+     * the functor is no longer referenced by this canvas's display list.
+     *
+     * NOTE: The callback does *not* necessarily mean that there are no longer
+     * any references to the functor, just that the reference from this specific
+     * canvas's display list has been released.
+     */
+    public void drawGLFunctor2(long drawGLFunctor, Runnable releasedCallback) {
+        nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
+    }
+
+    private static native void nCallDrawGLFunction(long renderer,
+            long drawGLFunction, Runnable releasedCallback);
 
     ///////////////////////////////////////////////////////////////////////////
     // Display list

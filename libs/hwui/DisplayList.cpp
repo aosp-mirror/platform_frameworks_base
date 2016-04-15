@@ -73,6 +73,12 @@ void DisplayList::cleanupResources() {
         delete path;
     }
 
+    for (auto& iter : functors) {
+        if (iter.listener) {
+            iter.listener->onGlFunctorReleased(iter.functor);
+        }
+    }
+
     patchResources.clear();
     pathResources.clear();
     paints.clear();

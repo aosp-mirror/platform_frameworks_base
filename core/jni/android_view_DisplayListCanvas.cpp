@@ -22,11 +22,11 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
+#include <utils/Looper.h>
 #include <cutils/properties.h>
 
 #include <SkBitmap.h>
 #include <SkRegion.h>
-
 
 #include <Rect.h>
 #include <RenderNode.h>
@@ -40,6 +40,52 @@
 namespace android {
 
 using namespace uirenderer;
+
+jmethodID gRunnableMethodId;
+
+static JNIEnv* jnienv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
+class InvokeRunnableMessage : public MessageHandler {
+public:
+    InvokeRunnableMessage(JNIEnv* env, jobject runnable) {
+        mRunnable = env->NewGlobalRef(runnable);
+        env->GetJavaVM(&mVm);
+    }
+
+    virtual ~InvokeRunnableMessage() {
+        jnienv(mVm)->DeleteGlobalRef(mRunnable);
+    }
+
+    virtual void handleMessage(const Message&) {
+        jnienv(mVm)->CallVoidMethod(mRunnable, gRunnableMethodId);
+    }
+
+private:
+    JavaVM* mVm;
+    jobject mRunnable;
+};
+
+class GlFunctorReleasedCallbackBridge : public GlFunctorLifecycleListener {
+public:
+    GlFunctorReleasedCallbackBridge(JNIEnv* env, jobject javaCallback) {
+        mLooper = Looper::getForThread();
+        mMessage = new InvokeRunnableMessage(env, javaCallback);
+    }
+
+    virtual void onGlFunctorReleased(Functor* functor) override {
+        mLooper->sendMessage(mMessage, 0);
+    }
+
+private:
+    sp<Looper> mLooper;
+    sp<InvokeRunnableMessage> mMessage;
+};
 
 // ----------------------------------------------------------------------------
 // Setup
@@ -56,10 +102,12 @@ static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, job
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
-        jlong canvasPtr, jlong functorPtr) {
+        jlong canvasPtr, jlong functorPtr, jobject releasedCallback) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    canvas->callDrawGLFunction(functor);
+    sp<GlFunctorReleasedCallbackBridge> bridge(new GlFunctorReleasedCallbackBridge(
+            env, releasedCallback));
+    canvas->callDrawGLFunction(functor, bridge.get());
 }
 
 // ----------------------------------------------------------------------------
@@ -184,7 +232,8 @@ static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "!()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
     { "nInsertReorderBarrier","!(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
-    { "nCallDrawGLFunction", "!(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
+    { "nCallDrawGLFunction", "!(JJLjava/lang/Runnable;)V",
+            (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
     { "nDrawRoundRect",     "!(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
     { "nDrawCircle",        "!(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
@@ -207,6 +256,9 @@ static JNINativeMethod gActivityThreadMethods[] = {
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {
+    jclass runnableClass = FindClassOrDie(env, "java/lang/Runnable");
+    gRunnableMethodId = GetMethodIDOrDie(env, runnableClass, "run", "()V");
+
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

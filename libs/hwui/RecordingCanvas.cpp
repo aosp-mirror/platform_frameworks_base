@@ -594,8 +594,10 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
             layerHandle->backingLayer()));
 }
 
-void RecordingCanvas::callDrawGLFunction(Functor* functor) {
-    mDisplayList->functors.push_back(functor);
+void RecordingCanvas::callDrawGLFunction(Functor* functor,
+        GlFunctorLifecycleListener* listener) {
+    mDisplayList->functors.push_back({functor, listener});
+    mDisplayList->ref(listener);
     addOp(alloc().create_trivial<FunctorOp>(
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),

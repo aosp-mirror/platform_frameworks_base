@@ -20,6 +20,7 @@
 #include <cutils/compiler.h>
 #include <utils/Functor.h>
 
+#include "GlFunctorLifecycleListener.h"
 #include "utils/NinePatch.h"
 
 #include <SkBitmap.h>
@@ -124,7 +125,8 @@ public:
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) = 0;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;
-    virtual void callDrawGLFunction(Functor* functor) = 0;
+    virtual void callDrawGLFunction(Functor* functor,
+            uirenderer::GlFunctorLifecycleListener* listener) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas state operations

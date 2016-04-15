@@ -81,9 +81,11 @@ DisplayList* DisplayListCanvas::finishRecording() {
     return displayList;
 }
 
-void DisplayListCanvas::callDrawGLFunction(Functor *functor) {
+void DisplayListCanvas::callDrawGLFunction(Functor* functor,
+        GlFunctorLifecycleListener* listener) {
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mDisplayList->functors.push_back(functor);
+    mDisplayList->functors.push_back({functor, listener});
+    mDisplayList->ref(listener);
 }
 
 SkCanvas* DisplayListCanvas::asSkCanvas() {

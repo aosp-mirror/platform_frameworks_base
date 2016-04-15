@@ -35,6 +35,7 @@
 #include "Debug.h"
 #include "CanvasProperty.h"
 #include "DeferredDisplayList.h"
+#include "GlFunctorLifecycleListener.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
 
@@ -119,6 +120,11 @@ struct PushStagingFunctor {
     virtual void operator ()() {}
 };
 
+struct FunctorContainer {
+    Functor* functor;
+    GlFunctorLifecycleListener* listener;
+};
+
 /**
  * Data structure that holds the list of commands used in display list stream
  */
@@ -154,7 +160,7 @@ public:
     const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
     const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
-    const LsaVector<Functor*>& getFunctors() const { return functors; }
+    const LsaVector<FunctorContainer>& getFunctors() const { return functors; }
     const LsaVector<PushStagingFunctor*>& getPushStagingFunctors() { return pushStagingFunctors; }
 
     size_t addChild(NodeOpType* childOp);
@@ -195,7 +201,7 @@ private:
     LsaVector< sp<VirtualLightRefBase> > referenceHolders;
 
     // List of functors
-    LsaVector<Functor*> functors;
+    LsaVector<FunctorContainer> functors;
 
     // List of functors that need to be notified of pushStaging. Note that this list gets nothing
     // but a callback during sync DisplayList, unlike the list of functors defined above, which
