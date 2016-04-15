@@ -121,6 +121,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private int mDividerWindowWidth;
     private int mDividerSize;
     private int mTouchElevation;
+    private int mLongPressEntraceAnimDuration;
 
     private final Rect mDockedRect = new Rect();
     private final Rect mDockedTaskRect = new Rect();
@@ -222,6 +223,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mDividerSize = mDividerWindowWidth - 2 * mDividerInsets;
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
+        mLongPressEntraceAnimDuration = getResources().getInteger(
+                R.integer.long_press_dock_anim_duration);
         mGrowRecents = getResources().getBoolean(R.bool.recents_grow_in_multiwindow);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.3f);
@@ -762,7 +765,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public void resizeStack(int position, int taskPosition, SnapTarget taskSnapTarget) {
         calculateBoundsForPosition(position, mDockSide, mDockedRect);
 
-        if (mDockedRect.equals(mLastResizeRect)) {
+        if (mDockedRect.equals(mLastResizeRect) && !mEntranceAnimationRunning) {
             return;
         }
 
@@ -1027,7 +1030,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             // Delay switching resizing mode because this might cause jank in recents animation
             // that's long than this animation.
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(),
-                    250 /* startDelay */, Interpolators.FAST_OUT_SLOW_IN, 200 /* endDelay */);
+                    mLongPressEntraceAnimDuration, Interpolators.FAST_OUT_SLOW_IN,
+                    200 /* endDelay */);
         }
         if (mGrowAfterRecentsDrawn) {
             mGrowAfterRecentsDrawn = false;
