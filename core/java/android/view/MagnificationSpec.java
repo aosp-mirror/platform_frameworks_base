@@ -131,11 +131,11 @@ public class MagnificationSpec implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("<scale:");
-        builder.append(scale);
+        builder.append(Float.toString(scale));
         builder.append(",offsetX:");
-        builder.append(offsetX);
+        builder.append(Float.toString(offsetX));
         builder.append(",offsetY:");
-        builder.append(offsetY);
+        builder.append(Float.toString(offsetY));
         builder.append(">");
         return builder.toString();
     }
