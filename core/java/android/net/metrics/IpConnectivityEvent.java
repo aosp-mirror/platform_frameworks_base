@@ -24,31 +24,39 @@ import android.os.Parcelable;
  * {@hide}
  */
 public class IpConnectivityEvent implements Parcelable {
-    // IPRM = IpReachabilityMonitor
-    // DHCP = DhcpClient
+    public static final String TAG = "IpConnectivityEvent";
+
+    // IPRM   = IpReachabilityMonitor
+    // DHCP   = DhcpClient
     // NETMON = NetworkMonitorEvent
     // CONSRV = ConnectivityServiceEvent
-    // IPMGR = IpManager
-    public static final String TAG = "IpConnectivityEvent";
-    public static final int IPCE_IPRM_BASE = 0*1024;
-    public static final int IPCE_DHCP_BASE = 1*1024;
-    public static final int IPCE_NETMON_BASE = 2*1024;
-    public static final int IPCE_CONSRV_BASE = 3*1024;
-    public static final int IPCE_IPMGR_BASE = 4*1024;
+    // IPMGR  = IpManager
+    public static final int IPCE_IPRM_BASE                 = 0 * 1024;
+    public static final int IPCE_DHCP_BASE                 = 1 * 1024;
+    public static final int IPCE_NETMON_BASE               = 2 * 1024;
+    public static final int IPCE_CONSRV_BASE               = 3 * 1024;
+    public static final int IPCE_IPMGR_BASE                = 4 * 1024;
+    public static final int IPCE_DNS_BASE                  = 5 * 1024;
 
-    public static final int IPCE_IPRM_PROBE_RESULT = IPCE_IPRM_BASE + 0;
-    public static final int IPCE_IPRM_MESSAGE_RECEIVED = IPCE_IPRM_BASE + 1;
-    public static final int IPCE_IPRM_REACHABILITY_LOST = IPCE_IPRM_BASE + 2;
-    public static final int IPCE_DHCP_RECV_ERROR = IPCE_DHCP_BASE + 0;
-    public static final int IPCE_DHCP_PARSE_ERROR = IPCE_DHCP_BASE + 1;
-    public static final int IPCE_DHCP_TIMEOUT = IPCE_DHCP_BASE + 2;
-    public static final int IPCE_DHCP_STATE_CHANGE = IPCE_DHCP_BASE + 3;
-    public static final int IPCE_NETMON_STATE_CHANGE = IPCE_NETMON_BASE + 0;
-    public static final int IPCE_NETMON_CHECK_RESULT = IPCE_NETMON_BASE + 1;
+    public static final int IPCE_IPRM_PROBE_RESULT         = IPCE_IPRM_BASE + 0;
+    public static final int IPCE_IPRM_MESSAGE_RECEIVED     = IPCE_IPRM_BASE + 1;
+    public static final int IPCE_IPRM_REACHABILITY_LOST    = IPCE_IPRM_BASE + 2;
+
+    public static final int IPCE_DHCP_RECV_ERROR           = IPCE_DHCP_BASE + 0;
+    public static final int IPCE_DHCP_PARSE_ERROR          = IPCE_DHCP_BASE + 1;
+    public static final int IPCE_DHCP_TIMEOUT              = IPCE_DHCP_BASE + 2;
+    public static final int IPCE_DHCP_STATE_CHANGE         = IPCE_DHCP_BASE + 3;
+
+    public static final int IPCE_NETMON_STATE_CHANGE       = IPCE_NETMON_BASE + 0;
+    public static final int IPCE_NETMON_CHECK_RESULT       = IPCE_NETMON_BASE + 1;
+
     public static final int IPCE_CONSRV_DEFAULT_NET_CHANGE = IPCE_CONSRV_BASE + 0;
-    public static final int IPCE_IPMGR_PROVISIONING_OK = IPCE_IPMGR_BASE + 0;
-    public static final int IPCE_IPMGR_PROVISIONING_FAIL = IPCE_IPMGR_BASE + 1;
-    public static final int IPCE_IPMGR_COMPLETE_LIFECYCLE = IPCE_IPMGR_BASE + 2;
+
+    public static final int IPCE_IPMGR_PROVISIONING_OK     = IPCE_IPMGR_BASE + 0;
+    public static final int IPCE_IPMGR_PROVISIONING_FAIL   = IPCE_IPMGR_BASE + 1;
+    public static final int IPCE_IPMGR_COMPLETE_LIFECYCLE  = IPCE_IPMGR_BASE + 2;
+
+    public static final int IPCE_DNS_LOOKUPS               = IPCE_DNS_BASE + 0;
 
     private static ConnectivityMetricsLogger mMetricsLogger = new ConnectivityMetricsLogger();
 
