@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"ಶೆಲ್"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ದೋಷ ವರದಿಯ <xliff:g id="ID">#%d</xliff:g> ಅನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ದೋಷ ವರದಿಯ <xliff:g id="ID">#%d</xliff:g> ಅನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"ದೋಷ ವರದಿಯ <xliff:g id="ID">#%d</xliff:g> ಅನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ ಆದರೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಬಾಕಿ ಉಳಿದಿದೆ"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ಬಗ್ ವರದಿಗೆ ವಿವರಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"ನಿಮ್ಮ ದೋಷ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್‌ ಮಾಡಿ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ನಿಮ್ಮ ಬಗ್ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಇಲ್ಲದೇ ನಿಮ್ಮ ಬಗ್ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ ಅಥವಾ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಪೂರ್ತಿಯಾಗುವವರೆಗೂ ನಿರೀಕ್ಷಿಸಿ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಇಲ್ಲದೇ ನಿಮ್ಮ ಬಗ್ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ ಅಥವಾ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಪೂರ್ತಿಯಾಗುವವರೆಗೂ ನಿರೀಕ್ಷಿಸಿ"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"ವೈಯಕ್ತಿಕ ಮತ್ತು ಖಾಸಗಿ ಮಾಹಿತಿಯು ಸೇರಿದಂತೆ, ಸಿಸ್ಟಂನ ಹಲವಾರು ಲಾಗ್ ಫೈಲ್‌ಗಳಿಂದ ಡೇಟಾವನ್ನು ದೋಷದ ವರದಿಗಳು ಒಳಗೊಂಡಿವೆ. ನೀವು ನಂಬುವಂತಹ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಜನರೊಂದಿಗೆ ಮಾತ್ರ ದೋಷದ ವರದಿಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ಈ ಸಂದೇಶವನ್ನು ಮುಂದಿನ ಬಾರಿ ತೋರಿಸಿ"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ದೋಷ ವರದಿಗಳು"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ಬಗ್‌ ವರದಿ ಫೈಲ್‌‌ ಅನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ಹೆಸರಿಸದಿರುವುದು"</string>

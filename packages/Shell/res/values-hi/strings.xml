@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"शेल"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> जेनरेट की जा रही है"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> कैप्चर की गई"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> कैप्चर की गई लेकिन स्क्रीनशॉट लंबित है"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"बग रिपोर्ट में विवरण जोड़े जा रहे हैं"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करें…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"अपनी बग रिपोर्ट साझा करने के लिए बाएं स्वाइप करें"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"अपनी बग रिपोर्ट साझा करने के लिए टैप करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"अपनी बग रिपोर्ट को बिना स्क्रीनशॉट साझा करने हेतु टैप करें या स्क्रीनशॉट पूरा होने की प्रतीक्षा करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"अपनी बग रिपोर्ट को बिना स्क्रीनशॉट साझा करने हेतु टैप करें या स्क्रीनशॉट पूरा होने की प्रतीक्षा करें"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"बग रिपोर्ट में व्यक्तिगत और निजी जानकारी सहित, सिस्टम की विभिन्न लॉग फ़ाइलों का डेटा होता है. बग रिपोर्ट केवल विश्वसनीय ऐप्स  और व्यक्तियों से ही साझा करें."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"यह संदेश अगली बार दिखाएं"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रिपोर्ट"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रिपोर्ट फ़ाइल नहीं पढ़ी जा सकी"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"अनामांकित"</string>

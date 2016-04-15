@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Lupina"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Poročilo o napaki <xliff:g id="ID">#%d</xliff:g> je v izdelavi"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Poročilo o napaki <xliff:g id="ID">#%d</xliff:g> zajeto"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Poroč. o napakah <xliff:g id="ID">#%d</xliff:g> zajeto, posnetek zaslona nastaja"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodajanje podrobnosti v poročilo o napakah"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Počakajte ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Povlecite v levo, če želite poslati sporočilo o napaki"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dotaknite se, če želite poročilo o napaki dati v skupno rabo"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Poročila o napakah vsebujejo podatke iz različnih dnevniških datotek sistema, vključno z osebnimi in zasebnimi podatki. Poročila o napakah delite samo z aplikacijami in ljudmi, ki jim zaupate."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaži to sporočilo naslednjič"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Poročila o napakah"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Datoteke s poročilom o napakah ni bilo mogoče prebrati"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"neimenovano"</string>

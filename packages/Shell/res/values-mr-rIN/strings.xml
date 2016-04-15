@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"शेल"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"दोष अहवाल <xliff:g id="ID">#%d</xliff:g> तयार केला जात आहे"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"दोष अहवाल <xliff:g id="ID">#%d</xliff:g> कॅप्चर केला"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"दोष अहवाल <xliff:g id="ID">#%d</xliff:g> कॅप्चर केला परंतु स्क्रीनशॉट प्रलंबित आहे"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"दोष अहवालामध्‍ये तपशील जोडत आहे"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करा..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"आपला दोष अहवाल सामायिक करण्यासाठी डावीकडे स्वाइप करा"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"दोष अहवालांमध्‍ये वैयक्तिक आणि खाजगी माहितीसह, सिस्‍टमच्‍या अनेक लॉग फायलींमधील डेटा असतो. केवळ आपला विश्वास असलेल्‍या अ‍ॅप्‍स आणि लोकांसह दोष अहवाल सामायिक करा."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"पुढील वेळी हा संदेश दर्शवा"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"दोष अहवाल"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"दोष अहवाल फाईल वाचणे शक्य झाले नाही"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"अनामित"</string>

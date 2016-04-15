@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Protecció"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"S\'està generant l\'informe d\'errors <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"S\'ha capturat l\'informe d\'errors <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"L\'informe d\'errors <xliff:g id="ID">#%d</xliff:g> s\'ha capturat (captura pendent)"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"S\'estan afegint detalls a l\'informe d\'errors"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Espera…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Llisca cap a l\'esquerra per compartir l\'informe d\'errors."</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toca per compartir l\'informe d\'errors"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Els informes d\'error contenen dades dels diferents fitxers de registre del sistema, inclosa informació privada i personal. Comparteix els informes d\'error només amb les aplicacions i amb les persones en qui confies."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostra aquest missatge la propera vegada"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes d\'error"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"No s\'ha pogut llegir el fitxer de l\'informe d\'errors"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sense nom"</string>
