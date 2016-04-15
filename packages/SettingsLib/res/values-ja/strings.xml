@@ -324,7 +324,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"管理者により管理されています"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"管理者によって有効にされています"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"管理者によって無効にされています"</string>
-    <string name="home" msgid="8263346537524314127">"ホーム"</string>
+    <string name="home" msgid="3256884684164448244">"設定のホーム"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"あと <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"小"</string>
@@ -333,6 +333,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"特大"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"最大"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"カスタム（<xliff:g id="DENSITYDPI">%d</xliff:g>）"</string>
-    <!-- no translation found for help_feedback_label (6815040660801785649) -->
-    <skip />
+    <string name="help_feedback_label" msgid="6815040660801785649">"ヘルプとフィードバック"</string>
 </resources>
