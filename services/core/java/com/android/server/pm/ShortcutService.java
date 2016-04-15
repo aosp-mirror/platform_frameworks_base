@@ -907,6 +907,16 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
+        final File packagePath = new File(getUserBitmapFilePath(userId), packageName);
+        if (!packagePath.isDirectory()) {
+            return;
+        }
+        if (!(FileUtils.deleteContents(packagePath) && packagePath.delete())) {
+            Slog.w(TAG, "Unable to remove directory " + packagePath);
+        }
+    }
+
     @VisibleForTesting
     static class FileOutputStreamWithPath extends FileOutputStream {
         private final File mFile;
@@ -1572,7 +1582,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         // First, remove the package from the package list (if the package is a publisher).
         if (packageUserId == owningUserId) {
-            if (mUser.removePackage(packageName) != null) {
+            if (mUser.removePackage(this, packageName) != null) {
                 doNotify = true;
             }
         }
@@ -2084,11 +2094,11 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println(mIconPersistFormat);
             pw.print("    Icon quality: ");
             pw.println(mIconPersistQuality);
-            pw.print("    saveDelayMillis:");
+            pw.print("    saveDelayMillis: ");
             pw.println(mSaveDelayMillis);
-            pw.print("    resetInterval:");
+            pw.print("    resetInterval: ");
             pw.println(mResetInterval);
-            pw.print("    maxUpdatesPerInterval:");
+            pw.print("    maxUpdatesPerInterval: ");
             pw.println(mMaxUpdatesPerInterval);
             pw.print("    maxDynamicShortcuts:");
             pw.println(mMaxDynamicShortcuts);
@@ -2416,7 +2426,6 @@ public class ShortcutService extends IShortcutService.Stub {
         return mPackageManagerInternal;
     }
 
-    @VisibleForTesting
     File getUserBitmapFilePath(@UserIdInt int userId) {
         return new File(injectUserDataPath(userId), DIRECTORY_BITMAPS);
     }
