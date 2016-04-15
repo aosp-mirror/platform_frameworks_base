@@ -169,6 +169,9 @@
          the smallest position when being launched. -->
     <bool name="recents_grow_in_multiwindow">true</bool>
 
+    <!-- Animation duration when using long press on recents to dock -->
+    <integer name="long_press_dock_anim_duration">250</integer>
+
     <!-- Recents: The relative range of visible tasks from the current scroll position
          while the stack is focused. -->
     <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
