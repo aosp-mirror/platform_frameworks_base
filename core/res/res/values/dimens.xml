@@ -162,9 +162,9 @@
     <dimen name="notification_min_height">92dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_width">40dp</dimen>
+    <dimen name="notification_large_icon_width">64dp</dimen>
     <!-- The width of the big icons in notifications. -->
-    <dimen name="notification_large_icon_height">40dp</dimen>
+    <dimen name="notification_large_icon_height">64dp</dimen>
 
     <!-- The minimum width of the app name in the header if it shrinks -->
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
