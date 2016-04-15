@@ -199,6 +199,12 @@ public class RttManager {
         // Whether STA responder role is supported.
         public boolean responderSupported;
 
+        /** Whether the secure RTT protocol is supported. */
+        public boolean secureRttSupported;
+
+        /** Draft 11mc version supported, including major and minor version. e.g, draft 4.3 is 43 */
+        public int mcVersion;
+
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer();
@@ -223,7 +229,7 @@ public class RttManager {
                 sb.append("VHT ");
             }
 
-            sb.append("is supported. \n");
+            sb.append("is supported. ");
 
             if ((bwSupported & RTT_BW_5_SUPPORT) != 0) {
                 sb.append("5 MHz ");
@@ -252,7 +258,10 @@ public class RttManager {
             sb.append("is supported.");
 
             sb.append(" STA responder role is ")
-                .append(responderSupported ? "supported" : "not supported.");
+                    .append(responderSupported ? "supported" : "not supported");
+            sb.append(" Secure RTT protocol is ")
+                    .append(secureRttSupported ? "supported" : "not supported");
+            sb.append(" 11mc version is " + mcVersion);
 
             return sb.toString();
         }
@@ -272,6 +281,8 @@ public class RttManager {
             dest.writeInt(preambleSupported);
             dest.writeInt(bwSupported);
             dest.writeInt(responderSupported ? 1 : 0);
+            dest.writeInt(secureRttSupported ? 1 : 0);
+            dest.writeInt(mcVersion);
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -279,16 +290,18 @@ public class RttManager {
             new Creator<RttCapabilities>() {
             @Override
             public RttCapabilities createFromParcel(Parcel in) {
-                    RttCapabilities capabilities = new RttCapabilities();
-                    capabilities.oneSidedRttSupported = (in.readInt() == 1);
-                        capabilities.twoSided11McRttSupported = (in.readInt() == 1);
-                        capabilities.lciSupported = (in.readInt() == 1);
-                        capabilities.lcrSupported = (in.readInt() == 1);
-                        capabilities.preambleSupported = in.readInt();
-                        capabilities.bwSupported = in.readInt();
-                        capabilities.responderSupported = (in.readInt() == 1);
-                        return capabilities;
-                    }
+                RttCapabilities capabilities = new RttCapabilities();
+                capabilities.oneSidedRttSupported = (in.readInt() == 1);
+                capabilities.twoSided11McRttSupported = (in.readInt() == 1);
+                capabilities.lciSupported = (in.readInt() == 1);
+                capabilities.lcrSupported = (in.readInt() == 1);
+                capabilities.preambleSupported = in.readInt();
+                capabilities.bwSupported = in.readInt();
+                capabilities.responderSupported = (in.readInt() == 1);
+                capabilities.secureRttSupported = (in.readInt() == 1);
+                capabilities.mcVersion = in.readInt();
+                return capabilities;
+            }
                 /** Implement the Parcelable interface {@hide} */
                 @Override
                 public RttCapabilities[] newArray(int size) {
