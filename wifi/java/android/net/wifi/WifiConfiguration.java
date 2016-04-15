@@ -691,6 +691,16 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Setting this value will force scan results associated with this configuration to
+     * be included in the bucket of networks that are externally scored.
+     * If not set, associated scan results will be treated as legacy saved networks and
+     * will take precedence over networks in the scored category.
+     */
+    @SystemApi
+    public boolean useExternalScores;
+
+    /**
+     * @hide
      * Number of time the scorer overrode a the priority based choice, when comparing two
      * WifiConfigurations, note that since comparing WifiConfiguration happens very often
      * potentially at every scan, this number might become very large, even on an idle
@@ -1333,6 +1343,7 @@ public class WifiConfiguration implements Parcelable {
         didSelfAdd = false;
         ephemeral = false;
         meteredHint = false;
+        useExternalScores = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
         lastUpdateUid = -1;
@@ -1433,8 +1444,9 @@ public class WifiConfiguration implements Parcelable {
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
         if (this.meteredHint) sbuf.append(" meteredHint");
+        if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-            || this.ephemeral || this.meteredHint) {
+            || this.ephemeral || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
         }
         sbuf.append(" KeyMgmt:");
@@ -1859,6 +1871,7 @@ public class WifiConfiguration implements Parcelable {
             validatedInternetAccess = source.validatedInternetAccess;
             ephemeral = source.ephemeral;
             meteredHint = source.meteredHint;
+            useExternalScores = source.useExternalScores;
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
@@ -1939,6 +1952,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(validatedInternetAccess ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
+        dest.writeInt(useExternalScores ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
@@ -2009,6 +2023,7 @@ public class WifiConfiguration implements Parcelable {
                 config.validatedInternetAccess = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
+                config.useExternalScores = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
