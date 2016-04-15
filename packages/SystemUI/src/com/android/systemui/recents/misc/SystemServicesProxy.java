@@ -504,6 +504,18 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns whether there is a soft nav bar.
+     */
+    public boolean hasSoftNavigationBar() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
      * Cancels the current window transtion to/from Recents for the given task id.
      */
     public void cancelWindowTransition(int taskId) {
