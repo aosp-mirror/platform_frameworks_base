@@ -84,9 +84,12 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private static final long IME_ADJUST_DRAWN_TIMEOUT = 200;
 
+    private static final int DIVIDER_WIDTH_INACTIVE_DP = 4;
+
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private int mDividerWindowWidth;
+    private int mDividerWindowWidthInactive;
     private int mDividerInsets;
     private boolean mResizing;
     private WindowState mWindow;
@@ -130,6 +133,8 @@ public class DockedStackDividerController implements DimLayerUser {
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mDividerInsets = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
+        mDividerWindowWidthInactive = WindowManagerService.dipToPixel(
+                DIVIDER_WIDTH_INACTIVE_DP, mDisplayContent.getDisplayMetrics());
     }
 
     void onConfigurationChanged() {
@@ -146,6 +151,10 @@ public class DockedStackDividerController implements DimLayerUser {
 
     int getContentInsets() {
         return mDividerInsets;
+    }
+
+    int getContentWidthInactive() {
+        return mDividerWindowWidthInactive;
     }
 
     void setResizing(boolean resizing) {
