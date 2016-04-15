@@ -702,6 +702,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         };
 
+        // Check if the user is currently in quiet mode and start it otherwise
+        if (mUserManager.isQuietModeEnabled(new UserHandle(userId))
+                && mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+            mUserManager.setQuietModeEnabled(userId, false);
+        }
+
         try {
             ActivityManagerNative.getDefault().unlockUser(userId, token, secret, listener);
         } catch (RemoteException e) {

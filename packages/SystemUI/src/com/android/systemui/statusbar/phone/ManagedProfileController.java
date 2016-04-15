@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -57,10 +58,18 @@ public class ManagedProfileController {
         }
     }
 
-    public void setWorkModeEnabled(boolean enabled) {
+    public void setWorkModeEnabled(boolean enableWorkMode) {
         synchronized (mProfiles) {
             for (UserInfo ui : mProfiles) {
-                mUserManager.setQuietModeEnabled(ui.id, !enabled);
+                if (enableWorkMode) {
+                    if (!mUserManager.trySetQuietModeDisabled(ui.id, null)) {
+                        StatusBarManager statusBarManager = (StatusBarManager) mContext
+                                .getSystemService(android.app.Service.STATUS_BAR_SERVICE);
+                        statusBarManager.collapsePanels();
+                    }
+                } else {
+                    mUserManager.setQuietModeEnabled(ui.id, true);
+                }
             }
         }
     }

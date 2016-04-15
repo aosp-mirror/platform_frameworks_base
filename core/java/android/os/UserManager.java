@@ -29,6 +29,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -1685,6 +1686,23 @@ public class UserManager {
     public boolean isQuietModeEnabled(UserHandle userHandle) {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Tries disabling quiet mode for a given user. If the user is still locked, we unlock the user
+     * first by showing the confirm credentials screen and disable quiet mode upon successful
+     * unlocking. If the user is already unlocked, we call through to {@link #setQuietModeEnabled}
+     * directly.
+     *
+     * @return true if the quiet mode was disabled immediately
+     * @hide
+     */
+    public boolean trySetQuietModeDisabled(@UserIdInt int userHandle, IntentSender target) {
+        try {
+            return mService.trySetQuietModeDisabled(userHandle, target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
