@@ -16,10 +16,12 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /** {@hide} */
+@SystemApi
 public final class ConnectivityMetricsEvent implements Parcelable {
 
     /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
@@ -80,12 +82,13 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     }
 
     /** {@hide} */
-    public static class Reference implements Parcelable {
+    @SystemApi
+    public final static class Reference implements Parcelable {
 
-        public long value;
+        private long mValue;
 
         public Reference(long ref) {
-            this.value = ref;
+            this.mValue = ref;
         }
 
         /** Implement the Parcelable interface */
@@ -109,11 +112,19 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         /** Implement the Parcelable interface */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(value);
+            dest.writeLong(mValue);
         }
 
         public void readFromParcel(Parcel in) {
-            value = in.readLong();
+            mValue = in.readLong();
+        }
+
+        public long getValue() {
+            return mValue;
+        }
+
+        public void setValue(long val) {
+            mValue = val;
         }
     }
 }
