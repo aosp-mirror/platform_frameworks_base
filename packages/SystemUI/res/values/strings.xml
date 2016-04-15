@@ -1225,38 +1225,69 @@
     <string name="do_not_silence_block">Don\'t silence or block</string>
 
     <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
-    <string name="tuner_full_importance_settings">Show full importance settings</string>
+    <string name="tuner_full_importance_settings">Power notification controls</string>
+    <string name="tuner_full_importance_settings_on">On</string>
+    <string name="tuner_full_importance_settings_off">Off</string>
+    <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
+        \n\n<b>Level 5</b>
+        \n- Show at the top of the notification list
+        \n- Allow full screen interruption
+        \n- Always peek
+        \n\n<b>Level 4</b>
+        \n- Prevent full screen interruption
+        \n- Always peek
+        \n\n<b>Level 3</b>
+        \n- Prevent full screen interruption
+        \n- Never peek
+        \n\n<b>Level 2</b>
+        \n- Prevent full screen interruption
+        \n- Never peek
+        \n- Never make sound and vibration
+        \n\n<b>Level 1</b>
+        \n- Prevent full screen interruption
+        \n- Never peek
+        \n- Never make sound or vibrate
+        \n- Hide from lock screen and status bar
+        \n- Show at the bottom of the notification list
+        \n\n<b>Level 0</b>
+        \n- Block all notifications from the app
+    </string>
 
+    <!-- Notification importance title, user unspecified status-->
+    <string name="user_unspecified_importance">Importance: Automatic</string>
     <!-- Notification importance title, blocked status-->
-    <string name="blocked_importance">Blocked</string>
+    <string name="blocked_importance">Importance: Level 0</string>
     <!-- Notification importance title, min status-->
-    <string name="min_importance">Min importance</string>
+    <string name="min_importance">Importance: Level 1</string>
     <!-- Notification importance title, low status-->
-    <string name="low_importance">Low importance</string>
+    <string name="low_importance">Importance: Level 2</string>
     <!-- Notification importance title, normal status-->
-    <string name="default_importance">Normal importance</string>
+    <string name="default_importance">Importance: Level 3</string>
     <!-- Notification importance title, high status-->
-    <string name="high_importance">High importance</string>
+    <string name="high_importance">Importance: Level 4</string>
     <!-- Notification importance title, max status-->
-    <string name="max_importance">Urgent importance</string>
+    <string name="max_importance">Importance: Level 5</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
-    <string name="notification_importance_blocked">Never show these notifications</string>
+    <string name="notification_importance_user_unspecified">App determines importance for each notification.</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
+    <string name="notification_importance_blocked">Never show notifications from this app.</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: min importance level description -->
-    <string name="notification_importance_min">Silently show at the bottom of the notification list</string>
+    <string name="notification_importance_min">No full screen interruption, peeking, sound, or vibration. Hide from lock screen and status bar.</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: low importance level description -->
-    <string name="notification_importance_low">Silently show these notifications</string>
+    <string name="notification_importance_low">No full screen interruption, peeking, sound, or vibration.</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: normal importance level description -->
-    <string name="notification_importance_default">Allow these notification to make sounds</string>
+    <string name="notification_importance_default">No full screen interruption or peeking.</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
-    <string name="notification_importance_high">Peek onto the screen and allow sound and allow sound</string>
+    <string name="notification_importance_high">Always peek. No full screen interruption.</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
-    <string name="notification_importance_max">Show at the top of the notifications list, peek onto the screen and allow sound</string>
+    <string name="notification_importance_max">Always peek, and allow full screen interruption.</string>
 
     <!-- Notification: Control panel: Label for button that launches notification settings. [CHAR LIMIT=NONE] -->
     <string name="notification_more_settings">More settings</string>
