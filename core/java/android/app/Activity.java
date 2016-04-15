@@ -2098,7 +2098,15 @@ public class Activity extends ContextThemeWrapper
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
         FragmentManagerNonConfig fragments = mFragments.retainNestedNonConfig();
+
+        // We're already stopped but we've been asked to retain.
+        // Our fragments are taken care of but we need to mark the loaders for retention.
+        // In order to do this correctly we need to restart the loaders first before
+        // handing them off to the next activity.
+        mFragments.doLoaderStart();
+        mFragments.doLoaderStop(true);
         ArrayMap<String, LoaderManager> loaders = mFragments.retainLoaderNonConfig();
+
         if (activity == null && children == null && fragments == null && loaders == null
                 && mVoiceInteractor == null) {
             return null;
