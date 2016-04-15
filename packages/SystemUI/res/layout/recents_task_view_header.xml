@@ -43,7 +43,8 @@
         android:singleLine="true"
         android:maxLines="1"
         android:ellipsize="marquee"
-        android:fadingEdge="horizontal" />
+        android:fadingEdge="horizontal"
+        android:forceHasOverlappingRendering="false" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/move_task"
         android:layout_width="wrap_content"
