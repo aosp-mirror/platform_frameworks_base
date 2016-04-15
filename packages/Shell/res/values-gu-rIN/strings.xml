@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"શેલ"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"બગ રિપોર્ટ <xliff:g id="ID">#%d</xliff:g> જનરેટ કરવામાં આવી રહી છે"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"બગ રિપોર્ટ <xliff:g id="ID">#%d</xliff:g> કૅપ્ચર કરી"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"બગ રિપોર્ટ <xliff:g id="ID">#%d</xliff:g> કૅપ્ચર કરી પરંતુ સ્ક્રીનશૉટ બાકી છે"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"બગ રિપોર્ટમાં વિગતો ઉમેરવી"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"કૃપા કરીને રાહ જુઓ…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"તમારી બગ રિપોર્ટ શેર કરવા માટે ડાબે સ્વાઇપ કરો"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"તમારી બગ રિપોર્ટ શેર કરવા ટૅપ કરો"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"સ્ક્રીનશૉટ વગર અથવા સ્ક્રીનશૉટ સમાપ્ત થવાની રાહ જોયા વગર તમારી બગ રિપોર્ટ શેર કરવા ટૅપ કરો"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"સ્ક્રીનશૉટ વગર અથવા સ્ક્રીનશૉટ સમાપ્ત થવાની રાહ જોયા વગર તમારી બગ રિપોર્ટ શેર કરવા ટૅપ કરો"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"બગ રિપોર્ટ્સ વ્યક્તિગત અને ખાનગી માહિતી સહિત, સિસ્ટમની વિભિન્ન લૉગ ફાઇલોનો ડેટા ધરાવે છે. બગ રિપોર્ટ્સ ફક્ત તમે વિશ્વાસ કરતા હો તે એપ્લિકેશનો અને લોકો સાથે જ શેર કરો."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"આગલી વખતે આ સંદેશ બતાવો"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"બગ રિપોર્ટ્સ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"બગ રીપોર્ટ ફાઇલ વાંચી શકાઇ નથી"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"અનામાંકિત"</string>

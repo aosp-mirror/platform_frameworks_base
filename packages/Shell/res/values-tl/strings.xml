@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Binubuo na ang ulat ng bug na <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Na-capture ang ulat ng bug na <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Nakunan ang ulat ng bug <xliff:g id="ID">#%d</xliff:g>, nakabinbin ang screenshot"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Pagdaragdag ng mga detalye sa ulat ng bug"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Mangyaring maghintay..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Mag-swipe pakaliwa upang ibahagi ang iyong ulat ng bug"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Mag-tap upang ibahagi ang iyong ulat ng bug"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Mag-tap para ibahagi ang iyong ulat ng bug nang walang screenshot o hintaying matapos ang screenshot"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Mag-tap para ibahagi ang iyong ulat ng bug nang walang screenshot o hintaying matapos ang screenshot"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Naglalaman ang mga ulat ng bug ng data mula sa iba\'t ibang file ng log ng system, kabilang ang personal at pribadong impormasyon. Magbahagi lang ng mga ulat ng bug sa apps at mga tao na pinagkakatiwalaan mo."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Ipakita ang mensaheng ito sa susunod"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Mga ulat sa bug"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Hindi mabasa ang file ng pag-uulat ng bug"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"walang pangalan"</string>
