@@ -7,7 +7,7 @@ HWUI_NEW_OPS := true
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
 # Has moderate overhead
-HWUI_ENABLE_OPENGL_VALIDATION := true
+HWUI_ENABLE_OPENGL_VALIDATION := false
 
 hwui_src_files := \
     font/CacheTexture.cpp \
