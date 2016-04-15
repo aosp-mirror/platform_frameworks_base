@@ -198,6 +198,11 @@ public class BugreportProgressService extends Service {
     private File mScreenshotsDir;
 
     /**
+     * id of the notification used to set service on foreground.
+     */
+    private int mForegroundId = -1;
+
+    /**
      * Flag indicating whether a screenshot is being taken.
      * <p>
      * This is the only state that is shared between the 2 handlers and hence must have synchronized
@@ -257,6 +262,7 @@ public class BugreportProgressService extends Service {
             writer.printf("No monitored processes");
             return;
         }
+        writer.printf("Foreground id: %d\n\n", mForegroundId);
         writer.printf("Monitored dumpstate processes\n");
         writer.printf("-----------------------------\n");
         for (int i = 0; i < size; i++) {
@@ -479,10 +485,21 @@ public class BugreportProgressService extends Service {
             return;
         }
         if (DEBUG) {
-            Log.d(TAG, "Sending 'Progress' notification for id " + info.id + "(pid " + info.pid
+            Log.d(TAG, "Sending 'Progress' notification for id " + info.id + " (pid " + info.pid
                     + "): " + percentageText);
         }
-        NotificationManager.from(mContext).notify(TAG, info.id, notification);
+        sendForegroundabledNotification(info.id, notification);
+    }
+
+    private void sendForegroundabledNotification(int id, Notification notification) {
+        if (mForegroundId >= 0) {
+            if (DEBUG) Log.d(TAG, "Already running as foreground service");
+            NotificationManager.from(mContext).notify(id, notification);
+        } else {
+            mForegroundId = id;
+            Log.d(TAG, "Start running as foreground service on id " + mForegroundId);
+            startForeground(mForegroundId, notification);
+        }
     }
 
     /**
@@ -506,8 +523,10 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Removing ID " + id);
             mProcesses.remove(id);
         }
-        Log.v(TAG, "stopProgress(" + id + "): cancel notification");
-        NotificationManager.from(mContext).cancel(TAG, id);
+        // Must stop foreground service first, otherwise notif.cancel() will fail below.
+        stopForegroundWhenDone(id);
+        Log.d(TAG, "stopProgress(" + id + "): cancel notification");
+        NotificationManager.from(mContext).cancel(id);
         stopSelfWhenDone();
     }
 
@@ -625,7 +644,7 @@ public class BugreportProgressService extends Service {
             Log.w(TAG, "launchBugreportInfoDialog(): canceling notification because id " + id
                     + " was not found");
             // TODO: add test case to make sure notification is canceled.
-            NotificationManager.from(mContext).cancel(TAG, id);
+            NotificationManager.from(mContext).cancel(id);
             return;
         }
 
@@ -648,7 +667,7 @@ public class BugreportProgressService extends Service {
             Log.w(TAG, "takeScreenshot(): canceling notification because id " + id
                     + " was not found");
             // TODO: add test case to make sure notification is canceled.
-            NotificationManager.from(mContext).cancel(TAG, id);
+            NotificationManager.from(mContext).cancel(id);
             return;
         }
         setTakingScreenshot(true);
@@ -731,7 +750,7 @@ public class BugreportProgressService extends Service {
             if (info.finished) {
                 Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
                 info.renameScreenshots(mScreenshotsDir);
-                sendBugreportNotification(mContext, info, mTakingScreenshot);
+                sendBugreportNotification(info, mTakingScreenshot);
             }
             msg = mContext.getString(R.string.bugreport_screenshot_taken);
         } else {
@@ -749,6 +768,33 @@ public class BugreportProgressService extends Service {
         for (File file : info.screenshotFiles) {
             Log.i(TAG, "Deleting screenshot file " + file);
             file.delete();
+        }
+    }
+
+    /**
+     * Stop running on foreground once there is no more active bugreports being watched.
+     */
+    private void stopForegroundWhenDone(int id) {
+        if (id != mForegroundId) {
+            Log.d(TAG, "stopForegroundWhenDone(" + id + "): ignoring since foreground id is "
+                    + mForegroundId);
+            return;
+        }
+
+        Log.d(TAG, "detaching foreground from id " + mForegroundId);
+        stopForeground(Service.STOP_FOREGROUND_DETACH);
+        mForegroundId = -1;
+
+        // Might need to restart foreground using a new notification id.
+        final int total = mProcesses.size();
+        if (total > 0) {
+            for (int i = 0; i < total; i++) {
+                final BugreportInfo info = mProcesses.valueAt(i);
+                if (!info.finished) {
+                    updateProgress(info);
+                    break;
+                }
+            }
         }
     }
 
@@ -797,6 +843,9 @@ public class BugreportProgressService extends Service {
         }
         info.finished = true;
 
+        // Stop running on foreground, otherwise share notification cannot be dismissed.
+        stopForegroundWhenDone(id);
+
         final Configuration conf = mContext.getResources().getConfiguration();
         if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
             triggerLocalNotification(mContext, info);
@@ -820,10 +869,10 @@ public class BugreportProgressService extends Service {
         boolean isPlainText = info.bugreportFile.getName().toLowerCase().endsWith(".txt");
         if (!isPlainText) {
             // Already zipped, send it right away.
-            sendBugreportNotification(context, info, mTakingScreenshot);
+            sendBugreportNotification(info, mTakingScreenshot);
         } else {
             // Asynchronously zip the file first, then send it.
-            sendZippedBugreportNotification(context, info, mTakingScreenshot);
+            sendZippedBugreportNotification(info, mTakingScreenshot);
         }
     }
 
@@ -905,7 +954,7 @@ public class BugreportProgressService extends Service {
             Log.v(TAG, "shareBugReport(): id " + id + " info = " + info);
         }
 
-        addDetailsToZipFile(mContext, info);
+        addDetailsToZipFile(info);
 
         final Intent sendIntent = buildSendIntent(mContext, info);
         if (sendIntent == null) {
@@ -934,36 +983,35 @@ public class BugreportProgressService extends Service {
     /**
      * Sends a notification indicating the bugreport has finished so use can share it.
      */
-    private static void sendBugreportNotification(Context context, BugreportInfo info,
-            boolean takingScreenshot) {
+    private void sendBugreportNotification(BugreportInfo info, boolean takingScreenshot) {
 
         // Since adding the details can take a while, do it before notifying user.
-        addDetailsToZipFile(context, info);
+        addDetailsToZipFile(info);
 
         final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
-        shareIntent.setClass(context, BugreportProgressService.class);
+        shareIntent.setClass(mContext, BugreportProgressService.class);
         shareIntent.setAction(INTENT_BUGREPORT_SHARE);
         shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = context.getString(R.string.bugreport_finished_title, info.id);
+        final String title = mContext.getString(R.string.bugreport_finished_title, info.id);
         final String content = takingScreenshot ?
-                context.getString(R.string.bugreport_finished_pending_screenshot_text)
-                : context.getString(R.string.bugreport_finished_text);
-        final Notification.Builder builder = newBaseNotification(context)
+                mContext.getString(R.string.bugreport_finished_pending_screenshot_text)
+                : mContext.getString(R.string.bugreport_finished_text);
+        final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(content)
-                .setContentIntent(PendingIntent.getService(context, info.id, shareIntent,
+                .setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
-                .setDeleteIntent(newCancelIntent(context, info));
+                .setDeleteIntent(newCancelIntent(mContext, info));
 
         if (!TextUtils.isEmpty(info.name)) {
             builder.setSubText(info.name);
         }
 
         Log.v(TAG, "Sending 'Share' notification for ID " + info.id + ": " + title);
-        NotificationManager.from(context).notify(TAG, info.id, builder.build());
+        NotificationManager.from(mContext).notify(info.id, builder.build());
     }
 
     /**
@@ -971,14 +1019,14 @@ public class BugreportProgressService extends Service {
      * finishes - at this point there is nothing to be done other than waiting, hence it has no
      * pending action.
      */
-    private static void sendBugreportBeingUpdatedNotification(Context context, int id) {
+    private void sendBugreportBeingUpdatedNotification(Context context, int id) {
         final String title = context.getString(R.string.bugreport_updating_title);
         final Notification.Builder builder = newBaseNotification(context)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(context.getString(R.string.bugreport_updating_wait));
         Log.v(TAG, "Sending 'Updating zip' notification for ID " + id + ": " + title);
-        NotificationManager.from(context).notify(TAG, id, builder.build());
+        sendForegroundabledNotification(id, builder.build());
     }
 
     private static Notification.Builder newBaseNotification(Context context) {
@@ -999,13 +1047,13 @@ public class BugreportProgressService extends Service {
     /**
      * Sends a zipped bugreport notification.
      */
-    private static void sendZippedBugreportNotification(final Context context,
-            final BugreportInfo info, final boolean takingScreenshot) {
+    private void sendZippedBugreportNotification( final BugreportInfo info,
+            final boolean takingScreenshot) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 zipBugreport(info);
-                sendBugreportNotification(context, info, takingScreenshot);
+                sendBugreportNotification(info, takingScreenshot);
                 return null;
             }
         }.execute();
@@ -1043,7 +1091,7 @@ public class BugreportProgressService extends Service {
      * If user provided a title, it will be saved into a {@code title.txt} entry; similarly, the
      * description will be saved on {@code description.txt}.
      */
-    private static void addDetailsToZipFile(Context context, BugreportInfo info) {
+    private void addDetailsToZipFile(BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
@@ -1061,7 +1109,8 @@ public class BugreportProgressService extends Service {
 
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
-        sendBugreportBeingUpdatedNotification(context, info.id); // ...and that takes time
+        sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
+
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
         Log.d(TAG, "Writing temporary zip file (" + tmpZip + ") with title and/or description");
@@ -1090,6 +1139,7 @@ public class BugreportProgressService extends Service {
             // Make sure it only tries to add details once, even it fails the first time.
             info.addedDetailsToZip = true;
             info.addingDetailsToZip = false;
+            stopForegroundWhenDone(info.id);
         }
 
         if (!tmpZip.renameTo(info.bugreportFile)) {
