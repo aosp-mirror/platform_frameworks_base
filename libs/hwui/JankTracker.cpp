@@ -212,8 +212,7 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
-    int64_t totalDuration =
-            frame[FrameInfoIndex::FrameCompleted] - frame[sFrameStart];
+    int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
     uint32_t framebucket = frameCountIndexForFrameTime(totalDuration);
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
