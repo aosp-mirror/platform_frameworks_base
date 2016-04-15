@@ -328,6 +328,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void setTasks(TaskStack stack, boolean allowNotifyStackChanges) {
         boolean isInitialized = mLayoutAlgorithm.isInitialized();
+
         // Only notify if we are already initialized, otherwise, everything will pick up all the
         // new and old tasks when we next layout
         mStack.setTasks(getContext(), stack.computeAllTasksList(),
@@ -344,7 +345,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void updateToInitialState() {
         mStackScroller.setStackScrollToInitialState();
-        mLayoutAlgorithm.setTaskOverridesForInitialState(mStack);
+        mLayoutAlgorithm.setTaskOverridesForInitialState(mStack, false /* ignoreScrollToFront */);
     }
 
     /** Updates the list of task views */
@@ -508,11 +509,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Binds the visible {@link TaskView}s at the given target scroll.
      */
     void bindVisibleTaskViews(float targetStackScroll) {
-        bindVisibleTaskViews(targetStackScroll, mIgnoreTasks, false /* ignoreTaskOverrides */);
-    }
-
-    void bindVisibleTaskViews(float targetStackScroll, boolean ignoreTaskOverrides) {
-        bindVisibleTaskViews(targetStackScroll, mIgnoreTasks, ignoreTaskOverrides);
+        bindVisibleTaskViews(targetStackScroll, false /* ignoreTaskOverrides */);
     }
 
     /**
@@ -525,17 +522,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * @param targetStackScroll If provided, will ensure that the set of visible {@link TaskView}s
      *                          includes those visible at the current stack scroll, and all at the
      *                          target stack scroll.
-     * @param ignoreTasksSet The set of tasks to ignore in this rebinding of the visible
-     *                       {@link TaskView}s
      * @param ignoreTaskOverrides If set, the visible task computation will get the transforms for
      *                            tasks at their non-overridden task progress
      */
-    void bindVisibleTaskViews(float targetStackScroll, ArraySet<Task.TaskKey> ignoreTasksSet,
-            boolean ignoreTaskOverrides) {
+    void bindVisibleTaskViews(float targetStackScroll, boolean ignoreTaskOverrides) {
         // Get all the task transforms
         ArrayList<Task> tasks = mStack.getStackTasks();
         int[] visibleTaskRange = computeVisibleTaskTransforms(mCurrentTaskTransforms, tasks,
-                mStackScroller.getStackScroll(), targetStackScroll, ignoreTasksSet,
+                mStackScroller.getStackScroll(), targetStackScroll, mIgnoreTasks,
                 ignoreTaskOverrides);
 
         // Return all the invisible children to the pool
@@ -548,7 +542,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task task = tv.getTask();
 
             // Skip ignored tasks
-            if (ignoreTasksSet.contains(task.key)) {
+            if (mIgnoreTasks.contains(task.key)) {
                 continue;
             }
 
@@ -578,7 +572,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskViewTransform transform = mCurrentTaskTransforms.get(i);
 
             // Skip ignored tasks
-            if (ignoreTasksSet.contains(task.key)) {
+            if (mIgnoreTasks.contains(task.key)) {
                 continue;
             }
 
@@ -626,10 +620,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>, boolean)
+     * @see #relayoutTaskViews(AnimationProps, boolean)
      */
     public void relayoutTaskViews(AnimationProps animation) {
-        relayoutTaskViews(animation, mIgnoreTasks, false /* ignoreTaskOverrides */);
+        relayoutTaskViews(animation, false /* ignoreTaskOverrides */);
     }
 
     /**
@@ -637,16 +631,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * {@link TaskStackLayoutAlgorithm} with the given {@param animation}. This call cancels any
      * animations that are current running on those task views, and will ensure that the children
      * {@link TaskView}s will match the set of visible tasks in the stack.
-     *
-     * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    private void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet,
-            boolean ignoreTaskOverrides) {
+    private void relayoutTaskViews(AnimationProps animation, boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
         mDeferredTaskViewLayoutAnimation = null;
 
         // Synchronize the current set of TaskViews
-        bindVisibleTaskViews(mStackScroller.getStackScroll(), ignoreTasksSet,
+        bindVisibleTaskViews(mStackScroller.getStackScroll(),
                 ignoreTaskOverrides /* ignoreTaskOverrides */);
 
         // Animate them to their final transforms with the given animation
@@ -657,7 +648,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int taskIndex = mStack.indexOfStackTask(tv.getTask());
             TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
 
-            if (ignoreTasksSet.contains(tv.getTask().key)) {
+            if (mIgnoreTasks.contains(tv.getTask().key)) {
                 continue;
             }
 
@@ -715,13 +706,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * {@param stackScroll} and {@param focusState}.
      */
     public void getLayoutTaskTransforms(float stackScroll, int focusState, ArrayList<Task> tasks,
-            ArrayList<TaskViewTransform> transformsOut) {
+            boolean ignoreTaskOverrides, ArrayList<TaskViewTransform> transformsOut) {
         Utilities.matchTaskListSize(tasks, transformsOut);
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
             mLayoutAlgorithm.getStackTransform(task, stackScroll, focusState, transform, null,
-                    true /* forceUpdate */, true /* ignoreTaskOverrides */);
+                    true /* forceUpdate */, ignoreTaskOverrides);
             transform.visible = true;
         }
     }
@@ -812,22 +803,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /**
      * Updates the layout algorithm min and max virtual scroll bounds.
-     *
-     * @see #updateLayoutAlgorithm(boolean, ArraySet<Task.TaskKey>)
      */
    public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
-        updateLayoutAlgorithm(boundScrollToNewMinMax, mIgnoreTasks);
-    }
-
-    /**
-     * Updates the min and max virtual scroll bounds.
-     *
-     * @param ignoreTasksSet the set of tasks to ignore in the relayout
-     */
-    private void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
-            ArraySet<Task.TaskKey> ignoreTasksSet) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.update(mStack, ignoreTasksSet);
+        mLayoutAlgorithm.update(mStack, mIgnoreTasks);
 
         // Update the freeform workspace background
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -1195,8 +1174,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Rebind all the views, including the ignore ones
-        bindVisibleTaskViews(mStackScroller.getStackScroll(), mIgnoreTasks,
-                false /* ignoreTaskOverrides */);
+        bindVisibleTaskViews(mStackScroller.getStackScroll(), false /* ignoreTaskOverrides */);
 
         // Measure each of the TaskViews
         mTmpTaskViews.clear();
@@ -1553,7 +1531,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.onTaskBound(task);
 
         // Load the task data
-        Recents.getTaskLoader().loadTaskData(task, true /* fetchAndInvalidateThumbnails */);
+        Recents.getTaskLoader().loadTaskData(task);
     }
 
     private void unbindTaskView(TaskView tv, Task task) {
@@ -1834,7 +1812,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             updateLayoutAlgorithm(true /* boundScroll */);
             addIgnoreTask(event.task);
         }
-        relayoutTaskViews(animation, mIgnoreTasks, ignoreTaskOverrides);
+        relayoutTaskViews(animation, ignoreTaskOverrides);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -1948,26 +1926,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public final void onBusEvent(MultiWindowStateChangedEvent event) {
-        if (!event.inMultiWindow) {
+    public final void onBusEvent(final MultiWindowStateChangedEvent event) {
+        if (event.inMultiWindow) {
+            setTasks(event.stack, true /* allowNotifyStackChanges */);
+        } else {
+            // Reset the launch state before handling the multiwindow change
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            launchState.reset();
+
             // Defer until the next frame to ensure that we have received all the system insets, and
             // initial layout updates
+            event.getAnimationTrigger().increment();
             post(new Runnable() {
                 @Override
                 public void run() {
                     // Scroll the stack to the front to see the undocked task
-                    mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP, new Runnable() {
-                        @Override
-                        public void run() {
-                            List<TaskView> taskViews = getTaskViews();
-                            int taskViewCount = taskViews.size();
-                            for (int i = 0; i < taskViewCount; i++) {
-                                TaskView tv = taskViews.get(i);
-                                tv.getHeaderView().rebindToTask(tv.getTask(),
-                                        tv.mTouchExplorationEnabled, tv.mIsDisabledInSafeMode);
-                            }
-                        }
-                    });
+                    mAnimationHelper.startNewStackScrollAnimation(event.stack,
+                            event.getAnimationTrigger());
+                    event.getAnimationTrigger().decrement();
                 }
             });
         }

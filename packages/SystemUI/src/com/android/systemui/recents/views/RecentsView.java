@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEve
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
+import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
@@ -143,7 +144,6 @@ public class RecentsView extends FrameLayout {
                     R.dimen.recents_task_view_rounded_corners_radius);
             mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
                     this, false);
-            mStackActionButton.forceHasOverlappingRendering(false);
             mStackActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -203,9 +203,11 @@ public class RecentsView extends FrameLayout {
     /**
      * Called from RecentsActivity when the task stack is updated.
      */
-    public void updateStack(TaskStack stack) {
+    public void updateStack(TaskStack stack, boolean setStackViewTasks) {
         mStack = stack;
-        mTaskStackView.setTasks(stack, true /* allowNotifyStackChanges */);
+        if (setStackViewTasks) {
+            mTaskStackView.setTasks(stack, true /* allowNotifyStackChanges */);
+        }
 
         // Update the top level view's visibilities
         if (stack.getTaskCount() > 0) {
@@ -620,6 +622,10 @@ public class RecentsView extends FrameLayout {
         }
 
         hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
+    }
+
+    public final void onBusEvent(MultiWindowStateChangedEvent event) {
+        updateStack(event.stack, false /* setStackViewTasks */);
     }
 
     /**

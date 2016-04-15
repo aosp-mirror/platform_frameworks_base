@@ -483,7 +483,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
             // Get the final set of task transforms (with task removed)
             mSv.getLayoutTaskTransforms(newStackScroll, TaskStackLayoutAlgorithm.STATE_UNFOCUSED,
-                    mCurrentTasks, mFinalTaskTransforms);
+                    mCurrentTasks, true /* ignoreTaskOverrides */, mFinalTaskTransforms);
 
             // Set the target to scroll towards upon dismissal
             mTargetStackScroll = newStackScroll;

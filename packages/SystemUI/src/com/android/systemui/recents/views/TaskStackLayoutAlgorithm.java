@@ -577,7 +577,7 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Creates task overrides to ensure the initial stack layout if necessary.
      */
-    public void setTaskOverridesForInitialState(TaskStack stack) {
+    public void setTaskOverridesForInitialState(TaskStack stack, boolean ignoreScrollToFront) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         mTaskIndexOverrideMap.clear();
@@ -585,7 +585,7 @@ public class TaskStackLayoutAlgorithm {
         boolean scrollToFront = launchState.launchedFromHome ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
-            if (!launchState.launchedWithAltTab && !scrollToFront) {
+            if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {
                 // Set the initial scroll to the predefined state (which differs from the stack)
                 float [] initialNormX = new float[] {
                         getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
@@ -938,7 +938,11 @@ public class TaskStackLayoutAlgorithm {
      * stack.
      */
     float getStackScrollForTask(Task t) {
-        return mTaskIndexOverrideMap.get(t.key.id, (float) mTaskIndexMap.get(t.key.id, 0));
+        Float overrideP = mTaskIndexOverrideMap.get(t.key.id, null);
+        if (overrideP == null) {
+            return (float) mTaskIndexMap.get(t.key.id, 0);
+        }
+        return overrideP;
     }
 
     /**
