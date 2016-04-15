@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Az óra tárhelye megtelt. Szabadítson fel helyet néhány fájl törlésével."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"A tévé tárhelye megtelt. Hely felszabadításához töröljön néhány fájlt."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"A telefon tárhelye megtelt. Hely felszabadításához töröljön néhány fájlt."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Lehet, hogy a hálózat felügyelt"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ismeretlen harmadik fél által"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"A munkaprofil adminisztrátora által"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Megfigyelő: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"Ki"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Művelet végrehajtása a következővel:"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Művelet elvégzése a(z) %1$s segítségével"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Művelet végrehajtása"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Megnyitás a következővel:"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Megnyitás a következővel: %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Megnyitás"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Szerkesztés a következővel:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Szerkesztés a következővel: %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Szerkesztés"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Megosztás a következővel:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Megosztás a következővel: %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Megosztás"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Küldés a következővel:"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Küldés a következővel: %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Küldés"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Válasszon kezdőalkalmazást"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"A(z) %1$s használata kezdőalkalmazásként"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Kép készítése"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Kép készítése a következővel:"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Kép készítése a következővel: %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Kép készítése"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ez legyen az alapértelmezett program ehhez a művelethez."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Használjon másik alkalmazást"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Alapértelmezés törlése itt: Rendszerbeállítások &gt; Alkalmazások &gt; Letöltve."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d percen át (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Egy percen át (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1505,7 +1516,7 @@
       <item quantity="one">1 órán keresztül</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő riasztás)"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő ébresztés)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Amíg ki nem kapcsolja a „Ne zavarjanak” lehetőséget"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Klokkens lagringsplass er full. Slett filer for å frigjøre plass."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV-ens lagringsplass er full. Slett noen filer for å frigjøre mer plass."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefonlageret er fullt. Slett noen filer for å frigjøre lagringsplass."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nettverket blir muligens overvåket"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Av en ukjent tredjepart"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"av administratoren for jobbprofilen din"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Av <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"Av"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Fullfør med"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Fullfør handlingen med %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Fullfør handlingen"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Åpne med"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Åpne med %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Åpne"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Rediger med"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Rediger med %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Endre"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Del med"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Del med %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Del"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Send via"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Send via %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Send"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Velg en startsideapp"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Bruk %1$s som startside"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Ta bilde"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Ta bilde med"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Ta bilde med %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Ta bilde"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Bruk som standardvalg."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Bruk en annen app"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Fjern app angitt som standard i systeminnstillingene &gt; Apper &gt; Nedlastet."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet av administratoren"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"For å forlenge batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minutter (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I 1 minutt (til <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

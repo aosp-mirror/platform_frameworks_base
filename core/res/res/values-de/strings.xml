@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Der Speicher deiner Uhr ist voll. Lösche Dateien, um Speicherplatz freizugeben."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Der TV-Speicher ist voll. Lösche Dateien, um Speicherplatz freizugeben."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Der Handyspeicher ist voll! Lösche Dateien, um Speicherplatz freizugeben."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Das Netzwerk wird möglicherweise überwacht."</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Von einem unbekannten Dritten"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Vom Administrator deines Arbeitsprofils"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Von <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Aktion mit %1$s abschließen"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"Abschließen"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Öffnen mit"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Mit %1$s öffnen"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Öffnen"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Bearbeiten mit"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Mit %1$s bearbeiten"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Bearbeiten"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Freigeben über"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Für %1$s freigeben"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Teilen"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Senden via"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Senden via %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Senden"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Start-App auswählen"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s als Start-App verwenden"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Bild aufnehmen"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Bild aufnehmen mit"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Bild aufnehmen mit %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Bild aufnehmen"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Immer für diese Aktion verwenden"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Andere App verwenden"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Das Löschen der Standardeinstellungen ist in den Systemeinstellungen unter \"Apps &gt; Heruntergeladen\" möglich."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Von deinem Administrator gelöscht"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d Minuten (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">1 Minute (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

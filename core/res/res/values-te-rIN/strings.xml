@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"వాచ్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"టీవీ నిల్వ నిండింది. ఖాళీ స్థలం కోసం కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ఫోన్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"తెలియని మూడవ పక్షం ద్వారా"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"మీ కార్యాలయ ప్రొఫైల్ నిర్వాహకుని ద్వారా"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ద్వారా"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"ఆఫ్‌లో ఉంది"</string>
     <string name="whichApplication" msgid="4533185947064773386">"దీన్ని ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయి"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"చర్యను పూర్తి చేయి"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"దీనితో తెరువు"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$sతో తెరువు"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"తెరువు"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"దీనితో సవరించు"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sతో సవరించు"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"సవరించు"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"దీనితో భాగస్వామ్యం చేయి"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sతో భాగస్వామ్యం చేయి"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"భాగస్వామ్యం చేయి"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$sని ఉపయోగించి పంపండి"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"పంపు"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"హోమ్ అనువర్తనాన్ని ఎంచుకోండి"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$sని హోమ్‌గా ఉపయోగించండి"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"దీనితో చిత్రాన్ని క్యాప్చర్ చేయి"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$sతో చిత్రాన్ని క్యాప్చర్ చేయండి"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ఈ చర్యకు డిఫాల్ట్‌గా ఉపయోగించండి."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"వేరొక అనువర్తనాన్ని ఉపయోగించండి"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేయబడినవిలో డిఫాల్ట్‌ను క్లియర్ చేయి."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
       <item quantity="one">ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>

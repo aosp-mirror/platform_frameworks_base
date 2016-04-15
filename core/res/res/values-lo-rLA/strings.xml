@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ໃນ​ໂມງ​ເຕັມ​ແລ້ວ. ໃຫ້​ລຶບ​ໄຟ​ລ໌​ບາງ​ອັນ​ທີ່ບໍ່​ໄດ້​ໃຊ້​ອອກ​ເພື່ອ​ເພີ່ມ​ເນື້ອ​ທີ່​ຫວ່າງ."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ບ່ອນ​ເກັບ​ຂໍ້​ມູນໂທລະພາບເຕັມ. ລຶບ​ບາງ​ໄຟ​ລ໌ ເພື່ອ​ໃຫ້​ມີ​ຊ່ອງ​ຫວ່າງ​."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ໂດຍບຸກຄົນທີສາມທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ຕາມ​ຜູ້​ຄວບ​ຄຸມ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ໂດຍ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -893,16 +893,25 @@
     <string name="capital_off" msgid="6815870386972805832">"ປິດ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"ສຳ​ເລັດ​​​ການ​ດຳ​ເນີນ​ການ​ໂດຍ​ໃຊ້ %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"ສຳເລັດຄຳສັ່ງ"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"ເປີດໂດຍໃຊ້"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"ເປີດ​ໂດຍ​ໃຊ້ %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"ເປີດ"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"​ແກ້​ໄຂ​ໃນ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"ແກ້​ໄຂ​ໃນ %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ແກ້ໄຂ"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ແບ່ງປັນກັບ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ແບ່ງ​ປັນ​ກັບ %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ແບ່ງປັນ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ສົ່ງໂດຍໃຊ້"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ສົ່ງໂດຍໃຊ້ %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ສົ່ງ"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"​ເລືອກ​ແອັບຯ​ໂຮມ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"​ໃຊ້ %1$s ເປັນ​ໜ້າຫຼັກ"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ບັນທຶກຮູບພາບ"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ບັນທຶກຮູບພາບດ້ວຍ"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"ບັນທຶກຮູບພາບດ້ວຍ %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ບັນທຶກຮູບພາບ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"ນຳໃຊ້ແອັບຯອື່ນ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ລຶບລ້າງຄ່າເລີ່ມຕົ້ນ ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ."</string>
@@ -1472,6 +1481,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

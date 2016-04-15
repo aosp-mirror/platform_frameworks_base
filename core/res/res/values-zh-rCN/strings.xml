@@ -164,7 +164,7 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"手表存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"电视存储空间已满。请删除一些文件以腾出空间。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手机存储空间已满。请删除一些文件以腾出空间。"</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"网络可能会受到监控"</string>
+    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明第三方的监控"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"由您的工作资料管理员监控"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 监控"</string>
@@ -893,16 +893,34 @@
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"选择要使用的应用："</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"使用%1$s完成操作"</string>
+    <!-- no translation found for whichApplicationLabel (7425855495383818784) -->
+    <skip />
     <string name="whichViewApplication" msgid="3272778576700572102">"打开方式"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用%1$s打开"</string>
+    <!-- no translation found for whichViewApplicationLabel (2666774233008808473) -->
+    <skip />
     <string name="whichEditApplication" msgid="144727838241402655">"编辑方式"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用%1$s编辑"</string>
+    <!-- no translation found for whichEditApplicationLabel (7183524181625290300) -->
+    <skip />
     <string name="whichSendApplication" msgid="6902512414057341668">"分享方式"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"使用%1$s分享"</string>
+    <!-- no translation found for whichSendApplicationLabel (4579076294675975354) -->
+    <skip />
     <string name="whichSendToApplication" msgid="8272422260066642057">"通过以下应用发送"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过1$s发送"</string>
+    <!-- no translation found for whichSendToApplicationLabel (8878962419005813500) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"选择主屏幕应用"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"将“%1$s”设为主屏幕应用"</string>
+    <!-- no translation found for whichHomeApplicationLabel (809529747002918649) -->
+    <skip />
+    <!-- no translation found for whichImageCaptureApplication (3680261417470652882) -->
+    <skip />
+    <!-- no translation found for whichImageCaptureApplicationNamed (8619384150737825003) -->
+    <skip />
+    <!-- no translation found for whichImageCaptureApplicationLabel (6390303445371527066) -->
+    <skip />
     <string name="alwaysUse" msgid="4583018368000610438">"设为默认选项。"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"使用其他应用"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"在“系统设置”&gt;“应用”&gt;“已下载”中清除默认设置。"</string>
@@ -1472,6 +1490,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，省电模式会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n省电模式会在设备充电时自动关闭。"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
