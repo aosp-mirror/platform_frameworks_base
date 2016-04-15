@@ -322,7 +322,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolleret af administratoren"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Aktiveret af administratoren"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Deaktiveret af administratoren"</string>
-    <string name="home" msgid="8263346537524314127">"Start"</string>
+    <string name="home" msgid="3256884684164448244">"Startside for Indstillinger"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> siden"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> tilbage"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Lille"</string>
@@ -331,4 +331,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Større"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Størst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Tilpasset (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Hjælp og feedback"</string>
 </resources>
