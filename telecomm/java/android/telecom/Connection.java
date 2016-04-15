@@ -100,6 +100,7 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * A connection can only be in this state if the {@link #PROPERTY_IS_EXTERNAL_CALL} property and
      * {@link #CAPABILITY_CAN_PULL_CALL} capability bits are set on the connection.
+     * @hide
      */
     public static final int STATE_PULLING_CALL = 7;
 
@@ -283,6 +284,7 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * Should only be set on a {@code Connection} where {@link #PROPERTY_IS_EXTERNAL_CALL}
      * is set.
+     * @hide
      */
     public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
 
@@ -330,6 +332,7 @@ public abstract class Connection extends Conferenceable {
      * external connections.  Only those {@link InCallService}s which have the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
      * manifest will see external connections.
+     * @hide
      */
     public static final int PROPERTY_IS_EXTERNAL_CALL = 1<<4;
 
@@ -388,6 +391,7 @@ public abstract class Connection extends Conferenceable {
      * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} and
      * {@link Call.Details#CAPABILITY_CAN_PULL_CALL}, but the {@link ConnectionService} could not
      * pull the external call due to an error condition.
+     * @hide
      */
     public static final String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
 
@@ -506,6 +510,13 @@ public abstract class Connection extends Conferenceable {
         return builder.toString();
     }
 
+    /**
+     * Builds a string representation of a properties bit-mask.
+     *
+     * @param properties The properties bit-mask.
+     * @return String representation.
+     * @hide
+     */
     public static String propertiesToString(int properties) {
         StringBuilder builder = new StringBuilder();
         builder.append("[Properties:");
@@ -1373,15 +1384,6 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Returns the extras associated with this connection.
-     * <p>
-     * Extras should be updated using {@link #putExtras(Bundle)}.
-     * <p>
-     * Telecom or an {@link InCallService} can also update the extras via
-     * {@link android.telecom.Call#putExtras(Bundle)}, and
-     * {@link Call#removeExtras(List)}.
-     * <p>
-     * The connection is notified of changes to the extras made by Telecom or an
-     * {@link InCallService} by {@link #onExtrasChanged(Bundle)}.
      *
      * @return The extras associated with this connection.
      */
@@ -1484,6 +1486,7 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Returns the connection's properties, as a bit mask of the {@code PROPERTY_*} constants.
+     * @hide
      */
     public final int getConnectionProperties() {
         return mConnectionProperties;
@@ -1689,6 +1692,7 @@ public abstract class Connection extends Conferenceable {
      * Sets the connection's properties as a bit mask of the {@code PROPERTY_*} constants.
      *
      * @param connectionProperties The new connection properties.
+     * @hide
      */
     public final void setConnectionProperties(int connectionProperties) {
         checkImmutable();
@@ -1873,8 +1877,6 @@ public abstract class Connection extends Conferenceable {
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with this {@code Connection}.
-     * @deprecated Use {@link #putExtras(Bundle)} to add extras.  Use {@link #removeExtras(List)}
-     * to remove extras.
      */
     public final void setExtras(@Nullable Bundle extras) {
         checkImmutable();
@@ -1915,6 +1917,7 @@ public abstract class Connection extends Conferenceable {
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras to add.
+     * @hide
      */
     public final void putExtras(@NonNull Bundle extras) {
         checkImmutable();
@@ -1975,6 +1978,7 @@ public abstract class Connection extends Conferenceable {
      * Removes an extra from this {@code Connection}.
      *
      * @param keys The key of the extra key to remove.
+     * @hide
      */
     public final void removeExtras(List<String> keys) {
         if (mExtras != null) {
@@ -2114,6 +2118,7 @@ public abstract class Connection extends Conferenceable {
      * capability and {@link Connection#PROPERTY_IS_EXTERNAL_CALL} property bits must be set.
      * <p>
      * For more information on external calls, see {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
+     * @hide
      */
     public void onPullExternalCall() {}
 
@@ -2126,6 +2131,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @param event The call event.
      * @param extras Extras associated with the call event.
+     * @hide
      */
     public void onCallEvent(String event, Bundle extras) {}
 
@@ -2138,6 +2144,7 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#removeExtras(List)}.
      *
      * @param extras The new extras bundle.
+     * @hide
      */
     public void onExtrasChanged(Bundle extras) {}
 
@@ -2316,6 +2323,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @param event The connection event.
      * @param extras Bundle containing extra information associated with the event.
+     * @hide
      */
     public void sendConnectionEvent(String event, Bundle extras) {
         for (Listener l : mListeners) {
