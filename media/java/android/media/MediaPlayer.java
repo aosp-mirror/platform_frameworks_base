@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -34,8 +33,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -56,7 +53,6 @@ import android.media.SubtitleData;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.media.SyncParams;
 
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.Preconditions;
 
 import libcore.io.IoBridge;
@@ -66,7 +62,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Runnable;
@@ -74,7 +69,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -561,7 +555,8 @@ import java.lang.ref.WeakReference;
  * thread by default has a Looper running).
  *
  */
-public class MediaPlayer implements SubtitleController.Listener
+public class MediaPlayer extends PlayerBase
+                         implements SubtitleController.Listener
 {
     /**
        Constant to retrieve only the new metadata since the last
@@ -615,7 +610,6 @@ public class MediaPlayer implements SubtitleController.Listener
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
-    private final IAppOpsService mAppOps;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
     private boolean mBypassInterruptionPolicy;
@@ -628,6 +622,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * result in an exception.</p>
      */
     public MediaPlayer() {
+        super(new AudioAttributes.Builder().build());
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -640,8 +635,6 @@ public class MediaPlayer implements SubtitleController.Listener
 
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
-        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-        mAppOps = IAppOpsService.Stub.asInterface(b);
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -1211,29 +1204,13 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void start() throws IllegalStateException {
-        if (isRestricted()) {
-            _setVolume(0, 0);
-        }
+        baseStart();
         stayAwake(true);
         _start();
     }
 
     private native void _start() throws IllegalStateException;
 
-    private boolean isRestricted() {
-        if (mBypassInterruptionPolicy) {
-            return false;
-        }
-        try {
-            final int usage = mUsage != -1 ? mUsage
-                    : AudioAttributes.usageForLegacyStreamType(getAudioStreamType());
-            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO, usage,
-                    Process.myUid(), ActivityThread.currentPackageName());
-            return mode != AppOpsManager.MODE_ALLOWED;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
 
     private int getAudioStreamType() {
         if (mStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
@@ -1687,6 +1664,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * at the same time.
      */
     public void release() {
+        baseRelease();
         stayAwake(false);
         updateSurfaceScreenOn();
         mOnPreparedListener = null;
@@ -1756,6 +1734,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @see android.media.AudioManager
      */
     public void setAudioStreamType(int streamtype) {
+        baseUpdateAudioAttributes(
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamtype).build());
         _setAudioStreamType(streamtype);
         mStreamType = streamtype;
     }
@@ -1785,6 +1765,7 @@ public class MediaPlayer implements SubtitleController.Listener
             final String msg = "Cannot set AudioAttributes to null";
             throw new IllegalArgumentException(msg);
         }
+        baseUpdateAudioAttributes(attributes);
         mUsage = attributes.getUsage();
         mBypassInterruptionPolicy = (attributes.getAllFlags()
                 & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
@@ -1826,9 +1807,11 @@ public class MediaPlayer implements SubtitleController.Listener
      * to be set independently.
      */
     public void setVolume(float leftVolume, float rightVolume) {
-        if (isRestricted()) {
-            return;
-        }
+        baseSetVolume(leftVolume, rightVolume);
+    }
+
+    @Override
+    void playerSetVolume(float leftVolume, float rightVolume) {
         _setVolume(leftVolume, rightVolume);
     }
 
@@ -1898,10 +1881,13 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param level send level scalar
      */
     public void setAuxEffectSendLevel(float level) {
-        if (isRestricted()) {
-            return;
-        }
+        baseSetAuxEffectSendLevel(level);
+    }
+
+    @Override
+    int playerSetAuxEffectSendLevel(float level) {
         _setAuxEffectSendLevel(level);
+        return AudioSystem.SUCCESS;
     }
 
     private native void _setAuxEffectSendLevel(float level);
@@ -2795,7 +2781,10 @@ public class MediaPlayer implements SubtitleController.Listener
     private native final int native_setRetransmitEndpoint(String addrString, int port);
 
     @Override
-    protected void finalize() { native_finalize(); }
+    protected void finalize() {
+        baseRelease();
+        native_finalize();
+    }
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!
