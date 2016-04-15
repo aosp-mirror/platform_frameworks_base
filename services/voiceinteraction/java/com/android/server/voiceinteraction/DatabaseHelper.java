@@ -252,7 +252,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] usersStr = text.split(",");
         int[] users = new int[usersStr.length];
         for (int i = 0; i < usersStr.length; i++) {
-            users[i] = Integer.valueOf(usersStr[i]);
+            users[i] = Integer.parseInt(usersStr[i]);
         }
         return users;
     }

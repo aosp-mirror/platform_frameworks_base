@@ -1163,7 +1163,7 @@ public final class StrictMode {
         }
         String policyString = message.substring(7, spaceIndex);
         try {
-            return Integer.valueOf(policyString).intValue();
+            return Integer.parseInt(policyString);
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -1187,7 +1187,7 @@ public final class StrictMode {
         }
         String violationString = message.substring(numberStartIndex, numberEndIndex);
         try {
-            return Integer.valueOf(violationString).intValue();
+            return Integer.parseInt(violationString);
         } catch (NumberFormatException e) {
             return 0;
         }

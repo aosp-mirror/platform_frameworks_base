@@ -38,7 +38,7 @@ public class SpannableStringBuilderBenchmark {
     @BeforeExperiment
     protected void setUp() throws Exception {
         clazz = Class.forName(paramType);
-        int strSize = Integer.valueOf(paramStringMult);
+        int strSize = Integer.parseInt(paramStringMult);
         StringBuilder strBuilder = new StringBuilder();
         for (int i = 0; i < strSize; i++) {
             strBuilder.append(TEST_STRING);
