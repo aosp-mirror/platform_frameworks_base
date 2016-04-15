@@ -33,12 +33,6 @@ namespace style {
     };
 }
 
-namespace integer {
-    enum {
-        number = 0x01030000, // sv
-    };
-}
-
 } // namespace R
 } // namespace android
 
