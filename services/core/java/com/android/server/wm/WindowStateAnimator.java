@@ -1774,6 +1774,10 @@ class WindowStateAnimator {
         }
         if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
             mService.adjustForImeIfNeeded(mWin.mDisplayContent);
+            if (isEntrance) {
+                mWin.setDisplayLayoutNeeded();
+                mService.mWindowPlacerLocked.requestTraversal();
+            }
         }
         return mAnimation != null;
     }
