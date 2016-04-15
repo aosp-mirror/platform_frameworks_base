@@ -52,6 +52,9 @@ public class ScreenPinningRequest implements View.OnClickListener {
 
     private RequestWindowView mRequestWindow;
 
+    // Id of task to be pinned or locked.
+    private int taskId;
+
     public ScreenPinningRequest(Context context) {
         mContext = context;
         mAccessibilityService = (AccessibilityManager)
@@ -67,8 +70,10 @@ public class ScreenPinningRequest implements View.OnClickListener {
         }
     }
 
-    public void showPrompt(boolean allowCancel) {
+    public void showPrompt(int taskId, boolean allowCancel) {
         clearPrompt();
+
+        this.taskId = taskId;
 
         mRequestWindow = new RequestWindowView(mContext, allowCancel);
 
@@ -106,7 +111,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.screen_pinning_ok_button || mRequestWindow == v) {
             try {
-                ActivityManagerNative.getDefault().startLockTaskModeOnCurrent();
+                ActivityManagerNative.getDefault().startSystemLockTaskMode(taskId);
             } catch (RemoteException e) {}
         }
         clearPrompt();

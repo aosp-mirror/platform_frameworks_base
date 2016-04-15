@@ -2578,9 +2578,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case START_LOCK_TASK_BY_CURRENT_TRANSACTION: {
+        case START_SYSTEM_LOCK_TASK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            startLockTaskModeOnCurrent();
+            int taskId = data.readInt();
+            startSystemLockTaskMode(taskId);
             reply.writeNoException();
             return true;
         }
@@ -2592,9 +2593,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case STOP_LOCK_TASK_BY_CURRENT_TRANSACTION: {
+        case STOP_SYSTEM_LOCK_TASK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            stopLockTaskModeOnCurrent();
+            stopSystemLockTaskMode();
             reply.writeNoException();
             return true;
         }
@@ -6386,11 +6387,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void startLockTaskModeOnCurrent() throws RemoteException {
+    public void startSystemLockTaskMode(int taskId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(START_LOCK_TASK_BY_CURRENT_TRANSACTION, data, reply, 0);
+        data.writeInt(taskId);
+        mRemote.transact(START_SYSTEM_LOCK_TASK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
@@ -6408,11 +6410,11 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void stopLockTaskModeOnCurrent() throws RemoteException {
+    public void stopSystemLockTaskMode() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(STOP_LOCK_TASK_BY_CURRENT_TRANSACTION, data, reply, 0);
+        mRemote.transact(STOP_SYSTEM_LOCK_TASK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

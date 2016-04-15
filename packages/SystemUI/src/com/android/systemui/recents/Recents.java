@@ -598,13 +598,13 @@ public class Recents extends SystemUI
     public final void onBusEvent(final ScreenPinningRequestEvent event) {
         int processUser = sSystemServicesProxy.getProcessUser();
         if (sSystemServicesProxy.isSystemUser(processUser)) {
-            mImpl.onStartScreenPinning(event.applicationContext);
+            mImpl.onStartScreenPinning(event.applicationContext, event.taskId);
         } else {
             postToSystemUser(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        mUserToSystemCallbacks.startScreenPinning();
+                        mUserToSystemCallbacks.startScreenPinning(event.taskId);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }

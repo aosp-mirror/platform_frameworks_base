@@ -153,10 +153,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void showScreenPinningRequest() {
+        public void showScreenPinningRequest(int taskId) {
             if (mBar != null) {
                 try {
-                    mBar.showScreenPinningRequest();
+                    mBar.showScreenPinningRequest(taskId);
                 } catch (RemoteException e) {
                 }
             }
