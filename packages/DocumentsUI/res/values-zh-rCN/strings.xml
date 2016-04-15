@@ -119,7 +119,10 @@
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
-    <!-- no translation found for elements_dragged (3727204615215602228) -->
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
+    </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"要删除“<xliff:g id="NAME">%1$s</xliff:g>”吗？"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"要删除文件夹“<xliff:g id="NAME">%1$s</xliff:g>”及其中的内容吗？"</string>
     <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
