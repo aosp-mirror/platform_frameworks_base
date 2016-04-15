@@ -7443,7 +7443,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void adjustForImeIfNeeded(final DisplayContent displayContent) {
+    void adjustForImeIfNeeded(final DisplayContent displayContent) {
         final WindowState imeWin = mInputMethodWindow;
         final TaskStack focusedStack =
                 mCurrentFocus != null ? mCurrentFocus.getStack() : null;

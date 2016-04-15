@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -1759,7 +1760,9 @@ class WindowStateAnimator {
         } else {
             clearAnimation();
         }
-
+        if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
+            mService.adjustForImeIfNeeded(mWin.mDisplayContent);
+        }
         return mAnimation != null;
     }
 
