@@ -497,8 +497,7 @@ public class DirectoryFragment extends Fragment
             if ((docFlags & Document.FLAG_PARTIAL) != 0) {
                 mNoCopyCount += selected ? 1 : -1;
             }
-            if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0
-                    && (docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
+            if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
             }
             if ((docFlags & Document.FLAG_SUPPORTS_RENAME) != 0) {
