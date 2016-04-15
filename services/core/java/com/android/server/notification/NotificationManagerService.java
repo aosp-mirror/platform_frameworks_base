@@ -2179,8 +2179,14 @@ public class NotificationManagerService extends SystemService {
         }
         if (adjustment.getSignals() != null) {
             Bundle.setDefusable(adjustment.getSignals(), true);
-            n.sbn.setOverrideGroupKey(adjustment.getSignals().getString(
-                    Adjustment.GROUP_KEY_OVERRIDE_KEY, null));
+            final String autoGroupKey = adjustment.getSignals().getString(
+                    Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
+            if (autoGroupKey == null) {
+                EventLogTags.writeNotificationUnautogrouped(adjustment.getKey());
+            } else {
+                EventLogTags.writeNotificationAutogrouped(adjustment.getKey());
+            }
+            n.sbn.setOverrideGroupKey(autoGroupKey);
         }
     }
 
