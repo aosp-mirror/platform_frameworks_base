@@ -474,8 +474,8 @@ void RenderNode::syncDisplayList(TreeObserver* observer) {
     mDisplayList = mStagingDisplayList;
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
-        for (size_t i = 0; i < mDisplayList->getFunctors().size(); i++) {
-            (*mDisplayList->getFunctors()[i])(DrawGlInfo::kModeSync, nullptr);
+        for (auto& iter : mDisplayList->getFunctors()) {
+            (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
         }
         for (size_t i = 0; i < mDisplayList->getPushStagingFunctors().size(); i++) {
             (*mDisplayList->getPushStagingFunctors()[i])();

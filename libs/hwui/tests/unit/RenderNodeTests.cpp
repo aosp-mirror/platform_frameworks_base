@@ -51,3 +51,41 @@ TEST(RenderNode, hasParents) {
     EXPECT_FALSE(child->hasParents()) << "Child should be removed";
     EXPECT_FALSE(parent->hasParents()) << "Root node shouldn't have any parents";
 }
+
+TEST(RenderNode, releasedCallback) {
+    class DecRefOnReleased : public GlFunctorLifecycleListener {
+    public:
+        DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
+        void onGlFunctorReleased(Functor* functor) override {
+            *mRefCnt -= 1;
+        }
+    private:
+        int* mRefCnt;
+    };
+
+    int refcnt = 0;
+    sp<DecRefOnReleased> listener(new DecRefOnReleased(&refcnt));
+    Functor noopFunctor;
+
+    auto node = TestUtils::createNode(0, 0, 200, 400,
+            [&](RenderProperties& props, TestCanvas& canvas) {
+        refcnt++;
+        canvas.callDrawGLFunction(&noopFunctor, listener.get());
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(1, refcnt);
+
+    TestUtils::recordNode(*node, [&](TestCanvas& canvas) {
+        refcnt++;
+        canvas.callDrawGLFunction(&noopFunctor, listener.get());
+    });
+    EXPECT_EQ(2, refcnt);
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(1, refcnt);
+
+    TestUtils::recordNode(*node, [](TestCanvas& canvas) {});
+    EXPECT_EQ(1, refcnt);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    EXPECT_EQ(0, refcnt);
+}
