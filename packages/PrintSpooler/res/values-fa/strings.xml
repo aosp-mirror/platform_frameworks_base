@@ -41,8 +41,8 @@
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"صفحه <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> از <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"خلاصه، تعداد نسخه <xliff:g id="COPIES">%1$s</xliff:g>، اندازه کاغذ <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"بزرگ کردن لیست گزینه‌ها"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"کوچک کردن لیست گزینه‌ها"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"بزرگ کردن فهرست گزینه‌ها"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"کوچک کردن فهرست گزینه‌ها"</string>
     <string name="print_button" msgid="645164566271246268">"چاپ"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"‏ذخیره در PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"گزینه‌های چاپ بزرگ شد"</string>
