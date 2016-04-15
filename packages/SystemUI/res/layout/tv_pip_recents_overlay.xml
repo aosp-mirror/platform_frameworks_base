@@ -23,7 +23,7 @@
     <com.android.systemui.tv.pip.PipRecentsControlsView
         android:id="@+id/pip_controls"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
 
     <View
         android:id="@+id/recents"
