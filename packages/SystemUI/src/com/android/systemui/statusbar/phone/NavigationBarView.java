@@ -531,6 +531,11 @@ public class NavigationBarView extends LinearLayout {
                 }
 
                 @Override
+                public void onAdjustedForImeChanged(boolean adjustedForIme, long animDuration)
+                        throws RemoteException {
+                }
+
+                @Override
                 public void onDockSideChanged(int newDockSide) throws RemoteException {
                 }
             });
