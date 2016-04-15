@@ -82,6 +82,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -444,6 +445,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow = null;
+    // For the new window in the replacement transition, if we have
+    // requested to replace without animation, then we should
+    // make sure we also don't apply an enter animation for
+    // the new window.
+    boolean mSkipEnterAnimationForSeamlessReplacement = false;
     // Whether this window is being moved via the resize API
     boolean mMovedByResize;
 
@@ -1552,7 +1558,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // If app died visible, apply a dim over the window to indicate that it's inactive
             mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && mDisplayContent != null && !mAnimatingExit && isDisplayedLw()) {
+                && mDisplayContent != null && !mAnimatingExit && isVisibleUnchecked()) {
             mDisplayContent.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
     }
@@ -1571,12 +1577,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mAppToken.allAppWindows.get(i);
-            if (win.mWillReplaceWindow && win.mReplacingWindow == this) {
+            if (win.mWillReplaceWindow && win.mReplacingWindow == this && hasDrawnLw()) {
                 if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
+                if (win.isDimming()) {
+                    win.transferDimToReplacement();
+                }
                 win.mWillReplaceWindow = false;
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
                 win.mReplacingWindow = null;
+                mSkipEnterAnimationForSeamlessReplacement = false;
                 if (win.mAnimatingExit) {
                     mService.removeWindowInnerLocked(win);
                 }
@@ -2709,5 +2719,26 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             winY *= mGlobalScale;
         }
         return winY;
+    }
+
+    void transferDimToReplacement() {
+        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
+        if (dimLayerUser != null && mDisplayContent != null) {
+            mDisplayContent.mDimLayerController.applyDim(dimLayerUser,
+                    mReplacingWindow.mWinAnimator,
+                    (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? true : false);
+        }
+    }
+
+    // During activity relaunch due to resize, we sometimes use window replacement
+    // for only child windows (as the main window is handled by window preservation)
+    // and the big surface.
+    //
+    // Though windows of TYPE_APPLICATION (as opposed to TYPE_BASE_APPLICATION)
+    // are not children in the sense of an attached window, we also want to replace
+    // them at such phases, as they won't be covered by window preservation,
+    // and in general we expect them to return following relaunch.
+    boolean shouldBeReplacedWithChildren() {
+        return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
     }
 }
