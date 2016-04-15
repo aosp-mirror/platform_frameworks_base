@@ -20104,6 +20104,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
             }
         }
+        if (memFactor != mLastMemoryLevel) {
+            EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
+        }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mLruProcesses.size();
         boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !isSleeping(), now);
