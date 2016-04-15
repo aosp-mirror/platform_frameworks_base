@@ -180,6 +180,8 @@
     <string name="copy_failure_alert_content">These files weren\u2019t copied: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the moving failure alert dialog. [CHAR LIMIT=48] -->
     <string name="move_failure_alert_content">These files weren\u2019t moved: <xliff:g id="list">%1$s</xliff:g></string>
+    <!-- Message shown to users when an operation to delete one or more files has failed. Presented in a dialog. [CHAR LIMIT=48] -->
+    <string name="delete_failure_alert_content">These files weren\u2019t deleted: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the copying warning dialog due to converted files. [CHAR LIMIT=64] -->
     <string name="copy_converted_warning_content">These files were converted to another format: <xliff:g id="list" example="Document.pdf, Photo.jpg, Song.ogg">%1$s</xliff:g></string>
     <!-- Toast shown when a user copies files to clipboard. -->
