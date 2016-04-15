@@ -216,6 +216,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
+import android.util.jar.StrictJarFile;
 import android.view.Display;
 
 import com.android.internal.R;
@@ -7643,6 +7644,52 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Returns {@code true} if the given file contains code. Otherwise {@code false}.
+     */
+    private static boolean apkHasCode(String fileName) {
+        StrictJarFile jarFile = null;
+        try {
+            jarFile = new StrictJarFile(fileName,
+                    false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
+            return jarFile.findEntry("classes.dex") != null;
+        } catch (IOException ignore) {
+        } finally {
+            try {
+                jarFile.close();
+            } catch (IOException ignore) {}
+        }
+        return false;
+    }
+
+    /**
+     * Enforces code policy for the package. This ensures that if an APK has
+     * declared hasCode="true" in its manifest that the APK actually contains
+     * code.
+     *
+     * @throws PackageManagerException If bytecode could not be found when it should exist
+     */
+    private static void enforceCodePolicy(PackageParser.Package pkg)
+            throws PackageManagerException {
+        final boolean shouldHaveCode =
+                (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        if (shouldHaveCode && !apkHasCode(pkg.baseCodePath)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Package " + pkg.baseCodePath + " code is missing");
+        }
+
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                final boolean splitShouldHaveCode =
+                        (pkg.splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0;
+                if (splitShouldHaveCode && !apkHasCode(pkg.splitCodePaths[i])) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Package " + pkg.splitCodePaths[i] + " code is missing");
+                }
+            }
+        }
+    }
+
     private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg,
             final int policyFlags, final int scanFlags, long currentTime, UserHandle user)
             throws PackageManagerException {
@@ -7685,6 +7732,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if ((policyFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+        }
+
+        if ((policyFlags & PackageParser.PARSE_ENFORCE_CODE) != 0) {
+            enforceCodePolicy(pkg);
         }
 
         if (mCustomResolverComponentName != null &&
