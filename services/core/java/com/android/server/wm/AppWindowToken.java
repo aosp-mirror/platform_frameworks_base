@@ -499,7 +499,7 @@ class AppWindowToken extends WindowToken {
                 + " with replacing child windows.");
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState w = allAppWindows.get(i);
-            if (w.isChildWindow()) {
+            if (w.shouldBeReplacedWithChildren()) {
                 w.setReplacing(false /* animate */);
             }
         }
@@ -539,8 +539,9 @@ class AppWindowToken extends WindowToken {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState candidate = allAppWindows.get(i);
             if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
-                    candidate.getWindowTag().equals(w.getWindowTag().toString())) {
+                    candidate.getWindowTag().toString().equals(w.getWindowTag().toString())) {
                 candidate.mReplacingWindow = w;
+                w.mSkipEnterAnimationForSeamlessReplacement = !candidate.mAnimateReplacingWindow;
 
                 // if we got a replacement window, reset the timeout to give drawing more time
                 service.mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
@@ -575,6 +576,9 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
             candidate.mWillReplaceWindow = false;
+            if (candidate.mReplacingWindow != null) {
+                candidate.mReplacingWindow.mSkipEnterAnimationForSeamlessReplacement = false;
+            }
             // Since the window already timed out, remove it immediately now.
             // Use removeWindowInnerLocked() instead of removeWindowLocked(), as the latter
             // delays removal on certain conditions, which will leave the stale window in the
