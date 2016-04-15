@@ -76,6 +76,7 @@ public class CameraDeviceState {
         void onBusy();
         void onCaptureStarted(RequestHolder holder, long timestamp);
         void onCaptureResult(CameraMetadataNative result, RequestHolder holder);
+        void onRepeatingRequestError(long lastFrameNumber);
     }
 
     /**
@@ -198,6 +199,22 @@ public class CameraDeviceState {
     public synchronized boolean setCaptureResult(final RequestHolder request,
             final CameraMetadataNative result) {
         return setCaptureResult(request, result, NO_CAPTURE_ERROR, /*errorArg*/null);
+    }
+
+    /**
+     * Set repeating request error.
+     *
+     * <p>Repeating request has been stopped due to an error such as abandoned output surfaces.</p>
+     *
+     * @param lastFrameNumber Frame number of the last repeating request before it is stopped.
+     */
+    public synchronized void setRepeatingRequestError(final long lastFrameNumber) {
+        mCurrentHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mCurrentListener.onRepeatingRequestError(lastFrameNumber);
+            }
+        });
     }
 
     /**
