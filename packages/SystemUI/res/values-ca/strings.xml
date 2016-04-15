@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"No s\'ha pogut iniciar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"En mode segur, l\'aplicació <xliff:g id="APP">%s</xliff:g> està desactivada."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Esborra-ho tot"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Aquesta aplicació no admet el mode multifinestra"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"L\'aplicació no admet el mode multifinestra"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"L\'aplicació no admet la pantalla dividida"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> és el diàleg de volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca per restaurar l\'original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estàs utilitzant el perfil professional"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca per activar el so."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca per activar la vibració. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca per silenciar el so. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Personalitzador d\'interfície d\'usuari"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra el percentatge de la bateria inserit"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de la configuració ràpida."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"L\'aplicació no admet la pantalla dividida."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Desplega la configuració ràpida."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

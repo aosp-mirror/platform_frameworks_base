@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> не може да се вклучи."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> е оневозможен во безбеден режим."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Исчисти ги сите"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Апликацијава не поддржува повеќе прозорци"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Апликацијата не поддржува повеќе прозорци"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Апликацијата не поддржува поделен екран"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Раздели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Раздели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Раздели прилагодено"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> е дијалог за јачина на звук"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Допрете за да го вратите оригиналот."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Го користите работниот профил"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Допрете за да вклучите звук."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Допрете за да поставите на вибрации. Можеби ќе се исклучи звукот на услугите за достапност."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Допрете за да исклучите звук. Можеби ќе се исклучи звукот на услугите за достапност."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Адаптер на УИ на системот"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Прикажи вграден процент на батеријата"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Прикажи процент на ниво на батеријата во внатрешноста на иконата со статусна лента кога не се полни"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Уредник за брзи поставки."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Апликацијата можеби нема да работи во поделен екран."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Апликацијата не поддржува поделен екран."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Прошири ги брзи поставки."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

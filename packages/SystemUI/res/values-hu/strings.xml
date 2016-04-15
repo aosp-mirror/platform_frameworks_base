@@ -190,7 +190,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Repülős üzemmód bekapcsolva."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"A „Ne zavarjanak” mód bekapcsolva. Csak prioritásos."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"„Ne zavarjanak” mód bekapcsolva; teljes némítás."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"A „Ne zavarjanak” mód bekapcsolva. Csak riasztások."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"A „Ne zavarjanak” mód bekapcsolva. Csak ébresztések."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"A „Ne zavarjanak” mód kikapcsolva."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"A „Ne zavarjanak” mód kikapcsolva."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"A „Ne zavarjanak” mód bekapcsolva."</string>
@@ -251,7 +251,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne zavarjanak"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Csak prioritásos"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Csak riasztások"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Csak ébresztések"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Teljes némítás"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> eszköz)"</string>
@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nem lehet elindítani a következőt: <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"A(z) <xliff:g id="APP">%s</xliff:g> csökkentett módban ki van kapcsolva."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Összes törlése"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ez az alkalmazás nem támogatja a többablakos nézetet"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Az alkalmazás nem támogatja a többablakos nézetet"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Az alkalmazás nem támogatja az osztott képernyős nézetet"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Osztott vízszintes"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Osztott függőleges"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Osztott egyéni"</string>
@@ -338,7 +337,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Teljes csend. Ezzel a képernyőolvasók is elnémulnak."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Teljes némítás"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Csak prioritásos"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Csak riasztások"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Csak ébresztések"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Teljes\nnémítás"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Csak\nprioritás"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Csak\nriasztások"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás kezeli a hangerőt"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Érintse meg az eredeti érték visszaállításához."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"A munkaprofilt használja"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Koppintson a némítás megszüntetéséhez."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Koppintson a rezgés beállításához. Előfordulhat, hogy a kisegítő lehetőségek szolgáltatásai le vannak némítva."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Koppintson a némításhoz. Előfordulhat, hogy a kisegítő lehetőségek szolgáltatásai le vannak némítva."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kezelőfelület-hangoló"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"A beépített akkumulátor töltöttségi szintjének megjelenítése"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Az akkumulátor töltöttségi szintjének megjelenítése az állapotsori ikonban, amikor az eszköz nem töltődik"</string>
@@ -436,7 +432,7 @@
     <string name="enable_demo_mode" msgid="4844205668718636518">"Demó mód engedélyezése"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Demó mód megjelenítése"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="8536256753575881818">"Riasztás"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Ébresztés"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Munkahelyi profil"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Repülős üzemmód"</string>
     <string name="add_tile" msgid="2995389510240786221">"Mozaik hozzáadása"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Gyorsbeállítások szerkesztője"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Gyorsbeállítások kibontása."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

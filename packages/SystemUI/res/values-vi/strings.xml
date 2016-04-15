@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Không thể khởi động <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> bị tắt ở chế độ an toàn."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Xóa tất cả"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ứng dụng này không hỗ trợ chế độ nhiều cửa sổ"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Ứng dụng không hỗ trợ chế độ nhiều cửa sổ"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Ứng dụng không hỗ trợ chia đôi màn hình"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Phân tách ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tùy chỉnh phân tách"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Chạm để khôi phục bản gốc."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Nhấn để bật tiếng."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Nhấn để đặt chế độ rung. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Nhấn để tắt tiếng. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Bộ điều hướng giao diện người dùng hệ thống"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Hiển thị tỷ lệ phần trăm pin được nhúng"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Hiển thị tỷ lệ phần trăm mức pin bên trong biểu tượng thanh trạng thái khi không sạc"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Trình chỉnh sửa cài đặt nhanh."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Ứng dụng có thể không hoạt động với tính năng chia đôi màn hình."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Mở rộng cài đặt nhanh."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करणे शक्य झाले नाही."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> सुरक्षित-मोडमध्ये अक्षम केला आहे."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"सर्व साफ करा"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"हा अॅप एकाधिक-विंडोला समर्थन देत नाही"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"अॅप एकाधिक-विंडोला समर्थन देत नाही"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"अॅप विभाजित स्क्रीनला समर्थन देत नाही"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज विभाजित करा"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"अनुलंब विभाजित करा"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"सानुकूल विभाजित करा"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आपण आपले कार्य प्रोफाईल वापरत आहात"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. कंपन सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"द्रुत सेटिंग्ज संपादक."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"द्रुत सेटिंग्ज विस्तृत करा."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

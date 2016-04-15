@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>을(를) 시작할 수 없습니다."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>은(는) 안전 모드에서 사용 중지됩니다."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"모두 지우기"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"이 앱은 다중 창을 지원하지 않습니다."</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"앱이 다중 창을 지원하지 않습니다."</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"앱이 화면 분할을 지원하지 않습니다."</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
@@ -420,12 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. 탭하여 음소거를 해제하세요."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"시스템 UI 튜너"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
@@ -612,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"빠른 설정 편집기"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"앱이 화면 분할을 지원하지 않습니다."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"빠른 설정을 펼칩니다."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>
