@@ -123,6 +123,10 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Пры пераключэнні профіляў патрабуецца ўзор"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Пры пераключэнні профіляў патрабуецца PIN-код"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Пры пераключэнні профіляў патрабуецца пароль"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
+    <skip />
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзіны. Увядзіце ўзор.</item>
       <item quantity="few">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзін. Увядзіце ўзор.</item>
