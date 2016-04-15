@@ -2795,11 +2795,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             // update low profile
             if ((diff & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
-                final boolean lightsOut = (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0;
-                if (lightsOut) {
-                    animateCollapsePanels();
-                }
-
                 setAreThereNotifications();
             }
 

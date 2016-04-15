@@ -3956,6 +3956,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!isKeyguardShowing) {
                 navTranslucent &= areTranslucentBarsAllowed();
             }
+            boolean statusBarExpandedNotKeyguard = !isKeyguardShowing
+                    && mStatusBar.getAttrs().height == MATCH_PARENT
+                    && mStatusBar.getAttrs().width == MATCH_PARENT;
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -3978,7 +3981,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             boolean updateSysUiVisibility = layoutNavigationBar(displayWidth, displayHeight,
                     displayRotation, uiMode, overscanRight, overscanBottom, dcf, navVisible, navTranslucent,
-                    navAllowedHidden);
+                    navAllowedHidden, statusBarExpandedNotKeyguard);
             if (DEBUG_LAYOUT) Slog.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
                     mDockLeft, mDockTop, mDockRight, mDockBottom));
             updateSysUiVisibility |= layoutStatusBar(pf, df, of, vf, dcf, sysui, isKeyguardShowing);
@@ -4057,7 +4060,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean layoutNavigationBar(int displayWidth, int displayHeight, int displayRotation,
             int uiMode, int overscanRight, int overscanBottom, Rect dcf, boolean navVisible,
-            boolean navTranslucent, boolean navAllowedHidden) {
+            boolean navTranslucent, boolean navAllowedHidden,
+            boolean statusBarExpandedNotKeyguard) {
         if (mNavigationBar != null) {
             boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();
             // Force the navigation bar to its appropriate place and
@@ -4079,8 +4083,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
                     mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
                 } else {
-                    // We currently want to hide the navigation UI.
-                    mNavigationBarController.setBarShowingLw(false);
+                    // We currently want to hide the navigation UI - unless we expanded the status
+                    // bar.
+                    mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
                 }
                 if (navVisible && !navTranslucent && !navAllowedHidden
                         && !mNavigationBar.isAnimatingLw()
@@ -4104,8 +4109,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
                     mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
                 } else {
-                    // We currently want to hide the navigation UI.
-                    mNavigationBarController.setBarShowingLw(false);
+                    // We currently want to hide the navigation UI - unless we expanded the status
+                    // bar.
+                    mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
                 }
                 if (navVisible && !navTranslucent && !navAllowedHidden
                         && !mNavigationBar.isAnimatingLw()
@@ -5023,7 +5029,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (!mStatusBar.isVisibleLw()) {
                 mStatusBarController.setShowTransparent(true /* transparent */);
             }
-            if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent) {
+
+            WindowManager.LayoutParams statusBarAttrs = mStatusBar.getAttrs();
+            boolean statusBarExpanded = statusBarAttrs.height == MATCH_PARENT
+                    && statusBarAttrs.width == MATCH_PARENT;
+            if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent
+                    || statusBarExpanded) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
                 if (mStatusBarController.setBarShowingLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -5034,6 +5045,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mForceStatusBarFromKeyguard && mStatusBarController.isTransientShowing()) {
                     mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
                             mLastSystemUiFlags, mLastSystemUiFlags);
+                }
+                if (statusBarExpanded && mNavigationBar != null) {
+                    if (mNavigationBarController.setBarShowingLw(true)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    }
                 }
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 final int fl = PolicyControl.getWindowFlags(null, lp);

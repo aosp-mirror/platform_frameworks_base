@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy.WindowState;
 
@@ -53,7 +54,7 @@ public class BarController {
     private final Object mServiceAquireLock = new Object();
     protected StatusBarManagerInternal mStatusBarInternal;
 
-    private WindowState mWin;
+    protected WindowState mWin;
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
     private int mTransientBarState;
     private boolean mPendingShow;
@@ -147,12 +148,16 @@ public class BarController {
         }
         final boolean wasVis = mWin.isVisibleLw();
         final boolean wasAnim = mWin.isAnimatingLw();
-        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow)
-                : mWin.hideLw(!mNoAnimationOnNextShow);
+        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow && !skipAnimation())
+                : mWin.hideLw(!mNoAnimationOnNextShow && !skipAnimation());
         mNoAnimationOnNextShow = false;
         final int state = computeStateLw(wasVis, wasAnim, mWin, change);
         final boolean stateChanged = updateStateLw(state);
         return change || stateChanged;
+    }
+
+    protected boolean skipAnimation() {
+        return false;
     }
 
     private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
