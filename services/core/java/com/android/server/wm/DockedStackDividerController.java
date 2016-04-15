@@ -38,6 +38,7 @@ import android.view.IDockedStackListener;
 import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
@@ -73,6 +74,11 @@ public class DockedStackDividerController implements DimLayerUser {
      * we meet at {@link #CLIP_REVEAL_MEET_EARLIEST}.
      */
     private static final float CLIP_REVEAL_MEET_FRACTION_MAX = 0.8f;
+
+    private static final Interpolator IME_ADJUST_ENTRY_INTERPOLATOR =
+            new PathInterpolator(0.1f, 0f, 0.1f, 1f);
+
+    private static final long IME_ADJUST_DURATION = 280;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -188,8 +194,10 @@ public class DockedStackDividerController implements DimLayerUser {
 
     void setAdjustedForIme(boolean adjusted, boolean animate) {
         if (mAdjustedForIme != adjusted) {
-            mAnimatingForIme = animate;
             mAdjustedForIme = adjusted;
+            if (animate) {
+                startImeAdjustAnimation(adjusted ? 0 : 1, adjusted ? 1 : 0);
+            }
         }
     }
 
@@ -371,7 +379,7 @@ public class DockedStackDividerController implements DimLayerUser {
             return;
         }
 
-        mAnimatingForIme = false;
+        clearImeAdjustAnimation();
         if (minimizedDock) {
             if (animate) {
                 startAdjustAnimation(0f, 1f);
@@ -387,8 +395,26 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
+    private void clearImeAdjustAnimation() {
+        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
+        for (int i = stacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = stacks.get(i);
+            if (stack != null && stack.isAdjustedForIme()) {
+                stack.resetAdjustedForIme(true /* adjustBoundsNow */);
+            }
+        }
+        mAnimatingForIme = false;
+    }
+
     private void startAdjustAnimation(float from, float to) {
         mAnimatingForMinimizedDockedStack = true;
+        mAnimationStarted = false;
+        mAnimationStart = from;
+        mAnimationTarget = to;
+    }
+
+    private void startImeAdjustAnimation(float from, float to) {
+        mAnimatingForIme = true;
         mAnimationStarted = false;
         mAnimationStart = from;
         mAnimationTarget = to;
@@ -413,39 +439,44 @@ public class DockedStackDividerController implements DimLayerUser {
         if (mAnimatingForMinimizedDockedStack) {
             return animateForMinimizedDockedStack(now);
         } else if (mAnimatingForIme) {
-            return animateForIme();
+            return animateForIme(now);
         } else {
             return false;
         }
     }
 
-    private boolean animateForIme() {
-        boolean updated = false;
-        boolean animating = false;
-
+    private boolean animateForIme(long now) {
+        if (!mAnimationStarted) {
+            mAnimationStarted = true;
+            mAnimationStartTime = now;
+            mAnimationDuration = (long)
+                    (IME_ADJUST_DURATION * mService.getWindowAnimationScaleLocked());
+        }
+        float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
+        t = (mAnimationTarget == 1f ? IME_ADJUST_ENTRY_INTERPOLATOR : TOUCH_RESPONSE_INTERPOLATOR)
+                .getInterpolation(t);
         final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
+        boolean updated = false;
         for (int i = stacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = stacks.get(i);
             if (stack != null && stack.isAdjustedForIme()) {
-                updated |= stack.updateAdjustForIme();
-                animating |= stack.isAnimatingForIme();
-            }
-        }
-
-        if (updated) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-        }
-
-        if (!animating) {
-            mAnimatingForIme = false;
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                final TaskStack stack = stacks.get(i);
-                if (stack != null) {
-                    stack.clearImeGoingAway();
+                if (t >= 1f && mAnimationTarget == 0f) {
+                    stack.resetAdjustedForIme(true /* adjustBoundsNow */);
+                    updated = true;
+                } else {
+                    updated |= stack.updateAdjustForIme(getInterpolatedAnimationValue(t));
                 }
             }
         }
-        return animating;
+        if (updated) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+        }
+        if (t >= 1.0f) {
+            mAnimatingForIme = false;
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
@@ -478,11 +509,15 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
+    private float getInterpolatedAnimationValue(float t) {
+        return t * mAnimationTarget + (1 - t) * mAnimationStart;
+    }
+
     /**
      * Gets the amount how much to minimize a stack depending on the interpolated fraction t.
      */
     private float getMinimizeAmount(TaskStack stack, float t) {
-        final float naturalAmount = t * mAnimationTarget + (1 - t) * mAnimationStart;
+        final float naturalAmount = getInterpolatedAnimationValue(t);
         if (isAnimationMaximizing()) {
             return adjustMaximizeAmount(stack, t, naturalAmount);
         } else {

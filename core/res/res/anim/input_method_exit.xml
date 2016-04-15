@@ -17,10 +17,10 @@
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
 	android:shareInterpolator="false">
-    <translate android:fromYDelta="0" android:toYDelta="10%"
-			android:interpolator="@interpolator/accelerate_quint"
-            android:duration="@android:integer/config_shortAnimTime"/>
+    <translate android:fromYDelta="0" android:toYDelta="8%"
+			android:interpolator="@interpolator/fast_out_linear_in"
+            android:duration="150"/>
     <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
-			android:interpolator="@interpolator/accelerate_cubic"
-            android:duration="@android:integer/config_shortAnimTime"/>
+			android:interpolator="@interpolator/fast_out_linear_in"
+            android:duration="150"/>
 </set>
