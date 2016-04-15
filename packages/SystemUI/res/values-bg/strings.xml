@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> не можа да стартира."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Приложението <xliff:g id="APP">%s</xliff:g> е деактивирано в безопасния режим."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Изчистване на всичко"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Това приложение не поддържа няколко прозореца"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Приложението не поддържа няколко прозореца"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Приложението не поддържа разделен екран"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хоризонтално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Вертикално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Персонализирано разделяне"</string>
@@ -420,6 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> изпълнява ролята на диалоговия прозорец за силата на звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Докоснете, за да възстановите оригинала."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Използвате служебния си потребителски профил"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Докоснете, за да включите отново звука."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Докоснете, за да зададете вибриране. Възможно е звукът на услугите за достъпност да бъде заглушен."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Докоснете, за да заглушите звука. Възможно е звукът на услугите за достъпност да бъде заглушен."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Тунер на системния потребителски интерфейс"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показване на процента на вградената батерия"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Показване на процента на нивото на батерията в иконата на лентата на състоянието, когато не се зарежда"</string>
@@ -606,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Редактор за бързи настройки."</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Приложението може да не работи в режим на разделен екран."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Приложението не поддържа разделен екран."</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Разгъване на бързите настройки."</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>

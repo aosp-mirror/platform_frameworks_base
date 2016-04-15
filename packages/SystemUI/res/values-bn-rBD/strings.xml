@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> শুরু করা যায়নি৷"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"নিরাপদ মোডে <xliff:g id="APP">%s</xliff:g> অক্ষম করা হয়েছে৷"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"সবকিছু সাফ করুন"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"এই অ্যাপ্লিকেশানটি মাল্টি-উইন্ডো সমর্থন করে না"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"অ্যাপ্লিকেশানগুলি মাল্টি-উইন্ডো সমর্থন করে না"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রীন সমর্থন করে না"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উল্লম্ব স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"কাস্টম স্প্লিট করুন"</string>
@@ -420,6 +419,9 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"আসলটি পুনঃস্থাপন করতে স্পর্শ করুন৷"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"আপনি আপনার কাজের প্রোফাইল ব্যবহার করছেন"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। নিঃশব্দ করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"সিস্টেম UI টিউনার"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"এম্বেড করা ব্যাটারির শতকরা হার দেখায়"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"যখন চার্জ করা হবে না তখন স্থিতি দন্ডের আইকনের ভিতরে ব্যাটারি স্তরের শতকার হার দেখায়"</string>
@@ -606,4 +608,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"দ্রুত সেটিংস সম্পাদক৷"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"অ্যাপ্লিকেশানটি বিভক্ত স্ক্রীনে কাজ নাও করতে পারে৷"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রীন সমর্থন করে না৷"</string>
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"দ্রুত সেটিংস প্রসারিত করুন৷"</string>
+    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <skip />
 </resources>
