@@ -1215,7 +1215,6 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void lockProfile(int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true);
-        notifyLockedProfile(userId);
     }
 
     private boolean shouldWaitForProvisioning() {
@@ -1542,13 +1541,6 @@ public class KeyguardViewMediator extends SystemUI {
     private void updateActivityLockScreenState() {
         try {
             ActivityManagerNative.getDefault().setLockScreenShown(mShowing && !mOccluded);
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void notifyLockedProfile(@UserIdInt int userId) {
-        try {
-            ActivityManagerNative.getDefault().notifyLockedProfile(userId);
         } catch (RemoteException e) {
         }
     }
