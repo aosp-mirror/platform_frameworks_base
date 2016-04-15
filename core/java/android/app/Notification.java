@@ -976,10 +976,8 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_CONTAINS_CUSTOM_VIEW = "android.contains.customView";
 
-    /**
-     * @SystemApi
-     * @hide
-     */
+    /** @hide */
+    @SystemApi
     public static final String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
 
     private Icon mSmallIcon;
