@@ -78,7 +78,6 @@ public class TaskStackAnimationHelper {
 
     public static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
     public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 333;
-    public static final int ENTER_WHILE_DOCKING_DURATION = 250;
 
     private static final PathInterpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
             new PathInterpolator(0, 0, 0, 1f);
@@ -120,6 +119,7 @@ public class TaskStackAnimationHelper {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         Resources res = mStackView.getResources();
+        Resources appResources = mStackView.getContext().getApplicationContext().getResources();
 
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
         TaskStackViewScroller stackScroller = mStackView.getScroller();
@@ -136,8 +136,8 @@ public class TaskStackAnimationHelper {
                 R.dimen.recents_task_stack_animation_affiliate_enter_offset);
         int launchedWhileDockingOffset = res.getDimensionPixelSize(
                 R.dimen.recents_task_stack_animation_launched_while_docking_offset);
-        boolean isLandscape = mStackView.getContext().getApplicationContext().getResources()
-                .getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        boolean isLandscape = appResources.getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
 
         // Prepare each of the task views for their enter animation from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -190,6 +190,7 @@ public class TaskStackAnimationHelper {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         Resources res = mStackView.getResources();
+        Resources appRes = mStackView.getContext().getApplicationContext().getResources();
 
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
         TaskStackViewScroller stackScroller = mStackView.getScroller();
@@ -205,6 +206,8 @@ public class TaskStackAnimationHelper {
                 R.integer.recents_task_enter_from_app_duration);
         int taskViewEnterFromAffiliatedAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_affiliated_app_duration);
+        int dockGestureAnimDuration = appRes.getInteger(
+                R.integer.long_press_dock_anim_duration);
 
         // Create enter animations for each of the views from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -267,7 +270,7 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedViaDockGesture) {
                 // Animate the tasks up
                 AnimationProps taskAnimation = new AnimationProps()
-                        .setDuration(AnimationProps.BOUNDS, (int) (ENTER_WHILE_DOCKING_DURATION +
+                        .setDuration(AnimationProps.BOUNDS, (int) (dockGestureAnimDuration +
                                                         (taskIndexFromBack * 2f * FRAME_OFFSET_MS)))
                         .setInterpolator(AnimationProps.BOUNDS,
                                 ENTER_WHILE_DOCKING_INTERPOLATOR)
