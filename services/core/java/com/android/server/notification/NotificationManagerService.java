@@ -2239,6 +2239,13 @@ public class NotificationManagerService extends SystemService {
                                         .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                                         .build();
                         summaryNotification.extras.putAll(extras);
+                        Intent appIntent = getContext().getPackageManager()
+                                .getLaunchIntentForPackage(adjustment.getPackage());
+                        if (appIntent != null) {
+                            summaryNotification.contentIntent = PendingIntent.getActivityAsUser(
+                                    getContext(), 0, appIntent, 0, null,
+                                    UserHandle.of(adjustedSbn.getUserId()));
+                        }
                         final StatusBarNotification summarySbn =
                                 new StatusBarNotification(adjustedSbn.getPackageName(),
                                         adjustedSbn.getOpPkg(),
