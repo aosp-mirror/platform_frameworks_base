@@ -6005,7 +6005,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 Bitmap bm = screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1,
-                        true, 1f);
+                        true, 1f, Bitmap.Config.ARGB_8888);
                 try {
                     receiver.send(bm);
                 } catch (RemoteException e) {
@@ -6018,8 +6018,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
-     * of the target image.
+     * In portrait mode, it grabs the full screenshot.
      *
      * @param displayId the Display to take a screenshot of.
      * @param width the width of the target bitmap
@@ -6036,14 +6035,14 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotApplications");
             return screenshotApplicationsInner(appToken, displayId, width, height, false,
-                    frameScale);
+                    frameScale, Bitmap.Config.RGB_565);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
     Bitmap screenshotApplicationsInner(IBinder appToken, int displayId, int width, int height,
-            boolean includeFullDisplay, float frameScale) {
+            boolean includeFullDisplay, float frameScale, Bitmap.Config config) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = getDisplayContentLocked(displayId);
@@ -6282,7 +6281,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Create a copy of the screenshot that is immutable and backed in ashmem.
         // This greatly reduces the overhead of passing the bitmap between processes.
-        Bitmap ret = bm.createAshmemBitmap();
+        Bitmap ret = bm.createAshmemBitmap(config);
         bm.recycle();
         return ret;
     }

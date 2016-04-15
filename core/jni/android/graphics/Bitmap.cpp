@@ -752,17 +752,32 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
             getPremulBitmapCreateFlags(isMutable));
 }
 
-static jobject Bitmap_copyAshmem(JNIEnv* env, jobject, jlong srcHandle) {
-    SkBitmap src;
-    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+static Bitmap* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& dstCT) {
     SkBitmap result;
 
     AshmemPixelAllocator allocator(env);
-    if (!src.copyTo(&result, &allocator)) {
+    if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
     Bitmap* bitmap = allocator.getStorageObjAndReset();
     bitmap->peekAtPixelRef()->setImmutable();
+    return bitmap;
+}
+
+static jobject Bitmap_copyAshmem(JNIEnv* env, jobject, jlong srcHandle) {
+    SkBitmap src;
+    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    SkColorType dstCT = src.colorType();
+    Bitmap* bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
+    jobject ret = GraphicsJNI::createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
+    return ret;
+}
+
+static jobject Bitmap_copyAshmemConfig(JNIEnv* env, jobject, jlong srcHandle, jint dstConfigHandle) {
+    SkBitmap src;
+    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
+    Bitmap* bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
     jobject ret = GraphicsJNI::createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
     return ret;
 }
@@ -1355,6 +1370,8 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copy },
     {   "nativeCopyAshmem",         "(J)Landroid/graphics/Bitmap;",
         (void*)Bitmap_copyAshmem },
+    {   "nativeCopyAshmemConfig",   "(JI)Landroid/graphics/Bitmap;",
+        (void*)Bitmap_copyAshmemConfig },
     {   "nativeGetNativeFinalizer", "()J", (void*)Bitmap_getNativeFinalizer },
     {   "nativeRecycle",            "(J)Z", (void*)Bitmap_recycle },
     {   "nativeReconfigure",        "(JIIIIZ)V", (void*)Bitmap_reconfigure },
