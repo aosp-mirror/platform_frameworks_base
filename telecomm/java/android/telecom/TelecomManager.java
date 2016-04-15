@@ -324,6 +324,7 @@ public class TelecomManager {
      * informed of external calls should set this meta-data to {@code true} in the manifest
      * registration of their {@link InCallService}.  By default, the {@link InCallService} will NOT
      * be informed of external calls.
+     * @hide
      */
     public static final String METADATA_INCLUDE_EXTERNAL_CALLS =
             "android.telecom.INCLUDE_EXTERNAL_CALLS";
