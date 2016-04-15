@@ -581,7 +581,7 @@ RENDERTHREAD_TEST(FrameBuilder, functor_reject) {
     auto scrolledFunctorView = TestUtils::createNode(0, 0, 400, 1000000,
             [&noopFunctor](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.translate(0, -800000);
-        canvas.callDrawGLFunction(&noopFunctor);
+        canvas.callDrawGLFunction(&noopFunctor, nullptr);
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,

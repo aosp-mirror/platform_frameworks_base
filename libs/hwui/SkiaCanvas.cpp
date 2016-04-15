@@ -160,7 +160,8 @@ public:
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
-    virtual void callDrawGLFunction(Functor* functor) override;
+    virtual void callDrawGLFunction(Functor* functor,
+            uirenderer::GlFunctorLifecycleListener* listener) override;
 
 protected:
     virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
@@ -846,6 +847,7 @@ void SkiaCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layer) { }
 
 void SkiaCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) { }
 
-void SkiaCanvas::callDrawGLFunction(Functor* functor) { }
+void SkiaCanvas::callDrawGLFunction(Functor* functor,
+        uirenderer::GlFunctorLifecycleListener* listener) { }
 
 } // namespace android
