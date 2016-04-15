@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ກຳລັງສ້າງລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ບັນທຶກລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g> ແລ້ວ"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"ບັນທຶກລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g> ແລ້ວແຕ່ກຳລັງລໍຖ້າຮູບໜ້າຈໍຢູ່"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ກຳລັງເພີ່ມລາຍລະອຽດໃສ່ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"ກະລຸນາລໍຖ້າ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"​ປັດ​ໄປ​ຊ້າຍ​ເພື່ອ​ສົ່ງ​ລາຍ​ງານ​ຂໍ້​ຜິດ​ພາດ​ຂອງ​ທ່ານ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"ການລາຍງານຂໍ້ຜິດພາດປະກອບມີ ຂໍ້ມູນຈາກໄຟລ໌ບັນທຶກຂອງລະບົບຫຼາຍໄຟລ໌, ຮວມທັງຂໍ້ມູນສ່ວນໂຕນຳ. ທ່ານຕ້ອງແບ່ງປັນລາຍງານຂໍ້ຜິດພາດໃຫ້ແອັບຯ ແລະຄົນທີ່ທ່ານເຊື່ອຖືໄດ້ເທົ່ານັ້ນ."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ສະແດງຂໍ້ຄວາມນີ້ອີກໃນເທື່ອຕໍ່ໄປ"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ລາຍ​ງານ​ບັນ​ຫາ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ບໍ່ສາມາດອ່ານໄຟລ໌ລາຍງານຂໍ້ຜິດພາດໄດ້"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ບໍ່ມີຊື່"</string>

@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"ਸ਼ੈਲ"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਸਿਰਜੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਕੈਪਚਰ ਕੀਤੀ ਗਈ"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਕੈਪਚਰ ਕੀਤੀ ਗਈ ਪਰ ਸਕ੍ਰੀਨਸ਼ਾਟ ਅਧੂਰਾ ਹੈ"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ਬੱਗ ਰਿਪੋਰਟ ਵਿੱਚ ਵੇਰਵਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"ਤੁਹਾਡੀ ਬਗ ਰਿਪੋਰਟ ਸ਼ੇਅਰ ਕਰਨ ਲਈ ਖੱਬੇ ਪਾਸੇ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਨੂੰ ਸਾਂਝੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਜਾਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਪੂਰੇ ਹੋਣ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਨੂੰ ਸਾਂਝੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਜਾਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਪੂਰੇ ਹੋਣ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"ਬਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਸਿਸਟਮ ਦੀਆਂ ਭਿੰਨ ਲੌਗ ਫਾਈਲਾਂ ਦਾ ਡਾਟਾ ਹੁੰਦਾ ਹੈ, ਨਿੱਜੀ ਅਤੇ ਪ੍ਰਾਈਵੇਟ ਜਾਣਕਾਰੀ ਸਮੇਤ। ਕੇਵਲ ਉਹਨਾਂ ਐਪਸ ਅਤੇ ਲੋਕਾਂ ਨਾਲ ਬਗ ਰਿਪੋਰਟਾਂ ਸ਼ੇਅਰ ਕਰੋ, ਜਿਹਨਾਂ ਤੇ ਤੁਸੀਂ ਭਰੋਸਾ ਕਰਦੇ ਹੋ।"</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ਅਗਲੀ ਵਾਰ ਇਹ ਸੁਨੇਹਾ ਦਿਖਾਓ"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ਬਗ ਰਿਪੋਰਟਾਂ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ਬਗ ਰਿਪੋਰਟ ਫ਼ਾਈਲ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ਬਿਨਾਂ-ਨਾਮ"</string>

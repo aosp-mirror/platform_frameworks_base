@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Κέλυφος"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Δημιουργείται η αναφορά σφάλματος <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Έγινε λήψη της αναφοράς σφάλματος <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Η αναφ. σφάλματος <xliff:g id="ID">#%d</xliff:g> ελήφθη, αλλά το στιγμ. εκκρεμεί"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Προσθήκη λεπτομερειών στην αναφορά σφάλματος"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Περιμένετε…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Σύρετε προς τα αριστερά για κοινή χρήση της αναφοράς σφαλμάτων"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Πατήστε για κοινή χρήση της αναφοράς σφάλματος"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Πατήστε για κοινοποίηση της αναφοράς σφάλματος χωρίς στιγμιότυπο οθόνης ή περιμένετε να ολοκληρωθεί"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Πατήστε για κοινοποίηση της αναφοράς σφάλματος χωρίς στιγμιότυπο οθόνης ή περιμένετε να ολοκληρωθεί"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Οι αναφορές σφαλμάτων περιέχουν δεδομένα από τα διάφορα αρχεία καταγραφής του συστήματος, συμπεριλαμβανομένων προσωπικών και ιδιωτικών πληροφοριών. Να μοιράζεστε αναφορές σφαλμάτων μόνο με εφαρμογές και άτομα που εμπιστεύεστε."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Εμφάνιση αυτού του μηνύματος την επόμενη φορά"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Αναφορές σφαλμάτων"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Δεν ήταν δυνατή η ανάγνωση του αρχείου της αναφοράς σφαλμάτων"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ανώνυμη"</string>

@@ -19,15 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"Kabuk"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Hata raporu (<xliff:g id="ID">#%d</xliff:g>) oluşturuluyor"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Hata raporu (<xliff:g id="ID">#%d</xliff:g>) yakalandı"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"<xliff:g id="ID">#%d</xliff:g> hata raporu yakalandı, ekran görüntüsü bekleniyor"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Hata raporuna ayrıntılar ekleniyor"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Lütfen bekleyin…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Hata raporunuzu paylaşmak için hızlıca sola kaydırın"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Hata raporunuzu paylaşmak için hafifçe dokunun"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Hata raporları, kişisel ve özel bilgiler dahil olmak üzere sistemin çeşitli günlük dosyalarından veriler içerir. Hata raporlarını sadece güvendiğiniz uygulamalar ve kişilerle paylaşın."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Bir dahaki sefere bu iletiyi göster"</string>
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Hata raporları"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Hata raporu dosyası okunamadı"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"adsız"</string>
