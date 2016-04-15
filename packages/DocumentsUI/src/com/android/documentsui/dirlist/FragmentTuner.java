@@ -90,6 +90,10 @@ public abstract class FragmentTuner {
      */
     private static final class DocumentsTuner extends FragmentTuner {
 
+        // We use this to keep track of whether a model has been previously loaded or not so we can
+        // open the drawer on empty directories on first launch
+        private boolean mModelPreviousLoaded;
+
         public DocumentsTuner(Context context, State state) {
             super(context, state);
         }
@@ -178,10 +182,12 @@ public abstract class FragmentTuner {
                 showDrawer = true;
             }
 
-            if (showDrawer && !mState.hasInitialLocationChanged() && !isSearch) {
+            if (showDrawer && !mState.hasInitialLocationChanged() && !isSearch
+                    && !mModelPreviousLoaded) {
                 // This noops on layouts without drawer, so no need to guard.
                 ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
+            mModelPreviousLoaded = true;
         }
 
         @Override
