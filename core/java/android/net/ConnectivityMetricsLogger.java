@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -22,6 +23,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 /** {@hide} */
+@SystemApi
 public class ConnectivityMetricsLogger {
     private static String TAG = "ConnectivityMetricsLogger";
     private static final boolean DBG = true;
