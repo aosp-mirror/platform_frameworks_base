@@ -31,7 +31,6 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -61,7 +60,6 @@ import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants.Metrics;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
@@ -98,6 +96,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
      * How much the background gets scaled when we are in the minimized dock state.
      */
     private static final float MINIMIZE_DOCK_SCALE = 0f;
+    private static final float ADJUSTED_FOR_IME_SCALE = 0.5f;
 
     private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
@@ -147,6 +146,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private int mExitStartPosition;
     private GestureDetector mGestureDetector;
     private boolean mDockedStackMinimized;
+    private boolean mAdjustedForIme;
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -655,6 +655,40 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setDuration(animDuration)
                 .start();
         mDockedStackMinimized = minimized;
+    }
+
+    public void setAdjustedForIme(boolean adjustedForIme) {
+        updateDockSide();
+        mHandle.setAlpha(adjustedForIme ? 0f : 1f);
+        if (!adjustedForIme) {
+            resetBackground();
+        } else if (mDockSide == WindowManager.DOCKED_TOP) {
+            mBackground.setPivotY(0);
+            mBackground.setScaleY(MINIMIZE_DOCK_SCALE);
+        }
+        mAdjustedForIme = adjustedForIme;
+    }
+
+    public void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
+        updateDockSide();
+        mHandle.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(animDuration)
+                .alpha(adjustedForIme ? 0f : 1f)
+                .start();
+        if (mDockSide == WindowManager.DOCKED_TOP) {
+            mBackground.setPivotY(0);
+            mBackground.animate()
+                    .scaleY(adjustedForIme ? MINIMIZE_DOCK_SCALE : 1f);
+        }
+        if (!adjustedForIme) {
+            mBackground.animate().withEndAction(mResetBackgroundRunnable);
+        }
+        mBackground.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(animDuration)
+                .start();
+        mAdjustedForIme = adjustedForIme;
     }
 
     private void resetBackground() {

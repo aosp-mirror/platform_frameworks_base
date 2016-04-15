@@ -39,6 +39,7 @@ public class Divider extends SystemUI {
     private DockDividerVisibilityListener mDockDividerVisibilityListener;
     private boolean mVisible = false;
     private boolean mMinimized = false;
+    private boolean mAdjustedForIme = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
 
     @Override
@@ -84,7 +85,7 @@ public class Divider extends SystemUI {
         addDivider(configuration);
         if (mMinimized) {
             mView.setMinimizedDockStack(true);
-            mWindowManager.setTouchable(false);
+            updateTouchable();
         }
     }
 
@@ -109,7 +110,7 @@ public class Divider extends SystemUI {
             public void run() {
                 if (mMinimized != minimized) {
                     mMinimized = minimized;
-                    mWindowManager.setTouchable(!minimized);
+                    updateTouchable();
                     if (animDuration > 0) {
                         mView.setMinimizedDockStack(minimized, animDuration);
                     } else {
@@ -129,6 +130,10 @@ public class Divider extends SystemUI {
         });
     }
 
+    private void updateTouchable() {
+        mWindowManager.setTouchable(!mMinimized && !mAdjustedForIme);
+    }
+
     class DockDividerVisibilityListener extends IDockedStackListener.Stub {
 
         @Override
@@ -145,6 +150,22 @@ public class Divider extends SystemUI {
         public void onDockedStackMinimizedChanged(boolean minimized, long animDuration)
                 throws RemoteException {
             updateMinimizedDockedStack(minimized, animDuration);
+        }
+
+        @Override
+        public void onAdjustedForImeChanged(boolean adjustedForIme, long animDuration)
+                throws RemoteException {
+            mView.post(() -> {
+                if (mAdjustedForIme != adjustedForIme) {
+                    mAdjustedForIme = adjustedForIme;
+                    updateTouchable();
+                    if (animDuration > 0) {
+                        mView.setAdjustedForIme(adjustedForIme, animDuration);
+                    } else {
+                        mView.setAdjustedForIme(adjustedForIme);
+                    }
+                }
+            });
         }
 
         @Override
