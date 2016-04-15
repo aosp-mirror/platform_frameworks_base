@@ -113,7 +113,9 @@ public class ActionSendMultipleConsumerActivity extends Activity {
         Bundle getExtras() {
             Bundle bundle = null;
             try {
-                bundle = mQueue.poll(TIMEOUT, TimeUnit.SECONDS);
+                // UI operations can be slower the very first time the tests are run due
+                // because ActionSendMultipleConsumer is not the default activity chosen.
+                bundle = mQueue.poll(2 * TIMEOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
