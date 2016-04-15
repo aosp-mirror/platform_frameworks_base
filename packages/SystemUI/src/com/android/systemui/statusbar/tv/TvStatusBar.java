@@ -165,7 +165,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void showScreenPinningRequest() {
+    public void showScreenPinningRequest(int taskId) {
     }
 
     @Override

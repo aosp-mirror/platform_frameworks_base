@@ -77,12 +77,17 @@ public class RecentsTransitionHelper {
     private Handler mHandler;
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
 
-    private Runnable mStartScreenPinningRunnable = new Runnable() {
+    private class StartScreenPinningRunnableRunnable implements Runnable {
+
+        private int taskId = -1;
+
         @Override
         public void run() {
-            EventBus.getDefault().send(new ScreenPinningRequestEvent(mContext));
+            EventBus.getDefault().send(new ScreenPinningRequestEvent(mContext, taskId));
         }
-    };
+    }
+    private StartScreenPinningRunnableRunnable mStartScreenPinningRunnable
+            = new StartScreenPinningRunnableRunnable();
 
     public RecentsTransitionHelper(Context context) {
         mContext = context;
@@ -120,6 +125,7 @@ public class RecentsTransitionHelper {
 
                     if (screenPinningRequested) {
                         // Request screen pinning after the animation runs
+                        mStartScreenPinningRunnable.taskId = task.key.id;
                         mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                     }
                 }
