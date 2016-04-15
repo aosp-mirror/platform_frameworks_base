@@ -218,7 +218,7 @@ public class WindowLayersController {
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
-        if (win != null && layer > win.mLayer) {
+        if (win != null) {
             assignAnimLayer(win, layer);
             // Make sure we leave space inbetween normal windows for dims and such.
             layer += WINDOW_LAYER_MULTIPLIER;
