@@ -509,6 +509,22 @@ class Task implements DimLayer.DimLayerUser {
         return mDragResizeMode;
     }
 
+    /**
+     * Adds all of the tasks windows to {@link WindowManagerService#mWaitingForDrawn} if drag
+     * resizing state of the window has been changed.
+     */
+    void addWindowsWaitingForDrawnIfResizingChanged() {
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                if (win.isDragResizeChanged()) {
+                    mService.mWaitingForDrawn.add(win);
+                }
+            }
+        }
+    }
+
     void updateDisplayInfo(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
@@ -614,6 +630,16 @@ class Task implements DimLayer.DimLayerUser {
                 if (!window.isHiddenFromUserLocked()) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    boolean isVisible() {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            final AppWindowToken appToken = mAppTokens.get(i);
+            if (appToken.isVisible()) {
+                return true;
             }
         }
         return false;
