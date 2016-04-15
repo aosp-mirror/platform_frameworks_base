@@ -1471,6 +1471,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
     static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
     static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 68;
+    static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2240,6 +2241,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
+            } break;
+            case VR_MODE_APPLY_IF_NEEDED_MSG: {
+                final ActivityRecord r = (ActivityRecord) msg.obj;
+                final boolean needsVrMode = r != null && r.requestedVrComponent != null;
+                if (needsVrMode) {
+                    VrManagerInternal vrService =
+                            LocalServices.getService(VrManagerInternal.class);
+                    boolean enable = msg.arg1 == 1;
+                    vrService.setVrMode(enable, r.requestedVrComponent, r.userId,
+                            r.info.getComponentName());
+                }
             } break;
             }
         }
@@ -3019,6 +3031,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void applyUpdateVrModeLocked(ActivityRecord r) {
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
+    }
+
+    private void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(VR_MODE_APPLY_IF_NEEDED_MSG, enable ? 1 : 0, 0, r));
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -6537,6 +6554,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     // Some stack visibility might change (e.g. docked stack)
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                    applyVrModeIfNeededLocked(mFocusedActivity, true);
                 }
             }
         } finally {
@@ -20925,6 +20943,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 SleepTokenImpl token = new SleepTokenImpl(tag);
                 mSleepTokens.add(token);
                 updateSleepIfNeededLocked();
+                applyVrModeIfNeededLocked(mFocusedActivity, false);
                 return token;
             }
         }
