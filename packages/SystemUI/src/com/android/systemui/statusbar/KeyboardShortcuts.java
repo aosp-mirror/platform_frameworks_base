@@ -54,6 +54,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 
@@ -126,6 +128,8 @@ public final class KeyboardShortcuts {
     }
 
     public static void show(Context context, int deviceId) {
+        MetricsLogger.visible(context,
+                MetricsProto.MetricsEvent.KEYBOARD_SHORTCUTS_HELPER);
         synchronized (sLock) {
             if (sInstance != null && !sInstance.mContext.equals(context)) {
                 dismiss();
@@ -146,6 +150,8 @@ public final class KeyboardShortcuts {
     }
 
     public static void dismiss() {
+        MetricsLogger.hidden(sInstance.mContext,
+                MetricsProto.MetricsEvent.KEYBOARD_SHORTCUTS_HELPER);
         synchronized (sLock) {
             if (sInstance != null) {
                 sInstance.dismissKeyboardShortcuts();
