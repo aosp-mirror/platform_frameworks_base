@@ -99,6 +99,7 @@ public class SystemServicesProxy {
     static {
         sBitmapOptions = new BitmapFactory.Options();
         sBitmapOptions.inMutable = true;
+        sBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
     }
 
     final static List<String> sRecentsBlacklist;
