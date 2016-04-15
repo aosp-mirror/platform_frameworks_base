@@ -144,35 +144,42 @@ final class UiBot {
         String shareText = "Share with " + name;
         Log.v(TAG, "Waiting for ActivityChooser text: '" + shareText + "'");
         boolean gotIt = mDevice.wait(Until.hasObject(By.text(shareText)), mTimeout);
+        boolean justOnceHack = false;
 
         if (gotIt) {
             Log.v(TAG, "Found activity " + name + ", it's the default action");
-            // Clicks the "Just Once" button.
-            gotIt = mDevice
-                    .wait(Until.hasObject(By.res("android", "button_once")), mTimeout);
-            assertTrue("'Just Once' button not visible yet", gotIt);
-
-            UiObject justOnce = mDevice
-                    .findObject(new UiSelector().resourceId("android:id/button_once"));
-            assertTrue("'Just Once' button not found", justOnce.exists());
-
-            click(justOnce, "Just Once");
+            clickJustOnce();
         } else {
             // Since it's not, need to find it in the scrollable list...
             Log.v(TAG, "Activity " + name + " is not default action");
             UiScrollable activitiesList = new UiScrollable(new UiSelector().scrollable(true));
-
-            UiObject activity;
             try {
                 activitiesList.scrollForward();
-                activity = getVisibleObject(name);
             } catch (UiObjectNotFoundException e) {
-                throw new IllegalStateException("didn't find activity '" + name
-                        + "' on activities chooser", e);
+                // TODO: for some paranormal issue, the first time a test is run the scrollable
+                // activity list is displayed but calling scrollForwad() (or even isScrollable())
+                // throws a "UiObjectNotFoundException: UiSelector[SCROLLABLE=true]" exception
+                justOnceHack = true;
+                Log.d(TAG, "could not scroll forward", e);
             }
+            UiObject activity = getVisibleObject(name);
             // ... then select it.
             click(activity, name);
+            if (justOnceHack) {
+                clickJustOnce();
+            }
         }
+    }
+
+    private void clickJustOnce() {
+        boolean gotIt = mDevice.wait(Until.hasObject(By.res("android", "button_once")), mTimeout);
+        assertTrue("'Just Once' button not visible yet", gotIt);
+
+        UiObject justOnce = mDevice
+                .findObject(new UiSelector().resourceId("android:id/button_once"));
+        assertTrue("'Just Once' button not found", justOnce.exists());
+
+        click(justOnce, "Just Once");
     }
 
     public void pressBack() {
