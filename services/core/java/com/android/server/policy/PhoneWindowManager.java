@@ -733,7 +733,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
                     break;
                 case MSG_DISPATCH_SHOW_RECENTS:
-                    showRecentApps(false);
+                    showRecentApps(false, msg.arg1 != 0);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
                     showGlobalActionsInternal();
@@ -3623,17 +3623,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void showRecentApps() {
+    public void showRecentApps(boolean fromHome) {
         mHandler.removeMessages(MSG_DISPATCH_SHOW_RECENTS);
-        mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_RECENTS);
+        mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS, fromHome ? 1 : 0, 0).sendToTarget();
     }
 
-    private void showRecentApps(boolean triggeredFromAltTab) {
+    private void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
-                statusbar.showRecentApps(triggeredFromAltTab);
+                statusbar.showRecentApps(triggeredFromAltTab, fromHome);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException when showing recent apps", e);
