@@ -1501,22 +1501,22 @@ final class TaskRecord {
                 Math.min((int)(mTmpStableBounds.width() / density), serviceConfig.screenWidthDp);
         config.screenHeightDp =
                 Math.min((int)(mTmpStableBounds.height() / density), serviceConfig.screenHeightDp);
-        config.smallestScreenWidthDp = Math.min(config.screenWidthDp, config.screenHeightDp);
 
         // TODO: Orientation?
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
 
-        // For calculating screen layout, we need to use the non-decor inset screen area for the
-        // calculation for compatibility reasons, i.e. screen area without system bars that could
-        // never go away in Honeycomb.
+        // For calculating screen layout and smallest screen width, we need to use the non-decor
+        // inset screen area for the calculation for compatibility reasons, i.e. screen area without
+        // system bars that could never go away in Honeycomb.
         final int compatScreenWidthDp = (int)(mTmpNonDecorBounds.width() / density);
         final int compatScreenHeightDp = (int)(mTmpNonDecorBounds.height() / density);
         final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
         final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
-        final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
-        config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
+        config.smallestScreenWidthDp = Math.min(compatScreenHeightDp, compatScreenWidthDp);
+        config.screenLayout = Configuration.reduceScreenLayout(sl, longSize,
+                config.smallestScreenWidthDp);
         return config;
     }
 
