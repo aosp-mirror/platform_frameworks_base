@@ -225,6 +225,30 @@ public class TelecomManager {
             "android.telecom.extra.UNKNOWN_CALL_HANDLE";
 
     /**
+     * Optional extra for incoming and outgoing calls containing a long which specifies the time the
+     * call was created. This value is in milliseconds since boot.
+     * @hide
+     */
+    public static final String EXTRA_CALL_CREATED_TIME_MILLIS =
+            "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
+
+    /**
+     * Optional extra for incoming and outgoing calls containing a long which specifies the time
+     * telecom began routing the call. This value is in milliseconds since boot.
+     * @hide
+     */
+    public static final String EXTRA_CALL_TELECOM_ROUTING_START_TIME_MILLIS =
+            "android.telecom.extra.CALL_TELECOM_ROUTING_START_TIME_MILLIS";
+
+    /**
+     * Optional extra for incoming and outgoing calls containing a long which specifies the time
+     * telecom finished routing the call. This value is in milliseconds since boot.
+     * @hide
+     */
+    public static final String EXTRA_CALL_TELECOM_ROUTING_END_TIME_MILLIS =
+            "android.telecom.extra.CALL_TELECOM_ROUTING_END_TIME_MILLIS";
+
+    /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
      * containing the disconnect code.
      */
