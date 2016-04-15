@@ -184,8 +184,9 @@
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
 
-    <!-- Preferred width of the search view. -->
+    <!-- Preferred width and height of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
+    <dimen name="search_view_preferred_height">48dip</dimen>
 
     <!-- Dialog padding for round display -->
     <dimen name="alert_dialog_round_padding">27dip</dimen>
