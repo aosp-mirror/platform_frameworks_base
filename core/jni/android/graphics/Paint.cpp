@@ -815,10 +815,15 @@ namespace PaintGlue {
             }
 
             if (prevCp != kStartOfString &&
-                ((0xFE00 <= cp && cp <= 0xFE0F) || (0xE0100 <= cp && cp <= 0xE01EF)) &&
-                !MinikinUtils::hasVariationSelector(typeface, prevCp, cp)) {
-                // No font has a glyph for the code point and variation selector pair.
-                return false;
+                ((0xFE00 <= cp && cp <= 0xFE0F) || (0xE0100 <= cp && cp <= 0xE01EF))) {
+                bool hasVS = MinikinUtils::hasVariationSelector(typeface, prevCp, cp);
+                if (!hasVS) {
+                    // No font has a glyph for the code point and variation selector pair.
+                    return false;
+                } else if (nChars == 1 && i + 1 == str.size()) {
+                    // The string is just a codepoint and a VS, we have an authoritative answer
+                    return true;
+                }
             }
             nChars++;
             prevCp = cp;
