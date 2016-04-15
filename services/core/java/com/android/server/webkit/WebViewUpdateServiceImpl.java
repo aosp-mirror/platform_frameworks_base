@@ -217,6 +217,11 @@ public class WebViewUpdateServiceImpl {
             mSystemInterface = systemInterface;
         }
 
+        private static class WebViewPackageMissingException extends Exception {
+            public WebViewPackageMissingException(String message) { super(message); }
+            public WebViewPackageMissingException(Exception e) { super(e); }
+        }
+
         private static final int WAIT_TIMEOUT_MS = 4500; // KEY_DISPATCHING_TIMEOUT is 5000.
 
         // Keeps track of the number of running relro creations
@@ -269,7 +274,7 @@ public class WebViewUpdateServiceImpl {
                             if (updateWebView) {
                                 onWebViewProviderChanged(newPackage);
                             }
-                        } catch (WebViewFactory.MissingWebViewPackageException e) {
+                        } catch (WebViewPackageMissingException e) {
                             Slog.e(TAG, "Could not find valid WebView package to create " +
                                     "relro with " + e);
                         }
@@ -324,7 +329,7 @@ public class WebViewUpdateServiceImpl {
                     newPackage = findPreferredWebViewPackage();
                     providerChanged = (oldPackage == null)
                             || !newPackage.packageName.equals(oldPackage.packageName);
-                } catch (WebViewFactory.MissingWebViewPackageException e) {
+                } catch (WebViewPackageMissingException e) {
                     Slog.e(TAG, "Tried to change WebView provider but failed to fetch WebView " +
                             "package " + e);
                     // If we don't perform the user change but don't have an installed WebView
@@ -420,7 +425,7 @@ public class WebViewUpdateServiceImpl {
          * otherwise use the first package in the webview priority list that is valid.
          *
          */
-        private PackageInfo findPreferredWebViewPackage() {
+        private PackageInfo findPreferredWebViewPackage() throws WebViewPackageMissingException {
             ProviderAndPackageInfo[] providers = getValidWebViewPackagesAndInfos();
 
             String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider(mContext);
@@ -451,8 +456,7 @@ public class WebViewUpdateServiceImpl {
             }
 
             mAnyWebViewInstalled = false;
-            throw new WebViewFactory.MissingWebViewPackageException(
-                    "Could not find a loadable WebView package");
+            throw new WebViewPackageMissingException("Could not find a loadable WebView package");
         }
 
         public void notifyRelroCreationCompleted() {
@@ -523,7 +527,7 @@ public class WebViewUpdateServiceImpl {
                     try {
                         PackageInfo newPackage = findPreferredWebViewPackage();
                         onWebViewProviderChanged(newPackage);
-                    } catch (WebViewFactory.MissingWebViewPackageException e) {
+                    } catch (WebViewPackageMissingException e) {
                         // If we can't find any valid WebView package we are now in a state where
                         // mAnyWebViewInstalled is false, so loading WebView will be blocked and we
                         // should simply wait until we receive an intent declaring a new package was
