@@ -1189,7 +1189,9 @@ public final class HdmiControlService extends SystemService {
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                mRecordListenerRecord = null;
+                if (mRecordListenerRecord == this) {
+                    mRecordListenerRecord = null;
+                }
             }
         }
     }
@@ -1813,7 +1815,9 @@ public final class HdmiControlService extends SystemService {
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                mInputChangeListenerRecord = null;
+                if (mInputChangeListenerRecord == this) {
+                    mInputChangeListenerRecord = null;
+                }
             }
         }
     }
