@@ -932,8 +932,9 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
                     break;
                 }
 
-                if (image_data.thumbnail.length == 0) {
-                    // No thumbnail.
+                if (image_data.thumbnail.length == 0
+                        || image_data.thumbnail.format == ::piex::Image::kJpegCompressed) {
+                    // No thumbnail or non jpeg thumbnail.
                     break;
                 }
 
