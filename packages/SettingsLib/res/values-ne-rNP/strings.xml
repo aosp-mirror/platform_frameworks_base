@@ -296,9 +296,9 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"यो सुविधा प्रयोगात्मक छ र प्रदर्शनमा असर गर्न सक्छ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"लगभग <xliff:g id="TIME">%1$s</xliff:g> बाँकी छ"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> बाँकी छ"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"बाँकी समय <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - लगभग। <xliff:g id="TIME">%2$s</xliff:g> बायाँ"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> बाँकी छ"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"बाँकी समय <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पूर्ण नभए सम्म"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -322,7 +322,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"प्रशासकद्वारा सक्षम गरिएको छ"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"प्रशासकद्वारा असक्षम गरिएको छ"</string>
-    <string name="home" msgid="8263346537524314127">"गृह"</string>
+    <string name="home" msgid="3256884684164448244">"सेटिङहरूको गृहपृष्ठ"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> पहिले"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> बाँकी"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"सानो"</string>
@@ -331,4 +331,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"अझ ठूलो"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"सबैभन्दा ठूलो"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"अनुकूलन (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"मद्दत र प्रतिक्रिया"</string>
 </resources>

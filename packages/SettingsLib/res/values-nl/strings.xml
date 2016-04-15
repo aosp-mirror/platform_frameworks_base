@@ -147,7 +147,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB-foutopsporing"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Foutopsporingsmodus bij USB-verbinding"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Autorisatie USB-foutopsporing intrekken"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Snelkoppeling naar foutenrapport"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Snelle link naar foutenrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Een knop in het voedingsmenu weergeven om een foutenrapport te maken"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Scherm gaat nooit uit tijdens het opladen"</string>
@@ -322,7 +322,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ingesteld door beheerder"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Ingeschakeld door beheerder"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Uitgeschakeld door beheerder"</string>
-    <string name="home" msgid="8263346537524314127">"Startpagina"</string>
+    <string name="home" msgid="3256884684164448244">"Startpagina voor instellingen"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> geleden"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> resterend"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Klein"</string>
@@ -331,4 +331,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Groter"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Grootst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Aangepast (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Help en feedback"</string>
 </resources>
