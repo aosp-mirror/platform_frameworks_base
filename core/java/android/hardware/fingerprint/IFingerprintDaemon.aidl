@@ -35,4 +35,6 @@ interface IFingerprintDaemon {
     int closeHal();
     void init(IFingerprintDaemonCallback callback);
     int postEnroll();
+    int enumerate();
+    int cancelEnumeration();
 }
