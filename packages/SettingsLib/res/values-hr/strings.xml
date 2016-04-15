@@ -322,7 +322,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolira administrator"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Omogućio administrator"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Onemogućio administrator"</string>
-    <string name="home" msgid="8263346537524314127">"Početni zaslon"</string>
+    <string name="home" msgid="3256884684164448244">"Početni zaslon postavki"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"Prije <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Još <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Malo"</string>
@@ -331,6 +331,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Veće"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najveće"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Prilagođeno (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <!-- no translation found for help_feedback_label (6815040660801785649) -->
-    <skip />
+    <string name="help_feedback_label" msgid="6815040660801785649">"Pomoć i povratne informacije"</string>
 </resources>
