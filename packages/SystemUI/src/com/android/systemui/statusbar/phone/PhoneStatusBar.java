@@ -46,6 +46,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
@@ -1928,19 +1929,27 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     + " state=" + mState);
         }
 
-        Bitmap artworkBitmap = null;
+        Drawable artworkDrawable = null;
         if (mMediaMetadata != null) {
+            Bitmap artworkBitmap = null;
             artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
                 artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
                 // might still be null
             }
+            if (artworkBitmap != null) {
+                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
+            }
         }
-        if (ENABLE_LOCKSCREEN_WALLPAPER && artworkBitmap == null) {
-            artworkBitmap = mLockscreenWallpaper.getBitmap();
+        if (ENABLE_LOCKSCREEN_WALLPAPER && artworkDrawable == null) {
+            Bitmap lockWallpaper = mLockscreenWallpaper.getBitmap();
+            if (lockWallpaper != null) {
+                artworkDrawable = new LockscreenWallpaper.WallpaperDrawable(
+                        mBackdropBack.getResources(), lockWallpaper);
+            }
         }
 
-        final boolean hasArtwork = artworkBitmap != null;
+        final boolean hasArtwork = artworkDrawable != null;
 
         if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK) && mState != StatusBarState.SHADE
                 && mFingerprintUnlockController.getMode()
@@ -1985,7 +1994,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mBackdropBack.setBackgroundColor(0xFFFFFFFF);
                     mBackdropBack.setImageDrawable(new ColorDrawable(c));
                 } else {
-                    mBackdropBack.setImageBitmap(artworkBitmap);
+                    mBackdropBack.setImageDrawable(artworkDrawable);
                 }
                 if (mScrimSrcModeEnabled) {
                     mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
