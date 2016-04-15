@@ -628,15 +628,6 @@ public class UserManagerService extends IUserManager.Stub {
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(intent, parentHandle);
-
-        //TODO: remove once Launcher3 is updated.
-        Intent oldIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
-        oldIntent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
-        oldIntent.putExtra(Intent.EXTRA_USER, profileHandle);
-        oldIntent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
-        oldIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(oldIntent, parentHandle);
-
     }
 
     @Override
