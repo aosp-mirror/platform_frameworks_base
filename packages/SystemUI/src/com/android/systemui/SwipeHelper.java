@@ -51,11 +51,9 @@ public class SwipeHelper implements Gefingerpoken {
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
     private int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
-    private int MAX_DISMISS_VELOCITY = 2000; // dp/sec
+    private int MAX_DISMISS_VELOCITY = 4000; // dp/sec
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
 
-    public static float SWIPE_PROGRESS_FADE_START = 0f; // fraction of thumbnail width
-                                                 // where fade starts
     static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
                                               // beyond which swipe progress->0
     private float mMinSwipeProgress = 0f;
@@ -102,8 +100,7 @@ public class SwipeHelper implements Gefingerpoken {
         mFalsingThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.swipe_helper_falsing_threshold);
         mFalsingManager = FalsingManager.getInstance(context);
-        mFlingAnimationUtils = new FlingAnimationUtils(context,
-                MAX_ESCAPE_ANIMATION_DURATION / 1000f /* maxLengthSeconds */);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
     }
 
     public void setLongPressListener(LongPressListener listener) {
@@ -183,21 +180,23 @@ public class SwipeHelper implements Gefingerpoken {
         mMaxSwipeProgress = maxSwipeProgress;
     }
 
-    private float getSwipeProgressForOffset(View view) {
+    private float getSwipeProgressForOffset(View view, float translation) {
         float viewSize = getSize(view);
-        final float fadeSize = SWIPE_PROGRESS_FADE_END * viewSize;
-        float result = 1.0f;
-        float pos = getTranslation(view);
-        if (pos >= viewSize * SWIPE_PROGRESS_FADE_START) {
-            result = 1.0f - (pos - viewSize * SWIPE_PROGRESS_FADE_START) / fadeSize;
-        } else if (pos < viewSize * (1.0f - SWIPE_PROGRESS_FADE_START)) {
-            result = 1.0f + (viewSize * SWIPE_PROGRESS_FADE_START + pos) / fadeSize;
-        }
+        float result = Math.abs(translation / viewSize);
         return Math.min(Math.max(mMinSwipeProgress, result), mMaxSwipeProgress);
     }
 
+    private float getSwipeAlpha(float progress) {
+        return Math.min(0, Math.max(1, progress / SWIPE_PROGRESS_FADE_END));
+    }
+
     private void updateSwipeProgressFromOffset(View animView, boolean dismissable) {
-        float swipeProgress = getSwipeProgressForOffset(animView);
+        updateSwipeProgressFromOffset(animView, dismissable, getTranslation(animView));
+    }
+
+    private void updateSwipeProgressFromOffset(View animView, boolean dismissable,
+            float translation) {
+        float swipeProgress = getSwipeProgressForOffset(animView, translation);
         if (!mCallback.updateSwipeProgress(animView, dismissable, swipeProgress)) {
             if (FADE_OUT_DURING_SWIPE && dismissable) {
                 float alpha = swipeProgress;
@@ -208,7 +207,7 @@ public class SwipeHelper implements Gefingerpoken {
                         animView.setLayerType(View.LAYER_TYPE_NONE, null);
                     }
                 }
-                animView.setAlpha(getSwipeProgressForOffset(animView));
+                animView.setAlpha(getSwipeAlpha(swipeProgress));
             }
         }
         invalidateGlobalRegion(animView);
@@ -485,7 +484,7 @@ public class SwipeHelper implements Gefingerpoken {
      * view is being animated to dismiss or snap.
      */
     public void onTranslationUpdate(View animView, float value, boolean canBeDismissed) {
-        updateSwipeProgressFromOffset(animView, canBeDismissed);
+        updateSwipeProgressFromOffset(animView, canBeDismissed, value);
     }
 
     private void snapChildInstantly(final View view) {
@@ -600,7 +599,15 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     protected float getEscapeVelocity() {
-        return SWIPE_ESCAPE_VELOCITY * mDensityScale;
+        return getUnscaledEscapeVelocity() * mDensityScale;
+    }
+
+    protected float getUnscaledEscapeVelocity() {
+        return SWIPE_ESCAPE_VELOCITY;
+    }
+
+    protected long getMaxEscapeAnimDuration() {
+        return MAX_ESCAPE_ANIMATION_DURATION;
     }
 
     protected boolean swipedFarEnough() {

@@ -60,8 +60,7 @@ import java.util.List;
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     private static final int INACTIVE_POINTER_ID = -1;
-    private static final Interpolator STACK_TRANSFORM_INTERPOLATOR =
-            new PathInterpolator(0.73f, 0.33f, 0.42f, 0.85f);
+    private static final float CHALLENGING_SWIPE_ESCAPE_VELOCITY = 800f; // dp/sec
     // The min overscroll is the amount of task progress overscroll we want / the max overscroll
     // curve value below
     private static final float MAX_OVERSCROLL = 0.7f / 0.3f;
@@ -125,7 +124,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, context) {
             @Override
             protected float getSize(View v) {
-                return mSv.getWidth();
+                return getScaledDismissSize();
             }
 
             @Override
@@ -137,6 +136,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             protected void prepareSnapBackAnimation(View v, Animator anim) {
                 anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 mSwipeHelperAnimations.put(v, anim);
+            }
+
+            @Override
+            protected float getUnscaledEscapeVelocity() {
+                return CHALLENGING_SWIPE_ESCAPE_VELOCITY;
+            }
+
+            @Override
+            protected long getMaxEscapeAnimDuration() {
+                return 700;
             }
         };
         mSwipeHelper.setDisableHardwareLayers(true);
@@ -500,7 +509,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     @Override
     public boolean updateSwipeProgress(View v, boolean dismissable, float swipeProgress) {
-        updateTaskViewTransforms(getDismissFraction(v));
+        updateTaskViewTransforms(Interpolators.FAST_OUT_SLOW_IN.getInterpolation(swipeProgress));
         return true;
     }
 
@@ -616,13 +625,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     }
 
     /**
-     * Returns the fraction which we should interpolate the other task views based on the dismissal
-     * of this given task.
-     *
-     * TODO: We can interpolate this to adjust when the other tasks should respond to the dismissal
+     * Returns the scaled size used to calculate the dismiss fraction.
      */
-    private float getDismissFraction(View v) {
-        float fraction = Math.min(1f, Math.abs(v.getTranslationX() / mSv.getWidth()));
-        return STACK_TRANSFORM_INTERPOLATOR.getInterpolation(fraction);
+    private float getScaledDismissSize() {
+        return 1.5f * Math.max(mSv.getWidth(), mSv.getHeight());
     }
 }
