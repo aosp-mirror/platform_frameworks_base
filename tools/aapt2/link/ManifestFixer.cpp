@@ -136,6 +136,9 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
         return true;
     });
 
+    // Meta tags.
+    manifestAction[u"eat-comment"];
+
     // Uses-sdk actions.
     manifestAction[u"uses-sdk"].action([&](xml::Element* el) -> bool {
         if (mOptions.minSdkVersionDefault &&
@@ -168,7 +171,7 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
         return true;
     });
 
-    manifestAction[u"eat-comment"];
+    manifestAction[u"original-package"];
     manifestAction[u"protected-broadcast"];
     manifestAction[u"uses-permission"];
     manifestAction[u"permission"];
