@@ -454,11 +454,8 @@ public class TaskStackLayoutAlgorithm {
         mStackActionButtonRect.set(mStackRect.left, mStackRect.top - topMargin,
                 mStackRect.right, mStackRect.top + mFocusedTopPeekHeight);
 
-        // Anchor the task rect top aligned to the non-freeform stack rect
-        float aspect = (float) (windowRect.width() - (mSystemInsets.left + mSystemInsets.right)) /
-                (windowRect.height() - (mSystemInsets.top + mSystemInsets.bottom));
-        int minHeight = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
-        int height = (int) Math.min(mStackRect.width() / aspect, minHeight);
+        // Anchor the task rect top aligned to the stack rect
+        int height = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
         mTaskRect.set(mStackRect.left, mStackRect.top, mStackRect.right, mStackRect.top + height);
 
         // Short circuit here if the stack rects haven't changed so we don't do all the work below
