@@ -29,6 +29,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
+import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
 
@@ -36,6 +37,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 // TODO Enhance javadoc
 /**
@@ -132,7 +134,7 @@ public final class ShortcutInfo implements Parcelable {
     private String mText;
 
     @NonNull
-    private List<String> mCategories;
+    private ArraySet<String> mCategories;
 
     /**
      * Intent *with extras removed*.
@@ -192,8 +194,8 @@ public final class ShortcutInfo implements Parcelable {
         updateTimestamp();
     }
 
-    private <T> ArrayList<T> clone(List<T> source) {
-        return (source == null) ? null : new ArrayList<>(source);
+    private <T> ArraySet<T> clone(Set<T> source) {
+        return (source == null) ? null : new ArraySet<>(source);
     }
 
     /**
@@ -346,7 +348,7 @@ public final class ShortcutInfo implements Parcelable {
 
         private String mText;
 
-        private List<String> mCategories;
+        private Set<String> mCategories;
 
         private Intent mIntent;
 
@@ -433,7 +435,7 @@ public final class ShortcutInfo implements Parcelable {
          * @see #SHORTCUT_CATEGORY_CONVERSATION
          */
         @NonNull
-        public Builder setCategories(List<String> categories) {
+        public Builder setCategories(Set<String> categories) {
             mCategories = categories;
             return this;
         }
@@ -539,7 +541,7 @@ public final class ShortcutInfo implements Parcelable {
      * Return the categories.
      */
     @Nullable
-    public List<String> getCategories() {
+    public Set<String> getCategories() {
         return mCategories;
     }
 
@@ -733,8 +735,6 @@ public final class ShortcutInfo implements Parcelable {
         mIcon = source.readParcelable(cl);
         mTitle = source.readString();
         mText = source.readString();
-        mCategories = new ArrayList<>();
-        source.readStringList(mCategories);
         mIntent = source.readParcelable(cl);
         mIntentPersistableExtras = source.readParcelable(cl);
         mWeight = source.readInt();
@@ -743,6 +743,16 @@ public final class ShortcutInfo implements Parcelable {
         mFlags = source.readInt();
         mIconResourceId = source.readInt();
         mBitmapPath = source.readString();
+
+        int N = source.readInt();
+        if (N == 0) {
+            mCategories = null;
+        } else {
+            mCategories = new ArraySet<>(N);
+            for (int i = 0; i < N; i++) {
+                mCategories.add(source.readString().intern());
+            }
+        }
     }
 
     @Override
@@ -754,7 +764,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mIcon, flags);
         dest.writeString(mTitle);
         dest.writeString(mText);
-        dest.writeStringList(mCategories);
+
         dest.writeParcelable(mIntent, flags);
         dest.writeParcelable(mIntentPersistableExtras, flags);
         dest.writeInt(mWeight);
@@ -763,6 +773,16 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeInt(mFlags);
         dest.writeInt(mIconResourceId);
         dest.writeString(mBitmapPath);
+
+        if (mCategories != null) {
+            final int N = mCategories.size();
+            dest.writeInt(N);
+            for (int i = 0; i < N; i++) {
+                dest.writeString(mCategories.valueAt(i));
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     public static final Creator<ShortcutInfo> CREATOR =
@@ -859,7 +879,7 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public ShortcutInfo(
             @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
-            Icon icon, String title, String text, List<String> categories, Intent intent,
+            Icon icon, String title, String text, Set<String> categories, Intent intent,
             PersistableBundle intentPersistableExtras,
             int weight, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
