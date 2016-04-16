@@ -138,11 +138,11 @@ static jobject getRawAttributes(JNIEnv* env, SkStream* stream, bool returnThumbn
 
     if (image_data.thumbnail.length > 0
             && image_data.thumbnail.format == ::piex::Image::kJpegCompressed) {
-        map.add(String8("hasThumbnail"), String8("true"));
-        map.add(String8("thumbnailOffset"), String8::format("%d", image_data.thumbnail.offset));
-        map.add(String8("thumbnailLength"), String8::format("%d", image_data.thumbnail.length));
+        map.add(String8("HasThumbnail"), String8("true"));
+        map.add(String8("ThumbnailOffset"), String8::format("%d", image_data.thumbnail.offset));
+        map.add(String8("ThumbnailLength"), String8::format("%d", image_data.thumbnail.length));
     } else {
-        map.add(String8("hasThumbnail"), String8("false"));
+        map.add(String8("HasThumbnail"), String8("false"));
     }
 
     map.add(
@@ -307,7 +307,7 @@ static jobject getRawAttributes(JNIEnv* env, SkStream* stream, bool returnThumbn
                 (uint8_t*)thumbnailData.get());
         env->SetByteArrayRegion(
                 jthumbnailByteArray, 0, image_data.thumbnail.length, thumbnailData.get());
-        jstring jkey = env->NewStringUTF(String8("thumbnailData"));
+        jstring jkey = env->NewStringUTF(String8("ThumbnailData"));
         env->CallObjectMethod(hashMap, gFields.hashMap.put, jkey, jthumbnailByteArray);
         env->DeleteLocalRef(jkey);
         env->DeleteLocalRef(jthumbnailByteArray);
