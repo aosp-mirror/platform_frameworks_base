@@ -68,7 +68,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     // encompasses lights-out mode and other flags defined on View
     private int mSystemUiVisibility = 0;
     private int mFullscreenStackSysUiVisibility;
@@ -926,6 +926,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                                 + " pkg=" + tok.pkg
                                 + " token=" + tok.token);
             }
+            pw.println("  mCurrentUserId=" + mCurrentUserId);
         }
     }
 }
