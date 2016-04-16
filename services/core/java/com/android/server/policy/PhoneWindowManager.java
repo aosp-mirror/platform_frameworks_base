@@ -1465,14 +1465,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void requestTvPictureInPictureInternal() {
         try {
-            IStatusBarService statusbar = getStatusBarService();
+            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
             if (statusbar != null) {
                 statusbar.requestTvPictureInPicture();
             }
-        } catch (RemoteException|IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Cannot handle picture-in-picture key", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
         }
     }
 
@@ -3544,21 +3542,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                     .launchLegacyAssist(hint, UserHandle.myUserId(), args);
         } else {
-            try {
-                if (hint != null) {
-                    if (args == null) {
-                        args = new Bundle();
-                    }
-                    args.putBoolean(hint, true);
+            if (hint != null) {
+                if (args == null) {
+                    args = new Bundle();
                 }
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.startAssist(args);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when starting assist", e);
-                // re-acquire status bar service next time it is needed.
-                mStatusBarService = null;
+                args.putBoolean(hint, true);
+            }
+            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+            if (statusbar != null) {
+                statusbar.startAssist(args);
             }
         }
     }
@@ -3580,45 +3572,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void preloadRecentApps() {
         mPreloadedRecentApps = true;
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.preloadRecentApps();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when preloading recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.preloadRecentApps();
         }
     }
 
     private void cancelPreloadRecentApps() {
         if (mPreloadedRecentApps) {
             mPreloadedRecentApps = false;
-            try {
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.cancelPreloadRecentApps();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when cancelling recent apps preload", e);
-                // re-acquire status bar service next time it is needed.
-                mStatusBarService = null;
+            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+            if (statusbar != null) {
+                statusbar.cancelPreloadRecentApps();
             }
         }
     }
 
     private void toggleRecentApps() {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.toggleRecentApps();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when toggling recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.toggleRecentApps();
         }
     }
 
@@ -3630,40 +3604,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.showRecentApps(triggeredFromAltTab, fromHome);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when showing recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.showRecentApps(triggeredFromAltTab, fromHome);
         }
     }
 
     private void toggleKeyboardShortcutsMenu(int deviceId) {
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.toggleKeyboardShortcutsMenu(deviceId);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when showing keyboard shortcuts menu", e);
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.toggleKeyboardShortcutsMenu(deviceId);
         }
     }
 
     private void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHome) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.hideRecentApps(triggeredFromAltTab, triggeredFromHome);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when closing recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.hideRecentApps(triggeredFromAltTab, triggeredFromHome);
         }
     }
 
@@ -7465,13 +7423,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.setCurrentUser(newUserId);
         }
-        IStatusBarService statusBar = getStatusBarService();
+        StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
         if (statusBar != null) {
-            try {
-                statusBar.setCurrentUser(newUserId);
-            } catch (RemoteException e) {
-                // oh well
-            }
+            statusBar.setCurrentUser(newUserId);
         }
         setLastInputMethodWindowLw(null, null);
     }
