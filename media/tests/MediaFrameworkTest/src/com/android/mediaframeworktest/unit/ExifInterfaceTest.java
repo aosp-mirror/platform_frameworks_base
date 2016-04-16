@@ -97,7 +97,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         // Values.
         public final String make;
         public final String model;
-        public final float aperture;
+        public final float fNumber;
         public final String datetime;
         public final float exposureTime;
         public final float flash;
@@ -140,7 +140,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
             // Reads values.
             make = getString(typedArray, 7);
             model = getString(typedArray, 8);
-            aperture = typedArray.getFloat(9, 0f);
+            fNumber = typedArray.getFloat(9, 0f);
             datetime = getString(typedArray, 10);
             exposureTime = typedArray.getFloat(11, 0f);
             flash = typedArray.getFloat(12, 0f);
@@ -243,7 +243,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         assertEquals(expectedValue, intValue);
     }
 
-    private void assertFloatTag(ExifInterface exifInterface, String tag, float expectedValue) {
+    private void assertDoubleTag(ExifInterface exifInterface, String tag, float expectedValue) {
         double doubleValue = exifInterface.getAttributeDouble(tag, 0.0);
         assertEquals(expectedValue, doubleValue, DIFFERENCE_TOLERANCE);
     }
@@ -288,10 +288,10 @@ public class ExifInterfaceTest extends AndroidTestCase {
         // Checks values.
         assertStringTag(exifInterface, ExifInterface.TAG_MAKE, expectedValue.make);
         assertStringTag(exifInterface, ExifInterface.TAG_MODEL, expectedValue.model);
-        assertFloatTag(exifInterface, ExifInterface.TAG_F_NUMBER, expectedValue.aperture);
+        assertDoubleTag(exifInterface, ExifInterface.TAG_F_NUMBER, expectedValue.fNumber);
         assertStringTag(exifInterface, ExifInterface.TAG_DATETIME, expectedValue.datetime);
-        assertFloatTag(exifInterface, ExifInterface.TAG_EXPOSURE_TIME, expectedValue.exposureTime);
-        assertFloatTag(exifInterface, ExifInterface.TAG_FLASH, expectedValue.flash);
+        assertDoubleTag(exifInterface, ExifInterface.TAG_EXPOSURE_TIME, expectedValue.exposureTime);
+        assertDoubleTag(exifInterface, ExifInterface.TAG_FLASH, expectedValue.flash);
         assertStringTag(exifInterface, ExifInterface.TAG_FOCAL_LENGTH, expectedValue.focalLength);
         assertStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE, expectedValue.gpsAltitude);
         assertStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE_REF,
