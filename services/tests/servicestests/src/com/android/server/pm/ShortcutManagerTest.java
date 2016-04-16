@@ -5053,7 +5053,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setTitle("title")
                 .setText("text")
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
-                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+                .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setWeight(123)
                 .setExtras(pb)
                 .build();
@@ -5069,7 +5069,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals("content://a.b.c/", si.getIcon().getUriString());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5091,7 +5091,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(Icon.createWithContentUri("content://a.b.c/"))
                 .setTitle("title")
                 .setText("text")
-                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+                .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5110,7 +5110,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals("content://a.b.c/", si.getIcon().getUriString());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5128,7 +5128,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5147,7 +5147,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getWeight());
         assertEquals(1, si.getExtras().getInt("k"));
@@ -5226,7 +5226,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(Icon.createWithContentUri("content://a.b.c/"))
                 .setTitle("title")
                 .setText("text")
-                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+                .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5263,15 +5263,15 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setCategories(list()).build());
+                .setCategories(set()).build());
         assertEquals("text", si.getText());
-        assertEquals(list(), si.getCategories());
+        assertEquals(set(), si.getCategories());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setCategories(list("x")).build());
+                .setCategories(set("x")).build());
         assertEquals("text", si.getText());
-        assertEquals(list("x"), si.getCategories());
+        assertEquals(set("x"), si.getCategories());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -5328,7 +5328,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(bmp32x32)
                 .setTitle("title")
                 .setText("text")
-                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+                .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5355,7 +5355,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5381,7 +5381,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(bmp32x32)
                 .setTitle("title")
                 .setText("text")
-                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+                .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5407,7 +5407,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
-        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
