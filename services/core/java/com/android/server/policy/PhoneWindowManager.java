@@ -7465,9 +7465,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.setCurrentUser(newUserId);
         }
-        if (mStatusBarService != null) {
+        IStatusBarService statusBar = getStatusBarService();
+        if (statusBar != null) {
             try {
-                mStatusBarService.setCurrentUser(newUserId);
+                statusBar.setCurrentUser(newUserId);
             } catch (RemoteException e) {
                 // oh well
             }
