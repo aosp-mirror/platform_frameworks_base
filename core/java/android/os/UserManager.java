@@ -48,7 +48,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages users and user details on a multi-user system.
+ * Manages users and user details on a multi-user system. There are two major categories of
+ * users: fully customizable users with their own login, and managed profiles that share a workspace
+ * with a related user.
+ * <p>
+ * Users are different from accounts, which are managed by
+ * {@link AccountManager}. Each user can have their own set of accounts.
+ * <p>
+ * See {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} for more on managed profiles.
  */
 public class UserManager {
 
@@ -662,9 +669,9 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the system supports multiple users.
-     * @return true if multiple users can be created by user, false if it is a single user device.
-     * @hide
+     * Returns whether this device supports multiple users with their own login and customizable
+     * space.
+     * @return whether the device supports multiple users.
      */
     public static boolean supportsMultipleUsers() {
         return getMaxSupportedUsers() > 1
@@ -1237,22 +1244,24 @@ public class UserManager {
     }
 
     /**
-     * Returns an intent to create a user for the provided name and email address. The name
-     * and email address will be used when the setup process for the new user is started.
-     * If this device does not support multiple users, null is returned.
-     * <p/>
+     * Returns an intent to create a user for the provided name and account name. The name
+     * and account name will be used when the setup process for the new user is started.
+     * <p>
      * The intent should be launched using startActivityForResult and the return result will
      * indicate if the user consented to adding a new user and if the operation succeeded. Any
      * errors in creating the user will be returned in the result code. If the user cancels the
      * request, the return result will be {@link Activity#RESULT_CANCELED}. On success, the
      * result code will be {@link Activity#RESULT_OK}.
-     * <p/>
+     * <p>
+     * Use {@link #supportsMultipleUsers()} to first check if the device supports this operation
+     * at all.
+     * <p>
      * The new user is created but not initialized. After switching into the user for the first
      * time, the preferred user name and account information are used by the setup process for that
      * user.
      *
      * @param userName Optional name to assign to the user.
-     * @param accountName Optional email address that will be used by the setup wizard to initialize
+     * @param accountName Optional account name that will be used by the setup wizard to initialize
      *                    the user.
      * @param accountType Optional account type for the account to be created. This is required
      *                    if the account name is specified.
@@ -1260,17 +1269,14 @@ public class UserManager {
      *                       new user via {@link AccountManager#addAccount(String, String, String[],
      *                       Bundle, android.app.Activity, android.accounts.AccountManagerCallback,
      *                       Handler)}.
-     * @return An Intent that can be launched from an Activity or null if creating users is not
-     *         supported on this device.
+     * @return An Intent that can be launched from an Activity.
      * @see #USER_CREATION_FAILED_NOT_PERMITTED
      * @see #USER_CREATION_FAILED_NO_MORE_USERS
+     * @see #supportsMultipleUsers
      */
     public static Intent createUserCreationIntent(@Nullable String userName,
             @Nullable String accountName,
             @Nullable String accountType, @Nullable PersistableBundle accountOptions) {
-        if (!supportsMultipleUsers() || getMaxSupportedUsers() < 2) {
-            return null;
-        }
         Intent intent = new Intent(ACTION_CREATE_USER);
         if (userName != null) {
             intent.putExtra(EXTRA_USER_NAME, userName);
