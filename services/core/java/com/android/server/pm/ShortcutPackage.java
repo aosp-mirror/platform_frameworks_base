@@ -40,6 +40,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -493,7 +494,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         {
-            final List<String> cat = si.getCategories();
+            final Set<String> cat = si.getCategories();
             if (cat != null && cat.size() > 0) {
                 out.startTag(null, TAG_CATEGORIES);
                 XmlUtils.writeStringArrayXml(cat.toArray(new String[cat.size()]),
@@ -567,7 +568,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int flags;
         int iconRes;
         String bitmapPath;
-        String[] categories = null;
+        ArraySet<String> categories = null;
 
         id = ShortcutService.parseStringAttribute(parser, ATTR_ID);
         activityComponent = ShortcutService.parseComponentNameAttribute(parser,
@@ -607,15 +608,21 @@ class ShortcutPackage extends ShortcutPackageItem {
                 case TAG_STRING_ARRAY_XMLUTILS:
                     if (NAME_CATEGORIES.equals(ShortcutService.parseStringAttribute(parser,
                             ATTR_NAME_XMLUTILS))) {
-                        categories = XmlUtils.readThisStringArrayXml(parser, TAG_STRING_ARRAY_XMLUTILS, null);
+                        final String[] ar = XmlUtils.readThisStringArrayXml(
+                                parser, TAG_STRING_ARRAY_XMLUTILS, null);
+                        categories = new ArraySet<>(ar.length);
+                        for (int i = 0; i < ar.length; i++) {
+                            categories.add(ar[i]);
+                        }
                     }
                     continue;
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
+
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon =*/ null, title, text,
-                (categories == null ? null : Arrays.asList(categories)), intent,
+                categories, intent,
                 intentPersistableExtras, weight, extras, lastChangedTimestamp, flags,
                 iconRes, bitmapPath);
     }
