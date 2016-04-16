@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -63,6 +64,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -2535,7 +2537,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public View addStartingWindow(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags) {
+            int icon, int logo, int windowFlags, Configuration overrideConfig) {
         if (!SHOW_STARTING_ANIMATIONS) {
             return null;
         }
@@ -2560,10 +2562,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            PhoneWindow win = new PhoneWindow(context);
+            if (overrideConfig != null && overrideConfig != EMPTY) {
+                if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow: creating context based"
+                        + " on overrideConfig" + overrideConfig + " for starting window");
+                final Context overrideContext = context.createConfigurationContext(overrideConfig);
+                overrideContext.setTheme(theme);
+                final TypedArray typedArray = overrideContext.obtainStyledAttributes(
+                        com.android.internal.R.styleable.Window);
+                final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
+                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
+                    // We want to use the windowBackground for the override context if it is
+                    // available, otherwise we use the default one to make sure a themed starting
+                    // window is displayed for the app.
+                    if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow: apply overrideConfig"
+                            + overrideConfig + " to starting window resId=" + resId);
+                    context = overrideContext;
+                }
+            }
+
+            final PhoneWindow win = new PhoneWindow(context);
             win.setIsStartingWindow(true);
 
-            Resources r = context.getResources();
+            final Resources r = context.getResources();
             win.setTitle(r.getText(labelRes, nonLocalizedLabel));
 
             win.setType(
@@ -2616,10 +2636,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
             view = win.getDecorView();
 
-            if (DEBUG_STARTING_WINDOW) Slog.d(
-                TAG, "Adding starting window for " + packageName
-                + " / " + appToken + ": "
-                + (view.getParent() != null ? view : null));
+            if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Adding starting window for "
+                + packageName + " / " + appToken + ": " + (view.getParent() != null ? view : null));
 
             wm.addView(view, params);
 
