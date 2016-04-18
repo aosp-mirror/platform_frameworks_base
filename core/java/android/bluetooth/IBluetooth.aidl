@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.OobData;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
+import android.os.ResultReceiver;
 
 /**
  * System private API for talking with the Bluetooth service.
@@ -103,6 +104,15 @@ interface IBluetooth
     boolean isActivityAndEnergyReportingSupported();
     void getActivityEnergyInfoFromController();
     BluetoothActivityEnergyInfo reportActivityInfo();
+
+    /**
+     * Requests the controller activity info asynchronously.
+     * The implementor is expected to reply with the
+     * {@link android.bluetooth.BluetoothActivityEnergyInfo} object placed into the Bundle with the
+     * key {@link android.os.BatteryStats#RESULT_RECEIVER_CONTROLLER_KEY}.
+     * The result code is ignored.
+     */
+    oneway void requestActivityInfo(in ResultReceiver result);
 
     void onLeServiceUp();
     void onBrEdrDown();

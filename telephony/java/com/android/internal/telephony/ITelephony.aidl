@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.net.Uri;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -1027,9 +1028,13 @@ interface ITelephony {
     String getLocaleFromDefaultSim();
 
     /**
-     * Return the modem activity info.
+     * Requests the modem activity info asynchronously.
+     * The implementor is expected to reply with the
+     * {@link android.telephony.ModemActivityInfo} object placed into the Bundle with the key
+     * {@link android.telephony.TelephonyManager#MODEM_ACTIVITY_RESULT_KEY}.
+     * The result code is ignored.
      */
-    ModemActivityInfo getModemActivityInfo();
+    oneway void requestModemActivityInfo(in ResultReceiver result);
 
     /**
      * Get the service state on specified subscription

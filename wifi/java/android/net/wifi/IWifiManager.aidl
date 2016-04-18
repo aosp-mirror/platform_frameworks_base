@@ -27,8 +27,8 @@ import android.net.Network;
 
 import android.net.DhcpInfo;
 
-
 import android.os.Messenger;
+import android.os.ResultReceiver;
 import android.os.WorkSource;
 
 /**
@@ -41,6 +41,14 @@ interface IWifiManager
     int getSupportedFeatures();
 
     WifiActivityEnergyInfo reportActivityInfo();
+
+    /**
+     * Requests the controller activity info asynchronously.
+     * The implementor is expected to reply with the
+     * {@link android.net.wifi.WifiActivityEnergyInfo} object placed into the Bundle with the key
+     * {@link android.os.BatteryStats#RESULT_RECEIVER_CONTROLLER_KEY}. The result code is ignored.
+     */
+    oneway void requestActivityInfo(in ResultReceiver result);
 
     List<WifiConfiguration> getConfiguredNetworks();
 
