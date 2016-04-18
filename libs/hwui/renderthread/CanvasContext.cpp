@@ -356,9 +356,13 @@ void CanvasContext::draw() {
 
 #if HWUI_NEW_OPS
     auto& caches = Caches::getInstance();
-    FrameBuilder frameBuilder(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
-            mRenderNodes, mLightGeometry, mContentDrawBounds, caches);
+    FrameBuilder frameBuilder(dirty, frame.width(), frame.height(), mLightGeometry, caches);
+
+    frameBuilder.deferLayers(mLayerUpdateQueue);
     mLayerUpdateQueue.clear();
+
+    frameBuilder.deferRenderNodeScene(mRenderNodes, mContentDrawBounds);
+
     BakedOpRenderer renderer(caches, mRenderThread.renderState(),
             mOpaque, mLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
@@ -623,8 +627,7 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
 #if HWUI_NEW_OPS
     static const std::vector< sp<RenderNode> > emptyNodeList;
     auto& caches = Caches::getInstance();
-    FrameBuilder frameBuilder(mLayerUpdateQueue, SkRect::MakeWH(1, 1), 1, 1,
-            emptyNodeList, mLightGeometry, mContentDrawBounds, caches);
+    FrameBuilder frameBuilder(mLayerUpdateQueue, mLightGeometry, caches);
     mLayerUpdateQueue.clear();
     BakedOpRenderer renderer(caches, mRenderThread.renderState(),
             mOpaque, mLightInfo);

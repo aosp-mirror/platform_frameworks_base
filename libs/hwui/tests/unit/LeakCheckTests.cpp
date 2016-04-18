@@ -26,7 +26,6 @@
 using namespace android;
 using namespace android::uirenderer;
 
-const LayerUpdateQueue sEmptyLayerUpdateQueue;
 const FrameBuilder::LightGeometry sLightGeometery = { {100, 100, 100}, 50};
 const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
@@ -43,8 +42,9 @@ RENDERTHREAD_TEST(LeakCheck, saveLayer_overdrawRejection) {
     RenderState& renderState = renderThread.renderState();
     Caches& caches = Caches::getInstance();
 
-    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
-            TestUtils::createSyncedNodeList(node), sLightGeometery, Caches::getInstance());
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometery, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
     BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
@@ -59,8 +59,9 @@ RENDERTHREAD_TEST(LeakCheck, saveLayerUnclipped_simple) {
     RenderState& renderState = renderThread.renderState();
     Caches& caches = Caches::getInstance();
 
-    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            TestUtils::createSyncedNodeList(node), sLightGeometery, Caches::getInstance());
+    FrameBuilder frameBuilder(SkRect::MakeWH(200, 200), 200, 200,
+            sLightGeometery, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
     BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }

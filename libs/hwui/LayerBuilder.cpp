@@ -244,7 +244,8 @@ void LayerBuilder::onDeferOp(LinearAllocator& allocator, const BakedOpState* bak
 
         if (CC_UNLIKELY(activeUnclippedSaveLayers.empty()
                 && bakedState->computedState.opaqueOverClippedBounds
-                && bakedState->computedState.clippedBounds.contains(repaintRect))) {
+                && bakedState->computedState.clippedBounds.contains(repaintRect)
+                && !Properties::debugOverdraw)) {
             // discard all deferred drawing ops, since new one will occlude them
             clear();
         }
