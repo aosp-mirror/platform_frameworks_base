@@ -714,20 +714,24 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
+
+        // Called only by Telecomm to communicate call state across different phone accounts. So
+        // there is no need to add a valid subId or slotId.
         broadcastCallStateChanged(state, incomingNumber,
+                SubscriptionManager.INVALID_PHONE_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
-    public void notifyCallStateForSubscriber(int subId, int state, String incomingNumber) {
+    public void notifyCallStateForPhoneId(int phoneId, int subId, int state,
+                String incomingNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCallStateForSubscriber: subId=" + subId
+            log("notifyCallStateForPhoneId: subId=" + subId
                 + " state=" + state + " incomingNumber=" + incomingNumber);
         }
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
                 mCallState[phoneId] = state;
                 mCallIncomingNumber[phoneId] = incomingNumber;
@@ -746,7 +750,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastCallStateChanged(state, incomingNumber, subId);
+        broadcastCallStateChanged(state, incomingNumber, phoneId, subId);
     }
 
     public void notifyServiceStateForPhoneId(int phoneId, int subId, ServiceState state) {
@@ -788,31 +792,27 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastServiceStateChanged(state, subId);
+        broadcastServiceStateChanged(state, phoneId, subId);
     }
 
-    public void notifySignalStrength(SignalStrength signalStrength) {
-        notifySignalStrengthForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                signalStrength);
-    }
-
-    public void notifySignalStrengthForSubscriber(int subId, SignalStrength signalStrength) {
+    public void notifySignalStrengthForPhoneId(int phoneId, int subId,
+                SignalStrength signalStrength) {
         if (!checkNotifyPermission("notifySignalStrength()")) {
             return;
         }
         if (VDBG) {
-            log("notifySignalStrengthForSubscriber: subId=" + subId
-                + " signalStrength=" + signalStrength);
-            toStringLogSSC("notifySignalStrengthForSubscriber");
+            log("notifySignalStrengthForPhoneId: subId=" + subId
+                +" phoneId=" + phoneId + " signalStrength=" + signalStrength);
+            toStringLogSSC("notifySignalStrengthForPhoneId");
         }
+
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                if (VDBG) log("notifySignalStrengthForSubscriber: valid phoneId=" + phoneId);
+                if (VDBG) log("notifySignalStrengthForPhoneId: valid phoneId=" + phoneId);
                 mSignalStrength[phoneId] = signalStrength;
                 for (Record r : mRecords) {
                     if (VDBG) {
-                        log("notifySignalStrengthForSubscriber: r=" + r + " subId=" + subId
+                        log("notifySignalStrengthForPhoneId: r=" + r + " subId=" + subId
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
                     if (r.matchPhoneStateListenerEvent(
@@ -820,7 +820,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG) {
-                                log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
+                                log("notifySignalStrengthForPhoneId: callback.onSsS r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " ss=" + signalStrength);
                             }
@@ -835,7 +835,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
                             if (DBG) {
-                                log("notifySignalStrengthForSubscriber: callback.onSS r=" + r
+                                log("notifySignalStrengthForPhoneId: callback.onSS r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " gsmSS=" + gsmSignalStrength + " ss=" + ss);
                             }
@@ -846,11 +846,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                log("notifySignalStrengthForSubscriber: invalid phoneId=" + phoneId);
+                log("notifySignalStrengthForPhoneId: invalid phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
-        broadcastSignalStrengthChanged(signalStrength, subId);
+        broadcastSignalStrengthChanged(signalStrength, phoneId, subId);
     }
 
     @Override
@@ -1347,7 +1347,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     // the legacy intent broadcasting
     //
 
-    private void broadcastServiceStateChanged(ServiceState state, int subId) {
+    private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneState(state.getState());
@@ -1363,10 +1363,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtras(data);
         // Pass the subscription along with the intent.
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int subId) {
+    private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,
+            int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneSignalStrength(signalStrength);
@@ -1382,6 +1384,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         signalStrength.fillInNotifierBundle(data);
         intent.putExtras(data);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
@@ -1391,7 +1394,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * can be {@code SubscriptionManager.INVALID_SUBSCRIPTION_ID}, in which case we send
      * a global state change broadcast ({@code TelephonyManager.ACTION_PHONE_STATE_CHANGED}).
      */
-    private void broadcastCallStateChanged(int state, String incomingNumber, int subId) {
+    private void broadcastCallStateChanged(int state, String incomingNumber, int phoneId,
+                int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
@@ -1417,6 +1421,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             intent.setAction(PhoneConstants.ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED);
             intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        }
+        // If the phoneId is invalid, the broadcast is for overall call state.
+        if (phoneId != SubscriptionManager.INVALID_PHONE_INDEX) {
+            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         }
 
         // Send broadcast twice, once for apps that have PRIVILEGED permission and once for those
