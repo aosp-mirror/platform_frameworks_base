@@ -107,6 +107,7 @@ public class ApfFilter {
     private static final boolean VDBG = false;
 
     private static final int ETH_HEADER_LEN = 14;
+    private static final int ETH_DEST_ADDR_OFFSET = 0;
     private static final int ETH_ETHERTYPE_OFFSET = 12;
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS = new byte[]{
             (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
@@ -582,7 +583,6 @@ public class ApfFilter {
      * DROP_LABEL or PASS_LABEL and does not fall off the end.
      * Preconditions:
      *  - Packet being filtered is IPv4
-     *  - R1 is initialized to 0
      */
     @GuardedBy("this")
     private void generateIPv4FilterLocked(ApfGenerator gen) throws IllegalInstructionException {
@@ -605,9 +605,8 @@ public class ApfFilter {
 
         // Drop all broadcasts besides DHCP addressed to us
         // If not a broadcast packet, pass
-        // NOTE: Relies on R1 being initialized to 0 which is the offset of the ethernet
-        //       destination MAC address
-        gen.addJumpIfBytesNotEqual(Register.R1, ETH_BROADCAST_MAC_ADDRESS, gen.PASS_LABEL);
+        gen.addLoadImmediate(Register.R0, ETH_DEST_ADDR_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, ETH_BROADCAST_MAC_ADDRESS, gen.PASS_LABEL);
         // If not UDP, drop
         gen.addLoad8(Register.R0, IPV4_PROTOCOL_OFFSET);
         gen.addJumpIfR0NotEquals(IPPROTO_UDP, gen.DROP_LABEL);
