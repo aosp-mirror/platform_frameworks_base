@@ -8905,7 +8905,7 @@ public class Intent implements Parcelable, Cloneable {
             } else if (ATTR_COMPONENT.equals(attrName)) {
                 intent.setComponent(ComponentName.unflattenFromString(attrValue));
             } else if (ATTR_FLAGS.equals(attrName)) {
-                intent.setFlags(Integer.valueOf(attrValue, 16));
+                intent.setFlags(Integer.parseInt(attrValue, 16));
             } else {
                 Log.e("Intent", "restoreFromXml: unknown attribute=" + attrName);
             }

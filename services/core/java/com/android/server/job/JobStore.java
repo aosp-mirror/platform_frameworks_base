@@ -486,7 +486,7 @@ public class JobStore {
                 final List<JobStatus> jobs = new ArrayList<JobStatus>();
                 // Read in version info.
                 try {
-                    int version = Integer.valueOf(parser.getAttributeValue(null, "version"));
+                    int version = Integer.parseInt(parser.getAttributeValue(null, "version"));
                     if (version != JOBS_FILE_VERSION) {
                         Slog.d(TAG, "Invalid version number, aborting jobs file read.");
                         return null;
@@ -534,14 +534,14 @@ public class JobStore {
             try {
                 jobBuilder = buildBuilderFromXml(parser);
                 jobBuilder.setPersisted(true);
-                uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
+                uid = Integer.parseInt(parser.getAttributeValue(null, "uid"));
 
                 String val = parser.getAttributeValue(null, "priority");
                 if (val != null) {
-                    jobBuilder.setPriority(Integer.valueOf(val));
+                    jobBuilder.setPriority(Integer.parseInt(val));
                 }
                 val = parser.getAttributeValue(null, "sourceUserId");
-                sourceUserId = val == null ? -1 : Integer.valueOf(val);
+                sourceUserId = val == null ? -1 : Integer.parseInt(val);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
@@ -684,7 +684,7 @@ public class JobStore {
 
         private JobInfo.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {
             // Pull out required fields from <job> attributes.
-            int jobId = Integer.valueOf(parser.getAttributeValue(null, "jobid"));
+            int jobId = Integer.parseInt(parser.getAttributeValue(null, "jobid"));
             String packageName = parser.getAttributeValue(null, "package");
             String className = parser.getAttributeValue(null, "class");
             ComponentName cname = new ComponentName(packageName, className);
@@ -720,7 +720,7 @@ public class JobStore {
             if (val != null) {
                 long initialBackoff = Long.valueOf(val);
                 val = parser.getAttributeValue(null, "backoff-policy");
-                int backoffPolicy = Integer.valueOf(val);  // Will throw NFE which we catch higher up.
+                int backoffPolicy = Integer.parseInt(val);  // Will throw NFE which we catch higher up.
                 jobBuilder.setBackoffCriteria(initialBackoff, backoffPolicy);
             }
         }

@@ -428,7 +428,7 @@ public final class NfcFCardEmulation {
             return false;
         }
         try {
-            Integer.valueOf(systemCode, 16);
+            Integer.parseInt(systemCode, 16);
         } catch (NumberFormatException e) {
             Log.e(TAG, "System Code " + systemCode + " is not a valid System Code.");
             return false;

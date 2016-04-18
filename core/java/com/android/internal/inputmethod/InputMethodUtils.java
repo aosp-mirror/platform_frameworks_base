@@ -972,7 +972,7 @@ public class InputMethodUtils {
         private int getInt(final String key, final int defaultValue) {
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.valueOf(result) : 0;
+                return result != null ? Integer.parseInt(result) : 0;
             }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
@@ -1273,7 +1273,7 @@ public class InputMethodUtils {
                             if (s.equals(subtypeHashCode)) {
                                 // If both imeId and subtypeId are enabled, return subtypeId.
                                 try {
-                                    final int hashCode = Integer.valueOf(subtypeHashCode);
+                                    final int hashCode = Integer.parseInt(subtypeHashCode);
                                     // Check whether the subtype id is valid or not
                                     if (isValidSubtypeId(imi, hashCode)) {
                                         return s;
