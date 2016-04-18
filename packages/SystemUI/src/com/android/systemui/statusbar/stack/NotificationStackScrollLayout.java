@@ -54,7 +54,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
@@ -353,7 +352,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mExpandHelper.setScrollAdapter(this);
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setLongPressListener(mLongPressListener);
-        mStackScrollAlgorithm = SystemUIFactory.getInstance().createStackScrollAlgorithm(context);
+        mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         initView(context);
         setWillNotDraw(false);
         if (DEBUG) {
@@ -2654,6 +2653,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         * drag mode.
         */
         return mIsBeingDragged;
+    }
+
+    protected StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
+        return new StackScrollAlgorithm(context);
     }
 
     /**
