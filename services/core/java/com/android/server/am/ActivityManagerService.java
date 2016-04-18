@@ -20669,7 +20669,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener) {
-        return mUserController.unlockUser(userId, token, secret, new ProgressReporter(0, listener));
+        return mUserController.unlockUser(userId, token, secret, listener);
     }
 
     @Override
