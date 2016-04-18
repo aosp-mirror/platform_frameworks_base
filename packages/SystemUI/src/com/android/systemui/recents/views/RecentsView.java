@@ -92,7 +92,7 @@ public class RecentsView extends FrameLayout {
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
     private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
 
-    private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 150;
+    private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 134;
     private static final int HIDE_STACK_ACTION_BUTTON_DURATION = 100;
 
     private TaskStack mStack;
@@ -464,6 +464,15 @@ public class RecentsView extends FrameLayout {
                 true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
                 TaskStack.DockState.NONE.viewState.hintTextAlpha,
                 true /* animateAlpha */, false /* animateBounds */);
+
+        // Temporarily hide the stack action button without changing visibility
+        if (mStackActionButton != null) {
+            mStackActionButton.animate()
+                    .alpha(0f)
+                    .setDuration(HIDE_STACK_ACTION_BUTTON_DURATION)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .start();
+        }
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
@@ -545,6 +554,15 @@ public class RecentsView extends FrameLayout {
             // Animate the overlay alpha back to 0
             updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
                     true /* animateAlpha */, false /* animateBounds */);
+        }
+
+        // Show the stack action button again without changing visibility
+        if (mStackActionButton != null) {
+            mStackActionButton.animate()
+                    .alpha(1f)
+                    .setDuration(SHOW_STACK_ACTION_BUTTON_DURATION)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .start();
         }
     }
 
@@ -733,8 +751,9 @@ public class RecentsView extends FrameLayout {
                     viewState.dockAreaOverlay.setCallback(this);
                     viewState.dockAreaOverlay.setBounds(bounds);
                 }
-                viewState.startAnimation(bounds, alpha, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
-                        Interpolators.ALPHA_IN, animateAlpha, animateBounds);
+                viewState.startAnimation(bounds, areaAlpha, hintAlpha,
+                        DOCK_AREA_OVERLAY_TRANSITION_DURATION, Interpolators.ALPHA_IN,
+                        animateAlpha, animateBounds);
             }
         }
     }
