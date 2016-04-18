@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
@@ -184,7 +185,7 @@ public class DisplayListCanvas extends Canvas {
      * any references to the functor, just that the reference from this specific
      * canvas's display list has been released.
      */
-    public void drawGLFunctor2(long drawGLFunctor, Runnable releasedCallback) {
+    public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
 
