@@ -105,8 +105,10 @@ static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobje
         jlong canvasPtr, jlong functorPtr, jobject releasedCallback) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    sp<GlFunctorReleasedCallbackBridge> bridge(new GlFunctorReleasedCallbackBridge(
-            env, releasedCallback));
+    sp<GlFunctorReleasedCallbackBridge> bridge;
+    if (releasedCallback) {
+        bridge = new GlFunctorReleasedCallbackBridge(env, releasedCallback);
+    }
     canvas->callDrawGLFunction(functor, bridge.get());
 }
 
