@@ -2608,7 +2608,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = containingFrame.height();
         final Task task = getTask();
         final boolean nonFullscreenTask = isInMultiWindowMode();
-        final boolean fitToDisplay = task != null && !nonFullscreenTask && !layoutInParentFrame();
+        final boolean fitToDisplay = (task == null || !nonFullscreenTask) && !layoutInParentFrame();
         float x, y;
         int w,h;
 
