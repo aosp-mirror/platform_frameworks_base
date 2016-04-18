@@ -272,6 +272,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     public void setTiles(Collection<QSTile<?>> tiles) {
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
+            record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
         for (QSTile<?> tile : tiles) {
@@ -323,6 +324,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             }
         };
         r.tile.addCallback(callback);
+        r.callback = callback;
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -506,6 +508,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         public QSTile<?> tile;
         public QSTileBaseView tileView;
         public boolean scanState;
+        public QSTile.Callback callback;
     }
 
     public interface Callback {
