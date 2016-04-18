@@ -1163,14 +1163,6 @@ public final class Display {
         public HdrCapabilities() {
         }
 
-        public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
-                float maxAverageLuminance, float minLuminance) {
-            mSupportedHdrTypes = supportedHdrTypes;
-            mMaxLuminance = maxLuminance;
-            mMaxAverageLuminance = maxAverageLuminance;
-            mMinLuminance = minLuminance;
-        }
-
         /**
          * Gets the supported HDR types of this display.
          * Returns empty array if HDR is not supported by the display.
