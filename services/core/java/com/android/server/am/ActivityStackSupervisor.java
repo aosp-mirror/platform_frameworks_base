@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.Manifest;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -29,6 +30,8 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IActivityManager.WaitResult;
+import android.app.KeyguardManager;
+import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -37,6 +40,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -166,6 +170,7 @@ import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -431,6 +436,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * Set of tasks that are in resizing mode during an app transition to fill the "void".
      */
     private final ArraySet<Integer> mResizingTasksDuringAnimation = new ArraySet<>();
+
+    /**
+     * Is dock currently minimized.
+     */
+    boolean mIsDockMinimized;
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -716,10 +726,44 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
-    boolean isFocusedUserLockedProfile() {
-        final int userId = mFocusedStack.topRunningActivityLocked().userId;
-        return userId != UserHandle.myUserId()
-                && mService.mUserController.shouldConfirmCredentials(userId);
+    /**
+     * TODO: Handle freefom mode.
+     * @return true when credential confirmation is needed for the user and there is any
+     *         activity started by the user in any visible stack.
+     */
+    boolean isUserLockedProfile(@UserIdInt int userId) {
+        if (!mService.mUserController.shouldConfirmCredentials(userId)) {
+            return false;
+        }
+        final ActivityStack fullScreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+        final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
+        final ActivityStack[] activityStacks = new ActivityStack[] {fullScreenStack, dockedStack};
+        for (final ActivityStack activityStack : activityStacks) {
+            if (activityStack == null) {
+                continue;
+            }
+            if (activityStack.topRunningActivityLocked() == null) {
+                continue;
+            }
+            if (activityStack.getStackVisibilityLocked(null) == STACK_INVISIBLE) {
+                continue;
+            }
+            if (activityStack.isDockedStack() && mIsDockMinimized) {
+                continue;
+            }
+            final TaskRecord topTask = activityStack.topTask();
+            if (topTask == null) {
+                continue;
+            }
+            // To handle the case that work app is in the task but just is not the top one.
+            for (int i = topTask.mActivities.size() - 1; i >= 0; i--) {
+                final ActivityRecord activityRecord = topTask.mActivities.get(i);
+                if (activityRecord.userId == userId) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     void setNextTaskIdForUserLocked(int taskId, int userId) {
@@ -3587,6 +3631,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
             mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+        }
+    }
+
+    void setDockedStackMinimized(boolean minimized) {
+        mIsDockMinimized = minimized;
+        if (minimized) {
+            // Docked stack is not visible, no need to confirm credentials for its top activity.
+            return;
+        }
+        final ActivityStack dockedStack = getStack(StackId.DOCKED_STACK_ID);
+        if (dockedStack == null) {
+            return;
+        }
+        final ActivityRecord top = dockedStack.topRunningActivityLocked();
+        if (top != null && mService.mUserController.shouldConfirmCredentials(top.userId)) {
+            mService.mActivityStarter.showConfirmDeviceCredential(top.userId);
         }
     }
 
