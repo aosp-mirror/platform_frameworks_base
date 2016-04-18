@@ -14272,8 +14272,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " mNumServiceProcs=" + mNumServiceProcs
                         + " mNewNumServiceProcs=" + mNewNumServiceProcs);
                 pw.println("  mAllowLowerMemLevel=" + mAllowLowerMemLevel
-                        + " mLastMemoryLevel" + mLastMemoryLevel
-                        + " mLastNumProcesses" + mLastNumProcesses);
+                        + " mLastMemoryLevel=" + mLastMemoryLevel
+                        + " mLastNumProcesses=" + mLastNumProcesses);
                 long now = SystemClock.uptimeMillis();
                 pw.print("  mLastIdleTime=");
                         TimeUtils.formatDuration(now, mLastIdleTime, pw);
