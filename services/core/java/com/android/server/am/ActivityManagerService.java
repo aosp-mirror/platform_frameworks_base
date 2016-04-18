@@ -16462,10 +16462,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void setServiceForeground(ComponentName className, IBinder token,
-            int id, Notification notification, boolean removeNotification) {
+            int id, Notification notification, int flags) {
         synchronized(this) {
-            mServices.setServiceForegroundLocked(className, token, id, notification,
-                    removeNotification);
+            mServices.setServiceForegroundLocked(className, token, id, notification, flags);
         }
     }
 
