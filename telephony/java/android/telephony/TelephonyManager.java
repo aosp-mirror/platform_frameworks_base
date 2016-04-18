@@ -25,6 +25,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.BatteryStats;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.os.Bundle;
@@ -72,6 +74,14 @@ import java.util.regex.Pattern;
  */
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
+
+    /**
+     * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
+     * into the ResultReceiver Bundle.
+     * @hide
+     */
+    public static final String MODEM_ACTIVITY_RESULT_KEY =
+            BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY;
 
     private static ITelephonyRegistry sRegistry;
 
@@ -5051,19 +5061,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the modem activity info.
+     * Requests the modem activity info. The recipient will place the result
+     * in `result`.
+     * @param result The object on which the recipient will send the resulting
+     * {@link android.telephony.ModemActivityInfo} object.
      * @hide
      */
-    public ModemActivityInfo getModemActivityInfo() {
+    public void requestModemActivityInfo(ResultReceiver result) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getModemActivityInfo();
+                service.requestModemActivityInfo(result);
+                return;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getModemActivityInfo", e);
         }
-        return null;
+        result.send(0, null);
     }
 
     /**

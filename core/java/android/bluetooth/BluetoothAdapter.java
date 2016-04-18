@@ -31,11 +31,14 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.SynchronousResultReceiver;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
@@ -53,6 +56,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Represents the local device Bluetooth adapter. The {@link BluetoothAdapter}
@@ -1369,33 +1373,62 @@ public final class BluetoothAdapter {
      *
      * @return a record with {@link BluetoothActivityEnergyInfo} or null if
      * report is unavailable or unsupported
+     * @deprecated use the asynchronous
+     * {@link #requestControllerActivityEnergyInfo(int, ResultReceiver)} instead.
      * @hide
      */
+    @Deprecated
     public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
-        if (getState() != STATE_ON) return null;
+        SynchronousResultReceiver receiver = new SynchronousResultReceiver();
+        requestControllerActivityEnergyInfo(updateType, receiver);
         try {
-            BluetoothActivityEnergyInfo record;
+            SynchronousResultReceiver.Result result = receiver.awaitResult(1000);
+            if (result.bundle != null) {
+                return result.bundle.getParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY);
+            }
+        } catch (TimeoutException e) {
+            Log.e(TAG, "getControllerActivityEnergyInfo timed out");
+        }
+        return null;
+    }
+
+    /**
+     * Request the record of {@link BluetoothActivityEnergyInfo} object that
+     * has the activity and energy info. This can be used to ascertain what
+     * the controller has been up to, since the last sample.
+     *
+     * A null value for the activity info object may be sent if the bluetooth service is
+     * unreachable or the device does not support reporting such information.
+     *
+     * @param updateType Type of info, cached vs refreshed.
+     * @param result The callback to which to send the activity info.
+     * @hide
+     */
+    public void requestControllerActivityEnergyInfo(int updateType, ResultReceiver result) {
+        if (getState() != STATE_ON) {
+            result.send(0, null);
+            return;
+        }
+
+        try {
             if (!mService.isActivityAndEnergyReportingSupported()) {
-                return null;
+                result.send(0, null);
+                return;
             }
             synchronized(this) {
                 if (updateType == ACTIVITY_ENERGY_INFO_REFRESHED) {
                     mService.getActivityEnergyInfoFromController();
                     wait(CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS);
                 }
-                record = mService.reportActivityInfo();
-                if (record.isValid()) {
-                    return record;
-                } else {
-                    return null;
-                }
+                mService.requestActivityInfo(result);
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "getControllerActivityEnergyInfoCallback wait interrupted: " + e);
+            result.send(0, null);
         } catch (RemoteException e) {
             Log.e(TAG, "getControllerActivityEnergyInfoCallback: " + e);
+            result.send(0, null);
         }
-        return null;
     }
 
     /**
