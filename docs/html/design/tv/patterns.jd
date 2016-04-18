@@ -23,14 +23,15 @@ page.title=UI Patterns for TV
 
 <h2 id="banner">App and Game Banners</h3>
 
-<p>App Banners represent your app or game on the home screens of TV devices and serve and as a way for
-  users to launch your app. Here are the specific requirements for a banner image:
-</p>
+<p>Banners are images that represent the face of your app or game on the home
+  screens of Android TV devices and serve as a way for users to launch your app.
+  Here are the requirements for your banner image:</p>
 
 <ul>
   <li>Size: 320 x 180 px, xhdpi resource</li>
-  <li>Text should be included in the image. If your app is available in more than one
-      language, you must provide versions of the banner image for each supported language.</li>
+  <li>Text must be included in the image. If your app is available in more than
+  one language, you must provide versions of the banner image for each supported
+  language.</li>
 </ul>
 
 <p>See <a href="{@docRoot}training/tv/start/start.html#banner">Provide a home screen banner</a>
