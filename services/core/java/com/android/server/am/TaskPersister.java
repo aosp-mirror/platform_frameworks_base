@@ -529,7 +529,7 @@ public class TaskPersister {
             if (taskIdEnd > 0) {
                 final int taskId;
                 try {
-                    taskId = Integer.valueOf(filename.substring(0, taskIdEnd));
+                    taskId = Integer.parseInt(filename.substring(0, taskIdEnd));
                     if (DEBUG) Slog.d(TAG, "removeObsoleteFiles: Found taskId=" + taskId);
                 } catch (Exception e) {
                     Slog.wtf(TAG, "removeObsoleteFiles: Can't parse file=" + file.getName());

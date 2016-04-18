@@ -2473,7 +2473,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int subtypeId = NOT_A_SUBTYPE_ID;
             if (lastIme != null && lastImi != null) {
                 final boolean imiIdIsSame = lastImi.getId().equals(mCurMethodId);
-                final int lastSubtypeHash = Integer.valueOf(lastIme.second);
+                final int lastSubtypeHash = Integer.parseInt(lastIme.second);
                 final int currentSubtypeHash = mCurrentSubtype == null ? NOT_A_SUBTYPE_ID
                         : mCurrentSubtype.hashCode();
                 // If the last IME is the same as the current IME and the last subtype is not
@@ -2587,7 +2587,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
             if (lastImi == null) return null;
             try {
-                final int lastSubtypeHash = Integer.valueOf(lastIme.second);
+                final int lastSubtypeHash = Integer.parseInt(lastIme.second);
                 final int lastSubtypeId =
                         InputMethodUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
                 if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
@@ -3437,7 +3437,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (subtypeHashCode != null) {
                 try {
                     lastSubtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
-                            imi, Integer.valueOf(subtypeHashCode));
+                            imi, Integer.parseInt(subtypeHashCode));
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
                 }
@@ -3798,9 +3798,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.w(TAG, "IME uninstalled or not valid.: " + currentImiId);
                             continue;
                         }
-                        final int icon = Integer.valueOf(
+                        final int icon = Integer.parseInt(
                                 parser.getAttributeValue(null, ATTR_ICON));
-                        final int label = Integer.valueOf(
+                        final int label = Integer.parseInt(
                                 parser.getAttributeValue(null, ATTR_LABEL));
                         final String imeSubtypeLocale =
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
@@ -3826,7 +3826,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         final String subtypeIdString =
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_ID);
                         if (subtypeIdString != null) {
-                            builder.setSubtypeId(Integer.valueOf(subtypeIdString));
+                            builder.setSubtypeId(Integer.parseInt(subtypeIdString));
                         }
                         tempSubtypesArray.add(builder.build());
                     }

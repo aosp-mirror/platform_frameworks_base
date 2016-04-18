@@ -106,7 +106,7 @@ final class DockObserver extends SystemService {
                 FileReader file = new FileReader(DOCK_STATE_PATH);
                 try {
                     int len = file.read(buffer, 0, 1024);
-                    setActualDockStateLocked(Integer.valueOf((new String(buffer, 0, len)).trim()));
+                    setActualDockStateLocked(Integer.parseInt((new String(buffer, 0, len)).trim()));
                     mPreviousDockState = mActualDockState;
                 } finally {
                     file.close();

@@ -378,7 +378,7 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
         Size maxPreviewSize = mOrderedPreviewSizes.get(0);
         List<Range<Integer> > fpsRanges = Arrays.asList(
                 mStaticInfo.getAeAvailableTargetFpsRangesChecked());
-        int cameraId = Integer.valueOf(mCamera.getId());
+        int cameraId = Integer.parseInt(mCamera.getId());
         int maxVideoFrameRate = -1;
         for (int profileId : camcorderProfileList) {
             if (!CamcorderProfile.hasProfile(cameraId, profileId) ||
@@ -539,7 +539,7 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
         int kFrameDrop_Tolerence = FRAMEDROP_TOLERANCE;
 
         for (int profileId : mCamcorderProfileList) {
-            int cameraId = Integer.valueOf(mCamera.getId());
+            int cameraId = Integer.parseInt(mCamera.getId());
             if (!CamcorderProfile.hasProfile(cameraId, profileId) ||
                     allowedUnsupported(cameraId, profileId)) {
                 continue;
