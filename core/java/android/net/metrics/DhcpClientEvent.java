@@ -54,7 +54,7 @@ public class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
         }
     };
 
-    public static void logEvent(int eventType, String ifName, String msg) {
-        IpConnectivityEvent.logEvent(eventType, new DhcpClientEvent(ifName, msg));
+    public static void logStateEvent(String ifName, String state) {
+        logEvent(IpConnectivityEvent.IPCE_DHCP_STATE_CHANGE, new DhcpClientEvent(ifName, state));
     }
 };
