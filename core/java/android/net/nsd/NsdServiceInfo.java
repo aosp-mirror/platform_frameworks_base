@@ -250,7 +250,8 @@ public final class NsdServiceInfo implements Parcelable {
     }
 
     /**
-     * Retrive attributes as a map of String keys to byte[] values.
+     * Retrieve attributes as a map of String keys to byte[] values. The attributes map is only
+     * valid for a resolved service.
      *
      * <p> The returned map is unmodifiable; changes must be made through {@link #setAttribute} and
      * {@link #removeAttribute}.
