@@ -216,7 +216,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
+                NAME, NO_TITLE, NO_DESCRIPTION, 0, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -266,7 +266,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 2, RENAMED_SCREENSHOTS);
+                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -283,6 +283,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         resetProperties();
 
         sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
+        takeScreenshot();
         sendBugreportFinished(ID, mPlainTextPath, NO_SCREENSHOT);
         waitShareNotification(ID);
 
@@ -340,7 +342,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath,
                 mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
+                NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -377,7 +379,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID,
                 plainText? mPlainTextPath : mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
+                NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -404,7 +406,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NO_NAME, NO_TITLE, mDescription, 1, DIDNT_RENAME_SCREENSHOTS);
+                NO_NAME, NO_TITLE, mDescription, 0, DIDNT_RENAME_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -449,7 +451,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // title.txt and description.txt entries.
         extras = sendBugreportFinishedAndGetSharedIntent(ID2, mZipPath2, NO_SCREENSHOT);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID2, PID2, TITLE2,
-                NEW_NAME2, TITLE2, DESCRIPTION2, 1, RENAMED_SCREENSHOTS);
+                NEW_NAME2, TITLE2, DESCRIPTION2, 0, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -500,7 +502,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
+                NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
