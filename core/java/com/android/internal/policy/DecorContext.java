@@ -17,22 +17,27 @@
 package com.android.internal.policy;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
 /**
  * Context for decor views which can be seeded with pure application context and not depend on the
- * activity, but still provide some of the facilities that Activity has, e.g. themes.
+ * activity, but still provide some of the facilities that Activity has,
+ * e.g. themes, activity-based resources, etc.
  *
  * @hide
  */
 class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
     private WindowManager mWindowManager;
+    private Resources mActivityResources;
 
-    public DecorContext(Context context) {
+    public DecorContext(Context context, Resources activityResources) {
         super(context, null);
+        mActivityResources = activityResources;
     }
 
     void setPhoneWindow(PhoneWindow phoneWindow) {
@@ -51,5 +56,15 @@ class DecorContext extends ContextThemeWrapper {
             return mWindowManager;
         }
         return super.getSystemService(name);
+    }
+
+    @Override
+    public Resources getResources() {
+        return mActivityResources;
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        return mActivityResources.getAssets();
     }
 }
