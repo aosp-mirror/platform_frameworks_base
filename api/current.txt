@@ -47725,6 +47725,8 @@ package java.lang {
 
   public abstract interface CharSequence {
     method public abstract char charAt(int);
+    method public default java.util.stream.IntStream chars();
+    method public default java.util.stream.IntStream codePoints();
     method public abstract int length();
     method public abstract java.lang.CharSequence subSequence(int, int);
     method public abstract java.lang.String toString();
@@ -50860,6 +50862,7 @@ package java.nio {
     method public final int arrayOffset();
     method public abstract java.nio.CharBuffer asReadOnlyBuffer();
     method public final char charAt(int);
+    method public java.util.stream.IntStream chars();
     method public abstract java.nio.CharBuffer compact();
     method public int compareTo(java.nio.CharBuffer);
     method public abstract java.nio.CharBuffer duplicate();
