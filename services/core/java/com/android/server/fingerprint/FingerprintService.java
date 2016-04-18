@@ -222,7 +222,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             removeClient(client);
         }
         if (DEBUG) Slog.v(TAG, "handleError(client="
-                + client != null ? client.getOwnerString() : "null" + ", error = " + error + ")");
+                + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
         // This is the magic code that starts the next client when the old client finishes.
         if (error == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
             mHandler.removeCallbacks(mResetClientState);
