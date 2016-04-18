@@ -53,6 +53,12 @@ import java.util.ArrayList;
 
 public class TaskStack implements DimLayer.DimLayerUser,
         BoundsAnimationController.AnimateBoundsUser {
+    /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
+     * restrict IME adjustment so that a min portion of top stack remains visible.*/
+    private static final float ADJUSTED_STACK_FRACTION_MIN = 0.3f;
+
+    /** Dimming amount for non-focused stack when stacks are IME-adjusted. */
+    private static final float IME_ADJUST_DIM_AMOUNT = 0.25f;
 
     /** Unique identifier */
     final int mStackId;
@@ -249,7 +255,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 task.scrollLocked(mTmpRect2);
             } else if (task.isResizeable() && task.mOverrideConfig != Configuration.EMPTY) {
                 task.getBounds(mTmpRect2);
-                mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
+                if (mAdjustedForIme && getDockSide() == DOCKED_TOP) {
+                    int offsetY = adjustedBounds.bottom - mTmpRect2.bottom;
+                    mTmpRect2.offset(0, offsetY);
+                } else {
+                    mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
+                }
                 task.setTempInsetBounds(tempInsetBounds);
                 task.resizeLocked(mTmpRect2, task.mOverrideConfig, false /* forced */);
             }
@@ -882,6 +893,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mImeGoingAway = false;
             mAdjustImeAmount = 0f;
             updateAdjustedBounds();
+            mService.setResizeDimLayer(false, mStackId, 1.0f);
         } else {
             mImeGoingAway |= mAdjustedForIme;
         }
@@ -930,6 +942,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    int getMinTopStackBottom(final Rect displayContentRect, int originalStackBottom) {
+        return displayContentRect.top + (int)
+                ((originalStackBottom - displayContentRect.top) * ADJUSTED_STACK_FRACTION_MIN);
+    }
+
     private boolean adjustForIME(final WindowState imeWin) {
         final int dockedSide = getDockSide();
         final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
@@ -953,23 +970,41 @@ public class TaskStack implements DimLayer.DimLayerUser,
         mLastContentBounds.set(contentBounds);
         final int yOffset = displayContentRect.bottom - contentBounds.bottom;
 
+        final int dividerWidth =
+                getDisplayContent().mDividerControllerLocked.getContentWidth();
+        final int dividerWidthInactive =
+                getDisplayContent().mDividerControllerLocked.getContentWidthInactive();
+
         if (dockedSide == DOCKED_TOP) {
             // If this stack is docked on top, we make it smaller so the bottom stack is not
-            // occluded by IME. We shift its bottom up by the height of the IME (capped by
-            // the display content rect). Note that we don't change the task bounds.
-            int bottom = Math.max(
-                    mBounds.bottom - yOffset, displayContentRect.top);
+            // occluded by IME. We shift its bottom up by the height of the IME, but
+            // leaves at least 30% of the top stack visible.
+            final int minTopStackBottom =
+                    getMinTopStackBottom(displayContentRect, mBounds.bottom);
+            final int bottom = Math.max(
+                    mBounds.bottom - yOffset + dividerWidth - dividerWidthInactive,
+                    minTopStackBottom);
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.bottom =
                     (int) (mAdjustImeAmount * bottom + (1 - mAdjustImeAmount) * mBounds.bottom);
             mFullyAdjustedImeBounds.set(mBounds);
         } else {
-            // If this stack is docked on bottom, we shift it up so that it's not occluded by
-            // IME. We try to move it up by the height of the IME window (although the best
-            // we could do is to make the top stack fully collapsed).
-            final int dividerWidth = getDisplayContent().mDividerControllerLocked
-                    .getContentWidth();
-            int top = Math.max(mBounds.top - yOffset, displayContentRect.top + dividerWidth);
+            final int top;
+            final boolean isFocusedStack = mService.getFocusedStackLocked() == this;
+            if (isFocusedStack) {
+                // If this stack is docked on bottom and has focus, we shift it up so that it's not
+                // occluded by IME. We try to move it up by the height of the IME window, but only
+                // to the extent that leaves at least 30% of the top stack visible.
+                final int minTopStackBottom =
+                        getMinTopStackBottom(displayContentRect, mBounds.top - dividerWidth);
+                top = Math.max(
+                        mBounds.top - yOffset, minTopStackBottom + dividerWidthInactive);
+            } else {
+                // If this stack is docked on bottom but doesn't have focus, we don't need to adjust
+                // for IME, but still need to apply a small adjustment due to the thinner divider.
+                top = mBounds.top - dividerWidth + dividerWidthInactive;
+            }
+
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.top =
                     (int) (mAdjustImeAmount * top + (1 - mAdjustImeAmount) * mBounds.top);
@@ -1043,6 +1078,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mLastContentBounds.setEmpty();
         }
         setAdjustedBounds(mTmpAdjustedBounds);
+
+        final boolean isFocusedStack = mService.getFocusedStackLocked() == this;
+        if (mAdjustedForIme && adjust && !isFocusedStack) {
+            final float alpha = mAdjustImeAmount * IME_ADJUST_DIM_AMOUNT;
+            mService.setResizeDimLayer(true, mStackId, alpha);
+        }
     }
 
     boolean isAdjustedForMinimizedDockedStack() {
