@@ -734,7 +734,11 @@ public class ApfGenerator {
      * Add an instruction to the end of the program to jump to {@code target} if the bytes of the
      * packet at, an offset specified by {@code register}, match {@code bytes}.
      */
-    public ApfGenerator addJumpIfBytesNotEqual(Register register, byte[] bytes, String target) {
+    public ApfGenerator addJumpIfBytesNotEqual(Register register, byte[] bytes, String target)
+            throws IllegalInstructionException {
+        if (register == Register.R1) {
+            throw new IllegalInstructionException("JNEBS fails with R1");
+        }
         Instruction instruction = new Instruction(Opcodes.JNEBS, register);
         instruction.setUnsignedImm(bytes.length);
         instruction.setTargetLabel(target);
