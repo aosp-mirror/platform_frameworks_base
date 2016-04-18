@@ -527,7 +527,7 @@ final class ProcessRecord {
             }
             EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
             Process.killProcessQuiet(pid);
-            Process.killProcessGroup(info.uid, pid);
+            Process.killProcessGroup(uid, pid);
             if (!persistent) {
                 killed = true;
                 killedByAm = true;
