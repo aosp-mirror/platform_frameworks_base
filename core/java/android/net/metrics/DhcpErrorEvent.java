@@ -48,7 +48,9 @@ public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
     public static final int DHCP_UNKNOWN_MSG_TYPE      = makeErrorCode(DHCP_ERROR, 5);
 
     public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
+    public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
 
+    public final String ifName;
     // error code byte format (MSB to LSB):
     // byte 0: error type
     // byte 1: error subtype
@@ -56,15 +58,18 @@ public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
     // byte 3: optional code
     public final int errorCode;
 
-    private DhcpErrorEvent(int errorCode) {
+    private DhcpErrorEvent(String ifName, int errorCode) {
+        this.ifName = ifName;
         this.errorCode = errorCode;
     }
 
     private DhcpErrorEvent(Parcel in) {
+        this.ifName = in.readString();
         this.errorCode = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeString(ifName);
         out.writeInt(errorCode);
     }
 
@@ -79,12 +84,17 @@ public class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
         }
     };
 
-    public static void logEvent(int errorCode) {
-        IpConnectivityEvent.logEvent(IPCE_DHCP_PARSE_ERROR, new DhcpErrorEvent(errorCode));
+    public static void logParseError(String ifName, int errorCode) {
+        IpConnectivityEvent.logEvent(IPCE_DHCP_PARSE_ERROR, new DhcpErrorEvent(ifName, errorCode));
     }
 
-    public static void logEvent(int errorCode, int option) {
-        logEvent((0xFFFF0000 & errorCode) | (0xFF & option));
+    public static void logReceiveError(String ifName) {
+        IpConnectivityEvent.logEvent(IPCE_DHCP_RECV_ERROR,
+                new DhcpErrorEvent(ifName, RECEIVE_ERROR));
+    }
+
+    public static int errorCodeWithOption(int errorCode, int option) {
+        return (0xFFFF0000 & errorCode) | (0xFF & option);
     }
 
     private static int makeErrorCode(int type, int subtype) {
