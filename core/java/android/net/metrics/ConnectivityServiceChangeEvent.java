@@ -16,12 +16,14 @@
 
 package android.net.metrics;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * {@hide}
  */
+@SystemApi
 public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
         implements Parcelable {
     // The ID of the network that has become the new default or NETID_UNSET if none.
