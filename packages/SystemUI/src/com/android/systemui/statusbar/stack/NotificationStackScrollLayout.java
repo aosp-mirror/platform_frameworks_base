@@ -1841,7 +1841,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the top.
      */
-    private void fling(int velocityY) {
+    protected void fling(int velocityY) {
         if (getChildCount() > 0) {
             int scrollRange = getScrollRange();
 
