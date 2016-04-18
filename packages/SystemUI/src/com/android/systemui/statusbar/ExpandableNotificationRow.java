@@ -41,6 +41,7 @@ import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
@@ -103,6 +104,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mMaxExpandHeight;
     private int mHeadsUpHeight;
     private View mVetoButton;
+    private int mNotificationColor;
     private boolean mClearable;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
@@ -226,6 +228,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.onNotificationUpdated(entry);
         mPublicLayout.onNotificationUpdated(entry);
         mShowingPublicInitialized = false;
+        updateNotificationColor();
         updateClearability();
         if (mIsSummaryWithChildren) {
             recreateNotificationHeader();
@@ -603,11 +606,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getNotificationColor() {
-        int color = getStatusBarNotification().getNotification().color;
-        if (color == Notification.COLOR_DEFAULT) {
-            return mContext.getColor(com.android.internal.R.color.notification_icon_default_color);
-        }
-        return color;
+        return mNotificationColor;
+    }
+
+    private void updateNotificationColor() {
+        mNotificationColor = NotificationColorUtil.resolveContrastColor(mContext,
+                getStatusBarNotification().getNotification().color);
     }
 
     public HybridNotificationView getSingleLineView() {

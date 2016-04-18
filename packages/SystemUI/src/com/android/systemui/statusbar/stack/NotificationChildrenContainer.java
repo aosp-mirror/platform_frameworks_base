@@ -663,6 +663,11 @@ public class NotificationChildrenContainer extends ViewGroup {
             addView(divider, index);
             mDividers.set(i, divider);
         }
+        removeView(mOverflowNumber);
+        mOverflowNumber = null;
+        mOverflowInvertHelper = null;
+        mGroupOverFlowState = null;
+        updateGroupOverflow();
     }
 
     public void setUserLocked(boolean userLocked) {
