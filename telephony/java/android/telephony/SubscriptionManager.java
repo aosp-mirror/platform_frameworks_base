@@ -1347,6 +1347,7 @@ public class SubscriptionManager {
         if (subInfo != null) {
             newConfig.mcc = subInfo.getMcc();
             newConfig.mnc = subInfo.getMnc();
+            if (newConfig.mnc == 0) newConfig.mnc = Configuration.MNC_ZERO;
         }
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         DisplayMetrics newMetrics = new DisplayMetrics();
