@@ -5043,6 +5043,8 @@ public final class ActivityThread {
     }
 
     private void handleBindApplication(AppBindData data) {
+        // Register the UI Thread as a sensitive thread to the runtime.
+        VMRuntime.registerSensitiveThread();
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
