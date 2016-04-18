@@ -1790,7 +1790,7 @@ public class Am extends BaseCommand {
 
     private void runStackStart() throws Exception {
         String displayIdStr = nextArgRequired();
-        int displayId = Integer.valueOf(displayIdStr);
+        int displayId = Integer.parseInt(displayIdStr);
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         try {
@@ -1804,9 +1804,9 @@ public class Am extends BaseCommand {
 
     private void runStackMoveTask() throws Exception {
         String taskIdStr = nextArgRequired();
-        int taskId = Integer.valueOf(taskIdStr);
+        int taskId = Integer.parseInt(taskIdStr);
         String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+        int stackId = Integer.parseInt(stackIdStr);
         String toTopStr = nextArgRequired();
         final boolean toTop;
         if ("true".equals(toTopStr)) {
@@ -1826,7 +1826,7 @@ public class Am extends BaseCommand {
 
     private void runStackResize() throws Exception {
         String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+        int stackId = Integer.parseInt(stackIdStr);
         final Rect bounds = getBounds();
         if (bounds == null) {
             System.err.println("Error: invalid input bounds");
@@ -1837,7 +1837,7 @@ public class Am extends BaseCommand {
 
     private void runStackResizeAnimated() throws Exception {
         String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+        int stackId = Integer.parseInt(stackIdStr);
         final Rect bounds;
         if ("null".equals(mArgs.peekNextArg())) {
             bounds = null;
@@ -1886,11 +1886,11 @@ public class Am extends BaseCommand {
 
     private void runStackPositionTask() throws Exception {
         String taskIdStr = nextArgRequired();
-        int taskId = Integer.valueOf(taskIdStr);
+        int taskId = Integer.parseInt(taskIdStr);
         String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+        int stackId = Integer.parseInt(stackIdStr);
         String positionStr = nextArgRequired();
-        int position = Integer.valueOf(positionStr);
+        int position = Integer.parseInt(positionStr);
 
         try {
             mAm.positionTaskInStack(taskId, stackId, position);
@@ -1911,7 +1911,7 @@ public class Am extends BaseCommand {
     private void runStackInfo() throws Exception {
         try {
             String stackIdStr = nextArgRequired();
-            int stackId = Integer.valueOf(stackIdStr);
+            int stackId = Integer.parseInt(stackIdStr);
             StackInfo info = mAm.getStackInfo(stackId);
             System.out.println(info);
         } catch (RemoteException e) {
@@ -1920,12 +1920,12 @@ public class Am extends BaseCommand {
 
     private void runStackRemove() throws Exception {
         String stackIdStr = nextArgRequired();
-        int stackId = Integer.valueOf(stackIdStr);
+        int stackId = Integer.parseInt(stackIdStr);
         mAm.removeStack(stackId);
     }
 
     private void runMoveTopActivityToPinnedStack() throws Exception {
-        int stackId = Integer.valueOf(nextArgRequired());
+        int stackId = Integer.parseInt(nextArgRequired());
         final Rect bounds = getBounds();
         if (bounds == null) {
             System.err.println("Error: invalid input bounds");
@@ -1943,10 +1943,10 @@ public class Am extends BaseCommand {
     }
 
     private void runStackSizeDockedStackTest() throws Exception {
-        final int stepSize = Integer.valueOf(nextArgRequired());
+        final int stepSize = Integer.parseInt(nextArgRequired());
         final String side = nextArgRequired();
         final String delayStr = nextArg();
-        final int delayMs = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+        final int delayMs = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
 
         Rect bounds;
         try {
@@ -2060,7 +2060,7 @@ public class Am extends BaseCommand {
             if (taskIdStr.equals("stop")) {
                 mAm.stopLockTaskMode();
             } else {
-                int taskId = Integer.valueOf(taskIdStr);
+                int taskId = Integer.parseInt(taskIdStr);
                 mAm.startLockTaskMode(taskId);
             }
             System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
@@ -2071,9 +2071,9 @@ public class Am extends BaseCommand {
 
     private void runTaskResizeable() throws Exception {
         final String taskIdStr = nextArgRequired();
-        final int taskId = Integer.valueOf(taskIdStr);
+        final int taskId = Integer.parseInt(taskIdStr);
         final String resizeableStr = nextArgRequired();
-        final int resizeableMode = Integer.valueOf(resizeableStr);
+        final int resizeableMode = Integer.parseInt(resizeableStr);
 
         try {
             mAm.setTaskResizeable(taskId, resizeableMode);
@@ -2083,7 +2083,7 @@ public class Am extends BaseCommand {
 
     private void runTaskResize() throws Exception {
         final String taskIdStr = nextArgRequired();
-        final int taskId = Integer.valueOf(taskIdStr);
+        final int taskId = Integer.parseInt(taskIdStr);
         final Rect bounds = getBounds();
         if (bounds == null) {
             System.err.println("Error: invalid input bounds");
@@ -2104,10 +2104,10 @@ public class Am extends BaseCommand {
     }
 
     private void runTaskDragTaskTest() {
-        final int taskId = Integer.valueOf(nextArgRequired());
-        final int stepSize = Integer.valueOf(nextArgRequired());
+        final int taskId = Integer.parseInt(nextArgRequired());
+        final int stepSize = Integer.parseInt(nextArgRequired());
         final String delayStr = nextArg();
-        final int delay_ms = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
         final StackInfo stackInfo;
         Rect taskBounds;
         try {
@@ -2203,10 +2203,10 @@ public class Am extends BaseCommand {
     }
 
     private void runTaskSizeTaskTest() {
-        final int taskId = Integer.valueOf(nextArgRequired());
-        final int stepSize = Integer.valueOf(nextArgRequired());
+        final int taskId = Integer.parseInt(nextArgRequired());
+        final int stepSize = Integer.parseInt(nextArgRequired());
         final String delayStr = nextArg();
-        final int delay_ms = (delayStr != null) ? Integer.valueOf(delayStr) : 0;
+        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
         final StackInfo stackInfo;
         final Rect initialTaskBounds;
         try {
@@ -2550,13 +2550,13 @@ public class Am extends BaseCommand {
 
     private Rect getBounds() {
         String leftStr = nextArgRequired();
-        int left = Integer.valueOf(leftStr);
+        int left = Integer.parseInt(leftStr);
         String topStr = nextArgRequired();
-        int top = Integer.valueOf(topStr);
+        int top = Integer.parseInt(topStr);
         String rightStr = nextArgRequired();
-        int right = Integer.valueOf(rightStr);
+        int right = Integer.parseInt(rightStr);
         String bottomStr = nextArgRequired();
-        int bottom = Integer.valueOf(bottomStr);
+        int bottom = Integer.parseInt(bottomStr);
         if (left < 0) {
             System.err.println("Error: bad left arg: " + leftStr);
             return null;

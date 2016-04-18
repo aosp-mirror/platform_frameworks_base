@@ -1110,7 +1110,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         private int getInt(final String key, final int defaultValue) {
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.valueOf(result) : 0;
+                return result != null ? Integer.parseInt(result) : 0;
             }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }

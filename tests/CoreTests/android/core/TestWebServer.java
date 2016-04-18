@@ -781,7 +781,7 @@ class TestWebServer implements HttpConstants {
 
 
             if (testID.startsWith("test")) {
-                testNum = Integer.valueOf(testID.substring(4))-1;
+                testNum = Integer.parseInt(testID.substring(4))-1;
             }
 
             if ((testNum < 0) || (testNum > TestWebData.tests.length - 1)) {

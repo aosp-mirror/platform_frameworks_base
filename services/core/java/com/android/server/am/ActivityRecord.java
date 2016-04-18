@@ -1396,7 +1396,7 @@ final class ActivityRecord {
             if (ATTR_ID.equals(attrName)) {
                 createTime = Long.valueOf(attrValue);
             } else if (ATTR_LAUNCHEDFROMUID.equals(attrName)) {
-                launchedFromUid = Integer.valueOf(attrValue);
+                launchedFromUid = Integer.parseInt(attrValue);
             } else if (ATTR_LAUNCHEDFROMPACKAGE.equals(attrName)) {
                 launchedFromPackage = attrValue;
             } else if (ATTR_RESOLVEDTYPE.equals(attrName)) {
@@ -1404,7 +1404,7 @@ final class ActivityRecord {
             } else if (ATTR_COMPONENTSPECIFIED.equals(attrName)) {
                 componentSpecified = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
-                userId = Integer.valueOf(attrValue);
+                userId = Integer.parseInt(attrValue);
             } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                 taskDescription.restoreFromXml(attrName, attrValue);
             } else {
