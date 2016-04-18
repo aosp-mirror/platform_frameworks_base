@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1030,14 +1031,46 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * This may be used by the system to prioritize operations such as fragment lifecycle updates
      * or loader ordering behavior.</p>
      *
+     * <p><strong>Note:</strong> Prior to Android N there was a platform bug that could cause
+     * <code>setUserVisibleHint</code> to bring a fragment up to the started state before its
+     * <code>FragmentTransaction</code> had been committed. As some apps relied on this behavior,
+     * it is preserved for apps that declare a <code>targetSdkVersion</code> of 23 or lower.</p>
+     *
      * @param isVisibleToUser true if this fragment's UI is currently visible to the user (default),
      *                        false if it is not.
      */
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (!mUserVisibleHint && isVisibleToUser && mState < STARTED
-                && mFragmentManager != null && isAdded()) {
+        // Prior to Android N we were simply checking if this fragment had a FragmentManager
+        // set before we would trigger a deferred start. Unfortunately this also gets set before
+        // a fragment transaction is committed, so if setUserVisibleHint was called before a
+        // transaction commit, we would start the fragment way too early. FragmentPagerAdapter
+        // triggers this situation.
+        // Unfortunately some apps relied on this timing in overrides of setUserVisibleHint
+        // on their own fragments, and expected, however erroneously, that after a call to
+        // super.setUserVisibleHint their onStart methods had been run.
+        // We preserve this behavior for apps targeting old platform versions below.
+        boolean useBrokenAddedCheck = false;
+        Context context = getContext();
+        if (mFragmentManager != null && mFragmentManager.mHost != null) {
+            context = mFragmentManager.mHost.getContext();
+        }
+        if (context != null) {
+            useBrokenAddedCheck = context.getApplicationInfo().targetSdkVersion <= VERSION_CODES.M;
+        }
+
+        final boolean performDeferredStart;
+        if (useBrokenAddedCheck) {
+            performDeferredStart = !mUserVisibleHint && isVisibleToUser && mState < STARTED
+                    && mFragmentManager != null;
+        } else {
+            performDeferredStart = !mUserVisibleHint && isVisibleToUser && mState < STARTED
+                    && mFragmentManager != null && isAdded();
+        }
+
+        if (performDeferredStart) {
             mFragmentManager.performPendingDeferredStart(this);
         }
+
         mUserVisibleHint = isVisibleToUser;
         mDeferStart = mState < STARTED && !isVisibleToUser;
     }
