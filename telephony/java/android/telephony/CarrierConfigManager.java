@@ -547,6 +547,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_EDITABLE_WFC_MODE_BOOL = "editable_wfc_mode_bool";
 
+     /**
+      * Flag to indicate if Wi-Fi needs to be disabled in ECBM
+      * @hide
+      **/
+     public static final String
+              KEY_CONFIG_WIFI_DISABLE_IN_ECBM = "config_wifi_disable_in_ecbm";
+
     /**
      * List operator-specific error codes and indices of corresponding error strings in
      * wfcOperatorErrorAlertMessages and wfcOperatorErrorNotificationMessages.
@@ -755,6 +762,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
