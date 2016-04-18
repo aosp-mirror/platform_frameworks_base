@@ -181,8 +181,8 @@ public final class WifiActivityEnergyInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        return ((mControllerTxTimeMs !=0) ||
-                (mControllerRxTimeMs !=0) ||
-                (mControllerIdleTimeMs !=0));
+        return ((mControllerTxTimeMs >=0) &&
+                (mControllerRxTimeMs >=0) &&
+                (mControllerIdleTimeMs >=0));
     }
 }
