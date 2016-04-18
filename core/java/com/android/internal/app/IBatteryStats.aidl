@@ -18,10 +18,13 @@ package com.android.internal.app;
 
 import com.android.internal.os.BatteryStatsImpl;
 
+import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.os.health.HealthStatsParceler;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 
 interface IBatteryStats {
@@ -129,4 +132,8 @@ interface IBatteryStats {
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);
+
+    oneway void noteBluetoothControllerActivity(in BluetoothActivityEnergyInfo info);
+    oneway void noteModemControllerActivity(in ModemActivityInfo info);
+    oneway void noteWifiControllerActivity(in WifiActivityEnergyInfo info);
 }
