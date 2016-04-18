@@ -1618,7 +1618,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         if (launchTaskIndex != -1) {
             // Stop all animations
-            mUIDozeTrigger.stopDozing();
             cancelAllTaskViewAnimations();
 
             final Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
