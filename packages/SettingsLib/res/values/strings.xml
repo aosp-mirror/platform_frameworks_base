@@ -215,7 +215,7 @@
     <string name="tether_settings_title_all">Tethering &amp; portable hotspot</string>
 
     <!-- Title for a work profile. [CHAR LIMIT=25] -->
-    <string name="managed_user_title">Work profile</string>
+    <string name="managed_user_title">All work apps</string>
 
     <!-- Title for Guest user [CHAR LIMIT=35] -->
     <string name="user_guest">Guest</string>
