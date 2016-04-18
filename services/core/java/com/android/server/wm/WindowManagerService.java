@@ -733,6 +733,9 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mStylusButtonDownAtStart;
         // Indicates the first event to check for button state.
         private boolean mIsStartEvent = true;
+        // Set to true to ignore input events after the drag gesture is complete but the drag events
+        // are still being dispatched.
+        private boolean mMuteInput = false;
 
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -744,7 +747,7 @@ public class WindowManagerService extends IWindowManager.Stub
             try {
                 if (event instanceof MotionEvent
                         && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
-                        && mDragState != null) {
+                        && mDragState != null && !mMuteInput) {
                     final MotionEvent motionEvent = (MotionEvent)event;
                     boolean endDrag = false;
                     final float newX = motionEvent.getRawX();
@@ -772,6 +775,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mStylusButtonDownAtStart && !isStylusButtonDown) {
                             if (DEBUG_DRAG) Slog.d(TAG_WM, "Button no longer pressed; dropping at "
                                     + newX + "," + newY);
+                            mMuteInput = true;
                             synchronized (mWindowMap) {
                                 endDrag = mDragState.notifyDropLw(newX, newY);
                             }
@@ -786,6 +790,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     case MotionEvent.ACTION_UP: {
                         if (DEBUG_DRAG) Slog.d(TAG_WM, "Got UP on move channel; dropping at "
                                 + newX + "," + newY);
+                        mMuteInput = true;
                         synchronized (mWindowMap) {
                             endDrag = mDragState.notifyDropLw(newX, newY);
                         }
@@ -793,6 +798,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     case MotionEvent.ACTION_CANCEL: {
                         if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag cancelled!");
+                        mMuteInput = true;
                         endDrag = true;
                     } break;
                     }
