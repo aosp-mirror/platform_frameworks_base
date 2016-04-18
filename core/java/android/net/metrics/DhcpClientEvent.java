@@ -16,12 +16,14 @@
 
 package android.net.metrics;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * {@hide}
  */
+@SystemApi
 public final class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
     public final String ifName;
     public final String msg;
