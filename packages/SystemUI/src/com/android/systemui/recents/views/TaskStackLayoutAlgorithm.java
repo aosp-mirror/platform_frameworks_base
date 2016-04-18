@@ -345,11 +345,11 @@ public class TaskStackLayoutAlgorithm {
         mCb = cb;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
         mMinMargin = res.getDimensionPixelSize(R.dimen.recents_layout_min_margin);
-        mBaseTopMargin = getDimensionForDevice(res,
+        mBaseTopMargin = getDimensionForDevice(context,
                 R.dimen.recents_layout_top_margin_phone,
                 R.dimen.recents_layout_top_margin_tablet,
                 R.dimen.recents_layout_top_margin_tablet_xlarge);
-        mBaseSideMargin = getDimensionForDevice(res,
+        mBaseSideMargin = getDimensionForDevice(context,
                 R.dimen.recents_layout_side_margin_phone,
                 R.dimen.recents_layout_side_margin_tablet,
                 R.dimen.recents_layout_side_margin_tablet_xlarge);
@@ -375,14 +375,14 @@ public class TaskStackLayoutAlgorithm {
                 res.getDimensionPixelSize(R.dimen.recents_layout_bottom_peek_size);
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_layout_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_layout_z_max);
-        mBaseInitialTopOffset = getDimensionForDevice(res,
+        mBaseInitialTopOffset = getDimensionForDevice(context,
                 R.dimen.recents_layout_initial_top_offset_phone_port,
                 R.dimen.recents_layout_initial_top_offset_phone_land,
                 R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet);
-        mBaseInitialBottomOffset = getDimensionForDevice(res,
+        mBaseInitialBottomOffset = getDimensionForDevice(context,
                 R.dimen.recents_layout_initial_bottom_offset_phone_port,
                 R.dimen.recents_layout_initial_bottom_offset_phone_land,
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
@@ -1005,7 +1005,8 @@ public class TaskStackLayoutAlgorithm {
         int sideMargin = getScaleForExtent(windowRect, displayRect, mBaseSideMargin, mMinMargin,
                 WIDTH);
         int targetStackWidth = taskStackBounds.width() - 2 * sideMargin;
-        if (ssp.getDisplayOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+        if (Utilities.getAppConfiguration(mContext).orientation
+                == Configuration.ORIENTATION_LANDSCAPE) {
             // If we are in landscape, calculate the width of the stack in portrait and ensure that
             // we are not larger than that size
             Rect portraitDisplayRect = new Rect(0, 0,
@@ -1022,20 +1023,21 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Retrieves resources that are constant regardless of the current configuration of the device.
      */
-    public static int getDimensionForDevice(Resources res, int phoneResId,
+    public static int getDimensionForDevice(Context ctx, int phoneResId,
             int tabletResId, int xlargeTabletResId) {
-        return getDimensionForDevice(res, phoneResId, phoneResId, tabletResId, tabletResId,
+        return getDimensionForDevice(ctx, phoneResId, phoneResId, tabletResId, tabletResId,
                 xlargeTabletResId, xlargeTabletResId);
     }
 
     /**
      * Retrieves resources that are constant regardless of the current configuration of the device.
      */
-    public static int getDimensionForDevice(Resources res, int phonePortResId, int phoneLandResId,
+    public static int getDimensionForDevice(Context ctx, int phonePortResId, int phoneLandResId,
             int tabletPortResId, int tabletLandResId, int xlargeTabletPortResId,
             int xlargeTabletLandResId) {
         RecentsConfiguration config = Recents.getConfiguration();
-        boolean isLandscape = Recents.getSystemServices().getDisplayOrientation() ==
+        Resources res = ctx.getResources();
+        boolean isLandscape = Utilities.getAppConfiguration(ctx).orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
         if (config.isXLargeScreen) {
             return res.getDimensionPixelSize(isLandscape
