@@ -103,11 +103,11 @@ import com.android.internal.util.Protocol;
  * to {@link DiscoveryListener#onServiceFound} and a service lost is notified on
  * {@link DiscoveryListener#onServiceLost}.
  *
- * <p> Once the peer application discovers the "Example" http srevice, and needs to receive data
- * from the "Example" application, it can initiate a resolve with {@link #resolveService} to
- * resolve the host and port details for the purpose of establishing a connection. A successful
- * resolve is notified on {@link ResolveListener#onServiceResolved} and a failure is notified
- * on {@link ResolveListener#onResolveFailed}.
+ * <p> Once the peer application discovers the "Example" http service, and either needs to read the
+ * attributes of the service or wants to receive data from the "Example" application, it can
+ * initiate a resolve with {@link #resolveService} to resolve the attributes, host, and port
+ * details. A successful resolve is notified on {@link ResolveListener#onServiceResolved} and a
+ * failure is notified on {@link ResolveListener#onResolveFailed}.
  *
  * Applications can reserve for a service type at
  * http://www.iana.org/form/ports-service. Existing services can be found at
