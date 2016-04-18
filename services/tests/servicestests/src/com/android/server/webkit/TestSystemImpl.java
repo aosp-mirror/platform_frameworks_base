@@ -110,7 +110,12 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public int getFactoryPackageVersion(String packageName) {
-        return 0;
+    public int getFactoryPackageVersion(String packageName) throws NameNotFoundException {
+        PackageInfo pi = null;
+        pi = mPackages.get(packageName);
+        if (pi != null && pi.applicationInfo.isSystemApp()) {
+            return pi.applicationInfo.versionCode;
+        }
+        throw new NameNotFoundException();
     }
 }

@@ -157,6 +157,15 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         return p;
     }
 
+    private static PackageInfo createPackageInfo(String packageName, boolean enabled, boolean valid,
+            Signature[] signatures, int versionCode, boolean isSystemApp) {
+        PackageInfo p = createPackageInfo(packageName, enabled, valid, signatures);
+        p.versionCode = versionCode;
+        p.applicationInfo.versionCode = versionCode;
+        if (isSystemApp) p.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        return p;
+    }
+
     private void checkPreparationPhasesForPackage(String expectedPackage, int numPreparation) {
         // Verify that onWebViewProviderChanged was called for the numPreparation'th time for the
         // expected package
@@ -816,5 +825,134 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         checkPreparationPhasesForPackage(firstPackage, 1);
 
         Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(thirdPackage));
+    }
+
+    public void testLowerPackageVersionNotValid() {
+        checkPackageVersions(new int[]{100} /* system version */, 50 /* non-system version */,
+                false /*expected validity*/);
+    }
+
+    public void testEqualPackageVersionValid() {
+        checkPackageVersions(new int[]{100} /* system version */, 100 /* non-system version */,
+                true /*expected validity*/);
+    }
+
+    public void testGreaterPackageVersionValid() {
+        checkPackageVersions(new int[]{100} /* system versions */, 200 /* non-system version */,
+                true /*expected validity*/);
+    }
+
+    public void testMinimumSystemVersionUsedTwoDefaultsNonSystemValid() {
+        checkPackageVersions(new int[]{300, 100} /* system versions */,
+                150 /* non-system version */, true /*expected validity*/);
+    }
+
+    public void testMinimumSystemVersionUsedTwoDefaultsNonSystemInvalid() {
+        checkPackageVersions(new int[]{300, 100} /* system versions */,
+                 80 /* non-system version */, false /*expected validity*/);
+    }
+
+    public void testMinimumSystemVersionUsedSeveralDefaultsNonSystemValid() {
+        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
+                50 /* non-system version */, true /*expected validity*/);
+    }
+
+    public void testMinimumSystemVersionUsedSeveralDefaultsNonSystemInvalid() {
+        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
+                49 /* non-system version */, false /*expected validity*/);
+    }
+
+    public void testMinimumSystemVersionUsedFallbackIgnored() {
+        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
+                49 /* non-system version */, false /*expected validity*/, true /* add fallback */,
+                5 /* fallback version */);
+    }
+
+    private void checkPackageVersions(int[] systemVersions, int nonSystemVersion,
+            boolean nonSystemShouldBeValid) {
+        checkPackageVersions(systemVersions, nonSystemVersion, nonSystemShouldBeValid, false, 0);
+    }
+
+    /**
+     * Utility method for checking that package version restriction works as it should.
+     * I.e. that a package with lower version than the system-default is not valid and that a
+     * package with greater than or equal version code is considered valid.
+     */
+    private void checkPackageVersions(int[] systemVersions, int nonSystemVersion,
+            boolean nonSystemShouldBeValid, boolean addFallback, int fallbackVersion) {
+        int numSystemPackages = systemVersions.length;
+        int numFallbackPackages = (addFallback ? 1 : 0);
+        int numPackages = systemVersions.length + 1 + numFallbackPackages;
+        String nonSystemPackage = "nonSystemPackage";
+        String systemPackage = "systemPackage";
+        String fallbackPackage = "fallbackPackage";
+
+        // Each package needs a valid signature since we set isDebuggable to false
+        Signature signature = new Signature("11");
+        String encodedSignatureString =
+            Base64.encodeToString(signature.toByteArray(), Base64.DEFAULT);
+
+        // Set up config
+        // 1. nonSystemPackage
+        // 2-N. default available non-fallback packages
+        // N+1. default available fallback package
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[numPackages];
+        packages[0] = new WebViewProviderInfo(nonSystemPackage, "",
+                false /* available by default */, false /* fallback */,
+                new String[]{encodedSignatureString});
+        for(int n = 1; n < numSystemPackages + 1; n++) {
+            packages[n] = new WebViewProviderInfo(systemPackage + n, "",
+                    true /* available by default */, false /* fallback */,
+                    new String[]{encodedSignatureString});
+        }
+        if (addFallback) {
+            packages[packages.length-1] = new WebViewProviderInfo(fallbackPackage, "",
+                    true /* available by default */, true /* fallback */,
+                    new String[]{encodedSignatureString});
+        }
+
+        setupWithPackages(packages, true /* fallback logic enabled */, 1 /* numRelros */,
+                false /* isDebuggable */);
+
+        // Set package infos
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(nonSystemPackage, true /* enabled */, true /* valid */,
+                    new Signature[]{signature}, nonSystemVersion, false /* isSystemApp */));
+        for(int n = 1; n < numSystemPackages + 1; n++) {
+            mTestSystemImpl.setPackageInfo(
+                    createPackageInfo(systemPackage + n, true /* enabled */, true /* valid */,
+                        new Signature[]{signature}, systemVersions[n-1], true /* isSystemApp */));
+        }
+        if (addFallback) {
+            mTestSystemImpl.setPackageInfo(
+                    createPackageInfo(fallbackPackage, true /* enabled */, true /* valid */,
+                        new Signature[]{signature}, fallbackVersion, true /* isSystemApp */));
+        }
+
+        WebViewProviderInfo[] validPackages = mWebViewUpdateServiceImpl.getValidWebViewPackages();
+        if (nonSystemShouldBeValid) {
+            assertEquals(numSystemPackages + 1 + numFallbackPackages, validPackages.length);
+        } else {
+            assertEquals(numSystemPackages + numFallbackPackages, validPackages.length);
+            // Ensure the non-system package is not one of the valid packages
+            for(int n = 0; n < validPackages.length; n++) {
+                assertFalse(nonSystemPackage.equals(validPackages[n].packageName));
+            }
+        }
+
+        mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
+
+        // The non-system package is not available by default so it shouldn't be used here
+        checkPreparationPhasesForPackage(systemPackage + "1", 1);
+
+        // Try explicitly switching to the non-system package
+        String packageChange = mWebViewUpdateServiceImpl.changeProviderAndSetting(nonSystemPackage);
+        if (nonSystemShouldBeValid) {
+            assertEquals(nonSystemPackage, packageChange);
+            checkPreparationPhasesForPackage(nonSystemPackage, 1);
+        } else {
+            assertEquals(systemPackage + "1", packageChange);
+            // We didn't change package so the webview preparation won't run here
+        }
     }
 }
