@@ -7445,17 +7445,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void adjustForImeIfNeeded(final DisplayContent displayContent) {
         final WindowState imeWin = mInputMethodWindow;
-        final TaskStack focusedStack =
-                mCurrentFocus != null ? mCurrentFocus.getStack() : null;
+        final TaskStack focusedStack = getFocusedStackLocked();
         final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
         if (imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
-                && dockVisible
-                && focusedStack != null
-                && focusedStack.getDockSide() == DOCKED_BOTTOM){
+                && dockVisible && focusedStack != null) {
+            final boolean isFocusOnBottom = focusedStack.getDockSide() == DOCKED_BOTTOM;
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
-                if (stack.isVisibleLocked()) {
+                final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
+                if (stack.isVisibleLocked() && (isFocusOnBottom || isDockedOnBottom)) {
                     stack.setAdjustedForIme(imeWin);
                 }
             }
@@ -7597,6 +7596,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowState getFocusedWindowLocked() {
         return mCurrentFocus;
+    }
+
+    TaskStack getFocusedStackLocked() {
+        return mCurrentFocus != null ? mCurrentFocus.getStack() : null;
     }
 
     private void showAuditSafeModeNotification() {
@@ -9339,6 +9342,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState newFocus = computeFocusedWindowLocked();
         if (mCurrentFocus != newFocus) {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmUpdateFocus");
+            TaskStack oldFocusedStack = getFocusedStackLocked();
             // This check makes sure that we don't already have the focus
             // change message pending.
             mH.removeMessages(H.REPORT_FOCUS_CHANGE);
@@ -9360,6 +9364,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mLosingFocus.remove(newFocus);
 
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
+            TaskStack newFocusedStack = getFocusedStackLocked();
 
             if (imWindowChanged && oldFocus != mInputMethodWindow) {
                 // Focus of the input method window changed. Perform layout if needed.
@@ -9388,6 +9393,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 // doing this part.
                 mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
             }
+
+            // TODO: Reset and re-apply IME adjustment if needed when stack focus changed.
+            // This makes sure divider starts an animation from pre-adjust position to final
+            // position. Ideally we want to skip the reset and animation from current position
+            // directly to final position.
+            final WindowState imeWin = mInputMethodWindow;
+            if (oldFocusedStack != null) {
+                oldFocusedStack.resetAdjustedForIme(true);
+            }
+            if (newFocusedStack != null) {
+                newFocusedStack.resetAdjustedForIme(true);
+            }
+            displayContent.mDividerControllerLocked.setAdjustedForIme(false, false, imeWin);
+            adjustForImeIfNeeded(displayContent);
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             return true;
