@@ -44,6 +44,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -508,6 +509,10 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
                 mMultiUserAvatar.setImageDrawable(picture);
             }
         });
+    }
+
+    @Override
+    public void setCallback(Callback qsPanelCallback) {
     }
 
     @Override

@@ -178,6 +178,7 @@ public class QSContainer extends FrameLayout {
     private void updateQsState() {
         boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling || mHeaderAnimating;
         mQSPanel.setExpanded(mQsExpanded);
+        mQSDetail.setExpanded(mQsExpanded);
         mHeader.setVisibility((mQsExpanded || !mKeyguardShowing || mHeaderAnimating)
                 ? View.VISIBLE
                 : View.INVISIBLE);

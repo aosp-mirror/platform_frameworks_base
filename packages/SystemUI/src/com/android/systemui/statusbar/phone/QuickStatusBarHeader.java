@@ -38,6 +38,7 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSAnimator;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -220,6 +221,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
+        mHeaderQsPanel.setExpanded(expanded);
         updateEverything();
     }
 
@@ -386,6 +388,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setUserInfoController(UserInfoController userInfoController) {
         userInfoController.addListener(this);
+    }
+
+    @Override
+    public void setCallback(Callback qsPanelCallback) {
+        mHeaderQsPanel.setCallback(qsPanelCallback);
     }
 
     @Override
