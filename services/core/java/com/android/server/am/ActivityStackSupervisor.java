@@ -2076,7 +2076,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (onTop) {
                 for (int i = 0; i < size; i++) {
                     moveTaskToStackLocked(tasks.get(i).taskId,
-                            FULLSCREEN_WORKSPACE_STACK_ID, onTop, !FORCE_FOCUS,
+                            FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
                             "moveTasksToFullscreenStack", ANIMATE);
                 }
             } else {
