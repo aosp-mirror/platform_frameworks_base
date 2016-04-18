@@ -19,10 +19,15 @@ import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
@@ -44,6 +49,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.utils.ManagedApplicationService.PendingEvent;
 import com.android.server.vr.EnabledComponentsObserver.EnabledComponentChangeListener;
@@ -56,6 +62,7 @@ import java.lang.StringBuilder;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -289,6 +296,93 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(VR_MANAGER_BINDER_SERVICE, mVrManager.asBinder());
+
+        // If there are no VR packages installed on the device, then disable VR
+        // components, otherwise, enable them.
+        setEnabledStatusOfVrComponents();
+    }
+
+    private void setEnabledStatusOfVrComponents() {
+        ArraySet<ComponentName> vrComponents = SystemConfig.getInstance().getDefaultVrComponents();
+        if (vrComponents == null) {
+           return;
+        }
+
+        // We only want to enable VR components if there is a VR package installed on the device.
+        // The VR components themselves do not quality as a VR package, so exclude them.
+        ArraySet<String> vrComponentPackageNames = new ArraySet<>();
+        for (ComponentName componentName : vrComponents) {
+            vrComponentPackageNames.add(componentName.getPackageName());
+        }
+
+        // Check to see if there are any packages on the device, other than the VR component
+        // packages.
+        PackageManager pm = mContext.getPackageManager();
+        List<PackageInfo> packageInfos = pm.getInstalledPackages(
+                PackageManager.GET_CONFIGURATIONS);
+        boolean vrModeIsUsed = false;
+        for (PackageInfo packageInfo : packageInfos) {
+            if (packageInfo != null && packageInfo.packageName != null &&
+                    pm.getApplicationEnabledSetting(packageInfo.packageName) ==
+                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+                vrModeIsUsed = enableVrComponentsIfVrModeUsed(pm, packageInfo,
+                        vrComponentPackageNames, vrComponents);
+                if (vrModeIsUsed) {
+                    break;
+                }
+            }
+        }
+
+        if (!vrModeIsUsed) {
+            Slog.i(TAG, "No VR packages found, disabling VR components");
+            for (ComponentName componentName : vrComponents) {
+                pm.setApplicationEnabledSetting(componentName.getPackageName(),
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+            }
+
+            // Register to receive an intent when a new package is installed, in case that package
+            // requires VR components.
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+            intentFilter.addDataScheme("package");
+            mContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    PackageManager pm = context.getPackageManager();
+                    final String packageName = intent.getData().getSchemeSpecificPart();
+                    if (packageName != null) {
+                        try {
+                            PackageInfo packageInfo = pm.getPackageInfo(packageName,
+                                    PackageManager.GET_CONFIGURATIONS);
+                            enableVrComponentsIfVrModeUsed(pm, packageInfo,
+                                    vrComponentPackageNames, vrComponents);
+                        } catch (NameNotFoundException e) {
+                        }
+                    }
+                };
+            }, intentFilter);
+        }
+    }
+
+    private boolean enableVrComponentsIfVrModeUsed(PackageManager pm, PackageInfo packageInfo,
+            ArraySet<String> vrComponentPackageNames, ArraySet<ComponentName> vrComponents) {
+        boolean isVrComponent = vrComponents != null &&
+                vrComponentPackageNames.contains(packageInfo.packageName);
+        if (packageInfo != null && packageInfo.reqFeatures != null && !isVrComponent) {
+            for (FeatureInfo featureInfo : packageInfo.reqFeatures) {
+                if (featureInfo.name != null &&
+                    (featureInfo.name.equals(PackageManager.FEATURE_VR_MODE) ||
+                     featureInfo.name.equals(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE))) {
+                    Slog.i(TAG, "VR package found, enabling VR components");
+                    for (ComponentName componentName : vrComponents) {
+                        pm.setApplicationEnabledSetting(componentName.getPackageName(),
+                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
