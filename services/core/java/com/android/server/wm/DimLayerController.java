@@ -149,8 +149,10 @@ class DimLayerController {
             if (state.animator.mWin.mAppToken == null && !dimLayerUser.isFullscreen()) {
                 // Dim should cover the entire screen for system windows.
                 mDisplayContent.getLogicalDisplayRect(mTmpBounds);
-                state.dimLayer.setBounds(mTmpBounds);
+            } else {
+                dimLayerUser.getDimBounds(mTmpBounds);
             }
+            state.dimLayer.setBounds(mTmpBounds);
         }
     }
 
