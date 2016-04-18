@@ -22,20 +22,24 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class IpReachabilityMonitorLostEvent extends IpConnectivityEvent
+public final class IpReachabilityMonitorLostEvent extends IpConnectivityEvent
         implements Parcelable {
-    private String mIfName;
+    public final String ifName;
 
-    public IpReachabilityMonitorLostEvent(String ifName) {
-        mIfName = ifName;
+    private IpReachabilityMonitorLostEvent(String ifName) {
+        this.ifName = ifName;
     }
 
-    public IpReachabilityMonitorLostEvent(Parcel in) {
-        mIfName = in.readString();
+    private IpReachabilityMonitorLostEvent(Parcel in) {
+        this.ifName = in.readString();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mIfName);
+        out.writeString(ifName);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<IpReachabilityMonitorLostEvent> CREATOR
@@ -50,7 +54,6 @@ public class IpReachabilityMonitorLostEvent extends IpConnectivityEvent
     };
 
     public static void logEvent(String ifName) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_IPRM_REACHABILITY_LOST,
-                new IpReachabilityMonitorLostEvent(ifName));
+        logEvent(IPCE_IPRM_REACHABILITY_LOST, new IpReachabilityMonitorLostEvent(ifName));
     }
 };

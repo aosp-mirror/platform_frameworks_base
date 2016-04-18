@@ -22,23 +22,27 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class IpManagerEvent extends IpConnectivityEvent implements Parcelable {
-    private String mIfName;
-    private long mDurationMs;
+public final class IpManagerEvent extends IpConnectivityEvent implements Parcelable {
+    public final String ifName;
+    public final long durationMs;
 
-    public IpManagerEvent(String ifName, long duration) {
-        mIfName = ifName;
-        mDurationMs = duration;
+    private IpManagerEvent(String ifName, long duration) {
+        this.ifName = ifName;
+        this.durationMs = duration;
     }
 
-    public IpManagerEvent(Parcel in) {
-        mIfName = in.readString();
-        mDurationMs = in.readLong();
+    private IpManagerEvent(Parcel in) {
+        this.ifName = in.readString();
+        this.durationMs = in.readLong();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mIfName);
-        out.writeLong(mDurationMs);
+        out.writeString(ifName);
+        out.writeLong(durationMs);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<IpManagerEvent> CREATOR
@@ -53,6 +57,6 @@ public class IpManagerEvent extends IpConnectivityEvent implements Parcelable {
     };
 
     public static void logEvent(int eventType, String ifName, long durationMs) {
-        IpConnectivityEvent.logEvent(eventType, new IpManagerEvent(ifName, durationMs));
+        logEvent(eventType, new IpManagerEvent(ifName, durationMs));
     }
 };

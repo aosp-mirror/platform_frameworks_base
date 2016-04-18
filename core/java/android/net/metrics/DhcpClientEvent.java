@@ -22,25 +22,27 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "DhcpClientEvent";
+public final class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
+    public final String ifName;
+    public final String msg;
 
-    private String mIfName;
-    private String mMsg;
-
-    public DhcpClientEvent(String ifName, String msg) {
-        mIfName = ifName;
-        mMsg = msg;
+    private DhcpClientEvent(String ifName, String msg) {
+        this.ifName = ifName;
+        this.msg = msg;
     }
 
-    public DhcpClientEvent(Parcel in) {
-        mIfName = in.readString();
-        mMsg = in.readString();
+    private DhcpClientEvent(Parcel in) {
+        this.ifName = in.readString();
+        this.msg = in.readString();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mIfName);
-        out.writeString(mMsg);
+        out.writeString(ifName);
+        out.writeString(msg);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<DhcpClientEvent> CREATOR
@@ -55,6 +57,6 @@ public class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
     };
 
     public static void logStateEvent(String ifName, String state) {
-        logEvent(IpConnectivityEvent.IPCE_DHCP_STATE_CHANGE, new DhcpClientEvent(ifName, state));
+        logEvent(IPCE_DHCP_STATE_CHANGE, new DhcpClientEvent(ifName, state));
     }
 };

@@ -22,24 +22,27 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class CaptivePortalStateChangeEvent extends IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "CaptivePortalStateChangeEvent";
-
-    public static final int NETWORK_MONITOR_CONNECTED = 0;
+public final class CaptivePortalStateChangeEvent extends IpConnectivityEvent implements Parcelable {
+    public static final int NETWORK_MONITOR_CONNECTED    = 0;
     public static final int NETWORK_MONITOR_DISCONNECTED = 1;
-    public static final int NETWORK_MONITOR_VALIDATED = 2;
-    private int mState;
+    public static final int NETWORK_MONITOR_VALIDATED    = 2;
+
+    public final int state;
 
     public CaptivePortalStateChangeEvent(int state) {
-        mState = state;
+        this.state = state;
     }
 
     public CaptivePortalStateChangeEvent(Parcel in) {
-        mState = in.readInt();
+        state = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mState);
+        out.writeInt(state);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<CaptivePortalStateChangeEvent> CREATOR
@@ -54,7 +57,6 @@ public class CaptivePortalStateChangeEvent extends IpConnectivityEvent implement
     };
 
     public static void logEvent(int state) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_NETMON_STATE_CHANGE,
-                new CaptivePortalStateChangeEvent(state));
+        logEvent(IPCE_NETMON_STATE_CHANGE, new CaptivePortalStateChangeEvent(state));
     }
 };

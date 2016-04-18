@@ -22,30 +22,32 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class IpReachabilityMonitorProbeEvent extends IpConnectivityEvent
-    implements Parcelable {
-    public static final String TAG = "IpReachabilityMonitorProbeEvent";
+public final class IpReachabilityMonitorProbeEvent extends IpConnectivityEvent
+        implements Parcelable {
+    public final String ifName;
+    public final String destination;
+    public final boolean success;
 
-    private String mIfName;
-    private String mDestination;
-    private boolean mSuccess;
-
-    public IpReachabilityMonitorProbeEvent(String ifName, String destination, boolean success) {
-        mIfName = ifName;
-        mDestination = destination;
-        mSuccess = success;
+    private IpReachabilityMonitorProbeEvent(String ifName, String destination, boolean success) {
+        this.ifName = ifName;
+        this.destination = destination;
+        this.success = success;
     }
 
-    public IpReachabilityMonitorProbeEvent(Parcel in) {
-        mIfName = in.readString();
-        mDestination = in.readString();
-        mSuccess = in.readByte() > 0 ? true : false;
+    private IpReachabilityMonitorProbeEvent(Parcel in) {
+        this.ifName = in.readString();
+        this.destination = in.readString();
+        this.success = in.readByte() > 0 ? true : false;
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mIfName);
-        out.writeString(mDestination);
-        out.writeByte((byte)(mSuccess ? 1 : 0));
+        out.writeString(ifName);
+        out.writeString(destination);
+        out.writeByte((byte)(success ? 1 : 0));
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<IpReachabilityMonitorProbeEvent> CREATOR
@@ -60,7 +62,7 @@ public class IpReachabilityMonitorProbeEvent extends IpConnectivityEvent
     };
 
     public static void logEvent(String ifName, String destination, boolean success) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_IPRM_PROBE_RESULT,
+        logEvent(IPCE_IPRM_PROBE_RESULT,
                 new IpReachabilityMonitorProbeEvent(ifName, destination, success));
     }
 };
