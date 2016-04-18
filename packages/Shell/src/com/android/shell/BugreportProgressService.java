@@ -336,7 +336,7 @@ public class BugreportProgressService extends Service {
                     launchBugreportInfoDialog(id);
                     break;
                 case INTENT_BUGREPORT_SCREENSHOT:
-                    takeScreenshot(id, true);
+                    takeScreenshot(id);
                     break;
                 case INTENT_BUGREPORT_SHARE:
                     shareBugreport(id, (BugreportInfo) intent.getParcelableExtra(EXTRA_INFO));
@@ -417,8 +417,6 @@ public class BugreportProgressService extends Service {
             return true;
         }
         mProcesses.put(info.id, info);
-        // Take initial screenshot.
-        takeScreenshot(id, false);
         updateProgress(info);
         return true;
     }
@@ -635,19 +633,11 @@ public class BugreportProgressService extends Service {
     /**
      * Starting point for taking a screenshot.
      * <p>
-     * If {@code delayed} is set, it first display a toast message and waits
-     * {@link #SCREENSHOT_DELAY_SECONDS} seconds before taking it, otherwise it takes the screenshot
-     * right away.
-     * <p>
-     * Typical usage is delaying when taken from the notification action, and taking it right away
-     * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
+     * It first display a toast message and waits {@link #SCREENSHOT_DELAY_SECONDS} seconds before
+     * taking the screenshot.
      */
-    private void takeScreenshot(int id, boolean delayed) {
-        if (delayed) {
-            // Only logs screenshots requested from the notification action.
-            MetricsLogger.action(this,
-                    MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
-        }
+    private void takeScreenshot(int id) {
+        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
         if (getInfo(id) == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
@@ -659,19 +649,15 @@ public class BugreportProgressService extends Service {
             return;
         }
         setTakingScreenshot(true);
-        if (delayed) {
-            collapseNotificationBar();
-            final String msg = mContext.getResources()
-                    .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
-                            SCREENSHOT_DELAY_SECONDS, SCREENSHOT_DELAY_SECONDS);
-            Log.i(TAG, msg);
-            // Show a toast just once, otherwise it might be captured in the screenshot.
-            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        collapseNotificationBar();
+        final String msg = mContext.getResources()
+                .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
+                        SCREENSHOT_DELAY_SECONDS, SCREENSHOT_DELAY_SECONDS);
+        Log.i(TAG, msg);
+        // Show a toast just once, otherwise it might be captured in the screenshot.
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
 
-            takeScreenshot(id, SCREENSHOT_DELAY_SECONDS);
-        } else {
-            takeScreenshot(id, 0);
-        }
+        takeScreenshot(id, SCREENSHOT_DELAY_SECONDS);
     }
 
     /**
