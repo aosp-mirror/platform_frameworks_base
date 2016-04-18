@@ -2875,6 +2875,19 @@ class MountService extends IMountService.Stub
     }
 
     @Override
+    public void destroyUserStorage(String volumeUuid, int userId, int flags) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        try {
+            mCryptConnector.execute("cryptfs", "destroy_user_storage", escapeNull(volumeUuid),
+                    userId, flags);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
     public ParcelFileDescriptor mountAppFuse(final String name) throws RemoteException {
         try {
             final int uid = Binder.getCallingUid();
