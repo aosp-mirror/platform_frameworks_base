@@ -564,7 +564,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             auto functor = std::bind(
                 std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePosition), this,
-                (jlong) info.frameNumber, (jint) bounds.left, (jint) bounds.top,
+                (jlong) info.canvasContext.getFrameNumber(),
+                (jint) bounds.left, (jint) bounds.top,
                 (jint) bounds.right, (jint) bounds.bottom);
 
             info.canvasContext.enqueueFrameWork(std::move(functor));
