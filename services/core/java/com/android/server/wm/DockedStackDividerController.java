@@ -27,6 +27,7 @@ import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -276,6 +277,9 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
+        mService.mH.removeMessages(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED);
+        mService.mH.obtainMessage(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED,
+                minimizedDock ? 1 : 0, 0).sendToTarget();
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
@@ -352,6 +356,12 @@ public class DockedStackDividerController implements DimLayerUser {
     void notifyAppVisibilityChanged(AppWindowToken wtoken, boolean visible) {
         final Task task = wtoken.mTask;
         if (!task.isHomeTask() || !task.isVisibleForUser()) {
+            return;
+        }
+
+        // If the app that having visibility change is not the top visible one in the task,
+        // it does not affect whether the docked stack is minimized, ignore it.
+        if (task.getTopVisibleAppToken() == null || task.getTopVisibleAppToken() != wtoken) {
             return;
         }
 

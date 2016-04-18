@@ -82,9 +82,11 @@ import android.app.AppGlobals;
 import android.app.IActivityContainer;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -380,7 +382,8 @@ class ActivityStarter {
         }
 
         mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage);
-        mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid, callingUid);
+        mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid, callingUid,
+                options);
         intent = mInterceptor.mIntent;
         rInfo = mInterceptor.mRInfo;
         aInfo = mInterceptor.mAInfo;
@@ -388,7 +391,7 @@ class ActivityStarter {
         inTask = mInterceptor.mInTask;
         callingPid = mInterceptor.mCallingPid;
         callingUid = mInterceptor.mCallingUid;
-
+        options = mInterceptor.mActivityOptions;
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
@@ -588,6 +591,53 @@ class ActivityStarter {
             mSupervisor.scheduleResumeTopActivities();
         }
     }
+
+    void showConfirmDeviceCredential(int userId) {
+        // First, retrieve the stack that we want to resume after credential is confirmed.
+        ActivityStack targetStack;
+        ActivityStack fullscreenStack =
+                mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+        if (fullscreenStack != null &&
+                fullscreenStack.getStackVisibilityLocked(null) != ActivityStack.STACK_INVISIBLE) {
+            // Single window case and the case that the docked stack is shown with fullscreen stack.
+            targetStack = fullscreenStack;
+        } else {
+            // The case that the docked stack is shown with recent.
+            targetStack = mSupervisor.getStack(HOME_STACK_ID);
+        }
+        if (targetStack == null) {
+            return;
+        }
+        final KeyguardManager km = (KeyguardManager) mService.mContext
+                .getSystemService(Context.KEYGUARD_SERVICE);
+        final Intent credential =
+                km.createConfirmDeviceCredentialIntent(null, null, userId);
+        credential.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchTaskId(mSupervisor.getHomeActivity().task.taskId);
+        final ActivityRecord activityRecord = targetStack.topRunningActivityLocked();
+        if (activityRecord != null) {
+            final IIntentSender target = mService.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_ACTIVITY,
+                    activityRecord.launchedFromPackage,
+                    activityRecord.launchedFromUid,
+                    activityRecord.userId,
+                    null, null, 0,
+                    new Intent[] { activityRecord.intent },
+                    new String[] { activityRecord.resolvedType },
+                    PendingIntent.FLAG_CANCEL_CURRENT |
+                            PendingIntent.FLAG_ONE_SHOT |
+                            PendingIntent.FLAG_IMMUTABLE,
+                    null);
+            credential.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+            // Show confirm credentials activity.
+            mService.mContext.startActivityAsUser(credential, options.toBundle(),
+                    UserHandle.CURRENT);
+        }
+    }
+
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType,
