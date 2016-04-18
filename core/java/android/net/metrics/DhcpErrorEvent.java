@@ -16,12 +16,14 @@
 
 package android.net.metrics;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * {@hide} Event class used to record error events when parsing DHCP response packets.
  */
+@SystemApi
 public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
     public static final int L2_ERROR   = 1;
     public static final int L3_ERROR   = 2;
