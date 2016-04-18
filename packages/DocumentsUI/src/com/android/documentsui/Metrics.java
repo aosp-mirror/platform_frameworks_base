@@ -243,6 +243,7 @@ public final class Metrics {
     public static final int USER_ACTION_COPY_CLIPBOARD = 23;
     public static final int USER_ACTION_DRAG_N_DROP = 24;
     public static final int USER_ACTION_DRAG_N_DROP_MULTI_WINDOW = 25;
+    public static final int USER_ACTION_CUT_CLIPBOARD = 26;
 
     @IntDef(flag = false, value = {
             USER_ACTION_OTHER,
@@ -269,7 +270,8 @@ public final class Metrics {
             USER_ACTION_PASTE_CLIPBOARD,
             USER_ACTION_COPY_CLIPBOARD,
             USER_ACTION_DRAG_N_DROP,
-            USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
+            USER_ACTION_DRAG_N_DROP_MULTI_WINDOW,
+            USER_ACTION_CUT_CLIPBOARD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserAction {}

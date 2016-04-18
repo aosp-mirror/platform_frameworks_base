@@ -359,6 +359,12 @@ public class FilesActivity extends BaseActivity {
                     dir.selectAllFiles();
                 }
                 return true;
+            case KeyEvent.KEYCODE_X:
+                dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.cutSelectedToClipboard();
+                }
+                return true;
             case KeyEvent.KEYCODE_C:
                 dir = getDirectoryFragment();
                 if (dir != null) {

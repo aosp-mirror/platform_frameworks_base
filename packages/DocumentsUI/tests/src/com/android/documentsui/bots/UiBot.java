@@ -224,4 +224,8 @@ public class UiBot extends BaseBot {
     public void pressKey(int keyCode) {
         mDevice.pressKeyCode(keyCode);
     }
+
+    public void pressKey(int keyCode, int metaState) {
+        mDevice.pressKeyCode(keyCode, metaState);
+    }
 }

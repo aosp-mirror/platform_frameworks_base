@@ -138,6 +138,50 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsAbsent("file1.png");
     }
 
+    public void testKeyboard_CutDocument() throws Exception {
+        initTestFiles();
+
+        bots.roots.openRoot(ROOT_0_ID);
+
+        bots.directory.clickDocument("file1.png");
+        device.waitForIdle();
+        bots.main.pressKey(KeyEvent.KEYCODE_X, KeyEvent.META_CTRL_ON);
+
+        device.waitForIdle();
+
+        bots.roots.openRoot(ROOT_1_ID);
+        bots.main.pressKey(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON);
+
+        device.waitForIdle();
+
+        bots.directory.assertDocumentsPresent("file1.png");
+
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.directory.assertDocumentsAbsent("file1.png");
+    }
+
+    public void testKeyboard_CopyDocument() throws Exception {
+        initTestFiles();
+
+        bots.roots.openRoot(ROOT_0_ID);
+
+        bots.directory.clickDocument("file1.png");
+        device.waitForIdle();
+        bots.main.pressKey(KeyEvent.KEYCODE_C, KeyEvent.META_CTRL_ON);
+
+        device.waitForIdle();
+
+        bots.roots.openRoot(ROOT_1_ID);
+        bots.main.pressKey(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON);
+
+        device.waitForIdle();
+
+        bots.directory.assertDocumentsPresent("file1.png");
+
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.directory.assertDocumentsPresent("file1.png");
+    }
+
     public void testDeleteDocument_Cancel() throws Exception {
         initTestFiles();
 
