@@ -203,6 +203,10 @@ public class WindowLayersController {
         if (mDockDivider != null && mDockDivider.isVisibleLw()
                 && mService.mInputMethodWindow != null) {
             layer = assignAndIncreaseLayerIfNeeded(mService.mInputMethodWindow, layer);
+            for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
+                final WindowState dialog = mService.mInputMethodDialogs.get(i);
+                layer = assignAndIncreaseLayerIfNeeded(dialog, layer);
+            }
         }
 
         // We know that we will be animating a relaunching window in the near future, which will
