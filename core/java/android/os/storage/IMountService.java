@@ -1325,6 +1325,24 @@ public interface IMountService extends IInterface {
             }
 
             @Override
+            public void destroyUserStorage(String volumeUuid, int userId, int flags)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volumeUuid);
+                    _data.writeInt(userId);
+                    _data.writeInt(flags);
+                    mRemote.transact(Stub.TRANSACTION_destroyUserStorage, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
             public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1465,6 +1483,7 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_isUserKeyUnlocked = IBinder.FIRST_CALL_TRANSACTION + 65;
 
         static final int TRANSACTION_prepareUserStorage = IBinder.FIRST_CALL_TRANSACTION + 66;
+        static final int TRANSACTION_destroyUserStorage = IBinder.FIRST_CALL_TRANSACTION + 67;
 
         static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 68;
 
@@ -2096,6 +2115,15 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_destroyUserStorage: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volumeUuid = data.readString();
+                    int userId = data.readInt();
+                    int _flags = data.readInt();
+                    destroyUserStorage(volumeUuid, userId, _flags);
+                    reply.writeNoException();
+                    return true;
+                }
                 case TRANSACTION_mountAppFuse: {
                     data.enforceInterface(DESCRIPTOR);
                     String name = data.readString();
@@ -2434,6 +2462,7 @@ public interface IMountService extends IInterface {
 
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber,
             int flags) throws RemoteException;
+    public void destroyUserStorage(String volumeUuid, int userId, int flags) throws RemoteException;
 
     public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }
