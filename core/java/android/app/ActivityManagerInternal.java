@@ -133,4 +133,10 @@ public abstract class ActivityManagerInternal {
      * the focused activity.
      */
     public abstract List<IBinder> getTopVisibleActivities();
+
+    /**
+     * Callback for window manager to let activity manager know that docked stack changes its
+     * minimized state.
+     */
+    public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
 }
