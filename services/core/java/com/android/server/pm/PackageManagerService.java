@@ -13425,14 +13425,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid),
                     move.dataAppName);
             Slog.d(TAG, "Cleaning up " + move.packageName + " on " + volumeUuid);
+            final int[] userIds = sUserManager.getUserIds();
             synchronized (mInstallLock) {
                 // Clean up both app data and code
                 // All package moves are frozen until finished
-                try {
-                    mInstaller.destroyAppData(volumeUuid, move.packageName, UserHandle.USER_ALL,
-                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE, 0);
-                } catch (InstallerException e) {
-                    Slog.w(TAG, String.valueOf(e));
+                for (int userId : userIds) {
+                    try {
+                        mInstaller.destroyAppData(volumeUuid, move.packageName, userId,
+                                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE, 0);
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, String.valueOf(e));
+                    }
                 }
                 removeCodePathLI(codeFile);
             }
