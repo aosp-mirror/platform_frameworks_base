@@ -709,8 +709,10 @@ abstract class DhcpPacket {
     }
 
     public static class ParseException extends Exception {
-        public ParseException(String msg, Object... args) {
+        public final int errorCode;
+        public ParseException(int errorCode, String msg, Object... args) {
             super(String.format(msg, args));
+            this.errorCode = errorCode;
         }
     }
 
@@ -766,9 +768,8 @@ abstract class DhcpPacket {
         // check to see if we need to parse L2, IP, and UDP encaps
         if (pktType == ENCAP_L2) {
             if (packet.remaining() < MIN_PACKET_LENGTH_L2) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L2_TOO_SHORT);
-                throw new ParseException("L2 packet too short, %d < %d",
-                        packet.remaining(), MIN_PACKET_LENGTH_L2);
+                throw new ParseException(DhcpErrorEvent.L2_TOO_SHORT,
+                        "L2 packet too short, %d < %d", packet.remaining(), MIN_PACKET_LENGTH_L2);
             }
 
             byte[] l2dst = new byte[6];
@@ -780,24 +781,22 @@ abstract class DhcpPacket {
             short l2type = packet.getShort();
 
             if (l2type != OsConstants.ETH_P_IP) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L2_WRONG_ETH_TYPE);
-                throw new ParseException("Unexpected L2 type 0x%04x, expected 0x%04x",
-                        l2type, OsConstants.ETH_P_IP);
+                throw new ParseException(DhcpErrorEvent.L2_WRONG_ETH_TYPE,
+                        "Unexpected L2 type 0x%04x, expected 0x%04x", l2type, OsConstants.ETH_P_IP);
             }
         }
 
         if (pktType <= ENCAP_L3) {
             if (packet.remaining() < MIN_PACKET_LENGTH_L3) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L3_TOO_SHORT);
-                throw new ParseException("L3 packet too short, %d < %d",
-                        packet.remaining(), MIN_PACKET_LENGTH_L3);
+                throw new ParseException(DhcpErrorEvent.L3_TOO_SHORT,
+                        "L3 packet too short, %d < %d", packet.remaining(), MIN_PACKET_LENGTH_L3);
             }
 
             byte ipTypeAndLength = packet.get();
             int ipVersion = (ipTypeAndLength & 0xf0) >> 4;
             if (ipVersion != 4) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L3_NOT_IPV4);
-                throw new ParseException("Invalid IP version %d", ipVersion);
+                throw new ParseException(
+                        DhcpErrorEvent.L3_NOT_IPV4, "Invalid IP version %d", ipVersion);
             }
 
             // System.out.println("ipType is " + ipType);
@@ -814,8 +813,8 @@ abstract class DhcpPacket {
             ipDst = readIpAddress(packet);
 
             if (ipProto != IP_TYPE_UDP) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L4_NOT_UDP);
-                throw new ParseException("Protocol not UDP: %d", ipProto);
+                throw new ParseException(
+                        DhcpErrorEvent.L4_NOT_UDP, "Protocol not UDP: %d", ipProto);
             }
 
             // Skip options. This cannot cause us to read beyond the end of the buffer because the
@@ -841,15 +840,15 @@ abstract class DhcpPacket {
                 // socket to drop packets that don't have the right source ports. However, it's
                 // possible that a packet arrives between when the socket is bound and when the
                 // filter is set. http://b/26696823 .
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.L4_WRONG_PORT);
-                throw new ParseException("Unexpected UDP ports %d->%d", udpSrcPort, udpDstPort);
+                throw new ParseException(DhcpErrorEvent.L4_WRONG_PORT,
+                        "Unexpected UDP ports %d->%d", udpSrcPort, udpDstPort);
             }
         }
 
         // We need to check the length even for ENCAP_L3 because the IPv4 header is variable-length.
         if (pktType > ENCAP_BOOTP || packet.remaining() < MIN_PACKET_LENGTH_BOOTP) {
-            DhcpErrorEvent.logEvent(DhcpErrorEvent.BOOTP_TOO_SHORT);
-            throw new ParseException("Invalid type or BOOTP packet too short, %d < %d",
+            throw new ParseException(DhcpErrorEvent.BOOTP_TOO_SHORT,
+                        "Invalid type or BOOTP packet too short, %d < %d",
                         packet.remaining(), MIN_PACKET_LENGTH_BOOTP);
         }
 
@@ -873,8 +872,8 @@ abstract class DhcpPacket {
             packet.get(ipv4addr);
             relayIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
         } catch (UnknownHostException ex) {
-            DhcpErrorEvent.logEvent(DhcpErrorEvent.L3_INVALID_IP);
-            throw new ParseException("Invalid IPv4 address: %s", Arrays.toString(ipv4addr));
+            throw new ParseException(DhcpErrorEvent.L3_INVALID_IP,
+                    "Invalid IPv4 address: %s", Arrays.toString(ipv4addr));
         }
 
         // Some DHCP servers have been known to announce invalid client hardware address values such
@@ -898,9 +897,9 @@ abstract class DhcpPacket {
         int dhcpMagicCookie = packet.getInt();
 
         if (dhcpMagicCookie != DHCP_MAGIC_COOKIE) {
-            DhcpErrorEvent.logEvent(DhcpErrorEvent.DHCP_BAD_MAGIC_COOKIE);
-            throw new ParseException("Bad magic cookie 0x%08x, should be 0x%08x", dhcpMagicCookie,
-                    DHCP_MAGIC_COOKIE);
+            throw new ParseException(DhcpErrorEvent.DHCP_BAD_MAGIC_COOKIE,
+                    "Bad magic cookie 0x%08x, should be 0x%08x",
+                    dhcpMagicCookie, DHCP_MAGIC_COOKIE);
         }
 
         // parse options
@@ -1009,15 +1008,17 @@ abstract class DhcpPacket {
                     }
 
                     if (expectedLen != optionLen) {
-                        DhcpErrorEvent.logEvent(
+                        final int errorCode = DhcpErrorEvent.errorCodeWithOption(
                                 DhcpErrorEvent.DHCP_INVALID_OPTION_LENGTH, optionType);
-                        throw new ParseException("Invalid length %d for option %d, expected %d",
+                        throw new ParseException(errorCode,
+                                "Invalid length %d for option %d, expected %d",
                                 optionLen, optionType, expectedLen);
                     }
                 }
             } catch (BufferUnderflowException e) {
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.BUFFER_UNDERFLOW, optionType);
-                throw new ParseException("BufferUnderflowException");
+                final int errorCode = DhcpErrorEvent.errorCodeWithOption(
+                        DhcpErrorEvent.BUFFER_UNDERFLOW, optionType);
+                throw new ParseException(errorCode, "BufferUnderflowException");
             }
         }
 
@@ -1025,8 +1026,8 @@ abstract class DhcpPacket {
 
         switch(dhcpType) {
             case (byte) 0xFF:
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.DHCP_NO_MSG_TYPE);
-                throw new ParseException("No DHCP message type option");
+                throw new ParseException(DhcpErrorEvent.DHCP_NO_MSG_TYPE,
+                        "No DHCP message type option");
             case DHCP_MESSAGE_TYPE_DISCOVER:
                 newPacket = new DhcpDiscoverPacket(
                     transactionId, secs, clientMac, broadcast);
@@ -1059,8 +1060,8 @@ abstract class DhcpPacket {
                     clientMac);
                 break;
             default:
-                DhcpErrorEvent.logEvent(DhcpErrorEvent.DHCP_UNKNOWN_MSG_TYPE);
-                throw new ParseException("Unimplemented DHCP type %d", dhcpType);
+                throw new ParseException(DhcpErrorEvent.DHCP_UNKNOWN_MSG_TYPE,
+                        "Unimplemented DHCP type %d", dhcpType);
         }
 
         newPacket.mBroadcastAddress = bcAddr;
