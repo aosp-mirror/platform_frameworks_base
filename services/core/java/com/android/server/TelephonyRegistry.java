@@ -159,7 +159,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private String[] mDataConnectionApn;
 
-    private ArrayList<String> mConnectedApns;
+    private ArrayList<String>[] mConnectedApns;
 
     private LinkProperties[] mDataConnectionLinkProperties;
 
@@ -292,11 +292,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
-        mConnectedApns = new ArrayList<String>();
 
         int numPhones = TelephonyManager.getDefault().getPhoneCount();
         if (DBG) log("TelephonyRegistor: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
+        mConnectedApns = new ArrayList[numPhones];
         mCallState = new int[numPhones];
         mDataActivity = new int[numPhones];
         mDataConnectionState = new int[numPhones];
@@ -327,6 +327,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionApn[i] =  "";
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
+            mConnectedApns[i] = new ArrayList<String>();
         }
 
         // Note that location can be null for non-phone builds like
@@ -336,7 +337,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 location.fillInNotifierBundle(mCellLocation[i]);
             }
         }
-        mConnectedApns = new ArrayList<String>();
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
     }
@@ -1059,16 +1059,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 boolean modified = false;
                 if (state == TelephonyManager.DATA_CONNECTED) {
-                    if (!mConnectedApns.contains(apnType)) {
-                        mConnectedApns.add(apnType);
+                    if (!mConnectedApns[phoneId].contains(apnType)) {
+                        mConnectedApns[phoneId].add(apnType);
                         if (mDataConnectionState[phoneId] != state) {
                             mDataConnectionState[phoneId] = state;
                             modified = true;
                         }
                     }
                 } else {
-                    if (mConnectedApns.remove(apnType)) {
-                        if (mConnectedApns.isEmpty()) {
+                    if (mConnectedApns[phoneId].remove(apnType)) {
+                        if (mConnectedApns[phoneId].isEmpty()) {
                             mDataConnectionState[phoneId] = state;
                             modified = true;
                         } else {
