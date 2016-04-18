@@ -29,6 +29,7 @@ import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.LocaleList;
@@ -430,37 +431,44 @@ public class ResourcesManager {
             @Nullable Configuration overrideConfig,
             @NonNull CompatibilityInfo compatInfo,
             @Nullable ClassLoader classLoader) {
-        final ResourcesKey key = new ResourcesKey(
-                resDir,
-                splitResDirs,
-                overlayDirs,
-                libDirs,
-                displayId,
-                overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
-                compatInfo);
-        classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#createBaseActivityResources");
+            final ResourcesKey key = new ResourcesKey(
+                    resDir,
+                    splitResDirs,
+                    overlayDirs,
+                    libDirs,
+                    displayId,
+                    overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
+                    compatInfo);
+            classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
 
-        if (DEBUG) {
-            Slog.d(TAG, "createBaseActivityResources activity=" + activityToken
-                    + " with key=" + key);
-        }
-
-        synchronized (this) {
-            final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
-                    activityToken);
-
-            if (overrideConfig != null) {
-                activityResources.overrideConfig.setTo(overrideConfig);
-            } else {
-                activityResources.overrideConfig.setToDefaults();
+            if (DEBUG) {
+                Slog.d(TAG, "createBaseActivityResources activity=" + activityToken
+                        + " with key=" + key);
             }
+
+            synchronized (this) {
+                final ActivityResources activityResources =
+                        getOrCreateActivityResourcesStructLocked(
+                                activityToken);
+
+                if (overrideConfig != null) {
+                    activityResources.overrideConfig.setTo(overrideConfig);
+                } else {
+                    activityResources.overrideConfig.setToDefaults();
+                }
+            }
+
+            // Update any existing Activity Resources references.
+            updateResourcesForActivity(activityToken, overrideConfig);
+
+            // Now request an actual Resources object.
+            return getOrCreateResources(activityToken, key, classLoader);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
-
-        // Update any existing Activity Resources references.
-        updateResourcesForActivity(activityToken, overrideConfig);
-
-        // Now request an actual Resources object.
-        return getOrCreateResources(activityToken, key, classLoader);
     }
 
     /**
@@ -490,8 +498,8 @@ public class ResourcesManager {
             }
 
             if (activityToken != null) {
-                final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
-                        activityToken);
+                final ActivityResources activityResources =
+                        getOrCreateActivityResourcesStructLocked(activityToken);
 
                 // Clean up any dead references so they don't pile up.
                 ArrayUtils.unstableRemoveIf(activityResources.activityResources,
@@ -539,6 +547,7 @@ public class ResourcesManager {
         final String[] systemLocales = findSystemLocales
                 ? AssetManager.getSystem().getLocales() : null;
         final String[] nonSystemLocales = resourcesImpl.getAssets().getNonSystemLocales();
+
         // Avoid checking for non-pseudo-locales if we already know there were some from a previous
         // Resources. The default value (for when hasNonSystemLocales is true) doesn't matter,
         // since mHasNonSystemLocales will also be true, and thus isPseudoLocalesOnly would not be
@@ -613,16 +622,21 @@ public class ResourcesManager {
             @Nullable Configuration overrideConfig,
             @NonNull CompatibilityInfo compatInfo,
             @Nullable ClassLoader classLoader) {
-        final ResourcesKey key = new ResourcesKey(
-                resDir,
-                splitResDirs,
-                overlayDirs,
-                libDirs,
-                displayId,
-                overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
-                compatInfo);
-        classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
-        return getOrCreateResources(activityToken, key, classLoader);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesManager#getResources");
+            final ResourcesKey key = new ResourcesKey(
+                    resDir,
+                    splitResDirs,
+                    overlayDirs,
+                    libDirs,
+                    displayId,
+                    overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
+                    compatInfo);
+            classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
+            return getOrCreateResources(activityToken, key, classLoader);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
     }
 
     /**
@@ -636,93 +650,104 @@ public class ResourcesManager {
      */
     public void updateResourcesForActivity(@NonNull IBinder activityToken,
             @Nullable Configuration overrideConfig) {
-        synchronized (this) {
-            final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
-                    activityToken);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#updateResourcesForActivity");
+            synchronized (this) {
+                final ActivityResources activityResources =
+                        getOrCreateActivityResourcesStructLocked(activityToken);
 
-            if (Objects.equals(activityResources.overrideConfig, overrideConfig)) {
-                // They are the same, no work to do.
-                return;
-            }
-
-            // Grab a copy of the old configuration so we can create the delta's of each
-            // Resources object associated with this Activity.
-            final Configuration oldConfig = new Configuration(activityResources.overrideConfig);
-
-            // Update the Activity's base override.
-            if (overrideConfig != null) {
-                activityResources.overrideConfig.setTo(overrideConfig);
-            } else {
-                activityResources.overrideConfig.setToDefaults();
-            }
-
-            if (DEBUG) {
-                Throwable here = new Throwable();
-                here.fillInStackTrace();
-                Slog.d(TAG, "updating resources override for activity=" + activityToken
-                        + " from oldConfig=" + Configuration.resourceQualifierString(oldConfig)
-                        + " to newConfig="
-                        + Configuration.resourceQualifierString(activityResources.overrideConfig),
-                        here);
-            }
-
-            final boolean activityHasOverrideConfig =
-                    !activityResources.overrideConfig.equals(Configuration.EMPTY);
-
-            // Rebase each Resources associated with this Activity.
-            final int refCount = activityResources.activityResources.size();
-            for (int i = 0; i < refCount; i++) {
-                WeakReference<Resources> weakResRef = activityResources.activityResources.get(i);
-                Resources resources = weakResRef.get();
-                if (resources == null) {
-                    continue;
+                if (Objects.equals(activityResources.overrideConfig, overrideConfig)) {
+                    // They are the same, no work to do.
+                    return;
                 }
 
-                // Extract the ResourcesKey that was last used to create the Resources for this
-                // activity.
-                final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
-                if (oldKey == null) {
-                    Slog.e(TAG, "can't find ResourcesKey for resources impl="
-                            + resources.getImpl());
-                    continue;
-                }
+                // Grab a copy of the old configuration so we can create the delta's of each
+                // Resources object associated with this Activity.
+                final Configuration oldConfig = new Configuration(activityResources.overrideConfig);
 
-                // Build the new override configuration for this ResourcesKey.
-                final Configuration rebasedOverrideConfig = new Configuration();
+                // Update the Activity's base override.
                 if (overrideConfig != null) {
-                    rebasedOverrideConfig.setTo(overrideConfig);
+                    activityResources.overrideConfig.setTo(overrideConfig);
+                } else {
+                    activityResources.overrideConfig.setToDefaults();
                 }
-
-                if (activityHasOverrideConfig && oldKey.hasOverrideConfiguration()) {
-                    // Generate a delta between the old base Activity override configuration and
-                    // the actual final override configuration that was used to figure out the real
-                    // delta this Resources object wanted.
-                    Configuration overrideOverrideConfig = Configuration.generateDelta(
-                            oldConfig, oldKey.mOverrideConfiguration);
-                    rebasedOverrideConfig.updateFrom(overrideOverrideConfig);
-                }
-
-                // Create the new ResourcesKey with the rebased override config.
-                final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir, oldKey.mSplitResDirs,
-                        oldKey.mOverlayDirs, oldKey.mLibDirs, oldKey.mDisplayId,
-                        rebasedOverrideConfig, oldKey.mCompatInfo);
 
                 if (DEBUG) {
-                    Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
-                            + " to newKey=" + newKey);
+                    Throwable here = new Throwable();
+                    here.fillInStackTrace();
+                    Slog.d(TAG, "updating resources override for activity=" + activityToken
+                            + " from oldConfig="
+                            + Configuration.resourceQualifierString(oldConfig)
+                            + " to newConfig="
+                            + Configuration.resourceQualifierString(
+                            activityResources.overrideConfig),
+                            here);
                 }
 
-                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);
-                if (resourcesImpl == null) {
-                    resourcesImpl = createResourcesImpl(newKey);
-                    mResourceImpls.put(newKey, new WeakReference<>(resourcesImpl));
-                }
+                final boolean activityHasOverrideConfig =
+                        !activityResources.overrideConfig.equals(Configuration.EMPTY);
 
-                if (resourcesImpl != resources.getImpl()) {
-                    // Set the ResourcesImpl, updating it for all users of this Resources object.
-                    resources.setImpl(resourcesImpl);
+                // Rebase each Resources associated with this Activity.
+                final int refCount = activityResources.activityResources.size();
+                for (int i = 0; i < refCount; i++) {
+                    WeakReference<Resources> weakResRef = activityResources.activityResources.get(
+                            i);
+                    Resources resources = weakResRef.get();
+                    if (resources == null) {
+                        continue;
+                    }
+
+                    // Extract the ResourcesKey that was last used to create the Resources for this
+                    // activity.
+                    final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
+                    if (oldKey == null) {
+                        Slog.e(TAG, "can't find ResourcesKey for resources impl="
+                                + resources.getImpl());
+                        continue;
+                    }
+
+                    // Build the new override configuration for this ResourcesKey.
+                    final Configuration rebasedOverrideConfig = new Configuration();
+                    if (overrideConfig != null) {
+                        rebasedOverrideConfig.setTo(overrideConfig);
+                    }
+
+                    if (activityHasOverrideConfig && oldKey.hasOverrideConfiguration()) {
+                        // Generate a delta between the old base Activity override configuration and
+                        // the actual final override configuration that was used to figure out the
+                        // real delta this Resources object wanted.
+                        Configuration overrideOverrideConfig = Configuration.generateDelta(
+                                oldConfig, oldKey.mOverrideConfiguration);
+                        rebasedOverrideConfig.updateFrom(overrideOverrideConfig);
+                    }
+
+                    // Create the new ResourcesKey with the rebased override config.
+                    final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir,
+                            oldKey.mSplitResDirs,
+                            oldKey.mOverlayDirs, oldKey.mLibDirs, oldKey.mDisplayId,
+                            rebasedOverrideConfig, oldKey.mCompatInfo);
+
+                    if (DEBUG) {
+                        Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
+                                + " to newKey=" + newKey);
+                    }
+
+                    ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);
+                    if (resourcesImpl == null) {
+                        resourcesImpl = createResourcesImpl(newKey);
+                        mResourceImpls.put(newKey, new WeakReference<>(resourcesImpl));
+                    }
+
+                    if (resourcesImpl != resources.getImpl()) {
+                        // Set the ResourcesImpl, updating it for all users of this Resources
+                        // object.
+                        resources.setImpl(resourcesImpl);
+                    }
                 }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
@@ -745,86 +770,95 @@ public class ResourcesManager {
 
     public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
                                                              @Nullable CompatibilityInfo compat) {
-        if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
-            if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
-                    + mResConfiguration.seq + ", newSeq=" + config.seq);
-            return false;
-        }
-        int changes = mResConfiguration.updateFrom(config);
-        // Things might have changed in display manager, so clear the cached displays.
-        mDisplays.clear();
-        DisplayMetrics defaultDisplayMetrics = getDisplayMetrics();
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#applyConfigurationToResourcesLocked");
 
-        if (compat != null && (mResCompatibilityInfo == null ||
-                !mResCompatibilityInfo.equals(compat))) {
-            mResCompatibilityInfo = compat;
-            changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
-                    | ActivityInfo.CONFIG_SCREEN_SIZE
-                    | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-        }
+            if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
+                if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
+                        + mResConfiguration.seq + ", newSeq=" + config.seq);
+                return false;
+            }
+            int changes = mResConfiguration.updateFrom(config);
+            // Things might have changed in display manager, so clear the cached displays.
+            mDisplays.clear();
+            DisplayMetrics defaultDisplayMetrics = getDisplayMetrics();
 
-        Configuration localeAdjustedConfig = config;
-        final LocaleList configLocales = config.getLocales();
-        if (!configLocales.isEmpty()) {
-            setDefaultLocalesLocked(configLocales);
-            final LocaleList adjustedLocales = LocaleList.getAdjustedDefault();
-            if (adjustedLocales != configLocales) { // has the same result as .equals() in this case
-                // The first locale in the list was not chosen. So we create a modified
-                // configuration with the adjusted locales (which moves the chosen locale to the
-                // front).
-                localeAdjustedConfig = new Configuration();
-                localeAdjustedConfig.setTo(config);
-                localeAdjustedConfig.setLocales(adjustedLocales);
-                // Also adjust the locale list in mResConfiguration, so that the Resources created
-                // later would have the same locale list.
-                if (!mResConfiguration.getLocales().equals(adjustedLocales)) {
-                    mResConfiguration.setLocales(adjustedLocales);
-                    changes |= ActivityInfo.CONFIG_LOCALE;
+            if (compat != null && (mResCompatibilityInfo == null ||
+                    !mResCompatibilityInfo.equals(compat))) {
+                mResCompatibilityInfo = compat;
+                changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
+                        | ActivityInfo.CONFIG_SCREEN_SIZE
+                        | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            }
+
+            Configuration localeAdjustedConfig = config;
+            final LocaleList configLocales = config.getLocales();
+            if (!configLocales.isEmpty()) {
+                setDefaultLocalesLocked(configLocales);
+                final LocaleList adjustedLocales = LocaleList.getAdjustedDefault();
+                if (adjustedLocales
+                        != configLocales) { // has the same result as .equals() in this case
+                    // The first locale in the list was not chosen. So we create a modified
+                    // configuration with the adjusted locales (which moves the chosen locale to the
+                    // front).
+                    localeAdjustedConfig = new Configuration();
+                    localeAdjustedConfig.setTo(config);
+                    localeAdjustedConfig.setLocales(adjustedLocales);
+                    // Also adjust the locale list in mResConfiguration, so that the Resources
+                    // created later would have the same locale list.
+                    if (!mResConfiguration.getLocales().equals(adjustedLocales)) {
+                        mResConfiguration.setLocales(adjustedLocales);
+                        changes |= ActivityInfo.CONFIG_LOCALE;
+                    }
                 }
             }
-        }
 
-        Resources.updateSystemConfiguration(localeAdjustedConfig, defaultDisplayMetrics, compat);
+            Resources.updateSystemConfiguration(localeAdjustedConfig, defaultDisplayMetrics,
+                    compat);
 
-        ApplicationPackageManager.configurationChanged();
-        //Slog.i(TAG, "Configuration changed in " + currentPackageName());
+            ApplicationPackageManager.configurationChanged();
+            //Slog.i(TAG, "Configuration changed in " + currentPackageName());
 
-        Configuration tmpConfig = null;
+            Configuration tmpConfig = null;
 
-        for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
-            ResourcesKey key = mResourceImpls.keyAt(i);
-            ResourcesImpl r = mResourceImpls.valueAt(i).get();
-            if (r != null) {
-                if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
-                        + r + " config to: " + localeAdjustedConfig);
-                int displayId = key.mDisplayId;
-                boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-                DisplayMetrics dm = defaultDisplayMetrics;
-                final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
-                if (!isDefaultDisplay || hasOverrideConfiguration) {
-                    if (tmpConfig == null) {
-                        tmpConfig = new Configuration();
+            for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
+                ResourcesKey key = mResourceImpls.keyAt(i);
+                ResourcesImpl r = mResourceImpls.valueAt(i).get();
+                if (r != null) {
+                    if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
+                            + r + " config to: " + localeAdjustedConfig);
+                    int displayId = key.mDisplayId;
+                    boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
+                    DisplayMetrics dm = defaultDisplayMetrics;
+                    final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+                    if (!isDefaultDisplay || hasOverrideConfiguration) {
+                        if (tmpConfig == null) {
+                            tmpConfig = new Configuration();
+                        }
+                        tmpConfig.setTo(localeAdjustedConfig);
+                        if (!isDefaultDisplay) {
+                            dm = getDisplayMetrics(displayId);
+                            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+                        }
+                        if (hasOverrideConfiguration) {
+                            tmpConfig.updateFrom(key.mOverrideConfiguration);
+                        }
+                        r.updateConfiguration(tmpConfig, dm, compat);
+                    } else {
+                        r.updateConfiguration(localeAdjustedConfig, dm, compat);
                     }
-                    tmpConfig.setTo(localeAdjustedConfig);
-                    if (!isDefaultDisplay) {
-                        dm = getDisplayMetrics(displayId);
-                        applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
-                    }
-                    if (hasOverrideConfiguration) {
-                        tmpConfig.updateFrom(key.mOverrideConfiguration);
-                    }
-                    r.updateConfiguration(tmpConfig, dm, compat);
+                    //Slog.i(TAG, "Updated app resources " + v.getKey()
+                    //        + " " + r + ": " + r.getConfiguration());
                 } else {
-                    r.updateConfiguration(localeAdjustedConfig, dm, compat);
+                    //Slog.i(TAG, "Removing old resources " + v.getKey());
+                    mResourceImpls.removeAt(i);
                 }
-                //Slog.i(TAG, "Updated app resources " + v.getKey()
-                //        + " " + r + ": " + r.getConfiguration());
-            } else {
-                //Slog.i(TAG, "Removing old resources " + v.getKey());
-                mResourceImpls.removeAt(i);
             }
-        }
 
-        return changes != 0;
+            return changes != 0;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
     }
 }
