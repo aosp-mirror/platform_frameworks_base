@@ -136,7 +136,7 @@ public final class MediaBrowser {
         mContext = context;
         mServiceComponent = serviceComponent;
         mCallback = callback;
-        mRootHints = rootHints;
+        mRootHints = rootHints == null ? null : new Bundle(rootHints);
     }
 
     /**
@@ -449,7 +449,7 @@ public final class MediaBrowser {
             }
         };
         try {
-            mServiceBinder.getMediaItem(mediaId, receiver);
+            mServiceBinder.getMediaItem(mediaId, receiver, mServiceCallbacks);
         } catch (RemoteException e) {
             Log.i(TAG, "Remote error getting media item.");
             mHandler.post(new Runnable() {
