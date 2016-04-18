@@ -22,43 +22,46 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class ConnectivityServiceChangeEvent extends IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "ConnectivityServiceChangeEvent";
-
+public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
+        implements Parcelable {
     // The ID of the network that has become the new default or NETID_UNSET if none.
-    private final int mNetId;
+    public final int netId;
     // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
     // defined in NetworkCapabilities.java.
-    private final int[] mTransportTypes;
+    public final int[] transportTypes;
     // The ID of the network that was the default before or NETID_UNSET if none.
-    private final int mPrevNetId;
+    public final int prevNetId;
     // Whether the previous network had IPv4/IPv6 connectivity.
-    private final boolean mPrevIPv4;
-    private final boolean mPrevIPv6;
+    public final boolean prevIPv4;
+    public final boolean prevIPv6;
 
-    public ConnectivityServiceChangeEvent(int netId, int[] transportTypes,
+    private ConnectivityServiceChangeEvent(int netId, int[] transportTypes,
                 int prevNetId, boolean prevIPv4, boolean prevIPv6) {
-        mNetId = netId;
-        mTransportTypes = transportTypes;
-        mPrevNetId = prevNetId;
-        mPrevIPv4 = prevIPv4;
-        mPrevIPv6 = prevIPv6;
+        this.netId = netId;
+        this.transportTypes = transportTypes;
+        this.prevNetId = prevNetId;
+        this.prevIPv4 = prevIPv4;
+        this.prevIPv6 = prevIPv6;
     }
 
-    public ConnectivityServiceChangeEvent(Parcel in) {
-        mNetId = in.readInt();
-        mTransportTypes = in.createIntArray();
-        mPrevNetId = in.readInt();
-        mPrevIPv4 = (in.readByte() > 0);
-        mPrevIPv6 = (in.readByte() > 0);
+    private ConnectivityServiceChangeEvent(Parcel in) {
+        this.netId = in.readInt();
+        this.transportTypes = in.createIntArray();
+        this.prevNetId = in.readInt();
+        this.prevIPv4 = (in.readByte() > 0);
+        this.prevIPv6 = (in.readByte() > 0);
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mNetId);
-        out.writeIntArray(mTransportTypes);
-        out.writeInt(mPrevNetId);
-        out.writeByte(mPrevIPv4 ? (byte) 1 : (byte) 0);
-        out.writeByte(mPrevIPv6 ? (byte) 1 : (byte) 0);
+        out.writeInt(netId);
+        out.writeIntArray(transportTypes);
+        out.writeInt(prevNetId);
+        out.writeByte(prevIPv4 ? (byte) 1 : (byte) 0);
+        out.writeByte(prevIPv6 ? (byte) 1 : (byte) 0);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<ConnectivityServiceChangeEvent> CREATOR
@@ -74,7 +77,7 @@ public class ConnectivityServiceChangeEvent extends IpConnectivityEvent implemen
 
     public static void logEvent(int netId, int[] transportTypes,
             int prevNetId, boolean prevIPv4, boolean prevIPv6) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_CONSRV_DEFAULT_NET_CHANGE,
+        logEvent(IPCE_CONSRV_DEFAULT_NET_CHANGE,
                 new ConnectivityServiceChangeEvent(
                         netId, transportTypes, prevNetId, prevIPv4, prevIPv6));
     }
