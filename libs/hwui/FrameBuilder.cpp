@@ -31,18 +31,16 @@
 namespace android {
 namespace uirenderer {
 
-FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
+FrameBuilder::FrameBuilder(const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
-        const std::vector< sp<RenderNode> >& nodes,
-        const LightGeometry& lightGeometry, const Rect &contentDrawBounds, Caches& caches)
-        : mCanvasState(*this)
+        const LightGeometry& lightGeometry, Caches& caches)
+        : mStdAllocator(mAllocator)
+        , mLayerBuilders(mStdAllocator)
+        , mLayerStack(mStdAllocator)
+        , mCanvasState(*this)
         , mCaches(caches)
         , mLightRadius(lightGeometry.radius)
-        , mDrawFbo0(!nodes.empty()) {
-    ATRACE_NAME("prepare drawing commands");
-
-    mLayerBuilders.reserve(layers.entries().size());
-    mLayerStack.reserve(layers.entries().size());
+        , mDrawFbo0(true) {
 
     // Prepare to defer Fbo0
     auto fbo0 = mAllocator.create<LayerBuilder>(viewportWidth, viewportHeight, Rect(clip));
@@ -51,7 +49,31 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
             lightGeometry.center);
+}
 
+FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers,
+        const LightGeometry& lightGeometry, Caches& caches)
+        : mStdAllocator(mAllocator)
+        , mLayerBuilders(mStdAllocator)
+        , mLayerStack(mStdAllocator)
+        , mCanvasState(*this)
+        , mCaches(caches)
+        , mLightRadius(lightGeometry.radius)
+        , mDrawFbo0(false) {
+    // TODO: remove, with each layer on its own save stack
+
+    // Prepare to defer Fbo0 (which will be empty)
+    auto fbo0 = mAllocator.create<LayerBuilder>(1, 1, Rect(1, 1));
+    mLayerBuilders.push_back(fbo0);
+    mLayerStack.push_back(0);
+    mCanvasState.initializeSaveStack(1, 1,
+            0, 0, 1, 1,
+            lightGeometry.center);
+
+    deferLayers(layers);
+}
+
+void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
     // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
@@ -76,10 +98,45 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
             restoreForLayer();
         }
     }
+}
 
+void FrameBuilder::deferRenderNode(RenderNode& renderNode) {
+    renderNode.computeOrdering();
+
+    mCanvasState.save(SaveFlags::MatrixClip);
+    deferNodePropsAndOps(renderNode);
+    mCanvasState.restore();
+}
+
+void FrameBuilder::deferRenderNode(float tx, float ty, Rect clipRect, RenderNode& renderNode) {
+    renderNode.computeOrdering();
+
+    mCanvasState.save(SaveFlags::MatrixClip);
+    mCanvasState.translate(tx, ty);
+    mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
+            SkRegion::kIntersect_Op);
+    deferNodePropsAndOps(renderNode);
+    mCanvasState.restore();
+}
+
+static Rect nodeBounds(RenderNode& node) {
+    auto& props = node.properties();
+    return Rect(props.getLeft(), props.getTop(),
+            props.getRight(), props.getBottom());
+}
+
+void FrameBuilder::deferRenderNodeScene(const std::vector< sp<RenderNode> >& nodes,
+        const Rect& contentDrawBounds) {
+    if (nodes.size() < 1) return;
+    if (nodes.size() == 1) {
+        if (!nodes[0]->nothingToDraw()) {
+            deferRenderNode(*nodes[0]);
+        }
+        return;
+    }
     // It there are multiple render nodes, they are laid out as follows:
     // #0 - backdrop (content + caption)
-    // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
+    // #1 - content (local bounds are at (0,0), will be translated and clipped to backdrop)
     // #2 - additional overlay nodes
     // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
     // resizing however it might become partially visible. The following render loop will crop the
@@ -88,45 +145,52 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
     //
     // Additional nodes will be drawn on top with no particular clipping semantics.
 
-    // The bounds of the backdrop against which the content should be clipped.
-    Rect backdropBounds = contentDrawBounds;
     // Usually the contents bounds should be mContentDrawBounds - however - we will
     // move it towards the fixed edge to give it a more stable appearance (for the moment).
     // If there is no content bounds we ignore the layering as stated above and start with 2.
-    int layer = (contentDrawBounds.isEmpty() || nodes.size() == 1) ? 2 : 0;
 
-    for (const sp<RenderNode>& node : nodes) {
-        if (node->nothingToDraw()) continue;
-        node->computeOrdering();
-        int count = mCanvasState.save(SaveFlags::MatrixClip);
+    // Backdrop bounds in render target space
+    const Rect backdrop = nodeBounds(*nodes[0]);
 
-        if (layer == 0) {
-            const RenderProperties& properties = node->properties();
-            Rect targetBounds(properties.getLeft(), properties.getTop(),
-                              properties.getRight(), properties.getBottom());
-            // Move the content bounds towards the fixed corner of the backdrop.
-            const int x = targetBounds.left;
-            const int y = targetBounds.top;
-            // Remember the intersection of the target bounds and the intersection bounds against
-            // which we have to crop the content.
-            backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
-            backdropBounds.doIntersect(targetBounds);
-        } else if (layer == 1) {
-            // We shift and clip the content to match its final location in the window.
-            const float left = contentDrawBounds.left;
-            const float top = contentDrawBounds.top;
-            const float dx = backdropBounds.left - left;
-            const float dy = backdropBounds.top - top;
-            const float width = backdropBounds.getWidth();
-            const float height = backdropBounds.getHeight();
-            mCanvasState.translate(dx, dy);
-            // It gets cropped against the bounds of the backdrop to stay inside.
-            mCanvasState.clipRect(left, top, left + width, top + height, SkRegion::kIntersect_Op);
+    // Bounds that content will fill in render target space (note content node bounds may be bigger)
+    Rect content(contentDrawBounds.getWidth(), contentDrawBounds.getHeight());
+    content.translate(backdrop.left, backdrop.top);
+    if (!content.contains(backdrop) && !nodes[0]->nothingToDraw()) {
+        // Content doesn't entirely overlap backdrop, so fill around content (right/bottom)
+
+        // Note: in the future, if content doesn't snap to backdrop's left/top, this may need to
+        // also fill left/top. Currently, both 2up and freeform position content at the top/left of
+        // the backdrop, so this isn't necessary.
+        if (content.right < backdrop.right) {
+            // draw backdrop to right side of content
+            deferRenderNode(0, 0, Rect(content.right, backdrop.top,
+                    backdrop.right, backdrop.bottom), *nodes[0]);
         }
+        if (content.bottom < backdrop.bottom) {
+            // draw backdrop to bottom of content
+            // Note: bottom fill uses content left/right, to avoid overdrawing left/right fill
+            deferRenderNode(0, 0, Rect(content.left, content.bottom,
+                    content.right, backdrop.bottom), *nodes[0]);
+        }
+    }
 
-        deferNodePropsAndOps(*node);
-        mCanvasState.restoreToCount(count);
-        layer++;
+    if (!backdrop.isEmpty()) {
+        // content node translation to catch up with backdrop
+        float dx = contentDrawBounds.left - backdrop.left;
+        float dy = contentDrawBounds.top - backdrop.top;
+
+        Rect contentLocalClip = backdrop;
+        contentLocalClip.translate(dx, dy);
+        deferRenderNode(-dx, -dy, contentLocalClip, *nodes[1]);
+    } else {
+        deferRenderNode(*nodes[1]);
+    }
+
+    // remaining overlay nodes, simply defer
+    for (size_t index = 2; index < nodes.size(); index++) {
+        if (!nodes[index]->nothingToDraw()) {
+            deferRenderNode(*nodes[index]);
+        }
     }
 }
 
