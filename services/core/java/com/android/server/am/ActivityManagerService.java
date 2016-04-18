@@ -2663,7 +2663,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!app.killed) {
                 Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
                 Process.killProcessQuiet(app.pid);
-                Process.killProcessGroup(app.info.uid, app.pid);
+                Process.killProcessGroup(app.uid, app.pid);
             }
             if (lrui <= mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
@@ -2998,7 +2998,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // clean it up now.
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
             checkTime(startTime, "startProcess: bad proc running, killing");
-            Process.killProcessGroup(app.info.uid, app.pid);
+            Process.killProcessGroup(app.uid, app.pid);
             handleAppDiedLocked(app, true, true);
             checkTime(startTime, "startProcess: done killing old proc");
         }
@@ -4872,7 +4872,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         Process.killProcessQuiet(pid);
-        Process.killProcessGroup(app.info.uid, pid);
+        Process.killProcessGroup(app.uid, pid);
         app.killed = true;
 
         // Clean up already done if the process has been re-started.
