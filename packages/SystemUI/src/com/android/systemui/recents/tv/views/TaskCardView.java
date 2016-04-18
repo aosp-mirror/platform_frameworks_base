@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -30,6 +31,7 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,6 +51,7 @@ public class TaskCardView extends LinearLayout {
     private ImageView mBadgeView;
     private Task mTask;
     private boolean mDismissState;
+    private int mCornerRadius;
 
     private ViewFocusAnimator mViewFocusAnimator;
     private DismissAnimationsHolder mDismissAnimationsHolder;
@@ -77,6 +80,8 @@ public class TaskCardView extends LinearLayout {
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
         mDismissAnimationsHolder = new DismissAnimationsHolder(this);
         View title = findViewById(R.id.card_info_field);
+        mCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
         mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
         mViewFocusAnimator = new ViewFocusAnimator(this);
     }
@@ -272,13 +277,18 @@ public class TaskCardView extends LinearLayout {
 
     private void setAsScreenShotView(Bitmap screenshot, ImageView screenshotView) {
         LayoutParams lp = (LayoutParams) screenshotView.getLayoutParams();
-        lp.width = getResources()
-                .getDimensionPixelSize(R.dimen.recents_tv_card_width);
-        lp.height = getResources()
-                .getDimensionPixelSize(R.dimen.recents_tv_screenshot_height);
+        lp.width = LayoutParams.MATCH_PARENT;
+        lp.height = LayoutParams.MATCH_PARENT;
 
         screenshotView.setLayoutParams(lp);
         screenshotView.setImageBitmap(screenshot);
+        screenshotView.setClipToOutline(true);
+        screenshotView.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCornerRadius);
+            }
+        });
     }
 
     private void setAsBannerView(Drawable banner, ImageView bannerView) {
