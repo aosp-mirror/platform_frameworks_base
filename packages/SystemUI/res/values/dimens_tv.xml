@@ -29,6 +29,7 @@
     <dimen name="recents_tv_icon_padding_bottom">8dip</dimen>
     <dimen name="recents_tv_text_padding_start">12dip</dimen>
     <dimen name="recents_tv_text_padding_bottom">12dip</dimen>
+    <dimen name="recents_tv_card_corner_radius">2dip</dimen>
 
     <!-- Padding for grid view in recents view on tv -->
     <dimen name="recents_tv_gird_row_top_margin">215dip</dimen>
