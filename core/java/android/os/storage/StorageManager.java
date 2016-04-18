@@ -1053,6 +1053,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public void destroyUserStorage(String volumeUuid, int userId, int flags) {
+        try {
+            mMountService.destroyUserStorage(volumeUuid, userId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
     public boolean isUserKeyUnlocked(int userId) {
         try {
             return mMountService.isUserKeyUnlocked(userId);
