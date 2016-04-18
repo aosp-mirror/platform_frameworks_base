@@ -342,6 +342,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_B
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
+import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -9743,7 +9744,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } else {
                     mStackSupervisor.resizeStackLocked(stackId, bounds, null /* tempTaskBounds */,
                             null /* tempTaskInsetBounds */, preserveWindows,
-                            allowResizeInDockedMode);
+                            allowResizeInDockedMode, !DEFER_RESUME);
                 }
             }
         } finally {
@@ -17960,46 +17961,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
-            final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
-            if (stack != null) {
-                mWindowManager.deferSurfaceLayout();
-                try {
-                    if (fromStackId == DOCKED_STACK_ID) {
-
-                        // We are moving all tasks from the docked stack to the fullscreen stack,
-                        // which is dismissing the docked stack, so resize all other stacks to
-                        // fullscreen here already so we don't end up with resize trashing.
-                        for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                            if (StackId.isResizeableByDockedStack(i)) {
-                                ActivityStack otherStack = mStackSupervisor.getStack(i);
-                                if (otherStack != null) {
-                                    mStackSupervisor.resizeStackLocked(i,
-                                            null, null, null, PRESERVE_WINDOWS,
-                                            true /* allowResizeInDockedMode */);
-                                }
-                            }
-                        }
-                    }
-                    final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                    final int size = tasks.size();
-                    if (onTop) {
-                        for (int i = 0; i < size; i++) {
-                            mStackSupervisor.moveTaskToStackLocked(tasks.get(i).taskId,
-                                    FULLSCREEN_WORKSPACE_STACK_ID, onTop, !FORCE_FOCUS,
-                                    "moveTasksToFullscreenStack", ANIMATE);
-                        }
-                    } else {
-                        for (int i = size - 1; i >= 0; i--) {
-                            mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
-                                    FULLSCREEN_WORKSPACE_STACK_ID, 0);
-                        }
-                    }
-                } finally {
-                    mWindowManager.continueSurfaceLayout();
-                }
-
+            try {
+                mStackSupervisor.moveTasksToFullscreenStackLocked(fromStackId, onTop);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -18221,7 +18187,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (int stackId : resizedStacks) {
                         final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
                         mStackSupervisor.resizeStackLocked(
-                                stackId, newBounds, null, null, false, false);
+                                stackId, newBounds, null, null, false, false, !DEFER_RESUME);
                     }
                 }
             }
