@@ -426,10 +426,7 @@ public class RecentsView extends FrameLayout {
 
         ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
-            Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
-            if (d.getAlpha() > 0) {
-                d.draw(canvas);
-            }
+            visDockStates.get(i).viewState.draw(canvas);
         }
     }
 
@@ -465,6 +462,7 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(DragStartEvent event) {
         updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
                 true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                TaskStack.DockState.NONE.viewState.hintTextAlpha,
                 true /* animateAlpha */, false /* animateBounds */);
     }
 
@@ -472,11 +470,12 @@ public class RecentsView extends FrameLayout {
         if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
             updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
                     true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                    TaskStack.DockState.NONE.viewState.hintTextAlpha,
                     true /* animateAlpha */, true /* animateBounds */);
         } else {
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
             updateVisibleDockRegions(new TaskStack.DockState[] {dockState},
-                    false /* isDefaultDockState */, -1, true /* animateAlpha */,
+                    false /* isDefaultDockState */, -1, -1, true /* animateAlpha */,
                     true /* animateBounds */);
         }
         if (mStackActionButton != null) {
@@ -498,12 +497,8 @@ public class RecentsView extends FrameLayout {
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
 
             // Hide the dock region
-            updateVisibleDockRegions(null, false /* isDefaultDockState */, -1,
+            updateVisibleDockRegions(null, false /* isDefaultDockState */, -1, -1,
                     false /* animateAlpha */, false /* animateBounds */);
-
-            TaskStackLayoutAlgorithm stackLayout = mTaskStackView.getStackAlgorithm();
-            TaskStackViewScroller stackScroller = mTaskStackView.getScroller();
-            TaskViewTransform tmpTransform = new TaskViewTransform();
 
             // We translated the view but we need to animate it back from the current layout-space
             // rect to its final layout-space rect
@@ -548,7 +543,7 @@ public class RecentsView extends FrameLayout {
                     event.task.getTopComponent().flattenToShortString());
         } else {
             // Animate the overlay alpha back to 0
-            updateVisibleDockRegions(null, true /* isDefaultDockState */, -1,
+            updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
                     true /* animateAlpha */, false /* animateBounds */);
         }
     }
@@ -710,8 +705,8 @@ public class RecentsView extends FrameLayout {
      * Updates the dock region to match the specified dock state.
      */
     private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
-            boolean isDefaultDockState, int overrideAlpha, boolean animateAlpha,
-            boolean animateBounds) {
+            boolean isDefaultDockState, int overrideAreaAlpha, int overrideHintAlpha,
+            boolean animateAlpha, boolean animateBounds) {
         ArraySet<TaskStack.DockState> newDockStatesSet = Utilities.arrayToSet(newDockStates,
                 new ArraySet<TaskStack.DockState>());
         ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
@@ -720,11 +715,16 @@ public class RecentsView extends FrameLayout {
             TaskStack.DockState.ViewState viewState = dockState.viewState;
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it
-                viewState.startAnimation(null, 0, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
+                viewState.startAnimation(null, 0, 0, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
                         Interpolators.ALPHA_OUT, animateAlpha, animateBounds);
             } else {
                 // This state is now visible, update the bounds and show it
-                int alpha = (overrideAlpha != -1 ? overrideAlpha : viewState.dockAreaAlpha);
+                int areaAlpha = overrideAreaAlpha != -1
+                        ? overrideAreaAlpha
+                        : viewState.dockAreaAlpha;
+                int hintAlpha = overrideHintAlpha != -1
+                        ? overrideHintAlpha
+                        : viewState.hintTextAlpha;
                 Rect bounds = isDefaultDockState
                         ? dockState.getPreDockedBounds(getMeasuredWidth(), getMeasuredHeight())
                         : dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight(),
