@@ -30,7 +30,7 @@ public class SpannableStringInternalCopyBenchmark {
 
     @BeforeExperiment
     protected void setUp() throws Exception {
-        int strSize = Integer.valueOf(paramStringMult);
+        int strSize = Integer.parseInt(paramStringMult);
         StringBuilder strBuilder = new StringBuilder();
         for (int i = 0; i < strSize; i++) {
             strBuilder.append(SpannableStringBuilderBenchmark.TEST_STRING);

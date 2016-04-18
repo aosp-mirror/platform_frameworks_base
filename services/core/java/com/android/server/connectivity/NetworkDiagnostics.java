@@ -548,8 +548,7 @@ public class NetworkDiagnostics {
             mMeasurement.description += " src{" + getSocketAddressString() + "}";
 
             // This needs to be fixed length so it can be dropped into the pre-canned packet.
-            final String sixRandomDigits =
-                    Integer.valueOf(mRandom.nextInt(900000) + 100000).toString();
+            final String sixRandomDigits = String.valueOf(mRandom.nextInt(900000) + 100000);
             mMeasurement.description += " qtype{" + mQueryType + "}"
                     + " qname{" + sixRandomDigits + "-android-ds.metric.gstatic.com}";
 
