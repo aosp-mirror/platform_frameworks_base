@@ -16,12 +16,14 @@
 
 package android.net.metrics;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * {@hide}
  */
+@SystemApi
 public final class CaptivePortalStateChangeEvent extends IpConnectivityEvent implements Parcelable {
     public static final int NETWORK_MONITOR_CONNECTED    = 0;
     public static final int NETWORK_MONITOR_DISCONNECTED = 1;

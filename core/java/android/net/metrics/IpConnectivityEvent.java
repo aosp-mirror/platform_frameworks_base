@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.SystemApi;
 import android.net.ConnectivityMetricsLogger;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,6 +24,7 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
+@SystemApi
 public abstract class IpConnectivityEvent {
     // IPRM   = IpReachabilityMonitor
     // DHCP   = DhcpClient
