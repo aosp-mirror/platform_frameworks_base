@@ -299,6 +299,11 @@
     <!-- [CHAR LIMIT=50] Title of the settings section that displays general preferences
          that are applicable to all engines, such as the speech rate -->
     <string name="tts_general_section_title">General</string>
+    <!-- On main TTS Settings screen, in default settings section,
+         reset speech pitch of synthesized voice to 1x speech pitch. [CHAR LIMIT=50] -->
+    <string name="tts_reset_speech_pitch_title">Reset speech pitch</string>
+    <!--On main TTS Settings screen, summary for reset speech pitch of synthesized voice [CHAR LIMIT=150] -->
+    <string name="tts_reset_speech_pitch_summary">Reset the pitch at which the text is spoken to default.</string>
 
     <!-- Default speech rate choices -->
     <string-array name="tts_rate_entries">
