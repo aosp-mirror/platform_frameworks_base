@@ -97,6 +97,7 @@ public abstract class MediaBrowserService extends Service {
     private @interface ResultFlags { }
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
+    private ConnectionRecord mCurConnection;
     private final Handler mHandler = new Handler();
     private ServiceBinder mBinder;
     MediaSession.Token mSession;
@@ -291,7 +292,8 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void getMediaItem(final String mediaId, final ResultReceiver receiver) {
+        public void getMediaItem(final String mediaId, final ResultReceiver receiver,
+                final IMediaBrowserServiceCallbacks callbacks) {
             if (TextUtils.isEmpty(mediaId) || receiver == null) {
                 return;
             }
@@ -299,7 +301,13 @@ public abstract class MediaBrowserService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    performLoadItem(mediaId, receiver);
+                    final IBinder b = callbacks.asBinder();
+                    ConnectionRecord connection = mConnections.get(b);
+                    if (connection == null) {
+                        Log.w(TAG, "getMediaItem for callback that isn't registered id=" + mediaId);
+                        return;
+                    }
+                    performLoadItem(mediaId, connection, receiver);
                 }
             });
         }
@@ -470,6 +478,20 @@ public abstract class MediaBrowserService extends Service {
     }
 
     /**
+     * Gets the root hints sent from the currently connected {@link MediaBrowser}.
+     *
+     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren}
+     *             or {@link #onLoadItem}
+     */
+    public final Bundle getBrowserRootHints() {
+        if (mCurConnection == null) {
+            throw new IllegalStateException("This should be called inside of onLoadChildren or"
+                    + " onLoadItem methods");
+        }
+        return mCurConnection.rootHints == null ? null : new Bundle(mCurConnection.rootHints);
+    }
+
+    /**
      * Notifies all connected media browsers that the children of
      * the specified parent id have changed in some way.
      * This will cause browsers to fetch subscribed content again.
@@ -619,11 +641,13 @@ public abstract class MediaBrowserService extends Service {
             }
         };
 
+        mCurConnection = connection;
         if (options == null) {
             onLoadChildren(parentId, result);
         } else {
             onLoadChildren(parentId, result, options);
         }
+        mCurConnection = null;
 
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
@@ -652,7 +676,8 @@ public abstract class MediaBrowserService extends Service {
         return list.subList(fromIndex, toIndex);
     }
 
-    private void performLoadItem(String itemId, final ResultReceiver receiver) {
+    private void performLoadItem(String itemId, final ConnectionRecord connection,
+            final ResultReceiver receiver) {
         final Result<MediaBrowser.MediaItem> result =
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
@@ -663,7 +688,9 @@ public abstract class MediaBrowserService extends Service {
             }
         };
 
-        MediaBrowserService.this.onLoadItem(itemId, result);
+        mCurConnection = connection;
+        onLoadItem(itemId, result);
+        mCurConnection = null;
 
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadItem must call detach() or sendResult()"
