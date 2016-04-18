@@ -2430,6 +2430,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         try {
             final TaskRecord task = r.task;
 
+            if (r == task.stack.getVisibleBehindActivity()) {
+                // An activity can't be pinned and visible behind at the same time. Go ahead and
+                // release it from been visible behind before pinning.
+                requestVisibleBehindLocked(r, false);
+            }
+
             // Need to make sure the pinned stack exist so we can resize it below...
             final ActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
@@ -2689,6 +2695,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     "requestVisibleBehind: r=" + r + " visible=" + visible + " stack is null");
             return false;
         }
+
+        if (visible && !StackId.activitiesCanRequestVisibleBehind(stack.mStackId)) {
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND, "requestVisibleBehind: r=" + r
+                    + " visible=" + visible + " stackId=" + stack.mStackId
+                    + " can't contain visible behind activities");
+            return false;
+        }
+
         final boolean isVisible = stack.hasVisibleBehindActivity();
         if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
                 "requestVisibleBehind r=" + r + " visible=" + visible + " isVisible=" + isVisible);

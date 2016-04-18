@@ -675,6 +675,14 @@ public class ActivityManager {
             return isStaticStack(stackId) || stackId == PINNED_STACK_ID
                     || stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
         }
+
+        /**
+         * Returns true if activities contained in this stack can request visible behind by
+         * calling {@link Activity#requestVisibleBehind}.
+         */
+        public static boolean activitiesCanRequestVisibleBehind(int stackId) {
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+        }
     }
 
     /**
