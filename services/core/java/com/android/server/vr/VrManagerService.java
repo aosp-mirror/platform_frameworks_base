@@ -85,6 +85,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     public static final String VR_MANAGER_BINDER_SERVICE = "vrmanager";
 
+    private static final int PENDING_STATE_DELAY_MS = 300;
+
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
 
@@ -107,8 +109,10 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private String mPreviousNotificationPolicyAccessPackage;
     private String mPreviousCoarseLocationPackage;
     private String mPreviousManageOverlayPackage;
+    private VrState mPendingState;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
+    private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -127,9 +131,29 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     }
                     mRemoteCallbacks.finishBroadcast();
                 } break;
+                case MSG_PENDING_VR_STATE_CHANGE : {
+                    synchronized(mLock) {
+                        VrManagerService.this.consumeAndApplyPendingStateLocked();
+                    }
+                } break;
                 default :
                     throw new IllegalStateException("Unknown message type: " + msg.what);
             }
+        }
+    };
+
+    private static class VrState {
+        final boolean enabled;
+        final int userId;
+        final ComponentName targetPackageName;
+        final ComponentName callingPackage;
+
+        VrState(boolean enabled, ComponentName targetPackageName, int userId,
+                ComponentName callingPackage) {
+            this.enabled = enabled;
+            this.userId = userId;
+            this.targetPackageName = targetPackageName;
+            this.callingPackage = callingPackage;
         }
     };
 
@@ -152,6 +176,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     @Override
     public void onEnabledComponentChanged() {
         synchronized (mLock) {
+            if (mCurrentVrService == null) {
+                return; // No active services
+            }
+
+            // If there is a pending state change, we'd better deal with that first
+            consumeAndApplyPendingStateLocked();
+
             if (mCurrentVrService == null) {
                 return; // No active services
             }
@@ -679,14 +710,40 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 sBinderChecker);
     }
 
+    private void consumeAndApplyPendingStateLocked() {
+        if (mPendingState != null) {
+            updateCurrentVrServiceLocked(mPendingState.enabled,
+                    mPendingState.targetPackageName, mPendingState.userId,
+                    mPendingState.callingPackage);
+            mPendingState = null;
+        }
+    }
+
     /*
      * Implementation of VrManagerInternal calls.  These are callable from system services.
      */
 
-    private boolean setVrMode(boolean enabled, @NonNull ComponentName targetPackageName,
+    private void setVrMode(boolean enabled, @NonNull ComponentName targetPackageName,
             int userId, @NonNull ComponentName callingPackage) {
+
         synchronized (mLock) {
-            return updateCurrentVrServiceLocked(enabled, targetPackageName, userId, callingPackage);
+
+            if (!enabled && mCurrentVrService != null) {
+                // If we're transitioning out of VR mode, delay briefly to avoid expensive HAL calls
+                // and service bind/unbind in case we are immediately switching to another VR app.
+                if (mPendingState == null) {
+                    mHandler.sendEmptyMessageDelayed(MSG_PENDING_VR_STATE_CHANGE,
+                            PENDING_STATE_DELAY_MS);
+                }
+
+                mPendingState = new VrState(enabled, targetPackageName, userId, callingPackage);
+                return;
+            } else {
+                mHandler.removeMessages(MSG_PENDING_VR_STATE_CHANGE);
+                mPendingState = null;
+            }
+
+            updateCurrentVrServiceLocked(enabled, targetPackageName, userId, callingPackage);
         }
     }
 
