@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -62,6 +63,9 @@ public class CarStatusBar extends PhoneStatusBar implements
     private CarBatteryController mCarBatteryController;
     private BatteryMeterView mBatteryMeterView;
 
+    private ConnectedDeviceSignalController mConnectedDeviceSignalController;
+    private View mSignalsView;
+
     @Override
     public void start() {
         super.start();
@@ -70,11 +74,14 @@ public class CarStatusBar extends PhoneStatusBar implements
         registerPackageChangeReceivers();
 
         mCarBatteryController.startListening();
+        mConnectedDeviceSignalController.startListening();
     }
 
     @Override
     public void destroy() {
         mCarBatteryController.stopListening();
+        mConnectedDeviceSignalController.stopListening();
+
         super.destroy();
     }
 
@@ -87,6 +94,18 @@ public class CarStatusBar extends PhoneStatusBar implements
         // By default, the BatteryMeterView should not be visible. It will be toggled visible
         // when a device has connected by bluetooth.
         mBatteryMeterView.setVisibility(View.GONE);
+
+        ViewStub stub = (ViewStub) statusBarView.findViewById(R.id.connected_device_signals_stub);
+        mSignalsView = stub.inflate();
+
+        // When a ViewStub if inflated, it does not respect the margins on the inflated view.
+        // As a result, manually add the ending margin.
+        ((LinearLayout.LayoutParams) mSignalsView.getLayoutParams()).setMarginEnd(
+                mContext.getResources().getDimensionPixelOffset(
+                        R.dimen.status_bar_connected_device_signal_margin_end));
+
+        mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
+                mSignalsView);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
