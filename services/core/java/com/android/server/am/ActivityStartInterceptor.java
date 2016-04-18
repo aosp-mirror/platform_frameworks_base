@@ -29,6 +29,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.IIntentSender;
@@ -76,6 +77,7 @@ class ActivityStartInterceptor {
     ActivityInfo mAInfo;
     String mResolvedType;
     TaskRecord mInTask;
+    ActivityOptions mActivityOptions;
 
     ActivityStartInterceptor(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
@@ -92,7 +94,7 @@ class ActivityStartInterceptor {
     }
 
     void intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
-            TaskRecord inTask, int callingPid, int callingUid) {
+            TaskRecord inTask, int callingPid, int callingUid, ActivityOptions activityOptions) {
         mUserManager = UserManager.get(mService.mContext);
         mIntent = intent;
         mCallingPid = callingPid;
@@ -101,6 +103,7 @@ class ActivityStartInterceptor {
         mAInfo = aInfo;
         mResolvedType = resolvedType;
         mInTask = inTask;
+        mActivityOptions = activityOptions;
         if (interceptSuspendPackageIfNeed()) {
             // Skip the rest of interceptions as the package is suspended by device admin so
             // no user action can undo this.
@@ -177,6 +180,12 @@ class ActivityStartInterceptor {
             mIntent.putExtra(EXTRA_TASK_ID, mInTask.taskId);
             mInTask = null;
         }
+        if (mActivityOptions == null) {
+            mActivityOptions = ActivityOptions.makeBasic();
+        }
+        // Showing credential confirmation activity in home task to avoid stopping multi-windowed
+        // mode after showing the full-screen credential confirmation activity.
+        mActivityOptions.setLaunchTaskId(mSupervisor.getHomeActivity().task.taskId);
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);

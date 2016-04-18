@@ -97,6 +97,7 @@ import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11471,20 +11472,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         synchronized (this) {
-            if (mStackSupervisor.isFocusedUserLockedProfile()) {
+            if (mStackSupervisor.isUserLockedProfile(userId)) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     final int currentUserId = mUserController.getCurrentUserIdLocked();
-                    // Get the focused task before launching launcher.
-
                     if (mUserController.isLockScreenDisabled(currentUserId)) {
-
                         // If there is no device lock, we will show the profile's credential page.
-                        // startActivityFromRecentsInner is intercepted and will forward user to it.
-                        if (mFocusedActivity != null) {
-                            mStackSupervisor.startActivityFromRecentsInner(
-                                    mFocusedActivity.task.taskId, null);
-                        }
+                        mActivityStarter.showConfirmDeviceCredential(userId);
                     } else {
                         // Showing launcher to avoid user entering credential twice.
                         startHomeActivityLocked(currentUserId, "notifyLockedProfile");
@@ -21004,6 +20998,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         public List<IBinder> getTopVisibleActivities() {
             synchronized (ActivityManagerService.this) {
                 return mStackSupervisor.getTopVisibleActivities();
+            }
+        }
+
+        @Override
+        public void notifyDockedStackMinimizedChanged(boolean minimized) {
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.setDockedStackMinimized(minimized);
             }
         }
     }

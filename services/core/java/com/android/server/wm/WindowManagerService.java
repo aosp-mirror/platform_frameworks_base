@@ -7800,6 +7800,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_REMOVE_TIMEOUT = 52;
 
+        public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
+
         /**
          * Used to denote that an integer field in a message will not be used.
          */
@@ -8421,6 +8423,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             removeWindowLocked(window);
                         }
                     }
+                }
+                break;
+                case NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED: {
+                    mAmInternal.notifyDockedStackMinimizedChanged(msg.arg1 == 1);
                 }
                 break;
             }
