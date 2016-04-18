@@ -171,11 +171,9 @@ public:
         syncHierarchyPropertiesAndDisplayListImpl(node.get());
     }
 
-    static std::vector<sp<RenderNode>> createSyncedNodeList(sp<RenderNode>& node) {
-        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-        std::vector<sp<RenderNode>> vec;
-        vec.emplace_back(node);
-        return vec;
+    static sp<RenderNode>& getSyncedNode(sp<RenderNode>& node) {
+        syncHierarchyPropertiesAndDisplayList(node);
+        return node;
     }
 
     typedef std::function<void(renderthread::RenderThread& thread)> RtCallback;
