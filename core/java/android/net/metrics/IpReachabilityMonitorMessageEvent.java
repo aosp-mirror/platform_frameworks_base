@@ -22,35 +22,37 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class IpReachabilityMonitorMessageEvent extends IpConnectivityEvent
-    implements Parcelable {
-    public static final String TAG = "IpReachabilityMonitorMessageEvent";
+public final class IpReachabilityMonitorMessageEvent extends IpConnectivityEvent
+        implements Parcelable {
+    public final String ifName;
+    public final String destination;
+    public final int msgType;
+    public final int nudState;
 
-    private String mIfName;
-    private String mDestination;
-    private int mMsgType;
-    private int mNudState;
-
-    public IpReachabilityMonitorMessageEvent(String ifName, String destination, int msgType,
+    private IpReachabilityMonitorMessageEvent(String ifName, String destination, int msgType,
             int nudState) {
-        mIfName = ifName;
-        mDestination = destination;
-        mMsgType = msgType;
-        mNudState = nudState;
+        this.ifName = ifName;
+        this.destination = destination;
+        this.msgType = msgType;
+        this.nudState = nudState;
     }
 
-    public IpReachabilityMonitorMessageEvent(Parcel in) {
-        mIfName = in.readString();
-        mDestination = in.readString();
-        mMsgType = in.readInt();
-        mNudState = in.readInt();
+    private IpReachabilityMonitorMessageEvent(Parcel in) {
+        this.ifName = in.readString();
+        this.destination = in.readString();
+        this.msgType = in.readInt();
+        this.nudState = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mIfName);
-        out.writeString(mDestination);
-        out.writeInt(mMsgType);
-        out.writeInt(mNudState);
+        out.writeString(ifName);
+        out.writeString(destination);
+        out.writeInt(msgType);
+        out.writeInt(nudState);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     public static final Parcelable.Creator<IpReachabilityMonitorMessageEvent> CREATOR
@@ -65,7 +67,7 @@ public class IpReachabilityMonitorMessageEvent extends IpConnectivityEvent
     };
 
     public static void logEvent(String ifName, String destination, int msgType, int nudState) {
-        IpConnectivityEvent.logEvent(IpConnectivityEvent.IPCE_IPRM_MESSAGE_RECEIVED,
+        logEvent(IPCE_IPRM_MESSAGE_RECEIVED,
                 new IpReachabilityMonitorMessageEvent(ifName, destination, msgType, nudState));
     }
 };
