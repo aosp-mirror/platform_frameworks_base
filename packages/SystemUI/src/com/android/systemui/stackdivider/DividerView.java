@@ -32,6 +32,7 @@ import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.MutableInt;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
@@ -66,6 +67,7 @@ import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
+import com.android.systemui.recents.events.ui.RecentsGrowingEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.events.StartedDragingEvent;
 import com.android.systemui.stackdivider.events.StoppedDragingEvent;
@@ -81,13 +83,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     static final long TOUCH_ANIMATION_DURATION = 150;
     static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
+    public static final int INVALID_RECENTS_GROW_TARGET = -1;
+
     private static final int LOG_VALUE_RESIZE_50_50 = 0;
     private static final int LOG_VALUE_RESIZE_DOCKED_SMALLER = 1;
     private static final int LOG_VALUE_RESIZE_DOCKED_LARGER = 2;
 
     private static final int LOG_VALUE_UNDOCK_MAX_DOCKED = 0;
     private static final int LOG_VALUE_UNDOCK_MAX_OTHER = 1;
-
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
     private static final boolean SWAPPING_ENABLED = false;
@@ -997,6 +1000,24 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mBackground.getRight(), mBackground.getBottom(), Op.UNION);
     }
 
+    /**
+     * Checks whether recents will grow when invoked. This happens in multi-window when recents is
+     * very small. When invoking recents, we shrink the docked stack so recents has more space.
+     *
+     * @return the position of the divider when recents grows, or
+     *         {@link #INVALID_RECENTS_GROW_TARGET} if recents won't grow
+     */
+    public int growsRecents() {
+        boolean result = mGrowRecents
+                && mWindowManagerProxy.getDockSide() == WindowManager.DOCKED_TOP
+                && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position;
+        if (result) {
+            return getSnapAlgorithm().getMiddleTarget().position;
+        } else {
+            return INVALID_RECENTS_GROW_TARGET;
+        }
+    }
+
     public final void onBusEvent(RecentsActivityStartingEvent recentsActivityStartingEvent) {
         if (mGrowRecents && getWindowManagerProxy().getDockSide() == WindowManager.DOCKED_TOP
                 && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position) {
@@ -1036,7 +1057,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mGrowAfterRecentsDrawn) {
             mGrowAfterRecentsDrawn = false;
             updateDockSide();
-            stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
+            EventBus.getDefault().send(new RecentsGrowingEvent());
+            stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 336,
                     Interpolators.FAST_OUT_SLOW_IN);
         }
     }

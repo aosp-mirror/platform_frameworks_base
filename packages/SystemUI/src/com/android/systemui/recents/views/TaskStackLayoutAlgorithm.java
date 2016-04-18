@@ -830,18 +830,23 @@ public class TaskStackLayoutAlgorithm {
      * Like {@link #getStackTransform}, but in screen coordinates
      */
     public TaskViewTransform getStackTransformScreenCoordinates(Task task, float stackScroll,
-            TaskViewTransform transformOut, TaskViewTransform frontTransform) {
+            TaskViewTransform transformOut, TaskViewTransform frontTransform,
+            Rect windowOverrideRect) {
         TaskViewTransform transform = getStackTransform(task, stackScroll, mFocusState,
                 transformOut, frontTransform, true /* forceUpdate */,
                 false /* ignoreTaskOverrides */);
-        return transformToScreenCoordinates(transform);
+        return transformToScreenCoordinates(transform, windowOverrideRect);
     }
 
     /**
-     * Transforms the given {@param transformOut} to the screen coordinates.
+     * Transforms the given {@param transformOut} to the screen coordinates, overriding the current
+     * window rectangle with {@param windowOverrideRect} if non-null.
      */
-    public TaskViewTransform transformToScreenCoordinates(TaskViewTransform transformOut) {
-        Rect windowRect = Recents.getSystemServices().getWindowRect();
+    public TaskViewTransform transformToScreenCoordinates(TaskViewTransform transformOut,
+            Rect windowOverrideRect) {
+        Rect windowRect = windowOverrideRect != null
+                ? windowOverrideRect
+                : Recents.getSystemServices().getWindowRect();
         transformOut.rect.offset(windowRect.left, windowRect.top);
         return transformOut;
     }

@@ -302,7 +302,8 @@ public class RecentsTransitionHelper {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
                 mTmpTransform.fillIn(taskView);
-                stackLayout.transformToScreenCoordinates(mTmpTransform);
+                stackLayout.transformToScreenCoordinates(mTmpTransform,
+                        null /* windowOverrideRect */);
                 specs.add(composeAnimationSpec(stackView, taskView, mTmpTransform,
                         true /* addHeaderBitmap */));
             }
@@ -324,7 +325,8 @@ public class RecentsTransitionHelper {
                     specs.add(composeOffscreenAnimationSpec(t, offscreenTaskRect));
                 } else {
                     mTmpTransform.fillIn(taskView);
-                    stackLayout.transformToScreenCoordinates(mTmpTransform);
+                    stackLayout.transformToScreenCoordinates(mTmpTransform,
+                            null /* windowOverrideRect */);
                     specs.add(composeAnimationSpec(stackView, tv, mTmpTransform,
                             true /* addHeaderBitmap */));
                 }

@@ -1352,7 +1352,7 @@ class WindowStateAnimator {
         final Task task = w.getTask();
 
         // We got resized, so block all updates until we got the new surface.
-        if (w.mResizedWhileNotDragResizing) {
+        if (w.mResizedWhileNotDragResizing && !w.isGoneForLayoutLw()) {
             return;
         }
 

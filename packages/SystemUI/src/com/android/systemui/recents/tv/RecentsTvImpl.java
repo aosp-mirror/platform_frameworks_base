@@ -49,7 +49,7 @@ public class RecentsTvImpl extends RecentsImpl{
 
     @Override
     protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome, boolean animate) {
+            boolean isTopTaskHome, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we

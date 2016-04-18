@@ -1318,7 +1318,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void showRecents(boolean triggeredFromAltTab, boolean fromHome) {
         if (mRecents != null) {
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
-            mRecents.showRecents(triggeredFromAltTab, fromHome, getStatusBarView());
+            mRecents.showRecents(triggeredFromAltTab, fromHome);
         }
     }
 
@@ -1330,7 +1330,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void toggleRecents() {
         if (mRecents != null) {
-            mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+            mRecents.toggleRecents(mDisplay);
         }
     }
 
