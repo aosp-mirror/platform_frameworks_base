@@ -108,6 +108,8 @@ void CanvasContext::setSurface(Surface* surface) {
         mEglSurface = mEglManager.createSurface(surface);
     }
 
+    mFrameNumber = -1;
+
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (mSwapBehavior != kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
@@ -213,10 +215,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 #else
     info.renderer = mCanvas;
 #endif
-
-    if (CC_LIKELY(mNativeSurface.get())) {
-        info.frameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
-    }
 
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
@@ -511,6 +509,7 @@ void CanvasContext::draw() {
         swap.swapTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         mHaveNewSurface = false;
+        mFrameNumber = -1;
     }
 
     // TODO: Use a fence for real completion?
@@ -777,6 +776,14 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
     sp<FuncTask> task(new FuncTask());
     task->func = func;
     mFrameWorkProcessor->add(task);
+}
+
+int64_t CanvasContext::getFrameNumber() {
+    // mFrameNumber is reset to -1 when the surface changes or we swap buffers
+    if (mFrameNumber == -1 && mNativeSurface.get()) {
+        mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
+    }
+    return mFrameNumber;
 }
 
 } /* namespace renderthread */

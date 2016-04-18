@@ -166,6 +166,8 @@ public:
     // Used to queue up work that needs to be completed before this frame completes
     ANDROID_API void enqueueFrameWork(std::function<void()>&& func);
 
+    ANDROID_API int64_t getFrameNumber();
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -195,6 +197,7 @@ private:
     };
 
     RingBuffer<SwapHistory, 3> mSwapHistory;
+    int64_t mFrameNumber = -1;
 
     bool mOpaque;
 #if HWUI_NEW_OPS
