@@ -1074,7 +1074,11 @@ public final class ScriptGroup extends BaseObj {
     protected void finalize() throws Throwable {
         // Clear out the list mClosures to avoid double-destroying the closures,
         // in case their finalizers race ahead.
-        mClosures.clear();
+        if (mClosures != null) {
+            // ScriptGroup created using the old Builder class does not
+            // initialize the field mClosures
+            mClosures.clear();
+        }
         super.finalize();
     }
 }
