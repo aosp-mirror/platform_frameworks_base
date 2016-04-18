@@ -37,8 +37,8 @@ class OffscreenBuffer;
 class Rect;
 
 /**
- * Traverses all of the drawing commands from the layers and RenderNodes passed into it, preparing
- * them to be rendered.
+ * Processes, optimizes, and stores rendering commands from RenderNodes and
+ * LayerUpdateQueue, building content needed to render a frame.
  *
  * Resolves final drawing state for each operation (including clip, alpha and matrix), and then
  * reorder and merge each op as it is resolved for drawing efficiency. Each layer of content (either
@@ -60,21 +60,21 @@ public:
         float radius;
     };
 
-    // TODO: remove
-    FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
+    FrameBuilder(const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
-            const std::vector< sp<RenderNode> >& nodes,
-            const LightGeometry& lightGeometry,
-            Caches& caches)
-            : FrameBuilder(layers, clip, viewportWidth, viewportHeight,
-                    nodes, lightGeometry, Rect(), caches) {}
+            const LightGeometry& lightGeometry, Caches& caches);
 
-    FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
-            uint32_t viewportWidth, uint32_t viewportHeight,
-            const std::vector< sp<RenderNode> >& nodes,
-            const LightGeometry& lightGeometry,
-            const Rect &contentDrawBounds,
-            Caches& caches);
+    FrameBuilder(const LayerUpdateQueue& layerUpdateQueue,
+            const LightGeometry& lightGeometry, Caches& caches);
+
+    void deferLayers(const LayerUpdateQueue& layers);
+
+    void deferRenderNode(RenderNode& renderNode);
+
+    void deferRenderNode(float tx, float ty, Rect clipRect, RenderNode& renderNode);
+
+    void deferRenderNodeScene(const std::vector< sp<RenderNode> >& nodes,
+            const Rect& contentDrawBounds);
 
     virtual ~FrameBuilder() {}
 
@@ -223,8 +223,12 @@ private:
     MAP_DEFERRABLE_OPS(X)
 #undef X
 
+    // contains single-frame objects, such as BakedOpStates, LayerBuilders, Batches
+    LinearAllocator mAllocator;
+    LinearStdAllocator<void*> mStdAllocator;
+
     // List of every deferred layer's render state. Replayed in reverse order to render a frame.
-    std::vector<LayerBuilder*> mLayerBuilders;
+    LsaVector<LayerBuilder*> mLayerBuilders;
 
     /*
      * Stack of indices within mLayerBuilders representing currently active layers. If drawing
@@ -238,16 +242,13 @@ private:
      * won't be in mLayerStack. This is because it can be replayed, but can't have any more drawing
      * ops added to it.
     */
-    std::vector<size_t> mLayerStack;
+    LsaVector<size_t> mLayerStack;
 
     CanvasState mCanvasState;
 
     Caches& mCaches;
 
     float mLightRadius;
-
-    // contains single-frame objects, such as BakedOpStates, LayerBuilders, Batches
-    LinearAllocator mAllocator;
 
     const bool mDrawFbo0;
 };
