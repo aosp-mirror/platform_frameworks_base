@@ -23,14 +23,13 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class IpConnectivityEvent implements Parcelable {
-    public static final String TAG = "IpConnectivityEvent";
-
+public abstract class IpConnectivityEvent {
     // IPRM   = IpReachabilityMonitor
     // DHCP   = DhcpClient
     // NETMON = NetworkMonitorEvent
     // CONSRV = ConnectivityServiceEvent
     // IPMGR  = IpManager
+    // DNS    = DnsEvent
     public static final int IPCE_IPRM_BASE                 = 0 * 1024;
     public static final int IPCE_DHCP_BASE                 = 1 * 1024;
     public static final int IPCE_NETMON_BASE               = 2 * 1024;
@@ -60,16 +59,10 @@ public class IpConnectivityEvent implements Parcelable {
 
     private static ConnectivityMetricsLogger mMetricsLogger = new ConnectivityMetricsLogger();
 
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel out, int flags) {
-    }
-
-    public static void logEvent(int tag, IpConnectivityEvent event) {
-        long timestamp = System.currentTimeMillis();
-        mMetricsLogger.logEvent(timestamp, ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY,
-                tag, event);
+    public static <T extends IpConnectivityEvent & Parcelable> void logEvent(int tag, T event) {
+        final long timestamp = System.currentTimeMillis();
+        final int componentTag = ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY;
+        // TODO: consider using different component for DNS event.
+        mMetricsLogger.logEvent(timestamp, componentTag, tag, event);
     }
 };
