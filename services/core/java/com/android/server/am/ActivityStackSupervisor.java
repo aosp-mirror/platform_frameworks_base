@@ -4356,28 +4356,31 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 ? new ActivityOptions(bOptions) : null;
         final int launchStackId = (activityOptions != null)
                 ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
-
         if (launchStackId == HOME_STACK_ID) {
             throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
                     + taskId + " can't be launch in the home stack.");
         }
+
+        if (launchStackId == DOCKED_STACK_ID) {
+            mWindowManager.setDockedStackCreateState(
+                    activityOptions.getDockCreateMode(), null /* initialBounds */);
+
+            // Defer updating the stack in which recents is until the app transition is done, to
+            // not run into issues where we still need to draw the task in recents but the
+            // docked stack is already created.
+            deferUpdateBounds(HOME_STACK_ID);
+            mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
+        }
+
         task = anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
         if (task == null) {
+            continueUpdateBounds(HOME_STACK_ID);
+            mWindowManager.executeAppTransition();
             throw new IllegalArgumentException(
                     "startActivityFromRecentsInner: Task " + taskId + " not found.");
         }
 
         if (launchStackId != INVALID_STACK_ID) {
-            if (launchStackId == DOCKED_STACK_ID) {
-                mWindowManager.setDockedStackCreateState(
-                        activityOptions.getDockCreateMode(), null /* initialBounds */);
-
-                // Defer updating the stack in which recents is until the app transition is done, to
-                // not run into issues where we still need to draw the task in recents but the
-                // docked stack is already created.
-                deferUpdateBounds(HOME_STACK_ID);
-                mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
-            }
             if (task.stack.mStackId != launchStackId) {
                 moveTaskToStackLocked(
                         taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
@@ -4405,12 +4408,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         intent = task.intent;
         intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
         userId = task.userId;
-            int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
-                    null, null, 0, 0, bOptions, userId, null, task);
-            if (launchStackId == DOCKED_STACK_ID) {
-                setResizingDuringAnimation(task.taskId);
-            }
-            return result;
+        int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
+                null, null, 0, 0, bOptions, userId, null, task);
+        if (launchStackId == DOCKED_STACK_ID) {
+            setResizingDuringAnimation(task.taskId);
+        }
+        return result;
     }
 
     /**
