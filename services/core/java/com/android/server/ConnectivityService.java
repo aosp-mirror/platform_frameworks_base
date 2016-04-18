@@ -1750,7 +1750,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if(restoreDefaultNetworkDelayStr != null &&
                 restoreDefaultNetworkDelayStr.length() != 0) {
             try {
-                return Integer.valueOf(restoreDefaultNetworkDelayStr);
+                return Integer.parseInt(restoreDefaultNetworkDelayStr);
             } catch (NumberFormatException e) {
             }
         }

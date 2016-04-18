@@ -1227,7 +1227,7 @@ final class TaskRecord {
             if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
                     attrName + " value=" + attrValue);
             if (ATTR_TASKID.equals(attrName)) {
-                if (taskId == INVALID_TASK_ID) taskId = Integer.valueOf(attrValue);
+                if (taskId == INVALID_TASK_ID) taskId = Integer.parseInt(attrValue);
             } else if (ATTR_REALACTIVITY.equals(attrName)) {
                 realActivity = ComponentName.unflattenFromString(attrValue);
             } else if (ATTR_REALACTIVITY_SUSPENDED.equals(attrName)) {
@@ -1246,13 +1246,13 @@ final class TaskRecord {
             } else if (ATTR_ASKEDCOMPATMODE.equals(attrName)) {
                 askedCompatMode = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
-                userId = Integer.valueOf(attrValue);
+                userId = Integer.parseInt(attrValue);
             } else if (ATTR_USER_SETUP_COMPLETE.equals(attrName)) {
                 userSetupComplete = Boolean.valueOf(attrValue);
             } else if (ATTR_EFFECTIVE_UID.equals(attrName)) {
-                effectiveUid = Integer.valueOf(attrValue);
+                effectiveUid = Integer.parseInt(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
-                taskType = Integer.valueOf(attrValue);
+                taskType = Integer.parseInt(attrValue);
             } else if (ATTR_FIRSTACTIVETIME.equals(attrName)) {
                 firstActiveTime = Long.valueOf(attrValue);
             } else if (ATTR_LASTACTIVETIME.equals(attrName)) {
@@ -1268,19 +1268,19 @@ final class TaskRecord {
             } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                 taskDescription.restoreFromXml(attrName, attrValue);
             } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
-                taskAffiliation = Integer.valueOf(attrValue);
+                taskAffiliation = Integer.parseInt(attrValue);
             } else if (ATTR_PREV_AFFILIATION.equals(attrName)) {
-                prevTaskId = Integer.valueOf(attrValue);
+                prevTaskId = Integer.parseInt(attrValue);
             } else if (ATTR_NEXT_AFFILIATION.equals(attrName)) {
-                nextTaskId = Integer.valueOf(attrValue);
+                nextTaskId = Integer.parseInt(attrValue);
             } else if (ATTR_TASK_AFFILIATION_COLOR.equals(attrName)) {
-                taskAffiliationColor = Integer.valueOf(attrValue);
+                taskAffiliationColor = Integer.parseInt(attrValue);
             } else if (ATTR_CALLING_UID.equals(attrName)) {
-                callingUid = Integer.valueOf(attrValue);
+                callingUid = Integer.parseInt(attrValue);
             } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
                 callingPackage = attrValue;
             } else if (ATTR_RESIZE_MODE.equals(attrName)) {
-                resizeMode = Integer.valueOf(attrValue);
+                resizeMode = Integer.parseInt(attrValue);
                 resizeMode = (resizeMode == RESIZE_MODE_CROP_WINDOWS)
                         ? RESIZE_MODE_FORCE_RESIZEABLE : resizeMode;
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
@@ -1288,9 +1288,9 @@ final class TaskRecord {
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
                 bounds = Rect.unflattenFromString(attrValue);
             } else if (ATTR_MINIMAL_WIDTH.equals(attrName)) {
-                minimalWidth = Integer.valueOf(attrValue);
+                minimalWidth = Integer.parseInt(attrValue);
             } else if (ATTR_MINIMAL_HEIGHT.equals(attrName)) {
-                minimalHeight = Integer.valueOf(attrValue);
+                minimalHeight = Integer.parseInt(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }

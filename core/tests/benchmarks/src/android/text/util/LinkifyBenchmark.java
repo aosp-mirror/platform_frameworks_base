@@ -49,7 +49,7 @@ public class LinkifyBenchmark {
 
     @BeforeExperiment
     protected void setUp() throws Exception {
-        int copyAmount = Integer.valueOf(mParamCopyAmount);
+        int copyAmount = Integer.parseInt(mParamCopyAmount);
         StringBuilder strBuilder = new StringBuilder();
         for (int i = 0; i < copyAmount; i++) {
             strBuilder.append(mParamBasicText);

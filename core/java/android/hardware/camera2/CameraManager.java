@@ -223,7 +223,7 @@ public final class CameraManager {
                         " currently connected camera device", cameraId));
             }
 
-            int id = Integer.valueOf(cameraId);
+            int id = Integer.parseInt(cameraId);
 
             /*
              * Get the camera characteristics from the camera service directly if it supports it,
