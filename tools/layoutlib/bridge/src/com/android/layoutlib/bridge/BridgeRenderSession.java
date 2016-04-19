@@ -192,7 +192,9 @@ public class BridgeRenderSession extends RenderSession {
 
     @Override
     public void setElapsedFrameTimeNanos(long nanos) {
-        mSession.setElapsedFrameTimeNanos(nanos);
+        if (mSession != null) {
+            mSession.setElapsedFrameTimeNanos(nanos);
+        }
     }
 
     @Override
