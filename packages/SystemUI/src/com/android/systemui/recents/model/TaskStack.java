@@ -30,17 +30,21 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
-import android.animation.RectEvaluator;
+import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntProperty;
 import android.util.SparseArray;
 import android.view.animation.Interpolator;
 
@@ -56,6 +60,8 @@ import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -240,22 +246,30 @@ public class TaskStack {
      */
     public static class DockState implements DropTarget {
 
+        // The rotation to apply to the hint text
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({HORIZONTAL, VERTICAL})
+        public @interface TextOrientation {}
+        private static final int HORIZONTAL = 0;
+        private static final int VERTICAL = 1;
+
         private static final int DOCK_AREA_ALPHA = 192;
-        public static final DockState NONE = new DockState(DOCKED_INVALID, -1, 80, null, null, null);
+        public static final DockState NONE = new DockState(DOCKED_INVALID, -1, 80, 255, HORIZONTAL,
+                null, null, null);
         public static final DockState LEFT = new DockState(DOCKED_LEFT,
-                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
+                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, VERTICAL,
                 new RectF(0, 0, 0.125f, 1), new RectF(0, 0, 0.125f, 1),
                 new RectF(0, 0, 0.5f, 1));
         public static final DockState TOP = new DockState(DOCKED_TOP,
-                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
+                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
                 new RectF(0, 0, 1, 0.125f), new RectF(0, 0, 1, 0.125f),
                 new RectF(0, 0, 1, 0.5f));
         public static final DockState RIGHT = new DockState(DOCKED_RIGHT,
-                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
+                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, VERTICAL,
                 new RectF(0.875f, 0, 1, 1), new RectF(0.875f, 0, 1, 1),
                 new RectF(0.5f, 0, 1, 1));
         public static final DockState BOTTOM = new DockState(DOCKED_BOTTOM,
-                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
+                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
                 new RectF(0, 0.875f, 1, 1), new RectF(0, 0.875f, 1, 1),
                 new RectF(0, 0.5f, 1, 1));
 
@@ -267,33 +281,109 @@ public class TaskStack {
         }
 
         // Represents the view state of this dock state
-        public class ViewState {
+        public static class ViewState {
+            private static final IntProperty<ViewState> HINT_ALPHA =
+                    new IntProperty<ViewState>("drawableAlpha") {
+                        @Override
+                        public void setValue(ViewState object, int alpha) {
+                            object.mHintTextAlpha = alpha;
+                            object.dockAreaOverlay.invalidateSelf();
+                        }
+
+                        @Override
+                        public Integer get(ViewState object) {
+                            return object.mHintTextAlpha;
+                        }
+                    };
+
             public final int dockAreaAlpha;
             public final ColorDrawable dockAreaOverlay;
-            private AnimatorSet dockAreaOverlayAnimator;
+            public final int hintTextAlpha;
+            public final int hintTextOrientation;
 
-            private ViewState(int alpha) {
-                dockAreaAlpha = alpha;
+            private final int mHintTextResId;
+            private String mHintText;
+            private Paint mHintTextPaint;
+            private Point mHintTextBounds = new Point();
+            private int mHintTextAlpha = 255;
+            private AnimatorSet mDockAreaOverlayAnimator;
+            private Rect mTmpRect = new Rect();
+
+            private ViewState(int areaAlpha, int hintAlpha, @TextOrientation int hintOrientation,
+                    int hintTextResId) {
+                dockAreaAlpha = areaAlpha;
                 dockAreaOverlay = new ColorDrawable(0xFFffffff);
                 dockAreaOverlay.setAlpha(0);
+                hintTextAlpha = hintAlpha;
+                hintTextOrientation = hintOrientation;
+                mHintTextResId = hintTextResId;
+                mHintTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mHintTextPaint.setColor(Color.WHITE);
+            }
+
+            /**
+             * Updates the view state with the given context.
+             */
+            public void update(Context context) {
+                Resources res = context.getResources();
+                mHintText = context.getString(mHintTextResId);
+                mHintTextPaint.setTextSize(res.getDimensionPixelSize(
+                        R.dimen.recents_drag_hint_text_size));
+                mHintTextPaint.getTextBounds(mHintText, 0, mHintText.length(), mTmpRect);
+                mHintTextBounds.set((int) mHintTextPaint.measureText(mHintText), mTmpRect.height());
+            }
+
+            /**
+             * Draws the current view state.
+             */
+            public void draw(Canvas canvas) {
+                // Draw the overlay background
+                if (dockAreaOverlay.getAlpha() > 0) {
+                    dockAreaOverlay.draw(canvas);
+                }
+
+                // Draw the hint text
+                if (mHintTextAlpha > 0) {
+                    Rect bounds = dockAreaOverlay.getBounds();
+                    int x = bounds.left + (bounds.width() - mHintTextBounds.x) / 2;
+                    int y = bounds.top + (bounds.height() + mHintTextBounds.y) / 2;
+                    mHintTextPaint.setAlpha(mHintTextAlpha);
+                    if (hintTextOrientation == VERTICAL) {
+                        canvas.save();
+                        canvas.rotate(-90f, bounds.centerX(), bounds.centerY());
+                    }
+                    canvas.drawText(mHintText, x, y, mHintTextPaint);
+                    if (hintTextOrientation == VERTICAL) {
+                        canvas.restore();
+                    }
+                }
             }
 
             /**
              * Creates a new bounds and alpha animation.
              */
-            public void startAnimation(Rect bounds, int alpha, int duration,
+            public void startAnimation(Rect bounds, int areaAlpha, int hintAlpha, int duration,
                     Interpolator interpolator, boolean animateAlpha, boolean animateBounds) {
-                if (dockAreaOverlayAnimator != null) {
-                    dockAreaOverlayAnimator.cancel();
+                if (mDockAreaOverlayAnimator != null) {
+                    mDockAreaOverlayAnimator.cancel();
                 }
 
                 ArrayList<Animator> animators = new ArrayList<>();
-                if (dockAreaOverlay.getAlpha() != alpha) {
+                if (dockAreaOverlay.getAlpha() != areaAlpha) {
                     if (animateAlpha) {
                         animators.add(ObjectAnimator.ofInt(dockAreaOverlay,
-                                Utilities.DRAWABLE_ALPHA, dockAreaOverlay.getAlpha(), alpha));
+                                Utilities.DRAWABLE_ALPHA, dockAreaOverlay.getAlpha(), areaAlpha));
                     } else {
-                        dockAreaOverlay.setAlpha(alpha);
+                        dockAreaOverlay.setAlpha(areaAlpha);
+                    }
+                }
+                if (mHintTextAlpha != hintAlpha) {
+                    if (animateAlpha) {
+                        animators.add(ObjectAnimator.ofInt(this, HINT_ALPHA, mHintTextAlpha,
+                                hintAlpha));
+                    } else {
+                        mHintTextAlpha = hintAlpha;
+                        dockAreaOverlay.invalidateSelf();
                     }
                 }
                 if (bounds != null && !dockAreaOverlay.getBounds().equals(bounds)) {
@@ -307,11 +397,11 @@ public class TaskStack {
                     }
                 }
                 if (!animators.isEmpty()) {
-                    dockAreaOverlayAnimator = new AnimatorSet();
-                    dockAreaOverlayAnimator.playTogether(animators);
-                    dockAreaOverlayAnimator.setDuration(duration);
-                    dockAreaOverlayAnimator.setInterpolator(interpolator);
-                    dockAreaOverlayAnimator.start();
+                    mDockAreaOverlayAnimator = new AnimatorSet();
+                    mDockAreaOverlayAnimator.playTogether(animators);
+                    mDockAreaOverlayAnimator.setDuration(duration);
+                    mDockAreaOverlayAnimator.setInterpolator(interpolator);
+                    mDockAreaOverlayAnimator.start();
                 }
             }
         }
@@ -331,14 +421,23 @@ public class TaskStack {
          *                              the initial touch area.  This is also the new dock area to
          *                              draw.
          */
-        DockState(int dockSide, int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea,
+        DockState(int dockSide, int createMode, int dockAreaAlpha, int hintTextAlpha,
+                  @TextOrientation int hintTextOrientation, RectF touchArea, RectF dockArea,
                   RectF expandedTouchDockArea) {
             this.dockSide = dockSide;
             this.createMode = createMode;
-            this.viewState = new ViewState(dockAreaAlpha);
+            this.viewState = new ViewState(dockAreaAlpha, hintTextAlpha, hintTextOrientation,
+                    R.string.recents_drag_hint_message);
             this.dockArea = dockArea;
             this.touchArea = touchArea;
             this.expandedTouchDockArea = expandedTouchDockArea;
+        }
+
+        /**
+         * Updates the dock state with the given context.
+         */
+        public void update(Context context) {
+            viewState.update(context);
         }
 
         /**
