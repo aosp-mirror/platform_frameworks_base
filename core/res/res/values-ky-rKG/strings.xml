@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Кызмат изделүүдө"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi Чалуу"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi аркылуу чалууларды аткарып жана билдирүүлөрдү жөнөтүү үчүн адегенде операторуңуздан бул кызматты орнотушун сураныңыз. Андан соң, Жөндөөлөрдөн Wi-Fi чалууну кайра күйгүзүңүз."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Операторуңузга катталыңыз"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi Чалуу"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өчүк"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi тандалган"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Уюлдук тармак тандалган"</string>
@@ -413,8 +417,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Колдонмого жергиликтүү Bluetooth телефонун конфигурациялап, ыраактагы түзмөктөрдү таап, жупташуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX түйүнүнө туташуу жана андан ажыроо"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Колдонмого WiMAX жандырылгандыгы жана туташкан WiMAX түйүндөрү тууралуу маалыматтарын көрүүгө уруксат берет."</string>
-    <!-- no translation found for permlab_changeWimaxState (340465839241528618) -->
-    <skip />
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX абалын өзгөртүү"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Колдонмого планшетти WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Колдонмого сыналгыны WiMAX тармактарына туташтырып, алардан ажыратуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Колдонмого телефонду WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
@@ -1470,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"Жылды тандаңыз"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> өчүрүлдү"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Бул экранды бошотуу үчүн Артка жана Көз жүгүртүүнү чогуу басып, кармап туруңуз."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Бул экранды бошотуу үчүн Көз жүгүртүүнү басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Колдонмо кадалган: Бул түзмөктө бошотууга уруксат жок."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>

@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Vyhľadávanie služby"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Volanie cez Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Ak chcete volať a odosielať správy prostredníctvom siete Wi-Fi, kontaktujte najskôr svojho operátora v súvislosti s nastavením tejto služby. Potom opäť zapnite v Nastaveniach volanie cez Wi-Fi."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrujte sa so svojím operátorom"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Volanie siete Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Uprednostniť Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Uprednostniť mobilné pripojenie"</string>
@@ -1489,7 +1493,7 @@
     <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ak chcete uvoľniť túto obrazovku, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Späť a podržte ho."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikácia je pripnutá. Uvoľnenie nie je na tomto zariadení povolené."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>

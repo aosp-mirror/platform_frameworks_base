@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Đang tìm kiếm Dịch vụ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Gọi qua Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Để gọi điện và gửi tin nhắn qua Wi-Fi, trước tiên hãy yêu cầu nhà cung cấp dịch vụ của bạn thiết lập dịch vụ này. Sau đó, bật lại gọi qua Wi-Fi từ Cài đặt."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Đăng ký với nhà cung cấp dịch vụ của bạn"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Gọi điện qua Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Ưu tiên mạng di động"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Chọn năm"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Đã xóa <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> làm việc"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Để bỏ khóa màn hình này, chạm và giữ Quay lại và Tổng quan cùng lúc."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Để bỏ ghim màn hình này, chạm và giữ Quay lại."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Để bỏ khóa màn hình này, chạm và giữ Tổng quan."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ứng dụng được ghim: Không được phép bỏ ghim trên thiết bị này."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Đã ghim màn hình"</string>

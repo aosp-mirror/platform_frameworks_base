@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"جستجوی سرویس"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏تماس از طریق Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"‏برای برقراری تماس و ارسال پیام از طریق Wi-Fi، ابتدا از شرکت مخابراتی‌تان درخواست کنید این سرویس را راه‌اندازی کند. سپس دوباره از تنظیمات، تماس Wi-Fi را روشن کنید."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ثبت نام با شرکت مخابراتی شما"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"‏تماس ‪%s Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"خاموش"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"شبکه سلولی ترجیحی"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"انتخاب سال"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> حذف شد"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> محل کار"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"برای برداشتن پین این صفحه، هم‌زمان «برگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"برای برداشتن پین این صفحه، «برگشت» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"برای برداشتن پین این صفحه، «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"برنامه پین شده است: برداشتن پین در این دستگاه مجاز نیست."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>

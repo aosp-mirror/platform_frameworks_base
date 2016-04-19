@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi ដំបូងឡើយអ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនរបស់អ្នកដំឡើងសេវាកម្មនេះសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតចេញពីការកំណត់។"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"ការហៅតាមរយៈ Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"គួរប្រើ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"គួរប្រើប្រព័ន្ធទូរស័ព្ទ"</string>
@@ -1471,7 +1475,8 @@
     <string name="select_year" msgid="7952052866994196170">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ថយក្រោយ និង​ទិដ្ឋភាព​នៅ​ពេល​តែ​មួយ។"</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ទិដ្ឋភាព។"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"កម្មវិធីនេះត្រូវបានខ្ទាស់។ មិនអនុញ្ញាតឲ្យដោះការខ្ទាស់នៅលើឧបករណ៍នេះទេ។"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>

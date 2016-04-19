@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা অনুসন্ধান করা হচ্ছে"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi কলিং"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi এর মাধ্যমে কল করতে ও বার্তা পাঠাতে, প্রথমে আপনার পরিষেবা প্রদানকারীকে এই পরিষেবার সেট আপ করার বিষয়ে জিজ্ঞাসা করুন। তারপরে আবার সেটিংস থেকে Wi-Fi কলিং চালু করুন।"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"আপনার পরিষেবা প্রদানকারীকে নথিভুক্ত করুন"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi কলিং"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"পছন্দের Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"পছন্দের মোবাইল নেটওয়ার্ক"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"বছর নির্বাচন করুন"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> মুছে ফেলা হয়েছে"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"কর্মক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"এই স্ক্রীনটিকে আনপিন করতে, \'এক নজরে\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"অ্যাপ্লিকেশান পিন করা আছে: এই ডিভাইস এটিকে পিনমুক্ত করা মঞ্জুরিপ্রাপ্ত নয়৷"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রীন পিন করা হয়েছে"</string>
