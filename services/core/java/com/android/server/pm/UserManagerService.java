@@ -2372,11 +2372,13 @@ public class UserManagerService extends IUserManager.Stub {
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             int userId) {
         checkSystemOrRoot("set application restrictions");
+        if (restrictions != null) {
+            restrictions.setDefusable(true);
+        }
         synchronized (mPackagesLock) {
             if (restrictions == null || restrictions.isEmpty()) {
                 cleanAppRestrictionsForPackage(packageName, userId);
             } else {
-                restrictions.setDefusable(true);
                 // Write the restrictions to XML
                 writeApplicationRestrictionsLP(packageName, restrictions, userId);
             }
