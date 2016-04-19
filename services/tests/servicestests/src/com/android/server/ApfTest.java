@@ -43,7 +43,7 @@ public class ApfTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         // Load up native shared library containing APF interpreter exposed via JNI.
-        System.loadLibrary("apfjni");
+        System.loadLibrary("servicestestsjni");
     }
 
     // Expected return codes from APF interpreter.
