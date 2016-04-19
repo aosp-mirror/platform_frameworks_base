@@ -126,12 +126,18 @@ public class LocaleStore {
             return mFullCountryNameNative;
         }
 
+        String getFullCountryNameInUiLanguage() {
+            // We don't cache the UI name because the default locale keeps changing
+            return LocaleHelper.getDisplayCountry(mLocale);
+        }
+
         /** Returns the name of the locale in the language of the UI.
          * It is used for search, but never shown.
          * For instance German will show as "Deutsch" in the list, but we will also search for
          * "allemand" if the system UI is in French.
          */
         public String getFullNameInUiLanguage() {
+            // We don't cache the UI name because the default locale keeps changing
             return LocaleHelper.getDisplayName(mLocale, true /* sentence case */);
         }
 
@@ -151,6 +157,14 @@ public class LocaleStore {
                 return getFullCountryNameNative();
             } else {
                 return getFullNameNative();
+            }
+        }
+
+        String getContentDescription(boolean countryMode) {
+            if (countryMode) {
+                return getFullCountryNameInUiLanguage();
+            } else {
+                return getFullNameInUiLanguage();
             }
         }
 
