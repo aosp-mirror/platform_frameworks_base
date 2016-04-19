@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ಸೇವೆ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi ಕರೆ ಮಾಡುವಿಕೆ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi ಬಳಸಿಕೊಂಡು ಕರೆ ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಮೊದಲು ಈ ಸಾಧನವನ್ನು ಹೊಂದಿಸಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ತದನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಮತ್ತೆ Wi-Fi ಆನ್‌ ಮಾಡಿ."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ನಿಮ್ಮ ವಾಹಕದಲ್ಲಿ ನೋಂದಾಯಿಸಿಕೊಳ್ಳಿ"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi ಕರೆ ಮಾಡುವಿಕೆ"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ಸೆಲ್ಯುಲಾರ್‌ಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"ವರ್ಷವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ಕೆಲಸ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ‘ಹಿಂದೆ’ ಮತ್ತು ‘ಸಮಗ್ರ ನೋಟ’ವನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಂದೆ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ‘ಸಮಗ್ರ ನೋಟ’ವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ಅಪ್ಲಿಕೇಶನ್ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ: ಈ ಸಾಧನದಲ್ಲಿ ಅನ್‌ಪಿನ್‌ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ನಿಮ್ಮ ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ನವೀಕರಣಗೊಳ್ಳುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>
       <item quantity="other">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>

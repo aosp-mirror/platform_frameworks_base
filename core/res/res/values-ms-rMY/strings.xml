@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Mencari Perkhidmatan"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Panggilan Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Untuk membuat panggilan dan menghantar mesej melalui Wi-Fi, mula-mula minta pembawa anda untuk menyediakan perkhidmatan ini. Kemudian hidupkan panggilan Wi-Fi semula daripada Tetapan."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Daftar dengan pembawa anda"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Panggilan Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Mati"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi diutamakan"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Selular diutamakan"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Pilih tahun"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> dipadamkan"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kerja <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk menyahsemat skrin ini, sentuh dan tahan Kembali serta Ikhtisar pada masa yang sama."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Untuk menyahsemat skrin ini, sentuh dan tahan Kembali."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk menyahsemat skrin ini, sentuh dan tahan Ikhtisar."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Apl disemat: Nyahsemat tidak dibenarkan pada peranti ini."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrin disemat"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dipadamkan oleh pentadbir anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan mengehadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

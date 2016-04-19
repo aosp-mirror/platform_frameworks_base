@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"አገልግሎት ፍለጋ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"የWi-Fi ጥሪ ማድረጊያ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"በWi-Fi ላይ ጥሪዎችን ለማድረግ እና መልዕክቶችን ለመላክ መጀመሪያ የአገልግሎት አቅራቢዎ ይህን አገልግሎት እንዲያዘጋጅልዎ መጠየቅ አለብዎት። ከዚያ ከቅንብሮች ሆነው እንደገና የWi-Fi ጥሪን ያብሩ።"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"የአገልግሎት አቅራቢዎ ጋር ይመዝገቡ"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"የ%s Wi-Fi ጥሪ"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ጠፍቷል"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ተመርጧል"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"የተንቀሳቃሽ ስልክ ተመርጧል"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"ዓመት ይምረጡ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ተሰርዟል"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ይህን ማያ ገጽ ለመንቀል ተመለስን እና አጠቃላይ እይታን በተመሳሳይ ይንኳቸውና ይያዟቸው።"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ይህን ማያ ገጽ ለመንቀል ይንኩት እና መልሰው ይያዙት።"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ይህን ማያ ገጽ ለመንቀል አጠቃላይ እይታን ይንኩትና ይያዙት።"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"መተግበሪያ ተሰክቷል፦ በዚህ መሣሪያ ላይ ማላቀቅ አይፈቀድም።"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ማያ ገጽ ተሰክቷል"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"በአስተዳዳሪዎ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"የባትሪ ዕድሜን ለማሻሻል ማገዝ እንዲቻል፣ ኢሜይል፣ መልዕክት አላላክ እና ሌሎች በማመሳሰል ላይ የሚመረኮዙ መተግበሪያዎች እርስዎ ካልከፈቱዋቸው በቀር አይዘምኑም።\n\nየባትሪ ኃይል ቆጣቢ የእርስዎ መሣሪያ ኃይል በሚሞላበት ጊዜ በራስ-ሰር ይጠፋል።"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
       <item quantity="other">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>

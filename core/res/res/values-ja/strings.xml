@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"サービスを検索中"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi経由で音声通話の発信やメッセージの送信を行うには、携帯通信会社にWi-Fiサービスを申し込んだ上で、設定画面でWi-Fi発信を再度ONにしてください。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"携帯通信会社に登録してください"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Wi-Fi通話（%s）"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"OFF"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi優先"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"モバイル優先"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"年を選択"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"この画面の固定を解除するには[戻る]と[最近]を同時に押し続けます。"</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"この画面の固定を解除するには[最近]を押し続けます。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"アプリは固定されています。この端末では固定を解除できません。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"管理者によって更新されています"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"管理者によって削除されました"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d分間（<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>まで）</item>
       <item quantity="one">1分間（<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>まで）</item>

@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Zerbitzu bila"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi bidezko deiak"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wi-Fi bidezko deiak Ezarpenak atalean."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Erregistratu operadorearekin"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi bidezko deiak"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi sarea hobesten da"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Sare mugikorra hobesten da"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Hautatu urtea"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ezabatu da"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Laneko <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Aingura kentzeko, eduki ukituta Atzera eta Ikuspegi orokorra botoiak aldi berean."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Pantailari aingura kentzeko, eduki sakatuta Atzera botoia."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Aingura kentzeko, eduki ukituta Ikuspegi orokorra botoia."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikazioa ainguratuta dago. Gailu honetan ezin da aingura kendu."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantaila ainguratu da"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minutuz (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> arte)</item>
       <item quantity="one">Minutu batez (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> arte)</item>

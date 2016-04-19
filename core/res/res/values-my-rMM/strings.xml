@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ဆားဗစ်အားရှာဖွေနေသည်"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ဝိုင်ဖိုင် ခေါ်ဆိုမှု"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"ဝိုင်ဖိုင်သုံး၍ ဖုန်းခေါ်ဆိုရန်နှင့် မက်စေ့ဂျ်များပို့ရန်၊ ဤဝန်ဆောင်မှုအား စတင်သုံးနိုင်ရန်အတွက် သင့် မိုဘိုင်းဝန်ဆောင်မှုအား ဦးစွာမေးမြန်းပါ။ ထို့နောက် ဆက်တင်မှတဆင့် ဝိုင်ဖိုင် ခေါ်ဆိုမှုအား ထပ်ဖွင့်ပါ။"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"သင့် မိုဘိုင်းဝန်ဆောင်မှုဖြင့် မှတ်ပုံတင်ရန်"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s ဝိုင်ဖိုင် ခေါ်ဆိုမှု"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ပိတ်ထားရသည်"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ဝိုင်ဖိုင်အား ပိုနှစ်သက်သော"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ဆယ်လူလာအား ပိုနှစ်သက်သော"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"ခုနှစ်ကို ရွေးပါ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ကို ဖျက်ပြီးပါပြီ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ဒီမျက်နှာပြင် ပင်ထိုးမှုကို ဖြုတ်ရန်၊ နောက်သို့ နှင့် ခြုံကြည့်မှု ခလုတ်များကို တစ်ချိန်တည်း ထိကိုင်ထားပါ။"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ဤဖန်သားပြင်ကို ပင်ဖြုတ်ရန် နောက်သို့ ကိုထိပြီး ဖိထားပါ။"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ဒီမျက်နှာပြင် ပင်ထိုးမှုကို ဖြုတ်ရန် ခြုံကြည့်မှု ခလုတ်ကို ထိကိုင်ထားပါ။"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appကို ပင်ထိုးထားသည်။ ပင်ဖျက်ခြင်းကို ဒီစက်မှာ မရနိုင်ပါ။"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"မျက်နှာပြင်ကို ပင်ထိုးထား"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"သင့်စီမံခန့်ခွဲသူမှ အဆင့်မြှင့်ထားပါသည်။"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"သင့် အက်ဒမင်အား ဖျက်ပစ်ရန်"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်၊ ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကို  လျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့်၊ နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်လုပ်ပေးရလေ့ရှိသည့် အီးမေး၊ စာပို့ခြင်းနှင့်၊ အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အဆင့်မြှင့်မွမ်းမံမည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းအား အလိုအလျောက် ပိတ်ထားသည်။"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
       <item quantity="one">တစ်မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>

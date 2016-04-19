@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा शोधत आहे"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"वाय-फाय कॉलिंग"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"वाय-फायवरून कॉल करण्यासाठी आणि संदेश पाठविण्यासाठी, प्रथम आपल्या वाहकास ही सेवा सेट करण्यास सांगा. नंतर सेटिंग्जमधून पुन्हा वाय-फाय कॉलिंग चालू करा."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"आपल्या वाहकासह नोंदणी करा"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s वाय-फाय कॉलिंग"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाय-फाय प्राधान्यकृत"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेल्युलर प्राधान्यकृत"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष निवडा"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटविली"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ही स्क्रीन अनपिन करण्यासाठी, एकाच वेळी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ही स्क्रीन अनपिन करण्यासाठी, परत ला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अॅप पिन केलेला आहे: या डिव्हाइसवर अनपिन करण्यास अनुमती नाही."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d मिनिटासाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>
       <item quantity="other">%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>

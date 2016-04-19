@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"如要透過 Wi-FI 撥打電話及傳送訊息，請先要求您的行動通訊業者開通這項服務，然後再到「設定」啟用 Wi-Fi 通話功能。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"向您的行動通訊業者註冊"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi 通話"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi 優先"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"行動通訊優先"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已刪除 <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"如要取消固定這個畫面，請同時輕觸並按住返回按鈕和總覽按鈕。"</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"如要取消固定這個畫面，請輕觸並按住總覽按鈕。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：無法在這部裝置取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已遭管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">持續 %1$d 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">持續 1 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

@@ -124,13 +124,13 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Inatafuta Huduma"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Upigaji Simu kwa Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Ili upige simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako asanidi huduma hii kwanza. Kisha uwashe tena upigaji simu kwa Wi-Fi kutoka kwenye Mipangilio."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Jisajili na mtoa huduma wako"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <!-- String.format failed for translation -->
-    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
-    <skip />
+    <!-- no translation found for wfcSpnFormats:0 (6830082633573257149) -->
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi inapedelewa"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mitandao ya simu za mkononi inapendelewa"</string>
@@ -1471,7 +1471,7 @@
     <string name="select_year" msgid="7952052866994196170">"Chagua mwaka"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> kimefutwa"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ya kazini <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ili ubanue skrini hii, gusa na ushikilie Nyuma na Muhtasari kwa wakati mmoja."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Ili kubandua skrini hii, gusa na ushikilie kitufe cha Nyuma."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ili ubanue skrini hii, gusa na ushikilie Muhtasari."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Programu imebanwa: Kubanuliwa hakuruhusiwi kwenye kifaa hiki."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrini imebandikwa"</string>
@@ -1483,6 +1483,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

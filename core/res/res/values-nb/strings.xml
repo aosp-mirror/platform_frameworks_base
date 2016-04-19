@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leter etter tjeneste"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"For å ringe og sende meldinger over Wi-Fi må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrer deg hos operatøren din"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi-anrop"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi er foretrukket"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil er foretrukket"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Velg året"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil avslutte én-appsmodusen for denne skjermen, trykker og holder du på Tilbake og Oversikt samtidig."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"For å løsne denne skjermen, trykk og hold inne Tilbake."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil avslutte én-appsmodusen for denne skjermen, trykker og holder du på Oversikt."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er festet – du kan ikke løsne apper på denne enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet av administratoren"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"For å forlenge batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minutter (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I 1 minutt (til <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

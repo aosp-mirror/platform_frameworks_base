@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवाको खोजी गर्दै…"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi कलिङ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi बाट कल गर्न र सन्देशहरू पठाउन, सबभन्दा पहिला यो सेवा सेटअप गर्न तपाईँको वाहकलाई भन्नुहोस्। त्यसपछि फेरि सेटिङहरूबाट Wi-Fi कलिङ सक्रिय पार्नुहोस्।"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"तपाईँको वाहकसँग दर्ता गर्नुहोस्"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi कलिङ"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेलुलर मनपराइयो"</string>
@@ -914,10 +918,10 @@
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"पठाउनुहोस्"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"गृह अनुप्रयोग चयन गर्नुहोस्"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s लाई गृहको रूपमा प्रयोग गर्नुहोस्"</string>
-    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"यस मार्फत छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s मार्फत छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"छविलाई क्याप्चर गर्नुहोस्"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"यस मार्फत छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s मार्फत छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"छविलाई कैंद गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"फरक अनुप्रयोग प्रयोग गर्नुहोस्"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"प्रणाली सेटिङहरूमा पूर्वनिर्धारितलाई हटाउनुहोस् &gt; अनुप्रयोगहरू &gt; डाउनलोड।"</string>
@@ -1475,7 +1479,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चयन गर्नुहोस्"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"यस पर्दालाई अनपिन गर्न एकै समय फिर्ता र सारांशलाई छोई पक्डिनुहोस्।"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"यस स्क्रिनलाई अनपिन गर्न पछाडि बटनलाई छोइराख्नुहोस्।"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यस पर्दालाई अनपिन गर्न सारांशलाई छुनुहोस् र पक्डनुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
@@ -1487,6 +1491,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
       <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>

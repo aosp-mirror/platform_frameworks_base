@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"സേവനത്തിനായി തിരയുന്നു"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"വൈഫൈ കോളിംഗ്"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"വൈഫൈ വഴി കോളുകൾ വിളിക്കാനും സന്ദേശങ്ങൾ അയയ്‌ക്കാനും ആദ്യം നിങ്ങളുടെ കാരിയറോട് ഈ സേവനം സജ്ജമാക്കാൻ ആവശ്യപ്പെടുക. ക്രമീകരണത്തിൽ നിന്ന് വീണ്ടും വൈഫൈ കോളിംഗ് ഓണാക്കുക."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"നിങ്ങളുടെ കാരിയറിൽ രജിസ്റ്റർ ചെയ്യുക"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s വൈഫൈ കോളിംഗ്"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"സെല്ലുലാർ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"വർഷം തിരഞ്ഞെടുക്കുക"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ഇല്ലാതാക്കി"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'കാഴ്ച\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, ബാക്ക് ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, കാഴ്ച സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"അപ്ലിക്കേഷൻ പിൻ ചെയ്‌തു: ഈ ഉപകരണത്തിൽ അൺപിൻ ചെയ്യാനാവില്ല."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അപ്‌ഡേറ്റുചെയ്‌തു"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>

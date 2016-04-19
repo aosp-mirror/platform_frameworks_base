@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"กำลังค้นหาบริการ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"การโทรผ่าน Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"หากต้องการโทรออกและส่งข้อความผ่าน Wi-Fi โปรดสอบถามผู้ให้บริการของคุณก่อนเพื่อตั้งค่าบริการนี้ แล้วเปิดการโทรผ่าน Wi-Fi อีกครั้งจากการตั้งค่า"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ลงทะเบียนกับผู้ให้บริการ"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"กำลังเรียก Wi-Fi ของ %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ปิด"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ต้องการใช้ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ต้องการใช้เครือข่ายมือถือ"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"เลือกปี"</string>
     <string name="deleted_key" msgid="7659477886625566590">"ลบ <xliff:g id="KEY">%1$s</xliff:g> แล้ว"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"หากต้องการเลิกตรึงหน้าจอนี้ แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้พร้อมกัน"</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"หากต้องการเลิกตรึงหน้าจอ แตะ \"ภาพรวม\" ค้างไว้"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"มีการตรึงแอป: ไม่อนุญาตให้เลิกตรึงบนอุปกรณ์นี้"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ตรึงหน้าจอแล้ว"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ลบโดยผู้ดูแลระบบของคุณ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"เพื่อช่วยปรับปรุงอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ส่วนใหญ่ สำหรับอีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ระยะเวลา %1$d นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">ระยะเวลา 1 นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

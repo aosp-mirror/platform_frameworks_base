@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"מחפש שירות"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏שיחות ב-Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"‏כדי להתקשר ולשלוח הודעות ברשת Wi-Fi, תחילה יש לבקש מהספק להגדיר את השירות. לאחר מכן, יש להפעיל שוב התקשרות Wi-Fi מ\'הגדרות\'."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"הירשם אצל הספק"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"‏שיחות Wi-Fi של %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"כבוי"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi מועדף"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"סלולרי מועדף"</string>
@@ -261,7 +265,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם ייאמרו בקול וניתן לנווט במסך באמצעות תנועות."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"להפעיל גישה משופרת לאינטרנט"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעלה של גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצגת טקסט בזמן הקלדה"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
@@ -718,7 +722,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"סיסמה"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"כניסה"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"בודק..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"בטל נעילה"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"קול פועל"</string>
@@ -1344,7 +1348,7 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
@@ -1489,7 +1493,7 @@
     <string name="select_year" msgid="7952052866994196170">"בחר שנה"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"כדי לבטל את הקפאת המסך הזה, גע בו-זמנית נגיעה ממושכת ב\'הקודם\' ו\'סקירה\'."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"כדי לבטל את הצמדת המסך הזה, לחץ לחיצה ממושכת על הלחצן \'הקודם\'."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"כדי לבטל את הקפאת המסך הזה, גע נגיעה ממושכת ב\'סקירה\'."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"האפליקציה מוצמדת: ביטול ההצמדה אסור במכשיר הזה."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
@@ -1501,6 +1505,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
