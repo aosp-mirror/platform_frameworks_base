@@ -111,6 +111,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <!-- Permission needed to rename bugreport notifications (so they're not shown as Shell) -->
+    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
