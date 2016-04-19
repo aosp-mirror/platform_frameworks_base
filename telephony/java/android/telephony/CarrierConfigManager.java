@@ -524,6 +524,17 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
+     * Determines whether video conference calls are supported by a carrier.  When {@code true},
+     * video calls can be merged into conference calls, {@code false} otherwiwse.
+     * <p>
+     * Note: even if video conference calls are not supported, audio calls may be merged into a
+     * conference if {@link #KEY_SUPPORT_CONFERENCE_CALL_BOOL} is {@code true}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL =
+            "support_video_conference_call_bool";
+
+    /**
      * Determine whether user can toggle Enhanced 4G LTE Mode in Settings.
      */
     public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
@@ -754,6 +765,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
