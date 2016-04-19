@@ -29,6 +29,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,6 +39,9 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.ErrnoException;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -50,6 +54,7 @@ import android.view.DisplayAdjustments;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -61,6 +66,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+
+import libcore.io.IoUtils;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     public IntentReceiverLeaked(String msg) {
@@ -488,6 +495,13 @@ public final class LoadedApk {
             final String add = TextUtils.join(File.pathSeparator, addedPaths);
             ApplicationLoaders.getDefault().addPath(mClassLoader, add);
         }
+
+        // Setup jit profile support.
+        // It is ok to call this multiple times if the application gets updated with new splits.
+        // The runtime only keeps track of unique code paths and can handle re-registration of
+        // the same code path. There's no need to pass `addedPaths` since any new code paths
+        // are already in `mApplicationInfo`.
+        setupJitProfileSupport();
     }
 
     public ClassLoader getClassLoader() {
@@ -497,6 +511,83 @@ public final class LoadedApk {
             }
             return mClassLoader;
         }
+    }
+
+    // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
+    private static File getPrimaryProfileFile(String packageName) {
+        File profileDir = Environment.getDataProfilesDePackageDirectory(
+                UserHandle.myUserId(), packageName);
+        return new File(profileDir, "primary.prof");
+    }
+
+    private void setupJitProfileSupport() {
+        if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
+            return;
+        }
+        final List<String> codePaths = new ArrayList<>();
+        if ((mApplicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            codePaths.add(mApplicationInfo.sourceDir);
+        }
+        if (mApplicationInfo.splitSourceDirs != null) {
+            Collections.addAll(codePaths, mApplicationInfo.splitSourceDirs);
+        }
+
+        if (codePaths.isEmpty()) {
+            // If there are no code paths there's no need to setup a profile file and register with
+            // the runtime,
+            return;
+        }
+
+        final File profileFile = getPrimaryProfileFile(mPackageName);
+        if (profileFile.exists()) {
+            if (!profileFile.canRead() || !profileFile.canWrite()) {
+                // The apk might be loaded in a context where we don't have permissions
+                // to track the profile (e.g. when loaded by another app via
+                // createApplicationContext)
+                return;
+            }
+        } else {
+            // Profile does not exist. Create it.
+            FileDescriptor fd = null;
+            try {
+                final int permissions = 0600;  // read-write for user.
+                fd = Os.open(profileFile.getAbsolutePath(), OsConstants.O_CREAT, permissions);
+                Os.fchmod(fd, permissions);
+                Os.fchown(fd, mApplicationInfo.uid, mApplicationInfo.uid);
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.EACCES) {
+                    // It can happen that the profile file does not exist but the apk is loaded in a
+                    // context where we don't have permissions (e.g. when loaded by another app via
+                    // createApplicationContext)
+                    return;
+                }
+                Log.v(TAG, "Unable to create jit profile file "
+                        + profileFile + ": " + e.getMessage());
+                try {
+                    Os.unlink(profileFile.getAbsolutePath());
+                } catch (ErrnoException unlinkErr) {
+                    if (unlinkErr.errno != OsConstants.ENOENT) {
+                        Log.v(TAG, "Unable to unlink jit profile file "
+                                + profileFile + ": " + unlinkErr.getMessage());
+                    }
+                }
+                return;
+            } finally {
+                IoUtils.closeQuietly(fd);
+            }
+        }
+
+        final File foreignDexProfilesFile =
+                Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
+        String foreignDexProfilesPath = null;
+        if (!foreignDexProfilesFile.exists()) {
+            Log.v(TAG, "ForeignDexProfilesPath does not exists:" +
+                    foreignDexProfilesFile.getPath());
+        } else {
+            foreignDexProfilesPath = foreignDexProfilesFile.getAbsolutePath();
+        }
+        VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), mApplicationInfo.dataDir,
+                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesPath);
     }
 
     /**
