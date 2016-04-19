@@ -45,7 +45,7 @@
             android:layout_gravity="end"
             android:minWidth="88dp"
             android:textAppearance="@style/TextAppearance.QS.DetailButton"
-            android:textColor="#4DFFFFFF"
+            android:textColor="#64FFFFFF"
             android:focusable="true"
             android:text="@string/qs_edit" />
 
