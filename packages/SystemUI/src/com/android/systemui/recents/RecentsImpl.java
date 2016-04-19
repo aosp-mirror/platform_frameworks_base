@@ -771,8 +771,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     if (icon != null) {
                         icon.setCallback(null);
                     }
-                    mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */,
+                    mHeaderBar.bindToTask(toTask, false /* touchExplorationEnabled */,
                             disabledInSafeMode);
+                    mHeaderBar.onTaskDataLoaded();
                     mHeaderBar.setDimAlpha(toTransform.dimAlpha);
                     mHeaderBar.draw(c);
                     c.setBitmap(null);

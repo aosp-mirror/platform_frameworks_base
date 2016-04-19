@@ -353,23 +353,15 @@ public class RecentsTaskLoader {
 
     /**
      * Acquires the task resource data directly from the cache, loading if necessary.
-     *
-     * @param fetchAndInvalidateThumbnails If set, will try loading thumbnails, invalidating them
-     *                                     in the cache and loading if necessary. Otherwise, do not
-     *                                     load the thumbnail unless the icon also has to be loaded.
      */
-    public void loadTaskData(Task t, boolean fetchAndInvalidateThumbnails) {
+    public void loadTaskData(Task t) {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
         Bitmap thumbnail = null;
         ActivityManager.TaskThumbnailInfo thumbnailInfo = null;
-        if (fetchAndInvalidateThumbnails) {
-            ThumbnailData thumbnailData = mThumbnailCache.getAndInvalidateIfModified(t.key);
-            if (thumbnailData != null) {
-                thumbnail = thumbnailData.thumbnail;
-                thumbnailInfo = thumbnailData.thumbnailInfo;
-            }
-        } else {
-            thumbnail = mDefaultThumbnail;
+        ThumbnailData thumbnailData = mThumbnailCache.getAndInvalidateIfModified(t.key);
+        if (thumbnailData != null) {
+            thumbnail = thumbnailData.thumbnail;
+            thumbnailInfo = thumbnailData.thumbnailInfo;
         }
 
         // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and

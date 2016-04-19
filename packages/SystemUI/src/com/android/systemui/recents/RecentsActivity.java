@@ -349,7 +349,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.loadTasks(this, loadPlan, loadOpts);
         TaskStack stack = loadPlan.getTaskStack();
         mRecentsView.onReload(mIsVisible, stack.getTaskCount() == 0);
-        mRecentsView.updateStack(stack);
+        mRecentsView.updateStack(stack, true /* setStackViewTasks */);
 
         // Update the nav bar scrim, but defer the animation until the enter-window event
         boolean animateNavBarScrim = !launchState.launchedViaDockGesture;
@@ -455,13 +455,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
                 false /* fromDeviceOrientationChange */, numStackTasks > 0));
-
-        if (mRecentsView != null) {
-            mRecentsView.updateStack(stack);
-        }
-
-        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode,
-                numStackTasks > 0));
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode, stack));
     }
 
     @Override
