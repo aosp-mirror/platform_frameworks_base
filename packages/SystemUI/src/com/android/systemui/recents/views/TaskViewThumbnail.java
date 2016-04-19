@@ -38,6 +38,7 @@ import android.view.ViewDebug;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -132,7 +133,7 @@ public class TaskViewThumbnail extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         SystemServicesProxy ssp = Recents.getSystemServices();
-        mOrientation = ssp.getDisplayOrientation();
+        mOrientation = Utilities.getAppConfiguration(mContext).orientation;
         mDisplayRect = ssp.getDisplayRect();
     }
 
