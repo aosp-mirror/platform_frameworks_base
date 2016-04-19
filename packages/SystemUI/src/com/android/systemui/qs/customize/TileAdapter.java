@@ -86,7 +86,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
-        setHasStableIds(true);
     }
 
     @Override
@@ -250,7 +249,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         holder.mTileView.onStateChanged(info.state);
         holder.mTileView.setAppLabel(info.appLabel);
-        holder.mTileView.setShowAppLabel(position > mTileDividerIndex);
+        holder.mTileView.setShowAppLabel(mTileDividerIndex > -1 && position > mTileDividerIndex);
 
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
             final boolean selectable = !mAccessibilityMoving || position < mEditIndex;
@@ -283,7 +282,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mTiles.remove(mEditIndex--);
         mAccessibilityMoving = false;
         move(mAccessibilityFromIndex, position, v);
-        notifyDataSetChanged();
+        notifyItemChanged(mAccessibilityFromIndex);
+        notifyItemMoved(mAccessibilityFromIndex, position);
     }
 
     private void showAccessibilityDialog(final int position, final View v) {
@@ -315,7 +315,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityFromIndex = position;
         // Add placeholder for last slot.
         mTiles.add(mEditIndex++, null);
-        notifyDataSetChanged();
+        notifyItemInserted(mEditIndex - 1);
     }
 
     public SpanSizeLookup getSizeLookup() {
@@ -335,6 +335,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 }
             } else {
                 if (mTileDividerIndex == mTiles.size()) {
+                    notifyItemInserted(mTiles.size());
                     mTiles.add(null);
                 }
                 if (to <= mTileDividerIndex) {
@@ -344,7 +345,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         CharSequence fromLabel = mTiles.get(from).state.label;
         move(from, to, mTiles);
-        notifyDataSetChanged();
+        notifyItemChanged(from);
+        notifyItemMoved(from, to);
         updateDividerLocations();
         CharSequence announcement;
         if (to >= mEditIndex) {
@@ -389,6 +391,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         if (mTiles.size() - 1 == mTileDividerIndex) {
             mTiles.remove(mTiles.size() - 1);
+            notifyItemRemoved(mTiles.size() - 1);
         }
     }
 
