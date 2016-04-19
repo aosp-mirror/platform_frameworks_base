@@ -21,5 +21,5 @@
     android:layout_marginStart="24dp"
     android:layout_marginTop="8dp"
     android:layout_marginEnd="0dp"
-    android:layout_marginBottom="20dp"
+    android:layout_marginBottom="0dp"
     android:background="?android:attr/dividerHorizontal" />
