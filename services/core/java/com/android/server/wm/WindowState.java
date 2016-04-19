@@ -2382,6 +2382,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 if (stack != null) {
                     pw.print(" stackId="); pw.print(stack.mStackId);
                 }
+                if (mNotOnAppsDisplay) {
+                    pw.print(" mNotOnAppsDisplay="); pw.print(mNotOnAppsDisplay);
+                }
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);
