@@ -6391,6 +6391,24 @@ public class DevicePolicyManager {
         }
     }
 
+    /**
+     * @hide
+     * Remove a test admin synchronously without sending it a broadcast about being removed.
+     * If the admin is a profile owner or device owner it will still be removed.
+     *
+     * @param userHandle user id to remove the admin for.
+     * @param admin The administration compononent to remove.
+     * @throws SecurityException if the caller is not shell / root or the admin package
+     *         isn't a test application see {@link ApplicationInfo#FLAG_TEST_APP}.
+     */
+    public void forceRemoveActiveAdmin(ComponentName adminReceiver, int userHandle) {
+        try {
+            mService.forceRemoveActiveAdmin(adminReceiver, userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
