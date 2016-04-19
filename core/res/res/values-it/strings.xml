@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ricerca servizio"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chiamate Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Per effettuare chiamate e inviare messaggi tramite Wi-Fi, è necessario prima chiedere all\'operatore telefonico di attivare il servizio. Successivamente, riattiva le chiamate Wi-Fi dalle Impostazioni."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrati con il tuo operatore"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Chiamata Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Rete preferita: Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Rete preferita: cellulare"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Seleziona anno"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminato"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Per sbloccare questa schermata, tocca e tieni premute contemporaneamente le opzioni Indietro e Panoramica."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Per sbloccare questa schermata, tocca e tieni premuta l\'opzione Indietro."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per sbloccare questa schermata, tocca e tieni premuta l\'opzione Panoramica."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'app è bloccata. Su questo dispositivo non è consentito lo sblocco."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>

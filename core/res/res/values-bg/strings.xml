@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Обаждания през Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"За да извършвате обаждания и да изпращате съобщения през Wi-Fi, първо помолете оператора си да настрои тази услуга. След това включете отново функцията за обаждания през Wi-Fi от настройките."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Регистриране с оператора ви"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s – обаждания през Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Изключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предпочита се Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Предпочита се клетъчна мрежа"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Избиране на година"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Изтрихте <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> за работа"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"За да освободите екрана, докоснете и задръжте едновременно бутона за връщане назад и този за общ преглед."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"За да освободите този екран, докоснете и задръжте бутона за връщане назад."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да освободите този екран, докоснете и задръжте бутона „Общ преглед“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Приложението е фиксирано. Освобождаването му не е разрешено на това устройство."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранът е фиксиран"</string>

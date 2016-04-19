@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Recherche des services disponibles"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Appels Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Pour effectuer des appels et envoyer des messages par Wi-Fi, demandez tout d\'abord à votre fournisseur de services de configurer ce service. Réactivez ensuite les appels Wi-Fi dans les paramètres."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Inscrivez-vous auprès de votre fournisseur de services"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Appels Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Réseau Wi-Fi de préférence"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Réseau cellulaire de préférence"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Sélectionnez une année"</string>
     <string name="deleted_key" msgid="7659477886625566590">"« <xliff:g id="KEY">%1$s</xliff:g> » a été supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage de cet écran, appuyez de manière prolongée sur Retour et Aperçu simultanément."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Pour annuler l\'épinglage de cet écran, maintenez enfoncée la touche Retour."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage, appuyez de manière prolongée sur Aperçu."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'application est épinglée : l\'annulation de l\'épinglage n\'est pas autorisée sur cet appareil."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé"</string>

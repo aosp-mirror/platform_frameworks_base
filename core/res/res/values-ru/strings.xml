@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Поиск службы"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Звонки по Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Чтобы совершать звонки и отправлять сообщения по Wi-Fi, необходимо сначала обратиться к оператору связи и подключить эту услугу. После этого вы сможете снова выбрать этот параметр в настройках."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Укажите оператора и зарегистрируйтесь"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Звонки по Wi-Fi (%s)"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Отключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Приоритет Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Приоритет моб. сети"</string>
@@ -921,7 +925,7 @@
     <string name="whichHomeApplication" msgid="4307587691506919691">"Выберите главное приложение"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Назначьте приложение \"%1$s\" главным"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Сделать снимок"</string>
-    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Делайте снимки с помощью:"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Делать снимки с помощью:"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Сделайте снимок с помощью приложения \"%1$s\""</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Сделать снимок"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
@@ -1489,7 +1493,7 @@
     <string name="select_year" msgid="7952052866994196170">"Выберите год"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Цифра <xliff:g id="KEY">%1$s</xliff:g> удалена"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\" одновременно."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Назад\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Обзор\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Включена блокировка в приложении. Ее отключение запрещено правилами организации."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>

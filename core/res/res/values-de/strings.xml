@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Anrufe über WLAN"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann erneut über die Einstellungen."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registriere dich bei deinem Mobilfunkanbieter."</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Anrufe über WLAN"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobilfunk bevorzugt"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Jahr auswählen"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> gelöscht"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Um die Fixierung dieses Bildschirms aufzuheben, berühre und halte gleichzeitig \"Zurück\" und \"Übersicht\"."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Um die Fixierung dieses Bildschirms aufzuheben, berühre und halte \"Zurück\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Um die Fixierung dieses Bildschirms aufzuheben, berühre und halte \"Übersicht\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Die App ist fixiert. Das Aufheben der Fixierung ist auf diesem Gerät nicht zulässig."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Bildschirm fixiert"</string>
