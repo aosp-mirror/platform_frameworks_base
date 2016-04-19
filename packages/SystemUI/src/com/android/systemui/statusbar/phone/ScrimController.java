@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -518,5 +519,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
         mScrimBehind.setChangeRunnable(changeRunnable);
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        ViewGroup.LayoutParams layoutParams = mHeadsUpScrim.getLayoutParams();
+        layoutParams.height = mHeadsUpScrim.getResources().getDimensionPixelSize(
+                R.dimen.heads_up_scrim_height);
+        mHeadsUpScrim.setLayoutParams(layoutParams);
     }
 }

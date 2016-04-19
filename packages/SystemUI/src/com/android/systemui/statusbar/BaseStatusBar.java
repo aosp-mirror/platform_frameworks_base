@@ -910,7 +910,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final float fontScale = newConfig.fontScale;
         final int density = newConfig.densityDpi;
         if (density != mDensity || mFontScale != fontScale) {
-            reInflateViews();
+            onDensityOrFontScaleChanged();
             mDensity = density;
             mFontScale = fontScale;
         }
@@ -926,7 +926,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected void reInflateViews() {
+    protected void onDensityOrFontScaleChanged() {
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         for (int i = 0; i < activeNotifications.size(); i++) {
             Entry entry = activeNotifications.get(i);

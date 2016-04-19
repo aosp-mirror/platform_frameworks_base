@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
@@ -33,12 +34,14 @@ public class BrightnessMirrorController {
     public long TRANSITION_DURATION_OUT = 150;
     public long TRANSITION_DURATION_IN = 200;
 
+    private final StatusBarWindowView mStatusBarWindow;
     private final ScrimView mScrimBehind;
-    private final View mBrightnessMirror;
     private final View mNotificationPanel;
     private final int[] mInt2Cache = new int[2];
+    private View mBrightnessMirror;
 
     public BrightnessMirrorController(StatusBarWindowView statusBarWindow) {
+        mStatusBarWindow = statusBarWindow;
         mScrimBehind = (ScrimView) statusBarWindow.findViewById(R.id.scrim_behind);
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
@@ -56,11 +59,11 @@ public class BrightnessMirrorController {
         inAnimation(mNotificationPanel.animate())
                 .withLayer()
                 .withEndAction(new Runnable() {
-            @Override
-            public void run() {
-                mBrightnessMirror.setVisibility(View.INVISIBLE);
-            }
-        });
+                    @Override
+                    public void run() {
+                        mBrightnessMirror.setVisibility(View.INVISIBLE);
+                    }
+                });
     }
 
     private ViewPropertyAnimator outAnimation(ViewPropertyAnimator a) {
@@ -103,5 +106,13 @@ public class BrightnessMirrorController {
         lp.gravity = mBrightnessMirror.getResources().getInteger(
                 R.integer.notification_panel_layout_gravity);
         mBrightnessMirror.setLayoutParams(lp);
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
+        mStatusBarWindow.removeView(mBrightnessMirror);
+        mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
+                R.layout.brightness_mirror, mStatusBarWindow, false);
+        mStatusBarWindow.addView(mBrightnessMirror, index);
     }
 }
