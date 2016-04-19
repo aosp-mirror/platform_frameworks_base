@@ -120,9 +120,8 @@ public class PageIndicator extends ViewGroup {
         }
         ImageView first = (ImageView) getChildAt(firstIndex);
         ImageView second = (ImageView) getChildAt(secondIndex);
-        if (second == null) {
-            // Weird state where number of pages must not have propagated yet.
-            return;
+        if (first == null || second == null) {
+            // may happen during reInflation or other weird cases
         }
         // Lay the two views on top of each other.
         second.setTranslationX(first.getX() - second.getX());
