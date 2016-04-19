@@ -71,7 +71,11 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.net.URL;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import java.util.Random;
 
@@ -228,7 +232,8 @@ public class NetworkMonitor extends StateMachine {
     private final AlarmManager mAlarmManager;
     private final NetworkRequest mDefaultRequest;
 
-    private boolean mIsCaptivePortalCheckEnabled = false;
+    private boolean mIsCaptivePortalCheckEnabled;
+    private boolean mUseHttps;
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
     private boolean mUserDoesNotWant = false;
@@ -276,6 +281,8 @@ public class NetworkMonitor extends StateMachine {
 
         mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
+        mUseHttps = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
 
         start();
     }
@@ -324,6 +331,21 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
                     log("CaptivePortal App responded with " + message.arg1);
+
+                    // If the user has seen and acted on a captive portal notification, and the
+                    // captive portal app is now closed, disable HTTPS probes. This avoids the
+                    // following pathological situation:
+                    //
+                    // 1. HTTP probe returns a captive portal, HTTPS probe fails or times out.
+                    // 2. User opens the app and logs into the captive portal.
+                    // 3. HTTP starts working, but HTTPS still doesn't work for some other reason -
+                    //    perhaps due to the network blocking HTTPS?
+                    //
+                    // In this case, we'll fail to validate the network even after the app is
+                    // dismissed. There is now no way to use this network, because the app is now
+                    // gone, so the user cannot select "Use this network as is".
+                    mUseHttps = false;
+
                     switch (message.arg1) {
                         case APP_RETURN_DISMISSED:
                             sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */, 0);
@@ -424,12 +446,19 @@ public class NetworkMonitor extends StateMachine {
      */
     @VisibleForTesting
     public static final class CaptivePortalProbeResult {
+        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(599, null);
+
         final int mHttpResponseCode; // HTTP response code returned from Internet probe.
         final String mRedirectUrl;   // Redirect destination returned from Internet probe.
 
         public CaptivePortalProbeResult(int httpResponseCode, String redirectUrl) {
             mHttpResponseCode = httpResponseCode;
             mRedirectUrl = redirectUrl;
+        }
+
+        boolean isSuccessful() { return mHttpResponseCode == 204; }
+        boolean isPortal() {
+            return !isSuccessful() && mHttpResponseCode >= 200 && mHttpResponseCode <= 399;
         }
     }
 
@@ -481,6 +510,7 @@ public class NetworkMonitor extends StateMachine {
                     //    expensive metered network, or unwanted leaking of the User Agent string.
                     if (!mDefaultRequest.networkCapabilities.satisfiedByNetworkCapabilities(
                             mNetworkAgentInfo.networkCapabilities)) {
+                        validationLog("Network would not satisfy default request, not validating");
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
@@ -492,10 +522,9 @@ public class NetworkMonitor extends StateMachine {
                     // will be unresponsive. isCaptivePortal() could be executed on another Thread
                     // if this is found to cause problems.
                     CaptivePortalProbeResult probeResult = isCaptivePortal();
-                    if (probeResult.mHttpResponseCode == 204) {
+                    if (probeResult.isSuccessful()) {
                         transitionTo(mValidatedState);
-                    } else if (probeResult.mHttpResponseCode >= 200 &&
-                            probeResult.mHttpResponseCode <= 399) {
+                    } else if (probeResult.isPortal()) {
                         mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                                 NETWORK_TEST_RESULT_INVALID, mNetId, probeResult.mRedirectUrl));
                         transitionTo(mCaptivePortalState);
@@ -659,11 +688,112 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    public static String getCaptivePortalServerUrl(Context context) {
+    private static String getCaptivePortalServerUrl(Context context, boolean isHttps) {
         String server = Settings.Global.getString(context.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_SERVER);
         if (server == null) server = DEFAULT_SERVER;
-        return "http://" + server + "/generate_204";
+        return (isHttps ? "https" : "http") + "://" + server + "/generate_204";
+    }
+
+    public static String getCaptivePortalServerUrl(Context context) {
+        return getCaptivePortalServerUrl(context, false);
+    }
+
+    @VisibleForTesting
+    protected CaptivePortalProbeResult isCaptivePortal() {
+        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204, null);
+
+        URL pacUrl = null, httpUrl = null, httpsUrl = null;
+
+        // On networks with a PAC instead of fetching a URL that should result in a 204
+        // response, we instead simply fetch the PAC script.  This is done for a few reasons:
+        // 1. At present our PAC code does not yet handle multiple PACs on multiple networks
+        //    until something like https://android-review.googlesource.com/#/c/115180/ lands.
+        //    Network.openConnection() will ignore network-specific PACs and instead fetch
+        //    using NO_PROXY.  If a PAC is in place, the only fetch we know will succeed with
+        //    NO_PROXY is the fetch of the PAC itself.
+        // 2. To proxy the generate_204 fetch through a PAC would require a number of things
+        //    happen before the fetch can commence, namely:
+        //        a) the PAC script be fetched
+        //        b) a PAC script resolver service be fired up and resolve the captive portal
+        //           server.
+        //    Network validation could be delayed until these prerequisities are satisifed or
+        //    could simply be left to race them.  Neither is an optimal solution.
+        // 3. PAC scripts are sometimes used to block or restrict Internet access and may in
+        //    fact block fetching of the generate_204 URL which would lead to false negative
+        //    results for network validation.
+        final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
+        if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
+            try {
+                pacUrl = new URL(proxyInfo.getPacFileUrl().toString());
+            } catch (MalformedURLException e) {
+                validationLog("Invalid PAC URL: " + proxyInfo.getPacFileUrl().toString());
+                return CaptivePortalProbeResult.FAILED;
+            }
+        }
+
+        if (pacUrl == null) {
+            try {
+                httpUrl = new URL(getCaptivePortalServerUrl(mContext, false));
+                httpsUrl = new URL(getCaptivePortalServerUrl(mContext, true));
+            } catch (MalformedURLException e) {
+                validationLog("Bad validation URL: " + getCaptivePortalServerUrl(mContext, false));
+                return CaptivePortalProbeResult.FAILED;
+            }
+        }
+
+        long startTime = SystemClock.elapsedRealtime();
+
+        // Pre-resolve the captive portal server host so we can log it.
+        // Only do this if HttpURLConnection is about to, to avoid any potentially
+        // unnecessary resolution.
+        String hostToResolve = null;
+        if (pacUrl != null) {
+            hostToResolve = pacUrl.getHost();
+        } else if (proxyInfo != null) {
+            hostToResolve = proxyInfo.getHost();
+        } else {
+            hostToResolve = httpUrl.getHost();
+        }
+
+        if (!TextUtils.isEmpty(hostToResolve)) {
+            String probeName = ValidationProbeEvent.getProbeName(ValidationProbeEvent.PROBE_DNS);
+            final Stopwatch dnsTimer = new Stopwatch().start();
+            try {
+                InetAddress[] addresses = mNetworkAgentInfo.network.getAllByName(hostToResolve);
+                long dnsLatency = dnsTimer.stop();
+                ValidationProbeEvent.logEvent(mNetId, dnsLatency,
+                        ValidationProbeEvent.PROBE_DNS, ValidationProbeEvent.DNS_SUCCESS);
+                final StringBuffer connectInfo = new StringBuffer(", " + hostToResolve + "=");
+                for (InetAddress address : addresses) {
+                    connectInfo.append(address.getHostAddress());
+                    if (address != addresses[addresses.length-1]) connectInfo.append(",");
+                }
+                validationLog(probeName + " OK " + dnsLatency + "ms" + connectInfo);
+            } catch (UnknownHostException e) {
+                long dnsLatency = dnsTimer.stop();
+                ValidationProbeEvent.logEvent(mNetId, dnsLatency,
+                        ValidationProbeEvent.PROBE_DNS, ValidationProbeEvent.DNS_FAILURE);
+                validationLog(probeName + " FAIL " + dnsLatency + "ms, " + hostToResolve);
+            }
+        }
+
+        CaptivePortalProbeResult result;
+        if (pacUrl != null) {
+            result = sendHttpProbe(pacUrl, ValidationProbeEvent.PROBE_PAC);
+        } else if (mUseHttps) {
+            result = sendParallelHttpProbes(httpsUrl, httpUrl);
+        } else {
+            result = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
+        }
+
+        long endTime = SystemClock.elapsedRealtime();
+
+        sendNetworkConditionsBroadcast(true /* response received */,
+                result.isPortal() /* isCaptivePortal */,
+                startTime, endTime);
+
+        return result;
     }
 
     /**
@@ -671,60 +801,14 @@ public class NetworkMonitor extends StateMachine {
      * Returns HTTP response code.
      */
     @VisibleForTesting
-    protected CaptivePortalProbeResult isCaptivePortal() {
-        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204, null);
-
+    protected CaptivePortalProbeResult sendHttpProbe(URL url, int probeType) {
         HttpURLConnection urlConnection = null;
         int httpResponseCode = 599;
         String redirectUrl = null;
         final Stopwatch probeTimer = new Stopwatch().start();
         try {
-            URL url = new URL(getCaptivePortalServerUrl(mContext));
-            // On networks with a PAC instead of fetching a URL that should result in a 204
-            // response, we instead simply fetch the PAC script.  This is done for a few reasons:
-            // 1. At present our PAC code does not yet handle multiple PACs on multiple networks
-            //    until something like https://android-review.googlesource.com/#/c/115180/ lands.
-            //    Network.openConnection() will ignore network-specific PACs and instead fetch
-            //    using NO_PROXY.  If a PAC is in place, the only fetch we know will succeed with
-            //    NO_PROXY is the fetch of the PAC itself.
-            // 2. To proxy the generate_204 fetch through a PAC would require a number of things
-            //    happen before the fetch can commence, namely:
-            //        a) the PAC script be fetched
-            //        b) a PAC script resolver service be fired up and resolve the captive portal
-            //           server.
-            //    Network validation could be delayed until these prerequisities are satisifed or
-            //    could simply be left to race them.  Neither is an optimal solution.
-            // 3. PAC scripts are sometimes used to block or restrict Internet access and may in
-            //    fact block fetching of the generate_204 URL which would lead to false negative
-            //    results for network validation.
-            boolean fetchPac = false;
-            final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
-            if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
-                url = new URL(proxyInfo.getPacFileUrl().toString());
-                fetchPac = true;
-            }
-            final StringBuffer connectInfo = new StringBuffer();
-            String hostToResolve = null;
-            // Only resolve a host if HttpURLConnection is about to, to avoid any potentially
-            // unnecessary resolution.
-            if (proxyInfo == null || fetchPac) {
-                hostToResolve = url.getHost();
-            } else if (proxyInfo != null) {
-                hostToResolve = proxyInfo.getHost();
-            }
-            if (!TextUtils.isEmpty(hostToResolve)) {
-                connectInfo.append(", " + hostToResolve + "=");
-                final InetAddress[] addresses =
-                        mNetworkAgentInfo.network.getAllByName(hostToResolve);
-                for (InetAddress address : addresses) {
-                    connectInfo.append(address.getHostAddress());
-                    if (address != addresses[addresses.length-1]) connectInfo.append(",");
-                }
-            }
-            validationLog("Checking " + url.toString() + " on " +
-                    mNetworkAgentInfo.networkInfo.getExtraInfo() + connectInfo);
             urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
-            urlConnection.setInstanceFollowRedirects(fetchPac);
+            urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
@@ -738,7 +822,9 @@ public class NetworkMonitor extends StateMachine {
             // Time how long it takes to get a response to our request
             long responseTimestamp = SystemClock.elapsedRealtime();
 
-            validationLog("isCaptivePortal: ret=" + httpResponseCode +
+            validationLog(ValidationProbeEvent.getProbeName(probeType) + " " + url +
+                    " time=" + (responseTimestamp - requestTimestamp) + "ms" +
+                    " ret=" + httpResponseCode +
                     " headers=" + urlConnection.getHeaderFields());
             // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
             // portal.  The only example of this seen so far was a captive portal.  For
@@ -756,14 +842,10 @@ public class NetworkMonitor extends StateMachine {
                 httpResponseCode = 204;
             }
 
-            if (httpResponseCode == 200 && fetchPac) {
+            if (httpResponseCode == 200 && probeType == ValidationProbeEvent.PROBE_PAC) {
                 validationLog("PAC fetch 200 response interpreted as 204 response.");
                 httpResponseCode = 204;
             }
-
-            sendNetworkConditionsBroadcast(true /* response received */,
-                    httpResponseCode != 204 /* isCaptivePortal */,
-                    requestTimestamp, responseTimestamp);
         } catch (IOException e) {
             validationLog("Probably not a portal: exception " + e);
             if (httpResponseCode == 599) {
@@ -774,9 +856,66 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.disconnect();
             }
         }
-        final int probeType = ValidationProbeEvent.PROBE_HTTP;
         ValidationProbeEvent.logEvent(mNetId, probeTimer.stop(), probeType, httpResponseCode);
         return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
+    }
+
+    private CaptivePortalProbeResult sendParallelHttpProbes(URL httpsUrl, URL httpUrl) {
+        // Number of probes to wait for. We might wait for all of them, but we might also return if
+        // only one of them has replied. For example, we immediately return if the HTTP probe finds
+        // a captive portal, even if the HTTPS probe is timing out.
+        final CountDownLatch latch = new CountDownLatch(2);
+
+        // Which probe result we're going to use. This doesn't need to be atomic, but it does need
+        // to be final because otherwise we can't set it from the ProbeThreads.
+        final AtomicReference<CaptivePortalProbeResult> finalResult = new AtomicReference<>();
+
+        final class ProbeThread extends Thread {
+            private final boolean mIsHttps;
+            private volatile CaptivePortalProbeResult mResult;
+
+            public ProbeThread(boolean isHttps) {
+                mIsHttps = isHttps;
+            }
+
+            public CaptivePortalProbeResult getResult() {
+                return mResult;
+            }
+
+            @Override
+            public void run() {
+                if (mIsHttps) {
+                    mResult = sendHttpProbe(httpsUrl, ValidationProbeEvent.PROBE_HTTPS);
+                } else {
+                    mResult = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
+                }
+                if ((mIsHttps && mResult.isSuccessful()) || (!mIsHttps && mResult.isPortal())) {
+                    // HTTPS succeeded, or HTTP found a portal. Don't wait for the other probe.
+                    finalResult.compareAndSet(null, mResult);
+                    latch.countDown();
+                }
+                // Signal that one probe has completed. If we've already made a decision, or if this
+                // is the second probe, the latch will be at zero and we'll return a result.
+                latch.countDown();
+            }
+        }
+
+        ProbeThread httpsProbe = new ProbeThread(true);
+        ProbeThread httpProbe = new ProbeThread(false);
+        httpsProbe.start();
+        httpProbe.start();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            validationLog("Error: probe wait interrupted!");
+            return CaptivePortalProbeResult.FAILED;
+        }
+
+        // If there was no deciding probe, that means that both probes completed. Return HTTPS.
+        finalResult.compareAndSet(null, httpsProbe.getResult());
+
+        return finalResult.get();
     }
 
     /**
