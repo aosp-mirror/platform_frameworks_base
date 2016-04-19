@@ -252,17 +252,6 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Sets the library directory to use as a search path for vulkan layers.
-     *
-     * @param libDir A directory that contains vulkan layers
-     *
-     * @hide
-     */
-    public static void setLibDir(String libDir) {
-        ThreadedRenderer.setupVulkanLayerPath(libDir);
-    }
-
-    /**
      * Creates a hardware renderer using OpenGL.
      *
      * @param translucent True if the surface is translucent, false otherwise
@@ -980,7 +969,6 @@ public final class ThreadedRenderer {
     }
 
     static native void setupShadersDiskCache(String cacheFile);
-    static native void setupVulkanLayerPath(String layerPath);
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
     private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
