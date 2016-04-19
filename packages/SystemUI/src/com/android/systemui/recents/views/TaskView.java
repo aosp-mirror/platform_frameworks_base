@@ -24,13 +24,9 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Outline;
-import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -607,6 +603,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTask = t;
         mTask.addCallback(this);
         mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
+        mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode);
+        mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
 
         if (!t.isDockable && ssp.hasDockedTask()) {
             if (mIncompatibleAppToastView == null) {
@@ -623,15 +621,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @Override
     public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
-        // Bind each of the views to the new task data
-        mThumbnailView.rebindToTask(mTask, thumbnailInfo, mIsDisabledInSafeMode);
-        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
+        // Update each of the views to the new task data
+        mThumbnailView.onTaskDataLoaded(thumbnailInfo);
+        mHeaderView.onTaskDataLoaded();
         mTaskDataLoaded = true;
     }
 
     @Override
     public void onTaskDataUnloaded() {
-        // Unbind each of the views from the task data and remove the task callback
+        // Unbind each of the views from the task and remove the task callback
         mTask.removeCallback(this);
         mThumbnailView.unbindFromTask();
         mHeaderView.unbindFromTask(mTouchExplorationEnabled);
@@ -640,7 +638,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @Override
     public void onTaskStackIdChanged() {
-        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
+        // Force rebind the header, the thumbnail does not change due to stack changes
+        mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
+        mHeaderView.onTaskDataLoaded();
     }
 
     /**** View.OnClickListener Implementation ****/
