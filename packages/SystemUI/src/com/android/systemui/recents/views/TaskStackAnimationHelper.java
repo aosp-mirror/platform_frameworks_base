@@ -485,7 +485,7 @@ public class TaskStackAnimationHelper {
 
         // Get the final set of task transforms
         mStackView.getLayoutTaskTransforms(newScroll, stackLayout.getFocusState(), stackTasks,
-                mTmpFinalTaskTransforms);
+                true /* ignoreTaskOverrides */, mTmpFinalTaskTransforms);
 
         // Focus the task view
         TaskView newFocusedTaskView = mStackView.getChildViewForTask(newFocusedTask);
@@ -529,7 +529,7 @@ public class TaskStackAnimationHelper {
             int duration;
             Interpolator interpolator;
             if (willScrollToFront) {
-                duration = Math.max(100, 100 + ((i - 1) * 50));
+                duration = calculateStaggeredAnimDuration(i);
                 interpolator = FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR;
             } else {
                 if (i < newFocusTaskViewIndex) {
@@ -552,5 +552,101 @@ public class TaskStackAnimationHelper {
             mStackView.updateTaskViewToTransform(tv, toTransform, anim);
         }
         return willScroll;
+    }
+
+    /**
+     * Starts the animation to go to the initial stack layout with a task focused.  In addition, the
+     * previous task will be animated in after the scroll completes.
+     */
+    public void startNewStackScrollAnimation(TaskStack newStack,
+            ReferenceCountedTrigger animationTrigger) {
+        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
+        TaskStackViewScroller stackScroller = mStackView.getScroller();
+
+        // Get the current set of task transforms
+        ArrayList<Task> stackTasks = newStack.getStackTasks();
+        mStackView.getCurrentTaskTransforms(stackTasks, mTmpCurrentTaskTransforms);
+
+        // Update the stack
+        mStackView.setTasks(newStack, false /* allowNotifyStackChanges */);
+        mStackView.updateLayoutAlgorithm(false /* boundScroll */);
+
+        // Pick up the newly visible views after the scroll
+        final float newScroll = stackLayout.mInitialScrollP;
+        mStackView.bindVisibleTaskViews(newScroll);
+
+        // Update the internal state
+        stackLayout.setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
+        stackLayout.setTaskOverridesForInitialState(newStack, true /* ignoreScrollToFront */);
+        stackScroller.setStackScroll(newScroll);
+        mStackView.cancelDeferredTaskViewLayoutAnimation();
+
+        // Get the final set of task transforms
+        mStackView.getLayoutTaskTransforms(newScroll, stackLayout.getFocusState(), stackTasks,
+                false /* ignoreTaskOverrides */, mTmpFinalTaskTransforms);
+
+        // Hide the front most task view until the scroll is complete
+        Task frontMostTask = newStack.getStackFrontMostTask(false /* includeFreeform */);
+        final TaskView frontMostTaskView = mStackView.getChildViewForTask(frontMostTask);
+        final TaskViewTransform frontMostTransform = mTmpFinalTaskTransforms.get(
+                stackTasks.indexOf(frontMostTask));
+        if (frontMostTaskView != null) {
+            mStackView.updateTaskViewToTransform(frontMostTaskView,
+                    stackLayout.getFrontOfStackTransform(), AnimationProps.IMMEDIATE);
+        }
+
+        // Setup the end listener to return all the hidden views to the view pool after the
+        // focus animation
+        animationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                mStackView.bindVisibleTaskViews(newScroll);
+
+                // Now, animate in the front-most task
+                if (frontMostTaskView != null) {
+                    mStackView.updateTaskViewToTransform(frontMostTaskView, frontMostTransform,
+                            new AnimationProps(75, 200, FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR));
+                }
+            }
+        });
+
+        List<TaskView> taskViews = mStackView.getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+
+            if (mStackView.isIgnoredTask(task)) {
+                continue;
+            }
+            if (task == frontMostTask && frontMostTaskView != null) {
+                continue;
+            }
+
+            int taskIndex = stackTasks.indexOf(task);
+            TaskViewTransform fromTransform = mTmpCurrentTaskTransforms.get(taskIndex);
+            TaskViewTransform toTransform = mTmpFinalTaskTransforms.get(taskIndex);
+
+            // Update the task to the initial state (for the newly picked up tasks)
+            mStackView.updateTaskViewToTransform(tv, fromTransform, AnimationProps.IMMEDIATE);
+
+            int duration = calculateStaggeredAnimDuration(i);
+            Interpolator interpolator = FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR;
+
+            AnimationProps anim = new AnimationProps()
+                    .setDuration(AnimationProps.BOUNDS, duration)
+                    .setInterpolator(AnimationProps.BOUNDS, interpolator)
+                    .setListener(animationTrigger.decrementOnAnimationEnd());
+            animationTrigger.increment();
+            mStackView.updateTaskViewToTransform(tv, toTransform, anim);
+        }
+    }
+
+    /**
+     * Caclulates a staggered duration for {@link #startScrollToFocusedTaskAnimation} and
+     * {@link #startNewStackScrollAnimation}.
+     */
+    private int calculateStaggeredAnimDuration(int i) {
+        return Math.max(100, 100 + ((i - 1) * 50));
     }
 }

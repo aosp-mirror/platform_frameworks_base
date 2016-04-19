@@ -286,10 +286,9 @@ public class RecentsTransitionHelper {
         // Calculate the offscreen task rect (for tasks that are not backed by views)
         float stackScroll = stackView.getScroller().getStackScroll();
         TaskView taskView = stackView.getChildViewForTask(task);
-        TaskStackLayoutAlgorithm layoutAlgorithm = stackView.getStackAlgorithm();
-        Rect offscreenTaskRect = new Rect(layoutAlgorithm.mTaskRect);
-        offscreenTaskRect.offsetTo(offscreenTaskRect.left,
-                layoutAlgorithm.mStackRect.bottom);
+        TaskStackLayoutAlgorithm stackLayout = stackView.getStackAlgorithm();
+        Rect offscreenTaskRect = new Rect();
+        stackLayout.getFrontOfStackTransform().rect.round(offscreenTaskRect);
 
         // If this is a full screen stack, the transition will be towards the single, full screen
         // task. We only need the transition spec for this task.
@@ -302,8 +301,8 @@ public class RecentsTransitionHelper {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
-                layoutAlgorithm.getStackTransformScreenCoordinates(task, stackScroll, mTmpTransform,
-                        null);
+                mTmpTransform.fillIn(taskView);
+                stackLayout.transformToScreenCoordinates(mTmpTransform);
                 specs.add(composeAnimationSpec(stackView, taskView, mTmpTransform,
                         true /* addHeaderBitmap */));
             }
@@ -324,8 +323,8 @@ public class RecentsTransitionHelper {
                     //       never happen)
                     specs.add(composeOffscreenAnimationSpec(t, offscreenTaskRect));
                 } else {
-                    layoutAlgorithm.getStackTransformScreenCoordinates(t, stackScroll,
-                            mTmpTransform, null);
+                    mTmpTransform.fillIn(taskView);
+                    stackLayout.transformToScreenCoordinates(mTmpTransform);
                     specs.add(composeAnimationSpec(stackView, tv, mTmpTransform,
                             true /* addHeaderBitmap */));
                 }

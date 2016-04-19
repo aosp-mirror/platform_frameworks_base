@@ -640,6 +640,9 @@
     <!-- The amount of overscroll allowed when flinging to the end of the stack. -->
     <dimen name="recents_fling_overscroll_distance">24dp</dimen>
 
+    <!-- The size of the drag hint text. -->
+    <dimen name="recents_drag_hint_text_size">14sp</dimen>
+
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
 
