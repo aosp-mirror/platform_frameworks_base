@@ -335,10 +335,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         if (!vrModeIsUsed) {
             Slog.i(TAG, "No VR packages found, disabling VR components");
-            for (ComponentName componentName : vrComponents) {
-                pm.setApplicationEnabledSetting(componentName.getPackageName(),
-                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
-            }
+            setVrComponentsEnabledOrDisabled(vrComponents, false);
 
             // Register to receive an intent when a new package is installed, in case that package
             // requires VR components.
@@ -364,6 +361,26 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
+    private void setVrComponentsEnabledOrDisabled(ArraySet<ComponentName> vrComponents,
+            boolean enabled) {
+        int state = enabled ?
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        PackageManager pm = mContext.getPackageManager();
+        for (ComponentName componentName : vrComponents) {
+            try {
+                // Note that we must first check for the existance of the package before trying
+                // to set its enabled state.  This is to prevent PackageManager from throwing
+                // an excepton if the package is not found (not just a NameNotFoundException
+                // exception).
+                PackageInfo packageInfo = pm.getPackageInfo(componentName.getPackageName(),
+                        PackageManager.GET_CONFIGURATIONS);
+                pm.setApplicationEnabledSetting(componentName.getPackageName(), state , 0);
+            } catch (NameNotFoundException e) {
+            }
+        }
+    }
+
     private boolean enableVrComponentsIfVrModeUsed(PackageManager pm, PackageInfo packageInfo,
             ArraySet<String> vrComponentPackageNames, ArraySet<ComponentName> vrComponents) {
         boolean isVrComponent = vrComponents != null &&
@@ -374,10 +391,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     (featureInfo.name.equals(PackageManager.FEATURE_VR_MODE) ||
                      featureInfo.name.equals(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE))) {
                     Slog.i(TAG, "VR package found, enabling VR components");
-                    for (ComponentName componentName : vrComponents) {
-                        pm.setApplicationEnabledSetting(componentName.getPackageName(),
-                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
-                    }
+                    setVrComponentsEnabledOrDisabled(vrComponents, true);
                     return true;
                 }
             }
