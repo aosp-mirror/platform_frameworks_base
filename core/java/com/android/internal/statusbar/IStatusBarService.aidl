@@ -41,7 +41,6 @@ interface IStatusBarService
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
-    void setCurrentUser(int newUserId);
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
@@ -63,48 +62,6 @@ interface IStatusBarService
             in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask, String cause);
-    void setWindowState(int window, int state);
-
-    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
-    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-    void toggleRecentApps();
-    void preloadRecentApps();
-    void cancelPreloadRecentApps();
-
-    void toggleKeyboardShortcutsMenu(int deviceId);
-
-    /**
-     * Notifies the status bar that an app transition is pending to delay applying some flags with
-     * visual impact until {@link #appTransitionReady} is called.
-     */
-    void appTransitionPending();
-
-    /**
-     * Notifies the status bar that a pending app transition has been cancelled.
-     */
-    void appTransitionCancelled();
-
-    /**
-     * Notifies the status bar that an app transition is now being executed.
-     *
-     * @param statusBarAnimationsStartTime the desired start time for all visual animations in the
-     *        status bar caused by this app transition in uptime millis
-     * @param statusBarAnimationsDuration the duration for all visual animations in the status
-     *        bar caused by this app transition in millis
-     */
-    void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
-
-    void startAssist(in Bundle args);
-
-    /**
-     * Request picture-in-picture.
-     *
-     * <p>
-     * This is called when an user presses picture-in-picture key or equivalent.
-     * TV device may start picture-in-picture from foreground activity if there's none.
-     * Picture-in-picture overlay menu will be shown instead otherwise.
-     */
-    void requestTvPictureInPicture();
 
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);

@@ -60,7 +60,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -92,7 +91,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
 
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -3315,13 +3313,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private void openRecents() {
             final long token = Binder.clearCallingIdentity();
 
-            IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
-                    ServiceManager.getService("statusbar"));
-            try {
-                statusBarService.toggleRecentApps();
-            } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Error toggling recent apps.");
-            }
+            StatusBarManagerInternal statusBarService = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            statusBarService.toggleRecentApps();
 
             Binder.restoreCallingIdentity(token);
         }
