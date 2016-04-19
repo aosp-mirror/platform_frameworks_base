@@ -154,31 +154,62 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
             if (isHorizontalDivision()) {
-                info.addAction(new AccessibilityAction(R.id.action_move_up,
-                        mContext.getString(R.string.accessibility_action_divider_move_up)));
-                info.addAction(new AccessibilityAction(R.id.action_move_down,
-                        mContext.getString(R.string.accessibility_action_divider_move_down)));
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
+                        mContext.getString(R.string.accessibility_action_divider_top_full)));
+                if (mSnapAlgorithm.isFirstSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
+                            mContext.getString(R.string.accessibility_action_divider_top_70)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                        mContext.getString(R.string.accessibility_action_divider_top_50)));
+                if (mSnapAlgorithm.isLastSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
+                            mContext.getString(R.string.accessibility_action_divider_top_30)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_rb_full,
+                        mContext.getString(R.string.accessibility_action_divider_bottom_full)));
             } else {
-                info.addAction(new AccessibilityAction(R.id.action_move_left,
-                        mContext.getString(R.string.accessibility_action_divider_move_left)));
-                info.addAction(new AccessibilityAction(R.id.action_move_right,
-                        mContext.getString(R.string.accessibility_action_divider_move_right)));
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
+                        mContext.getString(R.string.accessibility_action_divider_left_full)));
+                if (mSnapAlgorithm.isFirstSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
+                            mContext.getString(R.string.accessibility_action_divider_left_70)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                        mContext.getString(R.string.accessibility_action_divider_left_50)));
+                if (mSnapAlgorithm.isLastSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
+                            mContext.getString(R.string.accessibility_action_divider_left_30)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_rb_full,
+                        mContext.getString(R.string.accessibility_action_divider_right_full)));
             }
         }
 
         @Override
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            if (action == R.id.action_move_up || action == R.id.action_move_down
-                    || action == R.id.action_move_left || action == R.id.action_move_right) {
-                int position = getCurrentPosition();
-                SnapTarget currentTarget = mSnapAlgorithm.calculateSnapTarget(
-                        position, 0 /* velocity */);
-                SnapTarget nextTarget =
-                        action == R.id.action_move_up || action == R.id.action_move_left
-                                ? mSnapAlgorithm.getPreviousTarget(currentTarget)
-                                : mSnapAlgorithm.getNextTarget(currentTarget);
+            int currentPosition = getCurrentPosition();
+            SnapTarget nextTarget = null;
+            switch (action) {
+                case R.id.action_move_tl_full:
+                    nextTarget = mSnapAlgorithm.getDismissEndTarget();
+                    break;
+                case R.id.action_move_tl_70:
+                    nextTarget = mSnapAlgorithm.getLastSplitTarget();
+                    break;
+                case R.id.action_move_tl_50:
+                    nextTarget = mSnapAlgorithm.getMiddleTarget();
+                    break;
+                case R.id.action_move_tl_30:
+                    nextTarget = mSnapAlgorithm.getFirstSplitTarget();
+                    break;
+                case R.id.action_move_rb_full:
+                    nextTarget = mSnapAlgorithm.getDismissStartTarget();
+                    break;
+            }
+            if (nextTarget != null) {
                 startDragging(true /* animate */, false /* touching */);
-                stopDragging(getCurrentPosition(), nextTarget, 250, Interpolators.FAST_OUT_SLOW_IN);
+                stopDragging(currentPosition, nextTarget, 250, Interpolators.FAST_OUT_SLOW_IN);
                 return true;
             }
             return super.performAccessibilityAction(host, action, args);
