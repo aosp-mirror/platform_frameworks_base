@@ -44,6 +44,7 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_SET_ACTIVE_ADMIN = "set-active-admin";
     private static final String COMMAND_SET_DEVICE_OWNER = "set-device-owner";
     private static final String COMMAND_SET_PROFILE_OWNER = "set-profile-owner";
+    private static final String COMMAND_REMOVE_ACTIVE_ADMIN = "remove-active-admin";
 
     private IDevicePolicyManager mDevicePolicyManager;
     private int mUserId = UserHandle.USER_SYSTEM;
@@ -60,6 +61,8 @@ public final class Dpm extends BaseCommand {
                 "[ --name <NAME> ] <COMPONENT>\n" +
                 "usage: dpm set-profile-owner [ --user <USER_ID> | current ] [ --name <NAME> ] " +
                 "<COMPONENT>\n" +
+                "usage: dpm remove-active-admin [ --user <USER_ID> | current ] [ --name <NAME> ] " +
+                "<COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
                 " for an existing user.\n" +
@@ -68,7 +71,11 @@ public final class Dpm extends BaseCommand {
                 " package as device owner.\n" +
                 "\n" +
                 "dpm set-profile-owner: Sets the given component as active admin and profile" +
-                " owner for an existing user.\n");
+                " owner for an existing user.\n" +
+                "\n" +
+                "dpm remove-active-admin: Disables an active admin, the admin must have declared" +
+                " android:testOnly in the application in its manifest. This will also remove" +
+                " device and profile owners\n");
     }
 
     @Override
@@ -90,6 +97,9 @@ public final class Dpm extends BaseCommand {
                 break;
             case COMMAND_SET_PROFILE_OWNER:
                 runSetProfileOwner();
+                break;
+            case COMMAND_REMOVE_ACTIVE_ADMIN:
+                runRemoveActiveAdmin();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -150,6 +160,12 @@ public final class Dpm extends BaseCommand {
 
         System.out.println("Success: Device owner set to package " + mComponent);
         System.out.println("Active admin set to component " + mComponent.toShortString());
+    }
+
+    private void runRemoveActiveAdmin() throws RemoteException {
+        parseArgs(/*canHaveName=*/ false);
+        mDevicePolicyManager.forceRemoveActiveAdmin(mComponent, mUserId);
+        System.out.println("Success: Admin removed " + mComponent);
     }
 
     private void runSetProfileOwner() throws RemoteException {
