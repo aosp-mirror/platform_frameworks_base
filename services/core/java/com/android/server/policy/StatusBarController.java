@@ -18,9 +18,7 @@ package com.android.server.policy;
 
 import android.app.StatusBarManager;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -28,7 +26,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.Interpolator;
 import android.view.animation.TranslateAnimation;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -49,15 +46,9 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.appTransitionPending();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is pending", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.appTransitionPending();
                     }
                 }
             });
@@ -69,19 +60,13 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            long startTime = calculateStatusBarTransitionStartTime(openAnimation,
-                                    closeAnimation);
-                            long duration = closeAnimation != null || openAnimation != null
-                                    ? TRANSITION_DURATION : 0;
-                            statusbar.appTransitionStarting(startTime, duration);
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is starting", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        long startTime = calculateStatusBarTransitionStartTime(openAnimation,
+                                closeAnimation);
+                        long duration = closeAnimation != null || openAnimation != null
+                                ? TRANSITION_DURATION : 0;
+                        statusbar.appTransitionStarting(startTime, duration);
                     }
                 }
             });
@@ -92,15 +77,9 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.appTransitionCancelled();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is cancelled", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.appTransitionCancelled();
                     }
                 }
             });
