@@ -162,14 +162,14 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                         state = STATE_LF;
                     } else if (isVariationSelector(codePoint)) {
                         state = STATE_BEFORE_VS;
-                    } else if (Emoji.isZwjEmoji(codePoint)) {
-                        state = STATE_BEFORE_ZWJ_EMOJI;
                     } else if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
                         state = STATE_ODD_NUMBERED_RIS;
                     } else if (Emoji.isEmojiModifier(codePoint)) {
                         state = STATE_BEFORE_EMOJI_MODIFIER;
                     } else if (codePoint == Emoji.COMBINING_ENCLOSING_KEYCAP) {
                         state = STATE_BEFORE_KEYCAP;
+                    } else if (Emoji.isEmoji(codePoint)) {
+                        state = STATE_BEFORE_ZWJ_EMOJI;
                     } else {
                         state = STATE_FINISHED;
                     }
@@ -230,7 +230,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                     state = STATE_FINISHED;
                     break;
                 case STATE_BEFORE_VS:
-                    if (Emoji.isZwjEmoji(codePoint)) {
+                    if (Emoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint);
                         state = STATE_BEFORE_ZWJ_EMOJI;
                         break;
@@ -250,7 +250,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                     }
                     break;
                 case STATE_BEFORE_ZWJ:
-                    if (Emoji.isZwjEmoji(codePoint)) {
+                    if (Emoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint) + 1;  // +1 for ZWJ.
                         state = STATE_BEFORE_ZWJ_EMOJI;
                     } else if (isVariationSelector(codePoint)) {
@@ -261,7 +261,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                     }
                     break;
                 case STATE_BEFORE_VS_AND_ZWJ:
-                    if (Emoji.isZwjEmoji(codePoint)) {
+                    if (Emoji.isEmoji(codePoint)) {
                         // +1 for ZWJ.
                         deleteCharCount += lastSeenVSCharCount + 1 + Character.charCount(codePoint);
                         lastSeenVSCharCount = 0;
