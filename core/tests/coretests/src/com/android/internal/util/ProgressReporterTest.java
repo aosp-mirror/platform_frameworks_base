@@ -24,7 +24,7 @@ public class ProgressReporterTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        r = new ProgressReporter(0, null);
+        r = new ProgressReporter(0);
     }
 
     private void assertProgress(int expected) {
