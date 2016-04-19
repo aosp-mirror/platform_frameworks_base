@@ -35,12 +35,12 @@ import java.util.Map;
 
 public class HealthStatsBatteryStatsWriter {
 
-    private final long mNowRealtime;
-    private final long mNowUptime;
+    private final long mNowRealtimeMs;
+    private final long mNowUptimeMs;
 
     public HealthStatsBatteryStatsWriter() {
-        mNowRealtime = SystemClock.elapsedRealtime();
-        mNowUptime = SystemClock.uptimeMillis();
+        mNowRealtimeMs = SystemClock.elapsedRealtime();
+        mNowUptimeMs = SystemClock.uptimeMillis();
     }
 
     /**
@@ -62,19 +62,20 @@ public class HealthStatsBatteryStatsWriter {
 
         // MEASUREMENT_REALTIME_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_REALTIME_BATTERY_MS,
-                bs.computeBatteryRealtime(mNowRealtime*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryRealtime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // MEASUREMENT_UPTIME_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_UPTIME_BATTERY_MS,
-                bs.computeBatteryUptime(mNowUptime*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryUptime(mNowUptimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // MEASUREMENT_REALTIME_SCREEN_OFF_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_REALTIME_SCREEN_OFF_BATTERY_MS,
-                bs.computeBatteryScreenOffRealtime(mNowRealtime*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryScreenOffRealtime(
+                    mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // MEASUREMENT_UPTIME_SCREEN_OFF_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_UPTIME_SCREEN_OFF_BATTERY_MS,
-                bs.computeBatteryScreenOffUptime(mNowUptime*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryScreenOffUptime(mNowUptimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         //
         // Now on to the real per-uid stats...
@@ -214,20 +215,20 @@ public class HealthStatsBatteryStatsWriter {
 
         // MEASUREMENT_WIFI_RUNNING_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_RUNNING_MS,
-                uid.getWifiRunningTime(mNowRealtime, STATS_SINCE_UNPLUGGED));
+                uid.getWifiRunningTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // MEASUREMENT_WIFI_FULL_LOCK_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_FULL_LOCK_MS,
-                uid.getFullWifiLockTime(mNowRealtime, STATS_SINCE_UNPLUGGED));
+                uid.getFullWifiLockTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // TIMER_WIFI_SCAN
         uidWriter.addTimer(UidHealthStats.TIMER_WIFI_SCAN,
                 uid.getWifiScanCount(STATS_SINCE_UNPLUGGED),
-                uid.getWifiScanTime(mNowRealtime, STATS_SINCE_UNPLUGGED));
+                uid.getWifiScanTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // MEASUREMENT_WIFI_MULTICAST_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_MULTICAST_MS,
-                uid.getWifiMulticastTime(mNowRealtime, STATS_SINCE_UNPLUGGED));
+                uid.getWifiMulticastTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
 
         // TIMER_AUDIO
         addTimer(uidWriter, UidHealthStats.TIMER_AUDIO, uid.getAudioTurnedOnTimer());
@@ -355,17 +356,17 @@ public class HealthStatsBatteryStatsWriter {
                 uid.getMobileRadioActiveCount(STATS_SINCE_UNPLUGGED),
                 uid.getMobileRadioActiveTime(STATS_SINCE_UNPLUGGED));
 
-        // MEASUREMENT_USER_CPU_TIME_US
-        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_USER_CPU_TIME_US,
-                uid.getUserCpuTimeUs(STATS_SINCE_UNPLUGGED));
+        // MEASUREMENT_USER_CPU_TIME_MS
+        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_USER_CPU_TIME_MS,
+                uid.getUserCpuTimeUs(STATS_SINCE_UNPLUGGED)/1000);
 
-        // MEASUREMENT_SYSTEM_CPU_TIME_US
-        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_SYSTEM_CPU_TIME_US,
-                uid.getSystemCpuTimeUs(STATS_SINCE_UNPLUGGED));
+        // MEASUREMENT_SYSTEM_CPU_TIME_MS
+        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_SYSTEM_CPU_TIME_MS,
+                uid.getSystemCpuTimeUs(STATS_SINCE_UNPLUGGED)/1000);
 
-        // MEASUREMENT_CPU_POWER_MAUS
-        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_CPU_POWER_MAUS,
-                uid.getCpuPowerMaUs(STATS_SINCE_UNPLUGGED));
+        // MEASUREMENT_CPU_POWER_MAMS
+        uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_CPU_POWER_MAMS,
+                uid.getCpuPowerMaUs(STATS_SINCE_UNPLUGGED)/1000);
     }
 
     /**
@@ -457,7 +458,7 @@ public class HealthStatsBatteryStatsWriter {
     private void addTimer(HealthStatsWriter writer, int key, BatteryStats.Timer timer) {
         if (timer != null) {
             writer.addTimer(key, timer.getCountLocked(STATS_SINCE_UNPLUGGED),
-                    timer.getTotalTimeLocked(mNowRealtime, STATS_SINCE_UNPLUGGED));
+                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED) / 1000);
         }
     }
 
@@ -468,7 +469,7 @@ public class HealthStatsBatteryStatsWriter {
             BatteryStats.Timer timer) {
         if (timer != null) {
             writer.addTimers(key, name, new TimerStat(timer.getCountLocked(STATS_SINCE_UNPLUGGED),
-                    timer.getTotalTimeLocked(mNowRealtime, STATS_SINCE_UNPLUGGED)));
+                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED) / 1000));
         }
     }
 }

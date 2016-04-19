@@ -261,16 +261,16 @@ public final class UidHealthStats {
     public static final int TIMER_MOBILE_RADIO_ACTIVE = HealthKeys.BASE_UID + 61;
 
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
-    public static final int MEASUREMENT_USER_CPU_TIME_US = HealthKeys.BASE_UID + 62;
+    public static final int MEASUREMENT_USER_CPU_TIME_MS = HealthKeys.BASE_UID + 62;
 
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
-    public static final int MEASUREMENT_SYSTEM_CPU_TIME_US = HealthKeys.BASE_UID + 63;
+    public static final int MEASUREMENT_SYSTEM_CPU_TIME_MS = HealthKeys.BASE_UID + 63;
 
     /**
      * An estimate of the number of milliamp-microsends used by this uid.
      */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
-    public static final int MEASUREMENT_CPU_POWER_MAUS = HealthKeys.BASE_UID + 64;
+    public static final int MEASUREMENT_CPU_POWER_MAMS = HealthKeys.BASE_UID + 64;
 
     /**
      * @hide
