@@ -63,6 +63,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Process;
@@ -83,7 +84,6 @@ import android.util.SparseIntArray;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.ProgressReporter;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService;
@@ -260,7 +260,7 @@ final class UserController {
      * Step from {@link UserState#STATE_RUNNING_LOCKED} to
      * {@link UserState#STATE_RUNNING_UNLOCKING}.
      */
-    void finishUserUnlocking(final UserState uss, final ProgressReporter progress) {
+    private void finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -270,10 +270,13 @@ final class UserController {
             if (!isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
+                uss.mUnlockProgress.start();
+
                 // Prepare app storage before we go any further
-                progress.setProgress(5, mService.mContext.getString(R.string.android_start_title));
+                uss.mUnlockProgress.setProgress(5,
+                        mService.mContext.getString(R.string.android_start_title));
                 mUserManager.onBeforeUnlockUser(userId);
-                progress.setProgress(20);
+                uss.mUnlockProgress.setProgress(20);
 
                 // Dispatch unlocked to system services
                 mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
@@ -306,15 +309,15 @@ final class UserController {
                 // Send PRE_BOOT broadcasts if fingerprint changed
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
-                    progress.startSegment(80);
-                    new PreBootBroadcaster(mService, userId, progress) {
+                    uss.mUnlockProgress.startSegment(80);
+                    new PreBootBroadcaster(mService, userId, uss.mUnlockProgress) {
                         @Override
                         public void onFinished() {
-                            finishUserUnlocked(uss, progress);
+                            finishUserUnlocked(uss);
                         }
                     }.sendNext();
                 } else {
-                    finishUserUnlocked(uss, progress);
+                    finishUserUnlocked(uss);
                 }
             }
         }
@@ -324,15 +327,15 @@ final class UserController {
      * Step from {@link UserState#STATE_RUNNING_UNLOCKING} to
      * {@link UserState#STATE_RUNNING_UNLOCKED}.
      */
-    void finishUserUnlocked(UserState uss, ProgressReporter progress) {
+    private void finishUserUnlocked(UserState uss) {
         try {
             finishUserUnlockedInternal(uss);
         } finally {
-            progress.finish();
+            uss.mUnlockProgress.finish();
         }
     }
 
-    void finishUserUnlockedInternal(UserState uss) {
+    private void finishUserUnlockedInternal(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -860,7 +863,7 @@ final class UserController {
         return result;
     }
 
-    boolean unlockUser(final int userId, byte[] token, byte[] secret, ProgressReporter progress) {
+    boolean unlockUser(final int userId, byte[] token, byte[] secret, IProgressListener listener) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: unlockUser() from pid="
@@ -873,7 +876,7 @@ final class UserController {
 
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, token, secret, progress);
+            return unlockUserCleared(userId, token, secret, listener);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
@@ -887,23 +890,29 @@ final class UserController {
      */
     boolean maybeUnlockUser(final int userId) {
         // Try unlocking storage using empty token
-        return unlockUserCleared(userId, null, null, ProgressReporter.NO_OP);
+        return unlockUserCleared(userId, null, null, null);
+    }
+
+    private static void notifyFinished(int userId, IProgressListener listener) {
+        if (listener == null) return;
+        try {
+            listener.onFinished(userId, null);
+        } catch (RemoteException ignored) {
+        }
     }
 
     boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
-            ProgressReporter progress) {
+            IProgressListener listener) {
+        final UserState uss;
         synchronized (mService) {
-            // Bail if already running unlocked, or if not running at all
-            final UserState uss = mStartedUsers.get(userId);
+            // Bail if user isn't actually running, otherwise register the given
+            // listener to watch for unlock progress
+            uss = mStartedUsers.get(userId);
             if (uss == null) {
-                progress.finish();
+                notifyFinished(userId, listener);
                 return false;
-            }
-            switch (uss.state) {
-                case STATE_RUNNING_UNLOCKING:
-                case STATE_RUNNING_UNLOCKED:
-                    progress.finish();
-                    return true;
+            } else {
+                uss.mUnlockProgress.addListener(listener);
             }
         }
 
@@ -914,14 +923,13 @@ final class UserController {
                 mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
             } catch (RemoteException | RuntimeException e) {
                 Slog.w(TAG, "Failed to unlock: " + e.getMessage());
-                progress.finish();
+                notifyFinished(userId, listener);
                 return false;
             }
         }
 
         synchronized (mService) {
-            final UserState uss = mStartedUsers.get(userId);
-            finishUserUnlocking(uss, progress);
+            finishUserUnlocking(uss);
 
             // We just unlocked a user, so let's now attempt to unlock any
             // managed profiles under that user.
