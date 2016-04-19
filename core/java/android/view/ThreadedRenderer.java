@@ -307,6 +307,12 @@ public final class ThreadedRenderer {
     private static final int SYNC_INVALIDATE_REQUIRED = 1 << 0;
     // Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
     private static final int SYNC_LOST_SURFACE_REWARD_IF_FOUND = 1 << 1;
+    // setStopped is true, drawing is false
+    // TODO: Remove this and SYNC_LOST_SURFACE_REWARD_IF_FOUND?
+    // This flag isn't really used as there's nothing that we care to do
+    // in response, so it really just exists to differentiate from LOST_SURFACE
+    // but possibly both can just be deleted.
+    private static final int SYNC_CONTEXT_IS_STOPPED = 1 << 2;
 
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,
