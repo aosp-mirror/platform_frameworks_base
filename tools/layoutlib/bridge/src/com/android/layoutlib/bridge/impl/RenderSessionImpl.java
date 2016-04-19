@@ -134,6 +134,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private List<ViewInfo> mViewInfoList;
     private List<ViewInfo> mSystemViewInfoList;
     private Layout.Builder mLayoutBuilder;
+    private boolean mNewRenderSize;
 
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -200,6 +201,88 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
+     * Measures the the current layout if needed (see {@link #invalidateRenderingSize}).
+     */
+    private void measure(@NonNull SessionParams params) {
+        // only do the screen measure when needed.
+        if (mMeasuredScreenWidth != -1) {
+            return;
+        }
+
+        RenderingMode renderingMode = params.getRenderingMode();
+        HardwareConfig hardwareConfig = params.getHardwareConfig();
+
+        mNewRenderSize = true;
+        mMeasuredScreenWidth = hardwareConfig.getScreenWidth();
+        mMeasuredScreenHeight = hardwareConfig.getScreenHeight();
+
+        if (renderingMode != RenderingMode.NORMAL) {
+            int widthMeasureSpecMode = renderingMode.isHorizExpand() ?
+                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                    : MeasureSpec.EXACTLY;
+            int heightMeasureSpecMode = renderingMode.isVertExpand() ?
+                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                    : MeasureSpec.EXACTLY;
+
+            // We used to compare the measured size of the content to the screen size but
+            // this does not work anymore due to the 2 following issues:
+            // - If the content is in a decor (system bar, title/action bar), the root view
+            //   will not resize even with the UNSPECIFIED because of the embedded layout.
+            // - If there is no decor, but a dialog frame, then the dialog padding prevents
+            //   comparing the size of the content to the screen frame (as it would not
+            //   take into account the dialog padding).
+
+            // The solution is to first get the content size in a normal rendering, inside
+            // the decor or the dialog padding.
+            // Then measure only the content with UNSPECIFIED to see the size difference
+            // and apply this to the screen size.
+
+            // first measure the full layout, with EXACTLY to get the size of the
+            // content as it is inside the decor/dialog
+            @SuppressWarnings("deprecation")
+            Pair<Integer, Integer> exactMeasure = measureView(
+                    mViewRoot, mContentRoot.getChildAt(0),
+                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
+
+            // now measure the content only using UNSPECIFIED (where applicable, based on
+            // the rendering mode). This will give us the size the content needs.
+            @SuppressWarnings("deprecation")
+            Pair<Integer, Integer> result = measureView(
+                    mContentRoot, mContentRoot.getChildAt(0),
+                    mMeasuredScreenWidth, widthMeasureSpecMode,
+                    mMeasuredScreenHeight, heightMeasureSpecMode);
+
+            // now look at the difference and add what is needed.
+            if (renderingMode.isHorizExpand()) {
+                int measuredWidth = exactMeasure.getFirst();
+                int neededWidth = result.getFirst();
+                if (neededWidth > measuredWidth) {
+                    mMeasuredScreenWidth += neededWidth - measuredWidth;
+                }
+                if (mMeasuredScreenWidth < measuredWidth) {
+                    // If the screen width is less than the exact measured width,
+                    // expand to match.
+                    mMeasuredScreenWidth = measuredWidth;
+                }
+            }
+
+            if (renderingMode.isVertExpand()) {
+                int measuredHeight = exactMeasure.getSecond();
+                int neededHeight = result.getSecond();
+                if (neededHeight > measuredHeight) {
+                    mMeasuredScreenHeight += neededHeight - measuredHeight;
+                }
+                if (mMeasuredScreenHeight < measuredHeight) {
+                    // If the screen height is less than the exact measured height,
+                    // expand to match.
+                    mMeasuredScreenHeight = measuredHeight;
+                }
+            }
+        }
+    }
+
+    /**
      * Inflates the layout.
      * <p>
      * {@link #acquire(long)} must have been called before this.
@@ -244,6 +327,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mInflater.onDoneInflation();
 
             setActiveToolbar(view, context, params);
+
+            measure(params);
+            measureView(mViewRoot, null /*measuredView*/,
+                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
+            mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+                    false);
 
             return SUCCESS.createResult();
         } catch (PostInflateException e) {
@@ -320,82 +411,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 return ERROR_NOT_INFLATED.createResult();
             }
 
-            RenderingMode renderingMode = params.getRenderingMode();
+            measure(params);
+
             HardwareConfig hardwareConfig = params.getHardwareConfig();
-
-            // only do the screen measure when needed.
-            boolean newRenderSize = false;
-            if (mMeasuredScreenWidth == -1) {
-                newRenderSize = true;
-                mMeasuredScreenWidth = hardwareConfig.getScreenWidth();
-                mMeasuredScreenHeight = hardwareConfig.getScreenHeight();
-
-                if (renderingMode != RenderingMode.NORMAL) {
-                    int widthMeasureSpecMode = renderingMode.isHorizExpand() ?
-                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                            : MeasureSpec.EXACTLY;
-                    int heightMeasureSpecMode = renderingMode.isVertExpand() ?
-                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                            : MeasureSpec.EXACTLY;
-
-                    // We used to compare the measured size of the content to the screen size but
-                    // this does not work anymore due to the 2 following issues:
-                    // - If the content is in a decor (system bar, title/action bar), the root view
-                    //   will not resize even with the UNSPECIFIED because of the embedded layout.
-                    // - If there is no decor, but a dialog frame, then the dialog padding prevents
-                    //   comparing the size of the content to the screen frame (as it would not
-                    //   take into account the dialog padding).
-
-                    // The solution is to first get the content size in a normal rendering, inside
-                    // the decor or the dialog padding.
-                    // Then measure only the content with UNSPECIFIED to see the size difference
-                    // and apply this to the screen size.
-
-                    // first measure the full layout, with EXACTLY to get the size of the
-                    // content as it is inside the decor/dialog
-                    @SuppressWarnings("deprecation")
-                    Pair<Integer, Integer> exactMeasure = measureView(
-                            mViewRoot, mContentRoot.getChildAt(0),
-                            mMeasuredScreenWidth, MeasureSpec.EXACTLY,
-                            mMeasuredScreenHeight, MeasureSpec.EXACTLY);
-
-                    // now measure the content only using UNSPECIFIED (where applicable, based on
-                    // the rendering mode). This will give us the size the content needs.
-                    @SuppressWarnings("deprecation")
-                    Pair<Integer, Integer> result = measureView(
-                            mContentRoot, mContentRoot.getChildAt(0),
-                            mMeasuredScreenWidth, widthMeasureSpecMode,
-                            mMeasuredScreenHeight, heightMeasureSpecMode);
-
-                    // now look at the difference and add what is needed.
-                    if (renderingMode.isHorizExpand()) {
-                        int measuredWidth = exactMeasure.getFirst();
-                        int neededWidth = result.getFirst();
-                        if (neededWidth > measuredWidth) {
-                            mMeasuredScreenWidth += neededWidth - measuredWidth;
-                        }
-                        if (mMeasuredScreenWidth < measuredWidth) {
-                            // If the screen width is less than the exact measured width,
-                            // expand to match.
-                            mMeasuredScreenWidth = measuredWidth;
-                        }
-                    }
-
-                    if (renderingMode.isVertExpand()) {
-                        int measuredHeight = exactMeasure.getSecond();
-                        int neededHeight = result.getSecond();
-                        if (neededHeight > measuredHeight) {
-                            mMeasuredScreenHeight += neededHeight - measuredHeight;
-                        }
-                        if (mMeasuredScreenHeight < measuredHeight) {
-                            // If the screen height is less than the exact measured height,
-                            // expand to match.
-                            mMeasuredScreenHeight = measuredHeight;
-                        }
-                    }
-                }
-            }
-
             Result renderResult = SUCCESS.createResult();
             if (params.isLayoutOnly()) {
                 // delete the canvas and image to reset them on the next full rendering
@@ -412,7 +430,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // it doesn't get cached.
                 boolean disableBitmapCaching = Boolean.TRUE.equals(params.getFlag(
                     RenderParamsFlags.FLAG_KEY_DISABLE_BITMAP_CACHING));
-                if (newRenderSize || mCanvas == null || disableBitmapCaching) {
+                if (mNewRenderSize || mCanvas == null || disableBitmapCaching) {
+                    mNewRenderSize = false;
                     if (params.getImageFactory() != null) {
                         mImage = params.getImageFactory().getImage(
                                 mMeasuredScreenWidth,
