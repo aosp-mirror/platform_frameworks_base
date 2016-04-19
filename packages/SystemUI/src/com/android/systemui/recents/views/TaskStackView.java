@@ -1765,6 +1765,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mTmpTransform, null);
         mTmpTransform.scale = finalScale;
         mTmpTransform.translationZ = mLayoutAlgorithm.mMaxTranslationZ + 1;
+        mTmpTransform.dimAlpha = 0f;
         updateTaskViewToTransform(event.taskView, mTmpTransform,
                 new AnimationProps(DRAG_SCALE_DURATION, Interpolators.FAST_OUT_SLOW_IN));
     }
