@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
@@ -26,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableWrapper;
 import android.os.Bundle;
 import android.os.Handler;
@@ -161,12 +163,16 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
      */
     public static class WallpaperDrawable extends DrawableWrapper {
 
-        private Bitmap mBackground;
-        private Rect mTmpRect = new Rect();
+        private final ConstantState mState;
+        private final Rect mTmpRect = new Rect();
 
         public WallpaperDrawable(Resources r, Bitmap b) {
-            super(new BitmapDrawable(r, b));
-            mBackground = b;
+            this(r, new ConstantState(b));
+        }
+
+        private WallpaperDrawable(Resources r, ConstantState state) {
+            super(new BitmapDrawable(r, state.mBackground));
+            mState = state;
         }
 
         @Override
@@ -183,8 +189,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         protected void onBoundsChange(Rect bounds) {
             int vwidth = getBounds().width();
             int vheight = getBounds().height();
-            int dwidth = mBackground.getWidth();
-            int dheight = mBackground.getHeight();
+            int dwidth = mState.mBackground.getWidth();
+            int dheight = mState.mBackground.getHeight();
             float scale;
             float dx = 0, dy = 0;
 
@@ -206,6 +212,36 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                     bounds.top + Math.round(dheight * scale + dy));
 
             super.onBoundsChange(mTmpRect);
+        }
+
+        @Override
+        public ConstantState getConstantState() {
+            return mState;
+        }
+
+        static class ConstantState extends Drawable.ConstantState {
+
+            private final Bitmap mBackground;
+
+            ConstantState(Bitmap background) {
+                mBackground = background;
+            }
+
+            @Override
+            public Drawable newDrawable() {
+                return newDrawable(null);
+            }
+
+            @Override
+            public Drawable newDrawable(@Nullable Resources res) {
+                return new WallpaperDrawable(res, this);
+            }
+
+            @Override
+            public int getChangingConfigurations() {
+                // DrawableWrapper already handles this for us.
+                return 0;
+            }
         }
     }
 }
