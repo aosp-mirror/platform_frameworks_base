@@ -563,10 +563,23 @@ public class RadialTimePickerView extends View {
         return minute * DEGREES_FOR_ONE_MINUTE;
     }
 
-    public void setAmOrPm(int val) {
-        mAmOrPm = (val % 2);
+    /**
+     * Sets whether the picker is showing AM or PM hours. Has no effect when
+     * in 24-hour mode.
+     *
+     * @param amOrPm {@link #AM} or {@link #PM}
+     * @return {@code true} if the value changed from what was previously set,
+     *         or {@code false} otherwise
+     */
+    public boolean setAmOrPm(int amOrPm) {
+        if (mAmOrPm == amOrPm || mIs24HourMode) {
+            return false;
+        }
+
+        mAmOrPm = amOrPm;
         invalidate();
         mTouchHelper.invalidateRoot();
+        return true;
     }
 
     public int getAmOrPm() {
