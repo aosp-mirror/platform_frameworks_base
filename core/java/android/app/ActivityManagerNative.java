@@ -1111,8 +1111,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (data.readInt() != 0) {
                 notification = Notification.CREATOR.createFromParcel(data);
             }
-            boolean removeNotification = data.readInt() != 0;
-            setServiceForeground(className, token, id, notification, removeNotification);
+            int sflags = data.readInt();
+            setServiceForeground(className, token, id, notification, sflags);
             reply.writeNoException();
             return true;
         }
@@ -4300,7 +4300,7 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
     public void setServiceForeground(ComponentName className, IBinder token,
-            int id, Notification notification, boolean removeNotification) throws RemoteException {
+            int id, Notification notification, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -4313,7 +4313,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
-        data.writeInt(removeNotification ? 1 : 0);
+        data.writeInt(flags);
         mRemote.transact(SET_SERVICE_FOREGROUND_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

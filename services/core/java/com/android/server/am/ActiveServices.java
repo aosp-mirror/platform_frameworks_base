@@ -689,7 +689,7 @@ public final class ActiveServices {
     }
 
     public void setServiceForegroundLocked(ComponentName className, IBinder token,
-            int id, Notification notification, boolean removeNotification) {
+            int id, Notification notification, int flags) {
         final int userId = UserHandle.getCallingUserId();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -719,12 +719,16 @@ public final class ActiveServices {
                             updateServiceForegroundLocked(r.app, true);
                         }
                     }
-                    if (removeNotification) {
+                    if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
                         r.cancelNotification();
                         r.foregroundId = 0;
                         r.foregroundNoti = null;
                     } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
                         r.stripForegroundServiceFlagFromNotification();
+                        if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
+                            r.foregroundId = 0;
+                            r.foregroundNoti = null;
+                        }
                     }
                 }
             }
