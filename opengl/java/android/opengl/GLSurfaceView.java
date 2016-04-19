@@ -547,7 +547,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     @Override
     public void surfaceRedrawNeeded(SurfaceHolder holder) {
-        mGLThread.requestRenderAndWait();
+        if (mGLThread != null) {
+            mGLThread.requestRenderAndWait();
+        }
     }
 
 
