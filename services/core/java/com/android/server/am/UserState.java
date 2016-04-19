@@ -16,9 +16,6 @@
 
 package com.android.server.am;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -27,6 +24,11 @@ import android.app.IStopUserCallback;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+
+import com.android.internal.util.ProgressReporter;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public final class UserState {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserState" : TAG_AM;
@@ -47,6 +49,7 @@ public final class UserState {
     public final UserHandle mHandle;
     public final ArrayList<IStopUserCallback> mStopCallbacks
             = new ArrayList<IStopUserCallback>();
+    public final ProgressReporter mUnlockProgress;
 
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
@@ -61,6 +64,7 @@ public final class UserState {
 
     public UserState(UserHandle handle) {
         mHandle = handle;
+        mUnlockProgress = new ProgressReporter(handle.getIdentifier());
     }
 
     public boolean setState(int oldState, int newState) {
