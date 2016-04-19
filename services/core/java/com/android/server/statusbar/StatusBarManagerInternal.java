@@ -28,6 +28,50 @@ public interface StatusBarManagerInternal {
     void notificationLightOff();
     void showScreenPinningRequest(int taskId);
     void showAssistDisclosure();
+
+    void preloadRecentApps();
+
+    void cancelPreloadRecentApps();
+
+    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
+
+    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
+
+    void toggleKeyboardShortcutsMenu(int deviceId);
+
+    /**
+     * Request picture-in-picture.
+     *
+     * <p>
+     * This is called when an user presses picture-in-picture key or equivalent.
+     * TV device may start picture-in-picture from foreground activity if there's none.
+     * Picture-in-picture overlay menu will be shown instead otherwise.
+     */
+    void requestTvPictureInPicture();
+
+    void setWindowState(int window, int state);
+
+    /**
+     * Notifies the status bar that an app transition is pending to delay applying some flags with
+     * visual impact until {@link #appTransitionReady} is called.
+     */
+    void appTransitionPending();
+
+    /**
+     * Notifies the status bar that a pending app transition has been cancelled.
+     */
+    void appTransitionCancelled();
+
+    /**
+     * Notifies the status bar that an app transition is now being executed.
+     *
+     * @param statusBarAnimationsStartTime the desired start time for all visual animations in the
+     *        status bar caused by this app transition in uptime millis
+     * @param statusBarAnimationsDuration the duration for all visual animations in the status
+     *        bar caused by this app transition in millis
+     */
+    void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
+
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
     void topAppWindowChanged(boolean menuVisible);
@@ -35,4 +79,8 @@ public interface StatusBarManagerInternal {
             Rect fullscreenBounds, Rect dockedBounds, String cause);
     void toggleSplitScreen();
     void appTransitionFinished();
+
+    void toggleRecentApps();
+
+    void setCurrentUser(int newUserId);
 }
