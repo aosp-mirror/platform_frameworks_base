@@ -106,6 +106,7 @@
     <string name="close" msgid="3043722427445528732">"Zatvori"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Sledeće datoteke nisu kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Sledeće datoteke nisu premeštene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Sledeće datoteke nisu izbrisane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su konvertovane u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Kopirali ste <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku u privremenu memoriju.</item>
