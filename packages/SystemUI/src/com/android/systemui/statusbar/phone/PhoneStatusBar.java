@@ -4041,9 +4041,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && mStatusBarKeyguardViewManager.interceptMediaKey(event);
     }
 
+    protected boolean shouldUnlockOnMenuPressed() {
+        return mDeviceInteractive && mState != StatusBarState.SHADE
+            && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed();
+    }
+
     public boolean onMenuPressed() {
-        if (mDeviceInteractive && mState != StatusBarState.SHADE
-                && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed()) {
+        if (shouldUnlockOnMenuPressed()) {
             animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
             return true;
