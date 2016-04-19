@@ -24,7 +24,10 @@
     <string name="pip_play" msgid="674145557658227044">"ప్లే చేయి"</string>
     <string name="pip_pause" msgid="8412075640017218862">"పాజ్ చేయి"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP నియం. "<b>"HOME"</b>"నొక్కిఉంచండి"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIPని నియంత్రించడానికి హోమ్ బటన్‌ను నొక్కి పట్టుకోండి"</string>
+    <!-- no translation found for pip_onboarding_title (7125381413141913754) -->
+    <skip />
+    <!-- no translation found for pip_onboarding_description (1709731220109606682) -->
+    <skip />
     <string name="pip_onboarding_button" msgid="3957426748484904611">"అర్థమైంది"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"తీసివేస్తుంది"</string>
 </resources>

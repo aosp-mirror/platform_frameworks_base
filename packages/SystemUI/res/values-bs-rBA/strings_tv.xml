@@ -20,14 +20,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Zatvori PIP"</string>
-    <!-- no translation found for pip_fullscreen (8604643018538487816) -->
-    <skip />
-    <!-- no translation found for pip_play (674145557658227044) -->
-    <skip />
-    <!-- no translation found for pip_pause (8412075640017218862) -->
-    <skip />
+    <string name="pip_fullscreen" msgid="8604643018538487816">"Cijeli ekran"</string>
+    <string name="pip_play" msgid="674145557658227044">"Pokreni"</string>
+    <string name="pip_pause" msgid="8412075640017218862">"Pauziraj"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Za kontr. PIP držite "<b>"HOME"</b></string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Za kontrolu PIP, pritisnite i držite dugme POČETAK"</string>
+    <!-- no translation found for pip_onboarding_title (7125381413141913754) -->
+    <skip />
+    <!-- no translation found for pip_onboarding_description (1709731220109606682) -->
+    <skip />
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Jasno mi je"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Odbaci"</string>
 </resources>
