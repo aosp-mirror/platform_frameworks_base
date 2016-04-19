@@ -35,7 +35,7 @@ import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
-import com.android.systemui.settings.ToggleSlider;
+import com.android.systemui.settings.ToggleSliderView;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
@@ -94,7 +94,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
-                (ToggleSlider) findViewById(R.id.brightness_slider));
+                (ToggleSliderView) findViewById(R.id.brightness_slider));
 
     }
 
@@ -158,8 +158,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     public void setBrightnessMirror(BrightnessMirrorController c) {
         super.onFinishInflate();
-        ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
-        ToggleSlider mirror = (ToggleSlider) c.getMirror().findViewById(R.id.brightness_slider);
+        ToggleSliderView brightnessSlider = (ToggleSliderView) findViewById(R.id.brightness_slider);
+        ToggleSliderView mirror = (ToggleSliderView) c.getMirror().findViewById(
+                R.id.brightness_slider);
         brightnessSlider.setMirror(mirror);
         brightnessSlider.setMirrorController(c);
     }

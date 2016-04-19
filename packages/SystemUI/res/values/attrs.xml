@@ -22,7 +22,7 @@
         <attr name="keyRepeat" format="boolean" />
         <attr name="android:contentDescription" />
     </declare-styleable>
-    <declare-styleable name="ToggleSlider">
+    <declare-styleable name="ToggleSliderView">
         <attr name="text" format="string" />
     </declare-styleable>
     <declare-styleable name="NotificationLinearLayout">

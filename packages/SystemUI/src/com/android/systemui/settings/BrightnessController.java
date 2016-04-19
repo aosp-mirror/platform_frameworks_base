@@ -198,8 +198,8 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     @Override
-    public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value,
-            boolean stopTracking) {
+    public void onChanged(ToggleSlider toggleSlider, boolean tracking, boolean automatic,
+            int value, boolean stopTracking) {
         updateIcon(mAutomatic);
         if (mExternalChange) return;
 
