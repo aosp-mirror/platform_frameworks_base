@@ -420,10 +420,6 @@ public class BackspaceTest extends KeyListenerTestCase {
         // Regional indicator symbol + ZERO WIDTH JOINER
         state.setByString("U+1F1FA U+200D U+1F469 |");
         backspace(state, 0);
-        state.assertEquals("U+1F1FA U+200D |");
-        backspace(state, 0);
-        state.assertEquals("U+1F1FA |");
-        backspace(state, 0);
         state.assertEquals("|");
 
         // Start with ZERO WIDTH JOINER + emoji modifier
@@ -452,9 +448,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         // Emoji modifier + ZERO WIDTH JOINER
         state.setByString("U+1F466 U+1F3FB U+200D U+1F469 |");
         backspace(state, 0);
-        state.assertEquals("U+1F466 U+1F3FB U+200D |");
-        backspace(state, 0);
-        state.assertEquals("U+1F466 U+1F3FB |");
+        state.assertEquals("U+1F466 |");
         backspace(state, 0);
         state.assertEquals("|");
 
