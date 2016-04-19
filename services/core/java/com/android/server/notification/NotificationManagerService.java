@@ -2179,8 +2179,14 @@ public class NotificationManagerService extends SystemService {
         }
         if (adjustment.getSignals() != null) {
             Bundle.setDefusable(adjustment.getSignals(), true);
-            n.sbn.setOverrideGroupKey(adjustment.getSignals().getString(
-                    Adjustment.GROUP_KEY_OVERRIDE_KEY, null));
+            final String autoGroupKey = adjustment.getSignals().getString(
+                    Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
+            if (autoGroupKey == null) {
+                EventLogTags.writeNotificationUnautogrouped(adjustment.getKey());
+            } else {
+                EventLogTags.writeNotificationAutogrouped(adjustment.getKey());
+            }
+            n.sbn.setOverrideGroupKey(autoGroupKey);
         }
     }
 
@@ -2233,6 +2239,13 @@ public class NotificationManagerService extends SystemService {
                                         .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                                         .build();
                         summaryNotification.extras.putAll(extras);
+                        Intent appIntent = getContext().getPackageManager()
+                                .getLaunchIntentForPackage(adjustment.getPackage());
+                        if (appIntent != null) {
+                            summaryNotification.contentIntent = PendingIntent.getActivityAsUser(
+                                    getContext(), 0, appIntent, 0, null,
+                                    UserHandle.of(adjustedSbn.getUserId()));
+                        }
                         final StatusBarNotification summarySbn =
                                 new StatusBarNotification(adjustedSbn.getPackageName(),
                                         adjustedSbn.getOpPkg(),
