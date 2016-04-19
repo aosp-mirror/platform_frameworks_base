@@ -1127,6 +1127,7 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
     jint *nGeneration;
     struct audio_port *nPorts = NULL;
     int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
+    jint jStatus;
 
     // get the port count and all the ports until they both return the same generation
     do {
@@ -1141,9 +1142,13 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
                                                       &numPorts,
                                                       NULL,
                                                       &generation1);
-        if (status != NO_ERROR || numPorts == 0) {
+        if (status != NO_ERROR) {
             ALOGE_IF(status != NO_ERROR, "AudioSystem::listAudioPorts error %d", status);
             break;
+        }
+        if (numPorts == 0) {
+            jStatus = (jint)AUDIO_JAVA_SUCCESS;
+            goto exit;
         }
         nPorts = (struct audio_port *)realloc(nPorts, numPorts * sizeof(struct audio_port));
 
@@ -1156,18 +1161,10 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
               numPorts, generation, generation1);
     } while (generation1 != generation && status == NO_ERROR);
 
-    jint jStatus = nativeToJavaStatus(status);
+    jStatus = nativeToJavaStatus(status);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
         goto exit;
     }
-
-    nGeneration = env->GetIntArrayElements(jGeneration, NULL);
-    if (nGeneration == NULL) {
-        jStatus = (jint)AUDIO_JAVA_ERROR;
-        goto exit;
-    }
-    nGeneration[0] = generation1;
-    env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
 
     for (size_t i = 0; i < numPorts; i++) {
         jobject jAudioPort;
@@ -1179,6 +1176,13 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
     }
 
 exit:
+    nGeneration = env->GetIntArrayElements(jGeneration, NULL);
+    if (nGeneration == NULL) {
+        jStatus = (jint)AUDIO_JAVA_ERROR;
+    } else {
+        nGeneration[0] = generation1;
+        env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
+    }
     free(nPorts);
     return jStatus;
 }
@@ -1354,6 +1358,7 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
     jobject jSink = NULL;
     jobject jPatch = NULL;
     int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
+    jint jStatus;
 
     // get the patch count and all the patches until they both return the same generation
     do {
@@ -1366,11 +1371,16 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
         status = AudioSystem::listAudioPatches(&numPatches,
                                                NULL,
                                                &generation1);
-        if (status != NO_ERROR || numPatches == 0) {
+        if (status != NO_ERROR) {
             ALOGE_IF(status != NO_ERROR, "listAudioPatches AudioSystem::listAudioPatches error %d",
                                       status);
             break;
         }
+        if (numPatches == 0) {
+            jStatus = (jint)AUDIO_JAVA_SUCCESS;
+            goto exit;
+        }
+
         nPatches = (struct audio_patch *)realloc(nPatches, numPatches * sizeof(struct audio_patch));
 
         status = AudioSystem::listAudioPatches(&numPatches,
@@ -1381,18 +1391,10 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
 
     } while (generation1 != generation && status == NO_ERROR);
 
-    jint jStatus = nativeToJavaStatus(status);
+    jStatus = nativeToJavaStatus(status);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
         goto exit;
     }
-
-    nGeneration = env->GetIntArrayElements(jGeneration, NULL);
-    if (nGeneration == NULL) {
-        jStatus = AUDIO_JAVA_ERROR;
-        goto exit;
-    }
-    nGeneration[0] = generation1;
-    env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
 
     for (size_t i = 0; i < numPatches; i++) {
         jobject patchHandle = env->NewObject(gAudioHandleClass, gAudioHandleCstor,
@@ -1472,6 +1474,15 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
     }
 
 exit:
+
+    nGeneration = env->GetIntArrayElements(jGeneration, NULL);
+    if (nGeneration == NULL) {
+        jStatus = AUDIO_JAVA_ERROR;
+    } else {
+        nGeneration[0] = generation1;
+        env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
+    }
+
     if (jSources != NULL) {
         env->DeleteLocalRef(jSources);
     }
