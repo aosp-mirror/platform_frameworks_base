@@ -26,7 +26,7 @@
             android:id="@+id/keyboard_shortcuts_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="24dp"
             android:layout_gravity="center_vertical"
             android:visibility="gone"
             android:layout_alignParentStart="true"
