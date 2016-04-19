@@ -102,13 +102,13 @@ public class Surface implements Parcelable {
     public @interface ScalingMode {}
     // From system/window.h
     /** @hide */
-    static final int SCALING_MODE_FREEZE = 0;
+    public static final int SCALING_MODE_FREEZE = 0;
     /** @hide */
-    static final int SCALING_MODE_SCALE_TO_WINDOW = 1;
+    public static final int SCALING_MODE_SCALE_TO_WINDOW = 1;
     /** @hide */
-    static final int SCALING_MODE_SCALE_CROP = 2;
+    public static final int SCALING_MODE_SCALE_CROP = 2;
     /** @hide */
-    static final int SCALING_MODE_NO_SCALE_CROP = 3;
+    public static final int SCALING_MODE_NO_SCALE_CROP = 3;
 
     /** @hide */
     @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
