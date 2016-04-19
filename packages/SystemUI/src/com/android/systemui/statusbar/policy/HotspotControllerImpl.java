@@ -46,6 +46,12 @@ public class HotspotControllerImpl implements HotspotController {
                 Context.CONNECTIVITY_SERVICE);
     }
 
+    @Override
+    public boolean isHotspotSupported() {
+        return mConnectivityManager.isTetheringSupported()
+                && mConnectivityManager.getTetherableWifiRegexs().length != 0;
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("HotspotController state:");
         pw.print("  mHotspotEnabled="); pw.println(stateToString(mHotspotState));
