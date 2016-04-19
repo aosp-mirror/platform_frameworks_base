@@ -310,6 +310,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        if (mAnimatorSet.isInfinite() && mAnimatorSet.isStarted()) {
+            if (visible) {
+                // Resume the infinite animation when the drawable becomes visible again.
+                mAnimatorSet.resume();
+            } else {
+                // Pause the infinite animation once the drawable is no longer visible.
+                mAnimatorSet.pause();
+            }
+        }
         mAnimatedVectorState.mVectorDrawable.setVisible(visible, restart);
         return super.setVisible(visible, restart);
     }
@@ -815,6 +824,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         void onDraw(Canvas canvas);
         boolean isStarted();
         boolean isRunning();
+        boolean isInfinite();
+        void pause();
+        void resume();
     }
 
     private static class VectorDrawableAnimatorUI implements VectorDrawableAnimator {
@@ -825,6 +837,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         // Caching the listener in the case when listener operation is called before the mSet is
         // setup by init().
         private ArrayList<AnimatorListener> mListenerArray = null;
+        private boolean mIsInfinite = false;
 
         VectorDrawableAnimatorUI(@NonNull AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
@@ -840,6 +853,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             // Keep a deep copy of the set, such that set can be still be constantly representing
             // the static content from XML file.
             mSet = set.clone();
+            mIsInfinite = mSet.getTotalDuration() == Animator.DURATION_INFINITE;
 
             // If there are listeners added before calling init(), now they should be setup.
             if (mListenerArray != null && !mListenerArray.isEmpty()) {
@@ -934,6 +948,27 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             return mSet != null && mSet.isRunning();
         }
 
+        @Override
+        public boolean isInfinite() {
+            return mIsInfinite;
+        }
+
+        @Override
+        public void pause() {
+            if (mSet == null) {
+                return;
+            }
+            mSet.pause();
+        }
+
+        @Override
+        public void resume() {
+            if (mSet == null) {
+                return;
+            }
+            mSet.resume();
+        }
+
         private void invalidateOwningView() {
             mDrawable.invalidateSelf();
         }
@@ -956,6 +991,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private boolean mStarted = false;
         private boolean mInitialized = false;
         private boolean mIsReversible = false;
+        private boolean mIsInfinite = false;
         // This needs to be set before parsing starts.
         private boolean mShouldIgnoreInvalidAnim;
         // TODO: Consider using NativeAllocationRegistery to track native allocation
@@ -983,6 +1019,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mShouldIgnoreInvalidAnim = shouldIgnoreInvalidAnimation();
             parseAnimatorSet(set, 0);
             mInitialized = true;
+            mIsInfinite = set.getTotalDuration() == Animator.DURATION_INFINITE;
 
             // Check reversible.
             mIsReversible = true;
@@ -1406,6 +1443,21 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (canvas.isHardwareAccelerated()) {
                 recordLastSeenTarget((DisplayListCanvas) canvas);
             }
+        }
+
+        @Override
+        public boolean isInfinite() {
+            return mIsInfinite;
+        }
+
+        @Override
+        public void pause() {
+            // TODO: Implement pause for Animator On RT.
+        }
+
+        @Override
+        public void resume() {
+            // TODO: Implement resume for Animator On RT.
         }
 
         private void onAnimationEnd(int listenerId) {
