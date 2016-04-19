@@ -123,6 +123,10 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Öppna inställningar för sökmotor"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Prioriterad sökmotor"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Allmänt"</string>
+    <!-- no translation found for tts_reset_speech_pitch_title (5789394019544785915) -->
+    <skip />
+    <!-- no translation found for tts_reset_speech_pitch_summary (8700539616245004418) -->
+    <skip />
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Mycket långsamt"</item>
     <item msgid="4795095314303559268">"Långsamt"</item>
