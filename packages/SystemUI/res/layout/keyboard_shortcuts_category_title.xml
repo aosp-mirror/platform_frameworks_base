@@ -19,7 +19,8 @@
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
           android:textSize="14sp"
+          android:fontFamily="sans-serif-medium"
           android:paddingStart="24dp"
           android:paddingTop="20dp"
           android:paddingEnd="24dp"
-          android:paddingBottom="13dp"/>
+          android:paddingBottom="10dp"/>
