@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.os.CancellationSignal;
@@ -329,13 +331,11 @@ public final class MtpDevice {
      *
      * @param signal signal for cancellation
      * @return obtained event
+     * @throws IOException
      */
-    public MtpEvent readEvent(CancellationSignal signal) {
+    public @NonNull MtpEvent readEvent(@Nullable CancellationSignal signal) throws IOException {
         final int handle = native_submit_event_request();
-
-        if (handle < 0) {
-            throw new IllegalStateException("Other thread is reading an event.");
-        }
+        Preconditions.checkState(handle >= 0, "Other thread is reading an event.");
 
         if (signal != null) {
             signal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
@@ -391,8 +391,8 @@ public final class MtpDevice {
     private native boolean native_import_file(int objectHandle, int fd);
     private native boolean native_send_object(int objectHandle, long size, int fd);
     private native MtpObjectInfo native_send_object_info(MtpObjectInfo info);
-    private native int native_submit_event_request();
-    private native MtpEvent native_reap_event_request(int handle);
+    private native int native_submit_event_request() throws IOException;
+    private native MtpEvent native_reap_event_request(int handle) throws IOException;
     private native void native_discard_event_request(int handle);
     private native long native_get_object_size_long(int handle, int format) throws IOException;
 }
