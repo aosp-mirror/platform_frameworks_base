@@ -32,7 +32,7 @@ namespace renderthread {
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(nullptr)
         , mContext(nullptr)
-        , mSyncResult(kSync_OK) {
+        , mSyncResult(SyncResult::OK) {
 }
 
 DrawFrameTask::~DrawFrameTask() {
@@ -68,7 +68,7 @@ void DrawFrameTask::removeLayerUpdate(DeferredLayerUpdater* layer) {
 int DrawFrameTask::drawFrame(TreeObserver* observer) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
-    mSyncResult = kSync_OK;
+    mSyncResult = SyncResult::OK;
     mSyncQueued = systemTime(CLOCK_MONOTONIC);
     mObserver = observer;
     postAndWait();
@@ -127,13 +127,18 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.
     if (CC_UNLIKELY(!mContext->hasSurface() || !canDraw)) {
-        mSyncResult |= kSync_LostSurfaceRewardIfFound;
+        if (!mContext->hasSurface()) {
+            mSyncResult |= SyncResult::LostSurfaceRewardIfFound;
+        } else {
+            // If we have a surface but can't draw we must be stopped
+            mSyncResult |= SyncResult::ContextIsStopped;
+        }
         info.out.canDrawThisFrame = false;
     }
 
     if (info.out.hasAnimations) {
         if (info.out.requiresUiRedraw) {
-            mSyncResult |= kSync_UIRedrawRequired;
+            mSyncResult |= SyncResult::UIRedrawRequired;
         }
     }
     // If prepareTextures is false, we ran out of texture cache space
