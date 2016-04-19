@@ -1290,6 +1290,17 @@ class WindowStateAnimator {
     }
     private void adjustCropToStackBounds(WindowState w, Rect clipRect, Rect finalClipRect,
             boolean isFreeformResizing) {
+
+        final DisplayContent displayContent = w.getDisplayContent();
+        if (displayContent != null && !displayContent.isDefaultDisplay) {
+            // There are some windows that live on other displays while their app and main window
+            // live on the default display (e.g. casting...). We don't want to crop this windows
+            // to the stack bounds which is only currently supported on the default display.
+            // TODO(multi-display): Need to support cropping to stack bounds on other displays
+            // when we have stacks on other displays.
+            return;
+        }
+
         final Task task = w.getTask();
         if (task == null || !task.cropWindowsToStackBounds()) {
             return;
