@@ -111,6 +111,7 @@ interface IDevicePolicyManager {
     boolean packageHasActiveAdmins(String packageName, int userHandle);
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result, int userHandle);
     void removeActiveAdmin(in ComponentName policyReceiver, int userHandle);
+    void forceRemoveActiveAdmin(in ComponentName policyReceiver, int userHandle);
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
     void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,

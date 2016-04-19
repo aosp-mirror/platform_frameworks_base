@@ -2909,6 +2909,54 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    public void forceRemoveActiveAdmin(ComponentName adminReceiver, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(adminReceiver, "ComponentName is null");
+        enforceShell("forceRemoveActiveAdmin");
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            final ApplicationInfo ai;
+            try {
+                ai = mIPackageManager.getApplicationInfo(adminReceiver.getPackageName(),
+                        0, userHandle);
+            } catch (RemoteException e) {
+                throw new IllegalStateException(e);
+            }
+            if (ai == null) {
+                throw new IllegalStateException("Couldn't find package to remove admin "
+                        + adminReceiver.getPackageName() + " " + userHandle);
+            }
+            if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
+                throw new SecurityException("Attempt to remove non-test admin " + adminReceiver
+                        + adminReceiver + " " + userHandle);
+            }
+            // If admin is a device or profile owner tidy that up first.
+            synchronized (this)  {
+                if (isDeviceOwner(adminReceiver, userHandle)) {
+                    clearDeviceOwnerLocked(getDeviceOwnerAdminLocked(), userHandle);
+                }
+                if (isProfileOwner(adminReceiver, userHandle)) {
+                    final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver,
+                            userHandle, /* parent */ false);
+                    clearProfileOwnerLocked(admin, userHandle);
+                }
+            }
+            // Remove the admin skipping sending the broadcast.
+            removeAdminArtifacts(adminReceiver, userHandle);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+    }
+
+    private void enforceShell(String method) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Non-shell user attempted to call " + method);
+        }
+    }
+
     @Override
     public void removeActiveAdmin(ComponentName adminReceiver, int userHandle) {
         if (!mHasFeature) {
@@ -5732,29 +5780,34 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceUserUnlocked(deviceOwnerUserId);
 
             final ActiveAdmin admin = getDeviceOwnerAdminLocked();
-            if (admin != null) {
-                admin.disableCamera = false;
-                admin.userRestrictions = null;
-                admin.forceEphemeralUsers = false;
-                mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
-            }
-            clearUserPoliciesLocked(deviceOwnerUserId);
-
-            mOwners.clearDeviceOwner();
-            mOwners.writeDeviceOwner();
-            updateDeviceOwnerLocked();
-            disableSecurityLoggingIfNotCompliant();
-            // Reactivate backup service.
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
-
+                clearDeviceOwnerLocked(admin, deviceOwnerUserId);
                 removeActiveAdminLocked(deviceOwnerComponent, deviceOwnerUserId);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed reactivating backup service.", e);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
+        if (admin != null) {
+            admin.disableCamera = false;
+            admin.userRestrictions = null;
+            admin.forceEphemeralUsers = false;
+            mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
+        }
+        clearUserPoliciesLocked(userId);
+
+        mOwners.clearDeviceOwner();
+        mOwners.writeDeviceOwner();
+        updateDeviceOwnerLocked();
+        disableSecurityLoggingIfNotCompliant();
+        try {
+            // Reactivate backup service.
+            mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed reactivating backup service.", e);
         }
     }
 
@@ -5794,19 +5847,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ActiveAdmin admin =
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
-            admin.disableCamera = false;
-            admin.userRestrictions = null;
-            clearUserPoliciesLocked(userId);
-            mOwners.removeProfileOwner(userId);
-            mOwners.writeProfileOwner(userId);
-
             final long ident = mInjector.binderClearCallingIdentity();
             try {
+                clearProfileOwnerLocked(admin, userId);
                 removeActiveAdminLocked(who, userId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+    }
+
+    public void clearProfileOwnerLocked(ActiveAdmin admin, int userId) {
+        if (admin != null) {
+            admin.disableCamera = false;
+            admin.userRestrictions = null;
+        }
+        clearUserPoliciesLocked(userId);
+        mOwners.removeProfileOwner(userId);
+        mOwners.writeProfileOwner(userId);
     }
 
     @Override
@@ -5842,15 +5900,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         saveSettingsLocked(userId);
 
-        final long ident = mInjector.binderClearCallingIdentity();
         try {
             mIPackageManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userId);
             pushUserRestrictions(userId);
         } catch (RemoteException re) {
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
+            // Shouldn't happen.
         }
     }
 
