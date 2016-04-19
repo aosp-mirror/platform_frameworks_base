@@ -538,7 +538,8 @@ public final class AnimatorSet extends Animator {
         boolean previouslyPaused = mPaused;
         super.pause();
         if (!previouslyPaused && mPaused) {
-            if (mDelayAnim != null) {
+            if (mDelayAnim.isStarted()) {
+                // If delay hasn't passed, pause the start delay animator.
                 mDelayAnim.pause();
             } else {
                 int size = mNodes.size();
@@ -557,7 +558,8 @@ public final class AnimatorSet extends Animator {
         boolean previouslyPaused = mPaused;
         super.resume();
         if (previouslyPaused && !mPaused) {
-            if (mDelayAnim != null) {
+            if (mDelayAnim.isStarted()) {
+                // If start delay hasn't passed, resume the previously paused start delay animator
                 mDelayAnim.resume();
             } else {
                 int size = mNodes.size();
