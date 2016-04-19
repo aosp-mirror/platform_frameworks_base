@@ -131,12 +131,6 @@ public class PackageParser {
     /** File name in an APK for the Android manifest. */
     private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
-    /**
-     * File name in an APK for bytecode.  There may be additional bytecode files
-     * but this one is always required for an APK that has code.
-     */
-    private static final String BYTECODE_FILENAME = "classes.dex";
-
     /** Path prefix for apps on expanded storage */
     private static final String MNT_EXPAND = "/mnt/expand/";
 
@@ -1137,13 +1131,11 @@ public class PackageParser {
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
-            collectCertificates(
-                    pkg, new File(pkg.baseCodePath), pkg.applicationInfo.flags, parseFlags);
+            collectCertificates(pkg, new File(pkg.baseCodePath), parseFlags);
 
             if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
                 for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                    collectCertificates(
-                            pkg, new File(pkg.splitCodePaths[i]), pkg.splitFlags[i], parseFlags);
+                    collectCertificates(pkg, new File(pkg.splitCodePaths[i]), parseFlags);
                 }
             }
         } finally {
@@ -1151,10 +1143,8 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificates(Package pkg, File apkFile, int apkFlags, int parseFlags)
+    private static void collectCertificates(Package pkg, File apkFile, int parseFlags)
             throws PackageParserException {
-        final boolean hasCode = (apkFlags & ApplicationInfo.FLAG_HAS_CODE) != 0;
-        final boolean requireCode = ((parseFlags & PARSE_ENFORCE_CODE) != 0) && hasCode;
         final String apkPath = apkFile.getAbsolutePath();
 
         // Try to verify the APK using APK Signature Scheme v2.
@@ -1202,7 +1192,6 @@ public class PackageParser {
             }
         }
 
-        boolean codeFound = false;
         StrictJarFile jarFile = null;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
@@ -1226,10 +1215,6 @@ public class PackageParser {
 
             // Optimization: early termination when APK already verified
             if (verified) {
-                if ((requireCode) && (jarFile.findEntry(BYTECODE_FILENAME) == null)) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                            "Package " + apkPath + " code is missing");
-                }
                 return;
             }
 
@@ -1249,17 +1234,9 @@ public class PackageParser {
                     final String entryName = entry.getName();
                     if (entryName.startsWith("META-INF/")) continue;
                     if (entryName.equals(ANDROID_MANIFEST_FILENAME)) continue;
-                    if (entryName.equals(BYTECODE_FILENAME)) {
-                        codeFound = true;
-                    }
 
                     toVerify.add(entry);
                 }
-            }
-
-            if (!codeFound && requireCode) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                        "Package " + apkPath + " code is missing");
             }
 
             // Verify that entries are signed consistently with the first entry
@@ -1349,7 +1326,7 @@ public class PackageParser {
                 final Package tempPkg = new Package(null);
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    collectCertificates(tempPkg, apkFile, 0 /*apkFlags*/, 0 /*flags*/);
+                    collectCertificates(tempPkg, apkFile, 0 /*parseFlags*/);
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
