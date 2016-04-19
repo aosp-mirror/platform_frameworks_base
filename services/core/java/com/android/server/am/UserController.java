@@ -101,6 +101,7 @@ import java.util.Set;
  */
 final class UserController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
+
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
 
@@ -279,7 +280,8 @@ final class UserController {
                 uss.mUnlockProgress.setProgress(20);
 
                 // Dispatch unlocked to system services
-                mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
+                mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss.mUnlockProgress)
+                        .sendToTarget();
 
                 // Dispatch unlocked to external apps
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
@@ -309,8 +311,7 @@ final class UserController {
                 // Send PRE_BOOT broadcasts if fingerprint changed
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
-                    uss.mUnlockProgress.startSegment(80);
-                    new PreBootBroadcaster(mService, userId, uss.mUnlockProgress) {
+                    new PreBootBroadcaster(mService, userId, null) {
                         @Override
                         public void onFinished() {
                             finishUserUnlocked(uss);
@@ -328,14 +329,6 @@ final class UserController {
      * {@link UserState#STATE_RUNNING_UNLOCKED}.
      */
     private void finishUserUnlocked(UserState uss) {
-        try {
-            finishUserUnlockedInternal(uss);
-        } finally {
-            uss.mUnlockProgress.finish();
-        }
-    }
-
-    private void finishUserUnlockedInternal(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
