@@ -663,4 +663,8 @@ public class DockedStackDividerController implements DimLayerUser {
     public String toShortString() {
         return TAG;
     }
+
+    WindowState getWindow() {
+        return mWindow;
+    }
 }
