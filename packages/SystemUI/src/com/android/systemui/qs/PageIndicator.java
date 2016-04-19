@@ -122,6 +122,7 @@ public class PageIndicator extends ViewGroup {
         ImageView second = (ImageView) getChildAt(secondIndex);
         if (first == null || second == null) {
             // may happen during reInflation or other weird cases
+            return;
         }
         // Lay the two views on top of each other.
         second.setTranslationX(first.getX() - second.getX());
