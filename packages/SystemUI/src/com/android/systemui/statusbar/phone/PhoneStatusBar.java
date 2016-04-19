@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -3954,9 +3955,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updatePublicMode() {
-        setLockscreenPublicMode(
-                mStatusBarKeyguardViewManager.isShowing() && mStatusBarKeyguardViewManager
-                        .isSecure(mCurrentUserId));
+        boolean isPublic = false;
+        if (mStatusBarKeyguardViewManager.isShowing()) {
+            for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
+                UserInfo userInfo = mCurrentProfiles.valueAt(i);
+                if (mStatusBarKeyguardViewManager.isSecure(userInfo.id)) {
+                    isPublic = true;
+                    break;
+                }
+            }
+        }
+        setLockscreenPublicMode(isPublic);
     }
 
     protected void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
