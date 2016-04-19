@@ -1529,7 +1529,6 @@ public class PopupWindow {
             height = displayFrame.bottom - displayFrame.top;
         }
 
-
         // If we need to adjust for gravity RIGHT, align to the bottom-right
         // corner of the anchor (still accounting for offsets).
         final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection())
@@ -1583,9 +1582,10 @@ public class PopupWindow {
     private boolean tryFitVertical(@NonNull LayoutParams outParams, int yOffset, int height,
             int anchorHeight, int drawingLocationY, int screenLocationY, int displayFrameTop,
             int displayFrameBottom, boolean allowResize) {
-        final int anchorTopInScreen = screenLocationY + anchorHeight + yOffset;
+        final int winOffsetY = screenLocationY - drawingLocationY;
+        final int anchorTopInScreen = outParams.y + winOffsetY;
         final int spaceBelow = displayFrameBottom - anchorTopInScreen;
-        if (height <= spaceBelow) {
+        if (anchorTopInScreen >= 0 && height <= spaceBelow) {
             return true;
         }
 
@@ -1644,9 +1644,10 @@ public class PopupWindow {
     private boolean tryFitHorizontal(@NonNull LayoutParams outParams, int xOffset, int width,
             int anchorWidth, int drawingLocationX, int screenLocationX, int displayFrameLeft,
             int displayFrameRight, boolean allowResize) {
-        final int anchorLeftInScreen = screenLocationX + xOffset;
+        final int winOffsetX = screenLocationX - drawingLocationX;
+        final int anchorLeftInScreen = outParams.x + winOffsetX;
         final int spaceRight = displayFrameRight - anchorLeftInScreen;
-        if (width <= spaceRight) {
+        if (anchorLeftInScreen >= 0 && width <= spaceRight) {
             return true;
         }
 
