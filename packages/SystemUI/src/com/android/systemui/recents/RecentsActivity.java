@@ -99,6 +99,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private RecentsPackageMonitor mPackageMonitor;
     private long mLastTabKeyEventTime;
     private int mLastDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mLastDisplayDensity;
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
@@ -276,7 +277,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
-        mLastDeviceOrientation = Utilities.getAppConfiguration(this).orientation;
+        Configuration appConfiguration = Utilities.getAppConfiguration(this);
+        mLastDeviceOrientation = appConfiguration.orientation;
+        mLastDisplayDensity = appConfiguration.densityDpi;
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
         mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
             @Override
@@ -427,11 +430,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         super.onConfigurationChanged(newConfig);
 
         // Notify of the config change
-        int newDeviceOrientation = Utilities.getAppConfiguration(this).orientation;
+        Configuration newDeviceConfiguration = Utilities.getAppConfiguration(this);
         int numStackTasks = mRecentsView.getStack().getStackTaskCount();
         EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
-                (mLastDeviceOrientation != newDeviceOrientation), numStackTasks > 0));
-        mLastDeviceOrientation = newDeviceOrientation;
+                mLastDeviceOrientation != newDeviceConfiguration.orientation,
+                mLastDisplayDensity != newDeviceConfiguration.densityDpi, numStackTasks > 0));
+        mLastDeviceOrientation = newDeviceConfiguration.orientation;
+        mLastDisplayDensity = newDeviceConfiguration.densityDpi;
     }
 
     @Override
@@ -454,7 +459,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         int numStackTasks = stack.getStackTaskCount();
 
         EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
-                false /* fromDeviceOrientationChange */, numStackTasks > 0));
+                false /* fromDeviceOrientationChange */, false /* fromDisplayDensityChange */,
+                numStackTasks > 0));
         EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode, stack));
     }
 
