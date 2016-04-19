@@ -4970,70 +4970,6 @@ public final class ActivityThread {
         }
     }
 
-    // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
-    private static File getPrimaryProfileFile(String packageName) {
-        File profileDir = Environment.getDataProfilesDePackageDirectory(
-                UserHandle.myUserId(), packageName);
-        return new File(profileDir, "primary.prof");
-    }
-
-    private static void setupJitProfileSupport(LoadedApk loadedApk, File cacheDir) {
-        if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
-            return;
-        }
-        final ApplicationInfo appInfo = loadedApk.getApplicationInfo();
-        final List<String> codePaths = new ArrayList<>();
-        if ((appInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            codePaths.add(appInfo.sourceDir);
-        }
-        if (appInfo.splitSourceDirs != null) {
-            Collections.addAll(codePaths, appInfo.splitSourceDirs);
-        }
-
-        if (codePaths.isEmpty()) {
-            // If there are no code paths there's no need to setup a profile file and register with
-            // the runtime,
-            return;
-        }
-
-        final File profileFile = getPrimaryProfileFile(loadedApk.mPackageName);
-        if (!profileFile.exists()) {
-            FileDescriptor fd = null;
-            try {
-                final int permissions = 0600;  // read-write for user.
-                fd = Os.open(profileFile.getAbsolutePath(), OsConstants.O_CREAT, permissions);
-                Os.fchmod(fd, permissions);
-                Os.fchown(fd, appInfo.uid, appInfo.uid);
-            } catch (ErrnoException e) {
-                Log.v(TAG, "Unable to create jit profile file "
-                        + profileFile + ": " + e.getMessage());
-                try {
-                    Os.unlink(profileFile.getAbsolutePath());
-                } catch (ErrnoException unlinkErr) {
-                    if (unlinkErr.errno != OsConstants.ENOENT) {
-                        Log.v(TAG, "Unable to unlink jit profile file "
-                                + profileFile + ": " + unlinkErr.getMessage());
-                    }
-                }
-                return;
-            } finally {
-                IoUtils.closeQuietly(fd);
-            }
-        }
-
-        final File foreignDexProfilesFile =
-                Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
-        String foreignDexProfilesPath = null;
-        if (!foreignDexProfilesFile.exists()) {
-            Log.v(TAG, "ForeignDexProfilesPath does not exists:" +
-                    foreignDexProfilesFile.getPath());
-        } else {
-            foreignDexProfilesPath = foreignDexProfilesFile.getAbsolutePath();
-        }
-        VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), appInfo.dataDir,
-                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesPath);
-    }
-
     private void updateDefaultDensity() {
         final int densityDpi = mCurDefaultDisplayDpi;
         if (!mDensityCompatMode
@@ -5259,18 +5195,13 @@ public final class ActivityThread {
                         + "due to missing cache directory");
             }
 
-            // Setup a location to store generated/compiled graphics code and
-            // JIT profiling data. Note that this data is stored in a
-            // device-protected storage area, so these caches must never contain
-            // user sensitive user data.
+            // Setup a location to store generated/compiled graphics code.
             final Context deviceContext = appContext.createDeviceProtectedStorageContext();
             final File codeCacheDir = deviceContext.getCodeCacheDir();
             if (codeCacheDir != null) {
                 setupGraphicsSupport(data.info, codeCacheDir);
-                setupJitProfileSupport(data.info, codeCacheDir);
             } else {
-                Log.e(TAG, "Unable to setupGraphicsSupport and setupJitProfileSupport " +
-                        "due to missing code-cache directory");
+                Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
             }
 
             // Add the lib dir path to hardware renderer so that vulkan layers
