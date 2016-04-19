@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servicio"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamadas Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Para hacer llamadas y enviar mensajes por Wi-Fi, debes pedir antes a tu operador que configure este servicio. Una vez hecho esto, vuelva a activar las llamadas Wi-Fi en Ajustes."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Regístrate con tu operador"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Llamada Wi-Fi de %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferir datos móviles"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Seleccionar año"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para desactivar esta pantalla, mantén pulsados los botones de retroceso y Visión general al mismo tiempo."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Para desactivar esta pantalla, mantén pulsado el botón Atrás."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para desactivar esta pantalla, mantén pulsado Visión general."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"La aplicación está fijada: no se puede deshacer la fijación en este dispositivo."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fijada"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por tu administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado por tu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durante %1$d minutos (hasta las <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durante un minuto (hasta las <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

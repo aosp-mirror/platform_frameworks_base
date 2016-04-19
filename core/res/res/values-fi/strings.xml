@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Etsitään signaalia"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-puhelut"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Jos haluat soittaa puheluita ja lähettää viestejä Wi-Fin kautta, pyydä ensin operaattoriasi ottamaan tämä palvelu käyttöön. Ota sitten Wi-Fi-puhelut käyttöön asetuksissa."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Rekisteröidy operaattorisi asiakkaaksi."</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Wi-Fi-puhelut: %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ei käytössä"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ensisijainen"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Matkapuhelinverkko ensisijainen"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"Valitse vuosi"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> poistettiin"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (työ)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Poista näytön kiinnitys painamalla Edellinen- ja Viimeisimmät-kohtaa samanaikaisesti pitkään."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Poista näytön kiinnitys painamalla Viimeisimmät-kohtaa pitkään."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Sovellus on kiinnitetty. Irrottaminen ei ole sallittua tällä laitteella."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Näyttö kiinnitetty"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Järjestelmänvalvojasi on päivittänyt paketin."</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Järjestelmänvalvoja on poistanut paketin."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Jos haluat parantaa akun kestoa, virransäästö vähentää laitteesi suorituskykyä ja rajoittaa värinää, sijaintipalveluita ja useimpia taustatietoja. Sähköposti, viestit ja muut synkronointiin perustuvat sovellukset eivät välttämättä päivity, ellet avaa niitä.\n\nVirransäästö poistuu käytöstä automaattisesti, kun laitteesi latautuu."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Yhdeksi minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

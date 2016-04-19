@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ຊອກຫາບໍລິການ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ການ​ໂທ Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"ເພື່ອ​ໂທ ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ​ຢູ່​ເທິງ Wi-Fi, ກ່ອນ​ອື່ນ​ໝົດ​ໃຫ້​ຖ້າມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ ເພື່ອ​ຕັ້ງ​ການ​ບໍ​ລິ​ການ​ນີ້. ຈາກນັ້ນ​ເປີດການ​ໂທ Wi-Fi ອີກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ລົງ​ທະ​ບຽນ​ກັບ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"ການ​ໂທ %s Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ເລືອກໃຊ້ເຊລລູລາກ່ອນ"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"ເລືອກ​ປີ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດປຸ່ມ ​ກັບ​ຄືນ ແລະ ພາບ​ຮວມ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ໃຫ້ແຕະທີ່​ປຸ່ມກັບຄືນຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ ຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ແອັບ​ຖືກ​ປັກ​ໝຸດ​ແລ້ວ: ບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຖອນ​ປັກ​ໝຸດ​ຢູ່​ເທິງ​ອຸ​ປະ​ກອນ​ນີ້."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

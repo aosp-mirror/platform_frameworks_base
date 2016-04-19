@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пребарување за услуга"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Повикување преку Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"За повикување и испраќање пораки преку Wi-Fi, прво побарајте од операторот да ви ја постави оваа услуга. Потоа повторно вклучете повикување преку Wi-Fi во Поставки."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Регистрирајте се со операторот"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Повикување преку Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Исклучено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Се претпочита Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Се претпочита мобилна"</string>
@@ -1471,7 +1475,8 @@
     <string name="select_year" msgid="7952052866994196170">"Избери година"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Избришано <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"За да го откачите екранот, допрете и задржете Назад и Краток преглед во исто време."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да го откачите екранот, допрете и задржете Краток преглед."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Апликацијата е закачена: откачување не е дозволено на уредов."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
@@ -1483,6 +1488,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

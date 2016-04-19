@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xizmatlar qidirilmoqda"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi orqali qo‘ng‘iroqlarni amalga oshirish va xabarlar bilan almashinish uchun uyali aloqa operatoringizdan ushbu xizmatni yoqib qo‘yishni so‘rashingiz lozim. Keyin sozlamalarda Wi-Fi qo‘ng‘irog‘i imkoniyatini yoqib olishingiz mumkin."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Mobil operatoringiz yordamida ro‘yxatdan o‘ting"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi qo‘ng‘iroqlar"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil tarmoq afzal ko‘rilsin"</string>
@@ -910,7 +914,7 @@
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s: Bosh ilova sifatida foydalanish"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Suratga olish"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Suratga olish uchun ilovani tanlang:"</string>
-    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ilovasi orqali suratga olish"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s yordamida suratga oling"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Suratga olish"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ushbu amaldan standart sifatida foydalanish"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Boshqa ilovadan foydalanish"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"Yilni tanlash"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> o‘chirildi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ish <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ushbu ekrandan chiqish uchun “Orqaga” va “Umumiy nazar” tugmalarini bir vaqtda bosib turing."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ushbu ekrandan chiqish uchun “Umumiy nazar” tugmasini bosib turing."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ilova qadab qo‘yilgan. Uni ekrandan yechish ushbu qurilmada ta’qiqlangan."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran qadab qo‘yildi"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
       <item quantity="one">Bir daqiqa (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>

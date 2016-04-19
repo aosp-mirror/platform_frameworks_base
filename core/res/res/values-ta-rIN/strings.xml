@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"சேவையைத் தேடுகிறது"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"வைஃபை அழைப்பு"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"வைஃபை மூலம் அழைக்க மற்றும் செய்திகள் அனுப்ப, முதலில் மொபைல் நிறுவனத்திடம் இந்தச் சேவையை அமைக்குமாறு கேட்கவும். பிறகு அமைப்புகளில் மீண்டும் வைஃபை அழைப்பை இயக்கவும்."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"உங்கள் மொபைல் நிறுவனத்தில் பதிவுசெய்யவும்"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s வைஃபை அழைப்பு"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"ஆண்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> நீக்கப்பட்டது"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"இந்தத் திரையை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"இந்தத் திரையை விலக்க, முந்தையது எனும் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"இந்தத் திரையை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"பயன்பாடு பொருத்தப்பட்டது: பொருத்தியதை நீக்குவதற்கு இந்தச் சாதனத்தில் அனுமதியில்லை."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகள் திறக்கும்வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
       <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>

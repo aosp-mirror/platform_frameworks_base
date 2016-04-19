@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Hizmet Aranıyor"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Kablosuz Çağrı"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Kablosuz ağ üzerinden telefon etmek ve ileti göndermek için ilk önce operatörünüzden bu hizmeti ayarlamasını isteyin. Sonra tekrar Ayarlar\'dan Kablosuz çağrı özelliğini açın."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Operatörünüze kaydolun"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Kablosuz Çağrı"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Kapalı"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Kablosuz bağlantı tercih edildi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Hücresel ağ tercih edildi"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"Yılı seçin"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Bu ekranın sabitlemesini kaldırmak için Geri ve Genel Bakış\'a aynı anda dokunup basılı tutun."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Bu ekranın sabitlemesini kaldırmak için Genel Bakış\'a dokunup basılı tutun."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Uygulama sabitlendi. Bu cihazda sabitlemenin kaldırılmasına izin verilmiyor."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran sabitlendi"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Yöneticiniz tarafından silindi"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pil tasarrufu özelliği, pil ömrünü iyileştirmeye yardımcı olmak için cihazın performansını düşürür, titreşimi, konum hizmetlerini ve arka plan verilerinin çoğunu sınırlar. Senkronizasyona dayalı olarak çalışan e-posta, mesajlaşma uygulamaları ve diğer uygulamalar, bunları açmadığınız sürece güncellenmeyebilir.\n\nCihazınız şarj olurken pil tasarrufu otomatik olarak kapatılır."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

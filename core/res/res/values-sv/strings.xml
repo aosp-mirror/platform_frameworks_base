@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Söker efter tjänst"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-samtal"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Om du vill ringa samtal och skicka meddelanden via Wi-Fi ber du först operatören att konfigurera tjänsten. Därefter kan du aktivera Wi-Fi-samtal på nytt från Inställningar."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrera dig hos operatören"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi-samtal"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi i första hand"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil i första hand"</string>
@@ -1469,7 +1473,7 @@
     <string name="select_year" msgid="7952052866994196170">"Välj år"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Om du vill lossa skärmen trycker du länge på Tillbaka och Översikt samtidigt."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Om du vill lossa skärmen trycker du länge på Tillbaka."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Om du vill lossa skämen trycker du länge på Översikt."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen är fäst. Att lossa den är inte tillåtet på den här enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skärmen är fäst"</string>
@@ -1481,6 +1485,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Uppdaterat av administratören"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I en minut (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

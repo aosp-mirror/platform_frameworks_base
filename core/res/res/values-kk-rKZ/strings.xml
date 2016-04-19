@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Қызметті іздеу"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi қоңыраулары"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi арқылы қоңырау шалу және хабарларды жіберу үшін алдымен жабдықтаушыңыздан осы қызметті орнатуды сұраңыз. Содан кейін Параметрлерден Wi-Fi қоңырау шалуын іске қосыңыз."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Жабдықтаушыңыз арқылы тіркелу"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi арқылы қоңырау шалу"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өшірулі"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Қалаулы Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Қалаулы ұялы байланыс"</string>
@@ -1469,7 +1473,8 @@
     <string name="select_year" msgid="7952052866994196170">"Жыл таңдау"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Осы экранды босату үшін «Кері» және «Шолу» пәрмендерін бір уақытта түртіп, ұстап тұрыңыз."</string>
+    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
+    <skip />
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Осы экранды босату үшін «Шолу» пәрменін түртіп, ұстап тұрыңыз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Бағдарлама белгіленді: Бұл құрылғыда белгіні алуға рұқсат берілмейді."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
@@ -1481,6 +1486,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Әкімші жаңартты"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
+    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
       <item quantity="one">Бір минут бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
