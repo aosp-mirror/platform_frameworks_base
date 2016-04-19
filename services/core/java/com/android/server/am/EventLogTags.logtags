@@ -108,3 +108,7 @@ option java_package com.android.server.am
 30048 am_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
 # The activity's onStop has been called.
 30049 am_on_stop_called (User|1|5),(Component Name|3),(Reason|3)
+
+# Report changing memory conditions (Values are ProcessStats.ADJ_MEM_FACTOR* constants)
+30050 am_mem_factor (Current|1|5),(Previous|1|5)
+
