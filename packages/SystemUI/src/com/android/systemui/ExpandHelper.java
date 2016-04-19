@@ -317,8 +317,8 @@ public class ExpandHelper implements Gefingerpoken {
                     mResizedView = null;
                     mWatchingForPull = false;
                 }
-                mInitialTouchY = ev.getY();
-                mInitialTouchX = ev.getX();
+                mInitialTouchY = ev.getRawY();
+                mInitialTouchX = ev.getRawX();
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -412,8 +412,8 @@ public class ExpandHelper implements Gefingerpoken {
                 mWatchingForPull = mScrollAdapter != null &&
                         isInside(mScrollAdapter.getHostView(), x, y);
                 mResizedView = findView(x, y);
-                mInitialTouchX = ev.getX();
-                mInitialTouchY = ev.getY();
+                mInitialTouchX = ev.getRawX();
+                mInitialTouchY = ev.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE: {
                 if (mWatchingForPull) {
