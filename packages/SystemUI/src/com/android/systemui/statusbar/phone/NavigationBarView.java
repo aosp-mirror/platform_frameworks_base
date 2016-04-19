@@ -581,6 +581,9 @@ public class NavigationBarView extends LinearLayout {
         setNavigationIconHints(mNavigationIconHints, true);
     }
 
+    public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
+    }
+
     private void updateTaskSwitchHelper() {
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
         mGestureHelper.setBarState(mVertical, isRtl);

@@ -3440,6 +3440,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
+        mNavigationBarView.onKeyguardOccludedChanged(keyguardOccluded);
+    }
+
     // State logging
 
     private void logStateToEventlog() {
