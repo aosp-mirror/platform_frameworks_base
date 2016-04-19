@@ -593,7 +593,11 @@ public class StateMachine {
          * @param maxSize number of records to maintain at anyone time.
         */
         synchronized void setSize(int maxSize) {
+            // TODO: once b/28217358 is fixed, add unit tests  to verify that these variables are
+            // cleared after calling this method, and that subsequent calls to get() function as
+            // expected.
             mMaxSize = maxSize;
+            mOldestIndex = 0;
             mCount = 0;
             mLogRecVector.clear();
         }
