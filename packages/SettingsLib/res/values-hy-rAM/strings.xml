@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Կանխադրված կարգավորումներ չկան"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Տեքստից-խոսք կարգավորումներ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Գրվածքից խոսք ելք"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Տեքստի հնչեցում"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Խոսքի գնահատական"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Տեքստի արտասանման արագությունը"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Բարձրություն"</string>
@@ -123,6 +123,10 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Գործարկման շարժիչի կարգավորումներ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Նախընտրած շարժիչը"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Ընդհանուր"</string>
+    <!-- no translation found for tts_reset_speech_pitch_title (5789394019544785915) -->
+    <skip />
+    <!-- no translation found for tts_reset_speech_pitch_summary (8700539616245004418) -->
+    <skip />
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Շատ դանդաղ"</item>
     <item msgid="4795095314303559268">"Դանդաղ"</item>
