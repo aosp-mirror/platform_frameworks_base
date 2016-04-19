@@ -62,6 +62,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -203,6 +204,8 @@ public class BugreportProgressService extends Service {
      * access.
      */
     private boolean mTakingScreenshot;
+
+    private static final Bundle sNotificationBundle = new Bundle();
 
     @Override
     public void onCreate() {
@@ -979,7 +982,13 @@ public class BugreportProgressService extends Service {
     }
 
     private static Notification.Builder newBaseNotification(Context context) {
+        if (sNotificationBundle.isEmpty()) {
+            // Rename notifcations from "Shell" to "Android System"
+            sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                    context.getString(com.android.internal.R.string.android_system_label));
+        }
         return new Notification.Builder(context)
+                .addExtras(sNotificationBundle)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setLocalOnly(true)
