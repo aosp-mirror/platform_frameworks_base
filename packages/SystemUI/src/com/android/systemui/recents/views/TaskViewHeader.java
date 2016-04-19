@@ -284,14 +284,14 @@ public class TaskViewHeader extends FrameLayout
         // Update the dimensions of everything in the header. We do this because we need to use
         // resources for the display, and not the current configuration.
         Resources res = getResources();
-        int headerBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+        int headerBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(getContext(),
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land);
-        int headerButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+        int headerButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(getContext(),
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
