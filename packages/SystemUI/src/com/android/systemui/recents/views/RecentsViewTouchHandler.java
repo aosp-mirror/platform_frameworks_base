@@ -193,7 +193,9 @@ public class RecentsViewTouchHandler {
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
-        updateSnapAlgorithm();
+        if (event.fromDisplayDensityChange) {
+            updateSnapAlgorithm();
+        }
     }
 
     /**
