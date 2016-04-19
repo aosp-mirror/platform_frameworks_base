@@ -464,6 +464,9 @@ public final class Pm {
                 case "-g":
                     sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
                     break;
+                case "--dont-kill":
+                    sessionParams.installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+                    break;
                 case "--originating-uri":
                     sessionParams.originatingUri = Uri.parse(nextOptionData());
                     break;
