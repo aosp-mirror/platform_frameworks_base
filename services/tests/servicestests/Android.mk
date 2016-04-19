@@ -28,10 +28,22 @@ LOCAL_PACKAGE_NAME := FrameworksServicesTests
 
 LOCAL_CERTIFICATE := platform
 
-LOCAL_JNI_SHARED_LIBRARIES := \
-    libapfjni \
+# These are not normally accessible from apps so they must be explicitly included.
+LOCAL_JNI_SHARED_LIBRARIES := libservicestestsjni \
+    libbacktrace \
+    libbase \
+    libbinder \
     libc++ \
-    libnativehelper
+    libcutils \
+    liblog \
+    liblzma \
+    libnativehelper \
+    libnetdaidl \
+    libui \
+    libunwind \
+    libutils
+
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 include $(BUILD_PACKAGE)
 
@@ -45,22 +57,24 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_CFLAGS := -Wall -Werror
+LOCAL_CFLAGS := -Wall -Wextra -Werror
 
 LOCAL_C_INCLUDES := \
   libpcap \
   hardware/google/apf
 
-LOCAL_SRC_FILES := apf_jni.cpp
+LOCAL_SRC_FILES := $(call all-cpp-files-under)
 
 LOCAL_SHARED_LIBRARIES := \
+  libbinder \
+  libcutils \
   libnativehelper \
-  liblog
+  libnetdaidl
 
 LOCAL_STATIC_LIBRARIES := \
   libpcap \
   libapf
 
-LOCAL_MODULE := libapfjni
+LOCAL_MODULE := libservicestestsjni
 
 include $(BUILD_SHARED_LIBRARY)
