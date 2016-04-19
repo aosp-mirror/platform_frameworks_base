@@ -49,6 +49,8 @@ public class BaseBundle {
      */
     static final int FLAG_DEFUSABLE = 1 << 0;
 
+    private static final boolean LOG_DEFUSABLE = false;
+
     private static volatile boolean sShouldDefuse = false;
 
     /**
@@ -229,7 +231,7 @@ public class BaseBundle {
             return;
         }
 
-        if (sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
+        if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
             Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
                     + "clobber all data inside!", new Throwable());
         }
