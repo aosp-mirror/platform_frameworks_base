@@ -85,6 +85,8 @@ public class SurfaceControl {
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long nativeObject,
             IBinder handle, long frame);
+    private static native void nativeSetOverrideScalingMode(long nativeObject,
+            int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
 
 
@@ -374,6 +376,11 @@ public class SurfaceControl {
 
     public void deferTransactionUntil(IBinder handle, long frame) {
         nativeDeferTransactionUntil(mNativeObject, handle, frame);
+    }
+
+    public void setOverrideScalingMode(int scalingMode) {
+        checkNotReleased();
+        nativeSetOverrideScalingMode(mNativeObject, scalingMode);
     }
 
     public IBinder getHandle() {

@@ -42,6 +42,7 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.animation.PathInterpolator;
+import android.view.SurfaceControl;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
@@ -127,10 +128,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private float mAdjustImeAmount;
     private final int mDockedStackMinimizeThickness;
 
-    // If this is true, the task will be down or upscaled
-    // to perfectly fit the region it would have been cropped
-    // to.
-    private boolean mForceScaleToCrop = false;
+    // If this is true, we are in the bounds animating mode.
+    // The task will be down or upscaled to perfectly fit the
+    // region it would have been cropped to. We may also avoid
+    // certain logic we would otherwise apply while resizing,
+    // while resizing in the bounds animating mode.
+    private boolean mBoundsAnimating = false;
     // By default, movement animations are applied to all
     // window movement. If this is true, animations will not
     // be applied within this stack. This is useful for example
@@ -1269,11 +1272,36 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return true;
     }
 
+    void forceWindowsScaleable(boolean force) {
+        SurfaceControl.openTransaction();
+        try {
+            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
+                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                    final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
+                    for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                        final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
+                        if (winAnimator == null || !winAnimator.hasSurface()) {
+                            continue;
+                        }
+                        winAnimator.mSurfaceController.forceScaleableInTransaction(force);
+                    }
+                }
+            }
+        } finally {
+            SurfaceControl.closeTransaction();
+        }
+    }
+
     @Override  // AnimatesBounds
     public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
+            // We force windows out of SCALING_MODE_FREEZE
+            // so that we can continue to animate them
+            // while a resize is pending.
+            forceWindowsScaleable(true);
             mFreezeMovementAnimations = true;
-            mForceScaleToCrop = true;
+            mBoundsAnimating = true;
         }
     }
 
@@ -1281,7 +1309,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
             mFreezeMovementAnimations = false;
-            mForceScaleToCrop = false;
+            mBoundsAnimating = false;
+            forceWindowsScaleable(false);
             mService.requestTraversal();
         }
         if (mStackId == PINNED_STACK_ID) {
@@ -1312,6 +1341,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     public boolean getForceScaleToCrop() {
-        return mForceScaleToCrop;
+        return mBoundsAnimating;
+    }
+
+    public boolean getBoundsAnimating() {
+        return mBoundsAnimating;
     }
 }
