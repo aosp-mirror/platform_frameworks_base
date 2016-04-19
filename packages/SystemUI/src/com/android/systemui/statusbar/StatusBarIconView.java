@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -39,6 +40,7 @@ import java.text.NumberFormat;
 
 public class StatusBarIconView extends AnimatedImageView {
     private static final String TAG = "StatusBarIconView";
+    private boolean mAlwaysScaleIcon;
 
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
@@ -49,6 +51,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private String mNumberText;
     private Notification mNotification;
     private final boolean mBlocked;
+    private int mDensity;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -57,7 +60,6 @@ public class StatusBarIconView extends AnimatedImageView {
     public StatusBarIconView(Context context, String slot, Notification notification,
             boolean blocked) {
         super(context);
-        final Resources res = context.getResources();
         mBlocked = blocked;
         mSlot = slot;
         mNumberPain = new Paint();
@@ -65,18 +67,37 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
         setNotification(notification);
+        maybeUpdateIconScale();
+        setScaleType(ScaleType.CENTER);
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
+    }
 
+    private void maybeUpdateIconScale() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
-        if (notification != null) {
-            final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-            final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-            final float scale = (float)imageBounds / (float)outerBounds;
-            setScaleX(scale);
-            setScaleY(scale);
+        if (mNotification != null || mAlwaysScaleIcon) {
+            updateIconScale();
         }
+    }
 
-        setScaleType(ScaleType.CENTER);
+    private void updateIconScale() {
+        Resources res = mContext.getResources();
+        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+        final float scale = (float)imageBounds / (float)outerBounds;
+        setScaleX(scale);
+        setScaleY(scale);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int density = newConfig.densityDpi;
+        if (density != mDensity) {
+            mDensity = density;
+            maybeUpdateIconScale();
+            updateDrawable();
+        }
     }
 
     public void setNotification(Notification notification) {
@@ -87,12 +108,9 @@ public class StatusBarIconView extends AnimatedImageView {
     public StatusBarIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mBlocked = false;
-        final Resources res = context.getResources();
-        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        final float scale = (float)imageBounds / (float)outerBounds;
-        setScaleX(scale);
-        setScaleY(scale);
+        mAlwaysScaleIcon = true;
+        updateIconScale();
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     private static boolean streq(String a, String b) {

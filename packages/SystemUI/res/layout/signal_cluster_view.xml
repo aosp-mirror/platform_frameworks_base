@@ -19,6 +19,7 @@
 <!-- extends LinearLayout -->
 <com.android.systemui.statusbar.SignalClusterView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/signal_cluster"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:gravity="center_vertical"

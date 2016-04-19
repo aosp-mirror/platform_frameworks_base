@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,7 +18,6 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A controller for the space in the status bar to the left of the system icons. This area is
@@ -51,9 +51,7 @@ public class NotificationIconAreaController {
      * Initializes the views that will represent the notification area.
      */
     protected void initializeNotificationAreaViews(Context context) {
-        Resources res = context.getResources();
-        mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
-        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
+        reloadDimens(context);
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         mNotificationIconArea = inflateIconArea(layoutInflater);
@@ -66,6 +64,27 @@ public class NotificationIconAreaController {
             mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
             mNotificationIcons.setOverflowIndicator(mMoreIcon);
         }
+    }
+
+    public void onDensityOrFontScaleChanged(Context context) {
+        reloadDimens(context);
+        final LinearLayout.LayoutParams params = generateIconLayoutParams();
+        for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
+            View child = mNotificationIcons.getChildAt(i);
+            child.setLayoutParams(params);
+        }
+    }
+
+    @NonNull
+    private LinearLayout.LayoutParams generateIconLayoutParams() {
+        return new LinearLayout.LayoutParams(
+                mIconSize + 2 * mIconHPadding, getHeight());
+    }
+
+    private void reloadDimens(Context context) {
+        Resources res = context.getResources();
+        mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
+        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
     }
 
     /**
@@ -125,8 +144,7 @@ public class NotificationIconAreaController {
      * Updates the notifications with the given list of notifications to display.
      */
     public void updateNotificationIcons(NotificationData notificationData) {
-        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                mIconSize + 2 * mIconHPadding, getHeight());
+        final LinearLayout.LayoutParams params = generateIconLayoutParams();
 
         ArrayList<NotificationData.Entry> activeNotifications =
                 notificationData.getActiveNotifications();
