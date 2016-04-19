@@ -701,7 +701,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     private void setAmOrPm(int amOrPm) {
         updateAmPmLabelStates(amOrPm);
-        mRadialTimePickerView.setAmOrPm(amOrPm);
+
+        if (mRadialTimePickerView.setAmOrPm(amOrPm) && mOnTimeChangedListener != null) {
+            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
+        }
     }
 
     private final OnValueChangedListener mDigitEnteredListener = new OnValueChangedListener() {
