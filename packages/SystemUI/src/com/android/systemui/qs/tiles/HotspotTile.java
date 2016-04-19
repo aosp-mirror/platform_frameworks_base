@@ -43,6 +43,11 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public boolean isAvailable() {
+        return mController.isHotspotSupported();
+    }
+
+    @Override
     protected void handleDestroy() {
         super.handleDestroy();
     }
