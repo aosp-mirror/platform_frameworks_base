@@ -39,9 +39,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract void resetFailedAttempts();
 
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
-            IFingerprintServiceReceiver receiver, int userId, int groupId, long opId,
+            IFingerprintServiceReceiver receiver, int callingUserId, int groupId, long opId,
             boolean restricted, String owner) {
-        super(context, halDeviceId, token, receiver, userId, groupId, restricted, owner);
+        super(context, halDeviceId, token, receiver, callingUserId, groupId, restricted, owner);
         mOpId = opId;
     }
 
