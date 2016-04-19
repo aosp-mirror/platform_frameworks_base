@@ -2446,6 +2446,15 @@ public abstract class Context {
      * <p>This function will throw {@link SecurityException} if you do not
      * have permission to start the given service.
      *
+     * <p class="note"><strong>Note:</strong> Each call to startService()
+     * results in significant work done by the system to manage service
+     * lifecycle surrounding the processing of the intent, which can take
+     * multiple milliseconds of CPU time. Due to this cost, startService()
+     * should not be used for frequent intent delivery to a service, and only
+     * for scheduling significant work. Use {@link #bindService bound services}
+     * for high frequency calls.
+     * </p>
+     *
      * @param service Identifies the service to be started.  The Intent must be either
      *      fully explicit (supplying a component name) or specify a specific package
      *      name it is targetted to.  Additional values
