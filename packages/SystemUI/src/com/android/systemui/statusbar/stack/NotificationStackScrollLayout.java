@@ -747,7 +747,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
         if (!mIsExpanded && isPinnedHeadsUp(animView) && canChildBeDismissed(animView)) {
             mScrimController.setTopHeadsUpDragAmount(animView,
-                    Math.min(Math.abs(swipeProgress - 1.0f), 1.0f));
+                    Math.min(Math.abs(swipeProgress / 2f - 1.0f), 1.0f));
         }
         return true; // Don't fade out the notification
     }

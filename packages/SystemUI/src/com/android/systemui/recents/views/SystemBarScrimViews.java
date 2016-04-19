@@ -146,7 +146,7 @@ public class SystemBarScrimViews {
     }
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
-        animateScrimToCurrentNavBarState(event.hasStackTasks);
+        animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
     }
 
     /**

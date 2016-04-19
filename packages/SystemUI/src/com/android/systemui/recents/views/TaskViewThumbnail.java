@@ -302,18 +302,26 @@ public class TaskViewThumbnail extends View {
         updateThumbnailPaintFilter();
     }
 
-    /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t, ActivityManager.TaskThumbnailInfo thumbnailInfo,
-            boolean disabledInSafeMode) {
+    /**
+     * Binds the thumbnail view to the task.
+     */
+    void bindToTask(Task t, boolean disabledInSafeMode) {
         mTask = t;
         mDisabledInSafeMode = disabledInSafeMode;
-        if (t.thumbnail != null) {
-            setThumbnail(t.thumbnail, thumbnailInfo);
-        } else {
-            setThumbnail(null, null);
-        }
         if (t.colorBackground != 0) {
             mBgFillPaint.setColor(t.colorBackground);
+        }
+    }
+
+    /**
+     * Called when the bound task's data has loaded and this view should update to reflect the
+     * changes.
+     */
+    void onTaskDataLoaded(ActivityManager.TaskThumbnailInfo thumbnailInfo) {
+        if (mTask.thumbnail != null) {
+            setThumbnail(mTask.thumbnail, thumbnailInfo);
+        } else {
+            setThumbnail(null, null);
         }
     }
 

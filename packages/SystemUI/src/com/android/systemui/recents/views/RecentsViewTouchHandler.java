@@ -171,6 +171,7 @@ public class RecentsViewTouchHandler {
                 TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
                 for (TaskStack.DockState dockState : dockStates) {
                     registerDropTargetForCurrentDrag(dockState);
+                    dockState.update(mRv.getContext());
                     mVisibleDockStates.add(dockState);
                 }
             }

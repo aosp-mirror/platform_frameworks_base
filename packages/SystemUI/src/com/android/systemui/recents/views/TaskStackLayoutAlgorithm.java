@@ -454,11 +454,8 @@ public class TaskStackLayoutAlgorithm {
         mStackActionButtonRect.set(mStackRect.left, mStackRect.top - topMargin,
                 mStackRect.right, mStackRect.top + mFocusedTopPeekHeight);
 
-        // Anchor the task rect top aligned to the non-freeform stack rect
-        float aspect = (float) (windowRect.width() - (mSystemInsets.left + mSystemInsets.right)) /
-                (windowRect.height() - (mSystemInsets.top + mSystemInsets.bottom));
-        int minHeight = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
-        int height = (int) Math.min(mStackRect.width() / aspect, minHeight);
+        // Anchor the task rect top aligned to the stack rect
+        int height = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
         mTaskRect.set(mStackRect.left, mStackRect.top, mStackRect.right, mStackRect.top + height);
 
         // Short circuit here if the stack rects haven't changed so we don't do all the work below
@@ -577,7 +574,7 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Creates task overrides to ensure the initial stack layout if necessary.
      */
-    public void setTaskOverridesForInitialState(TaskStack stack) {
+    public void setTaskOverridesForInitialState(TaskStack stack, boolean ignoreScrollToFront) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         mTaskIndexOverrideMap.clear();
@@ -585,7 +582,7 @@ public class TaskStackLayoutAlgorithm {
         boolean scrollToFront = launchState.launchedFromHome ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
-            if (!launchState.launchedWithAltTab && !scrollToFront) {
+            if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {
                 // Set the initial scroll to the predefined state (which differs from the stack)
                 float [] initialNormX = new float[] {
                         getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
@@ -834,12 +831,19 @@ public class TaskStackLayoutAlgorithm {
      */
     public TaskViewTransform getStackTransformScreenCoordinates(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform) {
-        Rect windowRect = Recents.getSystemServices().getWindowRect();
         TaskViewTransform transform = getStackTransform(task, stackScroll, mFocusState,
                 transformOut, frontTransform, true /* forceUpdate */,
                 false /* ignoreTaskOverrides */);
-        transform.rect.offset(windowRect.left, windowRect.top);
-        return transform;
+        return transformToScreenCoordinates(transform);
+    }
+
+    /**
+     * Transforms the given {@param transformOut} to the screen coordinates.
+     */
+    public TaskViewTransform transformToScreenCoordinates(TaskViewTransform transformOut) {
+        Rect windowRect = Recents.getSystemServices().getWindowRect();
+        transformOut.rect.offset(windowRect.left, windowRect.top);
+        return transformOut;
     }
 
     /**
@@ -938,7 +942,11 @@ public class TaskStackLayoutAlgorithm {
      * stack.
      */
     float getStackScrollForTask(Task t) {
-        return mTaskIndexOverrideMap.get(t.key.id, (float) mTaskIndexMap.get(t.key.id, 0));
+        Float overrideP = mTaskIndexOverrideMap.get(t.key.id, null);
+        if (overrideP == null) {
+            return (float) mTaskIndexMap.get(t.key.id, 0);
+        }
+        return overrideP;
     }
 
     /**

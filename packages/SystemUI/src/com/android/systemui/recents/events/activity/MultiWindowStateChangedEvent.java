@@ -17,17 +17,18 @@
 package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.model.TaskStack;
 
 /**
  * This is sent by the activity whenever the multi-window state has changed.
  */
-public class MultiWindowStateChangedEvent extends EventBus.Event {
+public class MultiWindowStateChangedEvent extends EventBus.AnimatedEvent {
 
     public final boolean inMultiWindow;
-    public final boolean hasStackTasks;
+    public final TaskStack stack;
 
-    public MultiWindowStateChangedEvent(boolean inMultiWindow, boolean hasStackTasks) {
+    public MultiWindowStateChangedEvent(boolean inMultiWindow, TaskStack stack) {
         this.inMultiWindow = inMultiWindow;
-        this.hasStackTasks = hasStackTasks;
+        this.stack = stack;
     }
 }

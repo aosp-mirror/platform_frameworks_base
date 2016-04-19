@@ -438,20 +438,17 @@ public class TaskViewHeader extends FrameLayout
         }
     }
 
-    /** Binds the bar view to the task */
-    public void rebindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
+    /**
+     * Binds the bar view to the task.
+     */
+    public void bindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
         mTask = t;
 
-        // If an activity icon is defined, then we use that as the primary icon to show in the bar,
-        // otherwise, we fall back to the application icon
         int primaryColor = disabledInSafeMode
                 ? mDisabledTaskBarBackgroundColor
                 : t.colorPrimary;
         if (mBackground.getColor() != primaryColor) {
             updateBackgroundColor(primaryColor, mDimAlpha);
-        }
-        if (t.icon != null) {
-            mIconView.setImageDrawable(t.icon);
         }
         if (!mTitleView.getText().toString().equals(t.title)) {
             mTitleView.setText(t.title);
@@ -494,6 +491,16 @@ public class TaskViewHeader extends FrameLayout
         if (touchExplorationEnabled) {
             mIconView.setContentDescription(t.appInfoDescription);
             mIconView.setOnClickListener(this);
+        }
+    }
+
+    /**
+     * Called when the bound task's data has loaded and this view should update to reflect the
+     * changes.
+     */
+    public void onTaskDataLoaded() {
+        if (mTask.icon != null) {
+            mIconView.setImageDrawable(mTask.icon);
         }
     }
 
