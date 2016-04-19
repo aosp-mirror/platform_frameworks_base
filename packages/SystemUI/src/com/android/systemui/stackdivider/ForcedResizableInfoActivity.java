@@ -18,6 +18,7 @@ package com.android.systemui.stackdivider;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -74,5 +75,10 @@ public class ForcedResizableInfoActivity extends Activity implements OnTouchList
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         finish();
         return true;
+    }
+
+    @Override
+    public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
+        // Do nothing
     }
 }
