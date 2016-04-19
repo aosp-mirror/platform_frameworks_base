@@ -46,9 +46,12 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public boolean onEnrollResult(int fingerId, int groupId, int remaining) {
+        if (groupId != getGroupId()) {
+            Slog.w(TAG, "groupId != getGroupId(), groupId: " + groupId +
+                    " getGroupId():" + getGroupId());
+        }
         if (remaining == 0) {
-            FingerprintUtils.getInstance().addFingerprintForUser(getContext(), fingerId,
-                    getUserId());
+            FingerprintUtils.getInstance().addFingerprintForUser(getContext(), fingerId, groupId);
         }
         return sendEnrollResult(fingerId, groupId, remaining);
     }
