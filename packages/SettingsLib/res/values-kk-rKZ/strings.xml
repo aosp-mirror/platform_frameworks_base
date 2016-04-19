@@ -123,6 +123,10 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Қозғалтқыш параметрлерін қосу"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Қалаулы қозғалтқыш"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Жалпы"</string>
+    <!-- no translation found for tts_reset_speech_pitch_title (5789394019544785915) -->
+    <skip />
+    <!-- no translation found for tts_reset_speech_pitch_summary (8700539616245004418) -->
+    <skip />
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Өте баяу"</item>
     <item msgid="4795095314303559268">"Баяу"</item>
@@ -322,7 +326,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Әкімші басқарады"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Әкімші қосқан"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Әкімші өшірген"</string>
-    <string name="home" msgid="3256884684164448244">"Негізгі бет параметрлері"</string>
+    <string name="home" msgid="3256884684164448244">"Параметрлер негізгі беті"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> бұрын"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> қалды"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Кішкентай"</string>
