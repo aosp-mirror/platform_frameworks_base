@@ -110,6 +110,10 @@ public class RootsCache {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            if (uri == null) {
+                Log.w(TAG, "Received onChange event for null uri. Skipping.");
+                return;
+            }
             if (DEBUG) Log.d(TAG, "Updating roots due to change at " + uri);
             updateAuthorityAsync(uri.getAuthority());
         }
