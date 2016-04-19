@@ -311,8 +311,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>已在安全模式下停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
-    <!-- no translation found for recents_incompatible_app_message (5075812958564082451) -->
-    <skip />
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"该应用不支持分屏"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -420,13 +419,10 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已用作音量控制对话框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"触摸即可恢复原始设置。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您当前正在使用工作资料"</string>
-    <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_vibrate (1187944970457807498) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute (3625049841390467354) -->
-    <skip />
-    <string name="system_ui_tuner" msgid="708224127392452018">"系统界面调谐器"</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。点按即可取消静音。"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。点按即可设为振动，但可能会同时将无障碍服务设为静音。"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。点按即可设为静音，但可能会同时将无障碍服务设为静音。"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"系统界面调节工具"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"嵌入式显示电池电量百分比 显示嵌入的电池电量百分比"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充电时在状态栏图标内显示电池电量百分比"</string>
     <string name="quick_settings" msgid="10042998191725428">"快捷设置"</string>
@@ -448,13 +444,13 @@
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快捷设置，<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"热点"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作资料"</string>
-    <string name="tuner_warning_title" msgid="7094689930793031682">"是否有趣完全取决于个人感觉"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"系统界面调谐器可让您通过其他方式调整及自定义 Android 用户界面。在日后推出的版本中，这些实验性功能可能会变更、损坏或消失。操作时请务必谨慎。"</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"在日后推出的版本中，这些实验性功能可能会变更、损坏或消失。操作时请务必谨慎。"</string>
+    <string name="tuner_warning_title" msgid="7094689930793031682">"并不适合所有用户"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"系统界面调节工具可让您以更多方式调整及定制 Android 界面。在日后推出的版本中，这些实验性功能可能会变更、失效或消失。操作时请务必谨慎。"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"在日后推出的版本中，这些实验性功能可能会变更、失效或消失。操作时请务必谨慎。"</string>
     <string name="got_it" msgid="2239653834387972602">"知道了"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"恭喜！系统界面调谐器已添加到“设置”中"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"恭喜！系统界面调节工具已添加到“设置”中"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"从“设置”中移除"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"要将系统界面调谐器从“设置”中移除，并停止使用所有相关功能吗？"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"要从“设置”中移除系统界面调节工具，并停止使用所有相关功能吗？"</string>
     <string name="activity_not_found" msgid="348423244327799974">"您的设备中未安装此应用"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"显示时钟的秒数"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
@@ -470,25 +466,48 @@
     <string name="block" msgid="2734508760962682611">"屏蔽所有通知"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"不静音"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"不静音也不屏蔽"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"显示完整的重要性设置"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"屏蔽"</string>
-    <string name="min_importance" msgid="1901894910809414782">"重要性最低"</string>
-    <string name="low_importance" msgid="4109929986107147930">"重要性：低"</string>
-    <string name="default_importance" msgid="8192107689995742653">"重要性：一般"</string>
-    <string name="high_importance" msgid="1527066195614050263">"重要性：高"</string>
-    <string name="max_importance" msgid="5089005872719563894">"重要性：紧急"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"一律不显示这些通知"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"在通知列表底部显示，但不发出提示音"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"显示这些通知，但不发出提示音"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"允许这些通知发出提示音"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"在屏幕上短暂显示，并允许发出提示音"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"在通知列表顶部显示，同时在屏幕上短暂显示，并允许发出提示音"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>通知设置"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"颜色和外观"</string>
     <string name="night_mode" msgid="3540405868248625488">"夜间模式"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"校准显示画面"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"校准显示屏"</string>
     <string name="night_mode_on" msgid="5597545513026541108">"开启"</string>
     <string name="night_mode_off" msgid="8035605276956057508">"关闭"</string>
     <string name="turn_on_automatically" msgid="4167565356762016083">"自动开启"</string>
@@ -612,8 +631,7 @@
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"快捷设置编辑器。"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"应用可能无法在分屏模式下正常运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"应用不支持分屏。"</string>
-    <!-- no translation found for accessibility_quick_settings_expand (4982484435775933070) -->
-    <skip />
+    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"展开快捷设置。"</string>
     <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
     <skip />
 </resources>
