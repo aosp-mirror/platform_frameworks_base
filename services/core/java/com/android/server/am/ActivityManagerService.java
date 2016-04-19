@@ -1945,6 +1945,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 }
                 installEncryptionUnawareProviders(userId);
+                if (msg.obj instanceof ProgressReporter) {
+                    ((ProgressReporter) msg.obj).finish();
+                }
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
