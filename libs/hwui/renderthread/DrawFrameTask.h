@@ -40,11 +40,14 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
-enum SyncResult {
-    kSync_OK = 0,
-    kSync_UIRedrawRequired = 1 << 0,
-    kSync_LostSurfaceRewardIfFound = 1 << 1,
+namespace SyncResult {
+enum {
+    OK = 0,
+    UIRedrawRequired = 1 << 0,
+    LostSurfaceRewardIfFound = 1 << 1,
+    ContextIsStopped = 1 << 2,
 };
+}
 
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
