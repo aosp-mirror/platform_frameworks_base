@@ -78,9 +78,12 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         final ResolveInfo ri = mTargets.get(mIndex++);
         final ComponentName componentName = ri.activityInfo.getComponentName();
 
-        final CharSequence label = ri.activityInfo.loadLabel(mService.mContext.getPackageManager());
-        mProgress.setProgress(mIndex, mTargets.size(),
-                mService.mContext.getString(R.string.android_preparing_apk, label));
+        if (mProgress != null) {
+            final CharSequence label = ri.activityInfo
+                    .loadLabel(mService.mContext.getPackageManager());
+            mProgress.setProgress(mIndex, mTargets.size(),
+                    mService.mContext.getString(R.string.android_preparing_apk, label));
+        }
 
         Slog.i(TAG, "Pre-boot of " + componentName.toShortString() + " for user " + mUserId);
         EventLogTags.writeAmPreBoot(mUserId, componentName.getPackageName());
