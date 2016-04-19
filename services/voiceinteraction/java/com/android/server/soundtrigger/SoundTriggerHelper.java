@@ -188,13 +188,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             // Process existing model first.
-            if (model != null && model.getModelId() != soundModel.uuid) {
+            if (model != null && !model.getModelId().equals(soundModel.uuid)) {
                 // The existing model has a different UUID, should be replaced.
                 int status = cleanUpExistingKeyphraseModel(model);
-                removeKeyphraseModelLocked(keyphraseId);
                 if (status != STATUS_OK) {
                     return status;
                 }
+                removeKeyphraseModelLocked(keyphraseId);
                 model = null;
             }
 
@@ -478,8 +478,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             } else {
                 // Clear the ModelData state if successful.
                 modelData.clearState();
-                modelData.clearCallback();
-                modelData.setRecognitionConfig(null);
             }
         }
         return status;
@@ -498,15 +496,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             // Stop all recognition models.
             for (ModelData model : mModelDataMap.values()) {
                 if (model.isModelStarted()) {
-                    model.setRequested(false);
                     int status = stopRecognitionLocked(model,
                             false /* do not notify for synchronous calls */);
                     if (status != STATUS_OK) {
                         Slog.w(TAG, "Error stopping keyphrase model: " + model.getHandle());
                     }
                     model.clearState();
-                    model.clearCallback();
-                    model.setRecognitionConfig(null);
                 }
             }
             internalClearGlobalStateLocked();
@@ -849,7 +844,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private void internalClearModelStateLocked() {
         for (ModelData modelData : mModelDataMap.values()) {
             modelData.clearState();
-            modelData.clearCallback();
         }
     }
 
@@ -1194,6 +1188,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         synchronized void clearState() {
             mModelState = MODEL_NOTLOADED;
             mModelHandle = INVALID_VALUE;
+            mRecognitionConfig = null;
+            mRequested = false;
+            mCallback = null;
         }
 
         synchronized void clearCallback() {
