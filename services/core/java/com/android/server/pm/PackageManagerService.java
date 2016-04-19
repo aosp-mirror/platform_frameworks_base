@@ -18679,11 +18679,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         try {
             storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
 
-            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && !mOnlyCore) {
                 UserManagerService.enforceSerialNumber(
                         Environment.getDataUserDeDirectory(volumeUuid, userId), userSerial);
             }
-            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && !mOnlyCore) {
                 UserManagerService.enforceSerialNumber(
                         Environment.getDataUserCeDirectory(volumeUuid, userId), userSerial);
             }
@@ -18771,7 +18771,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 logCriticalInfo(Log.WARN, "Destroying user directory " + file
                         + " because no matching user was found");
                 destroyUser = true;
-            } else {
+            } else if (!mOnlyCore) {
                 try {
                     UserManagerService.enforceSerialNumber(file, info.serialNumber);
                 } catch (IOException e) {
