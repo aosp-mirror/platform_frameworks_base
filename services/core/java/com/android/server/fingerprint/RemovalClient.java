@@ -45,7 +45,7 @@ public abstract class RemovalClient extends ClientMonitor {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         // The fingerprint template ids will be removed when we get confirmation from the HAL
         try {
-            final int result = daemon.remove(mFingerId, getUserId());
+            final int result = daemon.remove(mFingerId, getGroupId());
             if (result != 0) {
                 Slog.w(TAG, "startRemove with id = " + mFingerId + " failed, result=" + result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
