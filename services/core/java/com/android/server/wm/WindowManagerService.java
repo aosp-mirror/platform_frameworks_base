@@ -7908,9 +7908,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     View view = null;
                     try {
-                        view = mPolicy.addStartingWindow(
-                            wtoken.token, sd.pkg, sd.theme, sd.compatInfo,
-                            sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.logo, sd.windowFlags);
+                        final Configuration overrideConfig = wtoken != null && wtoken.mTask != null
+                                ? wtoken.mTask.mOverrideConfig : null;
+                        view = mPolicy.addStartingWindow(wtoken.token, sd.pkg, sd.theme,
+                            sd.compatInfo, sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.logo,
+                            sd.windowFlags, overrideConfig);
                     } catch (Exception e) {
                         Slog.w(TAG_WM, "Exception when adding starting window", e);
                     }
