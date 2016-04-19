@@ -21,6 +21,7 @@ public interface HotspotController {
     void removeCallback(Callback callback);
     boolean isHotspotEnabled();
     void setHotspotEnabled(boolean enabled);
+    boolean isHotspotSupported();
 
     public interface Callback {
         void onHotspotChanged(boolean enabled);
