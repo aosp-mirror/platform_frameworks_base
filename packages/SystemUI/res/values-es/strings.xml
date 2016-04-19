@@ -420,8 +420,8 @@
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar la versión original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando tu perfil de trabajo"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca para activar el sonido."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca para poner el dispositivo en vibración. Los servicios de accesibilidad pueden estar silenciados."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Los servicios de accesibilidad pueden estar silenciados."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca para poner el dispositivo en vibración. Los servicios de accesibilidad pueden silenciarse."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Los servicios de accesibilidad pueden silenciarse."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de IU del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de batería insertado"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
@@ -466,19 +466,42 @@
     <string name="block" msgid="2734508760962682611">"Bloquear todas las notificaciones"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciar"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciar ni bloquear"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostrar ajustes de importancia por completo"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Bloqueado"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Importancia mínima"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Poco importante"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Importancia normal"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Muy importante"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Urgente"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"No mostrar estas notificaciones"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Mostrar en la parte inferior de la lista de notificaciones de forma silenciosa"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Mostrar estas notificaciones de forma silenciosa"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Permitir que estas notificaciones reproduzcan sonidos"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Mostrar en la pantalla y permitir sonido"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Mostrar en la parte superior de la lista de notificaciones, mostrar en la pantalla y permitir sonido"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Más ajustes"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controles de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
