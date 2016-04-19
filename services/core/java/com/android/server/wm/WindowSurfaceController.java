@@ -23,6 +23,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static android.view.Surface.SCALING_MODE_FREEZE;
+import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
 
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -390,6 +392,13 @@ class WindowSurfaceController {
     void deferTransactionUntil(IBinder handle, long frame) {
         // TODO: Logging
         mSurfaceControl.deferTransactionUntil(handle, frame);
+    }
+
+    void forceScaleableInTransaction(boolean force) {
+        // -1 means we don't override the default or client specified
+        // scaling mode.
+        int scalingMode = force ? SCALING_MODE_SCALE_TO_WINDOW : -1;
+        mSurfaceControl.setOverrideScalingMode(scalingMode);
     }
 
     boolean clearWindowContentFrameStats() {
