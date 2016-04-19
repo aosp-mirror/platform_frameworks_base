@@ -41,7 +41,8 @@ public class SystemBarScrimViews {
 
     private boolean mHasNavBarScrim;
     private boolean mShouldAnimateNavBarScrim;
-
+    private boolean mHasTransposedNavBar;
+    private boolean mHasDockedTasks;
     private int mNavBarScrimEnterDuration;
 
     public SystemBarScrimViews(RecentsActivity activity) {
@@ -50,6 +51,8 @@ public class SystemBarScrimViews {
         mNavBarScrimView.forceHasOverlappingRendering(false);
         mNavBarScrimEnterDuration = activity.getResources().getInteger(
                 R.integer.recents_nav_bar_scrim_enter_duration);
+        mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavBar();
+        mHasDockedTasks = Recents.getSystemServices().hasDockedTask();
     }
 
     /**
@@ -101,8 +104,7 @@ public class SystemBarScrimViews {
      * @return Whether to show the nav bar scrim.
      */
     private boolean isNavBarScrimRequired(boolean hasStackTasks) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        return hasStackTasks && !ssp.hasTransposedNavBar() && !ssp.hasDockedTask();
+        return hasStackTasks && !mHasTransposedNavBar && !mHasDockedTasks;
     }
 
     /**** EventBus events ****/
@@ -142,10 +144,14 @@ public class SystemBarScrimViews {
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
+        if (event.fromDeviceOrientationChange) {
+            mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavBar();
+        }
         animateScrimToCurrentNavBarState(event.hasStackTasks);
     }
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
+        mHasDockedTasks = event.inMultiWindow;
         animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
     }
 

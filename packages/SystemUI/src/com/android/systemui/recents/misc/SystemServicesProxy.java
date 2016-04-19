@@ -951,18 +951,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns the current display orientation.
-     */
-    public int getDisplayOrientation() {
-        // Because of multi-window, the configuration orientation does not necessarily reflect the
-        // orientation of the display, instead we just use the display's real-size.
-        Rect displayRect = getDisplayRect();
-        return displayRect.width() > displayRect.height()
-                ? Configuration.ORIENTATION_LANDSCAPE
-                : Configuration.ORIENTATION_PORTRAIT;
-    }
-
-    /**
      * Returns the window rect for the RecentsActivity, based on the dimensions of the home stack.
      */
     public Rect getWindowRect() {
