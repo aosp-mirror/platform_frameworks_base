@@ -45,8 +45,7 @@ public abstract class IpConnectivityEvent {
 
     public static final int IPCE_DHCP_RECV_ERROR           = IPCE_DHCP_BASE + 0;
     public static final int IPCE_DHCP_PARSE_ERROR          = IPCE_DHCP_BASE + 1;
-    public static final int IPCE_DHCP_TIMEOUT              = IPCE_DHCP_BASE + 2;
-    public static final int IPCE_DHCP_STATE_CHANGE         = IPCE_DHCP_BASE + 3;
+    public static final int IPCE_DHCP_STATE_CHANGE         = IPCE_DHCP_BASE + 2;
 
     public static final int IPCE_NETMON_STATE_CHANGE       = IPCE_NETMON_BASE + 0;
     public static final int IPCE_NETMON_CHECK_RESULT       = IPCE_NETMON_BASE + 1;
