@@ -86,6 +86,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -762,14 +763,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setOnGroupChangeListener(mStackScroller);
 
-        mKeyguardIconOverflowContainer =
-                (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
-        mKeyguardIconOverflowContainer.setOnActivatedListener(this);
-        mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
-        mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
-
-
+        inflateOverflowContainer();
         inflateEmptyShadeView();
         inflateDismissView();
         mExpandedContents = mStackScroller;
@@ -950,13 +944,62 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return new BatteryControllerImpl(mContext);
     }
 
+    private void inflateOverflowContainer() {
+        mKeyguardIconOverflowContainer =
+                (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
+                        R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
+        mKeyguardIconOverflowContainer.setOnActivatedListener(this);
+        mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
+        mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
+    }
+
     @Override
-    protected void reInflateViews() {
-        super.reInflateViews();
+    protected void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
+        mScrimController.onDensityOrFontScaleChanged();
+        mStatusBarView.onDensityOrFontScaleChanged();
+        mBrightnessMirrorController.onDensityOrFontScaleChanged();
+        inflateSignalClusters();
+        mIconController.onDensityOrFontScaleChanged();
         inflateDismissView();
         updateClearAll();
         inflateEmptyShadeView();
         updateEmptyShadeView();
+        inflateOverflowContainer();
+    }
+
+    private void inflateSignalClusters() {
+        SignalClusterView signalClusterView = reinflateSignalCluster(mStatusBarView);
+        mIconController.setSignalCluster(signalClusterView);
+        reinflateSignalCluster(mKeyguardStatusView);
+    }
+
+    private SignalClusterView reinflateSignalCluster(View view) {
+        SignalClusterView signalCluster =
+                (SignalClusterView) view.findViewById(R.id.signal_cluster);
+        if (signalCluster != null) {
+            ViewParent parent = signalCluster.getParent();
+            if (parent instanceof ViewGroup) {
+                ViewGroup viewParent = (ViewGroup) parent;
+                int index = viewParent.indexOfChild(signalCluster);
+                viewParent.removeView(signalCluster);
+                SignalClusterView newCluster = (SignalClusterView) LayoutInflater.from(mContext)
+                        .inflate(R.layout.signal_cluster_view, viewParent, false);
+                ViewGroup.MarginLayoutParams layoutParams =
+                        (ViewGroup.MarginLayoutParams) viewParent.getLayoutParams();
+                layoutParams.setMarginsRelative(
+                        mContext.getResources().getDimensionPixelSize(
+                                R.dimen.signal_cluster_margin_start),
+                        0, 0, 0);
+                newCluster.setLayoutParams(layoutParams);
+                newCluster.setSecurityController(mSecurityController);
+                newCluster.setNetworkController(mNetworkController);
+                viewParent.addView(newCluster, index);
+                return newCluster;
+            }
+            return signalCluster;
+        }
+        return null;
     }
 
     private void inflateEmptyShadeView() {
@@ -3250,17 +3293,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // SystemUIService notifies SystemBars of configuration changes, which then calls down here
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        updateResources();
+        updateDisplaySize(); // populates mDisplayMetrics
         super.onConfigurationChanged(newConfig); // calls refreshLayout
 
         if (DEBUG) {
             Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
         }
-        updateDisplaySize(); // populates mDisplayMetrics
 
-        updateResources();
         repositionNavigationBar();
         updateRowStates();
-        mIconController.updateResources();
+        mIconController.defineSlots();
         mScreenPinningRequest.onConfigurationChanged();
         mNetworkController.onConfigurationChanged();
     }
@@ -3331,7 +3374,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mMaxAllowedKeyguardNotifications = res.getInteger(
                 R.integer.keyguard_max_notification_count);
 
-        if (DEBUG) Log.v(TAG, "updateResources");
+        if (DEBUG) Log.v(TAG, "defineSlots");
     }
 
     // Visibility reporting

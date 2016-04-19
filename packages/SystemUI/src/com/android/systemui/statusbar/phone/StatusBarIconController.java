@@ -76,6 +76,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private View mNotificationIconAreaInner;
 
     private BatteryMeterView mBatteryMeterView;
+    private BatteryMeterView mBatteryMeterViewKeyguard;
     private TextView mClock;
 
     private int mIconSize;
@@ -129,39 +130,43 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mStatusIconsKeyguard = (LinearLayout) keyguardStatusBar.findViewById(R.id.statusIcons);
 
         mBatteryMeterView = (BatteryMeterView) statusBar.findViewById(R.id.battery);
-        maybeScaleBatteryMeterView(context);
+        mBatteryMeterViewKeyguard = (BatteryMeterView) keyguardStatusBar.findViewById(R.id.battery);
+        scaleBatteryMeterViews(context);
 
         mClock = (TextView) statusBar.findViewById(R.id.clock);
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
-        updateResources();
+        defineSlots();
+        loadDimens();
 
         TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
     }
 
+    public void setSignalCluster(SignalClusterView signalCluster) {
+        mSignalCluster = signalCluster;
+    }
+
     /**
-     * Looks up the scale factor for status bar icons and scales the battery view by that amount
-     * if appropriate.
+     * Looks up the scale factor for status bar icons and scales the battery view by that amount.
      */
-    private void maybeScaleBatteryMeterView(Context context) {
+    private void scaleBatteryMeterViews(Context context) {
         Resources res = context.getResources();
         TypedValue typedValue = new TypedValue();
 
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         float iconScaleFactor = typedValue.getFloat();
 
-        if (iconScaleFactor == 1.f) {
-            return;
-        }
-
-        float batteryHeight = res.getDimension(R.dimen.status_bar_battery_icon_height);
-        float batteryWidth = res.getDimension(R.dimen.status_bar_battery_icon_width);
+        int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
+        int batteryWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+        int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
                 (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
+        scaledLayoutParams.setMarginsRelative(0, 0, 0, marginBottom);
 
         mBatteryMeterView.setLayoutParams(scaledLayoutParams);
+        mBatteryMeterViewKeyguard.setLayoutParams(scaledLayoutParams);
     }
 
     @Override
@@ -185,15 +190,16 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
             setIcon(views.get(i).getSlot(), views.get(i).getStatusBarIcon());
         }
     }
-
-    public void updateResources() {
+    private void loadDimens() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
         mIconHPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
+    }
+
+    public void defineSlots() {
         defineSlots(mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
-        FontSizeUtils.updateFontSize(mClock, R.dimen.status_bar_clock_size);
     }
 
     private void addSystemIcon(int index, StatusBarIcon icon) {
@@ -570,5 +576,36 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
             }
         }
         return ret;
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        loadDimens();
+        mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+        updateClock();
+        for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
+            View child = mStatusIcons.getChildAt(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+            lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
+            child.setLayoutParams(lp);
+        }
+        for (int i = 0; i < mStatusIconsKeyguard.getChildCount(); i++) {
+            View child = mStatusIconsKeyguard.getChildAt(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+            child.setLayoutParams(lp);
+        }
+        scaleBatteryMeterViews(mContext);
+    }
+
+    private void updateClock() {
+        FontSizeUtils.updateFontSize(mClock, R.dimen.status_bar_clock_size);
+        mClock.setPaddingRelative(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_starting_padding),
+                0,
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_end_padding),
+                0);
     }
 }

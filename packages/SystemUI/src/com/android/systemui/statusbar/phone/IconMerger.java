@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
@@ -28,21 +29,29 @@ public class IconMerger extends LinearLayout {
     private static final String TAG = "IconMerger";
     private static final boolean DEBUG = false;
 
-    private final int mIconSize;
-    private final int mIconHPadding;
+    private int mIconSize;
+    private int mIconHPadding;
 
     private View mMoreView;
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        Resources res = context.getResources();
-        mIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
-
+        reloadDimens();
         if (DEBUG) {
             setBackgroundColor(0x800099FF);
         }
+    }
+
+    private void reloadDimens() {
+        Resources res = mContext.getResources();
+        mIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        reloadDimens();
     }
 
     public void setOverflowIndicator(View v) {

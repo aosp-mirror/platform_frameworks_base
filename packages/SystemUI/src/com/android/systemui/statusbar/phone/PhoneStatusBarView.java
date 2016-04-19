@@ -21,10 +21,12 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.R;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -184,5 +186,12 @@ public class PhoneStatusBarView extends PanelBar {
     private void updateScrimFraction() {
         float scrimFraction = Math.max(mPanelFraction, mMinFraction);
         mScrimController.setPanelExpansion(scrimFraction);
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        layoutParams.height = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_height);
+        setLayoutParams(layoutParams);
     }
 }
