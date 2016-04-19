@@ -212,6 +212,12 @@ public class OpenExternalDirectoryActivity extends Activity {
                 break;
             }
         }
+        if (internalRoot == null) {
+            // Should not happen on normal circumstances, unless app crafted an invalid volume
+            // using reflection or the list of mounted volumes changed.
+            Log.e(TAG, "Didn't find right volume for '" + storageVolume.dump() + "' on " + volumes);
+            return false;
+        }
 
         // Checks if the user has granted the permission already.
         final Intent intent = getIntentForExistingPermission(activity, isRoot, internalRoot, file);
