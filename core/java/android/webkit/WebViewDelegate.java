@@ -107,7 +107,29 @@ public final class WebViewDelegate {
             throw new IllegalArgumentException(canvas.getClass().getName()
                     + " is not a DisplayList canvas");
         }
-        ((DisplayListCanvas) canvas).callDrawGLFunction2(nativeDrawGLFunctor);
+        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, null);
+    }
+
+    /**
+     * Calls the function specified with the nativeDrawGLFunctor functor pointer. This
+     * functionality is used by the WebView for calling into their renderer from the
+     * framework display lists.
+     *
+     * @param canvas a hardware accelerated canvas (see {@link Canvas#isHardwareAccelerated()})
+     * @param nativeDrawGLFunctor the pointer to the native functor that implements
+     *        system/core/include/utils/Functor.h
+     * @param releasedRunnable Called when this nativeDrawGLFunctor is no longer referenced by this
+     *        canvas, so is safe to be destroyed.
+     * @throws IllegalArgumentException if the canvas is not hardware accelerated
+     */
+    public void callDrawGlFunction(@NonNull Canvas canvas, long nativeDrawGLFunctor,
+            @Nullable Runnable releasedRunnable) {
+        if (!(canvas instanceof DisplayListCanvas)) {
+            // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
+            throw new IllegalArgumentException(canvas.getClass().getName()
+                    + " is not a DisplayList canvas");
+        }
+        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, releasedRunnable);
     }
 
     /**
