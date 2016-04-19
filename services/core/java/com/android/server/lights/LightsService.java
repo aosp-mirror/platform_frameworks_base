@@ -17,16 +17,16 @@
 package com.android.server.lights;
 
 import com.android.server.SystemService;
-import com.android.server.vr.VrManagerInternal;
 import com.android.server.vr.VrManagerService;
-import com.android.server.vr.VrStateListener;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Slog;
@@ -36,6 +36,7 @@ public class LightsService extends SystemService {
     static final boolean DEBUG = false;
 
     final LightImpl mLights[] = new LightImpl[LightsManager.LIGHT_ID_COUNT];
+    private boolean mVrModeEnabled;
 
     private final class LightImpl extends Light {
 
@@ -179,17 +180,34 @@ public class LightsService extends SystemService {
         }
     }
 
+    private int getVrDisplayMode() {
+        int currentUser = ActivityManager.getCurrentUser();
+        return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.VR_DISPLAY_MODE,
+                /*default*/Settings.Secure.VR_DISPLAY_MODE_LOW_PERSISTENCE,
+                currentUser);
+    }
+
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
         public void onVrStateChanged(boolean enabled) throws RemoteException {
             LightImpl l = mLights[LightsManager.LIGHT_ID_BACKLIGHT];
-            if (enabled) {
-                if (DEBUG) Slog.v(TAG, "VR mode enabled, setting brightness to low persistence");
-                l.enableLowPersistence();
+            int vrDisplayMode = getVrDisplayMode();
 
+            // User leaves VR mode before altering display settings.
+            if (enabled && vrDisplayMode == Settings.Secure.VR_DISPLAY_MODE_LOW_PERSISTENCE) {
+                if (!mVrModeEnabled) {
+                    if (DEBUG)
+                        Slog.v(TAG, "VR mode enabled, setting brightness to low persistence");
+                    l.enableLowPersistence();
+                    mVrModeEnabled = true;
+                }
             } else {
-                if (DEBUG) Slog.v(TAG, "VR mode disabled, resetting brightnes");
-                l.disableLowPersistence();
+                if (mVrModeEnabled) {
+                    if (DEBUG) Slog.v(TAG, "VR mode disabled, resetting brightnes");
+                    l.disableLowPersistence();
+                    mVrModeEnabled = false;
+                }
             }
         }
     };
