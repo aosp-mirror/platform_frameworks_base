@@ -468,19 +468,42 @@
     <string name="block" msgid="2734508760962682611">"Blokuj wszystkie powiadomienia"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Nie ignoruj"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Nie ignoruj ani nie blokuj"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Pokaż pełne ustawienia ważności"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Zablokowane"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Najmniejsza ważność"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Mało ważne"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Ważne"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Bardzo ważne"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Pilne"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Nigdy nie pokazuj tych powiadomień"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Pokazuj na końcu listy powiadomień bez sygnału dźwiękowego"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Pokazuj te powiadomienia bez sygnału dźwiękowego"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Zezwól na sygnalizowanie tych powiadomień dźwiękiem"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Wyświetlaj na ekranie i sygnalizuj dźwiękiem"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Pokazuj na początku listy powiadomień, wyświetlaj na ekranie i sygnalizuj dźwiękiem"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Więcej ustawień"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotowe"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> – ustawienia powiadomień"</string>

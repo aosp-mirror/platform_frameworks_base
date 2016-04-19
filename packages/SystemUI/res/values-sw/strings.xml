@@ -466,19 +466,42 @@
     <string name="block" msgid="2734508760962682611">"Zuia arifa zote"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Usinyamazishe"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Usinyamazishe wala kuzuia"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Onyesha mipangilio kamili ya umuhimu"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Amezuiwa"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Umuhimu wa kiwango cha chini"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Umuhimu kiwango cha chini"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Umuhimu wa kiwango cha kawaida"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Umuhimu wa kiwango cha juu"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Umuhimu wa hali ya dharura"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Usionyeshe arifa hizi kamwe"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Onyesha katika sehemu ya chini ya orodha ya arifa bila sauti"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Onyesha arifa hizi bila sauti"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Ruhusu arifa hizi zitoe sauti"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Chungulia kwenye skrini na uruhusu sauti"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Onyesha katika sehemu ya juu ya orodha ya arifa, chungulia kwenye skrini na uruhusu sauti"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Mipangilio zaidi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Nimemaliza"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Vidhibiti vya arifa za <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

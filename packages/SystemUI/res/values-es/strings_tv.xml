@@ -24,7 +24,10 @@
     <string name="pip_play" msgid="674145557658227044">"Reproducir"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausar"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Mantén el botón "<b>"INICIO"</b>" pulsado para control de PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Mantén el botón de INICIO pulsado para controlar el modo PIP"</string>
+    <!-- no translation found for pip_onboarding_title (7125381413141913754) -->
+    <skip />
+    <!-- no translation found for pip_onboarding_description (1709731220109606682) -->
+    <skip />
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Entendido"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
 </resources>

@@ -466,19 +466,42 @@
     <string name="block" msgid="2734508760962682611">"Blokkeer alle kennisgewings"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Moenie stilmaak nie"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Moenie stilmaak of blokkeer nie"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Wys volledige belangrikheidinstellings"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Geblokkeer"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Onbelangrik"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Min belang"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Normale belang"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Groot belang"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Dringende belang"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Moet nooit hierdie kennisgewings wys nie"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Wys sonder klank aan die onderkant van die kennisgewinglys"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Wys hierdie kennisgewings sonder klank"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Laat hierdie kennisgewing toe om geluide te maak"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Verskyn vlugtig op die skerm en laat klank toe"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Wys boaan die kennisgewingslys, verskyn vlugtig op die skerm en laat klank toe"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellings"</string>
     <string name="notification_done" msgid="5279426047273930175">"Klaar"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>-kennisgewingkontroles"</string>

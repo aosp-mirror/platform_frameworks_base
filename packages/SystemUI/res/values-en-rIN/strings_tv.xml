@@ -24,7 +24,10 @@
     <string name="pip_play" msgid="674145557658227044">"Play"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pause"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Hold "<b>"HOME"</b>" to control PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Press and hold the HOME button to control PIP"</string>
+    <!-- no translation found for pip_onboarding_title (7125381413141913754) -->
+    <skip />
+    <!-- no translation found for pip_onboarding_description (1709731220109606682) -->
+    <skip />
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Understood"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Dismiss"</string>
 </resources>

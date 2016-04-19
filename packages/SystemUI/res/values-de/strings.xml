@@ -222,8 +222,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Arbeitsmodus an."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Arbeitsmodus deaktiviert."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Arbeitsmodus aktiviert."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Datenkomprimierung ist deaktiviert."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Datenkomprimierung ist aktiviert."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Der Datensparmodus ist deaktiviert."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Der Datensparmodus ist aktiviert."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Helligkeit des Displays"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-/3G-Daten pausiert"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-Daten pausiert"</string>
@@ -466,19 +466,42 @@
     <string name="block" msgid="2734508760962682611">"Alle Benachrichtigungen blockieren"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Nicht stummschalten"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Nicht stummschalten oder blockieren"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Vollständige Wichtigkeitseinstellungen anzeigen"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Blockiert"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Minimum-Wichtigkeit"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Geringe Wichtigkeit"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Reguläre Wichtigkeit"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Hohe Wichtigkeit"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Sehr hohe Wichtigkeit"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Diese Benachrichtigungen niemals anzeigen"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Ohne Ton am Ende der Benachrichtigungsliste anzeigen"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Diese Benachrichtigungen ohne Ton anzeigen"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Für diese Benachrichtigungen Ton zulassen"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Auf dem Display einblenden und Ton zulassen"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Ganz oben in der Benachrichtigungsliste anzeigen, auf dem Display einblenden und Ton zulassen"</string>
+    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
+    <skip />
+    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
+    <skip />
+    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5035073235408414397) -->
+    <skip />
+    <!-- no translation found for min_importance (560779348928574878) -->
+    <skip />
+    <!-- no translation found for low_importance (7571498511534140) -->
+    <skip />
+    <!-- no translation found for default_importance (7609889614553354702) -->
+    <skip />
+    <!-- no translation found for high_importance (3441537905162782568) -->
+    <skip />
+    <!-- no translation found for max_importance (4880179829869865275) -->
+    <skip />
+    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
+    <skip />
+    <!-- no translation found for notification_importance_min (7844224511187027155) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (7950291702044409847) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (5924405820269074915) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (1729480727023990427) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (2508384624461849111) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Weitere Einstellungen"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fertig"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>-Benachrichtigungseinstellungen"</string>
@@ -552,9 +575,9 @@
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Mit Headset verbunden"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Datenkomprimierung"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datenkomprimierung aktiviert"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Datenkomprimierung deaktiviert"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Datenverbrauch reduzieren"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datensparmodus aktiviert"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Datensparmodus deaktiviert"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"An"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Aus"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigationsleiste"</string>
