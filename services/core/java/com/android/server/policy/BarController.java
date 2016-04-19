@@ -18,15 +18,14 @@ package com.android.server.policy;
 
 import android.app.StatusBarManager;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy.WindowState;
 
-import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
 
@@ -52,7 +51,7 @@ public class BarController {
     private final int mTranslucentWmFlag;
     protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
-    protected IStatusBarService mStatusBarService;
+    protected StatusBarManagerInternal mStatusBarInternal;
 
     private WindowState mWin;
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
@@ -182,15 +181,9 @@ public class BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.setWindowState(mStatusBarManagerId, state);
-                        }
-                    } catch (RemoteException e) {
-                        if (DEBUG) Slog.w(mTag, "Error posting window state", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.setWindowState(mStatusBarManagerId, state);
                     }
                 }
             });
@@ -276,13 +269,12 @@ public class BarController {
         }
     }
 
-    protected IStatusBarService getStatusBarService() {
+    protected StatusBarManagerInternal getStatusBarInternal() {
         synchronized (mServiceAquireLock) {
-            if (mStatusBarService == null) {
-                mStatusBarService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService("statusbar"));
+            if (mStatusBarInternal == null) {
+                mStatusBarInternal = LocalServices.getService(StatusBarManagerInternal.class);
             }
-            return mStatusBarService;
+            return mStatusBarInternal;
         }
     }
 
