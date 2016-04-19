@@ -472,7 +472,8 @@ LOCAL_AIDL_INCLUDES += \
 
 LOCAL_AIDL_INCLUDES += \
 	frameworks/av/camera/aidl \
-	frameworks/native/aidl/gui
+	frameworks/native/aidl/gui \
+	system/netd/server/binder
 
 LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/android/R.java \
@@ -687,6 +688,7 @@ aidl_files := \
 	frameworks/base/core/java/android/database/CursorWindow.aidl \
 	frameworks/base/core/java/android/service/quicksettings/Tile.aidl \
 	frameworks/native/aidl/binder/android/os/PersistableBundle.aidl \
+	system/netd/server/binder/android/net/UidRange.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
