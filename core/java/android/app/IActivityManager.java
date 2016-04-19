@@ -235,7 +235,7 @@ public interface IActivityManager extends IInterface {
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) throws RemoteException;
     public void setServiceForeground(ComponentName className, IBinder token,
-            int id, Notification notification, boolean keepNotification) throws RemoteException;
+            int id, Notification notification, int flags) throws RemoteException;
     public int bindService(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags,
             String callingPackage, int userId) throws RemoteException;

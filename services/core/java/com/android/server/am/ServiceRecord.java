@@ -516,7 +516,7 @@ final class ServiceRecord extends Binder {
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
                         ams.setServiceForeground(name, ServiceRecord.this,
-                                0, null, true);
+                                0, null, 0);
                         ams.crashApplication(appUid, appPid, localPackageName,
                                 "Bad notification for startForeground: " + e);
                     }
