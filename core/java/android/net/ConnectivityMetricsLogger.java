@@ -16,6 +16,7 @@
 package android.net;
 
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -105,5 +106,47 @@ public class ConnectivityMetricsLogger {
         } catch (RemoteException e) {
             Log.e(TAG, "Error logging event " + e.getMessage());
         }
+    }
+
+    /**
+     * Retrieve events
+     *
+     * @param reference of the last event previously returned. The function will return
+     *                  events following it.
+     *                  If 0 then all events will be returned.
+     *                  After the function call it will contain reference of the
+     *                  last returned event.
+     * @return events
+     */
+    public ConnectivityMetricsEvent[] getEvents(ConnectivityMetricsEvent.Reference reference) {
+        try {
+            return mService.getEvents(reference);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "IConnectivityMetricsLogger.getEvents: " + ex);
+            return null;
+        }
+    }
+
+    /**
+     * Register PendingIntent which will be sent when new events are ready to be retrieved.
+     */
+    public boolean register(PendingIntent newEventsIntent) {
+        try {
+            return mService.register(newEventsIntent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "IConnectivityMetricsLogger.register: " + ex);
+            return false;
+        }
+    }
+
+    public boolean unregister(PendingIntent newEventsIntent) {
+        try {
+            mService.unregister(newEventsIntent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "IConnectivityMetricsLogger.unregister: " + ex);
+            return false;
+        }
+
+        return true;
     }
 }
