@@ -690,17 +690,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         final IProgressListener listener = new IProgressListener.Stub() {
             @Override
             public void onStarted(int id, Bundle extras) throws RemoteException {
-                // Ignored
+                Log.d(TAG, "unlockUser started");
             }
 
             @Override
             public void onProgress(int id, int progress, Bundle extras) throws RemoteException {
-                // Ignored
+                Log.d(TAG, "unlockUser progress " + progress);
             }
 
             @Override
             public void onFinished(int id, Bundle extras) throws RemoteException {
-                Log.d(TAG, "unlockUser finished!");
+                Log.d(TAG, "unlockUser finished");
                 latch.countDown();
             }
         };
