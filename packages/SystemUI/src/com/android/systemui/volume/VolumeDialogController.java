@@ -44,6 +44,7 @@ import android.service.notification.Condition;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.DndTile;
 
@@ -82,13 +83,12 @@ public class VolumeDialogController {
     private final HandlerThread mWorkerThread;
     private final W mWorker;
     private final Context mContext;
-    private final AudioManager mAudio;
+    private AudioManager mAudio;
     private final NotificationManager mNoMan;
     private final ComponentName mComponent;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
     private final MediaSessions mMediaSessions;
-    private final VC mVolumeController = new VC();
     private final C mCallbacks = new C();
     private final State mState = new State();
     private final String[] mStreamTitles;
@@ -100,6 +100,10 @@ public class VolumeDialogController {
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
     private boolean mShowDndTile = true;
+    @GuardedBy("this")
+    private UserActivityListener mUserActivityListener;
+
+    protected final VC mVolumeController = new VC();
 
     public VolumeDialogController(Context context, ComponentName component) {
         mContext = context.getApplicationContext();
@@ -128,13 +132,33 @@ public class VolumeDialogController {
         mCallbacks.onDismissRequested(Events.DISMISS_REASON_VOLUME_CONTROLLER);
     }
 
-    public void register() {
+    protected void setVolumeController() {
         try {
             mAudio.setVolumeController(mVolumeController);
         } catch (SecurityException e) {
             Log.w(TAG, "Unable to set the volume controller", e);
             return;
         }
+    }
+
+    protected void setAudioManagerStreamVolume(int stream, int level, int flag) {
+        mAudio.setStreamVolume(stream, level, flag);
+    }
+
+    protected int getAudioManagerStreamVolume(int stream) {
+        return mAudio.getLastAudibleStreamVolume(stream);
+    }
+
+    protected int getAudioManagerStreamMaxVolume(int stream) {
+        return mAudio.getStreamMaxVolume(stream);
+    }
+
+    protected int getAudioManagerStreamMinVolume(int stream) {
+        return mAudio.getStreamMinVolume(stream);
+    }
+
+    public void register() {
+        setVolumeController();
         setVolumePolicy(mVolumePolicy);
         showDndTile(mShowDndTile);
         try {
@@ -186,6 +210,13 @@ public class VolumeDialogController {
 
     public void addCallback(Callbacks callback, Handler handler) {
         mCallbacks.add(callback, handler);
+    }
+
+    public void setUserActivityListener(UserActivityListener listener) {
+        if (mDestroyed) return;
+        synchronized (this) {
+            mUserActivityListener = listener;
+        }
     }
 
     public void removeCallback(Callbacks callback) {
@@ -258,8 +289,12 @@ public class VolumeDialogController {
         }
     }
 
-    protected void onUserActivityW() {
-        // hook for subclasses
+    private void onUserActivityW() {
+        synchronized (this) {
+            if (mUserActivityListener != null) {
+                mUserActivityListener.onUserActivity();
+            }
+        }
     }
 
     private void onShowSafetyWarningW(int flags) {
@@ -288,7 +323,7 @@ public class VolumeDialogController {
         if (showUI) {
             changed |= updateActiveStreamW(stream);
         }
-        int lastAudibleStreamVolume = mAudio.getLastAudibleStreamVolume(stream);
+        int lastAudibleStreamVolume = getAudioManagerStreamVolume(stream);
         changed |= updateStreamLevelW(stream, lastAudibleStreamVolume);
         changed |= checkRoutedToBluetoothW(showUI ? AudioManager.STREAM_MUSIC : stream);
         if (changed) {
@@ -331,9 +366,9 @@ public class VolumeDialogController {
 
     private void onGetStateW() {
         for (int stream : STREAMS) {
-            updateStreamLevelW(stream, mAudio.getLastAudibleStreamVolume(stream));
-            streamStateW(stream).levelMin = mAudio.getStreamMinVolume(stream);
-            streamStateW(stream).levelMax = mAudio.getStreamMaxVolume(stream);
+            updateStreamLevelW(stream, getAudioManagerStreamVolume(stream));
+            streamStateW(stream).levelMin = getAudioManagerStreamMinVolume(stream);
+            streamStateW(stream).levelMax = getAudioManagerStreamMaxVolume(stream);
             updateStreamMuteW(stream, mAudio.isStreamMute(stream));
             final StreamState ss = streamStateW(stream);
             ss.muteSupported = mAudio.isStreamAffectedByMute(stream);
@@ -460,7 +495,7 @@ public class VolumeDialogController {
             mMediaSessionsCallbacksW.setStreamVolume(stream, level);
             return;
         }
-        mAudio.setStreamVolume(stream, level, 0);
+        setAudioManagerStreamVolume(stream, level, 0);
     }
 
     private void onSetActiveStreamW(int stream) {
@@ -998,5 +1033,9 @@ public class VolumeDialogController {
         void onShowSilentHint();
         void onScreenOff();
         void onShowSafetyWarning(int flags);
+    }
+
+    public interface UserActivityListener {
+        void onUserActivity();
     }
 }

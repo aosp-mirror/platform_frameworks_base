@@ -162,6 +162,9 @@
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
 
+    <!-- To control car audio module volume -->
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
