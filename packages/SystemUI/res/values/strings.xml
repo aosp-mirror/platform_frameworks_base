@@ -1580,17 +1580,27 @@
     <!-- Accessibility label for the divider that separates the windows in split-screen mode [CHAR LIMIT=NONE] -->
     <string name="accessibility_divider">Split-screen divider</string>
 
-    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
-    <string name="accessibility_action_divider_move_down">Move down</string>
+    <!-- Accessibility action for moving docked stack divider to make the left screen full screen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_left_full">Left full screen</string>
+    <!-- Accessibility action for moving docked stack divider to make the left screen 70% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_left_70">Left 70%</string>
+    <!-- Accessibility action for moving docked stack divider to make the left screen 50% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_left_50">Left 50%</string>
+    <!-- Accessibility action for moving docked stack divider to make the left screen 30% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_left_30">Left 30%</string>
+    <!-- Accessibility action for moving docked stack divider to make the right screen full screen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_right_full">Right full screen</string>
 
-    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
-    <string name="accessibility_action_divider_move_up">Move up</string>
-
-    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
-    <string name="accessibility_action_divider_move_left">Move left</string>
-
-    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
-    <string name="accessibility_action_divider_move_right">Move right</string>
+    <!-- Accessibility action for moving docked stack divider to make the top screen full screen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_top_full">Top full screen</string>
+    <!-- Accessibility action for moving docked stack divider to make the top screen 70% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_top_70">Top 70%</string>
+    <!-- Accessibility action for moving docked stack divider to make the top screen 50% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_top_50">Top 50%</string>
+    <!-- Accessibility action for moving docked stack divider to make the top screen 30% [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_top_30">Top 30%</string>
+    <!-- Accessibility action for moving docked stack divider to make the bottom screen full screen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_bottom_full">Bottom full screen</string>
 
     <!-- Accessibility description of a QS tile while editing positions [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_label">Position <xliff:g id="position" example="2">%1$d</xliff:g>, <xliff:g id="tile_name" example="Wi-Fi">%2$s</xliff:g>. Double tap to edit.</string>
