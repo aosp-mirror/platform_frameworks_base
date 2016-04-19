@@ -38,7 +38,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final boolean DEBUG = FingerprintService.DEBUG;
     private IBinder mToken;
     private IFingerprintServiceReceiver mReceiver;
-    private int mUserId;
+    private int mCallingUserId;
     private int mGroupId;
     private boolean mIsRestricted; // True if client does not have MANAGE_FINGERPRINT permission
     private String mOwner;
@@ -50,20 +50,20 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @param halDeviceId the HAL device ID of the associated fingerprint hardware
      * @param token a unique token for the client
      * @param receiver recipient of related events (e.g. authentication)
-     * @param userId userId for the fingerprint set
+     * @param callingUserId user id of calling user
      * @param groupId groupId for the fingerprint set
      * @param restricted whether or not client has the {@link Manifest#MANAGE_FINGERPRINT}
      * permission
      * @param owner name of the client that owns this
      */
     public ClientMonitor(Context context, long halDeviceId, IBinder token,
-            IFingerprintServiceReceiver receiver, int userId, int groupId,boolean restricted,
+            IFingerprintServiceReceiver receiver, int callingUserId, int groupId,boolean restricted,
             String owner) {
         mContext = context;
         mHalDeviceId = halDeviceId;
         mToken = token;
         mReceiver = receiver;
-        mUserId = userId;
+        mCallingUserId = callingUserId;
         mGroupId = groupId;
         mIsRestricted = restricted;
         mOwner = owner;
@@ -197,8 +197,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         return mIsRestricted;
     }
 
-    public final int getUserId() {
-        return mUserId;
+    public final int getCallingUserId() {
+        return mCallingUserId;
     }
 
     public final int getGroupId() {

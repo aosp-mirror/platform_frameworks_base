@@ -356,7 +356,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    void startRemove(IBinder token, int fingerId, int userId, int groupId,
+    void startRemove(IBinder token, int fingerId, int callingUserId, int groupId,
             IFingerprintServiceReceiver receiver, boolean restricted) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon == null) {
@@ -364,7 +364,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return;
         }
         RemovalClient client = new RemovalClient(getContext(), mHalDeviceId, token,
-                receiver, userId, groupId, fingerId, restricted, token.toString()) {
+                receiver, callingUserId, groupId, fingerId, restricted, token.toString()) {
             @Override
             public void notifyUserActivity() {
                 FingerprintService.this.userActivity();
@@ -372,8 +372,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
             @Override
             public IFingerprintDaemon getFingerprintDaemon() {
-                FingerprintService.this.getFingerprintDaemon();
-                return null;
+                return FingerprintService.this.getFingerprintDaemon();
             }
         };
         startClient(client, true);
@@ -494,7 +493,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    private void startAuthentication(IBinder token, long opId, int realUserId, int groupId,
+    private void startAuthentication(IBinder token, long opId, int callingUserId, int groupId,
                 IFingerprintServiceReceiver receiver, int flags, boolean restricted,
                 String opPackageName) {
         updateActiveGroup(groupId, opPackageName);
@@ -502,7 +501,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         if (DEBUG) Slog.v(TAG, "startAuthentication(" + opPackageName + ")");
 
         AuthenticationClient client = new AuthenticationClient(getContext(), mHalDeviceId, token,
-                receiver, realUserId, groupId, opId, restricted, opPackageName) {
+                receiver, callingUserId, groupId, opId, restricted, opPackageName) {
             @Override
             public boolean handleFailedAttempt() {
                 mFailedAttempts++;
@@ -541,13 +540,13 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         startClient(client, true /* initiatedByClient */);
     }
 
-    private void startEnrollment(IBinder token, byte [] cryptoToken, int userId, int groupId,
+    private void startEnrollment(IBinder token, byte [] cryptoToken, int callingUserId, int groupId,
             IFingerprintServiceReceiver receiver, int flags, boolean restricted,
             String opPackageName) {
         updateActiveGroup(groupId, opPackageName);
 
         EnrollClient client = new EnrollClient(getContext(), mHalDeviceId, token, receiver,
-                userId, groupId, cryptoToken, restricted, opPackageName) {
+                callingUserId, groupId, cryptoToken, restricted, opPackageName) {
 
             @Override
             public IFingerprintDaemon getFingerprintDaemon() {
@@ -687,9 +686,9 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             checkPermission(MANAGE_FINGERPRINT);
             final int limit =  mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
-            final int callingUid = Binder.getCallingUid();
-            final int userId = UserHandle.getUserId(callingUid);
-            final int enrolled = FingerprintService.this.getEnrolledFingerprints(userId).size();
+            final int callingUserId = UserHandle.getCallingUserId();
+            final int enrolled = FingerprintService.this.
+                    getEnrolledFingerprints(callingUserId).size();
             if (enrolled >= limit) {
                 Slog.w(TAG, "Too many fingerprints registered");
                 return;
@@ -705,7 +704,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startEnrollment(token, cryptoToken, userId, groupId, receiver, flags,
+                    startEnrollment(token, cryptoToken, callingUserId, groupId, receiver, flags,
                             restricted, opPackageName);
                 }
             });
@@ -735,7 +734,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
-            final int realUserId = Binder.getCallingUid();
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getCallingUserId();
             final int pid = Binder.getCallingPid();
             final boolean restricted = isRestricted();
             mHandler.post(new Runnable() {
@@ -743,11 +743,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 public void run() {
                     MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
                     if (!canUseFingerprint(opPackageName, true /* foregroundOnly */,
-                            realUserId, pid)) {
+                            callingUid, pid)) {
                         if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
                         return;
                     }
-                    startAuthentication(token, opId, realUserId, groupId, receiver,
+                    startAuthentication(token, opId, callingUserId, groupId, receiver,
                             flags, restricted, opPackageName);
                 }
             });
@@ -797,11 +797,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 final IFingerprintServiceReceiver receiver) {
             checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
             final boolean restricted = isRestricted();
-            final int realUserId = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getCallingUserId();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startRemove(token, fingerId, realUserId, groupId, receiver, restricted);
+                    startRemove(token, fingerId, callingUserId, groupId, receiver, restricted);
                 }
             });
 
