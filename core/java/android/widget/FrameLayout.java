@@ -417,22 +417,28 @@ public class FrameLayout extends ViewGroup {
      */
     public static class LayoutParams extends MarginLayoutParams {
         /**
+         * Value for {@link #gravity} indicating that a gravity has not been
+         * explicitly specified.
+         */
+        public static final int UNSPECIFIED_GRAVITY = -1;
+
+        /**
          * The gravity to apply with the View to which these layout parameters
          * are associated.
          * <p>
-         * The default value is {@code Gravity.TOP | Gravity.START}
+         * The default value is {@link #UNSPECIFIED_GRAVITY}, which is treated
+         * by FrameLayout as {@code Gravity.TOP | Gravity.START}.
          *
          * @see android.view.Gravity
          * @attr ref android.R.styleable#FrameLayout_Layout_layout_gravity
          */
-        public int gravity = DEFAULT_CHILD_GRAVITY;
+        public int gravity = UNSPECIFIED_GRAVITY;
 
         public LayoutParams(@NonNull Context c, @Nullable AttributeSet attrs) {
             super(c, attrs);
 
             final TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.FrameLayout_Layout);
-            gravity = a.getInt(R.styleable.FrameLayout_Layout_layout_gravity,
-                    DEFAULT_CHILD_GRAVITY);
+            gravity = a.getInt(R.styleable.FrameLayout_Layout_layout_gravity, UNSPECIFIED_GRAVITY);
             a.recycle();
         }
 
