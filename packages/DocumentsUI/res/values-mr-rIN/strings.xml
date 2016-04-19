@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"बंद करा"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"या फायलींची कॉपी झाली नाही: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"या फायली हलविल्या नाहीत: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"या फायली हटविल्या नाहीत: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"या फायली दुसऱ्या स्वरूपनात रूपांतरित केल्या होत्या: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">क्लिपबोर्डवर <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी केली.</item>

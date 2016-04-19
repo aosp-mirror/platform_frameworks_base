@@ -100,6 +100,8 @@
     <string name="close" msgid="3043722427445528732">"關閉"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"未複製下列檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"未移動下列檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for delete_failure_alert_content (892393767207938353) -->
+    <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"下列檔案已轉換成其他格式：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已將 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案複製到剪貼簿。</item>

@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Loka"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Þessar skrár voru ekki afritaðar: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Þessar skrár voru ekki færðar: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Þessum skrám var ekki eytt: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Þessum skrám var umbreytt yfir á annað snið: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> skrá afrituð á klippiborð.</item>
