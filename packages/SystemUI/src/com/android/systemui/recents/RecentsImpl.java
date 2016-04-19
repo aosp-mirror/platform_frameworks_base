@@ -560,7 +560,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 com.android.internal.R.dimen.navigation_bar_height);
         mNavBarWidth = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_width);
-        mTaskBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+        mTaskBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(mContext,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
