@@ -330,6 +330,14 @@ public class DividerSnapAlgorithm {
         return snapTarget;
     }
 
+    public boolean isFirstSplitTargetAvailable() {
+        return mFirstSplitTarget != mMiddleTarget;
+    }
+
+    public boolean isLastSplitTargetAvailable() {
+        return mLastSplitTarget != mMiddleTarget;
+    }
+
     /**
      * Cycles through all non-dismiss targets with a stepping of {@param increment}. It moves left
      * if {@param increment} is negative and moves right otherwise.
