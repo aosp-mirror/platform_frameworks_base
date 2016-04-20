@@ -420,12 +420,7 @@ class DragState {
     void notifyLocationLw(float x, float y) {
         // Tell the affected window
         WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
-        if (touchedWin == null) {
-            if (DEBUG_DRAG) Slog.d(TAG_WM, "No touched win at x=" + x + " y=" + y);
-            return;
-        }
-
-        if (!isWindowNotified(touchedWin)) {
+        if (touchedWin != null && !isWindowNotified(touchedWin)) {
             // The drag point is over a window which was not notified about a drag start.
             // Pretend it's over empty space.
             touchedWin = null;
