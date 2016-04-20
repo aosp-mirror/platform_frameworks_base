@@ -27,6 +27,7 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.analytics.DataCollector;
 import com.android.systemui.statusbar.StatusBarState;
@@ -60,6 +61,7 @@ public class FalsingManager implements SensorEventListener {
     private final SensorManager mSensorManager;
     private final DataCollector mDataCollector;
     private final HumanInteractionClassifier mHumanInteractionClassifier;
+    private final AccessibilityManager mAccessibilityManager;
 
     private static FalsingManager sInstance = null;
 
@@ -78,7 +80,8 @@ public class FalsingManager implements SensorEventListener {
 
     private FalsingManager(Context context) {
         mContext = context;
-        mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = mContext.getSystemService(SensorManager.class);
+        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
@@ -176,6 +179,11 @@ public class FalsingManager implements SensorEventListener {
                         .append(" mState=").append(StatusBarState.toShortString(mState))
                         .toString());
             }
+        }
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            // Touch exploration triggers false positives in the classifier and
+            // already sufficiently prevents false unlocks.
+            return false;
         }
         return mHumanInteractionClassifier.isFalseTouch();
     }
