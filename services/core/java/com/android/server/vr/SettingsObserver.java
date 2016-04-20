@@ -38,7 +38,7 @@ import java.util.Set;
 public class SettingsObserver {
 
     private final String mSecureSettingName;
-    private final BroadcastReceiver mSettingRestorReceiver;
+    private final BroadcastReceiver mSettingRestoreReceiver;
     private final ContentObserver mContentObserver;
     private final Set<SettingChangeListener> mSettingsListeners = new ArraySet<>();
 
@@ -67,7 +67,7 @@ public class SettingsObserver {
             @NonNull final Uri settingUri, @NonNull final String secureSettingName) {
 
         mSecureSettingName = secureSettingName;
-        mSettingRestorReceiver = new BroadcastReceiver() {
+        mSettingRestoreReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
@@ -117,7 +117,6 @@ public class SettingsObserver {
      */
     public void addListener(@NonNull SettingChangeListener listener) {
         mSettingsListeners.add(listener);
-
     }
 
     /**
