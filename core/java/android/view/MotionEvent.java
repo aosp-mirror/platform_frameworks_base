@@ -2067,7 +2067,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     
     /**
      * Return the pointer identifier associated with a particular pointer
-     * data index is this event.  The identifier tells you the actual pointer
+     * data index in this event.  The identifier tells you the actual pointer
      * number associated with the data, accounting for individual pointers
      * going up and down since the start of the current gesture.
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0

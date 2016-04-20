@@ -49,14 +49,10 @@ application manifest must include the following permissions:</p>
 
 <h2 id="http-client">Choose an HTTP Client</h2>
 
-<p>Most network-connected Android apps  use HTTP to send and receive  data.
-Android includes two HTTP clients: {@link java.net.HttpURLConnection} and the Apache HTTP client.
-Both support HTTPS, streaming uploads and downloads,  configurable
-timeouts, IPv6, and connection pooling. We recommend using {@link
-java.net.HttpURLConnection} for applications targeted at Gingerbread and higher. For
-more discussion of this topic, see the blog post <a
-href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html"
->Android's HTTP Clients</a>.</p>
+<p>Most network-connected Android apps use HTTP to send and receive data. The
+Android platform includes the {@link java.net.HttpURLConnection} client, which
+supports HTTPS, streaming uploads and downloads, configurable timeouts,
+IPv6, and connection pooling.</p>
 
 <h2 id="connection">Check the Network Connection</h2>
 

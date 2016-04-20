@@ -175,3 +175,38 @@ frameborder="0" allowfullscreen></iframe>
   <a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform">
   Designed for Families Interest Form</a>
 </p>
+
+<h2 id="playbook">
+  Find Success with the Family Playbook
+</h2>
+
+<p>
+  Read our developer guide, "The Family Playbook", to get tips on how to succeed
+  with family and kid-focused apps and games on Google Play.
+</p>
+
+<p>
+  The Family Playbook is a companion guide to <a href="https://g.co/play/developerguide">The
+  Secrets to App Success on Google Play</a> and includes best practices and advice from
+  other developers to help you tailor your apps for families and kids in order to
+  provide high quality, age-appropriate content.
+</p>
+
+<div style="text-align:center">
+  <a href="http://g.co/play/familyplaybook">
+  <img alt="Get it on Google Play"
+   src="https://play.google.com/intl/en_us/badges/images/books/en-play-badge-border.png"
+   style="height:60px" />
+  </a>
+</div>
+
+<p>
+  You can also <a
+  href="{@docRoot}shareables/distribute/family_playbook/family_playbook_v2a_en.pdf">download
+  the pdf</a>.
+</p>
+
+<p>
+  We’d love to hear your feedback so we can continue to improve our developer
+  resources, please <a href="http://goo.gl/xZL1No">let us know what you think</a>.
+</p>

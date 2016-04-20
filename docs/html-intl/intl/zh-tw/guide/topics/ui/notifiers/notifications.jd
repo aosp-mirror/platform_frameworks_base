@@ -1,0 +1,979 @@
+page.title=通知
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>本文件內容</h2>
+<ol>
+  <li><a href="#Design">設計注意事項</a></li>
+  <li><a href="#CreateNotification">建立通知</a>
+    <ol>
+      <li><a href="#Required">必要的通知內容</a></li>
+      <li><a href="#Optional">選用的通知內容和設定</a></li>
+      <li><a href="#Actions">通知動作</a></li>
+      <li><a href="#Priority">通知優先順序</a></li>
+      <li><a href="#SimpleNotification">建立簡易通知</a></li>
+      <li><a href="#ApplyStyle">將擴充版面配置套用至通知</a></li>
+      <li><a href="#Compatibility">處理相容性</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">管理通知</a>
+    <ol>
+      <li><a href="#Updating">更新通知</a></li>
+      <li><a href="#Removing">移除通知</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">啟動 Activity 時保留導覽</a>
+    <ol>
+      <li><a href="#DirectEntry">設定一般 Activity PendingIntent</a></li>
+      <li><a href="#ExtendedNotification">設定特殊 Activity PendingIntent</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">在通知中顯示進度</a>
+    <ol>
+      <li><a href="#FixedProgress">顯示時間長度固定的進度指示器</a></li>
+      <li><a href="#ActivityIndicator">顯示持續性 Activity 指示器</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">通知中繼資料</a></li>
+  <li><a href="#Heads-up">抬頭通知</a></li>
+  <li><a href="#lockscreenNotification">鎖定螢幕通知</a></li>
+    <ol>
+      <li><a href="#visibility">設定可見度</a></li>
+      <li><a href="#controllingMedia">在鎖定螢幕上控制媒體播放</a></li>
+    </ol>
+  <li><a href="#CustomNotification">自訂通知版面配置</a></li>
+</ol>
+
+    <h2>重要類別</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>相關影片</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">4.1 版中的通知
+</a>
+        </li>
+    </ol>
+<h2>另請參閱</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Android 設計：通知</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    通知是您應用程式的一般 UI 以外，可以向使用者顯示的訊息。當您告訴系統發出通知時，它會先在「通知區域」<strong></strong>顯示為圖示。
+
+使用者可開啟「通知匣」<strong></strong>來查看通知的詳細資料。
+通知區域與通知匣都是使用者可隨時查看的系統控制區域。
+
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>圖 1.</strong>通知區域中的通知。
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>圖 2.</strong>通知匣中的通知。
+</p>
+
+<p class="note"><strong>注意：</strong>除非另外註明，否則本指南參照<a href="{@docRoot}tools/support-library/index.html">支援程式庫</a> 4 版中的 
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} 類別。類別 {@link android.app.Notification.Builder Notification.Builder} 是在 Android 3.0 (API 級別 11) 新增。
+
+
+</p>
+
+<h2 id="Design">設計注意事項</h2>
+
+<p>做為 Android 使用者介面重要部分，通知有自己的設計指導方針。
+在 Android 5.0 (API 級別 21) 導入的質感設計變更，更是特別重要。
+如需詳情，請參閱<a href="{@docRoot}training/material/index.html">質感設計</a>。
+如要瞭解如何設計通知與其互動，請參閱<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計指南。
+</p>
+
+<h2 id="CreateNotification">建立通知</h2>
+
+<p>您會為 
+{@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} 物件中的通知指定 UI 資訊與動作。
+如要建立通知本身，您可以呼叫 
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()}，其傳回的 
+{@link android.app.Notification} 物件會包含您的規格。如要發出通知，您可以呼叫 {@link android.app.NotificationManager#notify NotificationManager.notify()} 將 {@link android.app.Notification} 物件傳送至系統。
+
+</p>
+
+<h3 id="Required">必要的通知內容</h3>
+<p>
+    {@link android.app.Notification} 物件「必須」<em></em>包含下列項目：
+</p>
+<ul>
+    <li>
+        小圖示，由
+{@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()} 設定
+    </li>
+    <li>
+        標題，由
+{@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()} 設定
+    </li>
+    <li>
+        詳情文字，由
+{@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()} 設定
+    </li>
+</ul>
+<h3 id="Optional">選用的通知內容和設定</h3>
+<p>
+    所有其他的通知設定與內容均為選用。如需詳情，請參閱
+{@link android.support.v4.app.NotificationCompat.Builder} 的參考文件。
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">通知動作</h3>
+<p>
+    動作雖屬選用性質，但您至少必須將一個動作新增至通知。
+    動作可讓使用者從通知直接移至您應用程式中的
+{@link android.app.Activity}，他們能在那裡查看一或多個事件或執行進一步工作。
+
+</p>
+<p>
+    通知可以提供多個動作。您應該一律定義會在使用者按一下通知時觸發的動作。
+這個動作通常會開啟您應用程式中的
+{@link android.app.Activity}。您也可以將按鈕新增至通知來執行其他動作，例如延遲鬧鐘或立即回應文字訊息。自 Android 4.1 起才提供此功能。
+
+如果您使用其他動作按鈕，也務必要在您應用程式的 {@link android.app.Activity} 中提供此功能。
+
+如需詳情，請參閱<a href="#Compatibility">處理相容性</a>。
+</p>
+<p>
+    在 {@link android.app.Notification} 內，動作本身是由
+{@link android.app.PendingIntent} 完成定義，其中包含的
+{@link android.content.Intent} 會啟動您應用程式中的
+{@link android.app.Activity}。如要將 
+{@link android.app.PendingIntent} 與手勢關聯，可呼叫
+{@link android.support.v4.app.NotificationCompat.Builder} 的適當方法。例如，如果當使用者按一下通知匣中的通知文字時，您希望啟動
+{@link android.app.Activity}，可呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} 來新增 {@link android.app.PendingIntent}。
+
+</p>
+<p>
+    最常見的動作情況就是在使用者按一下通知時啟動 {@link android.app.Activity}。
+您也可以在使用者關閉通知時啟動 {@link android.app.Activity}。
+在 Android 4.1 以上版本中，您可以透過動作按鈕啟動
+{@link android.app.Activity}。如需詳情，請參閱
+{@link android.support.v4.app.NotificationCompat.Builder} 的參考指南。
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">通知優先順序</h3>
+<p>
+    如有需要，您可以設定通知的優先順序。優先順序就像是提示一樣，可讓裝置 UI 知道該如何顯示通知。
+
+    如要設定通知的優先順序，可呼叫 {@link
+android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+NotificationCompat.Builder.setPriority()}，然後傳入其中一個 {@link
+android.support.v4.app.NotificationCompat} 優先順序常數。共有五個優先順序級別，範圍從
+{@link
+android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) 到 {@link
+android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2)。如未加以設定，優先順序會預設為
+{@link
+android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0)。
+</p>
+<p> 如要瞭解如何設定適當的優先順序級別，請參閱<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計指南中的「正確地設定及管理通知優先順序」。
+
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">建立簡易通知</h3>
+<p>
+    下列程式碼片段說明簡易的通知，指定要在使用者按一下通知時開啟的 Activity。
+請注意，以下程式碼會建立
+{@link android.support.v4.app.TaskStackBuilder} 物件，並使用此物件建立動作的
+{@link android.app.PendingIntent}。如要進一步瞭解這種模式，請參閱<a href="#NotificationResponse">啟動 Activity 時保留導覽</a>：
+
+
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>這樣一來，您的使用者就會收到通知。</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">將擴充版面配置套用至通知</h3>
+<p>
+    如要讓通知顯示在擴充的檢視中，請先建立含有您所需一般檢視選項的
+{@link android.support.v4.app.NotificationCompat.Builder} 物件。
+接著，將擴充版面配置物件當成引數，呼叫 {@link android.support.v4.app.NotificationCompat.Builder#setStyle
+Builder.setStyle()}。
+</p>
+<p>
+    請記住，Android 4.1 以下版本平台不支援擴充通知。如要進一步瞭解如何處理 Android 4.1 以下版本平台的通知，請參閱<a href="#Compatibility">處理相容性</a>。
+
+
+</p>
+<p>
+    例如，下列程式碼片段示範如何更改上述程式碼片段中建立的通知，以使用擴充版面配置：
+
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">處理相容性</h3>
+
+<p>
+    即使支援程式庫類別 {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} 中有設定這些功能的方法，特定版本也不一定能使用所有通知功能。
+
+
+    例如，取決於擴充通知的動作按鈕，只能在 Android 4.1 以上版本中顯示，原因是擴充通知本身只能在 Android 4.1 以上版本中使用。
+
+
+</p>
+<p>
+    為確保能有最佳相容性，可利用
+{@link android.support.v4.app.NotificationCompat NotificationCompat} 與其子類別來建立通知，特別是
+{@link android.support.v4.app.NotificationCompat.Builder
+NotificationCompat.Builder}。此外，實作通知時，請按照下列程序操作：
+</p>
+<ol>
+    <li>
+        不論使用者所用的版本為何，請向所有使用者提供所有所有通知功能。
+如要這麼做，請驗證可從您應用程式的
+{@link android.app.Activity} 使用所有功能。您可能會想要新增
+{@link android.app.Activity} 來執行此動作。
+        <p>
+            例如，如果您想要使用
+{@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()}
+ 以提供可停止和開始媒體播放的控制項，可先在您應用程式的
+{@link android.app.Activity} 中實作此控制項。
+        </p>
+    </li>
+    <li>
+        藉由在使用者按一下通知時啟動功能，可確保所有使用者都能使用 {@link android.app.Activity} 中的功能。
+如要這樣做，請為 {@link android.app.Activity} 建立 {@link android.app.PendingIntent}。
+
+呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()} 以將 {@link android.app.PendingIntent} 新增至通知。
+    </li>
+    <li>
+        現在，可以將您想要使用的擴充通知功能新增至通知。請記住，您新增的任何功能也必須能在使用者點選通知時所啟動的
+{@link android.app.Activity} 中使用。
+
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">管理通知</h2>
+<p>
+    當您必須對相同類型的事件發出多次通知時，請避免建立全新的通知。
+您應該考慮變更或新增 (或兩者) 就有通知的某些值來加以更新。
+
+</p>
+<p>
+    例如，Gmail 藉由新增其未讀訊息計數並將每封電子郵件的摘要新增至通知，藉此通知使用者新電子郵件已送達。
+而這稱為「堆疊」通知。詳情請參閱<a href="{@docRoot}design/patterns/notifications.html">通知</a>設計指南。
+
+
+</p>
+<p class="note">
+    <strong>注意：</strong>此 Gmail 功能需要「收件匣」擴充版面配置，也屬於 Android 4.1 以上版本才能使用的擴充通知功能。
+
+</p>
+<p>
+    以下各節說明如何更新及移除通知。
+</p>
+<h3 id="Updating">更新通知</h3>
+<p>
+    藉由呼叫
+{@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()} 連同通知 ID 一起發出，即可將通知設定成可以更新。
+    如要在發出此通知後加以更新，可以更新或建立
+{@link android.support.v4.app.NotificationCompat.Builder} 物件，從中建置
+{@link android.app.Notification} 物件，並將
+{@link android.app.Notification} 連同您先前使用的相同 ID 一起發出。如果仍可看見先前的通知，系統會更新 {@link android.app.Notification} 物件內容中的通知。
+
+如果已關閉先前的通知，會改為建立新的通知。
+
+</p>
+<p>
+    以下程式碼片段示範如何更新通知以反映發生的事件數目。
+以堆疊通知的方式顯示摘要：
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">移除通知</h3>
+<p>
+    下列其中一個情況發生之前，都會看見通知：
+</p>
+<ul>
+    <li>
+        使用者個別關閉通知，或透過「全部清除」的方式關閉通知 (如果可以清除通知的話)。
+
+    </li>
+    <li>
+        使用者按一下通知，而您在建立通知時呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()}。
+
+    </li>
+    <li>
+        您對特定通知 ID 呼叫 {@link android.app.NotificationManager#cancel(int) cancel()}。這種方法也會刪除進行中的通知。
+
+    </li>
+    <li>
+        您呼叫 {@link android.app.NotificationManager#cancelAll() cancelAll()}，將先前發出的所有通知移除。
+
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">啟動 Activity 時保留導覽</h2>
+<p>
+    當您從通知啟動 {@link android.app.Activity} 時，您必須保留使用者預期的導覽體驗。
+按一下  <i>[返回]</i> 應可將使用者從應用程式的一般工作流程帶回主螢幕，而按一下 
+ <i>[近期記錄]</i> 應會將
+{@link android.app.Activity} 顯示為個別的工作。如要保留導覽體驗，請以全新的工作啟動
+{@link android.app.Activity}。您該如何設定
+{@link android.app.PendingIntent} 以取得全新工作，取決於即將啟動的
+{@link android.app.Activity} 屬性。一般有兩種情況：
+</p>
+<dl>
+    <dt>
+        一般 Activity
+    </dt>
+    <dd>
+        您即將啟動的 {@link android.app.Activity} 屬於應用程式的一般工作流程。
+在這種情況下，設定 {@link android.app.PendingIntent}以啟動全新工作，再連同返回堆疊一起提供 {@link android.app.PendingIntent}，可再次產生應用程式的一般
+
+ <i>返回</i> 行為。
+        <p>
+            Gmail 應用程式的通知可示範這種情況。當您點選某一封電子郵件訊息的通知後，您會看到訊息本身。
+輕觸 [返回]<b></b>可將您從 Gmail 帶回主螢幕，就像您剛才從主螢幕進入 Gmail，而不是從通知進入。
+
+
+        </p>
+        <p>
+            不論您所在的應用程式為何，當您輕觸通知時，都會發生這種情況。
+例如，如果您在 Gmail 撰寫訊息，而您點選某一封電子郵件的通知，就會立即前往該封電子郵件。
+輕觸  <i>[返回]</i>
+            會將您帶往收件匣，然後再到主螢幕，而不是到您正在撰寫的訊息。
+
+        </p>
+    </dd>
+    <dt>
+        特殊 Activity
+    </dt>
+    <dd>
+        只有從通知啟動這個 {@link android.app.Activity} 時，使用者才會看到它。
+        在某種意義上，{@link android.app.Activity}藉由提供難以在通知本身顯示的資訊來擴充通知。
+針對這種情況，請設定
+{@link android.app.PendingIntent} 以全新工作啟動。您不必建立返回堆疊，原因是啟動的
+{@link android.app.Activity} 不屬於應用程式的 Activity 流程。
+按一下  <i>[返回]</i> 還是會將使用者帶回主螢幕。
+
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">設定一般 Activity PendingIntent</h3>
+<p>
+    如要設定會啟動直接項目
+{@link android.app.Activity} 的 {@link android.app.PendingIntent}，請按照下列步驟操作：
+</p>
+<ol>
+    <li>
+        在宣示說明中定義您應用程式的 {@link android.app.Activity} 階層。
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                新增 Android 4.0.3 以下版本的支援。如要這樣做，請將
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code> 元素新增為
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 的下層物件，以指定您要啟動
+{@link android.app.Activity} 的上層物件。
+
+                <p>
+                    針對此元素設定
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>。
+                    設定
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>，其中 <code>&lt;parent_activity_name&gt;</code> 是上層
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素的
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code> 值。
+
+
+如需範例，請參閱下列 XML。
+                </p>
+            </li>
+            <li>
+                此外您還需要新增 Android 4.1 以上版本的支援。為此，請將 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code> 屬性新增到您要啟動 {@link android.app.Activity} 的
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素。
+
+
+            </li>
+        </ol>
+        <p>
+            最後的 XML 看起來會如下所示：
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        根據啟動
+{@link android.app.Activity} 的 {@link android.content.Intent} 建立返回堆疊：
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                建立 {@link android.content.Intent} 以啟動 {@link android.app.Activity}。
+            </li>
+            <li>
+                呼叫 {@link android.app.TaskStackBuilder#create
+TaskStackBuilder.create()} 來建立堆疊建立器。
+            </li>
+            <li>
+                呼叫
+{@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()} 將返回堆疊新增至堆疊建立器。
+                對於您在宣示說明中所定義階層中的每個 {@link android.app.Activity}
+而言，返回堆疊包含會啟動
+{@link android.app.Activity} 的 {@link android.content.Intent} 物件。此方法也會新增以全新工作啟動堆疊的旗標。
+
+                <p class="note">
+                    <strong>注意：</strong>雖然
+{@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}的引數是參考啟動的 {@link android.app.Activity}，但呼叫的方法不會新增會啟動
+{@link android.app.Activity} 的
+{@link android.content.Intent}，
+這項工作是在下個步驟中完成。
+                </p>
+            </li>
+            <li>
+                呼叫
+{@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()} 來新增會從通知啟動 {@link android.app.Activity} 的 {@link android.content.Intent}。
+
+                將您在第一個步驟中建立的 {@link android.content.Intent} 當成
+{@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()} 的引數傳送。
+
+            </li>
+            <li>
+                如有必要，呼叫
+{@link android.support.v4.app.TaskStackBuilder#editIntentAt
+TaskStackBuilder.editIntentAt()} 在堆疊上將引數新增至 {@link android.content.Intent} 物件。當使用者使用以下方式導覽時，有必要確保目標
+{@link android.app.Activity} 可顯示有意義的資料：
+ <i>返回</i>。
+            </li>
+            <li>
+                呼叫
+{@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()} 來取得 {@link android.app.PendingIntent} 以用於此返回堆疊。
+                接著，您可以使用這個 {@link android.app.PendingIntent} 當成
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()} 的引數。
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    以下程式碼片段會示範程序：
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">設定特殊 Activity PendingIntent</h3>
+<p>
+    下一節說明如何設定特殊 Activity
+{@link android.app.PendingIntent}。
+</p>
+<p>
+    特殊 {@link android.app.Activity} 不需要返回堆疊，因此您不必在宣示說明中定義其
+{@link android.app.Activity} 階層，也不用呼叫
+{@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()}來建置返回堆疊。
+
+而是使用宣示說明設定 {@link android.app.Activity} 工作選項，並呼叫
+{@link android.app.PendingIntent#getActivity getActivity()} 來建立 {@link android.app.PendingIntent}：
+
+</p>
+<ol>
+    <li>
+        在您的宣示說明中，將下列屬性新增至 {@link android.app.Activity} 的
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素
+
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                Activity 的完整類別名稱。
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                結合您在程式碼中設定的
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK} 旗標，可確保此 {@link android.app.Activity} 不會前往應用程式的預設工作。
+
+具有應用程式預設親和性的任何現有工作均不受影響。
+
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                從 [近期記錄] 中排除新的工作，<i></i>，避免使用者意外返回瀏覽。
+
+            </dd>
+        </dl>
+        <p>
+            以下程式碼片段顯示該元素：
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        建置並發出通知：
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                建立會啟動 {@link android.app.Activity} 的{@link android.content.Intent}。
+
+            </li>
+            <li>
+                使用旗標
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK} 與
+{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK} 呼叫
+{@link android.content.Intent#setFlags setFlags()} 來設定 {@link android.app.Activity} 以全新的空白工作啟動。
+
+            </li>
+            <li>
+                為 {@link android.content.Intent} 設定您需要的任何其他選項。
+            </li>
+            <li>
+                呼叫 {@link android.app.PendingIntent#getActivity getActivity()} 從{@link android.content.Intent} 中建立 {@link android.app.PendingIntent}。
+
+                接著，您可以使用這個 {@link android.app.PendingIntent} 當成
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()} 的引數。
+            </li>
+        </ol>
+    <p>
+        以下程式碼片段會示範程序：
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">在通知中顯示進度</h2>
+<p>
+    通知可包含動畫進度指示器，向使用者顯示進行中操作的狀態。
+如果您隨時可預估操作花費的時間以及完成程度，可以使用形式「明確」的指示器 (進度列)。
+
+如果您無法預估操作的時間長度，請使用形式「不明確」的指示器 (Activity 指示器)。
+
+</p>
+<p>
+    進度指示器是使用平台的
+{@link android.widget.ProgressBar} 類別實作來顯示。
+</p>
+<p>
+    從 Android 4.0 開始，只要呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} 即可在平台上使用進度指示器。對於先前的版本，您必須建立自己的自訂通知版面配置，當中還要包含 {@link android.widget.ProgressBar} 檢視。
+
+
+</p>
+<p>
+    下列各節說明如何使用
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} 在通知中顯示進度。
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">顯示時間長度固定的進度指示器</h3>
+<p>
+    如要顯示明確的進度列，請呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress
+setProgress(max, progress, false)} 將該列新增至您的通知，然後發出通知。隨著您的操作進行，
+<code>progress</code> 會增加並更新通知。操作結束時，
+<code>progress</code> 應該等於 <code>max</code>。呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} 的常見方法是將 <code>max</code> 設定為 100，然後新增 <code>progress</code> 做為操作的「完成百分比」值。
+
+
+</p>
+<p>
+    當操作完成時，您可以繼續顯示進度列或將其移除。不論是任何一種情況，都務必更新通知文字來指出操作已完成。
+
+    如要移除進度列，請呼叫 
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress
+setProgress(0, 0, false)}。例如：
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">顯示持續性 Activity 指示器</h3>
+<p>
+    如要顯示不明確的 Activity 指示器，可利用
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}(可忽略前兩個引數) 將這類指示器新增至通知，然後發出通知。
+結果是指示器會有和進度列相同的樣式，只不過其中的動畫會持續播放。
+
+</p>
+<p>
+    在操作一開始發出通知。動畫會持續播放，直到您修改通知為止。
+操作完成時，可呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)}，然後更新通知以移除 Activity 指示器。
+
+    請務必這樣做，不然即使操作完成後，動畫還是會繼續播放。此外，請務必變更通知文字來指出操作已完成。
+
+</p>
+<p>
+    如要查看 Activity 指示器如何運作，請參考上方的程式碼片段。找出下列幾行程式碼：
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    用下列幾行取代您找到的程式碼：
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">通知中繼資料</h2>
+
+<p>通知會按照您以下列
+{@link android.support.v4.app.NotificationCompat.Builder} 方法指派的中繼資料加以排序：</p>
+
+<ul>
+    <li>當裝置處於「優先順序」模式時 (例如，如果您的通知代表來電、即時訊息或鬧鐘)，{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()} 會指示系統如何處理您的應用程式通知。
+
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} 會將具有優先順序欄位的通知設定為 {@code PRIORITY_MAX} 或 {@code PRIORITY_HIGH}，而如果通知也有聲音或振動，就會以小型浮動視窗顯示。
+
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()} 可讓您將人員名單新增至通知。
+您的應用程式可用這種方式通知系統，應該將來自指定人員的通知歸在同一組，或是將較重要人員發出的通知排序。
+
+</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>圖 3.</strong>顯示抬頭通知的全螢幕 Activity
+  </p>
+</div>
+
+<h2 id="Heads-up">抬頭通知</h2>
+
+<p>針對 Android 5.0 (API 級別 21)，當裝置處於使用中 (也就是裝置已解鎖且螢幕處於開啟) 時，通知能以小型浮動視窗顯示 (也稱為「抬頭」<em></em>通知)。
+
+這些通知類似於精簡版的通知，只不過抬頭通知也會顯示動作按鈕。
+
+使用者不需要離開目前的應用程式，就可以執行動作或關閉抬頭通知。
+</p>
+
+<p>可能觸發抬頭通知的範例情況包括：</p>
+
+<ul>
+  <li>使用者的 Activity 處於全螢幕模式 (應用程式使用
+{@link android.app.Notification#fullScreenIntent})；或者</li>
+  <li>通知擁有高優先順序，並使用鈴聲或振動
+</li>
+</ul>
+
+<h2 id="lockscreenNotification">鎖定螢幕通知</h2>
+
+<p>隨著 Android 5.0 (API 級別 21) 版發行，通知現在可以顯示在鎖定螢幕上。
+您的應用程式可使用此功能，提供媒體播放控制項和其他常見動作。
+使用者可以選擇是否透過 [設定] 在鎖定螢幕上顯示通知，您還可以指定是否能在鎖定螢幕上看見來自您應用程式的通知。
+</p>
+
+<h3 id="visibility">設定可見度</h3>
+
+<p>您的應用程式可控制安全鎖定螢幕上所顯示通知的詳細資料可見程度。
+您可以呼叫 {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}，然後指定下列其中一個值：
+</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}：顯示通知的完整內容。
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET}：不在鎖定螢幕上顯示此通知的任何部分。
+</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE}：顯示基本資訊，例如通知的圖示與內容標題，但隱藏通知的完整內容。
+</li>
+</ul>
+
+<p>已設定 {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} 時，您還可提供可隱藏特定詳細資料的通知內容替代版本。
+例如，SMS 應用程式可能會顯示「您有 3 則簡訊」<em></em>，但隱藏訊息內容與寄件者。
+
+如要提供此替代通知，可先使用 {@link android.support.v4.app.NotificationCompat.Builder} 來建立替代通知。
+建立私人通知物件時，透過 {@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()} 方法附加上替代通知。
+
+
+</p>
+
+<h3 id="controllingMedia">在鎖定螢幕上控制媒體播放</h3>
+
+<p>在 Android 5.0 (API 級別 21) 中，鎖定螢幕不會再依據 {@link android.media.RemoteControlClient} (現已淘汰) 顯示媒體控制項。
+利用 {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()} 方法使用 {@link android.app.Notification.MediaStyle} 範本，將動作轉換成可點擊的圖示。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>支援程式庫不包含範本與 {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()} 方法，因此這些功能只能在 Android 5.0 以上版本中執行。
+
+</p>
+
+<p>如要在 Android 5.0 的鎖定螢幕上顯示媒體播放控制項，請將可見度設定為 {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}，如上所述。
+接著，新增動作並設定 {@link android.app.Notification.MediaStyle} 範本，如以下程式碼範例所示：
+
+</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>注意：</strong>進一步實作控制媒體的 {@link android.media.RemoteControlClient} 已失效。
+如要進一步瞭解管理媒體工作階段與控制播放的新 API，請參閱<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">媒體播放控制項</a>。
+
+</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">自訂通知版面配置</h2>
+<p>
+    通知架構可讓您定義自訂通知版面配置，藉此定義 {@link android.widget.RemoteViews} 物件中的通知外觀。
+
+    自訂配置通知類似於一般通知，只不過這類通知是以 XML 版面配置檔案中定義的 {@link android.widget.RemoteViews} 為基礎。
+
+</p>
+<p>
+    自訂通知版面配置的可用高度取決於通知檢視。一般檢視的版面配置以 64 dp 為限，而擴充檢視的版面配置以 256 dp 為限。
+
+</p>
+<p>
+    如要定義自訂通知版面配置，請從具現化可擴大 XML 配置檔案的 
+{@link android.widget.RemoteViews} 物件著手。接著，改為呼叫 {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}，而不是呼叫像是 {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()} 的方法。
+
+
+如要設定自訂通知中的內容詳細資料，可使用 {@link android.widget.RemoteViews} 中的方法來設定檢視下層物件的值：
+
+
+</p>
+<ol>
+    <li>
+        以個別檔案建立通知的 XML 版面配置。您可以使用任何檔案名稱，但副檔名必須為 <code>.xml</code>。
+
+    </li>
+    <li>
+        在您的應用程式中，使用 {@link android.widget.RemoteViews} 方法來定義通知的圖示與文字。
+藉由呼叫 {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()} 將這個 {@link android.widget.RemoteViews} 物件放入您的 {@link android.support.v4.app.NotificationCompat.Builder}。
+
+避免在您的 {@link android.widget.RemoteViews} 物件上設定背景 {@link android.graphics.drawable.Drawable}，這是因為這樣做可能會使您的文字色彩變得無法閱讀。
+
+
+    </li>
+</ol>
+<p>
+    {@link android.widget.RemoteViews} 類別還包含您可用來將 {@link android.widget.Chronometer} 或 {@link android.widget.ProgressBar} 輕鬆新增至通知版面配置的方法。
+
+如要進一步瞭解如何為您的通知建立自訂版面配置，請參閱 {@link android.widget.RemoteViews} 參考文件。
+
+</p>
+<p class="caution">
+    <strong>注意：</strong>當您使用自訂通知版面配置時，請特別注意，確保您的自訂版面配置適用於不同的裝置方向或解析度。
+雖然此建議適用於所有檢視版面配置，但對於通知而言特別重要，原因是通知匣的空間十分有限。
+
+不要建立過於複雜的自訂版面配置，而且一定要在不同的設定中加以測試。
+
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>針對自訂通知文字使用樣式資源</h4>
+<p>
+    自訂通知文字一律使用樣式資源。在不同的裝置與版本間可能會有不同的通知背景色彩，因此使用樣式資源可協助您將這點列入考量。
+
+從 Android 2.3 開始，系統已定義了標準通知版面配置資料的樣式。
+如果您在適用於 Android 2.3 以上版本的應用程式中使用相同的樣式，將可確保能在顯示背景上看見您的文字。
+
+</p>

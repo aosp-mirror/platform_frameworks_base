@@ -1,0 +1,70 @@
+page.title=Compatibilidad con versiones anteriores
+page.tags="support"
+page.metaDescription=Notas sobre cómo Android 4.x adapta la IU diseñada para versiones de hardware y de SO anteriores.
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>Documentos para desarrolladores</h3>
+    <p>Compatible con diferentes dispositivos</p>
+  </div>
+</a>
+
+<p>Estos son algunos de los cambios importantes en Android 3.0:</p>
+<ul>
+<li>Se dejan de usar las teclas físicas de menú (Atrás, Menú, Búsqueda, Inicio) en favor de la navegación
+mediante controles virtuales (Back, Home, Recents).</li>
+<li>Patrón sólido para el uso de menús en las barras de acción.</li>
+</ul>
+<p>Android 4.0 incorpora estos cambios para tablets en la plataforma del teléfono.</p>
+
+<h2 id="older-hardware">Adaptar Android 4.0 a hardware y aplicaciones anteriores</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Teléfonos con controles de navegación virtuales</h4>
+<p>Las aplicaciones de Android escritas para Android 3.0 y versiones posteriores muestran acciones en la barra de acciones. Las acciones que no
+caben en la barra de acciones o que no son lo suficientemente importantes para que se las muestre en el nivel superior aparecen en la
+ampliación de acciones (action overflow).</p>
+<p>Los usuarios acceden a la ampliación de acciones (action overflow) tocando la barra de acciones.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Teléfonos con teclas de navegación físicas</h4>
+<p>Los teléfonos con Android que tienen teclas físicas de navegación no muestran la barra de navegación virtual en
+la parte inferior de la pantalla. En cambio, la ampliación de acciones (action overflow) está disponible desde la tecla física de menú. La
+ventana emergente con acciones que se muestra tiene el mismo estilo que la del ejemplo anterior, pero aparece en la parte inferior de la pantalla.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Aplicaciones heredadas en teléfonos con controles de navegación virtuales</h4>
+<p>Cuando se ejecuta una aplicación que fue generada para Android 2.3 o versiones anteriores en un teléfono con controles de
+navegación virtuales, aparece un control de ampliación de acciones (action overflow) a la derecha de la barra de navegación virtual. Se
+puede tocar el control para ver las acciones de la aplicación con el estilo del menú tradicional de Android.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

@@ -6,238 +6,182 @@ parent.link=index.html
 <div id="qv-wrapper">
   <div id="qv">
     <h2>In this document</h2>
-  <ol>
-    <li><a href="#buildProject">Building your Project in Android Studio</a>
       <ol>
-        <li><a href="#buildRelease">Build a release version</a> </li>
+        <li><a href="#run-configuration">Changing the run configuration</a> </li>
+        <li><a href="#changing-variant">Changing build variants</a></li>
+        <li><a href="#gradle-console">Monitoring the build process</a></li>
+        <li><a href="#generating-apks">Generating APKs</a></li>
       </ol>
-    </li>
-    <li><a href=id="RunningApp">Running your App</a>
+
+    <h2>See also</h2>
       <ol>
-        <li><a href="#RunConfig">Creating a Run Configuration</a></li>
-        <li><a href="#AutoAndManualTargetModes">Automatic and manual target modes</a></li>
-        <li><a href="#RunningOnEmulatorStudio">Running on an Emulator</a></li>
-        <li><a href="#RunningOnDeviceStudio">Running on a Device</a></li>
+        <li><a href="{@docRoot}sdk/installing/studio-build.html">
+          Build System</a></li>
+        <li><a href="{@docRoot}tools/devices/managing-avds.html">
+          Managing AVDs with AVD Manager</a></li>
+        <li><a href="{@docRoot}tools/devices/emulator.html">
+          Using the Android Emulator</a></li>
+        <li><a href="{@docRoot}tools/device.html">
+          Using Hardware Devices</a></li>
+        <li><a href="{@docRoot}tools/publishing/app-signing.html">
+          Signing Your Applications</a></li>
       </ol>
-    </li>
-  </ol>
-
-  <h2>See also</h2>
-  <ol>
-    <li><a href="{@docRoot}sdk/installing/studio-build.html">
-      Build System</a></li>
-    <li><a href="{@docRoot}tools/devices/managing-avds.html">
-      Managing AVDs with AVD Manager</a></li>
-    <li><a href="{@docRoot}tools/devices/emulator.html">
-      Using the Android Emulator</a></li>
-    <li><a href="{@docRoot}tools/publishing/app-signing.html">
-      Signing Your Applications</a></li>
-  </ol>
-
   </div>
 </div>
 
+<p>
+  By default, Android Studio sets up new projects to deploy to the Emulator or
+  a physical device with just a few clicks.
+</p>
 
-<p>This document shows you how to use Android Studio to build an application <code>.apk</code> for
-testing or release and how to run your application on an emulator or a real device.</p>
+<p>
+  To build and run your app, click <strong>Run 'app'</strong> <img src=
+  "{@docRoot}images/tools/as-run.png" alt="" style=
+  "vertical-align:bottom;margin:0;">. Android Studio builds your app with
+  Gradle, asks you to select a deployment target (an emulator or a connected
+  device), and then deploys your app to it. You can customize some of this
+  default behavior, such as selecting an automatic deployment target, by
+  <a href="#run-configuration">changing the run configuration</a>.
+</p>
 
+<p>
+  If you want to <a href="{@docRoot}tools/devices/emulator.html">use the Android
+  Emulator</a> to run your app, you need to have an Android Virtual Device
+  (AVD) ready. If you haven't already created one, then after you click
+  <strong>Run 'app'</strong>, click <strong>Create New Emulator</strong> in the
+  <strong>Select Deployment Target</strong> dialog. Follow the Virtual Device
+  Configuration wizard to define the type of device you want to emulate. For
+  more information, see <a href=
+  "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with the AVD
+  Manager</a>.
+</p>
 
-<h2 id="buildProject">Build your Project in Android Studio</h2>
+<p>
+  If you're using a physical Android device, you need to enable USB debugging
+  on the device. For more information, see <a href=
+  "{@docRoot}tools/device.html">Using Hardware Devices</a>.
+</p>
 
-<p>To build the project on Android Studio, click <strong>Build</strong> and select
-<strong>Make Project</strong>. The status bar at the bottom of the window shows the current
-progress of the build:</p>
+<p class="note">
+  <strong>Note:</strong> You can also deploy your app in debug mode by clicking
+  <strong>Debug 'app'</strong> <img src=
+  "{@docRoot}images/tools/as-debugbutton.png" alt="" style=
+  "vertical-align:bottom;margin:0;">. Running your app in debug mode
+  allows you to set breakpoints in your code, examine variables and evaluate
+  expressions at run time, and run debugging tools. To learn more, read about
+  <a href="{@docRoot}tools/debugging/debugging-studio.html">Debugging with
+  Android Studio</a>.
+</p>
 
-<p><code>Gradle: Executing tasks: [:app:assembleDebug, :lib:bundleDebug]</code></p>
+<h3 id="run-configuration">
+  Changing the run configuration
+</h3>
 
-<p>Click <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
-style="vertical-align:bottom;margin:0;"/> on the bottom
-right part of the window to show the <em>Gradle Console</em>, as shown in figure 1.</p>
+<p>
+  The run configuration specifies the module to run, package to deploy,
+  activity to start, target device, emulator settings, and Logcat options. The
+  default run configuration launches the default project activity and uses the
+  <strong>Device Chooser</strong> for target device selection. If the default
+  settings don't suit your project or module, you can customize the run
+  configuration, or even create a new one, at the project, default, and module
+  levels. To edit a run configuration:
+</p>
 
-<img src="{@docRoot}images/tools/studio-gradle-console.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The Gradle Console in Android Studio.</p>
+<ol>
+  <li>Select <strong>Run</strong> &gt; <strong>Edit Configurations</strong>.
+  </li>
 
-<p>The Gradle Console shows the build tasks and subtasks that the build system runs for
-Android Studio. If the build fails, you can find more details on the console. To hide the Gradle
-Console, click <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
-style="vertical-align:bottom;margin:0;"/> again.</p>
-
-<p class="note">If your project uses product flavors, Android Studio invokes the task for the
-selected build variant. For more information, see the
-<a href="{@docRoot}sdk/installing/studio-build.html">Build System</a> guide.</p>
-
-<p>To view the list of all available build tasks in Android Studio, click <strong>Gradle</strong>
-on the right side of the IDE window. The <em>Gradle tasks</em> panel appears.</p>
-
-
-<h3 id="buildRelease">Build a release version</h3>
-
-<p>You can now use the <strong>Build</strong> menu options to build the release version of your
-application for distribution. </p>
-
-<p>The build generates an APK for each build variant:
-the <code>app/build/apk/</code> directory contains packages named
-<code>app-&lt;flavor>-&lt;buildtype>.apk</code>; for example, <code>app-full-release.apk</code> and
-<code>app-demo-debug.apk</code>.</p>
-
-
-<p>For more build system information, see
-<a href="{@docRoot}sdk/installing/studio-build.html">Build System</a>.</p>
-
-
-  <h2 id="RunningApp">Running your app</h2>
-
-  <p>This section shows you how to run your application on an emulator or a real device
-   from Android Studio&mdash;all of which is done using the debug version of your application.
-   For more information about how to sign your application with a private key for release, see
-   <a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></p>
-
-
-  <h3 id="RunConfig">Creating a Run Configuration</h3>
-
-  <p>The run configuration specifies the module to run, package to deploy, Activity to start,
-  target device, emulator settings, and Logcat options. Run configuration can be set at the project,
-  default, and module levels. When you first run a module as an <em>Android Application</em>,
-  Android Studio will automatically create a run configuration. The default run
-  configuration will launch the default project Activity and use automatic target mode for device
-  selection (with no preferred AVD). If the default settings don't suit your project or module, you
-  can customize the run configuration or even create a new one.</p>
-
-  <p>To create or modify a run configuration, see the IntelliJ documentation on
-  <a href="https://www.jetbrains.com/idea/webhelp/run-debug-configuration-android-application.html">
-  Run/Debug configurations</a>.</p>
-
-  <p>The following steps highlight the important things you need to do for an Android project:</p>
-
-  <ol>
-    <li>Open <strong>Edit</strong> Configurations from the <strong>Run</strong> Menu.</li>
-
-    <li>Expand the <strong>Android Application</strong> item and create a new configuration or open
-    an existing one.</li>
-
-    <li>With the Run Configuration selected, adjust your desired run configuration settings:
-      <ul>
-      <li>In the General tab, specify the Module settings to launch. In Target tab, consider whether
-      you'd like to use Manual or Automatic mode when selecting an AVD to run your application. See
-      the following section on <a href="#AutoAndManualTargetModes">Automatic and manual target modes</a>).
+  <li>Expand the <strong>Android Application</strong> item and select an
+  existing run configuration.
+    <ul>
+      <li>To create a new run configuration, click the '<strong>+</strong>'
+      button in the top left corner of the dialog box and select
+      <strong>Android Application</strong>.
       </li>
-      <li>In the Emulator tab, specify any emulator options to the Additional Emulator Command Line
-      Options field. For example, you could add <code>-scale 96dpi</code> to scale the AVD's screen
-      to an accurate size, based on the dpi of your computer monitor. For a full list of emulator
-      options, see the <a href="{@docRoot}tools/help/emulator.html">Android
-      Emulator</a> document.</p>
-      </li>
-      <li>In the Logcat tab, set the LogCat options for the application.  </li>
-      </ul>
-    </li>
-  </ol>
+    </ul>
+  </li>
 
+  <li>With a run configuration selected, adjust your desired settings. For
+  example, in the <strong>General</strong> tab, you can specify the APK
+  installation settings, launch options, and deployment target options.
+  </li>
+</ol>
 
-  <h3 id="AutoAndManualTargetModes">Automatic and manual target modes</h3>
+<h3 id="changing-variant">
+  Changing the build variant
+</h3>
 
-  <p>By default, a run configuration uses the <strong>automatic</strong> target mode in order to
-  select an AVD. In this mode, Android Studio will select an AVD for the application in the following
-  manner:</p>
+<p>
+  By default, Android Studio builds the debug version of your app, which is
+  intended only for testing, when you click <strong>Run 'app'</strong>. You
+  need to build the release version when <a href=
+  "{@docRoot}tools/publishing/preparing.html">preparing your app for public
+  release</a>.
+</p>
+<p>
+  To change the build variant Android Studio uses, go to <strong>Build</strong>
+  &gt; <strong>Select Build Variant</strong> and select a different one from
+  the drop-down menu. By default, new projects are set up with a debug and
+  release build variant.
+</p>
 
-  <ol>
-    <li>If there's a device or emulator already running and its AVD configuration meets the
-    requirements of the application's build target, the application is installed and run upon
-    it.</li>
+<p>
+  Using <em>product flavors</em>, you can create additional build variants for
+  different versions of your app, each having different features or device
+  requirements. To learn more about build variants and product flavors, read
+  <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle
+  Builds</a>.
+</p>
 
-    <li>If there's more than one device or emulator running, each of which meets the requirements
-    of the build target, a device chooser is shown to let you select which device to use.</li>
+<h3 id="gradle-console">
+  Monitoring the build process
+</h3>
 
-    <li>If there are no devices or emulators running that meet the requirements of the build
-    target, Android Studio looks at the available AVDs. If there is an AVD that matches the build
-    target of the project, Android Studio chooses that AVD. If the AVD versions are newer than the
-    build target of the project, Android Studio chooses the oldest possible version of an AVD that
-    meets the project or module build target requirement.</li>
+<p>
+  You can view details about the build process by clicking <em>Gradle
+  Console</em> <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
+  style="vertical-align:bottom;margin:0;">. The console displays each
+  task that Gradle executes in order to build your app, as shown in figure 1.
+</p>
 
-    <li>If there are no suitable AVDs, the application is not installed and a console error warning
-    tells you that there is no existing AVD that meets the build target requirements.</li>
-  </ol>
+<img src="{@docRoot}images/tools/studio-gradle-console.png" alt="">
+<p class="img-caption">
+  <strong>Figure 1.</strong> The Gradle Console in Android Studio.
+</p>
 
-  <p>However, if a "preferred" AVD is selected in the run configuration, then the application will
-  <em>always</em> be deployed to that AVD. If it's not already running, then a new emulator will be
-  launched.</p>
+<p>
+  If your build variants use product flavors, Gradle also invokes tasks to
+  build those product flavors. To view the list of all available build tasks,
+  click <strong>Gradle</strong> <img src=
+  "{@docRoot}images/tools/as-gradle.png" alt="" style=
+  "vertical-align:bottom;margin:0;"> on the right side of the IDE
+  window.
+</p>
 
-  <p>If your run configuration uses <strong>manual</strong> mode, then the "device chooser" is
-  presented every time that your application is run, so that you can select which AVD to use.</p>
+<p>
+  If an error occurs during the build process, the <em>Messages</em> window
+  will appear to describe the issue.
+</p>
 
+<h3 id="generating-apks">
+  Generating APKs
+</h3>
 
+<p>
+  When you click <strong>Run 'app'</strong>, Android Studio generates a debug
+  APK and deploys it to your target device. Before you can generate a release
+  version of your app for public distribution, however, you must first learn
+  how to <a href="{@docRoot}tools/publishing/app-signing.html#studio">sign your
+  app</a>. You can then generate multiple signed APKs of your debug or release
+  build variants. To locate the generated APK files, click the link in the
+  pop-up dialog, as shown in figure 2.
+</p>
 
-  <h3 id="RunningOnEmulatorStudio">Running on the emulator</h3>
+<p>
+  <img src="{@docRoot}images/tools/as-find-apk.png" alt="">
+</p>
 
-  <p>Before you can run your application on the Android Emulator, you verify the default AVD or
- <a href="{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
-
-  <p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or
-  <strong>Run</strong> &gt; <strong>debug</strong>) from the Android Studio menu bar. Android Studio
-  automatically creates a default run configuration for the project. Android Studio will then perform
-  the following:</p>
-
-  <ol>
-    <li>Compile the project (if there have been changes since the last build).</li>
-
-    <li>Create a default run configuration (if one does not already exist for the project).</li>
-
-    <li>Install and start the application on an emulator (or device), based on the Deployment
-    Target defined by the run configuration.
-
-      <p>By default, Android run configurations use an "automatic target" mode for selecting a
-      device target. For information on how automatic target mode selects a deployment target, see
-      <a href="#AutoAndManualTargetModes">Automatic and manual target modes</a> above.</p>
-    </li>
-  </ol>
-
-  <p>If you run the application with <strong>Debug</strong>, the <em>Choose a Device</em> option
-  appears so you can select an attached device or emulator. Once the device or emulator is selected,
-  Android Studio opens the Debug console and starts the application's main activity. Otherwise, if
-  you run the application with the normal Run command, Android Studio installs the application on the
-  device and launches the main activity.</p>
-
-  <p>To set or change the run configuration used for your project or module, select
-  <strong>Run</strong> &gt; <strong>Edit Configurations</strong>. See the section below about
-  <a href="#RunConfig">Creating a Run Configuration</a> for more information.</p>
-
-  <p>Be certain to create multiple AVDs upon which to test your application. You should have one
-  AVD for each platform and screen type with which your application is compatible. For instance, if
-  your application compiles against the Android 4.0 (API Level 14) platform, you should create an
-  AVD for each platform equal to and greater than 4.0 and an AVD for each <a href=
-  "{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test your
-  application on each one.</p>
-
-  <h3 id="RunningOnDeviceStudio">Running on a device</h3>
-
-  <p>Before you can run your application on a device, you must perform some basic setup for your
-  device:</p>
-
-  <ul>
-    <li>Ensure that your application is debuggable by setting the
-    <code>android:debuggable</code> attribute of the <code>&lt;application&gt;</code>
-    element to <code>true</code> in the build.gradle file. </li>
-
-    <li>Enable <strong>USB debugging</strong> on your device.
-      <ul>
-        <li>On most devices running Android 3.2 or older, you can find the option under
-          <strong>Settings > Applications > Development</strong>.</li>
-        <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
-          <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
-          options</strong> is hidden by default. To make it available, go
-          to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
-          seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
-        </li>
-      </ul>
-    </li>
-
-    <li>Ensure that your development computer can detect your device when connected via USB</li>
-  </ul>
-
-  <p>Read <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>
-  for more information.</p>
-
-  <p>Once set up and your device is connected via USB, install your application on the device by
-  selecting <strong>Run</strong> &gt; <strong>Run</strong> (or <strong>Run</strong> &gt;
-  <strong>Debug</strong>) from the Android Studio menu bar.</p>
-
-
+<p class="img-caption">
+  <strong>Figure 2.</strong> Click the link to locate the generated APK
+  files.
+</p>

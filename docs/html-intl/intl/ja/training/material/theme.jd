@@ -1,0 +1,131 @@
+page.title=マテリアル テーマの使用
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#ColorPalette">カラーパレットをカスタマイズする</a></li>
+  <li><a href="#StatusBar">ステータスバーをカスタマイズする</a></li>
+  <li><a href="#Inheritance">テーマ個別のビュー</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>新しいマテリアル テーマでは、次のものが提供されます。</p>
+
+<ul>
+  <li>カラーパレットを設定できるシステム ウィジェット</li>
+  <li>システム ウィジェットのタッチ フィードバック アニメーション</li>
+  <li>アクティビティ遷移アニメーション</li>
+</ul>
+
+<p>マテリアル テーマの外観は、ブランド イメージにあわせて自分のカラーパレットでカスタマイズできます。
+<a href="#fig3">図 3</a> のように、アクションバーやステータスバーにテーマ属性で色を付けることができます。
+</p>
+
+<p>システム ウィジェットには、新しいデザインやタッチ フィードバックがあります。カラーパレット、タッチ フィードバック、アクティビティ遷移は、自分のアプリ向けにカスタマイズできます。
+</p>
+
+<p>マテリアル テーマは次のように定義されます。</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> （暗色バージョン）</li>
+  <li><code>@android:style/Theme.Material.Light</code> （明色バージョン）</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>使用できるマテリアル スタイルのリストについては、API リファレンスの
+{@link android.R.style R.style} をご覧ください。</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>図 1</strong> 暗い色のマテリアル テーマ</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>図 2</strong> 明るい色のマテリアル テーマ</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>注: </strong>マテリアル テーマは、Android 5.0（API レベル 21）以降でのみ使用できます。
+<a href="{@docRoot}tools/support-library/features.html#v7">v7 サポート ライブラリ</a>は、一部のウィジェットに対してマテリアル デザイン スタイルでテーマを提供し、カラーパレットのカスタマイズをサポートしています。
+
+詳細については、
+<a href="{@docRoot}training/material/compatibility.html">互換性の維持</a>をご覧ください。
+</p>
+
+
+<h2 id="ColorPalette">カラーパレットをカスタマイズする</h2>
+
+<p style="margin-bottom:30px">ブランド イメージに合うようにテーマの基本色をカスタマイズするには、次の例に示すようにマテリアル テーマから継承する場合、テーマ属性を使ってカスタムカラーを定義します。
+</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>図 3</strong> マテリアル テーマのカスタマイズ</p>
+</div>
+
+
+<h2 id="StatusBar">ステータスバーをカスタマイズする</h2>
+
+<p>マテリアル テーマを使うと、ステータスバーを簡単にカスタマイズできます。ブランド イメージに合わせて、またコントラストで白色のステータス アイコンを際立たせて色を設定できます。
+ステータスバーのカスタムカラーを設定するには、マテリアル テーマを拡張するときに <code>android:statusBarColor</code> 属性を使用します。
+
+デフォルトでは <code>android:statusBarColor</code> は <code>android:colorPrimaryDark</code> の値を継承します。
+</p>
+
+<p>また、ステータスバーの背景を描くこともできます。たとえば、白色のステータス アイコンが見にくくならないように薄い暗色のグラデーションを付けて、ステータスバーを写真の上に透過的に表示したい場合、
+
+<code>android:statusBarColor</code> 属性に
+<code>&#64;android:color/transparent</code> を指定してウィンドウ フラグを必要に応じて調整します。アニメーションやフェードには、{@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} メソッドも使用できます。
+
+</p>
+
+<p class="note">
+<strong>注: </strong>ステータスバーはメインのツールバーと明確に分かれている必要があります。ただし、背景に画面の端から端まで表示される鮮やかな画像やメディア コンテンツを使用したり、アイコンが見にくくならないようにグラデーションを使用する場合は例外です。
+
+
+</p>
+
+<p>ナビケーションとステータスバーをカスタマイズするときは、どちらも透過的にするか、ステータスバーだけを変更します。
+その他のケースではナビゲーション バーは黒色のままにする必要があります。</p>
+
+
+<h2 id="Inheritance">テーマ個別のビュー</h3>
+
+<p>XML レイアウト定義の各要素では、テーマのリソースを参照する <code>android:theme</code> 属性を指定できます。
+この属性は、要素や子要素のテーマを変更し、インターフェースの一定の割合を占めるテーマ カラーパレットを変更する場合に役立ちます。
+
+</p>

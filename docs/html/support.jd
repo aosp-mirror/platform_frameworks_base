@@ -1,8 +1,7 @@
-page.title=Developer Support
+page.title=Developer Support Resources
 page.type=about
 fullpage=1
-page.metaDescription=Resources available to help you report and resolve issues while you are developing apps for Android.
-page.image=/images/android-support-card.png
+page.metaDescription=Links to community and support resources for Android developers.
 
 @jd:body
 
@@ -42,8 +41,6 @@ page.image=/images/android-support-card.png
   <p>
     <a href="http://code.google.com/p/android/issues/entry?template=Developer%20Documentation">
       Report documentation bug</a><br />
-    <a href="https://code.google.com/p/android/issues/entry?template=User%20bug%20report">
-      Report device bug</a><br />
     <a href="https://code.google.com/p/android/issues/entry?template=Developer%20bug%20report">
       Report platform bug</a><br />
   </p>

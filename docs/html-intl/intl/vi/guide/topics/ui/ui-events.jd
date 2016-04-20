@@ -1,0 +1,291 @@
+page.title=Sự kiện Nhập liệu
+parent.title=Giao diện Người dùng
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#EventListeners">Đối tượng theo dõi Sự kiện</a></li>
+    <li><a href="#EventHandlers">Bộ xử lý Sự kiện</a></li>
+    <li><a href="#TouchMode">Chế độ Cảm ứng</a></li>
+    <li><a href="#HandlingFocus">Xử lý Tiêu điểm</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Trên Android, có nhiều cách để can thiệp vào các sự kiện từ tương tác của một người dùng với ứng dụng của bạn.
+Khi xem xét các sự kiện trong giao diện người dùng của bạn, cách tiếp cận là chụp lại sự kiện từ
+đối tượng Dạng xem cụ thể mà người dùng tương tác với. Lớp Dạng xem sẽ cung cấp phương thức để làm việc này.</p>
+
+<p>Trong các lớp Dạng xem khác nhau mà bạn sẽ sử dụng để soạn bố trí của mình, bạn có thể thấy một vài phương pháp gọi lại 
+công khai dường như hữu ích đối với sự kiện UI. Những phương pháp này được khuôn khổ Android gọi khi 
+xảy ra hành động tương ứng trên đối tượng đó. Ví dụ, khi một Dạng xem (chẳng hạn như một Nút) được chạm vào,
+phương pháp <code>onTouchEvent()</code> được gọi trên đối tượng đó. Tuy nhiên, để can thiệp vào điều này, bạn phải mở rộng
+lớp và khống chế phương pháp đó. Tuy nhiên, việc mở rộng mọi đối tượng Dạng xem
+để xử lý một sự kiện như vậy sẽ là không thực tế. Đây là lý do tại sao lớp Dạng xem cũng chứa
+một tập hợp giao diện lồng nhau cùng các phương pháp gọi lại mà bạn có thể định nghĩa dễ dàng hơn nhiều. Những giao diện này,
+được gọi là <a href="#EventListeners">đối tượng theo dõi sự kiện</a>, là tấm vé để bạn chụp lại tương tác giữa người dùng với UI của bạn.</p>
+
+<p>Trong khi các đối tượng theo dõi sự kiện sẽ thường được sử dụng để theo dõi tương tác của người dùng, có thể
+có lúc bạn muốn mở rộng một lớp Dạng xem để xây dựng một thành phần tùy chỉnh. 
+Có thể là bạn muốn mở rộng lớp {@link android.widget.Button}
+để khiến cái gì đó trông ấn tượng hơn. Trong trường hợp này, bạn sẽ có thể định nghĩa các hành vi sự kiện mặc định cho lớp
+của mình bằng cách sử dụng <a href="#EventHandlers">bộ xử lý sự kiện</a> của lớp.</p>
+
+
+<h2 id="EventListeners">Đối tượng theo dõi Sự kiện</h2>
+
+<p>Đối tượng theo dõi sự kiện là một giao diện trong lớp {@link android.view.View} chứa một phương pháp gọi lại 
+đơn lẻ. Những phương pháp này sẽ được khuôn khổ Android gọi khi Dạng xem mà đối tượng theo dõi đã
+được đăng ký với bị kích khởi bởi tương tác giữa người dùng với mục trong UI.</p>
+
+<p>Trong giao diện của đối tượng theo dõi sự kiện là những phương pháp gọi lại sau:</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>Từ {@link android.view.View.OnClickListener}. 
+    Phương pháp này được gọi khi người dùng chạm vào mục 
+    (khi ở chế độ cảm ứng), hoặc lấy tiêu điểm vào một mục bằng phím điều hướng hoặc bi xoay và
+    nhấn phím "enter" phù hợp hoặc nhấn bi xoay.</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>Từ {@link android.view.View.OnLongClickListener}. 
+    Phương pháp này được gọi khi người gọi chạm và giữ mục (khi ở chế độ cảm ứng), hoặc 
+    lấy tiêu điểm vào một mục bằng phím điều hướng hoặc bi xoay và
+    nhấn và giữ phím "enter" phù hợp hoặc nhấn và giữ bi xoay (trong một giây).</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>Từ {@link android.view.View.OnFocusChangeListener}. 
+    Phương pháp này được gọi khi người dùng điều hướng lên hoặc ra khỏi một mục bằng cách sử dụng các phím điều hướng hoặc bi xoay.</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>Từ {@link android.view.View.OnKeyListener}. 
+    Phương pháp này được gọi khi người dùng được lấy tiêu điểm vào một mục và nhấn hoặc nhả phím cứng trên thiết bị.</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>Từ {@link android.view.View.OnTouchListener}. 
+    Phương pháp này được gọi khi người dùng thực hiện một hành động được coi như một sự kiện chạm, bao gồm nhấn, nhả,
+    hoặc bất kỳ động tác chuyển động nào trên màn hình (trong đường biên của mục đó).</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>Từ {@link android.view.View.OnCreateContextMenuListener}. 
+    Phương pháp này được gọi khi một Menu Ngữ cảnh đang được xây dựng (kết quả của một sự kiện "nhấp giữ" kéo dài). Xem phần thảo luận về
+    menu ngữ cảnh trong hướng dẫn dành cho nhà phát triển <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menu</a>
+.</dd>
+</dl>
+
+<p>Những phương pháp này là phương pháp duy nhất nằm trong giao diện tương ứng của chúng. Để định nghĩa một trong những phương pháp này
+và xử lý sự kiện của bạn, hãy triển khai giao diện lồng nhau trong Hoạt động của bạn hoặc định nghĩa nó thành một lớp vô danh.
+Sau đó, chuyển một thực thể triển khai của bạn
+tới phương pháp <code>View.set...Listener()</code> tương ứng. (Ví dụ, gọi 
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code> 
+và chuyển cho nó triển khai {@link android.view.View.OnClickListener OnClickListener} của bạn.)</p>
+
+<p>Ví dụ bên dưới cho biết cách đăng ký một đối tượng theo dõi khi nhấp cho một Nút. </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>Bạn cũng có thể thấy tiện hơn khi triển khai OnClickListener như một phần trong Hoạt động của mình.
+Làm vậy sẽ tránh phải tải lớp bổ sung và phân bổ đối tượng. Ví dụ:</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>Lưu ý rằng phương pháp gọi lại <code>onClick()</code> trong ví dụ trên không có giá trị
+trả về, nhưng một số phương pháp đối tượng theo dõi sự kiện khác phải trả về một boolean. Lý do
+này phụ thuộc vào sự kiện. Với số ít sự kiện thực hiện như vậy, sau đây là lý do:</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> - 
+    Trả về một boolean cho biết bạn đã xử lý sự kiện và sự kiện không nên được tiếp tục hay không. 
+    Cụ thể, trả về <em>true</em> để cho biết rằng bạn đã xử lý sự kiện và nó nên dừng ở đây; 
+    trả về <em>false</em> nếu bạn chưa xử lý nó và/hoặc sự kiện sẽ tiếp tục đối với bất kỳ
+    đối tượng theo dõi khi nhấp nào khác.</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> - 
+    Trả về một boolean cho biết bạn đã xử lý sự kiện và sự kiện không nên được tiếp tục hay không.
+    Cụ thể, trả về <em>true</em> sẽ cho biết rằng bạn đã xử lý sự kiện và nó nên dừng ở đây; 
+    trả về <em>false</em> nếu bạn chưa xử lý nó và/hoặc sự kiện sẽ tiếp tục đối với bất kỳ
+    đối tượng theo dõi trên phím nào khác.</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> - 
+    Trả về một boolean cho biết đối tượng theo dõi của bạn có xử lý sự kiện này hay không. Điều quan trọng đó là
+    sự kiện này có thể có nhiều hành động nối tiếp nhau. Vì vậy, nếu bạn trả về <em>false</em> khi
+    nhận được sự kiện hành động hướng xuống, bạn sẽ cho biết rằng mình chưa xử lý sự kiện và cũng
+    không quan tâm tới các hành động sau đó từ sự kiện này. Vì thế, bạn sẽ không bị gọi vì bất kỳ hành động nào khác
+    trong sự kiện, chẳng hạn như một cử chỉ ngón tay, hay sự kiện hành động cho sự kiện hướng lên.</li>
+</ul>
+
+<p>Ghi nhớ rằng các sự kiện phím cứng luôn được chuyển tới Dạng xem đang được lấy tiêu điểm. Chúng được chuyển bắt đầu từ trên cùng
+của phân cấp Dạng xem, rồi xuống dưới, tới khi chúng đến đích phù hợp. Nếu Dạng xem của bạn (hoặc con của Dạng xem)
+hiện có tiêu điểm, khi đó bạn có thể thấy hành trình của sự kiện qua phương pháp <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code>. Một cách khác để chụp lại các sự kiện phím bấm thông qua Dạng xem của mình, bạn cũng có thể nhận
+tất cả sự kiện bên trong Hoạt động của mình bằng <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>
+và <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code>.</p>
+
+<p>Đồng thời, khi nghĩ tới nhập liệu văn bản cho ứng dụng của bạn, hãy nhớ rằng nhiều thiết bị chỉ có các phương pháp
+nhập liệu mềm. Những phương pháp như vậy không bắt buộc phải dựa trên phím bấm; một số có thể sử dụng nhập liệu bằng giọng nói, viết tay, v.v. Ngay cả khi
+một phương pháp nhập liệu trình bày một giao diện như bàn phím, nó sẽ thường <strong>không</strong> kích khởi họ sự kiện
+<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>. Bạn không nên
+xây dựng UI yêu cầu kiểm soát các thao tác nhấn phím cụ thể trừ khi muốn giới hạn ứng dụng của bạn ở một số thiết bị
+có bàn phím cứng. Cụ thể, không được dựa vào những phương pháp này để xác thực nhập liệu khi người dùng nhấn phím
+quay lại; thay vào đó, hãy sử dụng các hành động như {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} để báo hiệu với
+phương pháp nhập liệu bạn kỳ vọng ứng dụng của mình sẽ phản ứng như thế nào để nó có thể thay đổi UI của mình cho có nghĩa. Tránh các giả định
+về cách thức hoạt động của một phương pháp nhập liệu mềm và chỉ tin tưởng để nó cung cấp văn bản đã có định dạng cho ứng dụng của mình.</p>
+
+<p class="note"><strong>Lưu ý:</strong> Android sẽ gọi bộ xử lý sự kiện trước rồi mới tới bộ xử lý
+mặc định phù hợp từ định nghĩa lớp. Như thế, việc trả về <em>true</em> từ những đối tượng theo dõi sự kiện này sẽ dừng
+việc lan truyền sự kiện tới đối tượng theo dõi sự kiện khác và cũng sẽ chặn phương pháp gọi lại tới
+bộ xử lý sự kiện mặc định trong Dạng xem. Vì thế, hãy chắc chắn rằng bạn muốn chấm dứt sự kiện khi trả về <em>true</em>.</p>
+
+
+<h2 id="EventHandlers">Bộ xử lý Sự kiện</h2>
+
+<p>Nếu bạn đang xây dựng một thành phần tùy chỉnh từ Dạng xem, khi đó bạn sẽ có thể định nghĩa một vài phương pháp gọi lại
+được sử dụng như bộ xử lý sự kiện mặc định.
+Trong tài liệu về <a href="{@docRoot}guide/topics/ui/custom-components.html">Thành phần
+Tùy chỉnh</a>, bạn sẽ tìm hiểu về một số phương pháp gọi lại phổ biến được sử dụng để xử lý sự kiện,
+bao gồm:</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - Được gọi khi xảy ra một sự kiện phím bấm mới.</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - Được gọi khi xảy ra một sự kiện phím bấm hướng lên.</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - Được gọi khi xảy ra một sự kiện chuyển động bi xoay.</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - Được gọi khi xảy ra một sự kiện chuyển động màn hình cảm ứng.</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - Được gọi khi dạng xem có hoặc mất tiêu điểm.</li>
+</ul>
+<p>Có một số phương pháp khác mà bạn cần lưu ý, chúng không thuộc lớp Dạng xem, 
+nhưng có thể tác động trực tiếp tới cách bạn có thể xử lý sự kiện. Vì thế, khi quản lý các sự kiện phức tạp hơn bên trong 
+một bố trí, hãy xét những phương pháp khác sau:</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - Phương pháp này cho phép {@link 
+    android.app.Activity} của bạn can thiệp vào tất cả sự kiện chạm trước khi chúng được phân phối tới cửa sổ.</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - Phương pháp này cho phép một {@link
+    android.view.ViewGroup} xem sự kiện khi chúng được phân phối tới Dạng xem con.</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - Gọi phương pháp
+    này trên Dạng xem mẹ để cho biết rằng nó sẽ không can thiệp vào các sự kiện chạm bằng <code>{@link 
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code>.</li>
+</ul>
+
+<h2 id="TouchMode">Chế độ Cảm ứng</h2>
+<p>
+Khi một người dùng đang điều hướng trong một giao diện người dùng bằng phím hướng hoặc bi xoay, cần
+lấy tiêu điểm tới các mục có thể hành động (như nút) sao cho người dùng có thể thấy
+mục nào sẽ chấp nhận nhập liệu.  Tuy nhiên, nếu thiết bị có khả năng cảm ứng, và người dùng
+bắt đầu tương tác với giao diện bằng cách chạm vào nó, khi đó không còn cần
+tô sáng mục hay lấy tiêu điểm tới một Dạng xem cụ thể nữa.  Do đó, có một chế độ cho
+tương tác có tên là "chế độ cảm ứng." 
+</p>
+<p>
+Đối với thiết bị có khả năng cảm ứng, sau khi người dùng chạm vào màn hình, thiết bị
+sẽ vào chế độ cảm ứng.  Từ điểm này trở đi, chỉ những Dạng xem mà
+{@link android.view.View#isFocusableInTouchMode} là đúng mới có thể lấy tiêu điểm, chẳng hạn như chế độ xem các widget chỉnh sửa văn bản.
+Các Dạng xem chạm được, chẳng hạn như nút, sẽ không lấy được tiêu điểm khi chạm; chúng sẽ chỉ đơn giản
+khởi chạy đối tượng theo dõi khi nhấp của mình khi được nhấn.
+</p>
+<p>
+Bất cứ khi nào một người dùng nhấn phím hướng hoặc cuộn bằng bi xoay, thiết bị sẽ
+thoát chế độ cảm ứng, và tìm một dạng xem để lấy tiêu điểm. Lúc này, người dùng có thể tiếp tục tương tác
+với giao diện người dùng mà không chạm vào màn hình.
+</p>
+<p>
+Trạng thái chế độ cảm ứng sẽ được duy trì trên toàn bộ hệ thống (tất cả cửa sổ và hoạt động). 
+Để truy vấn trạng thái hiện tại, bạn có thể gọi
+{@link android.view.View#isInTouchMode} để xem liệu thiết bị có đang ở trong chế độ cảm ứng hay không.
+</p>
+
+
+<h2 id="HandlingFocus">Xử lý Tiêu điểm</h2>
+
+<p>Khuôn khổ sẽ xử lý chuyển động của tiêu điểm thường xuyên hồi đáp lại nhập liệu của người dùng.
+Việc này bao gồm thay đổi tiêu điểm khi Dạng xem bị loại bỏ hoặc ẩn đi, hoặc khi Dạng xem
+mới có sẵn. Dạng xem thể hiện sự sẵn sàng lấy tiêu điểm của chúng
+thông qua phương pháp <code>{@link android.view.View#isFocusable()}</code>. Để thay đổi việc liệu một Dạng xem có thể lấy
+tiêu điểm hay không, hãy gọi <code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code>.  Khi ở trong chế độ cảm ứng,
+bạn có thể truy vấn xem Dạng xem có cho phép lấy tiêu điểm bằng <code>{@link android.view.View#isFocusableInTouchMode()}</code> hay không.
+Bạn có thể thay đổi điều này bằng <code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code>.
+</p>
+
+<p>Chuyển động tiêu điểm được dựa trên một giải thuật tìm kiếm đối tượng gần nhất theo
+một hướng cho trước. Trong các trường hợp hiếm gặp, giải thuật mặc định có thể không khớp với
+hành vi theo ý định của nhà phát triển. Trong những tình huống này, bạn có thể cung cấp
+các khống chế rõ ràng với các thuộc tính XML sau trong tệp bố trí:
+<var>nextFocusDown</var>, <var>nextFocusLeft</var>, <var>nextFocusRight</var>, và
+<var>nextFocusUp</var>. Thêm một trong những thuộc tính này vào Dạng xem mà <em>từ</em> đó
+tiêu điểm đang rời khỏi. Định nghĩa giá trị của thuộc tính là id của Dạng xem
+<em>mà</em> cần được lấy tiêu điểm. Ví dụ:</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>Thông thưởng, trong bố trí thẳng đứng này, việc điều hướng lên từ Nút đầu tiên sẽ không
+đi tới đâu hết và việc điều hướng xuống từ Nút thứ hai cũng vậy. Giờ thì khi Nút trên cùng
+đã định nghĩa Nút dưới cùng là <var>nextFocusUp</var> (và ngược lại), tiêu điểm điều hướng sẽ 
+luân chuyển từ trên-xuống-dưới và dưới-lên-trên.</p>
+
+<p>Nếu bạn muốn khai báo một Dạng xem là có thể lấy tiêu điểm trong UI của mình (thông thường thì không), 
+hãy thêm thuộc tính XML <code>android:focusable</code> vào Dạng xem, trong khai báo bố trí của bạn.
+Đặt giá trị <var>true</var>. Bạn cũng có thể khai báo một Dạng xem
+là có thể lấy tiêu điểm trong khi ở Chế độ Cảm ứng bằng <code>android:focusableInTouchMode</code>.</p>
+<p>Để yêu cầu một Dạng xem cụ thể để lấy tiêu điểm, hãy gọi <code>{@link android.view.View#requestFocus()}</code>.</p>
+<p>Để theo dõi các sự kiện tiêu điểm (được thông báo khi một Dạng xem nhận được hoặc mất tiêu điểm), hãy sử dụng
+<code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code>,
+như được đề cập trong phần <a href="#EventListeners">Đối tượng theo dõi Sự kiện</a> bên trên.</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

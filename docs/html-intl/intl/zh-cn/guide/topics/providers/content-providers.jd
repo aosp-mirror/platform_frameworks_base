@@ -1,0 +1,108 @@
+page.title=内容提供程序
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>主题</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            内容提供程序基础知识</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            创建内容提供程序</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">日历提供程序</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">联系人提供程序</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>相关示例</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">
+            联系人管理器</a>应用
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        “游标（联系人）”
+        </a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        “游标（电话）”</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+            示例同步适配器</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    内容提供程序管理对结构化数据集的访问。它们封装数据，并提供用于定义数据安全性的机制。
+内容提供程序是连接一个进程中的数据与另一个进程中运行的代码的标准界面。
+
+</p>
+<p>
+    如果您想要访问内容提供程序中的数据，可以将应用的 {@link android.content.Context} 中的 {@link android.content.ContentResolver} 对象用作客户端来与提供程序通信。
+
+
+    {@link android.content.ContentResolver} 对象会与提供程序对象（即实现 {@link android.content.ContentProvider} 的类实例）通信。
+提供程序对象从客户端接收数据请求，执行请求的操作并返回结果。
+
+
+</p>
+<p>
+    如果您不打算与其他应用共享数据，则无需开发自己的提供程序。
+不过，您需要通过自己的提供程序在您自己的应用中提供自定义搜索建议。
+如果您想将复杂的数据或文件从您的应用复制并粘贴到其他应用中，也需要创建您自己的提供程序。
+
+</p>
+<p>
+    Android 本身包括的内容提供程序可管理音频、视频、图像和个人联系信息等数据。
+<code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code> 软件包参考文档中列出了部分提供程序。
+
+任何 Android 应用都可以访问这些提供程序，但会受到某些限制。
+
+</p><p>
+    以下主题对内容提供程序做了更详尽的描述：
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            内容提供程序基础知识</a></strong>
+    </dt>
+    <dd>
+        如何访问内容提供程序中以表形式组织的数据。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            创建内容提供程序</a></strong>
+    </dt>
+    <dd>
+        如何创建您自己的内容提供程序。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        日历提供程序</a></strong>
+    </dt>
+    <dd>
+        如何访问作为 Android 平台一部分的日历提供程序。
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        联系人提供程序</a></strong>
+    </dt>
+    <dd>
+        如何访问作为 Android 平台一部分的联系人提供程序。
+    </dd>
+</dl>

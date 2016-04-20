@@ -13,7 +13,7 @@ trainingnavtop=true
 Suppport</a></li>
   <li><a href="#abstraction">Add an Interface for Backward Compatibility</a></li>
   <li><a href="#newer">Implement the Interface on Android 4.1 and Higher</a></li>
-  <li><a href="#older">Implement the Interface on Android 2.3 up to Android
+  <li><a href="#older">Implement the Interface on Android 3.1 up to Android
 4.0</a></li>
   <li><a href="#using">Use the Version-Specific Implementations</a></li>
 </ol>
@@ -36,7 +36,7 @@ their controllers even when they switch or upgrade their Android devices.</p>
 
 <p>This lesson demonstrates how to use APIs available in Android 4.1 and higher
 in a backward compatible way, enabling your game to support the following
-features on devices running Android 2.3 and higher:</p>
+features on devices running Android 3.1 and higher:</p>
 <ul>
 <li>The game can detect if a new game controller is added, changed, or removed.</li>
 <li>The game can query the capabilities of a game controller.</li>
@@ -48,20 +48,20 @@ provided by the sample {@code ControllerSample.zip} available for download
 above. This sample shows how to implement the {@code InputManagerCompat}
 interface to support different versions of Android. To compile the sample, you
 must use Android 4.1 (API level 16) or higher. Once compiled, the sample app
-runs on any device running Android 2.3 (API level 9) or higher as the build
+runs on any device running Android 3.1 (API level 12) or higher as the build
 target.
 </p>
 
 <h2 id="prepare">Prepare to Abstract APIs for Game Controller Support</h2>
 <p>Suppose you want to be able to determine if a game controller's connection
-status has changed on devices running on Android 2.3 (API level 9). However,
+status has changed on devices running on Android 3.1 (API level 12). However,
 the APIs are only available in Android 4.1 (API level 16) and higher, so you
 need to provide an implementation that supports Android 4.1 and higher while
-providing a fallback mechanism that supports Android 2.3 up to Android 4.0.</p>
+providing a fallback mechanism that supports Android 3.1 up to Android 4.0.</p>
 
 <p>To help you determine which features require such a fallback mechanism for
     older versions, table 1 lists the differences in game controller support
-    between Android 2.3 (API level 9), 3.1 (API level 12), and 4.1 (API level
+    between Android 3.1 (API level 12) and 4.1 (API level
     16).</p>
 
 <p class="table-caption" id="game-controller-support-table">
@@ -74,7 +74,6 @@ different Android versions.
 <tr>
 <th>Controller Information</th>
 <th>Controller API</th>
-<th>API level 9</th>
 <th>API level 12</th>
 <th>API level 16</th>
 </tr>
@@ -83,34 +82,29 @@ different Android versions.
 <td rowspan="5">Device Identification</td>
 <td>{@link android.hardware.input.InputManager#getInputDeviceIds()}</td>
 <td style="text-align: center;"><big>&nbsp;</big></td>
-<td style="text-align: center;"><big>&nbsp;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>{@link android.hardware.input.InputManager#getInputDevice(int)
 getInputDevice()}</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&nbsp;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>{@link android.view.InputDevice#getVibrator()}</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&nbsp;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <td>{@link android.view.InputDevice#SOURCE_JOYSTICK}</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>{@link android.view.InputDevice#SOURCE_GAMEPAD}</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -119,20 +113,17 @@ getInputDevice()}</td>
 <td rowspan="3">Connection Status</td>
 <td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceAdded(int) onInputDeviceAdded()}</td>
 <td style="text-align: center;">&nbsp;</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceChanged(int) onInputDeviceChanged()}</td>
 <td style="text-align: center;">&nbsp;</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>{@link android.hardware.input.InputManager.InputDeviceListener#onInputDeviceRemoved(int) onInputDeviceRemoved()}</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -145,7 +136,6 @@ getInputDevice()}</td>
 {@link android.view.KeyEvent#KEYCODE_DPAD_LEFT},
 {@link android.view.KeyEvent#KEYCODE_DPAD_RIGHT},
 {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER})</td>
-<td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -162,7 +152,6 @@ getInputDevice()}</td>
 {@link android.view.KeyEvent#KEYCODE_BUTTON_L1 BUTTON_L1},
 {@link android.view.KeyEvent#KEYCODE_BUTTON_R2 BUTTON_R2},
 {@link android.view.KeyEvent#KEYCODE_BUTTON_L2 BUTTON_L2})</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -175,7 +164,6 @@ getInputDevice()}</td>
 {@link android.view.MotionEvent#AXIS_RZ},
 {@link android.view.MotionEvent#AXIS_HAT_X},
 {@link android.view.MotionEvent#AXIS_HAT_Y})</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -184,7 +172,6 @@ getInputDevice()}</td>
 <td>Analog trigger press (
 {@link android.view.MotionEvent#AXIS_LTRIGGER},
 {@link android.view.MotionEvent#AXIS_RTRIGGER})</td>
-<td style="text-align: center;">&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
@@ -200,7 +187,7 @@ the game controller features required by your game.</li>
 <li>Create a proxy implementation of your interface that uses APIs in Android
 4.1 and higher.</li>
 <li>Create a custom implementation of your interface that uses APIs available
-between Android 2.3 up to Android 4.0.</li>
+between Android 3.1 up to Android 4.0.</li>
 <li>Create the logic for switching between these implementations at runtime,
 and begin using the interface in your game.</li>
 </ol>
@@ -284,8 +271,9 @@ removed.</dd>
 across different platform versions. If your game is running on Android 4.1 or
 higher and calls an {@code InputManagerCompat} method, the proxy implementation
 calls the equivalent method in {@link android.hardware.input.InputManager}.
-However, if your game is running on Android 2.3 up to Android 4.0, the custom implementation processes calls to {@code InputManagerCompat} methods by using
-only APIs introduced no later than Android 2.3. Regardless of which
+However, if your game is running on Android 3.1 up to Android 4.0, the custom implementation
+processes calls to {@code InputManagerCompat} methods by using
+only APIs introduced no later than Android 3.1. Regardless of which
 version-specific implementation is used at runtime, the implementation passes
 the call results back transparently to the game.</p>
 
@@ -377,11 +365,10 @@ public class InputManagerV16 implements InputManagerCompat {
 }
 </pre>
 
-<h2 id="older">Implementing the Interface on Android 2.3 up to Android 4.0</h2>
+<h2 id="older">Implementing the Interface on Android 3.1 up to Android 4.0</h2>
 
-<p>The {@code InputManagerV9} implementation uses APIs introduced no later
-than Android 2.3. To create an implementation of {@code
-InputManagerCompat} that supports Android 2.3 up to Android 4.0, you can use
+<p>To create an implementation of {@code
+InputManagerCompat} that supports Android 3.1 up to Android 4.0, you can use
 the following objects:
 <ul>
 <li>A {@link android.util.SparseArray} of device IDs to track the
@@ -586,7 +573,7 @@ private static class DeviceEvent implements Runnable {
 
 <p>You now have two implementations of {@code InputManagerCompat}: one that
 works on devices running Android 4.1 and higher, and another
-that works on devices running Android 2.3 up to Android 4.0.</p>
+that works on devices running Android 3.1 up to Android 4.0.</p>
 
 <h2 id="using">Use the Version-Specific Implementation</h2>
 <p>The version-specific switching logic is implemented in a class that acts as
@@ -626,7 +613,7 @@ public class GameView extends View implements InputDeviceListener {
 onGenericMotionEvent()} method in your main view, as described in
 <a href="controller-input.html#analog">Handle a MotionEvent from a Game
 Controller</a>. Your game should now be able to process game controller events
-consistently on devices running Android 2.3 (API level 9) and higher.
+consistently on devices running Android 3.1 (API level 12) and higher.
 <p>
 <pre>
 &#64;Override

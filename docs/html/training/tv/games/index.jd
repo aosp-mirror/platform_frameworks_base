@@ -225,23 +225,19 @@ It includes a white controller on black background and a black controller on whi
 
 <p>
   Games controllers may not be available or active for users of a TV device. In order to properly
-  inform users that your game requires (or just supports) a game controller, you must include
-  entries in the app manifest. If your game requires a game controller, you must include the
-  following entry in your app manifest:
-</p>
-
-<pre>
-  &lt;uses-feature android:name="android.hardware.gamepad"/&gt;
-</pre>
-
-<p>
-  If your game uses, but does not require, a game controller, include the following feature
-  entry in your app manifest:
+  inform users that your game supports a game controller, you must include the following entry in
+  your app manifest:
 </p>
 
 <pre>
   &lt;uses-feature android:name="android.hardware.gamepad" android:required="false"/&gt;
 </pre>
+
+<p class="note">
+  <strong>Note:</strong> When specifying {@code android:hardware:gamepad} support, do not set the
+  {@code android:required} attribute to {@code "true"}. If you do this, users won’t be able to
+  install your app on TV devices.
+</p>
 
 <p>For more information about manifest entries, see
   <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">App Manifest</a>.

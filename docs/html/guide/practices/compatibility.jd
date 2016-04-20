@@ -74,14 +74,11 @@ users who install your app from Google Play Store are using an Android compatibl
 
 
 <p>However, you do need to consider whether your <b>app is compatible</b> with each potential
-device configuration. Because Android runs on a wide range of device configurations, some features are not
-available on all devices. For example, some devices may not include a
+device configuration. Because Android runs on a wide range of device configurations, some features
+are not available on all devices. For example, some devices may not include a
 compass sensor. If your app's core functionality requires the use
 of a compass sensor, then your app is compatible only with devices that
 include a compass sensor.</p>
-
-
-
 
 <h2 id="how">Controlling Your App's Availability to Devices</h2>
 
@@ -90,7 +87,6 @@ features are hardware-based (such as a compass sensor), some are software-based 
 widgets), and some are dependent on the platform version. Not every device supports every feature,
 so you may need to control your app's availability to devices based on your app's required
 features.</p>
-
 
 <p>To achieve the largest user-base possible for your app, you should strive to support as many
 device configurations as possible using a single APK. In most situations, you can do so by
@@ -107,7 +103,6 @@ Store based on the following device characteristics:</p>
   <li><a href="#Screens">Screen configuration</a>
 </ul>
 
-
 <h3 id="Features">Device features</h3>
 
 <p>In order for you to manage your app’s availability based on device features,
@@ -119,7 +114,7 @@ is {@link android.content.pm.PackageManager#FEATURE_APP_WIDGETS}.</p>
 
 <p>If necessary, you can prevent users from installing your app when their devices don't provide a
 given feature by declaring it with a <a href=
-"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
+"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
 element in your app's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest
 file</a>.</p>
 
@@ -127,11 +122,11 @@ file</a>.</p>
 you can declare the compass sensor as required with the following manifest tag:</p>
 
 <pre>
-&lt;manifest ... >
+&lt;manifest ... &gt;
     &lt;uses-feature android:name="android.hardware.sensor.compass"
-                  android:required="true" />
+                  android:required="true" /&gt;
     ...
-&lt;/manifest>
+&lt;/manifest&gt;
 </pre>
 
 <p>Google Play Store compares the features your app requires to the features available on
@@ -157,7 +152,7 @@ if (!pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS)) {
 </pre>
 
 <p>For information about all the filters you can
-use to control the availability of your app to users through Google Play Store, see the 
+use to control the availability of your app to users through Google Play Store, see the
 <a href="{@docRoot}google/play/filters.html">Filters on Google Play</a>
 document.</p>
 
@@ -169,16 +164,10 @@ android.content.pm.PackageManager#FEATURE_BLUETOOTH} device feature. You can dis
 on this feature and make your app available to devices without Bluetooth by setting the <a href=
 "{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a> attribute
 to {@code "false"} in the <a href=
-"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> tag.
+"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> tag.
 For more information about implicitly required device features, read <a href=
 "{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">Permissions that Imply
 Feature Requirements</a>.</p>
-
-
-
-
-
-
 
 <h3 id="Versions">Platform version</h3>
 
@@ -191,7 +180,9 @@ Android 1.0 is API level 1 and Android 4.4 is API level 19.</p>
 
 <p>The API level allows you to declare the minimum version with which your app is
 compatible, using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-<uses-sdk>}</a> manifest tag and its <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> attribute.</p>
+&lt;uses-sdk>}</a> manifest tag and its
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>
+attribute.</p>
 
 <p>For example, the <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar
 Provider</a> APIs were added in Android 4.0 (API level 14). If your app cannot function without
@@ -199,10 +190,10 @@ these APIs, you should declare API level 14 as your app's minimum supported
 version like this:</p>
 
 <pre>
-&lt;manifest ... >
-    &lt;uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
+&lt;manifest ... &gt;
+    &lt;uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" /&gt;
     ...
-&lt;/manifest>
+&lt;/manifest&gt;
 </pre>
 
 <p>The <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
@@ -212,7 +203,7 @@ targetSdkVersion}</a> attribute declares the highest version on which you've opt
 your app.</p>
 
 <p>Each successive version of Android provides compatibility for apps that were built using
-the APIs from previous platform versions, so your app should always be compitible with future
+the APIs from previous platform versions, so your app should always be compatible with future
 versions of Android while using the documented Android APIs.</p>
 
 <p class="note"><strong>Note:</strong>
@@ -241,17 +232,12 @@ codename constants in {@link android.os.Build.VERSION_CODES} that corresponds to
 API level you want to check. For example:</p>
 
 <pre>
-if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
     // Running on something older than API level 11, so disable
     // the drag/drop features that use {@link android.content.ClipboardManager} APIs
     disableDragAndDrop();
 }
 </pre>
-
-
-
-
-
 
 <h3 id="Screens">Screen configuration</h3>
 
@@ -279,13 +265,6 @@ and how to restrict your app to certain screen sizes when necessary, read <a
 href="{@docRoot}training/basics/supporting-devices/screens.html">Supporting Different Screens</a>.
 </p>
 
-
-
-
-
-
-
-
 <h2 id="filtering">Controlling Your App's Availability for Business Reasons</h2>
 
 <p>In addition to restricting your app's availability based on device characteristics,
@@ -300,11 +279,6 @@ availability for non-technical reasons such as the user's locale or wireless car
 is always based on information contained within your APK file. But
 filtering for non-technical reasons (such as geographic locale) is always
 handled in the Google Play developer console.</p>
-
-
-
-
-
 
 <div class="next-docs">
 <div class="col-6">

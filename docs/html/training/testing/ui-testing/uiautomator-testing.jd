@@ -61,41 +61,21 @@ test runner.
 </p>
 
 <h2 id="setup">Set Up UI Automator</h2>
-<p>Before you begin using UI Automator, you must:</p>
 
-  <ul>
-      <li>
-        <strong>Install the Android Testing Support Library</strong>. The UI Automator API is
-        located under the {@code com.android.support.test.uiautomator} package. These classes allow
-        you to create tests that use the Espresso testing framework. To learn how to install the
-        library, see <a href="{@docRoot}tools/testing-support-library/index.html#setup">
-        Testing Support Library Setup</a>.
-      </li>
+<p>Before building your UI test with UI Automator, make sure to configure your test source code
+location and project dependencies, as described in
+<a href="{@docRoot}training/testing/start/index.html#config-instrumented-tests">
+Getting Started with Testing</a>.</p>
 
-      <li>
-        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
-        the target app that you want to test is typically placed under the {@code app/src/main}
-        folder. The source code for instrumentation tests, including
-        your UI Automator tests, must be placed under the <code>app/src/androidTest</code> folder.
-        To learn more about setting up your project directory, see
-        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
-      </li>
+<p>In the {@code build.gradle} file of your Android app module, you must set a dependency
+  reference to the UI Automator library:</p>
 
-      <li>
-        <strong>Specify your Android testing dependencies</strong>. In order for the
-        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> to
-        correctly build and run your UI Automator tests, you must specify the following libraries in
-        the {@code build.gradle} file of your Android app module:
-
-        <pre>
+<pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
+    ...
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
 }
 </pre>
-      </li>
-  </ul>
 
 <p>To optimize your UI Automator testing, you should first inspect the target app’s UI components
 and ensure that they are accessible. These optimization tips are described in the next two
@@ -186,9 +166,21 @@ extend an existing container implementation
 
 <h2 id="build">Create a UI Automator Test Class</h2>
 
-<p>To build a UI Automator test, create a class that extends
-{@link android.test.InstrumentationTestCase}. Implement the following programming model in your
-UI Automator test class:</p>
+<p>
+Your UI Automator test class should be written the same way as a JUnit 4 test class. To learn more
+about creating JUnit 4 test classes and using JUnit 4 assertions and annotations, see
+<a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#build">
+Create an Instrumented Unit Test Class</a>.
+</p>
+<p>Add the {@code &#64;RunWith(AndroidJUnit4.class)} annotation at the beginning of your test class
+definition. You also need to specify the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class
+provided in the Android Testing Support Library as your default test runner. This step is described
+in more detail in <a href="#run">Run UI Automator Tests on a Device or Emulator</a>.
+</p>
+
+<p>Implement the following programming model in your UI Automator test class:</p>
 
 <ol>
 <li>Get a
@@ -241,24 +233,55 @@ the UI Automator API to select and interact with specific UI elements. </p>
 and simulate a Home button press:</p>
 
 <pre>
-import android.test.InstrumentationTestCase;
+import org.junit.Before;
+import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.Until;
+...
 
-public class CalculatorUiTest extends InstrumentationTestCase {
+&#64;RunWith(AndroidJUnit4.class)
+&#64;SdkSuppress(minSdkVersion = 18)
+public class ChangeTextBehaviorTest {
 
+    private static final String BASIC_SAMPLE_PACKAGE
+            = "com.example.android.testing.uiautomator.BasicSample";
+    private static final int LAUNCH_TIMEOUT = 5000;
+    private static final String STRING_TO_BE_TYPED = "UiAutomator";
     private UiDevice mDevice;
 
-    public void setUp() {
+    &#64;Before
+    public void startMainActivityFromHomeScreen() {
         // Initialize UiDevice instance
-        mDevice = UiDevice.getInstance(getInstrumentation());
+        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
         // Start from the home screen
         mDevice.pressHome();
-        mDevice.wait(Until.hasObject(By.pkg(getHomeScreenPackage()).depth(0)),
+
+        // Wait for launcher
+        final String launcherPackage = mDevice.getLauncherPackageName();
+        assertThat(launcherPackage, notNullValue());
+        mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)),
+                LAUNCH_TIMEOUT);
+
+        // Launch the app
+        Context context = InstrumentationRegistry.getContext();
+        final Intent intent = context.getPackageManager()
+                .getLaunchIntentForPackage(BASIC_SAMPLE_PACKAGE);
+        // Clear out any previous instances
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+
+        // Wait for the app to appear
+        mDevice.wait(Until.hasObject(By.pkg(BASIC_SAMPLE_PACKAGE).depth(0)),
+                LAUNCH_TIMEOUT);
     }
 }
 </pre>
+
+<p>In the example, the {@code &#64;SdkSuppress(minSdkVersion = 18)} statement helps to ensure that
+  tests will only run on devices with Android 4.3 (API level 18) or higher, as required by the
+  UI Automator framework.</p>
 
 <p>Use the
 <a href="{@docRoot}reference/android/support/test/uiautomator/UiDevice.html#findObject(android.support.test.uiautomator.UiSelector)">{@code findObject()}</a>
@@ -292,8 +315,7 @@ if(okButton.exists() &#38;&#38; okButton.isEnabled()) {
 <h4 id="specifying-selector">Specifying a selector</h4>
 <p>If you want to access a specific UI component in an app, use the
 <a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html">{@code UiSelector}</a>
-class. This class represents a query for specific elements in the
-currently displayed UI. </p>
+class. This class represents a query for specific elements in the currently displayed UI. </p>
 
 <p>If more than one matching element is found, the first matching element in the layout hierarchy
 is returned as the target
@@ -306,8 +328,8 @@ found, a
 {@code UiAutomatorObjectNotFoundException}</a> is thrown. </p>
 
 <p>You can use the
-<a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html#childSelector(android.support.test.uiautomator.UiSelector)">{@code childSelector()}</a>
-method to nest multiple
+<a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html#childSelector(android.support.test.uiautomator.UiSelector)">
+{@code childSelector()}</a> method to nest multiple
 <a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html">{@code UiSelector}</a>
 instances. For example, the following code example shows how your test might specify a search to
 find the first {@link android.widget.ListView} in the currently displayed UI, then search within that
@@ -489,33 +511,14 @@ public void testTwoPlusThreeEqualsFive() {
 </pre>
 
 <h2 id="run">Run UI Automator Tests on a Device or Emulator</h2>
-<p>UI Automator tests are based on the {@link android.app.Instrumentation} class. The
-<a href="https://developer.android.com/tools/building/plugin-for-gradle.html">
-  Android Plug-in for Gradle</a>
-provides a default directory ({@code src/androidTest/java}) for you to store the instrumented test
-classes and test suites that you want to run on a device. The plug-in compiles the test
-code in that directory and then executes the test app using a test runner class. You are
-strongly encouraged to use the
-<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
-class provided in the
-<a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
-as your default test runner. </p>
-
-<p>To run UI Automator tests in your Gradle project:</p>
-
-<ol>
-<li>Specify
-<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
-as the default test instrumentation runner in your {@code build.gradle} file:
-<pre>
-android {
-    defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-}</pre>
-</li>
-<li>Run your tests from the command-line by calling the {@code connectedCheck}
-  (or {@code cC}) task:
-<pre>./gradlew cC</pre>
-</li>
-</ol>
+<p>
+You can run UI Automator tests from <a href="{@docRoot}sdk/index.html">Android Studio</a> or
+from the command-line. Make sure to specify
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+  {@code AndroidJUnitRunner}</a> as the default instrumentation runner in your project.
+</p>
+<p>
+To run your UI Automator test, follow the steps for running instrumented tests
+described in <a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</a>.
+</p>

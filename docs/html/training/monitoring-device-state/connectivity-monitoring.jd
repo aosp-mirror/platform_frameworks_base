@@ -87,5 +87,5 @@ this broadcast only when you've previously suspended updates or downloads in ord
 It's generally sufficient to simply check for Internet connectivity before beginning an update and,
 should there be none, suspend further updates until connectivity is restored.</p>
 
-<p>This technique requires toggling broadcast receivers you've declard in the manifest, which is
+<p>This technique requires toggling broadcast receivers you've declared in the manifest, which is
 described in the next lesson.</p>

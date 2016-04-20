@@ -95,6 +95,11 @@
 
 
 
+
+
+
+
+
 <html>
 <head>
 
@@ -768,7 +773,7 @@ Summary:
 
   <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-direct" class="jd-expando-trigger closed"
           ><img id="subclasses-direct-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>Known Direct Subclasses
 
   <div id="subclasses-direct">
@@ -844,10 +849,9 @@ Summary:
  sleep until the watch face finishes drawing.
 
  <p>Registering watch faces in your application works similarly to registering wallpapers with
- several additional steps. First, watch faces require two permissions:
+ several additional steps. First, watch faces require the wake lock permission:
 
  <pre class="prettyprint">
- &lt;uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" /&gt;
  &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
  </pre>
 
@@ -964,7 +968,7 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_ALL">INTERRUPTION_FILTER_ALL</a></td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_ALARMS">INTERRUPTION_FILTER_ALARMS</a></td>
         <td class="jd-descrcol" width="100%">
           Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
  <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>.
@@ -977,7 +981,7 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_NONE">INTERRUPTION_FILTER_NONE</a></td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_ALL">INTERRUPTION_FILTER_ALL</a></td>
         <td class="jd-descrcol" width="100%">
           Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
  <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>.
@@ -990,7 +994,33 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_NONE">INTERRUPTION_FILTER_NONE</a></td>
+        <td class="jd-descrcol" width="100%">
+          Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
+ <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_PRIORITY">INTERRUPTION_FILTER_PRIORITY</a></td>
+        <td class="jd-descrcol" width="100%">
+          Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
+ <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#INTERRUPTION_FILTER_UNKNOWN">INTERRUPTION_FILTER_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
  <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>.
@@ -1083,7 +1113,7 @@ Summary:
 
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.service.wallpaper.WallpaperService" class="jd-expando-trigger closed"
           ><img id="inherited-constants-android.service.wallpaper.WallpaperService-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>From class
 android.service.wallpaper.WallpaperService
 <div id="inherited-constants-android.service.wallpaper.WallpaperService">
@@ -1131,7 +1161,7 @@ android.service.wallpaper.WallpaperService
 
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.app.Service" class="jd-expando-trigger closed"
           ><img id="inherited-constants-android.app.Service-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>From class
 android.app.Service
 <div id="inherited-constants-android.app.Service">
@@ -1241,7 +1271,7 @@ android.app.Service
 
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.content.Context" class="jd-expando-trigger closed"
           ><img id="inherited-constants-android.content.Context-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>From class
 android.content.Context
 <div id="inherited-constants-android.content.Context">
@@ -1483,7 +1513,7 @@ android.content.Context
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">CLIPBOARD_SERVICE</td>
+        <td class="jd-linkcol">CARRIER_CONFIG_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1494,6 +1524,18 @@ android.content.Context
     
     
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">CLIPBOARD_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONNECTIVITY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1505,7 +1547,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONSUMER_IR_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1517,7 +1559,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_IGNORE_SECURITY</td>
         <td class="jd-descrcol" width="100%">
@@ -1529,7 +1571,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_INCLUDE_CODE</td>
         <td class="jd-descrcol" width="100%">
@@ -1541,7 +1583,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_RESTRICTED</td>
         <td class="jd-descrcol" width="100%">
@@ -1553,7 +1595,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DEVICE_POLICY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1565,7 +1607,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DISPLAY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1577,7 +1619,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DOWNLOAD_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1589,9 +1631,21 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DROPBOX_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">FINGERPRINT_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1722,6 +1776,18 @@ android.content.Context
     
     
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">MIDI_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_APPEND</td>
         <td class="jd-descrcol" width="100%">
@@ -1733,7 +1799,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_ENABLE_WRITE_AHEAD_LOGGING</td>
         <td class="jd-descrcol" width="100%">
@@ -1745,7 +1811,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_MULTI_PROCESS</td>
         <td class="jd-descrcol" width="100%">
@@ -1757,7 +1823,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_PRIVATE</td>
         <td class="jd-descrcol" width="100%">
@@ -1769,7 +1835,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_READABLE</td>
         <td class="jd-descrcol" width="100%">
@@ -1781,9 +1847,21 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_WRITEABLE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">NETWORK_STATS_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -2083,7 +2161,7 @@ android.content.Context
 
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.content.ComponentCallbacks2" class="jd-expando-trigger closed"
           ><img id="inherited-constants-android.content.ComponentCallbacks2-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>From interface
 android.content.ComponentCallbacks2
 <div id="inherited-constants-android.content.ComponentCallbacks2">
@@ -2266,7 +2344,7 @@ android.content.ComponentCallbacks2
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.service.wallpaper.WallpaperService" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.service.wallpaper.WallpaperService-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -2372,7 +2450,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.app.Service" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.app.Service-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -2686,7 +2764,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.content.ContextWrapper" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.content.ContextWrapper-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -2824,7 +2902,7 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkUriPermission</span>(Uri arg0, int arg1, int arg2, int arg3)</nobr>
+        <span class="sympad">checkSelfPermission</span>(String arg0)</nobr>
         
   </td></tr>
 
@@ -2840,13 +2918,29 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkUriPermission</span>(Uri arg0, String arg1, String arg2, int arg3, int arg4, int arg5)</nobr>
+        <span class="sympad">checkUriPermission</span>(Uri arg0, int arg1, int arg2, int arg3)</nobr>
         
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">checkUriPermission</span>(Uri arg0, String arg1, String arg2, int arg3, int arg4, int arg5)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2862,7 +2956,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2878,7 +2972,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2894,7 +2988,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2910,7 +3004,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2926,7 +3020,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2942,7 +3036,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2958,7 +3052,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2974,7 +3068,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -2990,7 +3084,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3006,7 +3100,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3022,7 +3116,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3038,7 +3132,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3054,7 +3148,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3070,7 +3164,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3086,7 +3180,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3102,7 +3196,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3118,7 +3212,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3134,7 +3228,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3150,7 +3244,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3166,7 +3260,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3182,7 +3276,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3198,7 +3292,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3214,7 +3308,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3230,7 +3324,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3246,7 +3340,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3262,7 +3356,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3278,7 +3372,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3294,7 +3388,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3310,7 +3404,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3326,7 +3420,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3342,7 +3436,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3358,7 +3452,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3374,7 +3468,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3390,7 +3484,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3406,7 +3500,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3422,7 +3516,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3438,7 +3532,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3454,7 +3548,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3470,7 +3564,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3486,7 +3580,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3502,7 +3596,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3518,7 +3612,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -3529,6 +3623,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getSystemService</span>(String arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getSystemServiceName</span>(Class&lt;?&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -4200,7 +4310,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.content.Context" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.content.Context-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -4322,7 +4432,7 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkUriPermission</span>(Uri arg0, int arg1, int arg2, int arg3)</nobr>
+        <span class="sympad">checkSelfPermission</span>(String arg0)</nobr>
         
   </td></tr>
 
@@ -4338,13 +4448,29 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">checkUriPermission</span>(Uri arg0, String arg1, String arg2, int arg3, int arg4, int arg5)</nobr>
+        <span class="sympad">checkUriPermission</span>(Uri arg0, int arg1, int arg2, int arg3)</nobr>
         
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">checkUriPermission</span>(Uri arg0, String arg1, String arg2, int arg3, int arg4, int arg5)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4360,7 +4486,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4376,7 +4502,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4392,7 +4518,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4408,7 +4534,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4424,7 +4550,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4440,7 +4566,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4456,7 +4582,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4472,7 +4598,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4488,7 +4614,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4504,7 +4630,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4520,7 +4646,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4536,7 +4662,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4552,7 +4678,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4568,7 +4694,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4584,7 +4710,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4600,7 +4726,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4616,7 +4742,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4632,7 +4758,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4648,7 +4774,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4664,7 +4790,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4680,7 +4806,39 @@ From class
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getColor</span>(int arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            ColorStateList</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getColorStateList</span>(int arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4696,7 +4854,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4712,7 +4870,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4728,7 +4886,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4744,7 +4902,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4760,7 +4918,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4776,7 +4934,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4792,7 +4950,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4808,7 +4966,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4824,7 +4982,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4840,7 +4998,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4856,7 +5014,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4872,7 +5030,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4888,7 +5046,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4904,7 +5062,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4920,7 +5078,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4936,7 +5094,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4952,7 +5110,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4968,7 +5126,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4984,7 +5142,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5000,7 +5158,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5016,7 +5174,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5032,7 +5190,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5043,6 +5201,22 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getString</span>(int arg0, Object... arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            &lt;T&gt;
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getSystemService</span>(Class&lt;T&gt; arg0)</nobr>
         
   </td></tr>
 
@@ -5066,6 +5240,22 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getSystemServiceName</span>(Class&lt;?&gt; arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
             
             
             final
@@ -5080,7 +5270,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5096,7 +5286,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5112,7 +5302,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5128,7 +5318,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5144,7 +5334,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5160,7 +5350,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5176,7 +5366,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5192,7 +5382,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5208,7 +5398,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5224,7 +5414,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5240,7 +5430,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5256,7 +5446,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5272,7 +5462,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5288,7 +5478,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5304,7 +5494,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5320,7 +5510,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5336,7 +5526,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5352,7 +5542,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5368,7 +5558,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5384,7 +5574,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5400,7 +5590,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5416,7 +5606,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5432,7 +5622,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5448,7 +5638,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5464,7 +5654,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5480,7 +5670,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5496,7 +5686,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5512,7 +5702,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5528,7 +5718,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5544,7 +5734,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5560,7 +5750,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5576,7 +5766,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5592,7 +5782,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5608,7 +5798,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5624,7 +5814,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5640,7 +5830,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5656,7 +5846,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5672,7 +5862,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5688,7 +5878,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5704,7 +5894,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5720,7 +5910,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5736,7 +5926,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5752,7 +5942,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5768,7 +5958,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5784,7 +5974,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5800,7 +5990,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5816,7 +6006,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5842,7 +6032,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -6044,7 +6234,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.content.ComponentCallbacks2" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.content.ComponentCallbacks2-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 
@@ -6086,7 +6276,7 @@ From interface
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.content.ComponentCallbacks" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.content.ComponentCallbacks-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 
@@ -6165,6 +6355,50 @@ From interface
 <!-- ========= ENUM CONSTANTS DETAIL ======== -->
 <h2>Constants</h2>
 
+
+
+
+<A NAME="INTERRUPTION_FILTER_ALARMS"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        INTERRUPTION_FILTER_ALARMS
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
+ <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>. This value means that the user requested to
+ only be interrupted by alarms.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                4
+                (0x00000004)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
 
 
 
@@ -6291,6 +6525,50 @@ From interface
             
                 2
                 (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="INTERRUPTION_FILTER_UNKNOWN"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        INTERRUPTION_FILTER_UNKNOWN
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returned by <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter()</a></code> and passed to
+ <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged(int)</a></code>. This value means the interruption filter is
+ unavailable.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                0
+                (0x00000000)
             
         </span>
         </div>

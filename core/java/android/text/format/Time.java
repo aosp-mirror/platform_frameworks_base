@@ -331,7 +331,7 @@ public class Time {
      * @throws IllegalArgumentException if {@link #allDay} is true but {@code
      *             hour}, {@code minute}, and {@code second} are not 0.
      * @return a negative result if {@code a} is earlier, a positive result if
-     *         {@code a} is earlier, or 0 if they are equal.
+     *         {@code b} is earlier, or 0 if they are equal.
      */
     public static int compare(Time a, Time b) {
         if (a == null) {

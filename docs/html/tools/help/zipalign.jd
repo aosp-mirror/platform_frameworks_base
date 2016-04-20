@@ -16,12 +16,12 @@ when running the application.</p>
 
 <p>This tool should always be used to align your .apk file before 
 distributing it to end-users. The Android build tools can handle
-this for you. When using Eclipse with the ADT plugin, the Export Wizard
-will automatically zipalign your .apk after it signs it with your private key. 
+this for you. Android Studio automatically aligns your .apk after it signs it with your 
+private key. 
 The build scripts used
-when compiling your application with Ant will also zipalign your .apk,
+when compiling your application with Gradle also align your .apk,
 as long as you have provided the path to your keystore and the key alias in
-your project {@code ant.properties} file, so that the build tools 
+your project {@code gradle.properties} file, so that the build tools 
 can sign the package first.</p>
 
 <p class="caution"><strong>Caution:</strong> zipalign must only be performed

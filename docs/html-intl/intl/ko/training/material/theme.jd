@@ -1,0 +1,131 @@
+page.title=머티리얼 테마 사용
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#ColorPalette">색상표 사용자지정</a></li>
+  <li><a href="#StatusBar">상태 표시줄 사용자지정</a></li>
+  <li><a href="#Inheritance">개별 뷰의 테마 지정</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>새 머티리얼 테마는 다음과 같은 기능을 제공합니다.</p>
+
+<ul>
+  <li>색상표를 설정할 수 있는 시스템 위젯</li>
+  <li>시스템 위젯의 터치 피드백 애니메이션</li>
+  <li>액티비티 전환 애니메이션</li>
+</ul>
+
+<p>제어 중인 색상표로 브랜드 ID에 따라 머티리얼 테마의 모습을 사용자지정할 수 있습니다.
+ <a href="#fig3">그림 3</a>과 같이 테마 특성을 사용하여 작업 표시줄 및 상태 표시줄에 색조를 적용할 수 있습니다.
+</p>
+
+<p>시스템 위젯에는 새 디자인 및 터치 피드백 애니메이션이 있습니다. 앱에서 색상표, 터치 피드백 애니메이션, 액티비티 전환을 사용자지정할 수 있습니다.
+</p>
+
+<p>머티리얼 테마는 다음과 같이 정의됩니다.</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (어두운 버전)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (밝은 버전)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>사용가능한 머티리얼 스타일 목록은
+{@link android.R.style R.style}의 API 레퍼런스를 참조하세요.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>그림 1</strong>. 어두운 머티리얼 테마</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>그림 2</strong>. 밝은 머티리얼 테마</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>참고:</strong> 머티리얼 테마는 Android 5.0(API 레벨 21) 이상에서만 사용할 수 있습니다.
+ <a href="{@docRoot}tools/support-library/features.html#v7">v7 지원 라이브러리</a>
+는 일부 위젯에 머티리얼 디자인 스타일의 테마를 제공하고 색상표 사용자지정을 지원합니다.
+ 자세한 내용은
+<a href="{@docRoot}training/material/compatibility.html">호환성 유지</a>를 참조하세요.
+</p>
+
+
+<h2 id="ColorPalette">색상표 사용자지정</h2>
+
+<p style="margin-bottom:30px">테마의 기본 색상을 브랜드에 맞게 사용자지정하려면 머티리얼 테마에서 상속 시 테마 특성을 사용하여 사용자지정 색상을 정의합니다.
+</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>그림 3.</strong> 머티리얼 테마 사용자자정</p>
+</div>
+
+
+<h2 id="StatusBar">상태 표시줄 사용자지정</h2>
+
+<p>머티리얼 테마를 사용하면 손쉽게 상태 표시줄을 사용자지정할 수 있습니다. 따라서 브랜드에 맞는 색상을 지정하고 흰색 상태 아이콘이 보이도록 충분한 대비를 제공할 수 있습니다.
+ 상태 표시줄의 사용자지정 색상을 설정하려면 머티리얼 테마를 확장할 때 <code>android:statusBarColor</code> 특성을 사용합니다.
+
+ 기본적으로 <code>android:statusBarColor</code>는 <code>android:colorPrimaryDark</code>의 값을 상속합니다.
+</p>
+
+<p>직접 상태 표시줄 뒤에 그릴 수도 있습니다. 예를 들어 사진 위에 상태 표시줄이 투명하게 표시되도록 하려면, 희미하게 어두운 그라데이션으로 흰색 상태 아이콘이 보이게 합니다.
+
+ 그렇게 하려면 <code>android:statusBarColor</code> 특성을
+<code>&#64;android:color/transparent</code>로 설정하고 필요한 경우 창 플래그를 조정합니다. 또한 {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} 메서드를 사용하여 애니메이션 또는 페이드 효과를 줄 수도 있습니다.
+
+</p>
+
+<p class="note">
+<strong>참고:</strong> 상태 표시줄은 거의 언제나 기본 도구모음과 경계가 분명히 식별되어야 합니다. 단, 이러한 표시줄 뒤에 다채로운 가장자리 이미지 또는 미디어 콘텐츠를 표시하는 경우나 아이콘이 계속 보이도록 그라데이션을 사용하는 경우는 제외됩니다.
+
+
+</p>
+
+<p>탐색 표시줄과 상태 표시줄을 사용자지정하는 경우, 둘 다 투명하게 만들거나 상태 표시줄만 수정합니다.
+ 그 밖의 경우 탐색 표시줄은 항상 검은색을 유지해야 합니다.</p>
+
+
+<h2 id="Inheritance">개별 뷰의 테마 지정</h3>
+
+<p>XML 레이아웃 정의에 있는 요소는 테마 리소스를 참조하는 <code>android:theme</code> 특성을 지정할 수 있습니다.
+ 이 특성은 요소와 모든 하위 요소의 테마를 수정하며, 인터페이스의 특정 부분에서 테마 색상표를 바꿀 때 유용합니다.
+
+</p>

@@ -8,9 +8,6 @@ and manage Android Virtual Devices (AVDs), which are required by the
 
 <p>You can launch the AVD Manager in one of the following ways:</p>
 <ul>
-  <li>In Eclipse: select <strong>Window &gt; Android Virtual Device Manager</strong>, or click
-  the AVD Manager icon in the toolbar.</li>
-
   <li>In Android Studio: select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
   the AVD Manager icon in the toolbar.</li>
 

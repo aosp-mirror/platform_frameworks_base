@@ -13,6 +13,7 @@ trainingnavtop=true
     <li>Android 2.2 (API level 8) or higher</li>
     <li><a href="{@docRoot}tools/testing-support-library/index.html">
       Android Testing Support Library</a></li>
+    <li><a href="{@docRoot}tools/studio/index.html">Android Studio (latest version)</a>.</li>
   </ul>
 
   <h2>This lesson teaches you to</h2>
@@ -27,8 +28,10 @@ trainingnavtop=true
 
   <ul>
     <li>
-<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicUnitAndroidTest"
+<a href="https://github.com/googlesamples/android-testing/tree/master/unit/BasicUnitAndroidTest"
 class="external-link">Instrumented Unit Tests Code Samples</a></li>
+    <li><a href="https://www.code-labs.io/codelabs/android-studio-testing/index.html?index=..%2F..%2Findex#0"
+class="external-link">Unit and UI Testing in Android Studio (codelab)</a></li>
   </ul>
 </div>
 </div>
@@ -46,44 +49,10 @@ and supporting APIs, such as the Android Testing Support Library.
 </p>
 
 <h2 id="setup">Set Up Your Testing Environment</h2>
-<p>Before building instrumented unit tests, you must:</p>
-
-  <ul>
-      <li>
-        <strong>Install the Android Testing Support Library</strong>. The
-        <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
-        {@code AndroidJUnitRunner}</a> API, located under the
-        {@code com.android.support.test.runner} package, allows you to
-        create and run instrumented unit tests.  To learn how to install the
-        library, see <a href="{@docRoot}tools/testing-support-library/index.html#setup">
-        Testing Support Library Setup</a>.
-      </li>
-
-      <li>
-        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
-        the target app that you want to test is typically placed under the {@code app/src/main/java}
-        folder. The source code for instrumentatation tests, including your unit tests, must be
-        placed under the <code>app/src/androidTest/java</code> folder.
-        To learn more about setting up your project directory, see
-        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
-      </li>
-
-      <li>
-        <strong>Specify your Android testing dependencies</strong>. In order for the
-        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> to
-        correctly build and run your instrumented unit tests, you must specify the following
-        libraries in the {@code build.gradle} file of your Android app module:
-
-        <pre>
-dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
-    // Set this dependency if you want to use Hamcrest matching
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
-}
-</pre>
-      </li>
-  </ul>
+<p>Before building your instrumented unit test, make sure to configure your test source code
+location and project dependencies, as described in
+<a href="{@docRoot}training/testing/start/index.html#config-instrumented-tests">
+Getting Started with Testing</a>.</p>
 
 <h2 id="build">Create an Instrumented Unit Test Class</h2>
 <p>
@@ -91,13 +60,13 @@ Your instrumented unit test class should be written as a JUnit 4 test class. To 
 creating JUnit 4 test classes and using JUnit 4 assertions and annotations, see
 <a href="local-unit-tests.html#build">Create a Local Unit Test Class</a>.
 </p>
-<p>To create an instrumented JUnit 4 test class, add the {@code @RunWith(AndroidJUnit4.class)}
+<p>To create an instrumented JUnit 4 test class, add the {@code &#64;RunWith(AndroidJUnit4.class)}
 annotation at the beginning of your test class definition. You also need to specify the
 <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
 {@code AndroidJUnitRunner}</a> class
 provided in the Android Testing Support Library as your default test runner. This step is described
-in more detail in <a href="#run">Run Instrumented Unit Tests</a>.
-</p>
+in more detail in <a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</p>
 
 <p>The following example shows how you might write an instrumented unit test to test that
 the {@link android.os.Parcelable} interface is implemented correctly for the
@@ -114,6 +83,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 &#64;RunWith(AndroidJUnit4.class)
+&#64;SmallTest
 public class LogHistoryAndroidUnitTest {
 
     public static final String TEST_STRING = "This is a string";
@@ -168,8 +138,8 @@ To create a test suite for your unit tests, import the JUnit
 class="external-link">{@code RunWith}</a> and
 <a href="http://junit.sourceforge.net/javadoc/org/junit/runners/Suite.html"
 class="external-link">{@code Suite}</a> classes. In your test suite, add the
-{@code @RunWith(Suite.class)} and the {@code @Suite.SuitClasses()} annotations. In
-the {@code @Suite.SuiteClasses()} annotation, list the individual test classes or test
+{@code &#64;RunWith(Suite.class)} and the {@code &#64;Suite.SuitClasses()} annotations. In
+the {@code &#64;Suite.SuiteClasses()} annotation, list the individual test classes or test
 suites as arguments.
 </p>
 
@@ -194,57 +164,7 @@ public class UnitTestSuite {}
 
 <h2 id="run">Run Instrumented Unit Tests</h2>
 <p>
-The
-<a href="https://developer.android.com/tools/building/plugin-for-gradle.html">
-  Android Plug-in for Gradle</a>
-provides a default directory ({@code src/androidTest/java}) for you to store the instrumented unit
-and integration test classes and test suites that you want to run on a device. The plug-in compiles
-the test code in that directory and then executes the test app using a test runner class. You must
-set the
-<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
-{@code AndroidJUnitRunner}</a> class provided in the
-<a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
-as your default test runner.</p>
+To run your test, follow the steps for running instrumented tests
+described in <a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</a>.
 </p>
-
-<p>To specify
-<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
-{@code AndroidJUnitRunner}</a> as the default test instrumentation runner, add the following
-setting in your {@code build.gradle} file:</p>
-<pre>
-android {
-    defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-}
-</pre>
-
-<h3 id="run-from-Android-Studio">Running instrumented unit tests from Android Studio</h3>
-<p>
-To run instrumented unit tests in your Gradle project from Android Studio:
-</p>
-<ol>
-<li>Open the <strong>Build Variants</strong> window by clicking the left-hand tab, then set the
-test artifact to <em>Android Instrumentation Tests</em>.
-</li>
-<li>In the <strong>Project</strong> window, drill down to your unit test class or method, then
-  right-click and run it using the Android Test configuration.
-</li>
-</ol>
-
-<p>Android Studio displays the results of the unit test execution in the <strong>Run</strong>
-window.</p>
-
-<h3 id="run-from-commandline">Running instrumented unit tests from the command-line</h3>
-
-<p>To run instrumented unit tests in your Gradle project from the command-line, call the
-  {@code connectedCheck} (or {@code cC}) task:</p>
-
-<pre>
-./gradlew cC
-</pre>
-
-<p>You can find the generated HTML test result reports in the
-{@code <path_to_your_project>/app/build/outputs/reports/androidTests/connected/} directory,
-and the corresponding XML files in the
-{@code <path_to_your_project>/app/build/outputs/androidTest-results/connected/} directory.</p>
