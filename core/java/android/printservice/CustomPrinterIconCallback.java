@@ -27,7 +27,7 @@ import android.util.Log;
 /**
  * Callback for {@link PrinterDiscoverySession#onRequestCustomPrinterIcon}.
  */
-public class CustomPrinterIconCallback {
+public final class CustomPrinterIconCallback {
     /** The printer the call back is for */
     private final @NonNull PrinterId mPrinterId;
     private final @NonNull IPrintServiceClient mObserver;

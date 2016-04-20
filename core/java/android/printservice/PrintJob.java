@@ -347,18 +347,15 @@ public final class PrintJob {
      * <p />
      * This overrides any previously set status set via {@link #setStatus(CharSequence)},
      * {@link #setStatus(int)}, {@link #block(String)}, or {@link #fail(String)},
-     * <p />
-     * To clear the status use {@link #setStatus(CharSequence) <code>setStatus(null)</code>}
      *
-     * @param status  The new status as a String resource.
+     * @param statusResId The new status as a String resource. If 0 the status will be empty.
      */
     @MainThread
-    public void setStatus(@StringRes int status) {
+    public void setStatus(@StringRes int statusResId) {
         PrintService.throwIfNotCalledOnMainThread();
-        Preconditions.checkArgument(status != 0, "status has to be != 0");
 
         try {
-            mPrintServiceClient.setStatusRes(mCachedInfo.getId(), status,
+            mPrintServiceClient.setStatusRes(mCachedInfo.getId(), statusResId,
                     mContext.getPackageName());
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error setting status for job: " + mCachedInfo.getId(), re);
