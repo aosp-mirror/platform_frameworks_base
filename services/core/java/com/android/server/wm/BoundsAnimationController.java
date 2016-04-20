@@ -129,15 +129,19 @@ public class BoundsAnimationController {
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mReplacement=" + mReplacement);
+            // Ensure that we have prepared the target for animation before
+            // we trigger any size changes, so it can swap surfaces
+            // in to appropriate modes, or do as it wishes otherwise.
             if (!mReplacement) {
                 mTarget.onAnimationStart();
             }
 
-            // Ensure that we have prepared the target for animation before
-            // we trigger any size changes, so it can swap surfaces
-            // in to appropriate modes, or do as it wishes otherwise.
+            // Immediately update the task bounds if they have to become larger, but preserve
+            // the starting position so we don't jump at the beginning of the animation.
             if (animatingToLargerSize()) {
-                mTarget.setPinnedStackSize(mFrom, mTo);
+                mTmpRect.set(mFrom.left, mFrom.top,
+                        mFrom.left + mFrozenTaskWidth, mFrom.top + mFrozenTaskHeight);
+                mTarget.setPinnedStackSize(mFrom, mTmpRect);
             }
         }
 
