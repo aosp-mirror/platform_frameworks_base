@@ -1102,6 +1102,7 @@ final class Settings {
             if (installerPackageName != null
                     && installerPackageName.equals(packageName)) {
                 ps.setInstallerPackageName(null);
+                ps.isOrphaned = true;
             }
         }
         mInstallerPackages.remove(packageName);
@@ -2632,6 +2633,9 @@ final class Settings {
         if (pkg.installerPackageName != null) {
             serializer.attribute(null, "installer", pkg.installerPackageName);
         }
+        if (pkg.isOrphaned) {
+            serializer.attribute(null, "isOrphaned", "true");
+        }
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
@@ -3507,6 +3511,7 @@ final class Settings {
         String cpuAbiOverrideString = null;
         String systemStr = null;
         String installerPackageName = null;
+        String isOrphaned = null;
         String volumeUuid = null;
         String uidError = null;
         int pkgFlags = 0;
@@ -3548,6 +3553,7 @@ final class Settings {
                 }
             }
             installerPackageName = parser.getAttributeValue(null, "installer");
+            isOrphaned = parser.getAttributeValue(null, "isOrphaned");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
@@ -3698,6 +3704,7 @@ final class Settings {
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installerPackageName = installerPackageName;
+            packageSetting.isOrphaned = "true".equals(isOrphaned);
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
@@ -4098,6 +4105,14 @@ final class Settings {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
         return pkg.installerPackageName;
+    }
+
+    boolean isOrphaned(String packageName) {
+        final PackageSetting pkg = mPackages.get(packageName);
+        if (pkg == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkg.isOrphaned;
     }
 
     int getApplicationEnabledSettingLPr(String packageName, int userId) {

@@ -125,6 +125,8 @@ abstract class PackageSettingBase extends SettingBase {
 
     /** Package name of the app that installed this package */
     String installerPackageName;
+    /** Indicates if the package that installed this app has been uninstalled */
+    boolean isOrphaned;
     /** UUID of {@link VolumeInfo} hosting this app */
     String volumeUuid;
 
@@ -182,6 +184,7 @@ abstract class PackageSettingBase extends SettingBase {
         origPackage = base.origPackage;
 
         installerPackageName = base.installerPackageName;
+        isOrphaned = base.isOrphaned;
         volumeUuid = base.volumeUuid;
 
         keySetData = new PackageKeySetData(base.keySetData);
