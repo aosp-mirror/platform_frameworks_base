@@ -104,6 +104,11 @@ public final class Shared {
      */
     public static final String EXTRA_BENCHMARK = "com.android.documentsui.benchmark";
 
+    /**
+     * Maximum number of items in a Binder transaction packet.
+     */
+    public static final int MAX_DOCS_IN_INTENT = 1000;
+
     private static final Collator sCollator;
 
     static {
