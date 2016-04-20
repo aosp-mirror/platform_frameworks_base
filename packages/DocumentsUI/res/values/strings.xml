@@ -247,4 +247,9 @@
         <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> item?</item>
         <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> items?</item>
     </plurals>
+    <!-- Snackbar shown to users who wanted to select more than 1000 items (files or directories). -->
+    <string name="too_many_selected">Sorry, you can only select up to 1000 items at a time</string>
+    <!-- Snackbar shown to users who wanted to select all, but there were too many items (files or directories).
+         Only the first 1000 items are selected in such case. -->
+    <string name="too_many_in_select_all">Could only select 1000 items</string>
 </resources>

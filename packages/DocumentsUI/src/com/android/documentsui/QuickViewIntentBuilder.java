@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.MAX_DOCS_IN_INTENT;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.ClipData;
@@ -46,7 +47,6 @@ import java.util.List;
 final class QuickViewIntentBuilder {
 
     private static final String TAG = "QuickViewIntentBuilder";
-    private static final int MAX_CLIP_ITEMS = 1000;
 
     private final DocumentInfo mDocument;
     private final Model mModel;
@@ -165,11 +165,11 @@ final class QuickViewIntentBuilder {
         int firstSibling;
         int lastSibling;
         if (documentLocation < uris.size() / 2) {
-            firstSibling = Math.max(0, documentLocation - MAX_CLIP_ITEMS / 2);
-            lastSibling = Math.min(uris.size() - 1, firstSibling + MAX_CLIP_ITEMS - 1);
+            firstSibling = Math.max(0, documentLocation - MAX_DOCS_IN_INTENT / 2);
+            lastSibling = Math.min(uris.size() - 1, firstSibling + MAX_DOCS_IN_INTENT - 1);
         } else {
-            lastSibling = Math.min(uris.size() - 1, documentLocation + MAX_CLIP_ITEMS / 2);
-            firstSibling = Math.max(0, lastSibling - MAX_CLIP_ITEMS + 1);
+            lastSibling = Math.min(uris.size() - 1, documentLocation + MAX_DOCS_IN_INTENT / 2);
+            firstSibling = Math.max(0, lastSibling - MAX_DOCS_IN_INTENT + 1);
         }
 
         if (DEBUG) Log.d(TAG, "Copmuted siblings from index: " + firstSibling
