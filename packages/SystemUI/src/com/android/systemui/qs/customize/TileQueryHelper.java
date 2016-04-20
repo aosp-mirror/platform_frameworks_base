@@ -144,14 +144,18 @@ public class TileQueryHelper {
                 String packageName = info.serviceInfo.packageName;
                 ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
                 String spec = CustomTile.toSpec(componentName);
+                if (info.serviceInfo.icon == 0) {
+                    continue;
+                }
                 Drawable icon = info.serviceInfo.loadIcon(pm);
                 if (!permission.BIND_QUICK_SETTINGS_TILE.equals(info.serviceInfo.permission)) {
                     continue;
                 }
-                if (icon != null) {
-                    icon.mutate();
-                    icon.setTint(mContext.getColor(android.R.color.white));
+                if (icon == null) {
+                    continue;
                 }
+                icon.mutate();
+                icon.setTint(mContext.getColor(android.R.color.white));
                 CharSequence label = info.serviceInfo.loadLabel(pm);
                 final CharSequence appLabel = info.serviceInfo.applicationInfo.loadLabel(pm);
                 addTile(spec, icon, label != null ? label.toString() : "null", appLabel, mContext);
