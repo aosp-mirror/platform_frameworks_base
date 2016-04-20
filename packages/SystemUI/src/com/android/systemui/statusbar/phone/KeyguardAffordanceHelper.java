@@ -43,9 +43,9 @@ public class KeyguardAffordanceHelper {
     private static final int HINT_CIRCLE_OPEN_DURATION = 500;
 
     private final Context mContext;
+    private final Callback mCallback;
 
     private FlingAnimationUtils mFlingAnimationUtils;
-    private Callback mCallback;
     private VelocityTracker mVelocityTracker;
     private boolean mSwipingInProgress;
     private float mInitialTouchX;
@@ -318,12 +318,11 @@ public class KeyguardAffordanceHelper {
         float vel = getCurrentVelocity(lastX, lastY);
 
         // We snap back if the current translation is not far enough
-        boolean snapBack;
-        if (mFalsingManager.isFalseTouch()) {
-            snapBack = mFalsingManager.isFalseTouch();
-        } else {
-            snapBack = isBelowFalsingThreshold();
+        boolean snapBack = false;
+        if (mCallback.needsAntiFalsing()) {
+            snapBack = snapBack || mFalsingManager.isFalseTouch();
         }
+        snapBack = snapBack || isBelowFalsingThreshold();
 
         // or if the velocity is in the opposite direction.
         boolean velIsInWrongDirection = vel * mTranslation < 0;
@@ -582,5 +581,7 @@ public class KeyguardAffordanceHelper {
          * @return The factor the minimum swipe amount should be multiplied with.
          */
         float getAffordanceFalsingFactor();
+
+        boolean needsAntiFalsing();
     }
 }
