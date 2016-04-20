@@ -268,5 +268,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
 
+    <bool name="quick_settings_show_date">false</bool>
+
 </resources>
 
