@@ -154,7 +154,8 @@ public abstract class FragmentTuner {
             MenuItem rename = menu.findItem(R.id.menu_rename);
             MenuItem selectAll = menu.findItem(R.id.menu_select_all);
 
-            open.setVisible(true);
+            open.setVisible(mState.action == ACTION_GET_CONTENT ||
+                    mState.action == ACTION_OPEN);
             share.setVisible(false);
             delete.setVisible(false);
             rename.setVisible(false);
