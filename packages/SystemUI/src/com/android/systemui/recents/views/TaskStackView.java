@@ -72,6 +72,7 @@ import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.RecentsGrowingEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
@@ -189,6 +190,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
     private ArrayList<TaskViewTransform> mTmpTaskTransforms = new ArrayList<>();
     private int[] mTmpIntPair = new int[2];
+    private boolean mResetToInitialStateWhenResized;
+    private int mLastWidth;
+    private int mLastHeight;
 
     // A convenience update listener to request updating clipping of tasks
     private ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
@@ -1164,9 +1168,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
-        if (mAwaitingFirstLayout || mInitialState != INITIAL_STATE_UPDATE_NONE) {
-            if (mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY) {
+        boolean resetToInitialState = (width != mLastWidth || height != mLastHeight)
+                && mResetToInitialStateWhenResized;
+        if (mAwaitingFirstLayout || mInitialState != INITIAL_STATE_UPDATE_NONE
+                || resetToInitialState) {
+            if (mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY || resetToInitialState) {
                 updateToInitialState();
+                mResetToInitialStateWhenResized = false;
             }
             if (!mAwaitingFirstLayout) {
                 mInitialState = INITIAL_STATE_UPDATE_NONE;
@@ -1186,6 +1194,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         setMeasuredDimension(width, height);
+        mLastWidth = width;
+        mLastHeight = height;
         mInMeasureLayout = false;
     }
 
@@ -1971,6 +1981,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mInitialState = INITIAL_STATE_UPDATE_ALL;
             requestLayout();
         }
+    }
+
+    public final void onBusEvent(RecentsGrowingEvent event) {
+        mResetToInitialStateWhenResized = true;
     }
 
     public void reloadOnConfigurationChange() {

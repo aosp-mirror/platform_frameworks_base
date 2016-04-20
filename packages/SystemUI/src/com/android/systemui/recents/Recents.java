@@ -37,9 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.MutableBoolean;
 import android.view.Display;
-import android.view.View;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -59,6 +57,7 @@ import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.tv.RecentsTvImpl;
+import com.android.systemui.stackdivider.Divider;
 
 import java.util.ArrayList;
 
@@ -75,6 +74,7 @@ public class Recents extends SystemUI
 
     public final static int EVENT_BUS_PRIORITY = 1;
     public final static int BIND_TO_SYSTEM_USER_RETRY_DELAY = 5000;
+    public final static int RECENTS_GROW_TARGET_INVALID = -1;
 
     // Purely for experimentation
     private final static String RECENTS_OVERRIDE_SYSPROP_KEY = "persist.recents_override_pkg";
@@ -238,7 +238,7 @@ public class Recents extends SystemUI
      * Shows the Recents.
      */
     @Override
-    public void showRecents(boolean triggeredFromAltTab, boolean fromHome, View statusBarView) {
+    public void showRecents(boolean triggeredFromAltTab, boolean fromHome) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -249,10 +249,12 @@ public class Recents extends SystemUI
             return;
         }
 
+        int recentsGrowTarget = getComponent(Divider.class).getView().growsRecents();
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
-                    true /* animate */, false /* reloadTasks */, fromHome);
+                    true /* animate */, false /* reloadTasks */, fromHome, recentsGrowTarget);
         } else {
             if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
@@ -260,7 +262,8 @@ public class Recents extends SystemUI
                 if (callbacks != null) {
                     try {
                         callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
-                                true /* animate */, false /* reloadTasks */, fromHome);
+                                true /* animate */, false /* reloadTasks */, fromHome,
+                                recentsGrowTarget);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -310,7 +313,7 @@ public class Recents extends SystemUI
      * Toggles the Recents activity.
      */
     @Override
-    public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
+    public void toggleRecents(Display display) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -321,16 +324,18 @@ public class Recents extends SystemUI
             return;
         }
 
+        int growTarget = getComponent(Divider.class).getView().growsRecents();
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
-            mImpl.toggleRecents();
+            mImpl.toggleRecents(growTarget);
         } else {
             if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
                         mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
-                        callbacks.toggleRecents();
+                        callbacks.toggleRecents(growTarget);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
