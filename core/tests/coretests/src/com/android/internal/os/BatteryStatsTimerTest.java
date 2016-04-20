@@ -18,8 +18,7 @@ package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
+import android.support.test.filters.SmallTest;
 import android.util.StringBuilderPrinter;
 
 import junit.framework.Assert;
@@ -148,7 +147,7 @@ public class BatteryStatsTimerTest extends TestCase {
         timer.onTimeStarted(10, 20, 50);
         Assert.assertEquals(50, timer.lastComputeRunTimeRealtime);
         Assert.assertEquals(4, timer.getUnpluggedTime());
-        Assert.assertEquals(0, timer.getUnpluggedCount());
+        Assert.assertEquals(3000, timer.getUnpluggedCount());
 
         // Test that stopping the timer updates mTotalTime and mCount
         timer.nextComputeRunTime = 17;
@@ -168,15 +167,16 @@ public class BatteryStatsTimerTest extends TestCase {
         // Test write then read
         TestTimer timer1 = new TestTimer(clocks, 0, timeBase);
         timer1.setCount(1);
-        timer1.setLoadedCount(2);
-        timer1.setLastCount(3);
-        timer1.setUnpluggedCount(4);
+        timer1.setLoadedCount(3);
+        timer1.setLastCount(4);
+        timer1.setUnpluggedCount(5);
         timer1.setTotalTime(9223372036854775807L);
         timer1.setLoadedTime(9223372036854775806L);
         timer1.setLastTime(9223372036854775805L);
         timer1.setUnpluggedTime(9223372036854775804L);
         timer1.setTimeBeforeMark(9223372036854775803L);
         timer1.nextComputeRunTime = 201;
+        timer1.nextComputeCurrentCount = 2;
 
         Parcel parcel = Parcel.obtain();
         Timer.writeTimerToParcel(parcel, timer1, 77);
@@ -185,10 +185,10 @@ public class BatteryStatsTimerTest extends TestCase {
         Assert.assertTrue("parcel null object", parcel.readInt() != 0);
 
         TestTimer timer2 = new TestTimer(clocks, 0, timeBase, parcel);
-        Assert.assertEquals(1, timer2.getCount());
-        Assert.assertEquals(2, timer2.getLoadedCount());
+        Assert.assertEquals(2, timer2.getCount()); // from computeTotalCountLocked()
+        Assert.assertEquals(3, timer2.getLoadedCount());
         Assert.assertEquals(0, timer2.getLastCount()); // NOT saved
-        Assert.assertEquals(4, timer2.getUnpluggedCount());
+        Assert.assertEquals(5, timer2.getUnpluggedCount());
         Assert.assertEquals(201, timer2.getTotalTime()); // from computeRunTimeLocked()
         Assert.assertEquals(9223372036854775806L, timer2.getLoadedTime());
         Assert.assertEquals(0, timer2.getLastTime()); // NOT saved
@@ -309,6 +309,7 @@ public class BatteryStatsTimerTest extends TestCase {
 
         Parcel parcel = Parcel.obtain();
         timer1.nextComputeRunTime = 9223372036854775800L;
+        timer1.nextComputeCurrentCount = 1;
         timer1.writeSummaryFromParcelLocked(parcel, 201);
         Assert.assertEquals(40, timer1.lastComputeRunTimeRealtime);
 
