@@ -43,6 +43,8 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
 
+import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+
 import java.util.List;
 
 /**
@@ -792,8 +794,9 @@ public abstract class Window {
         if (wp.packageName == null) {
             wp.packageName = mContext.getPackageName();
         }
-        if (mHardwareAccelerated) {
-            wp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        if (mHardwareAccelerated ||
+                (mWindowAttributes.flags & FLAG_HARDWARE_ACCELERATED) != 0) {
+            wp.flags |= FLAG_HARDWARE_ACCELERATED;
         }
     }
 
