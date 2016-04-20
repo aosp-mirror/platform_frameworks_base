@@ -21,7 +21,8 @@ previous.link=receive.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+  <li><a href="{@docRoot}training/appbar/action-views.html">Action Views and
+    Action Providers</a></li>
 </ul>
 
 </div>
@@ -121,7 +122,8 @@ private void setShareIntent(Intent shareIntent) {
 want to set it and then update it as the UI changes. For example, when you view photos full screen
 in the Gallery app, the sharing intent changes as you flip between photos.</p>
 
-<p>For further discussion about the {@link android.widget.ShareActionProvider} object, see the <a
-href="{@docRoot}guide/topics/ui/actionbar.html#ActionProvider">Action Bar</a> guide.</p>
+<p>For further discussion about the {@link android.widget.ShareActionProvider}
+object, see <a href="{@docRoot}training/appbar/action-views.html">Action Views
+and Action Providers</a>.</p>
 
 

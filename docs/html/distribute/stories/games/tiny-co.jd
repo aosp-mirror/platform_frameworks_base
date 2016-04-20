@@ -1,0 +1,78 @@
+page.title=TinyCo finds monetization opportunities on tablets
+page.metaDescription=TinyCo launches their line of apps across multiple form factors.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/tiny-co.jpg
+page.timestamp=1456340902
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/tinyvillage-icon.png"
+  height="113" />
+</div>
+
+<p>
+  App developer TinyCo, makers of a suite of games such as Tiny Monsters,
+  decided to prioritize launching effectively across multiple platforms. They
+  chose Android as one of their primary launch platforms because of its large
+  installed base and global reach. They also knew that the growing base of
+  Android tablet users represented a huge opportunity.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  <a class="external-link"
+  href="http://play.google.com/store/apps/details?id=com.tinyco.village">
+  Tiny Village</a>, a game targeting 7- to 10-inch tablets and phones, was their
+  first title to take advantage of the strategy, and it proved to be a winning
+  one — especially in terms of Android tablets.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:336px">
+  <img
+   src="{@docRoot}images/distribute/stories/tinyvillage-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/tinyvillage-screenshot.png 1x
+  {@docRoot}images/distribute/stories/tinyvillage-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Tiny Village monetized better on tablets
+  </p>
+</div>
+
+<p>
+  In the six months from launch TinyCo saw Android tablet <b>downloads more than
+  triple</b>.
+</p>
+
+<p>
+  When used on tablets Tiny Village also showed an increase in average revenue
+  per paying user (ARPPU) — about 35% higher than on smaller-screen devices such
+  as phones. Additionally, average revenue per user <b>(ARPU) is now about 35%
+  higher</b> as well. “The game is just much more immersive on tablets,” said
+  Rajeev Nagpal, Head of Product at TinyCo.
+</p>
+
+<p>
+  There has also been a <b>consistent increase in retention</b> over other
+  platforms, an important metric for games according to Nagpal.
+</p>
+
+<p>
+  “With continued optimization of the gameplay experience and a genuine
+  commitment to our Android offering through our Griffin engine, all of our
+  metrics started to rise,” said Nagpal.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about creating a tablet version of your app by reviewing the
+  <a href="http://developer.android.com/distribute/essentials/quality/tablets.html">
+  Tablet App Quality</a> guidelines and growing your user base.
+</p>

@@ -72,7 +72,7 @@ Android Support Library selected.</p>
 
 <p>After downloading, the tool installs the Support Library files to your existing Android SDK
   directory. The library files are located in the following subdirectory of your SDK:
-  {@code <sdk>/extras/android/support/} directory.</p>
+  {@code &lt;sdk&gt;/extras/android/support/} directory.</p>
 
 
 <h2 id="choosing">Choosing Support Libraries</h2>
@@ -104,31 +104,6 @@ Android Support Library selected.</p>
 
 <p>To add a Support Library without resources to your application project:</p>
 
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Eclipse</a></p>
-
-  <div class="toggle-content-toggleme">
-  <ol>
-    <li>Make sure you have downloaded the <strong>Android Support Library</strong>
-      using the <a href="#download">SDK Manager</a>.</li>
-    <li>Create a {@code libs/} directory in the root of your application project.</li>
-    <li>Copy the JAR file from your Android SDK installation directory (e.g.,
-      {@code <sdk>/extras/android/support/v4/android-support-v4.jar}) into your
-      application's project {@code libs/} directory.
-    <li>Right click the JAR file and select <strong>Build Path &gt; Add to Build Path</strong>.
-      </li>
-  </ol>
-  </div>
-</div>
-
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Android Studio</a></p>
-
-  <div class="toggle-content-toggleme">
     <ol>
       <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
         using the <a href="#download">SDK Manager</a>.</li>
@@ -143,8 +118,6 @@ dependencies {
 </pre>
       </li>
     </ol>
-  </div>
-</div>
 
 
 <h3 id="libs-with-res">Adding libraries with resources</h3>
@@ -153,77 +126,6 @@ dependencies {
   <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
   appcompat</a> for action bar) to your application project:</p>
 
-<div class="toggle-content closed">
-  <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Eclipse</a></p>
-    <div class="toggle-content-toggleme">
-
-<p>Create a <a href="{@docRoot}tools/projects/index.html#LibraryProjects">library
-project</a> based on the support library code:</p>
-
-<ol>
-  <li>Make sure you have downloaded the <strong>Android Support Library</strong>
-    using the <a href="#download">SDK Manager</a>.</li>
-  <li>Create a library project and ensure the required JAR files are included in the project's
-    build path:
-    <ol>
-      <li>Select <strong>File &gt; Import</strong>.</li>
-      <li>Select <strong>Existing Android Code Into Workspace</strong> and click
-        <strong>Next</strong>.</li>
-      <li>Browse to the SDK installation directory and then to the Support Library folder.
-        For example, if you are adding the {@code appcompat} project, browse to
-        <code>&lt;sdk&gt;/extras/android/support/v7/appcompat/</code>.</li>
-      <li>Click <strong>Finish</strong> to import the project. For the v7 appcompat project, you
-        should now see a new project titled <em>android-support-v7-appcompat</em>.</li>
-      <li>In the new library project, expand the {@code libs/} folder, right-click each {@code .jar}
-        file and select <strong>Build Path &gt; Add to Build Path</strong>. For example, when
-        creating the the v7 appcompat project, add both the {@code android-support-v4.jar} and
-        {@code android-support-v7-appcompat.jar} files to the build path.</li>
-      <li>Right-click the library project folder and select <strong>Build Path &gt; Configure
-        Build Path</strong>.</li>
-      <li>In the <strong>Order and Export</strong> tab, check the <code>.jar</code> files you just
-        added to the build path, so they are available to projects that depend on this library
-        project. For example, the {@code appcompat} project requires you to export both the
-        {@code android-support-v4.jar} and {@code android-support-v7-appcompat.jar} files.</li>
-      <li>Uncheck <strong>Android Dependencies</strong>.</li>
-      <li>Click <strong>OK</strong> to complete the changes.</li>
-    </ol>
-  </li>
-</ol>
-
-<p>You now have a library project for your selected Support Library that you can use with one or
-  more application projects.</p>
-
-<p>Add the library to your application project:</p>
-  <ol>
-    <li>In the Project Explorer, right-click your project and select <strong>Properties</strong>.</li>
-    <li>In the category panel on the left side of the dialog, select <strong>Android</strong>.</li>
-    <li>In the Library pane, click the <strong>Add</strong> button.</li>
-    <li>Select the library project and click <strong>OK</strong>. For example, the
-      {@code appcompat} project should be listed as <strong>android-support-v7-appcompat</strong>.
-      </li>
-    <li>In the properties window, click <strong>OK</strong>.</li>
-  </ol>
-
-<p class="note">
-  <strong>Note:</strong> If you are using the {@code android-support-v7-mediarouter} support
-  library, you should note that it depends on the {@code android-support-v7-appcompat} library.
-  In order for the v7 mediarouter library to compile, you must import both library projects into
-  your development workspace. Then follow the procedure above to add the v7 appcompat project as a
-  library to the v7 mediarouter library project.
-</p>
-
-  </div>
-</div>
-
-
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-    <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-    />Using Android Studio</a></p>
-
-  <div class="toggle-content-toggleme">
     <ol>
       <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
         using the <a href="#download">SDK Manager</a>.</li>
@@ -240,8 +142,6 @@ dependencies {
 </pre>
       </li>
     </ol>
-  </div>
-</div>
 
 
 <h2 id="using-apis">Using Support Library APIs</h2>
@@ -333,9 +233,9 @@ APIs. The code is included in the download from the SDK Manager and is placed in
 SDK installation directory, as listed below:</p>
 
 <ul>
-  <li>4v Samples: {@code <sdk>/extras/android/support/samples/Support4Demos/}</li>
-  <li>7v Samples: {@code <sdk>/extras/android/support/samples/Support7Demos/}</li>
-  <li>13v Samples: {@code <sdk>/extras/android/support/samples/Support13Demos/}</li>
-  <li>App Navigation: {@code <sdk>/extras/android/support/samples/SupportAppNavigation/}</li>
+  <li>4v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support4Demos/}</li>
+  <li>7v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support7Demos/}</li>
+  <li>13v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support13Demos/}</li>
+  <li>App Navigation: {@code &lt;sdk&gt;/extras/android/support/samples/SupportAppNavigation/}</li>
 </ul>
 

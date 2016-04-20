@@ -1,0 +1,256 @@
+page.title=オーバービュー画面
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#adding">オーバービュー画面にタスクを追加する</a>
+      <ol>
+        <li><a href="#flag-new-doc">インテント フラグを使用してタスクを追加する</a></li>
+        <li><a href="#attr-doclaunch">アクティビティの属性を使用してタスクを追加する</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">タスクを削除する</a>
+      <ol>
+        <li><a href="#apptask-remove">AppTask クラスを使用してタスクを削除する</a></li>
+        <li><a href="#retain-finished">完了したタスクを保持する</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>キークラス</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>サンプル コード</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">ドキュメント中心のアプリ</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>オーバービュー画面（別名、最近使った画面、最近使ったタスクリスト、最近使ったアプリ）は、最近アクセスした<a href="{@docRoot}guide/components/activities.html">アクティビティ</a>や<a href="{@docRoot}guide/components/tasks-and-back-stack.html">タスク</a>の一覧を示すシステムレベルの UI です。
+
+ユーザーはリスト内をナビゲートして再開するタスクを選択したり、スワイプしてタスクをリストから削除したりできます。
+
+Android 5.0（API レベル 21）のリリースでは、異なるドキュメントを持つ同一アクティビティ内の複数のインスタンスが、1 つのタスクとしてオーバービュー画面に表示される場合があります。
+たとえば、Google ドライブには複数の Google ドキュメントごとのタスクが表示される場合があります。
+オーバービュー画面には、各ドキュメントが 1 つのタスクとして表示されます。
+</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>図 1.</strong> オーバービュー画面に表示されている 3 つの Google ドライブ ドキュメントが、それぞれ別のタスクを表しています。
+</p>
+
+<p>通常、オーバービュー画面にタスクとアクティビティを提示する方法はシステムが定義できるよう許可し、この動作を変更する必要はありません。
+ただし、アクティビティをいつ、どのようにオーバービュー画面に表示するかをアプリで決定することもできます。
+{@link android.app.ActivityManager.AppTask} クラスを使ってタスクを管理でき、{@link android.content.Intent} クラスのアクティビティ フラグを使うとアプリをオーバービュー画面に追加、削除するタイミングを指定できます。
+
+
+また、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 属性を使ってマニフェストで動作を設定することもできます。</p>
+
+<h2 id="adding">オーバービュー画面にタスクを追加する</h2>
+
+<p>{@link android.content.Intent} クラスのフラグを使用してタスクを追加すると、ドキュメントをいつ、どのようにオーバービュー画面で開いたり、再度開いたりできるかを細かく制御できます。
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 属性を使用すると、常に新しいタスクでドキュメントを開くか、ドキュメントの既存のタスクを再利用するかを選択できます。
+
+
+</p>
+
+<h3 id="flag-new-doc">インテント フラグを使用してタスクを追加する</h3>
+
+<p>アクティビティの新しいドキュメントを作成するときは、{@link android.app.ActivityManager.AppTask} クラスの {@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()} メソッドを呼び出し、アクティビティを起動するインテントを渡します。
+
+
+論理的な改行を挿入して、システムがアクティビティをオーバービュー画面の新しいタスクとして扱えるようにするには、{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} フラグを、アクティビティを起動する {@link android.content.Intent} の {@link android.content.Intent#addFlags(int) addFlags()} メソッドに渡します。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} フラグは、Android 5.1（API レベル 21）で廃止された {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET} を置き換えるものです。
+
+</p>
+
+<p>新しいドキュメントの作成時に {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} フラグを設定すると、システムは常にターゲット アクティビティの新しいタスクをルートとして作成するようになります。この設定によって、同じドキュメントを複数のタスクで開くことが可能になります。
+
+これをメインのアクティビティが行う方法を、次のコードで示し舞うs。
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>注:</strong> {@code FLAG_ACTIVITY_NEW_DOCUMENT} フラグを使って起動されたアクティビティには、マニフェスト ファイルで {@code android:launchMode="standard"} 属性の値（デフォルト）が設定されている必要があります。
+
+</p>
+
+<p>メイン アクティビティが新しいアクティビティを起動するとき、システムはアクティビティのインテント コンポーネント名とインテント データに一致するインテントを持つ既存のタスクを検索します。
+タスクが見つからない場合や、インテントに {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} フラグに含まれている場合は、新しいタスクがアクティビティのルートとして作成されます。
+
+タスク見つかった場合は、そのタスクをフロントに移動して、新しいインテントを {@link android.app.Activity#onNewIntent onNewIntent()} に渡します。新しいアクティビティがインテントを受け取り、次の例のようにオーバービュー画面に新しいドキュメントを作成します。
+
+
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">アクティビティの属性を使用してタスクを追加する</h3>
+
+<p>アクティビティのマニフェストで、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> の属性の<a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">{@code android:documentLaunchMode}</a> を使ってアクティビティを常に新しいタスクで起動するよう指定することもできます。
+
+
+この属性には 4 つの値があり、ユーザーがアプリケーションでドキュメントを開くときに次のような効果を生みます。
+</p>
+
+<dl>
+  <dt>「{@code intoExisting}」</dt>
+  <dd>アクティビティがそのドキュメントの既存のタスクを再利用します。これは、<a href="#flag-new-doc">インテント フラグを使用してタスクを追加する</a>で説明したように、{@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} フラグを<em>設定せずに</em>、{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} フラグを設定した場合と同じです。
+
+
+</dd>
+
+  <dt>「{@code always}」</dt>
+  <dd>ドキュメントが既に開いている場合でも、アクティビティがドキュメントの新しいタスクを作成します。これは、{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} フラグと {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} フラグの両方を設定した場合と同じです。
+
+</dd>
+
+  <dt>「{@code none”}」</dt>
+  <dd>アクティビティはドキュメントの新しいタスクを作成しません。オーバービュー画面はデフォルトでアクティビティがタスクを作成したかのように処理し、アプリの 1 つのタスクを表示して、ユーザーが最後に呼び出したアクティビティから再開します。
+
+</dd>
+
+  <dt>「{@code never}」</dt>
+  <dd>アクティビティはドキュメントの新しいタスクを作成しません。この値を設定すると、{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} フラグと {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} フラグのいずれかが設定されている場合にその動作をオーバーライドし、オーバービュー画面にはアプリの 1 つのタスクが表示され、ユーザーが最後に呼び出したアクティビティから再開します。
+
+
+
+</dd>
+</dl>
+
+<p class="note"><strong>注:</strong> {@code none} と {@code never} の値以外の場合、アクティビティを {@code launchMode="standard"} を使って定義する必要があります。
+属性が指定されていない場合は、{@code documentLaunchMode="none"} が使用されます。
+</p>
+
+<h2 id="removing">タスクを削除する</h2>
+
+<p>デフォルトで、アクティビティの完了時にドキュメントのタスクはオーバービュー画面から自動的に削除されます。
+この動作は、{@link android.app.ActivityManager.AppTask} クラスで {@link android.content.Intent} フラグを使うか、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 属性を使ってオーバーライドできます。
+</p>
+
+<p><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 属性の <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">{@code android:excludeFromRecents}</a> を {@code true} に設定すると、タスクを常にオーバービュー画面から完全に除外することができます。
+
+
+</p>
+
+<p>アプリがオーバービュー画面に表示できるタスクの最大数を設定するには、<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 属性の <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}</a> に整数値を設定します。
+
+
+デフォルトでは 16 に設定されています。タスクの最大数に達すると、最も古いタスクがオーバービュー画面から削除されます。
+{@code android:maxRecents} の最大値は 50（低メモリの端末では 25）で、1 未満の値は無効です。
+</p>
+
+<h3 id="#apptask-remove">AppTask クラスを使用してタスクを削除する</h3>
+
+<p>オーバービュー画面に新しいタスクを作成するアクティビティで {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} を呼び出すと、タスクを削除して関連アクティビティのすべてを終了させるタイミングを指定できます。
+
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>注:</strong> {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} メソッドを使用すると、次のセクションで説明する {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} タグの使用がオーバーライドされます。
+
+
+</p>
+
+<h3 id="#retain-finished">完了したタスクを保持する</h3>
+
+<p>アクティビティの終了後もオーバービュー画面にタスクを保持する場合は、{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} フラグを、アクティビティを起動するインテントの {@link android.content.Intent#addFlags(int) addFlags()} メソッドに渡します。
+
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 属性の <a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">{@code android:autoRemoveFromRecents}</a> を {@code false} に設定することでも同じ効果を得られます。
+
+
+ドキュメントのアクティビティのデフォルト値は {@code true}、通常のアクティビティでは {@code false} になります。
+この属性を使用すると、前のセクションで説明した {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} フラグがオーバーライドされます。
+</p>
+
+
+
+
+
+
+

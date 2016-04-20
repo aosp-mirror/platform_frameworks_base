@@ -1,0 +1,15 @@
+page.title=NDK Audio: OpenSL ES&#8482
+@jd:body
+
+<p>The NDK package includes an Android-specific implementation of the
+<a href="https://www.khronos.org/opensles/">OpenSL ES</a> API
+specification from the <a href="https://www.khronos.org">Khronos Group</a>. This library
+allows you to use C or C++ to implement high-performance, low-latency audio in your game or other
+demanding app.</p>
+
+<p>This section begins by providing some
+<a href="{@docRoot}ndk/guides/audio/basics.html">basic information</a> about the API, including how
+to incorporate it into your app. It then explains what you need to know about the
+<a href="{@docRoot}ndk/guides/audio/opensl-for-android.html">Android-specific implementation</a>
+of OpenSL ES, focusing on differences between this implementation and the reference specification.
+</p>

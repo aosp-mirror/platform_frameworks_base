@@ -1,0 +1,812 @@
+page.title=片段
+parent.title=Activity
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#Design">設計概念</a></li>
+    <li><a href="#Creating">建立片段</a>
+      <ol>
+        <li><a href="#UI">新增使用者介面</a></li>
+        <li><a href="#Adding">將片段新增到 Activity 中</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">管理片段</a></li>
+    <li><a href="#Transactions">進行片段交易</a></li>
+    <li><a href="#CommunicatingWithActivity">與 Activity 通訊</a>
+      <ol>
+        <li><a href="#EventCallbacks">為 Activity 建立事件回呼</a></li>
+        <li><a href="#ActionBar">將項目新增到動作列中</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">處理片段生命週期</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">調整 Activity 生命週期</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">範例說明</a></li>
+  </ol>
+
+  <h2>重要類別</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>另請參閱</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">使用片段建置動態 UI</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">支援平板電腦和手機</a>
+</li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment} 代表一種行為或 
+{@link android.app.Activity} 中的一部分使用者介面。您可以合併單一 Activity 中的多個片段，藉此建置
+多窗格 UI 以及在多個 Activity 中重複使用片段。您可以將片段想成是 Activity 的模組化區段，片段擁有自己的生命週期、接收自己的輸入事件，而且您可以在 Activity 執行時新增或移除片段 (有點像是您可以在不同 Activity 中重複使用的「子 Activity」)。
+
+
+</p>
+
+<p>片段必須一律嵌入 Activity 中，而主要 Activity 的生命週期會直接影響片段的生命週期。
+例如，當 Activity 暫停時，其中的所有片段也會一併暫停；而當 Activity 遭到刪除時，所有片段也會一併刪除。
+不過，當 Activity 執行時 (該 Activity 會處於繼續進行<em></em><a href="{@docRoot}guide/components/activities.html#Lifecycle">生命週期狀態</a>)，您可以個別操縱所有片段，例如新增或移除片段。
+
+當您進行片段交易這類操作時，您也可以將片段加到 Activity 所管理的返回堆疊中 &mdash; Activity 中的所有返回堆疊項目均為所發生片段交易的記錄。
+
+
+返回堆疊可讓使用者復原片段交易 (往回瀏覽)，只要按下 [返回]<em></em> 按鈕即可。
+</p>
+
+<p>當您將片段新增為 Activity 版面配置的一部分後，片段就會位於 Activity 檢視階層中的 {@link
+android.view.ViewGroup}，而且片段會自行定義專屬的版面配置。您可以宣告 Activity 版面配置檔案中的片段，或是在應用程式的程式碼中將片段加到現有的 {@link android.view.ViewGroup} 中，藉此在 Activity 版面配置中將片段插入為 {@code &lt;fragment&gt;} 元素。
+
+
+
+不過，片段未必要成為 Activity 版面配置的一部分；您也可以選擇不透過其 UI，以隱形工作人員的身分使用 Activity 的片段。
+
+</p>
+
+<p>本文說明如何建置應用程式以使用片段，包括片段如何在加到 Activity 返回堆疊時保持自身狀態、如何與 Activity 和 Activity 中的其他片段共用活動、如何製作 Activity 欄等等。
+
+
+</p>
+
+
+<h2 id="Design">設計概念</h2>
+
+<p>我們在 Android 3.0 (API 級別 11) 中導入了片段，主要目的是為了在大型螢幕 (例如平板電腦) 上支援更多動態和彈性 UI 設計。
+由於平板電腦的螢幕比手機大上許多，因此有更多空間可結合及交換 UI 元件。
+
+片段可實現這種介面設計，而不必讓您管理複雜的檢視階層變更。
+將 Activity 的版面配置劃分成片段後，您就可以修改 Activity 在執行階段的外觀，以及保留 Activity 所管理返回堆疊的相關變更。
+
+</p>
+
+<p>例如，某個新聞應用程式可使用單一片段在畫面左側顯示文章清單，並且使用另一個片段在畫面右側顯示某篇文章 &mdash; 這兩個片段是以並排方式出現在某個 Activity 中，而每個片段都有自己的一組生命週期回呼方法，可自行處理其使用者輸入事件。
+
+
+因此，使用者可以在相同 Activity 中選取並閱讀某篇文章 (如圖 1 中的平板電腦版面配置所示)，而不必使用不同 Activity 選取及閱讀文章。
+
+</p>
+
+<p>請務必將每個片段設計成模組化和可重複使用的 Activity 元件。這是因為每個片段會根據其生命週期回呼，定義專屬版面配置和行為，而您可將單一片段加到多個 Activity 中，故請將其設計成可重複使用的元件，同時避免直接操縱個別片段。
+
+
+由於模組化片段可讓您針對不同螢幕大小變更片段組合，因此請務必這麼做。
+設計您的應用程式以支援平板電腦和手機時，您可以在不同版面配置設定中重複使用片段，藉此根據可用的螢幕空間提供最佳的使用者體驗。
+
+以手機為例說明，如果相同 Activity 中有多個片段不相符，則只要分割片段即可提供單一面板式的 UI。
+
+</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>圖 1.</strong>片段所定義的兩個 UI 模組如何針對平板電腦設計合併成單一 Activity、如何針對手機設計分割成個別 Activity。
+
+</p>
+
+<p>例如 &mdash; 延續新聞應用程式範例加以說明 &mdash; 在平板電腦大小的裝置上執行的應用程式可將兩個片段嵌入「Activity A」<em></em>。
+不過，在手機大小的螢幕上，由於螢幕空間不足以容納兩個片段，因此「Activity A」<em></em>只會包含文章清單的片段，而當使用者選取文章後，系統就會啟動內含第二個片段的「Activity B」<em></em>，讓使用者閱讀文章。
+
+
+因此，應用程式可透過重複使用不同片段組合的方式，同時支援平板電腦和手機 (如圖 1 所示)。
+
+</p>
+
+<p>如要進一步瞭解如何使用不同片段組合針對各種螢幕設定設計應用程式，請參閱<a href="{@docRoot}guide/practices/tablets-and-handsets.html">支援平板電腦和手機</a>指南。
+</p>
+
+
+
+<h2 id="Creating">建立片段</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>圖 2.</strong>片段的生命週期 (當其中的 Activity 處於執行狀態時)。
+</p>
+</div>
+
+<p>如要建立片段，您必須建立 {@link android.app.Fragment} 的子類別 (或是其現有的子類別)。
+{@link android.app.Fragment} 類別內含與{@link android.app.Activity} 十分雷同的程式碼。
+該程式碼包括與 Activity 類似的回呼方法，例如 {@link android.app.Fragment#onCreate onCreate()}、{@link android.app.Fragment#onStart onStart()}、
+{@link android.app.Fragment#onPause onPause()} 和 {@link android.app.Fragment#onStop onStop()}。
+事實上，如果您是設定現有 Android 應用程式改用片段，只要將 Activity 的回呼方法中的程式碼移到片段的個別回呼方法即可。
+
+
+</p>
+
+<p>一般來說，您至少必須實作下列生命週期方法：</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>系統會在建立片段時呼叫這個方法。在實作這個方法時，您必須初始化您想保留的必要片段元件，以便恢復已暫停或停止的片段。
+
+</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>系統會在片段初次顯示其使用者介面時呼叫這個方法。
+您必須透過這個方法傳回 {@link android.view.View} (片段版面配置的根目錄)，才能顯示片段的 UI。
+如果片段並未提供 UI 的話，則可以傳回空值。
+</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>系統會在使用者初次離開片段時呼叫這個方法 (即使使用者這麼做未必會刪除片段)。
+您通常需要透過這個方法提交要在目前的使用者工作階段以外保留的任何變更 (原因在於使用者可能不會返回)。
+
+</dd>
+</dl>
+
+<p>大多數應用程式都至少必須針對每個片段實作這三個方法，不過您也必須使用幾個其他回呼方法來控制片段生命週期的各種狀態。
+
+如要進一步瞭解所有回呼方法，請參閱<a href="#Lifecycle">處理片段生命週期</a>。
+</p>
+
+
+<p>以下列出幾個您可能會想擴充的子類別 (基礎 {@link
+android.app.Fragment} 類別除外)：</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>顯示浮動對話方塊。使用這個類別建立對話方塊是使用 {@link android.app.Activity} 類別中的對話方塊協助程式方法的推薦替代方法，這是因為使用此類別可將片段對話方塊納入 Activity 所管理的片段堆疊，讓使用者得已返回已關閉的片段。
+
+
+</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>顯示配接器 (例如 {@link
+android.widget.SimpleCursorAdapter}) 所管理的項目清單；與 {@link android.app.ListActivity} 方法相似。這個方法可提供數種管理清單檢視畫面的方法，例如可處理點擊事件的 {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()}回呼。
+
+</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>列出 {@link android.preference.Preference} 物件的階層；與
+{@link android.preference.PreferenceActivity} 方法相似。為應用程式建立「設定」Activity 時，這個方法就非常實用。
+</dd>
+</dl>
+
+
+<h3 id="UI">新增使用者介面</h3>
+
+<p>片段通常是當作某 Activity 的使用者介面使用，而且可將自身的版面配置提供給 Activity。
+</p>
+
+<p>如要提供片段的版面配置，您必須實作 {@link
+android.app.Fragment#onCreateView onCreateView()} 回呼方法，讓 Android 系統呼叫片段顯示其版面配置。
+實作這個方法時，您必須傳回
+{@link android.view.View} (片段版面配置的根目錄)。</p>
+
+<p class="note"><strong>注意：</strong>如果您的片段是 {@link
+android.app.ListFragment} 的子類別，則實作完畢後系統預設會傳回 {@link android.app.Fragment#onCreateView onCreateView()} 的
+{@link android.widget.ListView}，因此您不必加以實作。</p>
+
+<p>如要從 {@link
+android.app.Fragment#onCreateView onCreateView()} 傳回版面配置，您可以從 XML 中定義的<a href="{@docRoot}guide/topics/resources/layout-resource.html">l版面配置資源</a>擴大它。為協助您完成這項作業，{@link android.app.Fragment#onCreateView onCreateView()} 提供了 
+{@link android.view.LayoutInflater} 物件。
+</p>
+
+<p>例如，以下是 {@link android.app.Fragment} 的子類別，可從 
+{@code example_fragment.xml} 檔案載入版面配置：</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>建立版面配置</h3>
+  <p>在上方範例中，{@code R.layout.example_fragment} 是應用程式中儲存的
+「{@code example_fragment.xml}」版面配置資源的參照資料。如要瞭解如何在 XML 中建立版面配置，請參閱<a href="{@docRoot}guide/topics/ui/index.html">使用者介面</a>。
+
+</p>
+</div>
+</div>
+
+<p>傳入 {@link android.app.Fragment#onCreateView
+onCreateView()} 的 {@code container} 參數是上層 {@link android.view.ViewGroup} (來自 Activity 的版面配置)，系統會將您的片段版面配置插入其中。
+
+{@code savedInstanceState} 參數是 {@link android.os.Bundle}，當片段即將恢復時 (如要進一步瞭解還原狀態，請參閱<a href="#Lifecycle">處理片段生命週期</a>)，這個參數就會提供先前的片段執行個體的相關資料。
+
+
+</p>
+
+<p>{@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()} 方法採用三種引數：
+</p>
+<ul>
+  <li>您想要擴大的版面配置的資源 ID。</li>
+  <li>要設為擴大過後版面配置的上層檢視的 {@link android.view.ViewGroup}。請務必傳遞 {@code
+container}，以便讓系統將版面配置參數套用至擴大過後版面配置的根檢視 (由將做為其目標的父檢視所指定)。
+</li>
+  <li>用於指示系統是否要在擴大期間將擴大過後的版面配置附加到 {@link
+android.view.ViewGroup} (第二個參數) 的布林值 (由於系統已將擴大過後的版面配置插入 {@code
+container}，因此布林值應為 false &mdash; 如果您傳送 true，會導致系統在最終版面配置中建立多餘的檢視群組)。
+</li>
+</ul>
+
+<p>您現在已瞭解如何建立可提供版面配置的片段了。接著，請將建立好的片段新增至 Activity。
+</p>
+
+
+
+<h3 id="Adding">將片段新增到 Activity 中</h3>
+
+<p>片段通常會將一部分 UI 嵌入主要 Activity 的整體檢視階層中。
+您有兩種方式可將片段新增到 Activity 版面配置：
+</p>
+
+<ul>
+  <li><b>宣告 Activity 版面配置檔案內含的片段。</b>
+<p>選用這種方式時，您可以將片段視為檢視，為其指定版面配置屬性。
+例如，以下是內含兩個片段的 Activity 版面配置檔案：
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>{@code &lt;fragment&gt;} 中的 {@code android:name} 屬性可指定系統呼叫版面配置中的 {@link
+android.app.Fragment} 類別。</p>
+
+<p>系統建立這個 Activity 版面配置後，就會呼叫版面配置中指定的任何片段，並為每個片段呼叫 {@link android.app.Fragment#onCreateView onCreateView()} 方法，藉此擷取所有片段的版面配置。
+
+系統會插入片段所傳回的 {@link android.view.View} 來取代 {@code &lt;fragment&gt;} 元素。
+</p>
+
+<div class="note">
+  <p><strong>注意：</strong>您必須為每個片段提供專屬識別碼，以便系統在 Activity 重新開始時復原片段 (您也可以使用此識別碼擷取要交易的片段，例如移除片段)。
+
+您有三種方式可提供片段的 ID：
+</p>
+  <ul>
+    <li>提供內含專屬 ID 的 {@code android:id} 屬性。</li>
+    <li>提供內含不重複字串的 {@code android:tag} 屬性。</li>
+    <li>如果您未提供上述兩項屬性，系統會採用容器檢視的 ID。
+</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>或者，利用程式將片段新增至現有的 {@link android.view.ViewGroup}。</b>
+<p>只要 Activity 處於執行狀態，您都可以將片段新增至 Activity 版面配置。方法很簡單，只要指定您想在其中加入片段的 {@link
+android.view.ViewGroup} 即可。
+</p>
+  <p>如要在 Activity 中進行片段交易 (例如新增、移除或替換片段)，請使用 {@link android.app.FragmentTransaction} 中的 API 進行。
+您可以透過以下方式取得 {@link android.app.Activity} 的 {@link android.app.FragmentTransaction} 執行個體：
+</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>接著，您就可以使用 {@link
+android.app.FragmentTransaction#add(int,Fragment) add()} 方法指定要新增的片段，以及要插入片段的目標檢視。
+例如：</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>第一個傳入 {@link android.app.FragmentTransaction#add(int,Fragment) add()} 的引數是要在其中插入片段的 {@link android.view.ViewGroup} (使用資源 ID 加以指定)，而第二個參數則是要新增的引數。
+
+</p>
+  <p>透過
+{@link android.app.FragmentTransaction} 完成變更後，請呼叫 {@link android.app.FragmentTransaction#commit} 以便讓變更生效。
+</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">新增不顯示 UI 的片段</h4>
+
+<p>上述範例說明如何將片段新增至 Activity，以提供 UI。但事實上，您也可以使用片段為 Activity 提供背景行為，避免顯示額外的 UI。
+
+</p>
+
+<p>如要新增不顯示使 UI 的片段，請使用 {@link
+android.app.FragmentTransaction#add(Fragment,String)} 從 Activity 新增片段 (請提供片段的不重複字串「標記」，而不是檢視 ID)。
+這樣即可新增片段，但由於該片段並未與 Activity 版面配置中的檢視相關聯，因此不會接收 {@link
+android.app.Fragment#onCreateView onCreateView()} 的呼叫。
+如此一來，您就不必實作該方法。</p>
+
+<p>提供片段的字串標記並不是採用非 UI 片段時的必要步驟 &mdash; 您也可以提供沒有 UI 的片段的字串標記 &mdash; 不過，如果片段沒有 UI，則字串標記將成為識別片段的唯一途徑。
+
+如果您想之後再從 Activity 中取得片段，請使用 {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}。
+</p>
+
+<p>如需使用沒有 UI 的片段做為背景工作者的 Activity 範例，請參閱 SDK 範例中位於以下路徑的 {@code
+FragmentRetainInstance.java} 範例 (可透過 Android SDK Manager 存取)<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>。
+
+</p>
+
+
+
+<h2 id="Managing">管理片段</h2>
+
+<p>如要管理 Activity 中的片段，請使用 {@link android.app.FragmentManager}。如要取得這些片段，請呼叫 Activity 中的 {@link android.app.Activity#getFragmentManager()}。
+</p>
+
+<p>您可透過 {@link android.app.FragmentManager} 執行下列操作：</p>
+
+<ul>
+  <li>使用 {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} (針對在 Activity 版面配置中提供 UI 的片段) 或 {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} (針對未提供 UI 的片段) 取得 Activity 中的現有片段。
+</li> 
+  <li>使用 {@link
+android.app.FragmentManager#popBackStack()} (模擬使用者的「返回」<em></em>命令) 將片段從返回堆疊中推出。</li>
+  <li>使用 {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()} 針對返回堆疊的變更項目註冊監聽器。</li>
+</ul>
+
+<p>如要進一步瞭解上述方法以及其他方法，請參閱 {@link
+android.app.FragmentManager} 類別說明文件。</p>
+
+<p>如上一節所述，您也可以使用 {@link android.app.FragmentManager} 開啟 {@link android.app.FragmentTransaction}，以便進行片段交易 (例如新增及移除片段)。
+
+</p>
+
+
+<h2 id="Transactions">進行片段交易</h2>
+
+<p>使用 Activity 中片段的一項實用功能，就是新增、移除、替換片段以及對它們執行其他動作，藉此反映使用者互動。
+您針對 Activity 提交的每組變更稱為交易，而您可以使用 {@link
+android.app.FragmentTransaction} 中的進行這種交易。
+此外，您也可以儲存對 Activity 所管理的返回堆疊進行的交易，讓使用者能夠往回瀏覽片段變更 (如同往回瀏覽 Activity)。
+
+</p>
+
+<p>您可以從 {@link
+android.app.FragmentManager} 中取得如下所示的 {@link android.app.FragmentTransaction}：</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>每次交易都是您想同時進行的一組變更。您可以使用 {@link
+android.app.FragmentTransaction#add add()}、{@link android.app.FragmentTransaction#remove remove()}和 {@link android.app.FragmentTransaction#replace replace()} 等方法設定您想針對特定交易進行的變更。
+
+接著，只要呼叫 {@link android.app.FragmentTransaction#commit()}，就能將該交易套用至 Activity。
+</p>
+</dl>
+
+<p>不過，您可能會為了新增交易至片段交易返回堆疊，先呼叫 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}，然後再呼叫 {@link
+android.app.FragmentTransaction#commit()}。
+返回堆疊是由 Activity 所管理，可讓使用者透過按下 [返回]<em></em> 按鈕的方式，返回先前的片段狀態。
+</p>
+
+<p>以下範例可讓您替換片段，並且保留先前的返回堆疊狀態：
+</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>在這個範例中，{@code newFragment} 會針對依據 {@code R.id.fragment_container} ID 識別的版面配置容器，
+替換其中的任何現有片段 (如果有的話)。系統會呼叫 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}，將替換交易儲存到返回堆疊，以便使用者按下 [返回]<em></em> 按鈕來復原交易以及返回上一個片段。
+
+</p>
+
+<p>如果您將多項變更新增至交易 (例如新增另一個 {@link
+android.app.FragmentTransaction#add add()} 或 {@link android.app.FragmentTransaction#remove
+remove()})，並且呼叫 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}，那麼您在呼叫 {@link android.app.FragmentTransaction#commit commit()} 之前套用的所有變更都會新增至返回堆疊做為單次交易，在這種情況下，按下 [返回]<em></em> 按鈕就能一次復原所有變更。
+
+</p>
+
+<p>您將變更新增至 {@link android.app.FragmentTransaction} 的順序並不會造成任何影響，但請注意以下例外狀況：
+</p>
+<ul>
+  <li>務必最後才呼叫 {@link android.app.FragmentTransaction#commit()}</li>
+  <li>如果您是將多個片段新增至同一容器，那麼您新增片段的順序將決定這些片段在檢視階層中的顯示順序
+</li>
+</ul>
+
+<p>如果您並未在進行移除片段的交易時呼叫 {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()}，該片段會在您提交交易後遭到刪除，而且使用者無法往回瀏覽至該片段。
+不過，如果您在移除片段時呼叫 {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}，則該片段將會遭到「停止」<em></em>，而且會在使用者往回瀏覽時繼續進行。
+
+
+</p>
+
+<p class="note"><strong>提示：</strong>您可以在進行每次片段交易時套用交易動畫，方法是在提交交易前呼叫 {@link android.app.FragmentTransaction#setTransition setTransition()}。
+
+</p>
+
+<p>呼叫 {@link android.app.FragmentTransaction#commit()} 並不會立即進行交易，
+而是會讓系統排定 UI 執行緒 (「主要」執行緒) 可執行這個方法時，立即加以執行。
+不過，您可以視需要透過 UI 執行緒呼叫 {@link
+android.app.FragmentManager#executePendingTransactions()}，立即執行 {@link android.app.FragmentTransaction#commit()} 所提交的交易。
+您通常不必這樣做，除非該交易是其他執行緒的工作的必要元件。
+</p>
+
+<p class="caution"><strong>注意：</strong>您可以使用 {@link
+android.app.FragmentTransaction#commit commit()} 來提交交易，但僅限於 Activity <a href="{@docRoot}guide/components/activities.html#SavingActivityState">儲存其狀態</a>之前 (也就是使用者離開 Activity 之前)。
+如果您在這個時間點之後嘗試提交交易，就會發生例外狀況，
+這是因為狀態會在交易提交後遺失 (如果需要復原 Activity 的話)。
+如果想確保狀態遺失不會造成任何影響，請使用 {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()} 提交交易。</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">與 Activity 通訊</h2>
+
+<p>雖然 {@link android.app.Fragment} 是實作成不同於
+{@link android.app.Activity} 的物件，而且可在多個 Activity 中使用，特定片段執行個體仍會直接與含有該物件的 Activity 建立關聯。
+</p>
+
+<p>因此，片段可存取內含{@link
+android.app.Fragment#getActivity()} 的 {@link android.app.Activity} 執行個體，以及輕鬆進行在 Activity 版面配置中尋找檢視等工作：
+</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>相同地，您的 Activity 可利用 {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} 或 {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()} 從 {@link android.app.FragmentManager} 中取得 {@link android.app.Fragment} 參照資料，以呼叫片段中的方法。
+例如：</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">為 Activity 建立事件回呼</h3>
+
+<p>在某些情況下，您可能需要可用來與 Activity 分享事件的片段。如果您需要這種片段，建議您在片段內定義回呼介面，然後要求主要 Activity 實作該片段。
+
+當 Activity 透過介面接收回呼後，即可視需要與版面配置中的其他片段分享這項資訊。
+</p>
+
+<p>例如，假設新聞應用程式的 Activity 中有兩個片段 &mdash; 一個用於顯示文章清單 (片段 A)，另一個用於顯示文章 (片段 B) &mdash; 其中的片段 A 必須告知 Activity 使用者選取清單項目的時間點，以便通知片段 B 顯示文章。
+
+在這個範例中，{@code OnArticleSelectedListener} 介面是在片段 A 中完成宣告：
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>接著，代管片段的 Activity 會實作 {@code OnArticleSelectedListener} 介面，並且覆寫 {@code onArticleSelected()} 以便將片段 A 的事件告知片段 B。為了確保主要 Activity 可實作該介面，片段 A 的 {@link
+android.app.Fragment#onAttach onAttach()} 回呼方法 (系統將片段新增至 Activity 時會呼叫這種方法) 轉換傳入 {@link android.app.Fragment#onAttach
+onAttach()} 的 {@link android.app.Activity}，藉此呼叫 {@code OnArticleSelectedListener} 執行個體：
+
+
+
+
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>如果 Activity 並未實作介面，那麼片段會擲回
+{@link java.lang.ClassCastException}。成功擲回時，{@code mListener} 成員會保留 Activity 所實作 
+{@code OnArticleSelectedListener} 的參照資料，以便片段 A 呼叫 {@code OnArticleSelectedListener} 介面定義的方法與 Activity 分享事件。
+
+例如，假設片段 A 是
+{@link android.app.ListFragment} 的延伸，則每當使用者點擊清單項目時，系統就會呼叫片段中的 {@link android.app.ListFragment#onListItemClick
+onListItemClick()}，讓該方法呼叫 {@code onArticleSelected()} 以便與 Activity 分享事件：
+
+</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>傳入 {@link
+android.app.ListFragment#onListItemClick onListItemClick()} 的 {@code id} 參數是使用者所點擊項目的資料列 ID，可讓 Activity (或其他片段) 用來從應用程式的 {@link
+android.content.ContentProvider} 擷取文章。
+</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->如要進一步瞭解如何使用內容供應程式，請參閱<a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>。
+</p>
+
+
+
+<h3 id="ActionBar">將項目新增到動作列中</h3>
+
+<p>片段可實作
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()} 來為 Activity 的<a href="{@docRoot}guide/topics/ui/menus.html#options-menu">選項選單</a> (以及<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>) 提供選單項目。不過，您必須在呼叫 {@link
+android.app.Fragment#onCreate(Bundle) onCreate()} 時呼叫 {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()}，告知系統該片段會新增項目到「選項選單」，這個方法才能接收呼叫 (否則該片段將無法接收
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} 的呼叫)。
+
+</p>
+
+<p>您之後透過片段新增到「選項選單」的任何物件都會附加到現有的選單項目。
+該片段也會在使用者選取選單項目時接收 {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} 的回呼。
+</p>
+
+<p>此外，您也可以在片段版面配置中註冊檢視來提供內容選單，方法是呼叫 {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}。當使用者開啟內容選單時，片段就會接收 {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()} 的呼叫。
+而當使用者選取某個項目時，片段則會接收 {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()} 的呼叫。</p>
+
+<p class="note"><strong>注意：</strong>雖然片段會在使用者選取項目時，針對所有新增的選單項目接收回呼，不過最先在使用者選取選單項目時接收個別回呼的是 Activity。
+
+如果 Activity 在使用者選取項目時所實作的回呼無法處理所選項目，則系統會將該事件傳送到片段的回呼中。
+這種情況會發生在「選項選單」和內容選單。
+</p>
+
+<p>如要進一步瞭解選單，請參閱<a href="{@docRoot}guide/topics/ui/menus.html">選單</a>和<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>開發人員指南。</p>
+
+
+
+
+<h2 id="Lifecycle">處理片段生命週期</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>圖 3.</strong>Activity 生命週期對片段生命週期造成的影響。
+</p>
+</div>
+
+<p>管理片段生命週期的方式與管理 Activity 生命週期十分雷同。與 Activity 相同，片段有以下三種狀態：
+</p>
+
+<dl>
+  <dt><i>已繼續</i></dt>
+    <dd>系統會在執行中的 Activity 內顯示片段。</dd>
+
+  <dt><i>已暫停</i></dt>
+    <dd>前景中有其他具備焦點的 Activity，但系統仍會顯示含有這個片段的 Activity (前景 Activity 處於半透明狀態，或是未覆蓋整個螢幕)。
+
+</dd>
+
+  <dt><i>已停止</i></dt>
+    <dd>系統不會顯示片段。這可能是因為主要 Activity 已停止，或是加到返回堆疊的片段已從 Activity 中移除。
+已停止的片段仍處於有效狀態 (系統會保留所有狀態和成員資訊)，
+但使用者無法看到這類片段，而且當 Activity 遭到刪除時，這些片段也會一併刪除。
+</dd>
+</dl>
+
+<p>與 Activity 相同，您可以使用 {@link
+android.os.Bundle} 保留片段的狀態，以便在 Activity 的處理程序遭到刪除後想重新建立 Activity 時，還原片段狀態。
+您可以在片段的 {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} 回呼期間儲存狀態，並且在
+{@link android.app.Fragment#onCreate onCreate()}、{@link
+android.app.Fragment#onCreateView onCreateView()} 或 {@link
+android.app.Fragment#onActivityCreated onActivityCreated()} 時還原狀態。如要進一步瞭解如何儲存狀態，請參閱 <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activity</a>。
+
+</p>
+
+<p>Activity 與片段生命週期之間最明顯的差異是，生命週期儲存在個別返回堆疊的方式。
+在預設情況下，Activity 停止後會插入系統所管理的 Activity 堆疊，方便使用者按下 [返回]<em></em> 按鈕來返回該 Activity (如<a href="{@docRoot}guide/components/tasks-and-back-stack.html">工作和返回堆疊</a>所述)。不過，片段只會在您進行移除片段的交易期間，呼叫 {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} 來要求系統儲存執行個體時，插入主要 Activity 所管理的返回堆疊。
+
+
+
+
+</p>
+
+<p>在其他情況下，管理片段生命週期的方式與管理 Activity 生命週期十分雷同。
+因此，<a href="{@docRoot}guide/components/activities.html#Lifecycle">管理 Activity 生命週期</a>的做法同樣適用於片段。
+不過，建議您參考相關資源，瞭解 Activity 生命週期對片段生命週期造成的影響。
+</p>
+
+<p class="caution"><strong>注意：</strong>如果您需要 {@link android.app.Fragment} 的
+{@link android.content.Context} 物件，請呼叫 {@link android.app.Fragment#getActivity()}。不過，請務必只在確定片段是附加到 Activity 的情況下，再呼叫 {@link android.app.Fragment#getActivity()}。
+
+如果片段未附加到 Activity，或是片段因超過生命週期而遭到卸除，則 {@link android.app.Fragment#getActivity()} 將傳回空值。
+</p>
+
+
+<h3 id="CoordinatingWithActivity">調整 Activity 生命週期</h3>
+
+<p>內含片段的 Activity 的生命週期會直接影響片段的生命週期，這樣一來，Activity 的每次生命週期回呼會針對每個片段產生相似的回呼。
+
+例如，當 Activity 收到 {@link android.app.Activity#onPause} 後，Activity 中的每個片段都會收到 {@link android.app.Fragment#onPause}。
+</p>
+
+<p>不過，片段有幾個額外的生命週期回呼，可用於處理與 Activity 之間的特殊互動，以執行建置或刪除片段 UI 等動作。以下是這些額外的回呼方法：
+
+</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>當片段與 Activity 建立關聯時，系統就會呼叫這個方法 ({@link
+android.app.Activity} 會傳入與片段相關聯的 Activity)。</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>系統會呼叫這個方法來建立與片段相關聯的檢視階層。</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>當 Activity 的 {@link android.app.Activity#onCreate
+onCreate()} 方法成功傳回時，系統就會呼叫這個方法。</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>當使用者移除與片段相關聯的檢視階層時，系統就會呼叫這個方法。</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>當使用者將片段與 Activity 解除關聯時，系統就會呼叫這個方法。</dd>
+</dl>
+
+<p>如圖 3 所述，片段生命週期的流程會受到主要 Activity 的影響。
+您可以透過該圖片瞭解 Activity 的連續狀態如何決定片段要接收的回呼方法。
+例如，當 Activity 收到 {@link
+android.app.Activity#onCreate onCreate()} 回呼後，Activity 中的片段就不會收到
+{@link android.app.Fragment#onActivityCreated onActivityCreated()} 以外的回呼。</p>
+
+<p>Activity 一旦進入已恢復狀態，您便可視需要在 Activity 中新增或移除片段。
+因此，只有處於已恢復狀態的 Activity 會影響片段的生命週期。
+</p>
+
+<p>不過，當 Activity 不再處於已恢復狀態後，Activity 就會再次推送片段的生命週期。
+</p>
+
+
+
+
+<h2 id="Example">範例說明</h2>
+
+<p>以下提供使用兩個片段建立兩個面板的版面配置的 Activity 範例，藉此綜合說明本文所述內容。
+下方 Activity 包含一個用於顯示莎士比亞劇作清單的片段，以及另一個用於在使用者選取清單項目時顯示劇作摘要的片段。
+
+這個 Activity 範例同時示範了如何根據螢幕設定提供不同的片段設定。
+</p>
+
+<p class="note"><strong>注意：</strong>如需這個 Activity 的完整原始碼，請查閱 
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>。</p>
+
+<p>主要 Activity 會在 {@link
+android.app.Activity#onCreate onCreate()} 時以常見的方式套用版面配置：</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>Activity 套用的版面配置為 {@code fragment_layout.xml}：</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>使用這個版面配置可讓系統在 Activity 載入版面配置時，呼叫 {@code TitlesFragment} (這個類別會列出劇本名稱)，而 {@link android.widget.FrameLayout} (顯示劇本摘要的片段將納入的目標類別) 則會佔用螢幕右側的空間，但在一開始會保持空白狀態。
+
+
+如下方所示，系統只會在使用者從清單中選取項目後，才將片段插入 {@link android.widget.FrameLayout}。
+</p>
+
+<p>不過，並非所有螢幕設定都有足夠的空間同時並排顯示劇作清單以及劇作摘要。
+因此，上方版面配置只適用於橫向螢幕設定，系統會將它儲存在 {@code res/layout-land/fragment_layout.xml} 中。
+</p>
+
+<p>而在螢幕為直向的情況下，系統會套用儲存在 {@code res/layout/fragment_layout.xml} 中的以下版面配置：
+</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>這個版面配置只包含 {@code TitlesFragment}。也就是說，如果裝置採用直向螢幕設定，系統只會顯示劇作名稱清單。
+因此，當使用者在採用這種設定的裝置上點擊清單項目後，應用程式就會啟動新 Activity 來顯示劇作摘要，而不是載入第二個片段。
+
+</p>
+
+<p>接著，請看看片段類別如何達到以上目標。首先是用於顯示莎士比亞劇作名稱清單的 {@code
+TitlesFragment}。這個片段會延伸 {@link
+android.app.ListFragment}，並且依據該類別控制大多數的清單檢視工作。</p>
+
+<p>如果您檢查這個程式碼，將會發現使用者點擊清單項目後會觸發兩種行為：視採用的版面配置而定，系統會建立並呈現新的片段，以便在同一 Activity 中顯示詳細資料 (將片段加到 {@link
+android.widget.FrameLayout})，或是啟動新的 Activity (藉此顯示片段)。
+
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>第二個片段 {@code DetailsFragment} 則會針對
+{@code TitlesFragment} 中，使用者所選清單項目的劇本摘要：</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>針對 {@code TitlesFragment} 類別發出的回呼，如果使用者點擊清單項目，而且目前的版面配置「並未」<em></em>包含 {@code R.id.details} 檢視 ({@code DetailsFragment} 所屬的檢視)，則應用程式會執行 {@code DetailsActivity} Activity 來顯示項目內容。
+
+
+</p>
+
+<p>以下是會在螢幕採用橫向版面設定時，嵌入 {@code DetailsFragment} 以顯示所選劇本摘要的 {@code DetailsActivity}：
+</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>請注意，這個 Activity 會在螢幕採用橫向版面配置的情況下自行結束，因此主要 Activity 會接續顯示 {@code TitlesFragment} 旁的 {@code DetailsFragment}。如果使用者在採用直向版面配置的裝置上執行 {@code DetailsActivity}，然後將該裝置旋轉成橫向 (這會重新執行目前的 Activity)，就可能會發生這種情況。
+
+
+</p>
+
+
+<p>如需更多使用片段的範例 (以及本範例的原始檔案)，請參閱<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">ApiDemos</a> 所提供的 API Demos 範例應用程式 (可透過 <a href="{@docRoot}resources/samples/get.html">SDK 元件範本</a>下載)。
+
+</p>
+
+

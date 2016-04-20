@@ -38,25 +38,34 @@ directly. Instead, you:
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">
   <code>setData()</code></a> to set the payload.
   </li>
+
+  <li>
+  If a delay in syncing would negatively impact user experience, call
+  <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest#setUrgent()">
+  {@code setUrgent()}</a>.
+  </li>
+
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
   </li>
-  <li>When requesting data items, the system returns objects
-  that properly implement the <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a> interface.
-  </li>
-</ol>
+  </ol>
 
 <p>
-However, instead of working with raw bytes using <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])"><code>setData()</code></a>,
-we recommend you <a href="#SyncData">use a data map</a>, which exposes
+When requesting data items, the system returns objects that properly implement the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code>
+</a> interface. However, instead of working with raw bytes using
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">
+<code>setData()</code></a>, we recommend you <a href="#SyncData">use a data map</a>, which exposes
 a data item in an easy-to-use {@link android.os.Bundle}-like interface.
 </p>
 
 
 <h2 id="SyncData">Sync Data with a Data Map</h2>
 <p>
-When possible, use the <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html"><code>DataMap</code></a> class.
+When possible, use the <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html">
+<code>DataMap</code></a> class.
 This approach lets you work with data items in the form of an Android {@link android.os.Bundle},
-so object serialization and de-serialization is done for you, and you can manipulate data with key-value pairs.
+so the system does object serialization and deserialization for you, and you can manipulate data
+with key-value pairs.
 </p>
 
 <p>To use a data map:</p>
@@ -77,11 +86,23 @@ app, you should create a path scheme that matches the structure of the data.
   <li>Set any desired values for the data map using the <code>put...()</code> methods, such as
   <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html#putString(java.lang.String, java.lang.String)"><code>putString()</code></a>.
   </li>
+
+   <li>
+   If a delay in syncing would negatively impact user experience, call
+   <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest#setUrgent()">
+   {@code setUrgent()}</a>.
+   </li>
+
+
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataMapRequest.html#asPutDataRequest()"><code>PutDataMapRequest.asPutDataRequest()</code></a>
   to obtain a <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a> object.
    </li>
+
+
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
+
   <p class="note"><b>Note:</b>
+
   If the handset and wearable devices are disconnected,
   the data is buffered and synced when the connection is re-established.
   </p>
@@ -124,6 +145,40 @@ public class MainActivity extends Activity implements
 Layer Calls</a>.</p>
 
 
+<h3>Set DataItem priority</h3>
+
+<p>
+In <a href="https://developers.google.com/android/guides/releases">Google Play services 8.3 and later</a>,
+the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi">{@code DataApi}</a> interface
+allows urgent requests for syncing of
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem">{@code DataItems}</a>.
+Normally, the system may delay delivery of
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem">{@code DataItems}</a>
+to the Wear network in order to improve battery life
+for user devices, but if a delay in syncing
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem">{@code DataItems}</a>
+would negatively impact user experience, you
+can mark them as urgent. For example, in a remote control app where the user expects their actions to be
+reflected immediately, you can have the system sync your
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem">{@code DataItems}</a>
+immediately by calling
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest#setUrgent()">
+{@code setUrgent()}</a>.
+</p>
+
+<p>
+If you do not call
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest#setUrgent()">
+{@code setUrgent()}</a>, the system may delay up to 30 minutes before syncing non-urgent
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem">{@code DataItems}</a>,
+but you can usually expect the delay to be a few minutes, if at all.
+The default urgency is now non-urgent, so you must use
+<a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest#setUrgent()">
+{@code setUrgent()}</a> if you wish to retain the immediate-sync behavior that
+existed in previous versions of the Wear API.
+</p>
+
 <h2 id="ListenEvents">Listen for Data Item Events</h2>
 
 <p>If one side of the data layer connection changes a data item, you probably want
@@ -158,7 +213,7 @@ public class MainActivity extends Activity implements
 
     &#64;Override
     protected void onResume() {
-        super.onStart();
+        super.onResume();
         mGoogleApiClient.connect();
     }
 

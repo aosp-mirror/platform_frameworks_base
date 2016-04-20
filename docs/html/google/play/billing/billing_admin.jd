@@ -130,9 +130,10 @@ number of in-app items.</p>
     a product ID.</p>
   </li>
   <li><strong>Product Type</strong>
-    <p>The product type can be <strong>Managed per user account</strong>, <strong>Unmanaged</strong>,
-    or <strong>Subscription</strong>. You can never change an item's product type after you set it. For more
-    information, see <a href="#billing-purchase-type">Choosing a product type</a> later in this
+    <p>The product type can be <strong>Managed per user account</strong>,
+    <strong>Unmanaged</strong>, or <strong>Subscription</strong>. You can never
+    change an item's product type after you set it. For more information, see
+    <a href="#billing-purchase-type">Choosing a product type</a> later in this
     document.</p>
   </li>
   <li><strong>Publishing State</strong>
@@ -154,14 +155,15 @@ number of in-app items.</p>
     application.</p>
   </li>
   <li><strong>Title</strong>
-    <p>The title is a short descriptor for the item. For example, "Sleeping potion." Titles must be
-    unique across an application's namespace. Every item must have a title. The title is visible to
+    <p>The title is a short descriptor for the item. For example, "Sleeping potion."
+    Every item must have a title. The title is visible to
     users during checkout. For optimum appearance, titles should be no longer than 25 characters;
     however, titles can be up to 55 characters in length.</p>
   </li>
   <li><strong>Description</strong>
     <p>The description is a long descriptor for the item. For example, "Instantly puts creatures to
-    sleep. Does not work on angry elves." Every item must have a description. Descriptions can be up to 80 characters in length.</p>
+    sleep. Does not work on angry elves." Every item must have a description. Descriptions can be
+    up to 80 characters in length.</p>
   </li>
   <li><strong>Price</strong>
     <p>You must provide a default price in your home currency. You can also provide prices in other
@@ -171,22 +173,25 @@ number of in-app items.</p>
     <p>To specify prices in other currencies, you can manually enter the price for each
     currency or you can click <strong>Auto Fill</strong> and let Google Play do a one-time
     conversion from your home currency to the currencies you are targeting (see figure 3).</p>
-    <p>For subscription items, note that you can not change the item's price once you have published it. </p>
+    <p>For subscription items, note that you can not change the item's price once you have published
+    it.</p>
   </li>
 </ul>
 
 <div style="margin:1em;">
-<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_list_form_2.png" xheight="1226" id="figure3" />
+<img style="border:1px solid #ddd;padding-bottom:.5em"
+    src="{@docRoot}images/in-app-billing/billing_list_form_2.png"
+    xheight="1226" id="figure3" />
 <p class="img-caption" style="padding-left:.5em;">
   <strong>Figure 3.</strong> Specifying additional currencies for an in-app product.
 </p>
 </div>
 
 <p>For more information about product IDs and product lists, see <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1072599">Creating In-App Product
-IDs</a>. For more information about pricing, see <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-App Billing
-Pricing</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1072599">
+Creating In-App Product IDs</a>. For more information about pricing, see <a
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">
+In-App Billing Pricing</a>.</p>
 
 <p class="note"><strong>Note</strong>: Be sure to plan your product ID namespace. You cannot reuse
 or modify product IDs after you save them.</p>
@@ -196,14 +201,15 @@ or modify product IDs after you save them.</p>
 <p>To add a batch of items to a product list using a CSV file, you first need to create your CSV
 file. The data values that you specify in the CSV file represent the same data values you specify
 manually through the In-app Products UI (see <a href="#billing-form-add">Adding items one at a time
-to a product list</a>). 
+to a product list</a>).
 
 <p>If you are importing and exporting CSV files with in-app products, please
 keep tax-inclusive pricing in mind. If you use auto-fill, you can provide a
 tax-exclusive default price and tax-inclusive prices will be auto-filled. If you
 do not use auto-fill, prices you provide must include tax.</p>
 
-<p class="note"><strong>Note:</strong> Batch upload of product lists containing subscriptions is not yet supported.</p>
+<p class="note"><strong>Note:</strong> Batch upload of product lists containing
+subscriptions is not yet supported.</p>
 
 The CSV file uses commas (,) and semi-colons (;) to separate data values.
 Commas are used to separate primary data values, and semi-colons are used to separate subvalues. For
@@ -287,7 +293,8 @@ example, the syntax for the CSV file is as follows:</p>
   </li>
   <li><em>price</em>
     <p>This is equivalent to the Price in the In-app Products UI. The price must be specified in
-    micro-units. To convert a currency value to micro-units, you multiply the real value by 1,000,000.
+    micro-units. To convert a currency value to micro-units, you multiply the real value by
+    1,000,000.
     For example, if you want to sell an in-app item for $1.99 you specify 1990000 in the
     <em>price</em> field.</p>
   </li>
@@ -413,8 +420,8 @@ refund notification from Google payments, and Google Play sends a refund message
 application. For more information, see <a
 href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
-Pricing</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">
+In-app Billing Pricing</a>.</p>
 
 <p class="caution"><strong>Important:</strong> You cannot use the API to issue
 refunds or cancel In-app Billing transactions. You must do this manually through your Google
@@ -442,7 +449,7 @@ Merchant Order Number (rather than a Google Order Number) and reports the Mercha
 Order Number as the value of <code>orderID</code>. Here's an
 example:</p>
 
-<pre>"orderId" : "12999556515565155651.5565135565155651"</pre>
+<pre>"orderId" : "GPA.1234-5678-9012-34567"</pre>
 
 <p>For transactions dated previous to 5 December 2012, Google checkout assigned
 a Google Order Number and reported that number as the value of
@@ -453,10 +460,11 @@ Google Order Number:</p>
 
 <h2 id="billing-testing-setup">Setting Up Test Accounts</h2>
 
-<p>The Google Play Developer Console lets you set up one or more test accounts. A test account is a
-regular Google account that you register on the Developer Console as a test account. Test accounts are
-authorized to make in-app purchases from applications that you have uploaded to the Google Play
-Developer Console but have not yet published.</p>
+<p>The Google Play Developer Console lets you set up one or more test accounts.
+A test account is a regular Google account that you register on the Developer
+Console as a test account. Test accounts are authorized to make in-app purchases
+from applications that you have uploaded to the Google Play Developer Console
+but have not yet published.</p>
 
 <p>You can use any Google account as a test account. Test accounts are useful if you want to let
 multiple people test In-app Billing on applications without giving them access to your publisher
@@ -547,6 +555,3 @@ project issue tracker</a></td>
 <p>For general information about how to post to the groups listed above, see <a
 href="{@docRoot}resources/community-groups.html">Developer Forums</a> document in the Resources
 tab.</p>
-
-
-

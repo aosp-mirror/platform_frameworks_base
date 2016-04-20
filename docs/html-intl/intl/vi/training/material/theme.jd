@@ -1,0 +1,131 @@
+page.title=Sử dụng Chủ đề Material
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#ColorPalette">Tùy chỉnh Bảng màu</a></li>
+  <li><a href="#StatusBar">Tùy chỉnh Thanh Trạng thái</a></li>
+  <li><a href="#Inheritance">Tạo Chủ đề Dạng xem Riêng</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Chủ đề material mới cung cấp:</p>
+
+<ul>
+  <li>Widget hệ thống cho phép bạn đặt bảng màu của chúng</li>
+  <li>Hoạt hình phản hồi chạm cho widget hệ thống</li>
+  <li>Hoạt hình chuyển tiếp hoạt động</li>
+</ul>
+
+<p>Bạn có thể tùy chỉnh diện mạo của chủ đề material
+theo nhận diện thương hiệu của mình bằng một bảng màu mà bạn kiểm soát. Bạn có thể nhuộm màu thanh hành động và
+thanh trạng thái bằng cách sử dụng các thuộc tính chủ đề như minh họa trong <a href="#fig3">Hình 3</a>.</p>
+
+<p>Widget hệ thống có một thiết kế mới và hoạt hình phản hồi chạm. Bạn có thể tùy chỉnh
+bảng màu, hoạt hình phản hồi chạm và chuyển tiếp hoạt động cho ứng dụng của mình.</p>
+
+<p>Chủ đề material được định nghĩa là:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (phiên bản tối)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (phiên bản sáng)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>Để biết danh sách các kiểu material mà bạn có thể sử dụng, hãy xem tài liệu tham chiếu API cho
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Hình 1</strong>. Giao diện material tối</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Hình 2</strong>. Giao diện material sáng</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Lưu ý:</strong> Chủ đề material chỉ sẵn có trong Android 5.0 (API mức 21) trở
+lên. <a href="{@docRoot}tools/support-library/features.html#v7">Thư viện Hỗ trợ v7</a>
+cung cấp chủ đề mang phong cách material design cho một số widget và hỗ trợ tùy chỉnh
+bảng màu. Để biết thêm thông tin, hãy xem phần
+<a href="{@docRoot}training/material/compatibility.html">Duy trì Tính tương thích</a>.
+</p>
+
+
+<h2 id="ColorPalette">Tùy chỉnh Bảng màu</h2>
+
+<p style="margin-bottom:30px">Để tùy chỉnh các màu cơ bản của chủ đề cho phù hợp với nhãn hiệu của bạn, hãy định nghĩa
+màu tùy chỉnh của bạn bằng thuộc tính chủ đề khi bạn kế thừa từ chủ đề material:</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Hình 3.</strong> Tùy chỉnh chủ đề material.</p>
+</div>
+
+
+<h2 id="StatusBar">Tùy chỉnh Thanh Trạng thái</h2>
+
+<p>Chủ đề material cho phép bạn dễ dàng tùy chỉnh thanh trạng thái để bạn có thể quy định
+màu cho phù hợp với nhãn hiệu của mình và đảm bảo đủ độ tương phản để hiển thị biểu tượng trạng thái màu trắng. Để
+đặt màu tùy chỉnh cho thanh trạng thái, hãy sử dụng thuộc tính <code>android:statusBarColor</code> khi
+bạn mở rộng chủ đề material. Theo mặc định, <code>android:statusBarColor</code> kế thừa
+giá trị của <code>android:colorPrimaryDark</code>.</p>
+
+<p>Bạn cũng có thể tự vẽ phía sau thanh trạng thái. Ví dụ, nếu bạn muốn hiển thị
+thanh trạng thái trong suốt trên một ảnh chụp, với graddien hơi tối để đảm bảo biểu tượng
+trạng thái màu trắng nhìn thấy được. Để làm vậy, hãy đặt thuộc tính <code>android:statusBarColor</code> thành
+<code>&#64;android:color/transparent</code> và điều chỉnh cờ cửa sổ nếu cần. Bạn cũng có thể
+sử dụng phương thức {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} cho hoạt hình
+hoặc hiệu ứng mờ dần.</p>
+
+<p class="note">
+<strong>Lưu ý:</strong> Thanh trạng thái cần luôn có một bản vẽ rõ ràng từ
+thanh công cụ chính, trừ trường hợp bạn hiển thị nội dung hình ảnh hoặc phương tiện phong phú từ cạnh tới cạnh phía sau
+những thanh này và khi bạn sử dụng gradient để đảm bảo rằng các biểu tượng vẫn nhìn thấy được.
+</p>
+
+<p>Khi bạn tùy chỉnh thanh điều hướng và trạng thái, hãy khiến cả hai đều trong suốt hoặc chỉ sửa đổi
+thanh trạng thái. Thanh điều hướng nên giữ lại màu đen trong mọi trường hợp khác.</p>
+
+
+<h2 id="Inheritance">Tạo Chủ đề Dạng xem Riêng</h3>
+
+<p>Những phần tử trong định nghĩa bố trí XML có thể quy định thuộc tính <code>android:theme</code> để
+tham chiếu tới một tài nguyên chủ đề. Thuộc tính này sửa đổi chủ đề cho phần tử và bất cứ
+phần tử con nào, điều này có ích đối với việc thay đổi bảng màu của chủ đề trong một phần cụ thể
+của giao diện.</p>

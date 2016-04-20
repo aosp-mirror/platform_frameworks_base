@@ -1,0 +1,94 @@
+page.title=Adding an Action to a Message
+page.tags="Snackbar" "action" "popup"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<!--
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li>
+        <a href="#id">heading</a>
+      </li>
+
+      <li>
+        <a href="#id">heading</a>
+      </li>
+    </ol>
+-->
+
+    <h2>See Also</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/topics/ui/ui-events.html">
+          Input Events</a></li>
+    </ul>
+
+
+  </div>
+</div>
+
+<p>
+  You can add an action to a {@link android.support.design.widget.Snackbar},
+  allowing the user to respond to your message. If you add an action to a
+  {@link android.support.design.widget.Snackbar}, the
+  {@link android.support.design.widget.Snackbar} puts a button
+  next to the message text. The user can trigger your action by pressing the
+  button. For example, an email app might put an <em>undo</em> button on its
+  "email archived" message; if the user clicks the <em>undo</em> button, the
+  app takes the email back out of the archive.
+</p>
+
+<img src="{@docRoot}images/training/snackbar/snackbar_undo_action_2x.png"
+  srcset="{@docRoot}images/training/snackbar/snackbar_undo_action.png 1x,
+      {@docRoot}images/training/snackbar/snackbar_undo_action_2x.png 2x"
+  width="400" alt="">
+
+<p class="img-caption">
+  <strong>Figure 1.</strong> This Snackbar has an <strong>Undo</strong>
+  button, which restores the item that was just removed.
+</p>
+
+<p>
+  To add an action to a {@link android.support.design.widget.Snackbar} message,
+  you need to define a listener object that implements the {@link
+  android.view.View.OnClickListener} interface. The system calls your
+  listener's {@link android.view.View.OnClickListener#onClick onClick()} method
+  if the user clicks on the message action. For example, this snippet shows a
+  listener for an undo action:
+</p>
+
+<pre>public class MyUndoListener implements View.OnClickListener{
+
+    &amp;Override
+    public void onClick(View v) {
+
+        // Code to undo the user's last action
+    }
+}</pre>
+
+<p>
+  Use one of the
+  {@link android.support.design.widget.Snackbar#setAction(int, android.view.View.OnClickListener)
+  SetAction()} methods to attach the listener to your {@link
+  android.support.design.widget.Snackbar}. Be sure to attach the listener
+  before you call {@link android.support.design.widget.Snackbar#show show()},
+  as shown in this code sample:
+</p>
+
+<pre>Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                                R.string.email_archived, Snackbar.LENGTH_SHORT);
+<strong>mySnackbar.setAction(R.string.undo_string, new MyUndoListener());</strong>
+mySnackbar.show();</pre>
+
+<p class="note">
+  <strong>Note:</strong> A {@link android.support.design.widget.Snackbar}
+  automatically goes away after a short time, so you can't count on the user
+  seeing the message or having a chance to press the button. For this reason,
+  you should consider offering an alternate way to perform any {@link
+  android.support.design.widget.Snackbar} action.
+</p>

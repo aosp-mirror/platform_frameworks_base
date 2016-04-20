@@ -1,0 +1,90 @@
+page.title=Элементы управления вводом
+parent.title=Пользовательский интерфейс
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>Элементы управления вводом представляют собой интерактивные компоненты пользовательского интерфейса приложения. В Android имеется
+широкий набор элементов управления, которые можно использовать в пользовательском интерфейсе, например, кнопки, текстовые поля, полосы прокрутки,
+флажки, кнопки изменения масштаба, переключатели и многие другие элементы.</p>
+
+<p>Чтобы добавить элемент управления вводом в пользовательский интерфейс, достаточно вставить соответствующий элемент XML в <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML-файл макета</a>. Ниже представлен пример макета
+с текстовым полем и кнопкой.</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Каждый элемент управления вводом поддерживает определенный набор событий ввода, чтобы можно было обрабатывать такие события, как ввод
+пользователем текста или нажатие кнопки.</p>
+
+
+<h2 id="CommonControls">Часто используемые элементы управления</h2>
+<p>Ниже представлен список некоторых часто используемых элементов управления, которые можно использовать в приложении. Чтобы узнать подробнее о каждом элементе управления,
+перейдите по соответствующей ссылке.</p>
+
+<p class="note"><strong>Примечание.</strong> Ниже перечислены далеко не все элементы управления, которые имеются в системе
+Android. Все они имеются в пакете {@link android.widget}. Если в вашем приложении требуется реализовать
+определенный тип элемента управления вводом, вы можете создать собственные <a href="{@docRoot}guide/topics/ui/custom-components.html">настраиваемые компоненты</a>.</p>
+
+<table>
+    <tr>
+        <th scope="col">Тип элемента управления</th>
+        <th scope="col">Описание</th>
+	<th scope="col">Связанные классы</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">Кнопка</a></td>
+        <td>Кнопка, которую пользователь может нажать для выполнения действия.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">Текстовое поле</a></td>
+        <td>Редактируемое текстовое поле. Можно воспользоваться виджетом <code>AutoCompleteTextView</code>, чтобы создать виджет для ввода текста с возможностью автозаполнения с помощью подсказок.</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">Флажок</a></td>
+        <td>Переключатель, которым можно воспользоваться для включения или отключения функции или компонента. Флажки следует использовать при отображении группы доступных для выбора параметров, которые не являются взаимоисключающими.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">Переключатель</a></td>
+        <td>Этот элемент управления аналогичен флажку, за исключением того, что в группе элементов можно выбрать только один вариант.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">Кнопка-переключатель</a></td>
+        <td>Кнопка включения/отключения с индикатором.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">Раскрывающийся список</a></td>
+        <td>Раскрывающийся список параметров, в котором пользователь может выбрать только одно значение.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">Элементы выбора</a></td>
+        <td>Элементы диалогового окна для выбора одного значения из набора с помощью кнопок со стрелками вверх и вниз или с помощью жеста пролистывания. Для ввода значений даты (дня, месяца, года) используйте виджет <code>DatePicker</code>, а для ввода значений времени (часов, минут и указания времени до полудня или после [AM/PM]) — виджет <code>TimePicker</code>. Формат этих виджетов выбирается автоматически на основе региональных настроек на устройстве.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>

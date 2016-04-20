@@ -1,0 +1,174 @@
+page.title=Normal Permissions
+page.tags=permissions,normal
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!--
+<h2>In this document</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.Manifest.permission}</li>
+  </ol>
+
+  <h2>See Also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/permissions/index.html">Working with System
+        Permissions</a></li>
+  </ol>
+
+<!--
+<h2>See also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  Many permissions are designated as {@link
+  android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL},
+  which indicates that
+  there's no great risk to the user's privacy or security in letting apps have
+  those permissions. For example, users would reasonably want to know whether
+  an app can read their contact information, so users have to grant this
+  permission explicitly. By contrast, there's no great risk in allowing an app
+  to vibrate the device, so that permission is designated as <em>normal.</em>
+</p>
+
+<p>
+  If an app declares in its
+  manifest that it needs a normal permission, the system automatically grants
+  the app
+  that permission at install time. The system does not prompt the user
+  to grant normal
+  permissions, and users cannot revoke these permissions.
+</p>
+
+<p>As of API level 23, the following permissions are classified as {@link
+    android.content.pm.PermissionInfo#PROTECTION_NORMAL PROTECTION_NORMAL}:</p>
+
+<ul>
+  <li>{@link android.Manifest.permission#ACCESS_LOCATION_EXTRA_COMMANDS
+  ACCESS_LOCATION_EXTRA_COMMANDS}
+  </li>
+
+  <li>{@link android.Manifest.permission#ACCESS_NETWORK_STATE
+  ACCESS_NETWORK_STATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#ACCESS_NOTIFICATION_POLICY
+  ACCESS_NOTIFICATION_POLICY}
+  </li>
+
+  <li>{@link android.Manifest.permission#ACCESS_WIFI_STATE ACCESS_WIFI_STATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#BLUETOOTH BLUETOOTH}
+  </li>
+
+  <li>{@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN}
+  </li>
+
+  <li>{@link android.Manifest.permission#BROADCAST_STICKY BROADCAST_STICKY}
+  </li>
+
+  <li>{@link android.Manifest.permission#CHANGE_NETWORK_STATE
+  CHANGE_NETWORK_STATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE
+  CHANGE_WIFI_MULTICAST_STATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#CHANGE_WIFI_STATE CHANGE_WIFI_STATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#DISABLE_KEYGUARD DISABLE_KEYGUARD}
+  </li>
+
+  <li>{@link android.Manifest.permission#EXPAND_STATUS_BAR EXPAND_STATUS_BAR}
+  </li>
+
+  <li>{@link android.Manifest.permission#GET_PACKAGE_SIZE GET_PACKAGE_SIZE}
+  </li>
+
+  <li>{@link android.Manifest.permission#INSTALL_SHORTCUT INSTALL_SHORTCUT}
+  </li>
+
+  <li>{@link android.Manifest.permission#INTERNET INTERNET}
+  </li>
+
+  <li>{@link android.Manifest.permission#KILL_BACKGROUND_PROCESSES
+  KILL_BACKGROUND_PROCESSES}
+  </li>
+
+  <li>{@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS
+  MODIFY_AUDIO_SETTINGS}
+  </li>
+
+  <li>{@link android.Manifest.permission#NFC NFC}
+  </li>
+
+  <li>{@link android.Manifest.permission#READ_SYNC_SETTINGS READ_SYNC_SETTINGS}
+  </li>
+
+  <li>{@link android.Manifest.permission#READ_SYNC_STATS READ_SYNC_STATS}
+  </li>
+
+  <li>{@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED
+  RECEIVE_BOOT_COMPLETED}
+  </li>
+
+  <li>{@link android.Manifest.permission#REORDER_TASKS REORDER_TASKS}
+  </li>
+
+  <li>{@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+  REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
+  </li>
+
+  <li>{@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES
+  REQUEST_INSTALL_PACKAGES}
+  </li>
+
+  <li>{@link android.Manifest.permission#SET_ALARM SET_ALARM}
+  </li>
+
+  <li>{@link android.Manifest.permission#SET_TIME_ZONE SET_TIME_ZONE}
+  </li>
+
+  <li>{@link android.Manifest.permission#SET_WALLPAPER SET_WALLPAPER}
+  </li>
+
+  <li>{@link android.Manifest.permission#SET_WALLPAPER_HINTS
+  SET_WALLPAPER_HINTS}
+  </li>
+
+  <li>{@link android.Manifest.permission#TRANSMIT_IR TRANSMIT_IR}
+  </li>
+
+  <li>{@link android.Manifest.permission#UNINSTALL_SHORTCUT UNINSTALL_SHORTCUT}
+  </li>
+
+  <li>{@link android.Manifest.permission#USE_FINGERPRINT USE_FINGERPRINT}
+  </li>
+
+  <li>{@link android.Manifest.permission#VIBRATE VIBRATE}
+  </li>
+
+  <li>{@link android.Manifest.permission#WAKE_LOCK WAKE_LOCK}
+  </li>
+
+  <li>{@link android.Manifest.permission#WRITE_SYNC_SETTINGS
+  WRITE_SYNC_SETTINGS}
+  </li>
+</ul>

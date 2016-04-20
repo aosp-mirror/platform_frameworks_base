@@ -1,0 +1,480 @@
+page.title=應用程式基礎知識
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文件內容</h2>
+<ol>
+<li><a href="#Components">應用程式元件</a>
+  <ol>
+    <li><a href="#ActivatingComponents">啟用元件</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">宣示說明檔案</a>
+  <ol>
+    <li><a href="#DeclaringComponents">宣告元件</a></li>
+    <li><a href="#DeclaringRequirements">宣告應用程式需求</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">應用程式資源</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android 應用程式是以 Java 程式語言編寫而成。Android SDK 工具可將您的程式碼 &mdash; 連同任何相關資料和資源檔案 &mdash; 編入 APK (
+ <i>Android 套件，</i>使用 {@code .apk} 後綴字詞的封存檔)。
+APK 檔案包含 Android 應用程式的所有內容，搭載 Android 作業系統的裝置會使用這種檔案來安裝應用程式。
+</p>
+
+<p>Android 應用程式安裝到裝置之後，便可在專屬的安全性沙箱中執行： </p>
+
+<ul>
+ <li>Android 作業系統是一種支援多位使用者的 Linux 系統；在這種系統中，每款應用程式即代表不同的使用者。
+</li>
+
+<li>在預設情況下，系統會為每款應用程式指派一個不重複 Linux 使用者 ID (只有系統可使用這個 ID，應用程式無法取得這項資訊)。
+系統會為應用程式中的所有檔案設定權限，因此只有該應用程式指派的使用者 ID 可存取這些檔案。
+ </li>
+
+<li>所有處理程序都有專屬的虛擬機器 (VM)，供系統在獨立環境中執行應用程式的程式碼。
+</li>
+
+<li>在預設情況下，每款應用程式會在專屬的 Linux 處理程序中執行。Android 會在需要執行應用程式的任何元件時啟動處理程序，並且在不必執行應用程式元件，或系統必須復原記憶體供其他應用程式使用時關閉處理程序。
+
+</li>
+</ul>
+
+<p>如此一來，Android 系統就會實作「最低權限原則」<em></em>。換句話說，在預設情況下，所有應用程式只能存取執行工作時所需的元件。
+
+這樣一來，應用程式便無法存取系統的某些部分，藉此建立十分安全的執行環境。
+</p>
+
+<p>不過，應用程式可透過一些方式與其他應用程式分享資料，以及存取系統服務：
+</p>
+
+<ul>
+  <li>兩款應用程式可共用相同的 Linux 使用者 ID，以便存取彼此的檔案。
+為了節省系統資源，共用相同使用者 ID 的應用程式可在相同 Linux 處理程序中執行，以及共用相同的 VM (前提是應用程式必須使用相同的憑證進行簽署)。
+
+</li>
+  <li>應用程式可要求存取裝置資料 (例如使用者的聯絡人資料、簡訊、掛載式儲存空間 (SD 卡)、相機、藍牙等)。
+使用者必須在安裝期間授予所有應用程式權限。
+</li>
+</ul>
+
+<p>本文提供有關 Android 應用程式如何在系統中運作的基本概念，其餘部分則說明以下幾點：
+</p>
+<ul>
+  <li>定義應用程式的核心架構元件。</li>
+  <li>用於宣告應用程式所需元件和裝置功能的宣示說明檔案。
+</li>
+  <li>應用程式的程式碼以外的資源；這些資源可讓您的應用程式針對各種裝置設定最佳化本身的行為。
+</li>
+</ul>
+
+
+
+<h2 id="Components">應用程式元件</h2>
+
+<p>應用程式元件是 Android 應用程式的重要設計模組。每個元件 都是系統進入您應用程式的不同要點。並非所有元件都是使用者的實際進入點；某些元件的定義取決於其他元件，但所有元件都是獨立的個體，扮演著特定角色 &mdash; 換句話說，每個元件都是獨特的設計模組，可協助定義您應用程式的整體行為。
+
+
+
+</p>
+
+<p>應用程式元件可分為 4 種不同類型。每種類型的用途和生命週期均不相同，可定義元件的建立及刪除方式。
+</p>
+
+<p>以下是應用程式元件的 4 種類型：</p>
+
+<dl>
+
+<dt><b>Activity</b></dt>
+
+<dd>單一 <i>Activity</i> 代表顯示使用者介面的一個畫面。例如，電子郵件應用程式可包含一個用於顯示新郵件清單的 Activity、一個用於撰寫郵件的 Activity，以及一個用於閱讀郵件的 Activity。
+
+雖然電子郵件應用程式的 Activity 會共同運作，以提供豐富的使用者體驗，不過每個 Activity 都是不同的個體。
+
+因此，其他應用程式可執行其中任何一項 Activity (如果電子郵件應用程式允許的話)。
+例如，相機應用程式可在電子郵件應用程式中，執行用於撰寫新郵件的 Activity，以便讓使用者分享相片。
+
+
+<p>Activity 是實作成 {@link android.app.Activity} 的子類別；詳情請參閱 <a href="{@docRoot}guide/components/activities.html">Activity</a> 開發人員指南。
+
+</p>
+</dd>
+
+
+<dt><b>服務</b></dt>
+
+<dd>單一 <i>服務</i> 是在背景執行的元件，用於進行長期作業或遠端處理程序工作。
+服務並不會提供使用者介面。
+例如，服務可在使用者位於其他應用程式時在背景撥放音樂，或是透過網路擷取資料，同時允許使用者與 Activity 進行互動。
+
+其他元件 (例如 Activity) 可啟動並讓服務執行，或是繫結至 Activity 以便與其進行互動。
+
+
+<p>服務是實作成 {@link android.app.Service} 的子類別；詳情請參閱<a href="{@docRoot}guide/components/services.html">服務</a>開發人員指南。
+
+</p>
+</dd>
+
+
+<dt><b>內容供應程式</b></dt>
+
+<dd>單一 <i>內容供應程式</i> 可管理一組已分享的應用程式資料。您可以將資料儲存在檔案系統、SQLite 資料庫、網路上，或是您應用程式可存取的任何其他永久儲存空間。
+
+其他應用程式可透過內容供應程式查詢或甚至修改資料 (如果內容供應程式允許這麼做的話)。
+例如，Android 系統會提供用於管理使用者聯絡資訊的內容供應程式。
+因此，任何具備適當權限的應用程式均可查詢內容供應程式的一部分 (例如 {@link
+android.provider.ContactsContract.Data})，以便讀取及寫入有關特定使用者的相關資訊。
+
+
+<p>此外，內容供應程式也可用於讀取及寫入只有您應用程式能存取的不公開資料。
+例如，<a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> 範例應用程式可使用內容供應程式儲存記事。
+</p>
+
+<p>內容供應程式是實作成 {@link android.content.ContentProvider} 的子類別，而且必須實作一組標準 API 以便讓其他應用程式執行交易。
+
+如需詳細資訊，請參閱<a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>開發人員指南。
+</p>
+</dd>
+
+
+<dt><b>廣播接收器</b></dt>
+
+<dd>單一 <i>廣播接收器</i> 是一種元件，可回應整個系統的廣播通知。
+大多數廣播都是由系統所發出 &mdash; 例如，系統會發出廣播來通知使用者螢幕已關閉、電池電量不足，或相片已拍攝完成。此外，應用程式也可發出廣播 &mdash; 例如說發出廣播來通知其他應用程式特定資料已下載到裝置，可供它們使用。
+
+
+雖然廣播接收器無法顯示使用者介面，但它們可<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">建立狀態列通知</a>，告訴使用者發生了廣播事件。
+
+具體而言，廣播接收器只是其他元件的「閘道」，用於執行極少量的工作。
+例如，廣播接收器可啟動服務依據事件執行特定工作。
+
+
+<p>廣播接收器是實作為成 {@link android.content.BroadcastReceiver} 的子類別，而每個廣播都是由 {@link android.content.Intent} 物件所發出。
+如需詳細資訊，請參閱 {@link android.content.BroadcastReceiver} 類別。
+</p>
+</dd>
+
+</dl>
+
+
+
+<p>Android 系統設計的一項特色是，任何應用程式都可啟動其他應用程式的元件。
+例如，假設您想讓使用者透過裝置相機拍攝相片，您的應用程式可利用其他具備相關功能的應用程式 (如果有的話)　以達到這個目標，這樣您就不必自行建立用於拍攝相片的 Activity。
+
+您不需要納入或連結相機應用程式的程式碼，只要啟動相機應用程式中用於拍攝像片的 Activity 即可。
+
+
+啟動相關 Activity 後，系統就會將相片傳回您的應用程式供您使用。對於使用者而言，相機就宛如是您應用程式的一部分。
+</p>
+
+<p>當系統啟動某個元件後，就會啟動該應用程式的處理程序 (如果該應用程式目前並非處於執行中狀態) 並且呼叫該元件所需的類別。
+例如，假設您的應用程式啟動相機應用程式中用於拍攝相片的 Activity，則該 Activity 會在隸屬於相機應用程式的處理程序中執行，而不是您應用程式的處理程序。因此，與大多數其他系統的應用程式不同，Android 應用程式沒有單一進入點 (例如沒有 {@code main()} 函式)。
+
+
+
+</p>
+
+<p>系統是在個別處理程序 (具備檔案權限，可限制其他應用程式存取) 中執行每款應用程式，因此您的應用程式無法直接啟動其他應用程式的元件，不過 Android 系統可以。
+
+基於這個原因，如要啟動其他應用程式的元件，您必須向指定「意圖」<em></em>的系統發送訊息，以啟動特定元件。
+
+系統隨後會為您啟用所需的元件。</p>
+
+
+<h3 id="ActivatingComponents">啟用元件</h3>
+
+<p>4 種元件類型的其中 3 種 &mdash; Activity、服務和廣播接收器 &mdash; 是透過「意圖」<em></em>這種非同步訊息啟用。意圖會在執行階段將元件與彼此繫結 (您可以意圖想成要求其他元件進行動作的傳令員)，不論元件是否屬於您的應用程式。
+
+
+
+</p>
+
+<p>意圖是使用 {@link android.content.Intent} 物件建立而成，該物件可定義訊息來啟用特定元件或特定「類型」<em></em>的元件 &mdash; 意圖可以採取明確或隱含設定。
+
+</p>
+
+<p>針對 Activity 和服務，意圖會定義要執行的動作 (例如「查看」或「傳送」某項目)，並且可能會指定執行動作的目標資料 URI (以及通知要啟用的元件)。
+
+例如，意圖可傳達某 Activity 的要求，顯示圖片或開啟網頁。
+在某些情況下，您可以啟動 Activity 來接收結果，此時該 Activity 也會傳回{@link android.content.Intent} 的結果 (例如，您可以發出意圖讓使用者挑選聯絡人資料，並將該資訊傳回給您 &mdash; 傳回意圖會包含指向所選聯絡人的 URI )。
+
+
+
+</p>
+
+<p>針對廣播接收器，意圖只會定義要廣播的通知 (例如，用於通知裝置電量不足的廣播只會包含指出「電池電量不足」的已知動作字串)。
+
+</p>
+
+<p>其他元件類型和內容供應程式並非由意圖所啟用，而是在受 {@link android.content.ContentResolver} 發出的要求所指定時由系統啟用。
+內容解析程式可處理內容供應程式的所有直接交易，因此與供應程式進行交易的元件不必呼叫 {@link
+android.content.ContentResolver} 物件的方法。
+
+這樣會在內容供應程式與要求資訊 (基於安全目的) 之間保留抽象層。
+</p>
+
+<p>用於啟用各種元件的方法有以下幾種：</p>
+<ul>
+  <li>將 {@link android.content.Intent} 傳送到 {@link android.content.Context#startActivity
+startActivity()} 或 {@link android.app.Activity#startActivityForResult startActivityForResult()}　(如果您想讓 Activity 傳回結果的話) 即可啟動 Activity (或是指派新工作給 Activity)。
+
+</li>
+  <li>將 {@link android.content.Intent} 傳送到 {@link android.content.Context#startService
+startService()} 即可啟動服務　(或是指派新指示給正在執行的服務)。
+或者，您也可以將 {@link android.content.Intent} 傳送到
+{@link android.content.Context#bindService bindService()} 來繫結至服務。</li>
+  <li>將 {@link android.content.Intent} 傳送到
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、{@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()} 或 {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()} 等方法即可啟用廣播。</li>
+  <li>對 {@link android.content.ContentResolver} 呼叫{@link
+android.content.ContentProvider#query query()} 即可查詢內容供應程式。</li>
+</ul>
+
+<p>如要進一步瞭解如何使用意圖，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+如要進一步瞭解如何啟用特定元件，請參閱下列說明文件：
+<a href="{@docRoot}guide/components/activities.html">Activity</a>、<a href="{@docRoot}guide/components/services.html">服務</a>、{@link
+android.content.BroadcastReceiver} 和<a href="{@docRoot}guide/topics/providers/content-providers.html">內容供應程式</a>。</p>
+
+
+<h2 id="Manifest">宣示說明檔案</h2>
+
+<p>Android 系統必須先讀取應用程式的 {@code AndroidManifest.xml} 檔案 (「宣示說明」檔案)　確認應用程式元件確實存在，才能啟動該元件。
+
+您的應用程式必須在這個檔案中宣告本身的所有元件，而該檔案必須位於應用程式專案目錄的根目錄。
+</p>
+
+<p>除了宣告應用程式的元件以外，宣示說明還可以進行許多工作，包括：
+</p>
+<ul>
+  <li>識別應用程式所需的任何使用者權限，例如網際網路存取權或使用者合約的讀取存取權。
+</li>
+  <li>根據應用程式使用的 API，宣告應用程式所需的最低 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 級別</a>。
+</li>
+  <li>宣告應用程式所使用或所需的硬體和軟體，例如相機、藍牙服務或多點觸控螢幕。
+</li>
+  <li>應用程式需要連結的 API 程式庫 (除了 Android 架構　API 以外)，例如 <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google 地圖程式庫</a>。
+
+</li>
+  <li>還有其他工作</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">宣告元件</h3>
+
+<p>宣告說明的主要工作是將應用程式的元件告知系統。例如，宣告說明檔案可用如下方式宣告 Activity：
+ </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>在 <code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>元素中，{@code android:icon} 屬性會指向識別應用程式的圖示資源。
+
+</p>
+
+<p>而在 <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素中，
+{@code android:name} 屬性會指定 {@link
+android.app.Activity} 子類別的完整類別名稱，{@code android:label} 屬性則會指定要當作 Activity 的使用者可見標籤使用的字串。
+</p>
+
+<p>您必須用以下方式宣告所有應用程式元件：</p>
+<ul>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>：Activity 適用的元素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>：服務適用的元素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>：廣播接收器適用的元素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>：內容供應程式適用的元素
+</li>
+</ul>
+
+<p>系統看不到您納入來源但未在宣示說明中宣告的 Activity、服務和內容供應程式，因此系統無法執行這些項目。
+不過，您可在宣示說明宣告廣播接收器，或是透過程式碼以動態方式建立廣播接收器 (將廣播接收器建立為 
+{@link android.content.BroadcastReceiver} 物件)，然後呼叫 {@link android.content.Context#registerReceiver registerReceiver()}
+向系統註冊廣播接收器。
+
+</p>
+
+<p>如要進一步瞭解如何為應用程式建立宣示說明檔案，請參閱 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml 檔案</a>。
+ </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">宣告元件功能</h3>
+
+<p>如<a href="#ActivatingComponents">啟用元件</a>所述，您可以使用
+{@link android.content.Intent} 來啟動 Activity、服務和廣播接收器。如要這麼做，請在意圖中明確指定目標元件 (使用元件類別名稱)。
+不過，意圖最大的功能在於「隱含意圖」<em></em>的概念。
+隱含意圖可簡單描述要執行的動作類型 (或是執行動作的資料依據) 以及讓系統在裝置中找出可執行動作的元件，然後加以啟動。
+
+
+如果意圖指出有多個元件可執行動作，則使用者可選取要使用的元件。
+</p>
+
+<p>系統會比對接受到的意圖與裝置上其他應用程式的宣示說明檔案中提供的意圖篩選器，藉此識別可回應意圖的元件。
+<i></i>
+</p>
+
+<p>在應用程式的宣示說明中宣告 Activity 時，您可視需要納入宣告 Activity 功能的意圖篩選器，以便讓 Activity 可回應其他應用程式的意圖。
+
+您可以為元件宣告意圖篩選器，方法是將 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 元素新增為元件宣告元素的子元素。
+</p>
+
+<p>例如，假設您以用於撰寫新郵件的 Activity 建置電子郵件應用程式，您可以下列方式宣告意圖篩選器來回應「傳送」意圖 (藉此傳送新郵件)：
+</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>接著，如果其他應用程式透過 {@link
+android.content.Intent#ACTION_SEND} 動作建立了意圖並傳送到 {@link android.app.Activity#startActivity
+startActivity()}，系統就可能會啟動您的 Activity 讓使用者撰寫及傳送郵件。
+</p>
+
+<p>如要進一不瞭解如何建立意圖篩選器，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+</p>
+
+
+
+<h3 id="DeclaringRequirements">宣告應用程式需求</h3>
+
+<p>並非所有搭載 Android 作業系統的裝置都能提供完整功能。
+為了避免使用者在缺少應用程式所需功能的裝置上安裝您的應用程式，請務必在宣示說明檔案中宣告裝置和軟體需求，清楚定義您的應用程式支援的裝置類型。
+
+
+大多數宣告僅供使用者參考，系統無法讀取，但 Google Play 等外部服務可讀取這些宣示，以便在使用者透過自己的裝置搜尋應用程式時提供篩選功能。
+
+</p>
+
+<p>例如，假設您的應用程式需要相機且採用 Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 級別</a> 7) 導入的 API，建議您用下列方式在宣示說明檔案中宣告這些需求：
+</p> 
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>如此一來，「沒有」<em></em>相機且搭載 Android 2.1「以下版本」<em></em>的裝置就無法從 Google Play 安裝您的應用程式。
+</p>
+
+<p>不過，您也可以宣告您的應用程式會使用相機，但相機並非應用程式的「必要」<em></em>配備。
+在這種情況下，應用程式的 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>屬性必須設為 {@code "false"}，而且應用程式必須在執行階段檢查裝置是否具備相機，並且視需要停用任何相機功能。
+
+</p>
+
+<p>如要進一步瞭解如何管理應用程式與不同裝置的相容性，請參閱<a href="{@docRoot}guide/practices/compatibility.html">裝置相容性</a>。
+
+</p>
+
+
+
+<h2 id="Resources">應用程式資源</h2>
+
+<p>Android 應用程式是以程式碼等其他要素開發而成 &mdash; 例如圖片、音訊檔案以及與應用程式視覺效果相關的其他資源。例如，您必須使用 XML 檔案定義 Activity 使用者介面的動畫、選單、樣式、顏色以及版面配置。
+
+
+使用應用程式資源可協助更新應用程式的各種特性，而不必修改程式碼 &mdash; 或是提供多組替代資源 &mdash; 藉此針對各種裝置設定 (例如不同的語言和螢幕大小) 最佳化您的應用程式。
+
+
+</p>
+
+<p>針對您在 Android 專案中加入的所有資源，SDK 建置工具會定義一個整數 ID，讓您用於從應用程式的程式碼或 XML 中定義的其他資源參照特定資源。
+
+例如，假設您的應用程式含有名為 {@code
+logo.png} 的圖片檔案 (儲存在 {@code res/drawable/} 目錄中)，SDK 工具會產生名為 {@code R.drawable.logo} 的資源 ID，讓您用於參照圖片並將其插入使用者介面。
+
+</p>
+
+<p>提供原始碼以外資源的一個重點是針對不同的裝置設定提供替代資源。
+
+例如，您可以在 XML 中定義使用者介面字串，藉此將字串翻譯成其他語言，以及將這些字串儲存成個別檔案。
+接著，視您附加到資源目錄名稱的語言「修飾語」<em></em> (例如代表法文字串值的 {@code res/values-fr/})，以及使用者的語言設定而定，Android 系統會為您的 UI 套用適當的語言字串。
+
+
+</p>
+
+<p>Android 針對替代資源支援各種「修飾語」<em></em>。修飾語是一個簡短字串；您可在資源目錄名稱中加入修飾語，藉此定義應使用這些資源的裝置設定。
+
+例如，您通常需要為 Activity 建立多種版面配置 (視裝置螢幕的方向和大小而定)。
+
+例如，假設裝置螢幕的方向為縱向 (直版)，版面配置的按鈕就必須以垂直方向排列；假設裝置螢幕的方向為橫向 (寬版)，則版面配置的按鈕就必須以水平方向排列。
+
+如要根據螢幕方向變更版面配置，請建立兩種版面配置，然後為每個版面配置目錄名稱套用適當的修飾語。
+
+如此系統就會根據目前的裝置方向，自動套用適當的版面配置。
+</p>
+
+<p>如要進一步瞭解您可在應用程式中加入的資源類型，以及如何針對不同的裝置設定建立替代資源，請詳閱<a href="{@docRoot}guide/topics/resources/providing-resources.html">提供資源</a>。
+</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">繼續閱讀有關下列主題的說明文章：</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>
+    </dt>
+    <dd>說明如何使用 {@link android.content.Intent} API 來啟用應用程式元件 (例如 Activity 和服務)，以及如何將應用程式元件提供給其他應用程式使用。
+
+</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">Activity</a></dt>
+    <dd>說明如何建立 {@link android.app.Activity} 類別執行個體，以便讓應用程式的使用者介面提供不同內容。
+</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">提供資源</a></dt>
+    <dd>說明 Android 應用程式如何區別應用程式資源與程式碼，包括如何針對特定裝置設定供替代資源。
+
+
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">您可能也會想瞭解下列主題：</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">裝置相容性</a></dt>
+    <dd>說明 Android 如何在各種裝置上運作，以及如何針對各個裝置最佳化您的應用程式，或針對不同裝置限制應用程式提供的功能。
+
+</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">系統權限</a></dt>
+    <dd>說明 Android 如何運用系統權限規定應用程式必須取得使用者同意才能使用特定 API。
+</dd>
+  </dl>
+</div>
+</div>
+

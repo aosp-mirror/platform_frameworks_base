@@ -1,0 +1,90 @@
+page.title=輸入控制項
+parent.title=使用者介面
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>輸入控制項是應用程式使用者介面中的互動元件。Android 提供了多種控制項讓您在 UI 中使用，例如按鈕、文字欄位、搜尋列、核取方塊、縮放按鈕、切換按鈕等。
+
+</p>
+
+<p>在使用者介面中加入輸入控制項，就如同將 XML 元素加到 <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML 版面配置</a>一樣簡單。例如，以下是包含文字欄位和按鈕的版面配置：
+</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>每個輸入控制項均支援一組特定輸入事件，方便您處理使用者輸入文字或輕觸按鈕等事件。
+</p>
+
+
+<h2 id="CommonControls">一般控制項</h2>
+<p>下方列出您可在應用程式中使用的部分一般控制項。只要點進清單中的相關連結，即可進一步瞭解如何使用這些控制項。
+</p>
+
+<p class="note"><strong>注意：</strong>本文並未列出 Android 提供的部分控制項。
+如果想查看未列出的控制項，請瀏覽 {@link android.widget} 套件。如果您的應用程式需要特定類型的輸入控制項，您可以自行建置<a href="{@docRoot}guide/topics/ui/custom-components.html">自訂元件</a>。
+</p>
+
+<table>
+    <tr>
+        <th scope="col">控制項類型</th>
+        <th scope="col">說明</th>
+	<th scope="col">相關類別</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">按鈕</a></td>
+        <td>可供使用者按下或點擊來執行某項動作的按鈕。</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">文字欄位</a></td>
+        <td>可編輯的文字欄位。您可以使用 <code>AutoCompleteTextView</code> 小工具建立可提供自動完成建議的文字輸入小工具。</td>
+	<td>{@link android.widget.EditText EditText}、{@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">核取方塊</a></td>
+        <td>可供使用者切換的開啟/關閉開關。如果想為使用者提供一組互不相斥的可選取選項時，請使用核取方塊。</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">圓形按鈕</a></td>
+        <td>功用與核取方塊類似，但會限制使用者只能從一組選項中選取一個選項。</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">切換按鈕</a></td>
+        <td>附有亮光指標的開啟/關閉按鈕。</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">微調按鈕</a></td>
+        <td>可供使用者從一組選項中選取單一值的下拉式清單。</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">挑選器</a></td>
+        <td>可供使用者透過向上/向下按鈕或滑動手勢選取單一值的對話方塊。此外，挑選器還會提供 <code>DatePicker</code> 程式碼小工具和 <code>TimePicker</code> 小工具，分別讓使用者輸入日期值 (年、月、日) 以及時間值 (小時、分鐘、AM/PM)；系統會自動根據使用者所在的地區為這些值設定對應的格式。</td>
+	<td>{@link android.widget.DatePicker}、{@link android.widget.TimePicker}</td>
+    </tr>
+</table>

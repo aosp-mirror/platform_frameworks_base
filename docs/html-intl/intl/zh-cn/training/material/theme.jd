@@ -1,0 +1,131 @@
+page.title=使用材料主题
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#ColorPalette">定制配色工具</a></li>
+  <li><a href="#StatusBar">定制状态栏</a></li>
+  <li><a href="#Inheritance">主题个别视图</a></li>
+</ol>
+<h2>您也应该阅读</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料设计规范</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 材料设计</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>新材料主题将提供：</p>
+
+<ul>
+  <li>让您设置主题配色工具的系统小组件</li>
+  <li>适用于系统小组件的触摸反馈动画</li>
+  <li>操作行为转换动画</li>
+</ul>
+
+<p>您可使用您所控制的配色工具，按照您的品牌形象定制材料主题的外观。
+您可使用主题属性为操作栏和状态栏着色，如<a href="#fig3">图 3</a> 所示。
+</p>
+
+<p>系统小组件拥有全新的设计与触摸反馈动画。您可为您的应用定制配色工具、触摸反馈动画以及操作行为转换。
+</p>
+
+<p>材料主题的定义为：</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code>（深色版本）</li>
+  <li><code>@android:style/Theme.Material.Light</code>（浅色版本）</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>如果要了解您可使用的材料风格，请参阅
+{@link android.R.style R.style} 的 API 参考。</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>图 1</strong>.深色材料主题</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>图 2</strong>.浅色材料主题</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>注意：</strong>材料主题仅在 Android 5.0（API 级别 21）及更高版本中提供。
+<a href="{@docRoot}tools/support-library/features.html#v7">v7 支持内容库</a>为一些小组件提供附带材料设计风格的主题，同时为配色工具定制提供支持。
+
+如果要了解更多信息，请参阅
+<a href="{@docRoot}training/material/compatibility.html">保持兼容性</a>。
+</p>
+
+
+<h2 id="ColorPalette">定制配色工具</h2>
+
+<p style="margin-bottom:30px">如果要定制主题的基色以符合您的品牌，您可在进行材料主题继承时使用主题属性定义您的定制颜色：
+</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>图 3.</strong>定制材料主题。</p>
+</div>
+
+
+<h2 id="StatusBar">定制状态栏</h2>
+
+<p>材料主题可让您轻松定制状态栏，因此您可以指定一个符合自己品牌特色且对比度足够高、能够显示白色状态图标的颜色。
+如果要为状态栏设置定制颜色，您可在扩展材料主题时使用 <code>android:statusBarColor</code> 属性。
+
+默认情况下，<code>android:statusBarColor</code> 将继承 <code>android:colorPrimaryDark</code> 的值。
+</p>
+
+<p>您也可自行将状态栏移到后侧。例如，您想在一个照片上以透明的方式显示状态栏，同时利用细微的深色渐变以确保白色状态图标仍保持可见。
+
+如果要执行此操作，请将 <code>android:statusBarColor</code> 属性设置为
+<code>&#64;android:color/transparent</code> 并根据需要调整窗口标志。您也可以使用 {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} 方法进行动画或淡出设置。
+
+</p>
+
+<p class="note">
+<strong>注意：</strong>在多数情况下，状态栏与主工具栏之间应该有一个清楚的分割，您在这些栏的后侧显示全屏的丰富图像或媒体内容以及使用颜色渐变以确保图表仍保持可见的情况除外。
+
+
+</p>
+
+<p>定制导航栏和状态栏时，您可选择将导航栏和状态栏变透明或仅修改状态栏。
+在所有其他情况中，导航栏均应保持黑色。</p>
+
+
+<h2 id="Inheritance">主题个别视图</h3>
+
+<p>XML 布局定义内的元素可指定 <code>android:theme</code> 属性，而该属性将引用一个主题资源。
+此属性可修改元素以及任何子元素的主题，有助于改变界面中特定部分的主题配色工具。
+
+</p>

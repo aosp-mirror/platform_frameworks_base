@@ -1,0 +1,1214 @@
+page.title=建立內容供應程式
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>本文件內容</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">設計資料儲存空間</a>
+    </li>
+    <li>
+        <a href="#ContentURI">設計內容 URI</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">實作 ContentProvider 類別</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">必要方法</a>
+            </li>
+            <li>
+                <a href="#Query">實作 query() 方法</a>
+            </li>
+            <li>
+                <a href="#Insert">實作 insert() 方法</a>
+            </li>
+            <li>
+                <a href="#Delete">實作 delete() 方法</a>
+            </li>
+            <li>
+                <a href="#Update">實作 update() 方法</a>
+            </li>
+            <li>
+                <a href="#OnCreate">實作 onCreate() 方法</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">實作內容供應程式 MIME 類型</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">表格 MIME 類型</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">檔案 MIME 類型</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">實作合約類別</a>
+    </li>
+    <li>
+        <a href="#Permissions">實作內容供應程式權限</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">&lt;provider&gt; 元素</a>
+    </li>
+    <li>
+        <a href="#Intents">意圖和資料存取權</a>
+    </li>
+</ol>
+<h2>重要類別</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>相關範例</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">                Note Pad 範例應用程式
+            </a>
+
+        </li>
+    </ol>
+<h2>另請參閱</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">        內容供應程式基本存放庫概念</a>
+
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">        日曆供應程式</a>
+
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    內容供應程式可管理中央資料存放庫的存取權。您可以將供應程式實作成 Android 應用程式的一或多個類別，以及宣示說明檔案的元素。
+
+您的其中一個類別會實作子類別
+{@link android.content.ContentProvider} (供應程式與其他應用程式之間的介面)。
+雖然內容供應程式的用途是將資料提供給其他應用程式，不過您也可以在應用程式中加入 Activity，讓使用者查詢及修改供應程式所管理的資料。
+
+
+</p>
+<p>
+    本主題的其餘部分為一份說明建置內容供應程式的步驟清單，以及一份可供您使用的 API 清單。
+
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">建置供應程式的前置作業</h2>
+<p>
+    請先完成下列事項，再開始建置供應程式：
+</p>
+<ol>
+    <li>
+        <strong>評估建置內容供應程式的必要性</strong>。如果您想提供下列功能，您就必須建置內容供應程式：
+
+        <ul>
+            <li>您想將複雜的資料或檔案提供給其他應用程式。</li>
+            <li>您想讓使用者從您的應用程式將複雜的資料複製到其他應用程式。</li>
+            <li>您想使用搜尋架構提供自訂搜尋建議。</li>
+        </ul>
+    <p>
+        如果您的應用程式內建所有您想提供的功能，您就「不需要」<em></em>建置供應程式來使用 SQLite 資料庫。
+
+    </p>
+    </li>
+    <li>
+        詳閱<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容供應程式基本概念</a>進一步瞭解供應程式 (如果您尚未閱讀該文章的話)。
+
+
+    </li>
+</ol>
+<p>
+    完成上述事項後，請按照下列步驟建置供應程式：
+</p>
+<ol>
+    <li>
+        為您的資料設計原始儲存空間。內容供應程式會以兩種方式提供資料：
+        <dl>
+            <dt>
+                檔案資料
+            </dt>
+            <dd>
+                通常儲存在檔案中的資料，例如相片、音訊或影片。
+這種檔案會儲存在您應用程式的私人空間中。
+您的供應程式可針對此檔案提供處理支援，藉此回應其他應用程式發出的檔案要求。
+
+            </dd>
+            <dt>
+                「結構化」資料
+            </dt>
+            <dd>
+                通常儲存在資料庫、陣列或類似結構中的資料。
+                這種資料會採用與內含資料列和資料欄的表格相容的格式儲存。資料列代表一個實體，例如某個人或庫存中的商品。
+而資料欄則代表實體的部分資料，例如某個人的名稱或商品的售價。
+這種資料類型一般會儲存在 SQLite 資料庫，但您也可以將它儲存在其他類型的永久儲存空間。
+
+如要進一步瞭解 Android 系統提供的儲存空間類型，請參閱<a href="#DataStorage">設計資料儲存空間</a>。
+
+
+            </dd>
+        </dl>
+    </li>
+    <li>
+        定義 {@link android.content.ContentProvider} 類別及其所需方法的實作方式。
+這個類別是您的資料與 Android 系統其餘部分之間的介面。
+如要進一步瞭解這個類別，請參閱<a href="#ContentProvider">實作 ContentProvider 類別</a>。
+
+    </li>
+    <li>
+        定義供應程式的授權字串、內容 URI 和資料列名稱。如果您希望供應程式的應用程式能控制意圖，請同時定義意圖動作、額外資料和旗標。
+
+此外，您還需要針對想存取您資料的應用程式，定義其所需的權限。
+建議您將這些值定義為個別合約類別中的常數；您之後可將這個類別提供給其他開發人員。
+如要進一步瞭解內容 URI，請參閱<a href="#ContentURI">設計內容 URI</a>。
+
+
+        如要進一步瞭解意圖，請參閱<a href="#Intents">意圖和資料存取權</a>。
+
+    </li>
+    <li>
+        視需要進行其他動作，例如新增範例資料，或實作 {@link android.content.AbstractThreadedSyncAdapter} 讓應程式與雲端資料之間的資料保持同步。
+
+
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">設計資料儲存空間</h2>
+<p>
+    內容供應程式是模組化格式資料的介面。建議這個介面之前，請先決定您儲存資料的方式。
+您可用任何偏好格式儲存資料，然後設計對應介面來讀取及寫入所需資料。
+
+</p>
+<p>
+    以下是 Android 提供的部分資料儲存技術：
+</p>
+<ul>
+    <li>
+        Android 系統內含 SQLite 資料庫 API，可讓 Android 本身的供應程式用於儲存以表格為基礎的資料。
+
+{@link android.database.sqlite.SQLiteOpenHelper} 類別可協助您建立資料庫，而 {@link android.database.sqlite.SQLiteDatabase} 類別則是用於存取資料庫的基礎類別。
+
+
+        <p>
+            請記住，您不需要使用資料庫實作存放庫。供應程式會以一組表格的形式對外顯示 (類似於相關的資料庫)，不過這並非在內部實作供應程式的必要條件。
+
+
+        </p>
+    </li>
+    <li>
+        如果您想儲存檔案資料，請使用 Android 提供的多種適用於檔案的 API。
+        如要進一步瞭解檔案儲存空間，請參閱<a href="{@docRoot}guide/topics/data/data-storage.html">資料儲存空間</a>。
+如果您想設計可提供媒體相關資料 (例如音樂或影片) 的供應程式，建議您建立結合表格資料與檔案的供應程式。
+
+
+    </li>
+    <li>
+        如果您想存取以網路為基準的資料，請使用 {@link java.net} 和
+{@link android.net} 中的類別。您也可以將以網路為基準的資料同步到本機資料儲存空間 (例如資料庫)，然後以表格或檔案的形式提供資料。
+
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>應用程式範例示範了如何進行這種同步處理作業。
+
+    </li>
+</ul>
+<h3 id="DataDesign">
+    資料設計注意事項
+</h3>
+<p>
+    以下提供一些有關設計供應程式資料結構的祕訣：
+</p>
+<ul>
+    <li>
+        表格資料一律需包含「主索引鍵」欄，方便供應程式保存每個資料列的數值。
+您可以使用這些值將資料列連結至其他表格中的相關資料列 (也就是將這些值當作「外部索引鍵」使用)。
+事實上，您也可以使用此資料欄的任何名稱進行連結，但使用 {@link android.provider.BaseColumns#_ID BaseColumns._ID} 是最佳做法，這是因為將供應程式的查詢結果連結至
+{@link android.widget.ListView} 時需要將某個擷取出的資料列命名為 
+<code>_ID</code>。
+
+
+    </li>
+    <li>
+        如果您想提供點陣圖或檔案資料的一大部分，請將資料儲存在檔案中，然後以間接方式提供該檔案，而不要直接將該檔案儲存在表格中。
+
+如果您採用這種做法，請務必通知供應程式的使用者採用
+{@link android.content.ContentResolver} 檔案方法來存取資料。
+    </li>
+    <li>
+        使用二進位大型物件 (BLOB) 資料類型儲存大小或結構不同的資料。
+例如，您可以使用 BLOB 欄儲存<a href="http://code.google.com/p/protobuf">通訊協定緩衝區</a> 或　<a href="http://www.json.org">JSON 結構</a>。
+
+
+        <p>
+            此外，您也可以使用 BLOB 實作「按結構定義分門別類」<em></em>的表格。在這種表格中，您需要定義主索引鍵欄、MIME 類型欄和一或多個 BLOB 一般資料欄。
+
+MIME 類型欄中的值會決定 BLOB 欄的資料定義，
+這可讓您在同一表格中儲存多種資料列類型。
+聯絡人供應程式的「資料」表格
+{@link android.provider.ContactsContract.Data} 即為按結構定義分門別類的表格範例。
+
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">設計內容 URI</h2>
+<p>
+    <strong>內容 URI</strong> 是指用於識別供應程式資料的 URI，其中包括整個供應程式的符號名稱 (亦即供應程式的<strong>授權</strong>)，以及指向表格或檔案的名稱 (亦即<strong>路徑</strong>)。
+
+選用的 ID 部分則會指向表格中的個別資料欄。
+
+{@link android.content.ContentProvider} 的每個資料存取方法均包括一個內容 URI (引數)；該內容 URI 可讓您決定要存取哪個表格、資料列或檔案。
+
+</p>
+<p>
+    如需內容 URI 的基本概念，請參閱<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容供應程式基本概念</a>。
+
+
+</p>
+<h3>設計授權</h3>
+<p>
+    供應程式通常會包含一個授權，可當做供應程式 Android 內部名稱。為了避免與其他供應程式發生衝突，請務必反向使用網際網路網域擁有權作為供應程式授權的基礎。
+
+此外，也請針對 Android 套件名稱採取此建議做法；您可以將供應程式授權定義為內含供應程式的套件名稱的副檔名。
+
+例如，假設您 Android 套件的名稱為
+ <code>com.example.&lt;appname&gt;</code>，則請將供應程式的授權定義為 
+<code>com.example.&lt;appname&gt;.provider</code>。
+</p>
+<h3>設計路徑結構</h3>
+<p>
+    開發人員通常只要附加指向個別表格的路徑，即可從授權建立內容 URI。
+例如，假設您有「table1」<em></em>和「table2」<em></em>這兩個表格，則您可以結合上述範例中的授權來產生內容 URI 
+<code>com.example.&lt;appname&gt;.provider/table1</code> 和 
+<code>com.example.&lt;appname&gt;.provider/table2</code>。
+
+路徑並不侷限於單一區隔，而您也不必為每個路徑層級產生表格。
+
+</p>
+<h3>處理內容 URI ID</h3>
+<p>
+    一般來說，供應程式可利用 URI 尾端資料列的 ID 值接受內容 URI，藉此提供某個資料列的存取權。此外，供應程式通常也可比對 ID 值與表格的 <code>_ID</code> 欄，然後對相符的資料列執行要求的存取動作。
+
+
+
+</p>
+<p>
+    這種機制可協助採用一般設計模式應用程式存取供應程式，讓應用程式對供應程式執行查詢，並且利用 {@link android.widget.CursorAdapter} 在 {@link android.widget.ListView} 中顯示最終的 {@link android.database.Cursor}。
+
+
+    定義 {@link android.widget.CursorAdapter} 時需要將
+{@link android.database.Cursor} 的其中一個資料列設為 <code>_ID</code>。
+</p>
+<p>
+    使用者之後挑選了顯示在 UI 中的某一資料列，以查看或修改資料。
+應用程式會從支援
+ {@link android.widget.ListView} 的 {@link android.database.Cursor} 取得對應的資料列、取得該資料列的 <code>_ID</code> 值，然後將該值附加到內容 URI 並向供應程式發出存取要求。
+供應程式之後可對使用者挑選的資料列進行查詢或修改。
+
+</p>
+<h3>內容 URI 模式</h3>
+<p>
+    為協助您決定要對傳入內容 URI 採取什麼動作，供應程式 API 提供了簡便類別 {@link android.content.UriMatcher}，可將內容 URI「模式」對應至整數值。
+
+您可以在 <code>switch</code> 陳述式中使用整數值，決定要對符合特定模式的內容 URI 採取的動作。
+
+</p>
+<p>
+    內容 URI 模式會比對採用萬用字元的內容 URI：
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>：</strong>比對由任何有效字元組成的字串；長度不限。
+        </li>
+        <li>
+            <strong><code>#</code>：</strong>比對由數字組成的字串；長度不限。
+        </li>
+    </ul>
+<p>
+    以設計及編寫內容 URI 處理方式為例，假設供應程式內含 <code>com.example.app.provider</code> 授權，可識別下列指向表格的內容 URI：
+
+
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>：名稱為 <code>table1</code> 的表格。
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>：名稱為 
+<code>dataset1</code> 的表格。
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>：名稱為 
+<code>dataset2</code> 的表格。
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>：名稱為 <code>table3</code> 的表格。
+    </li>
+</ul>
+<p>
+    此外，供應程式也會識別附有資料列 ID 的內容 URI，例如 <code>content://com.example.app.provider/table3/1</code> 會指定 <code>table3</code> 中 ID 為
+ <code>1</code> 的資料列。
+
+</p>
+<p>
+    以下是可能的內容 URI 模式：
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        與供應程式的任何內容 URI 相符。
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>：
+    </dt>
+    <dd>
+        與 <code>dataset1</code> 和 <code>dataset2</code> 表格的內容 URI 相符，但與 <code>table1</code> 或 
+<code>table3</code> 的內容 URI 不符。
+
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>：比對 <code>table3</code> 中單一資料列的內容 URI，例如
+ <code>content://com.example.app.provider/table3/6</code> 會比對其中的
+ <code>6</code> 所指定的資料列。
+
+    </dt>
+</dl>
+<p>
+    以下程式碼片段說明各種方法在 {@link android.content.UriMatcher} 中的運作方式。
+    這個程式碼會以不同方式處理整個表格的 URI 以及單一資料列的 URI；針對表格使用內容 URI 模式 
+<code>content://&lt;authority&gt;/&lt;path&gt;</code>，針對單一資料列則使用 
+<code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code>。
+
+</p>
+<p>
+    {@link android.content.UriMatcher#addURI(String, String, int) addURI()} 方法會將授權和
+路徑對應至某個整數值，而 {@link android.content.UriMatcher#match(Uri)
+    match()} 方法會傳回 URI 的整數值。<code>switch</code> 陳述式則會要查詢整個表格，還是查詢單一記錄：
+
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    另一個 {@link android.content.ContentUris} 類別可提供使用內容 URI 的 <code>id</code> 部分的簡便方法。
+{@link android.net.Uri} 和 
+{@link android.net.Uri.Builder} 類別則可提供剖析現有 
+{@link android.net.Uri} 物件及建置新物件的簡便方法。
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">實作 ContentProvider 類別</h2>
+<p>
+    {@link android.content.ContentProvider} 執行個體可透過處理其他應用程式所發出要求的方式，管理一組結構化資料的存取權。
+所有形式的存取權最終都會呼叫 {@link android.content.ContentResolver}，而這個類別隨後會呼叫 {@link android.content.ContentProvider} 方法來取得存取權。
+
+
+</p>
+<h3 id="RequiredAccess">必要方法</h3>
+<p>
+    抽象類別 {@link android.content.ContentProvider} 會定義 6 種方法，而您必須將這些方法實作成您所擁有子類別的一部分。
+嘗試存取您內容供應程式的用戶端應用程式會呼叫以下所有方法 
+({@link android.content.ContentProvider#onCreate() onCreate()} 除外)：
+
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+        query()}
+    </dt>
+    <dd>
+        從您的供應程式擷取檔案。您可以使用引數來選取要查詢的表格、要傳回的資料列和資料欄，以及最終結果的排序順序。
+
+        以 {@link android.database.Cursor} 物件的形式傳回資料。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        在供應程式中插入新的資料列。您可以使用引數來選取目標表格，以及取得要使用的資料欄值。
+此外，這個方法還可傳回新插入資料欄的內容 URI。
+
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+        update()}
+    </dt>
+    <dd>
+        更新供應程式中的現有資料欄。您可以使用引數來選取要更新的表格和資料列，以及取得更新過後的資料欄值。
+此外，這個方法還可傳回經過更新的資料列數量。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        從您的供應程式中刪除資料列。您可以使用引數來選取要刪除的表格和資料列。
+此外，這個方法還可傳回遭刪除的資料列數量。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        傳回與內容 URI 相對應的 MIME 類型。如要進一步瞭解這個方法，請參閱<a href="#MIMETypes">實作內容供應程式 MIME 類型</a>。
+
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        初始化您的供應程式。Android 系統會在建立供應程式後立即呼叫這個方法。
+請注意，一旦
+ {@link android.content.ContentResolver} 嘗試存取您的供應程式，Android 系統便會建立供應程式。
+    </dd>
+</dl>
+<p>
+    請注意，上述方法採用的簽名與同名的 
+{@link android.content.ContentResolver} 方法相同。
+</p>
+<p>
+    實作這些方法時請注意下列事項：
+</p>
+<ul>
+    <li>
+        多重執行緒可能會同時呼叫 {@link android.content.ContentProvider#onCreate() onCreate()} 以外的所有方法，因此請務必確保這些方法不會對執行緒造成負面影響。
+如要進一步瞭解多重執行緒，請參閱<a href="{@docRoot}guide/components/processes-and-threads.html">處理程序和執行緒</a>。
+
+
+
+    </li>
+    <li>
+        避免透過 {@link android.content.ContentProvider#onCreate()
+        onCreate()} 進行需大量時間才可完成的作業。除非有實質上的需求，否則請延遲初始化工作。
+        如需相關資訊，請參閱<a href="#OnCreate">實作 onCreate() 方法</a>。
+
+    </li>
+    <li>
+        雖然您必須實作這些方法，但您的程式碼只需傳回預期的資料類型即可，不必傳回任何其他資料。
+例如，您可能想避免其他應用程式將資料插入部分表格。
+在這種情況下，您可以略過呼叫
+{@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} 並傳回 0。
+
+    </li>
+</ul>
+<h3 id="Query">實作 query() 方法</h3>
+<p>
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} 方法如果未傳回 {@link android.database.Cursor} 物件，便會發生錯誤而擲回 {@link java.lang.Exception}。
+
+如果您採用 SQLite 資料庫做為資料儲存空間，您可以直接傳回
+{@link android.database.sqlite.SQLiteDatabase} 類別的任一 <code>query()</code> 方法所傳回的 {@link android.database.Cursor}。
+
+    如果查詢不符任何資料列，您就必須傳回其中的 {@link android.database.Cursor#getCount()} 方法傳回 0 的
+ {@link android.database.Cursor} 執行個體。
+    請注意，只有在查詢程序發生內部錯誤時，您才需要傳回 <code>null</code>。
+</p>
+<p>
+    如果您並非採用 SQLite 資料庫做為資料儲存空間，請使用
+ {@link android.database.Cursor} 的子類別。例如，{@link android.database.MatrixCursor} 類別
+會一系列 {@link java.lang.Object} 的所有資料列中實作游標。您可以搭配這個類別使用 {@link android.database.MatrixCursor#addRow(Object[]) addRow()} 來新增資料列。
+
+</p>
+<p>
+    請記住，您必須確保 Android 系統能夠與 {@link java.lang.Exception} 通訊，而不會受到處理程序的限制。
+Android 可以針對下列例外狀況執行這項動作，藉此協助解決查詢錯誤：
+
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException} (如果供應程式接收的內容 URI 無效，您可以選擇擲回這個類別)
+
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}
+    </li>
+</ul>
+<h3 id="Insert">實作 insert() 方法</h3>
+<p>
+    {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} 方法會利用 {@link android.content.ContentValues} 引數中的值，在適當的表格中新增資料列。
+
+如果 {@link android.content.ContentValues} 引數中沒有資料欄名稱，建議您在供應程式的程式碼或資料庫的結構定義中，提供預設的資料欄名稱。
+
+
+</p>
+<p>
+    這個方法會傳回新資料列的內容 URI。如要建構這個方法，請使用 {@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()}，將新資料列的 <code>_ID</code> (或其他主索引鍵) 值附加到表格的內容 URI。
+
+
+</p>
+<h3 id="Delete">實作 delete() 方法</h3>
+<p>
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} 方法並不會從您的資料儲存空間中刪除資料列。
+如果您搭配供應程式使用同步配接器，建議您為已刪除的資料列加上「已刪除」標示，而不是徹底移除資料列。
+
+同步配接器可檢查已刪除的資料列，並且將這些資料列從伺服器中移除，然後再從供應程式中將它們刪除。
+
+</p>
+<h3 id="Update">實作 update() 方法</h3>
+<p>
+    {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+    update()} 方法會採用 {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} 所使用的相同 {@link android.content.ContentValues} 引數，以及
+ {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} 和 {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} 所使用的相同 <code>selection</code> 與 <code>selectionArgs</code> 引數，
+
+
+以便讓您針對這些方法重複使用相同的程式碼。
+</p>
+<h3 id="OnCreate">實作 onCreate() 方法</h3>
+<p>
+    Android 系統會在啟動供應程式時呼叫 {@link android.content.ContentProvider#onCreate()
+    onCreate()}。建議您只使用這個方法執行可快速完成的初始化工作，並且等到供應程式實際收到資料要求後，再建立資料庫以及載入資料。
+
+如果您使用 {@link android.content.ContentProvider#onCreate() onCreate()} 進行需大量時間才能完成工作，啟動供應程式所需的時間就會延長。
+
+此外，這樣也會延遲供應程式回應其他應用程式的時間。
+
+</p>
+<p>
+    例如，如果您採用 SQLite 資料庫，您可以透過 
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} 建立新的 {@link android.database.sqlite.SQLiteOpenHelper} 物件，然後在初次開啟資料庫時建立 SQL 表格。
+
+為了加快這個程序，當您初次呼叫 {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+getWritableDatabase()} 時，該方法會自動呼叫 {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+SQLiteOpenHelper.onCreate()} 方法。
+
+
+</p>
+<p>
+    以下兩個程式碼片段展示了 
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} 與 {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()} 之間的互動過程。
+而第一個程式碼片段是用於實作 
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}：
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    第二個程式碼片段則是用於實作 {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+SQLiteOpenHelper.onCreate()}，包括協助程式類別：
+
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">實作 ContentProvider MIME 類型</h2>
+<p>
+    {@link android.content.ContentProvider} 類別包含兩種用於傳回 MIME 類型的方法：
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        您必須針對任何供應程式實作的其中一個必要方法。
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        如果您的供應程式會提供檔案，您就需要實作這個方法。
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">表格 MIME 類型</h3>
+<p>
+    {@link android.content.ContentProvider#getType(Uri) getType()} 方法會採用 MIME 格式傳回
+ {@link java.lang.String}，以說明 URI 引數所傳回的資料類型。
+{@link android.net.Uri} 可以是一個模式 (而非特定 URI)；在這種情況下，建議您傳回與符合模式的內容 URI 相關聯的資料類型。
+
+
+</p>
+<p>
+    針對文字、HTML、JPEG 等常見資料類型，
+{@link android.content.ContentProvider#getType(Uri) getType()} 會傳回該資料的標準 MIME 類型。
+如需這些標準模式的完整清單，請造訪
+ <a href="http://www.iana.org/assignments/media-types/index.htm">IANA MIME 媒體類型</a>網站。
+
+</p>
+<p>
+    針對指向表格資料的資料列的內容 URI，
+{@link android.content.ContentProvider#getType(Uri) getType()} 會採用 Android 廠商專用的 MINE 格式傳回 MIME 類型：
+
+</p>
+<ul>
+    <li>
+        類型部分：<code>vnd</code>
+    </li>
+    <li>
+        子類型部分：
+        <ul>
+            <li>
+    如果 URI 模式適用於單一資料列：<code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    如果 URI 模式適用於一個以上的資料列：<code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        供應程式專用部分：<code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            您需要提供 <code>&lt;name&gt;</code> 和 <code>&lt;type&gt;</code>。
+            <code>&lt;name&gt;</code> 必須是全域唯一值，而 <code>&lt;type&gt;</code> 必須為相對應 URI 模式的專屬值。
+
+建議您使用貴公司的名稱或您應用程式的部分 Android 套件名稱做為 <code>&lt;name&gt;</code>。
+針對 
+<code>&lt;type&gt;</code>，則建議您使用可識別與 URI 相關的表格的字串。
+
+        </p>
+
+    </li>
+</ul>
+<p>
+    例如，假設供應程式的授權為 
+<code>com.example.app.provider</code>，而該授權可提供 
+<code>table1</code> 這個表格，則 <code>table1</code> 中多個資料列的 MIME 類型會如下所示：
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    而 <code>table1</code> 中單一資料列的 MIME 類型則會如下所示：
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">檔案 MIME 類型</h3>
+<p>
+    如果您的供應程式會提供檔案，您就需要實作
+{@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}。
+    該方法會針對您的供應程式可為特定 URI 傳回的檔案，傳回一系列 MIME 類型的 {@link java.lang.String}。建議您按 MIME 類型篩選器引數篩選您提供的 MIME 類型，方便您只傳回用戶端想處理的 MIME 類型。
+
+
+</p>
+<p>
+    例如，假設您的供應程式會採用 <code>.jpg</code>、
+<code>.png</code> 和 <code>.gif</code> 檔案格式提供相片。
+    當有應用程式使用篩選器字串 <code>image/*</code> (類型為「圖片」的任何檔案) 呼叫 {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+ContentResolver.getStreamTypes()} 時，{@link android.content.ContentProvider#getStreamTypes(Uri, String)
+ContentProvider.getStreamTypes()} 方法就會傳回如下所示的陣列：
+
+
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    如果應用程式只想取得 <code>.jpg</code> 檔案，則可以使用篩選器字串 <code>*\/jpeg</code> 呼叫 {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+ContentResolver.getStreamTypes()}，此時 {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+ContentProvider.getStreamTypes()} 會傳回如下所示的陣列：
+
+
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    如果您的供應程式並未提供任何篩選器字串所要求的 MIME 類型，則
+ {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()} 會傳回 <code>null</code>。
+
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">實作合約類別</h2>
+<p>
+    合約類別是 <code>public final</code> 類別，內含以下項目的固定不變定義：URI、欄名稱、MIME 類型以及供應程式擁有的其他中繼資料。
+這個類別會在供應程式與其他應用程式之間建立合約，藉此確保使用者在 URI、欄名等值有變更的情況下，仍可正常存取供應程式。
+
+
+
+</p>
+<p>
+    此外，由於合約類別針對其常數採用了好記的名稱，因此可協助開發人員避免使用錯誤的欄名或 URI 值。
+與其他類別相同，合約類別也包含 Javadoc 說明文件。
+如 Eclipse 這類整合式開發環境可利用合約類別自動填入常數名稱，並針對常數顯示 Javadoc。
+
+
+</p>
+<p>
+    開發人員無法存取您應用程式中合約類別的類別檔案，但可以靜態方式從您提供的 <code>.jar</code> 檔案中將類別檔案編入其應用程式。
+
+</p>
+<p>
+    {@link android.provider.ContactsContract} 類別及其巢狀類別均為合約類別範例。
+
+</p>
+<h2 id="Permissions">實作內容供應程式權限</h2>
+<p>
+    如需 Android 系統提供的所有權限和存取權的詳細資訊，請參閱<a href="{@docRoot}guide/topics/security/security.html">安全性和權限</a>。
+
+    您也可以參閱<a href="{@docRoot}guide/topics/data/data-storage.html">資料儲存空間</a>，瞭解各種儲存空間實際提供的安全性和權限。
+
+    簡言之，請注意下列重點：
+</p>
+<ul>
+    <li>
+        在預設情況下，儲存在裝置內部儲存空間的資料檔案只有您的應用程式和供應程式可存取。
+
+    </li>
+    <li>
+        您所建立的 {@link android.database.sqlite.SQLiteDatabase} 資料庫只有您的應用程式和供應程式可存取。
+
+    </li>
+    <li>
+        在預設情況下，您儲存到外部儲存空間的資料檔案為「公開分享」<em></em>，任何人均可讀取<em></em>。
+您無法使用內容供應程式針對外部儲存空間中的檔案限制存取權，這是因為其他應用程式可使用其他 API 呼叫讀取及寫入這類檔案。
+
+    </li>
+    <li>
+        呼叫用於開啟/建立檔案，或是用於在裝置內部儲存空間中開啟/建立 SQLite 儲存庫的方法，可能會同時將讀取及寫入存取權授予其他所有應用程式。
+如果您採用內部檔案或資料庫做為供應程式的存放庫，並且將「開放讀取」或「開放寫入」存取權授予該存放庫，則您在供應程式的宣示說明中設定的權限無助於保護您的資料安全。
+
+
+內部儲存空間中的檔案和儲存庫的預設存取權為「不公開」；請勿針對供應程式的存放庫變更此存取權。
+
+    </li>
+</ul>
+<p>
+    如果您想使用內容供應程式權限控制資料的存取權，建議您將資料儲存在內部檔案、SQLite 資料庫或「雲端」(例如遠端伺服器)，並確保只有您的應用程式可以存取這些檔案和資料庫。
+
+
+</p>
+<h3>實作權限</h3>
+<p>
+    在預設情況下，您的供應程式不會設定任何權限，因此即使底層資料的存取權限為「不公開」，任何應用程式都可透過您的供應程式讀取及寫入資料。
+如果想改變這種情況，請使用屬性或 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code> 元素的子元素，在供應程式的宣示說明檔案中設定權限。
+
+您可以選擇讓設定好的權限套用至整個供應程式、特定表格或記錄，或是套用至以上三者。
+
+</p>
+<p>
+    您可以使用一或多項 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> 元素，在供應程式的宣示說明檔案中定義權限。
+為了將權限設為僅適用於您的供應程式，請針對
+ <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code> 屬性使用 Java 式範圍。
+例如，請將讀取權限命名為 
+<code>com.example.app.provider.permission.READ_PROVIDER</code>。
+
+</p>
+<p>
+    以下列出供應程式權限範圍的詳細說明；這份清單將從套用至整個供應程式的權限開始說明，接著逐一說明套用範圍較小的權限。
+
+    套用範圍較小權限的優先等級會比套用範圍較大的權限來得高：
+</p>
+<dl>
+    <dt>
+        供應程式層級的單一讀取寫入權限
+    </dt>
+    <dd>
+        這項權限是由 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 元素的 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> 屬性所指定，可控制整個供應程式的讀取及寫入存取權。
+
+    </dd>
+    <dt>
+        供應程式層級的個別讀取及寫入權限
+    </dt>
+    <dd>
+        整個供應程式的讀取權限及寫入權限。您可以使用 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 元素的
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code> 和 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code> 屬性指定這兩項權限。
+這些權限的優先等級比 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> 所需的權限來得高。
+    </dd>
+    <dt>
+        路徑層級權限
+    </dt>
+    <dd>
+        供應程式內容 URI 的讀取、寫入或讀取/寫入權限。您可以使用
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code> 元素的
+ <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> 子元素指定您想控制的所有 URI。
+針對您所指定的每個內容 URI，您可以指定讀取/寫入權限、讀取權限或寫入權限，或是以上三種權限。
+讀取及寫入權限的優先等級比讀取/寫入權限來得高。
+此外，路徑層級權限的優先等級比供應程式層級權限來得高。
+
+    </dd>
+    <dt>
+        臨時權限
+    </dt>
+    <dd>
+        這種權限層級可將臨時存取權授予某個應用程式，即使該應用程式不具備一般的必要權限。
+臨時存取功能可減少應用程式的宣示說明所需的權限數量。
+
+在啟用臨時權限的情況下，只有會繼續存取您資料的應用程式，需要供應程式的「永久」權限。
+
+
+        <p>
+            如果想允許外部的圖片檢視器應用程式顯示您供應程式中的相片附加檔案，請將實作電子郵件供應程式和應用程式時所需的權限納入考量。
+
+如要授予圖片檢視器必要的存取權，而不發出權限要求，請設定相片內容 URI 的臨時權限。
+並且將您的電子郵件應用程式設計成在使用者想顯示相片時，將內含相片內容 URI 和權限旗標的意圖傳送給圖片檢視器。
+
+讓圖片檢視器在檢視器沒有供應程式的一般讀取權限的情況下，仍可查詢電子郵件供應程式來擷取相片。
+
+
+        </p>
+        <p>
+            如要啟用臨時權限，請設定
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 元素的
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> 元素，或是在
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 元素中新增一或多項
+ <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> 子元素。如果您有使用臨時權限，您就必須在從供應程式中移除內容 URI 支援，以及將內容 URI 與臨時權限建立關聯時呼叫 {@link android.content.Context#revokeUriPermission(Uri, int)
+Context.revokeUriPermission()}。
+
+
+        </p>
+        <p>
+            屬性的值會決定供應程式的可存取部分。
+            如果將屬性設為 <code>true</code>，則系統會將臨時權限授予整個供應程式，從而覆寫供應程式層級或路徑層級權限所需的任何其他權限。
+
+
+        </p>
+        <p>
+            如果將這個旗標設為 <code>false</code>，您就必須在
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 元素中加入
+ <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> 子元素。每項子元素都會指定要授予臨時存取權的內容 URI。
+
+        </p>
+        <p>
+            如要將臨時存取權委派給某款應用程式，您就必須在意圖中加入 
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} 或 
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} 旗標，或是同時加入以上兩者。請使用 
+{@link android.content.Intent#setFlags(int) setFlags()} 方法設定這些旗標。
+        </p>
+        <p>
+            如果系統未顯示 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> 屬性，代表該屬性是設為
+ <code>false</code>。
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">&lt;provider&gt; 元素</h2>
+<p>
+    與 {@link android.app.Activity} 和 {@link android.app.Service} 元件相同，您必須使用
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code> 元素在應用程式的宣示說明檔案中定義 {@link android.content.ContentProvider} 子類別：Android 系統會從元素取得下列資訊：
+
+
+
+<dl>
+    <dt>
+        授權
+        (<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+        android:authorities}</a>)
+    </dt>
+    <dd>
+        用於識別系統內整個供應程式的符號名稱。如要進一步瞭解這項屬性，請參閱<a href="#ContentURI">設定內容 URI</a>。
+
+
+    </dd>
+    <dt>
+        供應程式類別名稱
+        (<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>)
+    </dt>
+    <dd>
+        實作 {@link android.content.ContentProvider} 的類別。如要進一步瞭解這個類別，請參閱<a href="#ContentProvider">實作 ContentProvider </a>。
+
+
+    </dd>
+    <dt>
+        權限
+    </dt>
+    <dd>
+        這些屬性可指定其他應用程式在存取供應程式的資料時所需的權限：
+
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>：臨時的權限旗標。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>：供應程式範圍的單一讀取/寫入權限。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>：供應程式範圍的讀取權限。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>：供應程式範圍的寫入權限。
+            </li>
+        </ul>
+        <p>
+            如要進一步瞭解權限及相對應的屬性，請參閱<a href="#Permissions">實作內容供應程式權限</a>。
+
+
+        </p>
+    </dd>
+    <dt>
+        啟動及控制屬性
+    </dt>
+    <dd>
+        這些屬性可決定 Android 系統啟動供應程式的方式和時間、供應程式的處理程序特性，以及其他執行階段設定：
+
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>：可讓系統啟動供應程式的旗標。
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>：可讓其他應用程式使用這個供應程式的旗標。
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>：這個供應程式的啟動順序 (相對於相同處理程序中的其他供應程式)。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>：可讓系統將相同處理程序中的供應程式啟動成呼叫用戶端的旗標。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>：執行供應程式的處理程序名稱。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>：指示系統將供應程式的資料與伺服器的資料保持同步的旗標。
+
+            </li>
+        </ul>
+        <p>
+            如需上述屬性的完整說明，請參閱開發人員指南的
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 元素。
+
+        </p>
+    </dd>
+    <dt>
+        資訊屬性
+    </dt>
+    <dd>
+        選用的供應程式圖示和標籤：
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>：內含供應程式圖示的可繪資源。
+                這個圖示會顯示在應用程式清單 ([設定]<em></em> &gt; [應用程式]<em></em> &gt; [全部]<em></em>) 中，供應程式標籤的旁邊。
+
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>：附有供應程式或其資料或以上兩者的說明的資訊標籤。
+這個標籤會顯示在應用程式清單 ([設定]<em></em> &gt; [應用程式]<em></em> &gt; [全部]<em></em>) 中。
+
+            </li>
+        </ul>
+        <p>
+            如需上述屬性的完整說明，請參閱開發人員指南的
+ <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> 元素。
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">意圖和資料存取權</h2>
+<p>
+    應用程式可透過 {@link android.content.Intent} 以間接方式存取內容供應程式。
+    利用這種存取方式的應用程式不會呼叫 {@link android.content.ContentResolver} 或 
+{@link android.content.ContentProvider} 的任何方法，而是會傳送可啟動 Activity (此 Activity 通常屬於供應程式本身的應用程式) 的意圖。
+目標 Activity 會負責擷取資料並在本身的 UI 中顯示該資料。視意圖中的動作而定，目標 Activity 也可能會提示使用者修改供應程式的資料。
+
+
+    此外，意圖還可能會包含目標 Activity 顯示在 UI 中的「額外」資料；使用者之後可選擇是否要先變更這些資料，然後再將其用於修改供應程式的資料。
+
+
+</p>
+<p>
+
+</p>
+<p>
+    您可以使用意圖存取權來確保資料的完整性。您的供應程式可能會將根據詳細定義的業務邏輯插入、更新及刪除的資料做為運作依據。
+如果是這樣，允許其他應用程式直接修改您的資料可能會導致資料失效。
+
+如果想讓開發人員使用意圖存取權，請務必保留相關的完整記錄。
+    並且向他們說明為何使用您應用程式 UI 的意圖存取權，比嘗試使用自己的程式碼修改資料來得好。
+
+</p>
+<p>
+    處理想修改供應程式資料的傳入意圖的方式與處理其他意圖完全相同。
+如要進一步瞭解如何使用意圖，請參閱<a href="{@docRoot}guide/components/intents-filters.html">意圖和意圖篩選器</a>。
+
+</p>

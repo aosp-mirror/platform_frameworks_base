@@ -1,0 +1,126 @@
+page.title=드로어블 사용
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#DrawableTint">드로어블 리소스 색조 적용</a></li>
+  <li><a href="#ColorExtract">이미지에서 주요 색상 추출</a></li>
+  <li><a href="#VectorDrawables">벡터 드로어블 생성</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+<p>드로어블의 다음 기능은 앱에서 머티리얼 디자인을 구현하는 데 도움이 됩니다.</p>
+
+<ul>
+<li>드로어블 색조 적용</li>
+<li>주요 색상 추출</li>
+<li>벡터 드로어블</li>
+</ul>
+
+<p>이 과정은 앱에서 이러한 기능을 사용하는 방법을 보여줍니다.</p>
+
+
+<h2 id="DrawableTint">드로어블 리소스 색조 적용</h2>
+
+<p>Android 5.0(API 레벨 21) 이상에서는 알파 마스크로 정의된 비트맵 및 나인패치에 색조를 적용할 수 있습니다.
+ 색상 리소스 또는 색상 리소스로 변환되는 테마 특성(예: <code>?android:attr/colorPrimary</code>)을 사용하여 색조를 적용할 수 있습니다.
+ 일반적으로 이러한 자산은 한 번만 생성하며 자동으로 채색되어 테마와 일치하게 됩니다.
+</p>
+
+<p>{@code setTint()} 메서드를 사용하여 {@link android.graphics.drawable.BitmapDrawable} 또는 {@link
+android.graphics.drawable.NinePatchDrawable} 객체에 색조를 적용할 수 있습니다. 또한
+<code>android:tint</code> 및 <code>android:tintMode</code> 특성으로 레이아웃에 색조 색상과 모드를 설정할 수 있습니다.
+</p>
+
+
+<h2 id="ColorExtract">이미지에서 주요 색상 추출</h2>
+
+<p>Android 지원 라이브러리 r21 이상에는 이미지에서 주요 색상을 추출할 수 있는 {@link
+android.support.v7.graphics.Palette} 클래스가 있습니다. 이 클래스는 다음과 같은 주요 색상을 추출합니다.
+</p>
+
+<ul>
+<li>생생한 색상</li>
+<li>생생한 어두운 색상</li>
+<li>생생한 밝은 색상</li>
+<li>차분한 색상</li>
+<li>차분하고 어두운 색상</li>
+<li>차분하고 밝은 색상</li>
+</ul>
+
+<p>이러한 색상을 추출하려면, 이미지를 불러올 배경 스레드에서
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} 정적 메서드로 {@link android.graphics.Bitmap} 객체를 전달합니다.
+ 스레드를 사용할 수 없는 경우, 대신
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} 메서드를 호출하고 Listener를 제공합니다.
+</p>
+
+<p><code>Palette.getVibrantColor</code>와 같은
+<code>Palette</code> 클래스의 getter 메서드를 사용하여 이미지에서 주요 색상을 추출할 수 있습니다.</p>
+
+<p>프로젝트에서 {@link android.support.v7.graphics.Palette} 클래스를 사용하려면 다음
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 종속 사항을</a>를 앱의 모듈에 추가합니다.
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>자세한 내용은 {@link android.support.v7.graphics.Palette}
+클래스의 API 레퍼런스를 참조하세요.</p>
+
+
+<h2 id="VectorDrawables">벡터 드로어블 생성</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>비디오</h3>
+    <p>Android 벡터 그래픽</p>
+</div>
+</a>
+
+<p>Android 5.0(API 레벨 21) 이상에서는 정의를 잃지 않고 배율을 조정하는 벡터 드로어블을 정의할 수 있습니다.
+ 비트맵 이미지의 경우 각 화면 밀도마다 자산 파일이 필요한 반면, 벡터 이미지의 경우에는 하나의 자산 파일만 필요합니다.
+ 벡터 이미지를 생성하려면 <code>&lt;vector&gt;</code> XML 요소 안에 모양의 세부정보를 정의합니다.
+</p>
+
+<p>다음 예에서는 하트 모양을 가진 벡터 이미지를 정의합니다.</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>벡터 이미지는 Android에서 {@link android.graphics.drawable.VectorDrawable}
+객체로 나타납니다. <code>pathData</code> 구문에 대한 자세한 내용은 <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">SVG Path reference</a>를 참조하세요. 벡터 드로어블의 속성 애니메이트에 대한 자세한 내용은
+<a href="{@docRoot}training/material/animations.html#AnimVector">벡터 드로어블 애니메이트</a>를 참조하세요.
+</p>

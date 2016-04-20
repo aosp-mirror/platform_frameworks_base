@@ -22,6 +22,7 @@ page.image=auto/images/assets/icons/auto_app_in_simulator.png
  <h2>You should also read</h2>
  <ul>
    <li><a href="{@docRoot}design/auto/index.html">Designing for Auto</a></li>
+   <li><a href="{@docRoot}distribute/googleplay/auto.html">Distribute to Android Auto</a></li>
    <li><a href="{@docRoot}training/auto/audio/index.html">Providing Audio Playback with Auto</a></li>
    <li><a href="{@docRoot}training/auto/messaging/index.html">Providing Messaging for Auto</a></li>
  </ul>
@@ -192,18 +193,24 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
   </li>
 </ol>
 
-<div class="figure" style="width:330px">
-  <img src="{@docRoot}images/training/auto-desktop-head-unit-server-running.png"
-      alt="" >
-  <p class="img-caption">
-    <strong>Figure 2.</strong> Notification that the head unit server is running.
-  </p>
-</div>
-<img src="{@docRoot}images/training/auto-desktop-head-unit-context-menu-enabled.png"
-    alt="" >
-<p class="img-caption">
-  <strong>Figure 1.</strong> Context menu with developer options.
-</p>
+<div class="cols">
+  <div class="col-6">
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-context-menu-enabled.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 1.</strong> Context menu with developer options.
+    </p>
+  </div>
+
+  <div class="col-6">
+    <img src="{@docRoot}images/training/auto-desktop-head-unit-server-running.png"
+        alt="" >
+    <p class="img-caption">
+      <strong>Figure 2.</strong> Notification that the head unit server is running.
+    </p>
+  </div>
+</div> <!-- end cols-->
+
 
 <h3 id="connecting-dhu">Connecting the DHU to your mobile device</h3>
 
@@ -213,7 +220,7 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
 
 <ol>
   <li>On the mobile device, enable Android Auto developer mode by starting the Android Auto
-    companion app, and then tapping the header image 10 times.
+    companion app, and then tapping the <i>Android Auto</i> toolbar title 10 times.
     This step is only required the first time you run the companion app.
   </li>
   <li>If the server is not already running, select <strong>Start head unit server</strong>
@@ -221,9 +228,13 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
     <p>On the device, a foreground service appears in the notification area. </p>
   </li>
 
-  <li>Connect the mobile device to the development machine via USB. Your device must be unlocked to
-    launch the DHU.
-  </li>
+  <li>In the Android Auto app, make sure the <strong>Only connect to known cars</strong> option
+    is disabled.</li>
+
+  <li>Connect the mobile device to the development machine via USB.</li>
+
+  <li>Make sure the mobile device has its screen unlocked, otherwise it cannot launch the DHU.</li>
+
   <li>On the development machine, run the following {@code adb} command to
     forward socket connections from the
     development machine's port 5277 to the same port number on the Android device.
@@ -241,8 +252,12 @@ $ ./desktop-head-unit</pre>
 
     <p>
       By default, the head unit server connects over port 5277. To override the host or port
-      (for example, to forward over SSH), use the <code>--adb</code> flag.
+      (for example, to forward over SSH), use the
+      <code>desktop-head-unit --adb &lt;[localhost:]port&gt;</code> flag, as in
+      the following example:
     </p>
+
+    <pre class="no-pretty-print">$ ./desktop-head-unit --adb 5999</pre>
 
   </li>
 </ol>

@@ -382,7 +382,7 @@ public class MainActivity extends FragmentActivity {
     ...
     // Constants
     // The authority for the sync adapter's content provider
-    public static final String AUTHORITY = "com.example.android.datasync.provider"
+    public static final String AUTHORITY = "com.example.android.datasync.provider";
     // An account type, in the form of a domain name
     public static final String ACCOUNT_TYPE = "example.com";
     // The account name
@@ -416,7 +416,7 @@ public class MainActivity extends FragmentActivity {
          * Add the account and account type, no password or user data
          * If successful, return the Account object, otherwise report an error.
          */
-        if (accountManager.addAccountExplicitly(newAccount, null, null))) {
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
             /*
              * If you don't set android:syncable="true" in
              * in your &lt;provider&gt; element in the manifest,

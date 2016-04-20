@@ -1,0 +1,2356 @@
+page.title=聯絡人供應程式
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>快速檢視</h2>
+<ul>
+    <li>Android 關於人員資訊的存放庫。</li>
+    <li>
+        與網頁同步。
+    </li>
+    <li>
+        整合社交串流資料。
+    </li>
+</ul>
+<h2>本文件內容</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">聯絡人供應程式組織架構</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">原始聯絡人</a>
+    </li>
+    <li>
+        <a href="#DataBasics">資料</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">聯絡人</a>
+    </li>
+    <li>
+        <a href="#Sources">來自同步配接器的資料</a>
+    </li>
+    <li>
+        <a href="#Permissions">必要權限</a>
+    </li>
+    <li>
+        <a href="#UserProfile">使用者設定檔</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">聯絡人供應程式中繼資料</a>
+    </li>
+    <li>
+        <a href="#Access">聯絡人供應程式存取</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">聯絡人供應程式同步配接器</a>
+    </li>
+    <li>
+        <a href="#SocialStream">社交串流資料</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">其他聯絡人供應程式功能</a>
+    </li>
+</ol>
+<h2>重要類別</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>相關範例</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">聯絡人管理員
+</a>
+
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+範例同步配接器</a>
+    </li>
+</ol>
+<h2>另請參閱</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        內容供應程式基本概念
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    聯絡人供應程式是強大且有彈性的 Android 元件，負責管理裝置上與人員相關的中央資料存放庫。
+聯絡人供應程式是裝置中聯絡人應用程式的資料來源，您也可以在自己的應用程式中存取其資料，並且在裝置和線上服務之間傳輸資料。
+
+供應程式內含範圍寬廣的資料來源，而且嘗試管理每個人愈來愈多的資料，組織架構因而變得很複雜。
+
+基於這個原因，供應程式的 API 包括豐富的合約類別和介面，可幫助資料的擷取和修改。
+
+
+</p>
+<p>
+    本指南描述以下各項：
+</p>
+    <ul>
+        <li>
+            基本的供應程式結構。
+        </li>
+        <li>
+            如何從供應程式擷取資料。
+        </li>
+        <li>
+            如何修改供應程式中的資料。
+        </li>
+        <li>
+            如何針對從伺服器到聯絡人供應程式的資料同步編寫同步配接器。
+
+        </li>
+    </ul>
+<p>
+    本指南假設您瞭解 Android 內容供應程式基本概念。如要更瞭解 Android 內容供應程式的詳細資訊，請閱讀<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容供應程式基本概念</a>指南。
+
+
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>範例應用程式是使用同步配接器在聯絡人供應程式和 Google 網路服務代管的範例應用程式之間傳輸資料的例子。
+
+
+
+</p>
+<h2 id="InformationTypes">聯絡人供應程式組織架構</h2>
+<p>
+    聯絡人供應程式是 Android 內容供應程式元件。負責維護三種與人有關的資料類型，每一種類型都會對應到供應程式所提供的表格，如圖 1 所示：
+
+
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>圖 1.</strong>聯絡人供應程式表格結構。
+</p>
+<p>
+    這三個表格通常會以其合約類別的名稱來稱呼。類別會定義內容 URI 的常數、欄名稱以及表格所使用的欄值：
+
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Contacts} 表格
+    </dt>
+    <dd>
+        根據原始聯絡人列的彙總，代表不同人員的列。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.RawContacts} 表格
+    </dt>
+    <dd>
+        內含人員資料摘要的列，針對使用者帳戶和類型。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data} 表格
+    </dt>
+    <dd>
+        內含原始聯絡人詳細資料的列，例如電子郵件地址或電話號碼。
+    </dd>
+</dl>
+<p>
+    合約類別在 {@link android.provider.ContactsContract} 中呈現的其他表格都是輔助表格。聯絡人供應程式使用輔助表格來管理其操作，或支援裝置中聯絡人或電話應用程式的特定功能。
+
+
+</p>
+<h2 id="RawContactBasics">原始聯絡人</h2>
+<p>
+    原始聯絡人是來自單一帳戶類型和帳戶名稱的人員資料。
+因為聯絡人供應程式允許一個人有多種線上服務做為資料來源，所以聯絡人供應程式可以讓同一個人有多個原始聯絡人。
+
+    多個原始聯絡人也可以讓使用者，將相同帳戶類型中多個帳戶的人員資料合併。
+
+</p>
+<p>
+    原始聯絡人的大部分資料不是儲存在
+{@link android.provider.ContactsContract.RawContacts} 表格，而是儲存在 {@link android.provider.ContactsContract.Data} 表格中的一或多個列。
+每個資料列都有一欄
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID}，當中包含其上層資料列 {@link android.provider.ContactsContract.RawContacts} 的 {@code android.provider.BaseColumns#_ID RawContacts._ID} 值。
+
+
+</p>
+<h3 id="RawContactsColumns">重要的原始聯絡人欄</h3>
+<p>
+    {@link android.provider.ContactsContract.RawContacts} 表格中的重要欄列於表 1。
+請詳閱表格下方的注意事項：
+</p>
+<p class="table-caption" id="table1">
+    <strong>表 1.</strong>重要的原始聯絡人欄。
+</p>
+<table>
+    <tr>
+        <th scope="col">欄名稱</th>
+        <th scope="col">用途</th>
+        <th scope="col">備註</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            帳戶類型 (此原始聯絡人的來源) 的帳戶名稱。
+            例如，Google 帳戶的帳戶名稱是裝置擁有者的其中一個 Gmail 地址。
+請參閱下一個項目，進一步瞭解
+ {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}。
+
+        </td>
+        <td>
+            不同的帳戶類型的名稱格式各不相同。帳戶名稱不一定是電子郵件地址。
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            帳戶類型是此原始聯絡人的來源。例如，Google 帳戶的帳戶類型為 <code>com.google</code>。
+一定要將帳戶類型加上您所擁有或控制網域的網域識別碼。
+這樣可以確認您的帳戶類型是唯一的。
+
+        </td>
+        <td>
+            提供聯絡人資料的帳戶類型通常有關聯的同步配接器，可以與聯絡人供應程式同步。
+
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            原始聯絡人的「已刪除」旗標。
+        </td>
+        <td>
+            此旗標讓聯絡人供應程式可以在內部維護列，直到同步配接器從其伺服器刪除該列，最後從存放庫刪除該列。
+
+
+        </td>
+    </tr>
+</table>
+<h4>備註</h4>
+<p>
+    以下是有關
+ {@link android.provider.ContactsContract.RawContacts} 表格的注意事項：
+</p>
+<ul>
+    <li>
+        原始聯絡人的名稱不是儲存於本身在
+{@link android.provider.ContactsContract.RawContacts} 的列，而是儲存在 {@link android.provider.ContactsContract.Data} 表格的
+ {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 列中。
+原始聯絡人在 {@link android.provider.ContactsContract.Data} 表格中只有一列這種類型。
+
+    </li>
+    <li>
+        <strong>注意：</strong>如要使用您在原始聯絡人列中自己的帳戶資料，必須先向 {@link android.accounts.AccountManager} 註冊。
+如要註冊，請提示使用者將帳戶類型及其帳戶名稱新增至帳戶清單。
+如果沒有這麼做，聯絡人供應程式將自動刪除您的原始聯絡人列。
+
+        <p>
+            例如，如果您希望應用程式維護網域為 {@code com.example.dataservice} 網頁式服務的聯絡人資料，此服務的使用者帳戶是 {@code becky.sharp@dataservice.example.com}，這名使用者必須先新增帳戶「類型」({@code com.example.dataservice}) 和帳戶「名稱」
+({@code becky.smart@dataservice.example.com})，您的應用程式才能新增原始聯絡人列。
+
+
+
+            您可以在文件中向使用者說明此需求，或提示使用者同時新增類型和名稱。
+帳戶類型和帳戶名稱在下一節有更詳細的說明。
+
+    </li>
+</ul>
+<h3 id="RawContactsExample">原始聯絡人資料的來源</h3>
+<p>
+    如要瞭解原始聯絡人的運作方式，假設一位使用者 Emily Dickinson 在其裝置上定義了下列三個使用者帳戶：
+
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Twitter 帳戶「belle_of_amherst」</li>
+</ul>
+<p>
+    此使用者在「帳戶」<em></em>設定中為這三個帳戶啟用了「同步聯絡人」<em></em>。
+
+</p>
+<p>
+    假設 Emily Dickinson 開啟瀏覽器視窗，使用
+ <code>emily.dickinson@gmail.com</code>登入 Gmail，開啟[聯絡人] 並新增「Thomas Higginson」。
+接著，她使用
+ <code>emilyd@gmail.com</code>登入 Gmail，並寄送電子郵件給「Thomas Higginson」(系統已自動將他新增為聯絡人)。
+她也在 Twitter 上關注「colonel_tom」(Thomas Higginson 的 Twitter ID)。
+
+</p>
+<p>
+    聯絡人供應程式建立三個原始聯絡人的方式如下：
+</p>
+<ol>
+    <li>
+        「Thomas Higginson」的原始聯絡人與 <code>emily.dickinson@gmail.com</code> 相關聯。
+        該使用者帳戶類型為 Google。
+    </li>
+    <li>
+        「Thomas Higginson」的第二個原始聯絡人與 <code>emilyd@gmail.com</code> 相關聯。
+        該使用者帳戶類型也是 Google。儘管第二個原始聯絡人的名稱與前一個名稱完全相同，但此人是針對不同使用者帳戶所新增的。
+
+
+    </li>
+    <li>
+        「Thomas Higginson」的第三個原始聯絡人與「belle_of_amherst」相關聯。該使用者帳戶類型是 Twitter。
+
+    </li>
+</ol>
+<h2 id="DataBasics">資料</h2>
+<p>
+    如前所述，原始聯絡人的資料是儲存在
+ {@link android.provider.ContactsContract.Data} 列，而此列會連結到原始聯絡人的
+ <code>_ID</code> 值。這樣讓原始聯絡人的相同資料類型可以有多個執行個體，例如電子郵件地址或電話號碼。
+例如，如果{@code emilyd@gmail.com} 的 "Thomas Higginson" (Thomas Higginson 的原始聯絡人列，與 Google 帳戶 <code>emilyd@gmail.com</code> 關聯) 的住家電子郵件地址為
+ <code>thigg@gmail.com</code>，而工作電子郵件地址為
+ <code>thomas.higginson@gmail.com</code>，則聯絡人供應程式會儲存這兩個電子郵件地址列，並將兩者連結到原始聯絡人。
+
+
+
+</p>
+<p>
+    請注意，此單一表格中儲存了不同類型的資料。{@link android.provider.ContactsContract.Data} 表格中可以看到顯示名稱、電話號碼、電子郵件、郵寄地址、相片以及網站詳細資料等列。
+
+為了協助管理這些內容，
+{@link android.provider.ContactsContract.Data} 表格有一些欄附有描述性名稱，而其他欄則有一般名稱。
+描述性名稱欄的內容有相同的意義 (無論列中的資料類型為何)，而一般名稱欄的內容則視資料的類型會有不同的意義。
+
+
+</p>
+<h3 id="DescriptiveColumns">描述性欄名稱</h3>
+<p>
+    以下提供幾個描述性欄名稱範例：
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        原始聯絡人 <code>_ID</code> 欄的資料值。
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        儲存在此列中的資料類型，以自訂 MIME 類型表示。聯絡人供應程式會使用
+ {@link android.provider.ContactsContract.CommonDataKinds} 子類別中定義的MIME 類型。
+這些 MIME 類型屬開放原始碼，可以和聯絡人供應程式搭配的任何應用程式或同步配接器都可以加以使用。
+
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        如果原始聯絡人的此類型資料列出現多次，則
+ {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 欄會在包含主要資料類型的資料列加上旗標。
+例如，使用者長按聯絡人的電話號碼並選取 [設為預設值]<strong></strong>，則包含該號碼的 {@link android.provider.ContactsContract.Data} 列就會將它的 {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} 欄設為零以外的值。
+
+
+
+
+    </dd>
+</dl>
+<h3 id="GenericColumns">一般欄名稱</h3>
+<p>
+    一般欄有 15 個 (名稱為 <code>DATA1</code> 到
+ <code>DATA15</code>)，系統通常會提供這些欄。另外有 4 個一般欄(<code>SYNC1</code> 到 <code>SYNC4</code>) 只能透過同步配接器使用。
+
+不管列中的資料類型為何，一定可以使用一般欄名稱常數。
+
+</p>
+<p>
+    <code>DATA1</code> 欄會建立索引。聯絡人供應程式一律會使用此欄的資料，而且供應程式預期此欄為最常查詢的目標。
+例如，在電子郵件列中，此欄內含實際的電子郵件地址。
+
+</p>
+<p>
+    一般來說，<code>DATA15</code> 欄會保留用於儲存「二進位大型物件」(BLOB) 資料，例如相片縮圖。
+
+</p>
+<h3 id="TypeSpecificNames">類型特定的欄名稱</h3>
+<p>
+    為了要協助欄處理具有特定類型的列，聯絡人供應程式也提供類型特定的欄名稱常數。這些常數會在
+ {@link android.provider.ContactsContract.CommonDataKinds}的子類別中定義。
+常數只是為相同欄名稱指定不同的常數名稱，以協助您存取列中特定類型的資料。
+
+
+</p>
+<p>
+    例如，{@link android.provider.ContactsContract.CommonDataKinds.Email} 類別定義了 {@link android.provider.ContactsContract.Data} 列的類型特定欄名稱常數。此列內含 MIME 類型 {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+Email.CONTENT_ITEM_TYPE}。
+
+
+類別含有電子郵件地址欄的常數
+ {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}。
+
+ {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}的實際值是「data1」。此值與欄的一般名稱相同。
+
+</p>
+<p class="caution">
+    <strong>注意：</strong>如果
+ {@link android.provider.ContactsContract.Data} 表格使用供應程式預先定義 MIME 類型的其中一種，請不要將您自訂的資料新增至此表格。
+假如將您自訂的資料新增至此表格，可能會遺失資料或讓供應程式發生故障。
+例如，您不應該將含有 MIME 類型 {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+Email.CONTENT_ITEM_TYPE} (內含使用者名稱，而不是電子郵件地址) 的列新增至 <code>DATA1</code> 欄。
+
+如果您的列使用自訂 MIME 類型，那麼您可以自行定義專屬的類型特定的欄名稱，並按照您的需求使用這些欄。
+
+</p>
+<p>
+    圖 2 顯示描述性欄和資料欄顯示在
+ {@link android.provider.ContactsContract.Data} 列的樣式，以及類型特定欄名稱與一般欄名稱的「重疊」方式。
+
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>圖 2.</strong>特定類型欄名稱與一般欄名稱。
+</p>
+<h3 id="ColumnMaps">特定類型欄名稱類別</h3>
+<p>
+    表 2 列出最常用的特定類型欄名稱類別：
+</p>
+<p class="table-caption" id="table2">
+  <strong>表 2.</strong>特定類型欄名稱類別</p>
+<table>
+  <tr>
+    <th scope="col">對應類別</th>
+    <th scope="col">資料類型</th>
+    <th scope="col">備註</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>原始聯絡人 (與此資料列相關聯) 的名稱資料。</td>
+    <td>原始聯絡人只有一列此資料。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>原始聯絡人 (與此資料列相關聯) 的主要相片。</td>
+    <td>原始聯絡人只有一列此資料。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>原始聯絡人 (與此資料列相關聯) 的電子郵件地址。</td>
+    <td>原始聯絡人可以有多個電子郵件地址。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>原始聯絡人 (與此資料列相關聯) 的郵寄地址。</td>
+    <td>原始聯絡人可以有多個郵寄地址。</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>將原始聯絡人連結至聯絡人供應程式內其中一個群組的識別碼。</td>
+    <td>
+        群組是帳戶類型和帳戶名稱的選用功能。如要進一步瞭解群組，請參閱<a href="#Groups">聯絡人群組</a>。
+
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">聯絡人</h3>
+<p>
+    聯絡人供應程式會合併所有帳戶類型和帳戶名稱的原始聯絡人，而成為「聯絡人」<strong></strong>。
+藉此協助使用者顯示及修改針對某個人所收集的所有資料。
+聯絡人供應程式負責建立新的聯絡人列，以及彙總原始聯絡人與現有的聯絡人列。
+應用程式或同步配接器都可以新增聯絡人，而聯絡人列中的某些欄屬於唯讀性質。
+
+</p>
+<p class="note">
+    <strong>注意：</strong>如果您嘗試使用
+ {@link android.content.ContentResolver#insert(Uri,ContentValues) insert()} 將聯絡人新增至聯絡人供應程式，將會收到 {@link java.lang.UnsupportedOperationException} 例外狀況。
+如果您試著更新列為「唯讀」的欄，則會略過此更新作業。
+
+</p>
+<p>
+    如果新增的原始聯絡人與現有的聯絡人都不相符，聯絡人供應程式就會建立新的聯絡人。
+如果現有原始聯絡人的資料在變更後，不再與之前附加的聯絡人相符，則供應程式也會建立新的聯絡人。
+
+如果應用程式或同步配接器建立的新原始聯絡人「符合」<em></em>現有的聯絡人，則新的原始聯絡人會彙總為現有的聯絡人。
+
+
+</p>
+<p>
+    聯絡人供應程式使用 {@link android.provider.ContactsContract.Contacts Contacts} 表格中的聯絡人
+ <code>_ID</code> 欄，將聯絡人列連結到其原始聯絡人列。
+原始聯絡人表格
+ {@link android.provider.ContactsContract.RawContacts} 的 <code>CONTACT_ID</code> 欄，內含聯絡人列 (與每個原始聯絡人列相關聯) 的 <code>_ID</code> 值。
+
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts} 表格也有
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 欄，此為聯絡人列的「永久」連結。
+因為聯絡人供應程式會自動維護聯絡人，它會變更聯絡人列的 {@code android.provider.BaseColumns#_ID} 值，以回應彙總或同步操作。
+
+即使發生這種情況，與聯絡人的
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 合併的內容 URI {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} 仍會指向聯絡人列，因此，您可以使用
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+ 來維護「常用聯絡人」等聯絡人的連結。
+
+此欄有自己的格式，與 {@code android.provider.BaseColumns#_ID} 欄的格式無關。
+
+</p>
+<p>
+    圖 3 說明這三個主要表格彼此之間的關係。
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>圖 3.</strong>聯絡人、原始聯絡人以及詳細資料表格的關係。
+</p>
+<h2 id="Sources">來自同步配接器的資料</h2>
+<p>
+    使用者將聯絡人資料直接輸入裝置，但資料也會過「同步配接器」從網路服務流入聯絡人供應程式<strong></strong> (同步配接器會自動將資料在裝置和服務之間傳輸)。
+
+同步配接器受到系統的控制、在背景執行，並且會呼叫 {@link android.content.ContentResolver} 方法來管理資料。
+
+
+</p>
+<p>
+    在 Android 中，與同步配接器搭配運作的網路服務，是透過帳戶類型加以識別。
+    每個同步配接器會與一種帳戶類型搭配，但可以支援該類型的多個帳戶名稱。
+帳戶類型和帳戶名稱在<a href="#RawContactsExample">原始聯絡人資料的來源</a>中會有更詳細的說明。
+ 下列定義提供更詳細的資訊，說明帳戶類型和名稱與同步配接器和服務之間的關係。
+
+</p>
+<dl>
+    <dt>
+        帳戶類型
+    </dt>
+    <dd>
+        識別使用者儲存資料的服務。在大部分情況下，使用者必須經過服務的驗證。
+例如，Google 聯絡人是一種帳戶類型，由程式碼 <code>google.com</code> 加以識別。
+此值會對應到
+ {@link android.accounts.AccountManager} 所使用的帳戶類型。
+    </dd>
+    <dt>
+        帳戶名稱
+    </dt>
+    <dd>
+        識別特定帳戶或帳戶類型的登入。Google 聯絡人帳戶與 Google 帳戶相同，都是使用電子郵件地址做為帳戶名稱。
+
+        其他服務可能是以單一文字使用者名稱或數值 ID 做為帳戶名稱。
+    </dd>
+</dl>
+<p>
+    帳戶類型不必是唯一的。使用者可以設定多個 Google 聯絡人帳戶，並將其資料下載至聯絡人供應程式；如果使用者有一組個人帳戶名稱的個人聯絡人，還有另一組工作用的聯絡人，就可能發生此情形。
+
+帳戶名稱通常是唯一的。
+兩者加起來，就可以識別聯絡人供應程式和外部服務之間的特定資料流程。
+
+</p>
+<p>
+    如果您要將服務的資料傳輸到聯絡人供應程式，則需要編寫您自己的同步配接器。
+如要進一步瞭解同步配接器，請參閱<a href="#SyncAdapters">聯絡人供應程式同步配接器</a>。
+
+</p>
+<p>
+    圖 4 顯示聯絡人供應程式在人員相關的資料流程中所扮演的角色。
+在標記為「同步配接器」的方塊中，每個配接器都以其帳戶類型做為標籤。
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>圖 4.</strong>聯絡人供應程式資料流程。
+</p>
+<h2 id="Permissions">必要權限</h2>
+<p>
+    要存取聯絡人供應程式的應用程式必須要求下列權限：
+
+</p>
+<dl>
+    <dt>一或多份表格的讀取權限</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}，在
+ <code>AndroidManifest.xml</code> 的
+ <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 元素中，以
+ <code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code> 指定。
+    </dd>
+    <dt>一或多份表格的寫入權限</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}，在
+<code>AndroidManifest.xml</code> 的
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code> 元素中，以
+<code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code> 指定。
+    </dd>
+</dl>
+<p>
+    這些權限不會延伸到使用者設定檔資料。如要瞭解使用者設定檔及其必要權限，請參閱<a href="#UserProfile">使用者設定檔</a>。
+
+
+</p>
+<p>
+    請記住，使用者的聯絡人資料是個人的敏感資訊。使用者很關心隱私權相關的問題，因此不希望應用程式收集使用者本身或其聯絡人的相關資訊。
+
+    如果沒有明確說明為何需要存取使用者的聯絡人資料，使用者可能會給您的應用程式低評分，或直接拒絕安裝。
+
+</p>
+<h2 id="UserProfile">使用者設定檔</h2>
+<p>
+    {@link android.provider.ContactsContract.Contacts} 表格中有一列內含裝置使用者的設定檔資料，
+此資料描述裝置的 <code>user</code>，而不是其中一位使用者的聯絡人。
+針對使用設定檔的每個系統，設定檔聯絡人列會連結到原始聯絡人列。
+
+    每個設定檔原始聯絡人列可以有多個資料列。{@link android.provider.ContactsContract.Profile} 類別中提供存取使用者設定檔的常數。
+
+</p>
+<p>
+    存取使用者設定檔需要特殊權限。除了
+{@link android.Manifest.permission#READ_CONTACTS} 和
+{@link android.Manifest.permission#WRITE_CONTACTS} 的讀取和寫入權限以外，存取使用者設定檔還分別需要 {@code android.Manifest.permission#READ_PROFILE} 讀取權限和
+{@code android.Manifest.permission#WRITE_PROFILE} 寫入權限。
+
+
+</p>
+<p>
+    請務必將使用者的設定檔視為敏感資訊。
+{@code android.Manifest.permission#READ_PROFILE}權限可以讓您存取裝置上使用者的身分識別資料。
+請務必在應用程式的簡介中告訴使用者，為何需要使用者設定檔存取權限。
+
+</p>
+<p>
+    如要擷取內含使用者的設定檔的聯絡人列，請呼叫 {@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
+ContentResolver.query()}。
+將內容 URI 設為 
+{@link android.provider.ContactsContract.Profile#CONTENT_URI}，並且不要提供任何選取條件。
+您也可以使用此內容 URI 做為擷取原始聯絡人或設定檔資料的基礎 URI。
+例如，以下程式碼片段會擷取設定檔資料：
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>注意：</strong>如果您擷取了多個聯絡人列，而想要判斷其中之一是否為使用者設定檔，請測試該列的
+{@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} 欄。
+如果聯絡人為使用者設定檔，此欄會設為「1」。
+
+</p>
+<h2 id="ContactsProviderMetadata">聯絡人供應程式中繼資料</h2>
+<p>
+    聯絡人供應程式管理的資料可以追蹤存放庫中聯絡人資料的
+狀態。存放庫相關的中繼資料儲存在不同的位置，包括
+「原始聯絡人」、「資料」以及「聯絡人」表格列，
+{@link android.provider.ContactsContract.Settings} 表格以及
+{@link android.provider.ContactsContract.SyncState} 表格。以下表格說明
+這些中繼資料的作用：
+</p>
+<p class="table-caption" id="table3">
+  <strong>表 3.</strong>聯絡人供應程式的中繼資料</p>
+<table>
+    <tr>
+        <th scope="col">表格</th>
+        <th scope="col">欄</th>
+        <th scope="col">值</th>
+        <th scope="col">意義</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>「0」：上次同步後沒有變更。</td>
+        <td rowspan="2">
+            標記裝置上經過變更，且必須同步回伺服器的原始聯絡人。
+Android 應用程式更新列時，聯絡人供應程式會自動設定此值。
+
+            <p>
+                修改原始聯絡人或資料表格的同步配接器一律會將字串{@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER} 附加到其使用的內容 URI，
+
+藉此防止供應程式將列標記為已變更 (dirty)。
+                否則，同步配接器修改會顯示為本機修改，因而傳送到伺服器，儘管伺服器才是修改的來源。
+
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>「1」：上次同步後已變更，需要同步回伺服器。</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>此列的版本號碼。</td>
+        <td>
+            每當列或其相關資料變更時，聯絡人供應程式都會自動增加此值。
+
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>此列的版本號碼。</td>
+        <td>
+            每當資料列變更時，聯絡人供應程式都會自動增加此值。
+
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            可唯一識別帳戶原始聯絡人的字串值(此帳戶是以此字串值所建立)。
+
+        </td>
+        <td>
+            同步配接器建立新的原始聯絡人時，此欄應設為原始聯絡人的伺服器唯一 ID。
+Android 應用程式建立新的原始聯絡人時，應用程式應將此欄保留空白。
+這樣會提供訊號給同步配接器，要在伺服器上建立新的原始聯絡人，然後取得
+{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID} 值。
+
+            <p>
+                尤其是來源 ID 對於每個帳戶類型必須具備<strong>唯一性</strong>，在同步時應該很穩定：
+
+            </p>
+                <ul>
+                    <li>
+                        唯一：帳戶的每個原始聯絡人都必須有自己的來源 ID。如果沒有強制執行此條件，則聯絡人應用程式會發生問題。
+
+                        請注意，同一個帳戶「類型」<em></em>的兩個原始聯絡人可能會有相同的來源 ID。
+例如，{@code emily.dickinson@gmail.com} 帳戶的原始聯絡人「Thomas Higginson」與
+ {@code emilyd@gmail.com} 帳戶的原始聯絡人「Thomas Higginson」的來源 ID相同。
+
+
+                    </li>
+                    <li>
+                        穩定：來源 ID 是線上服務中原始聯絡人資料的永久部分。
+例如，如果使用者從應用程式設定中清除「聯絡人儲存空間」，然後重新同步，則還原的原始聯絡人的來源 ID 應該與先前相同。
+
+如果沒有強制執行此條件，捷徑將停止運作。
+
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>「0」：Android 應用程式 UI 中不應顯示此群組中的聯絡人。</td>
+        <td>
+            有些伺服器可以讓使用者隱藏某些群組中的聯絡人，此欄的設計提供了與這類伺服器的相容性。
+
+        </td>
+    </tr>
+    <tr>
+        <td>「1」：應用程式 UI 中會顯示此群組中的聯絡人。</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            「0」：針對此帳戶和帳戶類型，Android 應用程式 UI 中不會顯示不屬於群組的聯絡人。
+
+        </td>
+        <td rowspan="2">
+            如果沒有任何原始聯絡人屬於某個群組，則聯絡人預設為不可見(原始聯絡人的群組成員資格是由{@link android.provider.ContactsContract.Data} 表格中的一或多個
+{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} 列所指出)。
+
+
+            在 {@link android.provider.ContactsContract.Settings} 表格列中為帳戶類型和帳戶設定此旗標，可以強制讓不屬於任何群組的聯絡人成為可見的。
+
+            此旗標的其中一個用途是，顯示伺服器中不屬於任何群組的聯絡人。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            「1」：針對此帳戶和帳戶類型，應用程式 UI 中會顯示不屬於群組的聯絡人。
+
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>(全部)</td>
+        <td>
+            使用此表格儲存同步配接器的中繼資料。
+        </td>
+        <td>
+            使用此表格，您可以儲存同步狀態，以及其他與同步相關、會永久放在裝置上的資料。
+
+        </td>
+    </tr>
+</table>
+<h2 id="Access">聯絡人供應程式存取</h2>
+<p>
+    本節說明從聯絡人供應程式存取資料的指導方針，著重於以下各項：
+
+</p>
+<ul>
+    <li>
+        實體查詢。
+    </li>
+    <li>
+        批次修改。
+    </li>
+    <li>
+        使用意圖進行擷取及修改。
+    </li>
+    <li>
+        資料完整性。
+    </li>
+</ul>
+<p>
+    從同步配接器進行修改，在<a href="#SyncAdapters">聯絡人供應程式同步配接器</a>中也提供更詳細的資訊。
+
+</p>
+<h3 id="Entities">實體查詢</h3>
+<p>
+    因為聯絡人供應程式為階層式表格，擷取某一列及連結至此列的所有「子」列時非常實用。
+例如，如要顯示人員的所有資訊，您可能要擷取單一
+ {@link android.provider.ContactsContract.Contacts} 列的
+所有 {@link android.provider.ContactsContract.RawContacts} 列，或單一
+{@link android.provider.ContactsContract.RawContacts} 列的所有
+{@link android.provider.ContactsContract.CommonDataKinds.Email} 列。
+為了協助此操作，聯絡人供應程式提供<strong>實體</strong>建構，其運作方式就像是資料庫結合各個表格一樣。
+
+
+</p>
+<p>
+    實體就像是一份表格，由上層表格及其下層表格中的選取欄所組成。
+    查詢實體時，您會提供投影 (projection) 和搜尋條件根據該實體可用的欄。
+結果會是 {@link android.database.Cursor}，擷取到的每個下層表格列在其中都會有一列。
+例如，如果您查詢
+{@link android.provider.ContactsContract.Contacts.Entity} 的聯絡人名稱，並且查詢所有 {@link android.provider.ContactsContract.CommonDataKinds.Email} 列中該名稱的所有原始聯絡人，則會取回 {@link android.database.Cursor}，每個 {@link android.provider.ContactsContract.CommonDataKinds.Email} 列都會有一列。
+
+
+
+</p>
+<p>
+    實體簡化查詢。使用實體，您可以一次擷取聯絡人或原始聯絡人的所有聯絡人資料，而不用先查詢父項表格以取得 ID，再以此 ID 查詢子項表格。另外，聯絡人供應程式會在單一交易中處理針對實體的查詢，以確保所擷取的資料在內部的一致性。
+
+
+
+
+</p>
+<p class="note">
+    <strong>注意：</strong>實體通常不會包含上層表格和下層表格的所有欄。
+如果您嘗試使用的欄名稱未列在實體的欄名稱常數中，將會收到 {@link java.lang.Exception}。
+
+</p>
+<p>
+    以下程式碼片段展示如何擷取一位聯絡人的所有原始聯絡人列。此程式碼片段屬於大型應用程式的一部分，此應用程式有兩個 Activity：「主要」和「詳細」。
+主要 Activity 會顯示聯絡人列的清單，當使用者選取其中一項時，此 Activity 會將其 ID 傳送給詳細 Activity。
+
+詳細 Activity 會使用 {@link android.provider.ContactsContract.Contacts.Entity}，針對所選取的聯絡人，顯示與其關聯的所有原始聯絡人的所有資料列。
+
+
+</p>
+<p>
+    此程式碼片段是取自「詳細」Activity：
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    載入完成時，{@link android.app.LoaderManager} 會呼叫 {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D)
+    onLoadFinished()} 的回呼。
+此方法的其中一個傳入引數是內含查詢結果的
+ {@link android.database.Cursor}。在您的應用程式中，您可以從這個 {@link android.database.Cursor} 取得資料，然後加以顯示或進一步處理。
+
+</p>
+<h3 id="Transactions">批次修改</h3>
+<p>
+    您應該儘可能透過建立
+ {@link android.content.ContentProviderOperation} 物件的{@link java.util.ArrayList}，然後呼叫
+ {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}，以「批次模式」在聯絡人供應程式中進行資料的插入、更新以及刪除。
+因為聯絡人供應程式會在單一交易中執行 
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 的所有操作，所以您所做的修改不會讓聯絡人存放庫處於不一致的狀態。
+
+
+批次修改同時也有助於插入原始聯絡人及其詳細資料。
+
+</p>
+<p class="note">
+    <strong>注意：</strong>如要修改「單一」<em></em>原始聯絡人，請考慮將意圖傳送到裝置的聯絡人應用程式，而不要在您的應用程式中處理修改操作。這些動作在<a href="#Intents">使用意圖擷取和修改</a>中有更詳細的資料。
+
+
+
+</p>
+<h4>降伏點</h4>
+<p>
+    包含大量操作的批次修改可能會封鎖其他處理程序，導致整體的使用者體驗不良。
+如要將您想要執行的所有修改，儘可能安排在較少的清單中執行，同時要避免這些修改讓系統無法進行其他操作，則應該要為一或多個操作設定「降伏點」<strong></strong>。
+
+
+    降伏點是一個 {@link android.content.ContentProviderOperation} 物件，而且其
+{@link android.content.ContentProviderOperation#isYieldAllowed()} 值是設為
+<code>true</code>。當聯絡人供應程式遇到降伏點時，會暫停它的工作，以便讓其他處理程序執行，並關閉目前的交易。
+供應程式再次啟動時，會繼續 {@link java.util.ArrayList} 中的下一項操作，並啟動新的交易。
+
+
+</p>
+<p>
+    降伏點會讓每次呼叫
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 產生一個以上的交易。基於這項原因，您必須將上次操作的降伏點設為一組相關的列。
+
+    例如，您應該為以下兩種上次操作設定降伏點：新增原始聯絡人列及其相關資料列的一組動作，或與單一聯絡人相關的一組列。
+
+
+</p>
+<p>
+    降伏點也是微型操作的單位。兩個降伏點之間的所有存取會以單一單元來看待為成功或失敗。
+如果沒有設定任何降伏點，則最小的微型操作就是整批操作。
+如果使用降伏點，您可以防止操作降低系統效能，同時確保操作的子集是微型操作。
+
+
+</p>
+<h4>修改反向參考</h4>
+<p>
+    以一組
+ {@link android.content.ContentProviderOperation} 物件插入新的原始聯絡人及其關聯的資料列時，您必須透過插入原始聯絡人的
+ {@code android.provider.BaseColumns#_ID} 值做為
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 值，將資料列連結到原始聯絡人列。
+不過，此
+值在您為資料列建立 {@link android.content.ContentProviderOperation}
+時並不存在，這是因為您尚未替原始聯絡人列
+套用 {@link android.content.ContentProviderOperation}。為解決此狀況，{@link android.content.ContentProviderOperation.Builder} 類別提供了
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()} 這個方法。
+
+    此方法可以讓您使用之前操作的結果來插入或修改欄。
+
+</p>
+<p>
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+方法有兩個引數：
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            鍵值對的鍵。此引數的值是您要修改表格中的欄名稱。
+
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 中的
+{@link android.content.ContentProviderResult} 物件以 0 開始的陣列索引值。套用批次操作時，每次操作結果都會儲存在結果的中繼陣列。
+
+<code>previousResult</code> 值是這些結果的其中一個索引，這些結果是以 <code>key</code>值擷取並加以儲存。
+
+這樣可以讓您插入新的原始聯絡人記錄，並取得其
+{@code android.provider.BaseColumns#_ID} 值，然後在您新增 {@link android.provider.ContactsContract.Data} 列時，做為此值的「反向參考」。
+
+            <p>
+                您首次呼叫
+ {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 時會建立整個結果陣列，此陣列的大小等同於您所提供
+ {@link android.content.ContentProviderOperation} 物件的{@link java.util.ArrayList} 大小。
+不過，結果陣列中的所有元素會設為 <code>null</code>，如果您嘗試要針對尚未套用的操作結果製作反向參考，
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}則會擲回 {@link java.lang.Exception}。
+
+
+
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    以下程式碼片段展示如何插入大量新的原始聯絡人和資料。其中包括建立降伏點和使用反向參考的程式碼。
+此程式碼片段是 <code>createContacEntry()</code> 方法的擴充版本。而這個方法是
+ <code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code> 範例應用程式中
+ <code>ContactAdder</code> 類別的一部分。
+
+</p>
+<p>
+    第一個程式碼片段會從 UI 擷取聯絡人資料。此時，使用者已經選好要加入的新原始聯絡人帳戶。
+
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    下一個程式碼片段的操作會將原始聯絡人列插入
+{@link android.provider.ContactsContract.RawContacts} 表格：
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    接著，程式碼會建立顯示名稱、電話以及電子郵件列的資料列。
+</p>
+<p>
+    每項操作建立器物件會使用
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}來取得
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}。
+參照會指向第一項操作中的 {@link android.content.ContentProviderResult} 物件 (第一項操作會新增原始聯絡人列，並傳回其新的 {@code android.provider.BaseColumns#_ID} 值)。
+
+
+因此，每個資料列會透過其
+{@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID} 自動連結到它所屬的新 {@link android.provider.ContactsContract.RawContacts} 列。
+
+</p>
+<p>
+    新增電子郵件列的 {@link android.content.ContentProviderOperation.Builder} 物件會帶有 {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean)
+    withYieldAllowed()} 旗標，而這會設定降伏點：
+
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    最後一個程式碼片段顯示
+{@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 的呼叫，以插入新的原始聯絡人和資料列。
+
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    批次操作也可以讓您實作<strong>開放式並行存取控制</strong>，此方法可以在套用修改交易時，不需要鎖定底層存放庫。
+
+    如要使用此方法，您要套用交易，然後檢查同時發生的其他修改操作。
+如果您發現不一致的修改，請將交易復原並加以重試。
+
+</p>
+<p>
+    開放式並行存取控制很適合用在行動裝置，這是因為行動裝置一次只會有一位使用者，而且很少會發生同時存取資料存放庫的情形。
+由於不會使用到鎖定，因此您不必花時間在設定鎖定，或等待其他交易釋放鎖定。
+
+</p>
+<p>
+    如要在更新單一
+ {@link android.provider.ContactsContract.RawContacts} 列時使用開放式並行存取控制，請遵循以下步驟：
+</p>
+<ol>
+    <li>
+        隨著您要擷取的其他資料，一起擷取原始聯絡人的 {@link android.provider.ContactsContract.SyncColumns#VERSION} 欄。
+
+    </li>
+    <li>
+        使用
+ {@link android.content.ContentProviderOperation#newAssertQuery(Uri)} 方法建立適合用於強制執行限制的{@link android.content.ContentProviderOperation.Builder} 物件。
+如果是內容 URI，請使用 {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+RawContacts.CONTENT_URI} 並附加原始聯絡人的 {@code android.provider.BaseColumns#_ID}。
+
+
+    </li>
+    <li>
+        如果是 {@link android.content.ContentProviderOperation.Builder} 物件，請呼叫 {@link android.content.ContentProviderOperation.Builder#withValue(String, Object)
+        withValue()}，以比較 {@link android.provider.ContactsContract.SyncColumns#VERSION} 欄和您剛才擷取的版本號碼。
+
+
+    </li>
+    <li>
+        如果是相同的 {@link android.content.ContentProviderOperation.Builder}，請呼叫 {@link android.content.ContentProviderOperation.Builder#withExpectedCount(int)
+withExpectedCount()} 以確保此判斷提示只測試一列。
+
+    </li>
+    <li>
+        呼叫 {@link android.content.ContentProviderOperation.Builder#build()} 以建立
+{@link android.content.ContentProviderOperation} 物件，然後將此物件新增為您傳送到
+ {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 的第一個 {@link java.util.ArrayList} 物件。
+
+    </li>
+    <li>
+        套用批次交易。
+    </li>
+</ol>
+<p>
+    如果在您讀取原始聯絡人列和嘗試加以修改之間，有另一項操作要加以更新，則「判斷提示」{@link android.content.ContentProviderOperation} 將會失敗，而且整個批次的操作將會退出。
+
+您之後可以選擇重試此批次作業或採取其他動作。
+
+</p>
+<p>
+    以下程式碼片段展示如何在使用 {@link android.content.CursorLoader} 查詢單一原始聯絡人後，建立「判斷提示」
+{@link android.content.ContentProviderOperation}：
+
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">使用意圖進行擷取及修改</h3>
+<p>
+    將意圖傳送給裝置的聯絡人應用程式，可讓您間接存取聯絡人供應程式。
+意圖會啟動裝置的聯絡人應用程式 UI，使用者可以在此執行與聯絡人相關的工作。
+透過此類型的存取方式，使用者可以：
+    <ul>
+        <li>從清單挑選聯絡人，並將它傳送給應用程式以進行其他操作。</li>
+        <li>編輯現有的聯絡人資料。</li>
+        <li>為使用者的任何帳戶插入新的原始聯絡人。</li>
+        <li>刪除聯絡人或聯絡人資料。</li>
+    </ul>
+<p>
+    如果使用者正在插入或更新資料，您可以先收集資料，然後讓它成為意圖的一部分加以傳送。
+
+</p>
+<p>
+    當您透過裝置的聯絡人應用程式使用意圖來存取聯絡人供應程式時，不需要自已撰寫存取供應程式的 UI 或程式碼。
+您也不需要要求供應程式的讀取或寫入權限。
+裝置的聯絡人應用程式可以將某個聯絡人的讀取權限委派給您，而且因為是透過另一個應用程式對供應程式進行修改，所以不需要具備寫入權限。
+
+
+</p>
+<p>
+    傳送意圖以存取供應程式的一般流程在<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容供應程式基本概念</a>指南的「透過意圖存取資料」中有詳細的說明。
+
+表 4 摘要說明您可以在工作中使用的動作、MIME 類型以及資料值，而您可以和
+ {@link android.content.Intent#putExtra(String, String) putExtra()} 搭配使用的額外值則列於 {@link android.provider.ContactsContract.Intents.Insert} 的參考文件：
+
+
+
+</p>
+<p class="table-caption" id="table4">
+  <strong>表 4.</strong>聯絡人供應程式意圖。
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">工作</th>
+        <th scope="col" style="width:5%">動作</th>
+        <th scope="col" style="width:10%">資料</th>
+        <th scope="col" style="width:10%">MIME 類型</th>
+        <th scope="col" style="width:25%">備註</th>
+    </tr>
+    <tr>
+        <td><strong>從清單挑選聯絡人</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            可以是以下其中一種：
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI}，可顯示聯絡人的清單。
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI}，可顯示原始聯絡人的電話號碼清單。
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI
+StructuredPostal.CONTENT_URI}，可顯示原始聯絡人的郵寄地址清單。
+
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI}，可顯示原始聯絡人的電子郵件地址清單。
+
+                </li>
+            </ul>
+        </td>
+        <td>
+            未使用
+        </td>
+        <td>
+            顯示原始聯絡人清單或原始聯絡人的資料清單，視您提供的內容 URI 類型而定。
+
+            <p>
+                呼叫
+{@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()}可傳回所選取列的內容 URI。
+URI 的格式是表格的內容 URI 附加列的 <code>LOOKUP_ID</code>。
+
+                裝置的聯絡人應用程式會在 Activity 的生命週期內，將讀取和寫入權限委派給此內容 URI。
+詳情請參閱<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容供應程式基本概念</a>指南。
+
+
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>插入新的原始聯絡人</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>不適用</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE
+RawContacts.CONTENT_TYPE}，一組原始聯絡人的 MIME 類型。
+        </td>
+        <td>
+            顯示裝置聯絡人應用程式中的「新增聯絡人」<strong></strong>畫面。會顯示您新增至意圖的額外值。
+如果隨著
+{@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()} 一起傳送，則新增的原始聯絡人內容 URI 會在 {@link android.content.Intent} 引數的 [資料] 欄位中傳回給 Activity 的
+{@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}回呼方法。
+
+
+如要取得此值，請呼叫 {@link android.content.Intent#getData()}。
+        </td>
+    </tr>
+    <tr>
+        <td><strong>編輯聯絡人</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            聯絡人的 {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}。
+編輯器 Activity 可讓使用者編輯與此聯絡人關聯的任何資料。
+
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE
+Contacts.CONTENT_ITEM_TYPE}，單一聯絡人。</td>
+        <td>
+            顯示聯絡人應用程式中的「編輯聯絡人」畫面。顯示您新增至意圖的額外值。
+使用者按一下 [完成]<strong></strong> 來儲存編輯內容時，您的 Activity 會回到前景。
+
+        </td>
+    </tr>
+    <tr>
+        <td><strong>顯示也能夠新增資料的挑選器</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            不適用
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            此意圖一律會顯示聯絡人應用程式的挑選器畫面。使用者可以挑選要編輯的聯絡人，或新增聯絡人。
+不論使用者選擇編輯或新增，所顯示的畫面中也會顯示您在意圖中傳送的額外資料。
+
+如果您的應用程式顯示電子郵件或電話號碼之類的聯絡人資料，使用此意圖會讓使用者將資料新增至現有聯絡人。
+
+
+            <p class="note">
+                <strong>注意：</strong>不需要在意圖的額外值中傳送名稱值，這是因為使用者一定會挑選現有名稱或新增名稱。
+再者，如果您傳送名稱，而使用者選擇編輯，則聯絡人應用程式會覆寫之前的值，以顯示您傳送的名稱。
+
+如果使用者沒有注意到此情形並儲存本次編輯，則會遺失舊的值。
+
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    裝置的聯絡人應用程式不會讓您刪除原始聯絡人或任何含有意圖的資料。
+如要刪除原始聯絡人，請改用
+{@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()} 或 {@link android.content.ContentProviderOperation#newDelete(Uri)
+ContentProviderOperation.newDelete()}。
+
+</p>
+<p>
+    以下程式碼片段展示如何建構及傳送可插入新原始聯絡人和資料，的意圖：
+
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">資料完整性</h3>
+<p>
+    因為聯絡人存放庫內含重要的敏感資料，使用者會期待這些資料為正確且為最新狀態，聯絡人供應程式對於資料完整性有定義良好的規則。
+因此，您在修改聯絡人資料時，必須符合這些規則。
+以下列出重要規則：
+
+</p>
+<dl>
+    <dt>
+        務必為您新增的每個 {@link android.provider.ContactsContract.RawContacts} 列新增 {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 列。
+
+    </dt>
+    <dd>
+        {@link android.provider.ContactsContract.Data} 表格中不含
+ {@link android.provider.ContactsContract.CommonDataKinds.StructuredName} 列的
+{@link android.provider.ContactsContract.RawContacts} 列，在彙總時會造成問題。
+
+    </dd>
+    <dt>
+        務必將 {@link android.provider.ContactsContract.Data} 列連結到其上層的
+{@link android.provider.ContactsContract.RawContacts} 列。
+    </dt>
+    <dd>
+        裝置的聯絡人應用程式中將看不到未連結到
+ {@link android.provider.ContactsContract.RawContacts} 的 {@link android.provider.ContactsContract.Data} 列，而且與同步配接器搭配使用時可能會造成問題。
+
+    </dd>
+    <dt>
+        只針對您擁有的原始聯絡人變更資料。
+    </dt>
+    <dd>
+        請記住，聯絡人供應程式通常用來管理來自不同帳戶類型或線上服務的資料。
+您必須確認應用程式只會修改或刪除屬於您的資料列，並且確認應用程式插入的資料只含有您可控制的帳戶類型和名稱。
+
+
+    </dd>
+    <dt>
+        務必使用 {@link android.provider.ContactsContract} 及其子類別中定義的常數，做為授權、內容 URI、URI 路徑、欄名稱、MIME 類型以及
+{@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE} 值。
+
+    </dt>
+    <dd>
+        使用這些常數可協助您避免發生錯誤。如果有任何常數已失效，則編譯器會發出通知。
+
+    </dd>
+</dl>
+<h3 id="CustomData">自訂資料列</h3>
+<p>
+    透過建立自訂的 MIME 類型，您可以插入、編輯、刪除以及擷取 {@link android.provider.ContactsContract.Data} 表格中您自己的資料列。
+儘管您可以將自己的類型特定欄名稱對應到預設的欄名稱，您的列仍受限於使用
+ {@link android.provider.ContactsContract.DataColumns} 中所定義的欄。
+
+在裝置的聯絡人應用程式中，可以顯示您的列中資料，但無法加以編輯或刪除，而且使用者無法新增其他資料。
+
+如要讓使用者修改您自訂的資料列，您必須在自己的應用程式中提供編輯器 Activity。
+
+</p>
+<p>
+    如要顯示自己的資料，請提供 <code>contacts.xml</code> 檔案，其中要包含
+<code>&lt;ContactsAccountType&gt;</code> 元素以及一或多個其
+<code>&lt;ContactsDataKind&gt;</code> 子元素。詳情請參閱 <a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a>一節。
+
+</p>
+<p>
+    如要更瞭解自訂 MIME 類型的詳細資訊，請閱讀<a href="{@docRoot}guide/topics/providers/content-provider-creating.html">建立內容供應程式</a>指南。
+
+
+</p>
+<h2 id="SyncAdapters">聯絡人供應程式同步配接器</h2>
+<p>
+    聯絡人供應程式的設計是專門用來處理裝置和線上服務之間聯絡人資料的「同步作業」<strong></strong>。
+以便讓使用者將現有資料下載到新裝置，以及將現有資料上傳到新帳戶。
+
+    同步作業也可以確保使用者手邊使用的是最新的資料，不論來源經過哪些新增和變更。
+同步作業的另一個好處是，即使裝置沒有連上網路，使用者仍然可以存取聯絡人資料。
+
+</p>
+<p>
+    您可以用各種方式實作同步作業，不過 Android 系統提供的外掛程式同步架構可以將以下工作自動化：
+
+    <ul>
+
+    <li>
+        檢查網路可用性。
+    </li>
+    <li>
+        根據使用者偏好設定，安排並執行同步作業。
+    </li>
+    <li>
+        重新啟動已停止的同步作業。
+    </li>
+    </ul>
+<p>
+    如要使用此架構，您要提供同步配接器外掛程式。每個同步配接器對於服務和內容供應程式來說是唯一的，但可以處理相同服務的多個帳戶名稱。
+此架構也可以讓相同服務和供應程式使用多個同步配接器。
+
+</p>
+<h3 id="SyncClassesFiles">同步配接器類別和檔案</h3>
+<p>
+    您將同步配接器實做為 {@link android.content.AbstractThreadedSyncAdapter} 的子類別，並以 Android 應用程式的一部分加以安裝。
+
+系統會從應用程式宣示說明中的元素，以及從宣示說明所指向的特殊 XML 檔案中瞭解同步配接器的相關資訊。
+此 XML 檔案定義線上服務的帳戶類型，以及內容供應程式的授權，這兩者可用來唯一識別此配接器。
+
+同步配接器要在使用者新增同步配接器的帳戶類型，
+並啟用要與同步配接器的內容供應程式同步後，
+同步配接器才會變成使用中。此時，系統會開始管理配接器並視需要加以呼叫，以便在內容供應程式和伺服器之間進行同步。
+
+</p>
+<p class="note">
+    <strong>注意：</strong>使用帳戶類型做為同步配接器識別的一部分，可以讓系統在偵測後，將存取不同服務、但來自相同組織的同步配接器群組在一起。
+
+例如，Google 線上服務的同步配接器都有相同的帳戶類型 <code>com.google</code>。
+使用者將 Google 帳戶新增至其裝置後，所有已安裝的 Google 服務同步配接器會列在一起，每個列出的同步配接器會與裝置上不同的內容供應程式進行同步。
+
+
+</p>
+<p>
+    由於大多數服務都需要在存取資料之前先驗證其身分，因此 Android 系統提供類似的驗證架構，而且通常會與同步配接器架構一起搭配使用。
+
+驗證架構使用外掛程式驗證器，這是
+ {@link android.accounts.AbstractAccountAuthenticator} 的子類別。
+驗證器會以下列步驟驗證使用者的身分：
+
+    <ol>
+        <li>
+            收集使用者的名稱、密碼或類似資訊 (使用者的<strong>憑證</strong>)。
+
+        </li>
+        <li>
+            將憑證傳送給服務
+        </li>
+        <li>
+            檢驗服務的回覆。
+        </li>
+    </ol>
+<p>
+    如果服務接受此憑證，則驗證器可以儲存憑證供以後使用。
+由於外掛程式驗證器架構的緣故，
+{@link android.accounts.AccountManager} 可以存取驗證器支援且選擇顯示的任何 authtoken，例如 OAuth2 authtoken。
+
+</p>
+<p>
+    雖然驗證並非必要，大部分聯絡人服務仍會加以使用。
+    不過，您不一定要使用 Android 驗證架構來進行驗證動作。
+</p>
+<h3 id="SyncAdapterImplementing">同步配接器實作</h3>
+<p>
+    如要實作聯絡人供應程式的同步配接器，要從建立內含以下各項的 Android 應用程式開始：
+
+</p>
+    <dl>
+        <dt>
+            回應來自系統的要求，以繫結至同步配接器的 {@link android.app.Service} 元件。
+
+        </dt>
+        <dd>
+            系統要執行同步時，會呼叫服務的
+ {@link android.app.Service#onBind(Intent) onBind()} 方法，以取得同步配接器的
+ {@link android.os.IBinder}。這樣可以讓系統以跨處理程序的方式呼叫配接器的方法。
+
+            <p>
+                在<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>範例應用程式中，此服務的名稱為
+ <code>com.example.android.samplesync.syncadapter.SyncService</code>。
+
+            </p>
+        </dd>
+        <dt>
+            實際的同步配接器是以
+ {@link android.content.AbstractThreadedSyncAdapter} 的實體子類別加以實作。
+        </dt>
+        <dd>
+            此類別會執行的工作包括：從伺服器下載資料、從裝置上傳資料以及解決衝突。
+配接器的主要工作會使用 {@link android.content.AbstractThreadedSyncAdapter#onPerformSync(
+Account, Bundle, String, ContentProviderClient, SyncResult)
+onPerformSync()} 方法完成。
+此類別必須以單一執行個體的方式加以具現化。
+            <p>
+                在<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>範例應用程式中，同步配接器定義在
+<code>com.example.android.samplesync.syncadapter.SyncAdapter</code> 類別中。
+
+            </p>
+        </dd>
+        <dt>
+            {@link android.app.Application} 的子類別。
+        </dt>
+        <dd>
+            此類別就像是同步配接器單一執行個體的工廠。使用
+{@link android.app.Application#onCreate()} 方法具現化同步配接器，並提供靜態的「getter」方法將單一執行個體傳回給同步配接器服務的
+{@link android.app.Service#onBind(Intent) onBind()} 方法。
+
+
+        </dd>
+        <dt>
+            <strong>選用：</strong>回應系統針對使用者發出的驗證要求的 {@link android.app.Service} 元件。
+
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager} 會啟動此服以開始驗證程序。
+服務的 {@link android.app.Service#onCreate()} 方法會具現化為驗證器物件。
+系統需驗證應用程式同步配接器的使用者帳戶時，會呼叫服務的 
+{@link android.app.Service#onBind(Intent) onBind()} 方法以取得驗證器的
+ {@link android.os.IBinder}。
+這樣可以讓系統以跨處理程序的方式呼叫驗證器的方法。
+
+            <p>
+                在<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>範例應用程式中，此服務的類別名稱為
+<code>com.example.android.samplesync.authenticator.AuthenticationService</code>。
+
+            </p>
+        </dd>
+        <dt>
+            <strong>選用：</strong>處理驗證要求的
+{@link android.accounts.AbstractAccountAuthenticator} 實體子類別。
+
+        </dt>
+        <dd>
+            {@link android.accounts.AccountManager} 會呼叫此類別提供的方法，透過伺服器驗證使用者的憑證。
+驗證程序的詳細方式會根據所使用的伺服器技術，而有很大的差異。
+建議您參閱伺服器軟體的說明文件，進一步瞭解驗證。
+
+            <p>
+                在<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">範例同步配接器</a>範例應用程式中，驗證器是在
+<code>com.example.android.samplesync.authenticator.Authenticator</code> 類別中完成定義。
+
+            </p>
+        </dd>
+        <dt>
+            定義系統同步配接器和驗證器的 XML 檔案。
+        </dt>
+        <dd>
+            應用程式宣示說明中的
+ <code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code> 元素會定義之前說明的同步配接器和驗證器服務元件。
+
+這些元素包含的
+<code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 子元素可提供系統的特定資料：
+
+
+
+            <ul>
+                <li>
+                    同步配接器服務的
+ <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 元素，此元素會指向 XML 檔案 <code>res/xml/syncadapter.xml</code>。
+
+此檔案會按順序指出
+將與聯絡人供應程式同步的網路服務 URI，
+以及網路服務的帳戶類型。
+                </li>
+                <li>
+                    <strong>選用：</strong>驗證器服務的
+ <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code> 元素，此元素會指向 XML 檔案
+<code>res/xml/authenticator.xml</code>。
+此檔案會按順序指出此驗證器支援的帳戶類型，以及驗證程序中會出現的 UI 資源。
+
+此元素中指定的帳戶類型必須與同步配接器中指定的帳戶類型相同。
+
+
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">社交串流資料</h2>
+<p>
+    {@code android.provider.ContactsContract.StreamItems} 和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格負責管理社交網路的傳入資料。
+您可以編寫一個同步配接器，將來自您自己網路的串流資料
+新增至這些表格，或是可以從這些表格讀取串流資料，然後
+顯示於您自己的應用程式中，或同時具備這兩種功能。有了這些功能，您的社交網路服務和應用程式就可以整合到 Android 的社交網路體驗。
+
+</p>
+<h3 id="StreamText">社交串流文字</h3>
+<p>
+    串流項目永遠會與原始聯絡人關聯。
+{@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} 會連結到原始聯絡人的
+ <code>_ID</code> 值。原始聯絡人的帳戶類型和帳戶名稱也會儲存在串流項目列。
+
+</p>
+<p>
+    串流中的資料會儲存在下列各欄：
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>必要。</strong>與此串流項目相關聯的原始聯絡人使用者帳戶類型。
+請記得在插入串流項目時設定此值。
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>必要。</strong>與此串流項目相關聯的原始聯絡人使用者帳戶名稱。
+請記得在插入串流項目時設定此值。
+    </dd>
+    <dt>
+        識別碼欄
+    </dt>
+    <dd>
+        <strong>必要。</strong>您必須在插入串流項目時插入以下識別碼欄：
+
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}：與此串流項目相關聯的聯絡人
+{@code android.provider.BaseColumns#_ID} 值。
+
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}：與此串流項目相關聯的聯絡人
+{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} 值。
+
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}：與此串流項目相關聯的原始聯絡人
+{@code android.provider.BaseColumns#_ID} 值。
+
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        選用。儲存您可以在串流項目開頭顯示的摘要資訊。
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        串流項目的文字，可能是項目來源張貼的內容，或者會產生串流項目動作的描述。
+此欄可以包含
+{@link android.text.Html#fromHtml(String) fromHtml()} 能夠轉譯的任何格式內嵌資源影像。
+供應程式會截斷較長的內容，但會試著避免破壞標籤。
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        內含插入或更新串流項目時間的文字字串，
+，以「毫秒」<em></em>為單位。插入或更新串流項目的應用程式負責維護此欄，聯絡人供應程式不會自動加以維護。
+
+
+    </dd>
+</dl>
+<p>
+    如要顯示串流項目的識別資訊，請使用
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON}、
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} 以及
+{@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} 連結到應用程式中的資源。
+
+</p>
+<p>
+    {@code android.provider.ContactsContract.StreamItems} 表格也包含
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} 到
+{@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} 欄，專門供同步配接器使用。
+
+</p>
+<h3 id="StreamPhotos">社交串流相片</h3>
+<p>
+   {@code android.provider.ContactsContract.StreamItemPhotos} 表格會儲存與串流項目相關聯的相片。
+表格的
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} 欄會連結到
+ {@code android.provider.ContactsContract.StreamItems} 表格中 {@code android.provider.BaseColumns#_ID} 欄的值。
+相片參照會儲存在表格中的以下各欄：
+
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} 欄 (BLOB)。
+    </dt>
+    <dd>
+        相片的二進位檔，由供應程式調整大小以進行儲存和顯示。
+        此欄是要提供與使用舊版聯絡人供應程式儲存相片的向下相容性。
+不過，在目前版本中，您不應使用此欄來儲存相片。
+請改用 {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} 或
+{@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (下文提供這兩者的相關說明) 在檔案中儲存相片。
+
+此欄現在包含相片的縮圖可供讀取。
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        原始聯絡人相片的數字識別碼。將此值附加到常數
+{@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI} 可取得指向單一相片檔案的內容 URI，然後呼叫 {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+openAssetFileDescriptor()} 可取得此相片檔案的控制代碼。
+
+
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        直接指向此列所呈現相片的相片檔案內容 URI。
+        使用此 URI 呼叫 {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+openAssetFileDescriptor()} 可取得相片檔案的控制代碼。
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">使用社交串流表格</h3>
+<p>
+    這些表格的運作方式與聯絡人供應程式中的其他主要表格大致相同，以下各項除外：
+</p>
+    <ul>
+        <li>
+            這些表格需要額外的存取權限。如要從中讀取，您的應用程式必須具備 {@code android.Manifest.permission#READ_SOCIAL_STREAM} 權限。
+如要加以修改，您的應用程式必須具備
+{@code android.Manifest.permission#WRITE_SOCIAL_STREAM} 權限。
+
+        </li>
+        <li>
+            針對 {@code android.provider.ContactsContract.StreamItems} 表格，每個原始聯絡人的儲存列數是有限制的。
+達到此限制後，聯絡人供應程式會自動刪除
+{@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} 最舊的列，為新的串流項目列騰出空間。
+
+如要取得此限制，請發出查詢給內容 URI
+{@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}。
+您只要將內容 URI 設為 <code>null</code> 即可，其餘引數不需要處理。
+此查詢會傳回內含單一列的 Cursor 與單一欄
+{@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}。
+
+        </li>
+    </ul>
+
+<p>
+    類別 {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} 定義了單一串流項目，且內含相片列的 {@code android.provider.ContactsContract.StreamItemPhotos} 子表格。
+
+
+</p>
+<h3 id="SocialStreamInteraction">社交串流互動</h3>
+<p>
+    社交串流資料受到聯絡人供應程式與裝置聯絡人應用程式的管理，提供強大的方式將您的社交網路系統與現有聯絡人連接起來。
+
+提供下列功能：
+</p>
+    <ul>
+        <li>
+            使用同步配接器將您的社交網路服務同步到聯絡人供應程式後，您可以擷取某位使用者的聯絡人最近 Activity，並將它儲存在 {@code android.provider.ContactsContract.StreamItems} 和
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格中，供後續使用。
+
+
+        </li>
+        <li>
+            除了一般同步之外，您可以在使用者選取要檢視的聯絡人時，觸發您的同步配接器，以擷取其他資料。
+此舉可讓您的同步配接器擷取聯絡人高解析度的相片，以及聯絡人最近的串流項目。
+
+        </li>
+        <li>
+            藉由向裝置的聯絡人應用程式和聯絡人供應程式註冊通知，您可以在檢視聯絡人時「收到」<em></em>意圖，並於此時更新您服務中的聯絡人狀態。
+
+相較於與同步配接器執行完整同步，
+此方式較快速且使用的頻寬較少。
+        </li>
+        <li>
+            使用者在裝置的聯絡人應用程式查看聯絡人時，可以將聯絡人新增至您的社交網路服務。
+您可以透過「邀請聯絡人」啟用上述功能。「邀請聯絡人」會啟用一連串的 Activity，將現有聯絡人新增至您的網路和 XML 檔案。此檔案會將您應用程式的詳細資訊提供給裝置的聯絡人應用程式和聯絡人供應程式。
+
+
+
+        </li>
+    </ul>
+<p>
+    串流項目與聯絡人供應程式的一般同步與其他同步相同。
+如要進一步瞭解同步，請參閱<a href="#SyncAdapters">聯絡人供應程式同步配接器</a>。
+以下兩節說明如何註冊通知和邀請聯絡人。
+
+</p>
+<h4>註冊以處理社交網路檢視</h4>
+<p>
+    註冊您的同步配接器，使其在使用者查看由您的同步配接器所管理的聯絡人時收到通知：
+
+</p>
+<ol>
+    <li>
+        在專案的 <code>res/xml/</code> 目錄中建立名稱為 <code>contacts.xml</code>的檔案。
+如果已經有這個檔案，可略過此步驟。
+    </li>
+    <li>
+        在此檔案中，新增
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 元素。
+        如果這個元素已經存在，可略過此步驟。
+    </li>
+    <li>
+        為了註冊服務，讓使用者在裝置的聯絡人應用程式中開啟聯絡人的詳細資訊頁面時收到通知，請將
+ <code>viewContactNotifyService="<em>serviceclass</em>"</code> 屬性新增至此元素，其中
+ <code><em>serviceclass</em></code> 是該服務的完整類別名稱，而此服務會收到來自裝置聯絡人應用程式的意圖。
+
+對於通知器服務而言，使用擴充 {@link android.app.IntentService} 的類別可以讓此服務接收意圖。
+
+傳入意圖的資料中含有使用者所點擊該名原始聯絡人的內容 URI。
+您可以從通知器服務繫結，然後呼叫您的同步配接器，以更新原始聯絡人的資料。
+
+    </li>
+</ol>
+<p>
+    如何註冊使用者點擊串流項目或相片 (或兩者) 時所呼叫的 Activity：
+</p>
+<ol>
+    <li>
+        在專案的 <code>res/xml/</code> 目錄中建立名稱為 <code>contacts.xml</code>的檔案。
+如果已經有這個檔案，可略過此步驟。
+    </li>
+    <li>
+        在此檔案中，新增
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 元素。
+        如果這個元素已經存在，可略過此步驟。
+    </li>
+    <li>
+        為了註冊其中一個 Activity，讓它處理使用者在裝置的聯絡人應用程式中點擊串流項目的 Activity，請將
+ <code>viewStreamItemActivity="<em>activityclass</em>"</code> 屬性新增至此元素，其中
+ <code><em>activityclass</em></code> 是該 Activity 的完整類別名稱，而此 Activity 會收到來自裝置聯絡人應用程式的意圖。
+
+
+    </li>
+    <li>
+        為了註冊其中一個 Activity，讓它處理使用者在裝置的聯絡人應用程式中點擊串流相片的活動，請將
+ <code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> 屬性新增至此元素，其中
+ <code><em>activityclass</em></code> 是該 Activity 的完整類別名稱，而此 Activity 會收到來自裝置聯絡人應用程式的意圖。
+
+
+    </li>
+</ol>
+<p>
+    如要進一步瞭解 <code>&lt;ContactsAccountType&gt;</code> 元素，請參閱 <a href="#SocialStreamAcctType">&lt;ContactsAccountType&gt; 元素</a>。
+
+</p>
+<p>
+    傳入意圖的資料中含有使用者所按下項目或相片的內容 URI。
+    如要針對文字項目和相片採取不同的 Activity，請在相同的檔案中同時使用兩個屬性。
+</p>
+<h4>與社交網路服務互動</h4>
+<p>
+    使用者不需要離開裝置的聯絡人應用程式，就可以邀請聯絡人到您的社交網路網站。
+您可以改為讓裝置的聯絡人應用程式傳送意圖，以邀請聯絡人前往您的 Activity。
+如要進行此設定：
+</p>
+<ol>
+    <li>
+        在專案的 <code>res/xml/</code> 目錄中建立名稱為 <code>contacts.xml</code>的檔案。
+如果已經有這個檔案，可略過此步驟。
+    </li>
+    <li>
+        在此檔案中，新增 <code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code> 元素。
+
+        如果這個元素已經存在，可略過此步驟。
+    </li>
+    <li>
+        新增下列屬性：
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        <code><em>activityclass</em></code> 值是 Activity 的完整類別名稱，以此 Activity 接收意圖。
+<code><em>invite_action_label</em></code> 值是顯示在裝置聯絡人應用程式內 [新增連線]<strong></strong> 選單中的文字字串。
+ 
+
+    </li>
+</ol>
+<p class="note">
+    <strong>注意：</strong><code>ContactsSource</code> 是
+ <code>ContactsAccountType</code> 已淘汰的標籤名稱。
+</p>
+<h3 id="ContactsFile">contacts.xml 參照</h3>
+<p>
+    <code>contacts.xml</code> 檔案包含的 XML 元素，可控制您的同步配接器與應用程式 (聯絡人應用程式和聯絡人供應程式) 之間的互動。
+這些元素在以下各節有詳細的說明。
+
+</p>
+<h4 id="SocialStreamAcctType">&lt;ContactsAccountType&gt; 元素</h4>
+<p>
+    <code>&lt;ContactsAccountType&gt;</code> 元素控制您的應用程式與聯絡人應用程式之間的互動。
+此元素的語法如下：
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>包含於：</strong>
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>可以包含：</strong>
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>描述：</strong>
+</p>
+<p>
+    宣告 Android 元件和 UI 標籤，讓使用者可以邀請聯絡人加入社交網路、使用者的社交網路串流更新內容時通知使用者等等。
+
+
+</p>
+<p>
+    請注意，<code>&lt;ContactsAccountType&gt;</code> 的屬性不需要使用屬性前置詞 <code>android:</code>。
+
+</p>
+<p>
+    <strong>屬性：</strong>
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        使用者從裝置的聯絡人應用程式選取[新增連線]<strong></strong>時，您希望在應用程式中啟動的 Activity 完整類別名稱。
+
+
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        在 [新增連線]<strong></strong> 選單的
+ {@code inviteContactActivity} 中所指定 Activity 的顯示文字字串。
+        例如，您可以使用「關注我的網路活動」字串。此標籤可以使用字串資源識別碼。
+
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        使用者檢視聯絡人時，要接收通知的應用程式中的服務完整類別名稱。
+此通知是由裝置的聯絡人應用程式所傳送，這樣可以讓您的應用程式延後要處理大量資料的操作，需要時再加以處理。
+
+例如，您的應用程式可以藉由讀取並顯示聯絡人的高解析度相片，以及最近的社交串流項目，以回應此通知。
+
+如要進一步瞭解此功能，請參閱<a href="#SocialStreamInteraction">社交串流互動</a>。
+您可以在
+ <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a> 範例應用程式的 <code>NotifierService.java</code>中查看通知服務的範例。
+
+
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        應用程式中可以顯示群組資訊的 Activity 完整類別名稱。
+使用者在裝置的聯絡人應用程式中按一下群組標籤時，會顯示此 Activity 的 UI。
+
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        聯絡人應用程式顯示 UI 控制項的標籤，可以讓使用者在您的應用程式中查看群組。
+
+        <p>
+            例如，如果您在裝置上安裝 Google+ 應用程式，而您將Google+ 與聯絡人應用程式進行同步，您會看到 Google+ 社交圈已列為聯絡人應用程式 [群組]<strong></strong> 標籤中的群組。
+
+如果按一下 Google+ 社交圈，您會看到該社交圈中的人員已列為「群組」。
+系統會在畫面頂端顯示 Google+ 圖示，如果您按一下此圖示，則控制權會切換到 Google+ 應用程式。聯絡人應用程式使用
+{@code viewGroupActivity} 執行此動作，並使用 Google+ 圖示做為
+{@code viewGroupActionLabel} 的值。
+
+
+        </p>
+        <p>
+            此屬性可以使用字串資源識別碼。
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        使用者按一下原始聯絡人的串流項目時，裝置的聯絡人應用程式所啟動應用程式中的 Activity 完整類別名稱。
+
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        使用者按一下原始聯絡人串流項目中的相片時，裝置的聯絡人應用程式所啟動應用程式中的 Activity 完整類別名稱。
+
+
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">&lt;ContactsDataKind&gt; 元素</h4>
+<p>
+    <code>&lt;ContactsDataKind&gt;</code> 元素控制聯絡人應用程式的 UI 中，您的應用程式自訂資料列所顯示的控制項。此元素的語法如下：
+
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>包含於：</strong>
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>描述：</strong>
+</p>
+<p>
+    使用此元素讓聯絡人應用程式，將自訂資料列的內容顯示為原始聯絡人詳細資訊的一部分。
+<code>&lt;ContactsAccountType&gt;</code> 的每個 <code>&lt;ContactsDataKind&gt;</code> 子元素都代表同步配接器新增至 {@link android.provider.ContactsContract.Data} 表格的自訂資料列類型。
+
+針對您使用的每個自訂 MIME 類型，新增一個
+ <code>&lt;ContactsDataKind&gt;</code> 元素。如果您不要顯示某個自訂資料列的資料，就不用為該列新增元素。
+
+</p>
+<p>
+    <strong>屬性：</strong>
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        您在
+ {@link android.provider.ContactsContract.Data} 表格中已經為自訂資料列類型所定義的自訂 MIME 類型。例如，
+<code>vnd.android.cursor.item/vnd.example.locationstatus</code> 值可能是
+記錄聯絡人最後已知位置資料列的自訂 MIME 類型。
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+        聯絡人應用程式顯示在資料旁邊的 Android
+<a href="{@docRoot}guide/topics/resources/drawable-resource.html">可繪資源</a>。
+使用此項向使用者指出資料是來自您的服務。
+
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        從資料列擷取兩個值，其中第一個值的欄名稱。此資料列的值會顯示為該項目的第一行。
+第一行的用意是做為資料的摘要使用，但為選用。
+另請參閱
+ <a href="#detailColumn">android:detailColumn</a>。
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        從資料列擷取兩個值，其中第二個值的欄名稱。此資料列的值會顯示為該項目的第二行。
+另請參閱
+{@code android:summaryColumn}。
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">其他聯絡人供應程式功能</h2>
+<p>
+    除了上一節所描述的主要功能之外，聯絡人供應程式也提供以下實用功能來處理聯絡人資料：
+
+</p>
+    <ul>
+       <li>聯絡人群組</li>
+       <li>相片功能</li>
+    </ul>
+<h3 id="Groups">聯絡人群組</h3>
+<p>
+    聯絡人供應程式可以選擇為群組<strong></strong>資料相關的聯絡人集合貼上標籤。
+如果與使用者帳戶關聯的伺服器要維護群組，該帳戶的帳戶類型所屬的同步配接器，應該要在聯絡人供應程式和伺服器之間傳輸群組資料。
+
+使用者將新的聯絡人新增至伺服器，然後將此聯絡人放置於新群組時，同步配接器必須將新群組新增至 {@link android.provider.ContactsContract.Groups} 表格。
+
+原始聯絡人所屬的一或多個群組會使用 {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership} MIME 類型儲存在 {@link android.provider.ContactsContract.Data} 表格。
+
+
+</p>
+<p>
+    如果您設計的同步配接器，會將原始聯絡人資料從伺服器新增至聯絡人供應程式，表示您並未使用群組，那麼您需要告訴供應程式讓您的資料變成可見的。
+
+在使用者將帳戶新增至裝置時，要執行的程式碼中，更新聯絡人供應程式為帳戶新增的 {@link android.provider.ContactsContract.Settings} 列。
+
+在此列中，將 {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE
+Settings.UNGROUPED_VISIBLE} 欄的值設為 1。
+這麼做之後，即使您沒有使用群組，聯絡人供應程式
+一律會讓您的聯絡人資料成為可見的。
+</p>
+<h3 id="Photos">聯絡人相片</h3>
+<p>
+    {@link android.provider.ContactsContract.Data} 表格會使用 MIME 類型 {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+Photo.CONTENT_ITEM_TYPE} 在列中儲存相片。
+列的
+{@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} 欄是連結到其所屬原始聯絡人的
+ {@code android.provider.BaseColumns#_ID} 欄。
+    類別 {@link android.provider.ContactsContract.Contacts.Photo} 定義了
+ {@link android.provider.ContactsContract.Contacts} 的子表格，其中包含聯絡人主要相片的相片資訊，也就是聯絡人之主要原始聯絡人的主要相片。
+同樣地，
+類別 {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} 定義了 {@link android.provider.ContactsContract.RawContacts} 的子表格，其中包含原始聯絡人之主要相片的相片資訊。
+
+
+</p>
+<p>
+    {@link android.provider.ContactsContract.Contacts.Photo} 和
+{@link android.provider.ContactsContract.RawContacts.DisplayPhoto} 的參考文件含有擷取相片資訊的範例。
+擷取原始聯絡人的主要縮圖沒有方便使用的類別，不過您可以傳送查詢到
+{@link android.provider.ContactsContract.Data} 表格，然後選取原始聯絡人的
+{@code android.provider.BaseColumns#_ID}、{@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+Photo.CONTENT_ITEM_TYPE} 以及 {@link android.provider.ContactsContract.Data#IS_PRIMARY} 欄，以尋找原始聯絡人的主要相片列。
+
+
+
+</p>
+<p>
+    人員的社交串流資料可能也包括相片。這些資訊都儲存在
+{@code android.provider.ContactsContract.StreamItemPhotos} 表格。<a href="#StreamPhotos">社交串流相片</a>中針對此表格會有更詳細的說明。
+
+</p>

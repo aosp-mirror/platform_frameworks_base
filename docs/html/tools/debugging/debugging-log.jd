@@ -1,6 +1,5 @@
 page.title=Reading and Writing Logs
-parent.title=Debugging
-parent.link=index.html
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -8,8 +7,6 @@ parent.link=index.html
       <h2>In this document</h2>
 
       <ol>
-        <li><a href="#logClass">The Log class</a></li>
-
         <li><a href="#startingLogcat">Starting LogCat</a></li>
 
         <li><a href="#filteringOutput">Filtering Log Output</a></li>
@@ -20,7 +17,7 @@ parent.link=index.html
 
         <li><a href="#viewingStd">Viewing stdout and stderr</a></li>
 
-        <li><a href="#DebuggingWebPages">Debugging Web Pages</a></li>
+        <li><a href="#logClass">Logging from Code</a></li>
       </ol>
     </div>
   </div>
@@ -30,31 +27,6 @@ parent.link=index.html
   emulator throws an error and messages that you have written from your application by using the
   {@link android.util.Log} class. You can run LogCat through ADB or from DDMS, which allows you to
   read the messages in real time.</p>
-
-  <h2 id="logClass">The <code>Log</code> class</h2>
-
-  <p>{@link android.util.Log} is a logging class that you can utilize in your code to print out
-  messages to the LogCat. Common logging methods include:</p>
-
-  <ul>
-    <li>{@link android.util.Log#v(String,String)} (verbose)</li>
-
-    <li>{@link android.util.Log#d(String,String)} (debug)</li>
-
-    <li>{@link android.util.Log#i(String,String)} (information)</li>
-
-    <li>{@link android.util.Log#w(String,String)} (warning)</li>
-
-    <li>{@link android.util.Log#e(String,String)} (error)</li>
-  </ul>For example:
-  <pre class="no-pretty-print">
-Log.i("MyActivity", "MyClass.getView() &mdash; get item number " + position);
-</pre>
-
-  <p>The LogCat will then output something like:</p>
-  <pre class="no-pretty-print">
-I/MyActivity( 1557): MyClass.getView() &mdash; get item number 1
-</pre>
 
   <h2 id="startingLogcat">Using LogCat</h2>
 
@@ -192,7 +164,7 @@ adb logcat ActivityManager:I MyApp:D *:S
 </pre>
 
   <p>The final element in the above expression, <code>*:S</code>, sets the priority level for all
-  tags to "silent", thus ensuring only log messages with "View" and "MyApp" are displayed. Using
+  tags to "silent", thus ensuring only log messages with "ActivityManager" and "MyApp" are displayed. Using
   <code>*:S</code> is an excellent way to ensure that log output is restricted to the filters that
   you have explicitly specified &mdash; it lets your filters serve as a "whitelist" for log
   output.</p>
@@ -287,8 +259,35 @@ adb logcat -b radio
   output to <code>/dev/null</code>. (The Java <code>System.out</code> and <code>System.err</code>
   streams go to the log.)
 
-  <h2 id="DebuggingWebPages">Debugging Web Apps</h2>
-  <p>
-  If you're developing a web application for Android, you can debug your JavaScript using the console JavaScript APIs,
-  which output messages to LogCat. For more information, see
-  <a href="{@docRoot}guide/webapps/debugging.html">Debugging Web Apps</a>.</p>
+  <h2 id="logClass">Logging from Code</h2>
+
+  <p>The {@link android.util.Log} class allows you to create log entries in your code that display
+  in the LogCat tool. Common logging methods include:</p>
+
+  <ul>
+    <li>{@link android.util.Log#v(java.lang.String, java.lang.String)
+      Log.v(String, String)} (verbose)</li>
+
+    <li>{@link android.util.Log#d(java.lang.String, java.lang.String)
+      Log.d(String, String)} (debug)</li>
+
+    <li>{@link android.util.Log#i(java.lang.String, java.lang.String)
+      Log.i(String, String)} (information)</li>
+
+    <li>{@link android.util.Log#w(java.lang.String, java.lang.String)
+      Log.w(String, String)} (warning)</li>
+
+    <li>{@link android.util.Log#e(java.lang.String, java.lang.String)
+      Log.e(String, String)} (error)</li>
+  </ul>
+
+  <p>For example, using the following call:</p>
+
+  <pre class="no-pretty-print">
+Log.i("MyActivity", "MyClass.getView() &mdash; get item number " + position);
+</pre>
+
+  <p>The LogCat outputs something like:</p>
+  <pre class="no-pretty-print">
+I/MyActivity( 1557): MyClass.getView() &mdash; get item number 1
+</pre>

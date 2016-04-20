@@ -17,6 +17,94 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
  /* TODO Remove standard resources from here, such as below
  */
   {
+    "title":"Writing More Code by Writing Less Code with Android Studio Live Templates",
+    "titleFriendly":"",
+    "summary":"Unless you’re getting paid by the keystroke, no one wants to write repetitive boilerplate code.",
+    "url":"https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
+    "group":"",
+    "keywords": [],
+    "tags": ['studio'],
+    "image":"https://cdn-images-1.medium.com/max/800/1*JkrYXGs1AxZAbK0sCLrJAQ.gif",
+    "type":"medium"
+  },
+  {
+    "title":"How Often Should You Update Android Studio?",
+    "titleFriendly":"",
+    "summary":"One of the beauties of Android Studio is how quickly is evolves and improves.",
+    "url":"https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
+    "group":"",
+    "keywords": [],
+    "tags": ['studio'],
+    "image":"https://cdn-images-1.medium.com/max/2000/1*chMiA9mGa_FBUOoesHHk3Q.png",
+    "type":"medium"
+  },
+  {
+    "title":"Measure your app’s user acquisition channels",
+    "titleFriendly":"",
+    "summary":"Get details on how to use the Developer Console User Acquisitions reports to discover where your users come from.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/6263332",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Set up native app install banners in Chrome",
+    "titleFriendly":"",
+    "summary":"Get the details you need to add your native app or game to your site’s web app manifest file.",
+    "url":"https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Optimize your store listing pages with experiments",
+    "titleFriendly":"",
+    "summary":"You can run experiments to find the most effective graphics and localized text for your app.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/6227309",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Content Experiments for Mobile Apps",
+    "titleFriendly":"",
+    "summary":"Google Analytics Content Experiments allows you to test multiple variations of a given web page.",
+    "url":"https://support.google.com/tagmanager/answer/6003007",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Store Listing Experiments for Google Play",
+    "titleFriendly":"",
+    "summary":"Learn how to use Google Play’s new store listing optimization feature to get more installs of your app.",
+    "url":"https://www.youtube.com/watch?v=B6ydLpkhq04",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Use alpha/beta testing & staged rollouts",
+    "titleFriendly":"",
+    "summary":"Using the Google Play Developer Console, you can choose groups of users to test different versions of your app.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/3131213",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
     "title":"Quizlet Developer Story",
     "titleFriendly":"",
     "summary":"Quizlet is an extremely popular online learning tool for students. See how they optimized for the classroom with Android and the power of Google Play for Education.",
@@ -27,7 +115,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/Idu7VcTTXfk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/Idu7VcTTXfk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -41,7 +129,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -70,7 +158,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Cast sample apps",
     "titleFriendly":"",
     "summary":"Get example Google Cast applications for both senders and receivers.",
-    "url":"http://www.github.com/googlecast",
+    "url":"https://www.github.com/googlecast",
     "group":"",
     "keywords": ["cast", "samples"],
     "tags": [],
@@ -103,7 +191,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Cardboard design guidelines",
     "titleFriendly":"",
     "summary":"Focus on overall usability and avoiding common VR pitfalls while creating an immersive experience of your own.",
-    "url":"http://www.google.com/design/spec-vr",
+    "url":"https://www.google.com/design/spec-vr",
     "group":"",
     "keywords": ["carboard","vr"],
     "tags": [],
@@ -165,7 +253,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/iokH4SAIfRw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/iokH4SAIfRw/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -179,7 +267,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/Eh2adsAyTKc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/Eh2adsAyTKc/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -193,7 +281,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/_AZ6UcPz-_g/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/_AZ6UcPz-_g/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -207,79 +295,115 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/iulXz8QTD1g/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/iulXz8QTD1g/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Intro To Material Design",
     "titleFriendly":"",
     "summary":"These days, UI designers need to be thinking about phones, tablets, laptops, TVs, smartwatches, and beyond. In this DesignByte we talk about how Google designers have been working on making cross-platform and multi-screen design easier. We wanted to build a design system that felt at home on every screen, from the smallest watch to the largest TV.",
-    "url":"http://www.youtube.com/watch?v=p4gmvHyuZzw",
+    "url":"https://www.youtube.com/watch?v=p4gmvHyuZzw",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/p4gmvHyuZzw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/p4gmvHyuZzw/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Paper and Ink: The Materials that Matter",
     "titleFriendly":"",
     "summary":"Join Rich Fulcher to learn about the materials of material design. See how virtual paper and ink form the foundation of your tactile user interface and master the rules that govern their behaviour.",
-    "url":"http://www.youtube.com/watch?v=YaG_ljfzeUw",
+    "url":"https://www.youtube.com/watch?v=YaG_ljfzeUw",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/YaG_ljfzeUw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/YaG_ljfzeUw/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Material Design in the Google I/O App",
     "titleFriendly":"",
     "summary":"Roman Nurik shares details on the design process for the Google I/O 2014 app. To check out the app's source code, visit github.com/google/iosched.",
-    "url":"http://www.youtube.com/watch?v=XOcCOBe8PTc",
+    "url":"https://www.youtube.com/watch?v=XOcCOBe8PTc",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/XOcCOBe8PTc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/XOcCOBe8PTc/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Toolbars for a flexible Action Bar & more",
+    "titleFriendly":"",
+    "summary":"Toolbars are a flexible View you can add to your Android app which provides many of the same APIs as the system provided Action Bar, but can also do so much more such as reacting to scrolling or being integrated directly into your layouts.",
+    "url":"https://www.youtube.com/watch?v=kmUGLURRPkI",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/kmUGLURRPkI/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Protecting Implicit Intents with Runtime Checks",
+    "titleFriendly":"",
+    "summary":"Make sure you protect your implicit intents with a simple runtime check.",
+    "url":"https://www.youtube.com/watch?v=HGElAW224dE",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/HGElAW224dE/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Tabs and ViewPager",
+    "titleFriendly":"",
+    "summary":"Showing multiple screens or pages of content is easy with the help of ViewPager and a PagerAdapter. Combining that with tabs make for an effective top level navigation strategy for your app or for moving between content at the same level of hierarchy within your app.",
+    "url":"https://www.youtube.com/watch?v=zQekzaAgIlQ",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/zQekzaAgIlQ/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Battery Drain and Networking",
     "titleFriendly":"",
     "summary":"Let’s take a moment to make something insanely clear: As far as battery is concerned, NETWORKING is the biggest, baddest, dirtiest offender there is. And optimizing performance here isn’t easy. Since the chip isn’t always awake and draining power, means you can optimize how it wakes up, sends traffic, and saves battery.",
-    "url":"http://www.youtube.com/watch?v=fEEulSk1kNY",
+    "url":"https://www.youtube.com/watch?v=fEEulSk1kNY",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/fEEulSk1kNY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/fEEulSk1kNY/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Batching Background Work Until Later",
     "titleFriendly":"",
     "summary":"Yes, your app is special. But when it comes to battery use, sometimes it’s better to be part of the crowd. Why not spread the battery blame around a bit? Ian Ni-Lewis shows you how ridiculously easy it is to go from battery hog to team player in this video.",
-    "url":"http://www.youtube.com/watch?v=-3ry8PxcJJA",
+    "url":"https://www.youtube.com/watch?v=-3ry8PxcJJA",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/-3ry8PxcJJA/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/-3ry8PxcJJA/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"The Performance Lifecycle",
     "titleFriendly":"",
     "summary":"Performance problems surface in your application at the least-wanted times (like right before you’re about to ship your first build). But don’t freak out: There’s a simple process that you can follow to help get your performance back under control.",
-    "url":"http://www.youtube.com/watch?v=_kKTGK-Cb_4",
+    "url":"https://www.youtube.com/watch?v=_kKTGK-Cb_4",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/_kKTGK-Cb_4/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/_kKTGK-Cb_4/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -291,7 +415,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["studio", "tools"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
     "type":"video"
   },
 
@@ -304,7 +428,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/M3Udfu6qidk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/M3Udfu6qidk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -316,7 +440,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -328,7 +452,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/fvtMtfCuEpw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/fvtMtfCuEpw/maxresdefault.jpg",
     "type":"video"
   },
     {
@@ -340,19 +464,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/F0Kh_RnSM0w/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/F0Kh_RnSM0w/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Running a Successful Games Business with Google",
     "titleFriendly":"",
     "summary":"Sure, we all want to make the next great gaming masterpiece. But we also want to feed our families and/or dogs. Join Bob Meese from the Google Play team as he gives you some key pointers on how to make sure you're best taking advantage of Google Play and running a successful games business.",
-    "url":"http://www.youtube.com/watch?v=tDmnGNkTtlE",
+    "url":"https://www.youtube.com/watch?v=tDmnGNkTtlE",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/tDmnGNkTtlE/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/tDmnGNkTtlE/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -364,7 +488,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["tv"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -376,8 +500,92 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["auto"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/ctiaVxgclsg/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/ctiaVxgclsg/maxresdefault.jpg",
     "type":"video"
+  },
+  {
+    "title":"Debugging and testing in Android Studio",
+    "titleFriendly":"",
+    "summary":"This video introduces the state of unit testing support in Studio and Google’s new Android Testing Support Library for functional UI testing and running instrumented tests on a device.",
+    "url":"https://www.youtube.com/watch?v=2I6fuD20qlY",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Android Testing (Android Dev Summit 2015)",
+    "titleFriendly":"",
+    "summary":"Overview of the testing tools and frameworks provided by Google and how they can help you to iterate more quickly and maintain a more healthy codebase.",
+    "url":"https://www.youtube.com/watch?v=vdasFFfXKOY",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/vdasFFfXKOY/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"dumpsys",
+    "titleFriendly":"",
+    "summary":"A tool that runs on the device and provides information about the status of system services.",
+    "url":"https://source.android.com/devices/tech/debug/dumpsys.html",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"",
+    "type":"google"
+  },
+  {
+    "title":"Android Testing Samples",
+    "titleFriendly":"",
+    "summary":"A collection of samples demonstrating different frameworks and techniques for automated testing.",
+    "url":"https://github.com/googlesamples/android-testing",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+  {
+    "title":"Android Testing Templates",
+    "titleFriendly":"",
+    "summary":"A collection of Google's Android testing tools and frameworks, all integrated in a single application project.",
+    "url":"https://github.com/googlesamples/android-testing-templates",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+   {
+    "title":"Android Testing Support Library (GitHub)",
+    "titleFriendly":"",
+    "summary":"A resource page on GitHub for the Android Testing Support Library.",
+    "url":"https://google.github.io/android-testing-support-library",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+  {
+    "title":"Android Testing Codelab",
+    "titleFriendly":"",
+    "summary":"This codelab shows how to build an Android app from the ground up in Android Studio, using a Model View Presenter architecture, Unit Tests and Instrumentation Tests.",
+    "url":"https://codelabs.developers.google.com/codelabs/android-testing/index.html",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"google"
   },
   {
     "title":"Developer Registration",
@@ -425,6 +633,17 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"google"
   },
   {
+    "title":"Google Play Badge Generator",
+    "titleFriendly":"",
+    "summary":"Build badges for your app in just a few clicks, or download hi-res badge assets localized for a variety of languages.",
+    "url":"https://play.google.com/intl/en_us/badges/",
+    "group":"",
+    "keywords": [],
+    "tags": ["#developersupport"],
+    "image":"images/gp-badges-set.png",
+    "type":"google"
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": ["#developersupport #termsandpolicies"],
@@ -445,7 +664,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": [],
     "tags": [],
-    "image":"http://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
+    "image":"https://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
     "type":"google"
   },
   {
@@ -456,7 +675,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": [],
     "tags": [],
-    "image":"http://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
+    "image":"https://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
     "type":"google"
   },
   {
@@ -485,7 +704,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Google for Education",
     "titleFriendly":"",
     "summary":"Find out more about how Google can support your work with apps and tablets.",
-    "url":"http://www.google.com/edu/tablets/",
+    "url":"https://www.google.com/edu/tablets/",
     "group":"",
     "keywords": [],
     "tags": [],
@@ -506,22 +725,54 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Google Play Game Services",
     "titleFriendly":"",
-    "summary":"Tools to offer a better game experience.",
-    "url":"google/play-services/games.html",
+    "summary":"Make your games social with Google Play game services. Add achievements, leaderboards, real-time multiplayer, and other popular features using the Google Play game services SDK.",
+    "url":"https://developers.google.com/games/services/",
     "group":"",
     "keywords": ["games","play games"],
     "tags": [],
     "image":"images/google/gps-play_games_logo.png",
     "type":"google"
   },
-
+  {
+    "title":"Get Started with Analytics",
+    "titleFriendly":"",
+    "summary":"Get advanced insight into how players discover and play your games.",
+    "url":"distribute/analyze/start.html",
+    "group":"",
+    "keywords": ["analytics"],
+    "tags": [],
+    "image": "images/cards/analytics-mobile_2x.jpg",
+    "type": "distribute"
+  },
+  {
+    "title":"Build VR with Google Cardboard",
+    "titleFriendly":"",
+    "summary":"Turn any phone into a virtual reality headset with a Cardboard viewer and experiment with adding virtual reality to your games with the Cardboard SDK.",
+    "url":"distribute/googleplay/cardboard.html",
+    "group":"",
+    "keywords": ["cardboard"],
+    "tags": [],
+    "image":"images/cards/card-cardboard_2x.png",
+    "type": "distribute"
+  },
+  {
+    "title":"Monetize your apps intelligently",
+    "titleFriendly":"",
+    "summary":"Generate revenue from your free games with ads tailored to match your game's look and feel.",
+    "url":"https://www.google.com/admob/",
+    "group":"",
+    "keywords": ["AdMob"],
+    "tags": [],
+    "image":"images/cards/admob-analytics_2x.png",
+    "type": "distribute"
+  },
   {
     "lang": "en",
     "group": "",
     "tags": [
       "versions", "blog", "googleplay"
     ],
-    "url": "http://android-developers.blogspot.com/",
+    "url": "https://android-developers.blogspot.com/",
     "timestamp": 1004884220000,
     "image": "images/blog.jpg",
     "title": "Android Developers Blog",
@@ -530,12 +781,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "blog",
     "titleFriendly": ""
   },
-
   {
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
+    "url": "https://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Making Android Apps that Play Nice",
@@ -548,7 +798,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
+    "url": "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Multithreading for Performance",
@@ -561,7 +811,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-content-policy.html",
+    "url": "https://play.google.com/about/developer-content-policy.html",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
     "title": "Developer Program Policies",
@@ -584,6 +834,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "en",
+    "group": "",
+    "tags": ["devices", "nexus", "testing"],
+    "url": "https://developers.google.com/android/nexus/images",
+    "timestamp": 1194884220000,
+    "image": "images/cards/card-download_16-9_2x.png",
+    "title": "Factory Images for Nexus Devices",
+    "summary": "System image files for Android 6.0 and other Android releases.",
+    "keywords": ["nexus, downloads"],
+    "type": "support",
+    "titleFriendly": ""
+  },
+  {
     "lang": "zh-cn",
     "group": "",
     "tags": [],
@@ -600,7 +863,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+    "url": "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
     "title": "Google Play Featured Image Guidelines",
@@ -782,9 +1045,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://youtu.be/SkHHPf3EdzE",
+    "url": "https://youtu.be/SkHHPf3EdzE",
     "timestamp": 1194884220000,
-    "image": "http://i1.ytimg.com/vi/SkHHPf3EdzE/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/SkHHPf3EdzE/maxresdefault.jpg",
     "title": "Level Up Your Android Game",
     "summary": "Learn how to take your game to the next level on Google Play.",
     "keywords": [],
@@ -808,7 +1071,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-distribution-agreement.html",
+    "url": "https://play.google.com/about/developer-distribution-agreement.html",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
     "title": "Developer Distribution Agreement",
@@ -847,7 +1110,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+    "url": "https://play.google.com/about/developer-distribution-agreement-addendum.html",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
     "title": "Google Play for Education Addendum",
@@ -860,7 +1123,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
+    "url": "https://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
     "timestamp": null,
     "image": null,
     "title": "Native RTL Support in Android 4.2",
@@ -1020,7 +1283,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["android","dashboard","platforms","versions"],
     "tags": ["#ecosystem","#versions","#whatsnew"],
-    "image":"http://chart.googleapis.com/chart?chl=GL%201.1%20only%7CGL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A0.1%2C93.5%2C6.4&chco=c4df9b%2C6fad0c&chs=400x250&cht=p",
+    "image":"https://chart.googleapis.com/chart?chl=GL%201.1%20only%7CGL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A0.1%2C93.5%2C6.4&chco=c4df9b%2C6fad0c&chs=400x250&cht=p",
     "lang":"en",
     "type":"about"
   },
@@ -1239,9 +1502,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "url": "http://youtu.be/vzvpcEffvaE",
+    "url": "https://youtu.be/vzvpcEffvaE",
     "timestamp": 1383243492000,
-    "image": "http://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
     "title": "Introducing Tablets with Google Play for Education",
     "summary": "Schools in Hillsborough, New Jersey were among the first to try out Nexus 7 tablets with Google Play for Education. See the difference it made for students, teachers, and administrators.",
     "keywords": [],
@@ -1254,9 +1517,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#engagement",
     ],
-    "url": "http://www.youtube.com/yt/dev/",
+    "url": "https://www.youtube.com/yt/dev/",
     "timestamp": 1383243492000,
-    "image": "http://www.youtube.com/yt/dev/media/images/yt-dev-home-hero.jpg",
+    "image": "https://www.youtube.com/yt/dev/media/images/yt-dev-home-hero.jpg",
     "title": "YouTube for Developers",
     "summary": "The YouTube APIs and Tools enable you to integrate YouTube's video content and functionality into your website, app, or device.",
     "keywords": [],
@@ -1269,7 +1532,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#engagement",
     ],
-    "url": "http://www.google.com/analytics/mobile/",
+    "url": "https://www.google.com/analytics/mobile/",
     "timestamp": 1383243492000,
     "image": "images/cards/analytics-mobile_2x.jpg",
     "title": "Mobile App Analytics",
@@ -1286,9 +1549,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#gcm",
     ],
-    "url": "http://www.youtube.com/watch?v=y76rjidm8cU",
+    "url": "https://www.youtube.com/watch?v=y76rjidm8cU",
     "timestamp": 1383243492000,
-    "image": "http://1.bp.blogspot.com/-IF-1-1kA0sg/UYwTidxdi3I/AAAAAAAAAEU/ellLeQ-E1vs/s800/google-io-lockup-2.png",
+    "image": "https://1.bp.blogspot.com/-IF-1-1kA0sg/UYwTidxdi3I/AAAAAAAAAEU/ellLeQ-E1vs/s800/google-io-lockup-2.png",
     "title": "Google Cloud Messaging at I/O 2013",
     "summary": "Google Cloud Messaging allows your services to efficiently send data to applications on Android devices. See what's new, and learn how to use GCM to make your apps more efficient.",
     "keywords": ["gcm"],
@@ -1301,7 +1564,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#gcm",
     ],
-    "url": "http://developer.chrome.com/apps/cloudMessagingV2",
+    "url": "https://developer.chrome.com/apps/cloudMessagingV2",
     "timestamp": 1383243492000,
     "image": "images/kk-chromium-icon.png",
     "title": "Google Cloud Messaging for Chrome",
@@ -1317,7 +1580,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
+    "url": "https://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Make Beautiful Android App Icons",
@@ -1332,7 +1595,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
+    "url": "https://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Localize Your Promotional Graphics",
@@ -1347,7 +1610,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html",
+    "url": "https://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Make your App Content more Accessible with App Linking",
@@ -1438,7 +1701,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://en.wikipedia.org/wiki/XLIFF",
+    "url": "https://en.wikipedia.org/wiki/XLIFF",
     "timestamp": 1194884220000,
     "image": null,
     "title": "XML Localisation Interchange File Format (XLIFF)",
@@ -1503,7 +1766,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
+    "url": "https://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
     "timestamp": null,
     "image": "distribute/images/gp-edu-apps-image.jpg",
     "title": "Google play for education",
@@ -1542,7 +1805,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": ["games", "localization", "quality"],
-    "url": "http://www.youtube.com/watch?v=SkHHPf3EdzE",
+    "url": "https://www.youtube.com/watch?v=SkHHPf3EdzE",
     "timestamp": null,
     "image": "https://developers.google.com/apps/images/io_2013/google-io-logo.png",
     "title": "Level Up Your Android Game",
@@ -1581,9 +1844,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": ["monetize", "ads"],
-    "url": "http://www.google.com/doubleclick/publishers/small-business/index.html",
+    "url": "https://www.google.com/doubleclick/publishers/small-business/index.html",
     "timestamp": null,
-    "image": "http://www.google.com/doubleclick/publishers/small-business/images/define_ad.png",
+    "image": "https://www.google.com/doubleclick/publishers/small-business/images/define_ad.png",
     "title": "DoubleClick for Publishers",
     "summary": "A free ad management solution that helps growing publishers sell, schedule, deliver, and measure all of their digital ad inventory.",
     "keywords": ["ads"],
@@ -1594,7 +1857,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": ["monetize", "ads"],
-    "url": "http://support.google.com/googleplay/android-developer/topic/2985714",
+    "url": "https://support.google.com/googleplay/android-developer/topic/2985714",
     "timestamp": null,
     "image":"images/play_dev.jpg",
     "title": "Policy Center: Ads",
@@ -1620,7 +1883,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://admob.blogspot.com/",
+    "url": "https://admob.blogspot.com/",
     "timestamp": null,
     "image": "images/cards/analytics-mobile_2x.jpg",
     "title": "Inside Admob",
@@ -1685,7 +1948,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": ["plus", "social"],
-    "url": "http://plus.google.com/+GooglePlay",
+    "url": "https://plus.google.com/+GooglePlay",
     "timestamp": null,
     "image": "https://lh4.googleusercontent.com/-IKezweZlcXI/AAAAAAAAAAI/AAAAAAABOvg/uK8Z0jekVE4/s120-c/photo.jpg",
     "title": "+Google Play",
@@ -1726,7 +1989,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/guidelines",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "image": "https://developer.android.com/distribute/images/edu-guidelines.jpg",
     "title": "Education Guidelines",
     "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
     "keywords": [],
@@ -1739,7 +2002,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/guidelines?hl=zh-Hans",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "image": "https://developer.android.com/distribute/images/edu-guidelines.jpg",
     "title": "Education Guidelines",
     "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
     "keywords": [],
@@ -1752,7 +2015,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/faq",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/gpfe-faq.jpg",
+    "image": "https://developer.android.com/distribute/images/gpfe-faq.jpg",
     "title": "Education FAQ",
     "summary": "Answers to common questions you might have about Google Play for Education.",
     "keywords": [],
@@ -1789,9 +2052,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.png",
     "title": "Deer Hunter 2014 by Glu &mdash; Sign-in",
     "summary": "Glu finds that Google Play Game Services helps improve the user experience which leads to increased player happiness. They also find that Play Games Services signed in users tend to play longer and have a higher lifetime value.",
     "keywords": ["stories"],
@@ -1802,9 +2065,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.png",
     "title": "PBA® Bowling Challenge by Concrete Software &mdash; Quests",
     "summary": "Concrete Software finds that Google Play Game Services' quests are a great way to create new content for users that leads to higher engagement.",
     "keywords": ["stories"],
@@ -1815,9 +2078,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.png",
     "title": "Dragonplay Slots by Dragonplay &mdash; Sign-in",
     "summary": "Dragonplay finds that players who sign in with Google Play Games services tend to be high quality users who were highly engaged. They also tend to be easier to convert to paying users.",
     "keywords": ["stories"],
@@ -1828,9 +2091,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.png",
     "title": "Asphalt 8 by Gameloft &mdash; Friends invitations",
     "summary": "Gameloft finds that Google Play Game Services users are more engaged than the average Android user and more likely to convert to paying players.",
     "keywords": ["stories"],
@@ -1841,9 +2104,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.png",
     "title": "Eternity Warriors 3 by Glu &mdash; Gifting",
     "summary": "Glu finds that Google Play Game Services gifting outperforms other implementations (including those with incentives) because of its seamless flow and consistent performance.",
     "keywords": ["stories"],
@@ -1854,9 +2117,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.jpg",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.jpg",
     "title": "Rivals at War: Firefight by Hothead Games &mdash; Leaderboards",
     "summary": "Hothead Games is planning to include Google Play Game Services features in all their games going forwards after seeing that players that signed in with Play Games Services tend to show higher retention and a higher average revenue.",
     "keywords": ["stories"],
@@ -1867,9 +2130,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.png",
     "title": "Compulsive by TMSOFT &mdash; Cross-platform",
     "summary": "TMSOFT finds that users who authenticate with Play Games Services on Android and iOS play Compulsive twice as much and purchase in-app products over four times as much.",
     "keywords": ["stories"],
@@ -1880,9 +2143,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.png",
     "title": "Super Stickman Golf 2 by Noodlecake Studios &mdash; Multiplayer",
     "summary": "Noodlecake Studios finds that Google Play Game Services’ multiplayer feature helps reduce attrition.",
     "keywords": ["stories"],
@@ -1893,9 +2156,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebelGames_DrWhoLegacy_pgps.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebelGames_DrWhoLegacy_pgps.png",
     "title": "Dr. Doctor Who: Legacy by Tiny Rebel Games &mdash; Achievements",
     "summary": "After integrating achievements and cloud services from Google Play Game Services, Tiny Rebel Games saw a dramatic increase in daily revenues as a result of an increase in daily installs and an increase in the average revenue per install.",
     "keywords": ["stories"],
@@ -1906,9 +2169,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.png",
     "title": "Leo’s Fortune by 1337 &amp; Senri &mdash; Saved games",
     "summary": "1337 + Senri finds that Google Play Game Services is easy to integrate and provides essential game functions like cloud saved games, achievements and leaderboards which have a very large adoption rate amongst players.",
     "keywords": ["stories"],
@@ -1918,15 +2181,15 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "lang": "en",
     "group": "",
-    "tags": [],
-    "url": "shareables/distribute/play_dev_guide_secrets_en.pdf",
-    "timestamp": null,
-    "image": "distribute/images/play_dev_guide_b.jpg",
+    "tags": ["play,protips"],
+    "url": "shareables/distribute/secrets_play/v2/web/secrets_to_app_success_v2_en.pdf",
+    "timestamp": 1447437450,
+    "image": "images/distribute/secrets_v2_banner.jpg",
     "title": "The Secrets to App Success on Google Play",
-    "summary": "A guide to useful features, tips, and best practices that will help you grow a successful app business on Google Play.",
-    "keywords": ["distribute"],
-    "type": "PDF DOWNLOAD (11MB)",
-    "titleFriendly": ""
+    "summary": "Get the updated guide full of useful features, tips, and best practices that will help you grow a successful app or game business on Google Play.",
+    "keywords": ["secrets, success, play, google"],
+    "type": "Book",
+    "category": "distribute"
   },
   {
     "lang": "en",
@@ -1984,9 +2247,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://www.google.com/tagmanager/",
+    "url": "https://www.google.com/tagmanager/",
     "timestamp": null,
-    "image": "http://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
+    "image": "https://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
     "title": "Google Tag Manager",
     "summary": "Google Tag Manager enables you to change configuration values in your mobile apps using the Google Tag Manager interface, without having to rebuild and resubmit application binaries to app marketplaces.",
     "keywords": ["analytics", "tagmanager"],
@@ -2181,7 +2444,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://support.google.com/tagmanager/answer/6003007",
     "timestamp": null,
-    "image": "http://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
+    "image": "https://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
     "title": "In-App A/B Testing",
     "summary": "With content experiments in Google Tag Manager you can test multiple variations of your app to find which works best.",
     "keywords": ["tagmanager"],
@@ -2507,7 +2770,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://analyticsacademy.withgoogle.com/mobile-app",
+    "url": "https://analyticsacademy.withgoogle.com/mobile-app",
     "timestamp": null,
     "image": "distribute/images/advertising.jpg",
     "title": "Analytics Academy for Mobile Apps",
@@ -2650,6 +2913,200 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
 
+ // Online courses
+
+ {
+    "title":"UX Design for Mobile Developers",
+    "titleFriendly":"",
+    "summary":"Learn how to design a 5-star app.",
+    "url":"https://www.udacity.com/course/ud849",
+    "group":"",
+    "keywords": ["mobile","ux","design"],
+    "tags": ["courses, start"],
+    "image":"images/cards/courses/mobile_ux_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Developing Android Apps",
+    "titleFriendly":"",
+    "summary":"Learn Android and build an app!",
+    "url":"https://www.udacity.com/course/ud853",
+    "group":"",
+    "keywords": ["android", "start","firstapp","sdk"],
+    "tags": ["courses, start"],
+    "image":"images/cards/courses/android_fundamentals_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android Performance",
+    "titleFriendly":"",
+    "summary":"Optimize your apps for speed and usability.",
+    "url":"https://www.udacity.com/course/ud825",
+    "group":"",
+    "keywords": ["android, performance","battery"],
+    "tags": ["courses, performance"],
+    "image":"images/cards/courses/android_performance_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Enroll in the Android Nanodegree",
+    "titleFriendly":"",
+    "summary":"Enroll in the Android Nanodegree to build the skills to work as an Android developer.",
+    "url":"https://www.udacity.com/android",
+    "group":"",
+    "keywords": ["android, nanodegree"],
+    "tags": ["courses"],
+    "image":"images/cards/courses/android_nanodegree.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Advanced Android App Development",
+    "titleFriendly":"",
+    "summary":"Productionize and publish your apps.",
+    "url":"https://www.udacity.com/course/ud855",
+    "group":"",
+    "keywords": ["android, experts"],
+    "tags": ["courses, expert"],
+    "image":"images/cards/courses/advanced_android_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Material Design for Android Developers",
+    "titleFriendly":"",
+    "summary":"Learn how to make your apps material.",
+    "url":"https://www.udacity.com/course/ud862",
+    "group":"",
+    "keywords": ["android, design, pure, material"],
+    "tags": ["courses, start, material"],
+    "image":"images/cards/courses/android_design_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android for Beginners",
+    "titleFriendly":"",
+    "summary":"Make your first Android app, even if you don't write code.",
+    "url":"https://www.udacity.com/course/ud837",
+    "group":"",
+    "keywords": ["android, sdk, firstapp"],
+    "tags": ["courses, start"],
+    "image":"images/cards/courses/beginning_android_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Gradle for Android and Java",
+    "titleFriendly":"",
+    "summary":"Build better apps through automation",
+    "url":"https://www.udacity.com/course/ud867",
+    "group":"",
+    "keywords": ["gradle","studio", "sdk"],
+    "tags": ["courses, gradle, sdk"],
+    "image":"images/cards/courses/gradle_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Add Location and Context to your app",
+    "titleFriendly":"",
+    "summary":"Make Your Android App Location Aware.",
+    "url":"https://www.udacity.com/course/ud876-1",
+    "group":"",
+    "keywords": ["google services, context, location"],
+    "tags": ["courses, google, location, context"],
+    "image":"images/cards/courses/android_location_course.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Analytics and Tag Manager for Android",
+    "titleFriendly":"",
+    "summary":"Use Analytics and Tag Manager in Your Apps.",
+    "url":"https://www.udacity.com/course/ud876-2",
+    "group":"",
+    "keywords": ["google services, analytics, tag manager"],
+    "tags": ["courses, google, analytics"],
+    "image":"images/cards/courses/android_analytics_course.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"AdMob for Android",
+    "titleFriendly":"",
+    "summary":"Monetize Your App by Displaying Ads.",
+    "url":"https://www.udacity.com/course/ud876-3",
+    "group":"",
+    "keywords": ["monetize, google services, ads, admob"],
+    "tags": ["courses, google, ads, admob"],
+    "image":"images/cards/courses/admob_course.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Add Maps to your Android app",
+    "titleFriendly":"",
+    "summary":"Use maps, cameras, markers and more in your app.",
+    "url":"https://www.udacity.com/course/ud876-4",
+    "group":"",
+    "keywords": ["google, maps, marker, camera"],
+    "tags": ["courses, google, maps"],
+    "image":"images/cards/courses/android_maps_course.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Add Sign-in to your Android app",
+    "titleFriendly":"",
+    "summary":"Build a Seamless Sign-In Experience.",
+    "url":"https://www.udacity.com/course/ud876-5",
+    "group":"",
+    "keywords": ["google services, signin, authorization"],
+    "tags": ["courses, google, auth"],
+    "image":"images/cards/courses/android_identity_course.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android Wear Development",
+    "titleFriendly":"",
+    "summary":"Extend your Apps to Android Smartwatches.",
+    "url":"https://www.udacity.com/course/ud875A",
+    "group":"",
+    "keywords": ["wear, wearables, smartwatch"],
+    "tags": ["courses, wear, wearable"],
+    "image":"images/cards/courses/android_wear_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android TV and Google Cast Development",
+    "titleFriendly":"",
+    "summary":"Extend your Apps to the Big Screen.",
+    "url":"https://www.udacity.com/course/ud875B",
+    "group":"",
+    "keywords": ["cast, living room"],
+    "tags": ["courses, cast, tv"],
+    "image":"images/cards/courses/android_tv_cast_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android Auto Development",
+    "titleFriendly":"",
+    "summary":"Put your apps in the driver's seat.",
+    "url":"https://www.udacity.com/course/ud875C",
+    "group":"",
+    "keywords": ["auto"],
+    "tags": ["courses, auto"],
+    "image":"images/cards/courses/android_auto_course.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
 
 
  // TODO remove this?
@@ -2666,126 +3123,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"design"
   },
   {
-    "title":"UX Design for Mobile Developers",
-    "titleFriendly":"",
-    "summary":"Learn how to design a 5-star app.",
-    "url":"https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
-    "group":"",
-    "keywords": ["mobile","ux","design"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud849_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Developing Android Apps",
-    "titleFriendly":"",
-    "summary":"Learn Android and build an app!",
-    "url":"https://www.udacity.com/course/developing-android-apps--ud853",
-    "group":"",
-    "keywords": ["start","firstapp","sdk"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud853_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Android Performance",
-    "titleFriendly":"",
-    "summary":"Optimize your apps for speed and usability.",
-    "url":"https://www.udacity.com/course/android-performance--ud825",
-    "group":"",
-    "keywords": ["performance","battery"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud825_2x.png",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Enroll in the Android Nanodegree",
-    "titleFriendly":"",
-    "summary":"Enroll in the Android Nanodegree to build the skills to work as an Android developer.",
-    "url":"https://www.udacity.com/android",
-    "group":"",
-    "keywords": ["nanodegree"],
-    "tags": ["courses"],
-    "image":"images/cards/course-nanodegree_2x.png",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Advanced Android App Development",
-    "titleFriendly":"",
-    "summary":"Productionize and publish your apps.",
-    "url":"https://www.udacity.com/course/advanced-android-app-development--ud855",
-    "group":"",
-    "keywords": ["android, experts"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud855_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Android Ubiquitous Computing",
-    "titleFriendly":"",
-    "summary":"Extend your apps to Wear, TV, and Auto.",
-    "url":"https://www.udacity.com/course/android-ubiquitous-computing--ud875",
-    "group":"",
-    "keywords": ["wear, tv, auto"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud875_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Google Play Services",
-    "titleFriendly":"",
-    "summary":"Use Google APIs to improve your apps.",
-    "url":"https://www.udacity.com/course/google-play-services--ud876",
-    "group":"",
-    "keywords": ["google, play services, google services"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud876_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Android Design for Developers",
-    "titleFriendly":"",
-    "summary":"Learn how to make your apps material.",
-    "url":"https://www.udacity.com/course/android-design-for-developers--ud862",
-    "group":"",
-    "keywords": ["design, pure, material"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud862_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Android Development for Beginners",
-    "titleFriendly":"",
-    "summary":"Make your first Android app, even if you don't write code.",
-    "url":"https://www.udacity.com/course/android-development-for-beginners--ud837",
-    "group":"",
-    "keywords": ["firstapp",],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud837_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
-    "title":"Gradle for Android and Java",
-    "titleFriendly":"",
-    "summary":"Build better apps through automation",
-    "url":"https://www.udacity.com/course/gradle-for-android-and-java--ud867",
-    "group":"",
-    "keywords": ["gradle","studio", "sdk"],
-    "tags": ["courses"],
-    "image":"images/cards/course-ud867_2x.jpg",
-    "lang":"en",
-    "type":"online course"
-  },
-  {
     "title":"Watch Faces for Android Wear",
     "titleFriendly":"",
     "summary":"Watch faces let you customize the most prominent UI feature of Android wearables. The API is simple enough for rapid development and flexible enough to build something awesome.",
@@ -2793,7 +3130,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["wear", "wearable", "watch face"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/AK38PJZmIW8/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/AK38PJZmIW8/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2805,7 +3142,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["support", "compatibility"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/3PIc-DuEU2s/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/3PIc-DuEU2s/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2817,7 +3154,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["support", "compatibility","design-code"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/5Be2mJzP-Uw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/5Be2mJzP-Uw/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2829,7 +3166,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["tools", "studio","gradle"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/cD7NPxuuXYY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/cD7NPxuuXYY/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2841,7 +3178,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["tools", "studio","layout"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/JLLnhwtDoHw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/JLLnhwtDoHw/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2853,20 +3190,9 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["tools", "studio","debugging","profiling","performance"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
-  },
-  {
-    "tags": [
-      "android",
-      "developerstory",
-      "googleplay",
-      "featured"
-    ],
-    "title": "Android Developer Story: Jelly Button Games — Growing globally through data driven development",
-    "type": "youtube",
-    "url": "http://www.youtube.com/watch?v=Pd49vTkvu0U"
   },
   {
     "title":"Scale with Google Cloud Platform",
@@ -2896,7 +3222,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Android for Work",
     "titleFriendly":"",
     "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
-    "url":"http://www.android.com/work/",
+    "url":"https://www.android.com/work/",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
@@ -2912,7 +3238,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
     "lang":"en",
     "type":"youtube"
   },
@@ -2924,7 +3250,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
     "lang":"en",
     "type":"youtube"
   },
@@ -2936,7 +3262,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
     "lang":"en",
     "type":"youtube"
   },
@@ -2948,7 +3274,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
     "type":"youtube"
   },
@@ -2976,8 +3302,186 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang":"en",
     "type":"distribute"
   },
-
-
+  {
+    "title":"What’s New in Android N Developer Preview",
+    "titleFriendly":"",
+    "summary":"Learn all about the new features in the Android N Preview.",
+    "url":"https://www.youtube.com/watch?v=CsulIu3UaUM",
+    "group":"",
+    "keywords": ["n preview"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/CsulIu3UaUM/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Developing for Android 6.0 (Marshmallow)",
+    "titleFriendly":"",
+    "summary":"This video covers how to get started with the preview, important APIs to test and how to provide feedback on the preview.",
+    "url":"https://www.youtube.com/watch?v=yYU4DHLwoRk",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/yYU4DHLwoRk/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Google I/O 2015 - What's new in Android",
+    "titleFriendly":"",
+    "summary":"This session will highlight the most exciting new developer features of the Android platform.",
+    "url":"https://www.youtube.com/watch?v=ndBdf1_oOGA",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/ndBdf1_oOGA/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Fingerprint and payments APIs",
+    "titleFriendly":"",
+    "summary":"New fingerprint and payments APIs are introduced in M, to enable enhanced UX and security for online purchasing, banking, and retail payments.",
+    "url":"https://www.youtube.com/watch?v=VOn7VrTRlA4",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/VOn7VrTRlA4/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Introduction to Voice Interaction API",
+    "titleFriendly":"",
+    "summary":"This video covers how to use the Voice Interaction API to support system or custom voice actions.",
+    "url":"https://www.youtube.com/watch?v=OW1A4XFRuyc",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/OW1A4XFRuyc/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Android Auto Backup for Apps",
+    "titleFriendly":"",
+    "summary":"Android Backup is the automatic, cloud-based backup and restore of users’ apps when they set up a new device.",
+    "url":"https://www.youtube.com/watch?v=HXacyy0HSW0",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/HXacyy0HSW0/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"New APIs in M for Android for Work",
+    "titleFriendly":"",
+    "summary":"Android M extends Android for Work functionality with a new set of APIs for Enterprise Mobility Management providers to offer new features and policy controls to IT Departments.",
+    "url":"https://www.youtube.com/watch?v=vcSj8ln-BlE",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/vcSj8ln-BlE/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Android for Work: Single Use Devices",
+    "titleFriendly":"",
+    "summary":"Android M is bringing the power of Android to all kinds of workplaces.",
+    "url":"https://www.youtube.com/watch?v=j3QC6hcpy90",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Runtime Permissions in Android 6.0 Marshmallow",
+    "titleFriendly":"",
+    "summary":"Learn how to integrate runtime permissions into your Android app.",
+    "url":"https://www.youtube.com/watch?v=C8lUdPVSzDk",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/C8lUdPVSzDk/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Introduction to Doze",
+    "titleFriendly":"",
+    "summary":"An overview of Doze and how to make sure that your app behaves as expected both in and out of Doze mode. ",
+    "url":"https://youtu.be/N72ksDKrX6c",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/N72ksDKrX6c/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"The Nexus 5X, Nexus 6P and Android Marshmallow",
+    "titleFriendly":"",
+    "summary":"The new Nexus 5X and Nexus 6P along with some of the most significant developer features in the latest Android release,.",
+    "url":"https://youtu.be/U9tw5ypqEN0",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/U9tw5ypqEN0/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Asking For Permission Fine",
+    "titleFriendly":"",
+    "summary":"Picking the right way and time to ask for a permission is critical to it being granted. ",
+    "url":"https://youtu.be/iZqDdvhTZj0",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/iZqDdvhTZj0/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Data Binding Library",
+    "titleFriendly":"",
+    "summary":"Data Binding Library is a way to write declarative layouts and minimize the glue code necessary to bind your application logic and layouts. ",
+    "url":"https://youtu.be/5sCQjeGoE7M",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/5sCQjeGoE7M/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"App Links",
+    "titleFriendly":"",
+    "summary":"App Links is a new feature of Android Marshmallow that brings a faster way of opening website links for domains that you own.",
+    "url":"https://youtu.be/LQoohRwojmw",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/LQoohRwojmw/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
+    "title":"Android M Permissions",
+    "titleFriendly":"",
+    "summary":"An introduction to Android M runtime permissions in Android M from Google I/O 2015. ",
+    "url":"https://www.youtube.com/watch?v=f17qe9vZ8RM",
+    "group":"",
+    "keywords": ["Marshmallow"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/f17qe9vZ8RM/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
   {
     "lang": "ja",
     "title": "Gaming Everywhere",
@@ -2987,7 +3491,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/xelYnWcYkuE/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/xelYnWcYkuE/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -2999,7 +3503,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/lJdjY3z6-LY/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/lJdjY3z6-LY/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -3007,11 +3511,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Android Wear 関連の動画に日本語字幕が付きました",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/android-wear.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://i1.ytimg.com/vi/4JcDYkgqksY/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/4JcDYkgqksY/maxresdefault.jpg",
     "type": "blog"
   },
   {
@@ -3019,11 +3523,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Android Studio 1.0 をリリースしました",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://3.bp.blogspot.com/-1hV3sD1At74/VIaQSWBasUI/AAAAAAAABAU/9vYLJMsmMuQ/s1600/studio-logo.png",
+    "image": "https://3.bp.blogspot.com/-1hV3sD1At74/VIaQSWBasUI/AAAAAAAABAU/9vYLJMsmMuQ/s1600/studio-logo.png",
     "type": "blog"
   },
   {
@@ -3031,11 +3535,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Google Play 開発者サービス 6.5 のご紹介",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/google-play-65.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://1.bp.blogspot.com/-4BNREC0Jojo/VGo7ahW35wI/AAAAAAAABAc/9thZl94F6fY/s1600/GMS%2B-%2BRelease%2BBlog%2BNacho%2B-%2BMap%2BToolbar.png",
+    "image": "https://1.bp.blogspot.com/-4BNREC0Jojo/VGo7ahW35wI/AAAAAAAABAc/9thZl94F6fY/s1600/GMS%2B-%2BRelease%2BBlog%2BNacho%2B-%2BMap%2BToolbar.png",
     "type": "blog"
   },
   {
@@ -3079,7 +3583,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Google Play アプリ ポリシー センター",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+    "url": "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -3115,11 +3619,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Google Cloud Platform が支える、新感覚リアルタイム RPG ユニゾンリーグ - 株式会社エイチームの GCP 導入事例",
     "titleFriendly": "",
     "summary": "スケーラブルなバックエンドを実現する Google Cloud Platform の最新導入事例。",
-    "url": "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+    "url": "https://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://3.bp.blogspot.com/-xp7KoPkbne4/VI_PfoFil3I/AAAAAAAAA3U/-k1UZ0zjCBc/s1600/unison-league.jpeg",
+    "image": "https://3.bp.blogspot.com/-xp7KoPkbne4/VI_PfoFil3I/AAAAAAAAA3U/-k1UZ0zjCBc/s1600/unison-league.jpeg",
     "type": "distribute"
   },
   {
@@ -3143,7 +3647,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/7X9Ue0Nfdh4/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/7X9Ue0Nfdh4/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -3155,7 +3659,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/83FpwuschCQ/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/83FpwuschCQ/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -3163,7 +3667,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "안드로이드 5.0 롤리팝을 맞이하는 개발자를 위한 안내서",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+    "url": "https://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -3175,7 +3679,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "안드로이드 앱을 위한 머티리얼 디자인 체크 리스트",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+    "url": "https://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -3187,11 +3691,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "App Compat 라이브러리",
     "titleFriendly": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+    "url": "https://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://2.bp.blogspot.com/-7fF9ayZ6PgI/U9iFpk5FNEI/AAAAAAAAAs0/4P4SCvdB_4M/s640/image00.png",
+    "image": "https://2.bp.blogspot.com/-7fF9ayZ6PgI/U9iFpk5FNEI/AAAAAAAAAs0/4P4SCvdB_4M/s640/image00.png",
     "type": "blog"
   },
   {
@@ -3312,7 +3816,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/wcjqBSei3a0/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/wcjqBSei3a0/maxresdefault.jpg",
     "title": "Developers connecting the world through Google Play",
     "summary": "The mobile ecosystem is empowering developers to make good on the dream of connecting the world through technology to improve people's lives.",
     "tags":["io15","googleplay"],
@@ -3321,7 +3825,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
     "title": "Store Listing Experiments for Google Play",
     "summary": "Learn how to use Google Play’s new store listing optimization feature to get more installs of your app, and how to test different graphics and text to find out which options perform the best. ",
     "tags":["io15","googleplay","store listing"],
@@ -3330,16 +3834,37 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/jyO3-rF4Mu0/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/jyO3-rF4Mu0/maxresdefault.jpg",
     "title": "Growing games with Google",
     "summary": "The games industry has never been more promising and full of opportunities. This talk covers how Google is helping developers across a broad range of existing and emerging platforms.",
     "tags":["io15","android", "googleplay","games"],
     "keywords":["Google I/O","google play","games"],
     "type":"youtube"
-  }
+  },
+  {
+    "url":"https://www.youtube.com/watch?v=yJisuP94lHU",
+    "image": "images/distribute/hero-playtime-opener.jpg",
+    "title": "Playtime 2015: Innovation happens everywhere",
+    "type":"Video",
+    "tags":["googleplay"],
+    "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
+  },
+{
+    "url":"https://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "image": "images/distribute/hero-acquisition-devbyte.jpg",
+    "title": "User acquisition and tracking on Google Play",
+    "type" : "Video",
+    "tags" : "users,googleplay,googleio",
+    "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
+  },
 ]);
 
 var CAROUSEL_OVERRIDE = {
+  "distribute/googleplay/guide.html": {
+    "image": "images/distribute/hero-secrets-to-app-success.jpg",
+    "title": "The Secrets to App Success on Google Play",
+    "summary": "Get the updated guide full of useful features, tips, and best practices that will help you grow a successful app or game business on Google Play.",
+  },
   "about/versions/lollipop.html": {
     "image": "images/home/hero-lollipop_2x.png",
     "heroColor": "#263238",
@@ -3347,58 +3872,33 @@ var CAROUSEL_OVERRIDE = {
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
-  "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
-    "url":"http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-jelly-button.jpg",
-    "title": "How Jelly Button Games are growing globally through data",
-    "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery.",
+  "http://www.youtube.com/watch?v=Pms0pcyPbAM": {
+    "url":"https://www.youtube.com/watch?v=Pms0pcyPbAM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c]",
+    "image": "images/distribute/hero-carousel-giftedmom.jpg",
+    "title": "Gifted Mom reaches more mothers across Africa with Android",
+    "type":"youtube",
+    "summary": "Gifted Mom is an app developed in Cameroon which provides users with critical information about pregnancy, breastfeeding and child vaccinations. Hear the creators explain how they built their business on Google Play.",
   },
-  "http://www.youtube.com/watch?v=700gYRkhkLM": {
-    "url":"http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-outfit7.jpg",
-    "title": "Outfit7 — Building an entertainment company with Google",
-    "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories....",
+  "http://www.youtube.com/watch?v=9m6MoBM-sFI": {
+    "url":"https://www.youtube.com/watch?v=9m6MoBM-sFI&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=3",
+    "image": "images/distribute/hero-carousel-sgn.jpg",
+    "title": "SGN increases installs with Store Listing Experiments",
+    "type" : "youtube",
+    "summary": "Watch mobile game developer SGN talk about how using Store Listing Experiments to test multiple variants across their portfolio of games helped improve their ROI, conversion rates and gamer retention.",
   },
-  "http://www.youtube.com/watch?v=MPnH7h12h0U": {
-    "url":"http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-haystack.jpg",
-    "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen.",
+  "http://www.youtube.com/watch?v=e7t3svG9PTk": {
+    "url":"https://www.youtube.com/watch?v=e7t3svG9PTk&index=2&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-carousel-djit.jpg",
+    "title": "DJiT builds higher quality experiences on Android",
+    "type" : "youtube",
+    "summary": "Learn how Music app developer DJiT create higher quality apps with improved latency on Android Marshmallow, as well as other Android and Google Play features.",
   },
-  "http://www.youtube.com/watch?v=ekxABqJeRBc": {
-    "url":"http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-ginlemon.jpg",
-    "title": "How GinLemon is breaking through with Google Play",
-    "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy.",
-  },
-  "distribute/googleplay/guide.html": {
-    "heroColor": "#fcb94e",
-    "image": "images/distribute/hero-g-play-guidebooks_2x.png",
-    "title": "Finding success on Google Play",
-    "summary": "We’ve created a downloadable guide to help you find success with your app or game business on Google Play. In it, you’ll find features, tips, and best practices to help you build an effective strategy.",
-  },
-  "http://www.youtube.com/watch?v=0r36OJaeMo4": {
-    "url":"http://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-shifty-jelly.jpg",
-    "title": "Shifty Jelly — building a number 1 podcast app",
-    "summary": "Shifty Jelly is an Adelaide based mobile development company that has seen great success building Pocket Casts, a premium podcast manager app.",
-  },
-  "http://www.youtube.com/watch?v=1Iw7Tg_afKk": {
-    "image": "images/distribute/hero-wooga.jpg",
-    "url":"http://www.youtube.com/watch?v=1Iw7Tg_afKk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "title": "Wooga’s fast iterations on Google Play",
-    "summary": "The speed at which Wooga is able to iterate its live and under development games with the Android and Google Play tools has been key to delivering hits such as Diamond Dash, Jelly Splash, and Agent Alice.",
-  },
-  "http://www.youtube.com/watch?v=TieksFvD-7o": {
-    "url":"http://www.youtube.com/watch?v=TieksFvD-7o&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-trello.jpg",
-    "title": "Trello lifts engagement by double digits with material design",
-    "summary": "Trello recently redesigned their collaborative planning app using the material design guidelines, and their efforts paid off.",
-  },
-  "http://www.youtube.com/watch?v=MCoh4Pxs_ok": {
-    "url":"http://www.youtube.com/watch?v=MCoh4Pxs_ok&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-the-hunt.jpg",
-    "title": "The Hunt — growing engagement with material design and Google Play",
-    "summary": "Material design has helped The Hunt to enhance engagement in their style advice and product discovery app. ",
+  "http://www.youtube.com/watch?v=J3IvOfvH1ys": {
+    "url":"https://www.youtube.com/watch?v=J3IvOfvH1ys&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=1",
+    "image": "images/distribute/hero-carousel-wego.jpg",
+    "title": "Wego increases user retention with material design",
+    "type" : "youtube",
+    "summary": "Hear how online travel marketplace Wego, increased monthly user retention by 300% and reduced uninstall rates by up to 25% with material design.",
   },
   "https://www.youtube.com/watch?v=QDM52bblwlg": {
     "url":"distribute/googleplay/families/about.html",

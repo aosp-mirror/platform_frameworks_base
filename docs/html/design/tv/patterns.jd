@@ -39,9 +39,10 @@ in Get Started with TV Apps for more information.</p>
 <h2 id="recommendation">Recommendations</h2>
 
 <p>The first row of the Android TV home screen displays cards for content recommended by applications.
-Your application provides these recommendations, as described in <a href="{@docRoot}training/tv/discovery/recommendations.html">
-</a>. For a visual overview of recommendations, see <a href="design/tv/index.html#recommendations">
-Design for Android TV</a>.</p>
+Your application provides these recommendations, as described in
+<a href="{@docRoot}training/tv/discovery/recommendations.html">Recommending TV Content</a>.
+For a visual overview of recommendations, see
+<a href="{@docRoot}design/tv/index.html#recommendations">Designing for Android TV</a>.</p>
 
 <div class="cols">
   <div class="col-8 with-callouts">
@@ -75,7 +76,7 @@ row and fills the Android TV home screen when the user selects the recommendatio
 should be different than the one provided for the large icon, and meet the following specifications:</p>
 
 <ul>
-  <li>Measure 2016 x 1134 pixels (1920 x 1080 plus 5% margin for for motion)</li>
+  <li>Measure 2016 x 1134 pixels (1920 x 1080 plus 5% margin for motion)</li>
   <li id="solid-background">Must not be transparent</li>
 </ul>
 
@@ -113,19 +114,23 @@ specifications:</p>
 
 <h4>Small icon</h4>
 
-<p>Recommendation cards include a small icon that is imposed over a colored background. The icon and
-background color display at 100% opacity when the card is selected, and at 50% opacity when not
-selected.</p>
+<p>Recommendation cards include a small icon that is imposed over a colored
+background. The icon and background color both display at 100% opacity when the card
+is selected and at 50% opacity when the card is not selected.</p>
 
 <img src="{@docRoot}design/tv/images/icon.png" alt="Recommendation icon examples" />
 
-<p>Here are the requirements for recommendation small icons:</p>
+<p>Here are the requirements for a small recommendation icon:</p>
 
 <ul>
-  <li>Flat image</li>
-  <li>Monocolor: size 16x16dp, white (#fff) icon with transparent background, PNG format</li>
-  <li>Graphics should be centered within the icon image</li>
+  <li>Visually flat graphic, monocolor, 16x16dp</li>
+  <li>Color <code>#eeeeee</code> with transparency</li>
+  <li>Graphic centered over transparent background</li>
+  <li>PNG file format</li>
 </ul>
+
+<p class="note"><strong>Note:</strong> The color value <code>#eeeeee</code> is actually a light
+gray, but it is used by the system to create a background which appears white.</p>
 
 <h2>Audio Feedback</h2>
 

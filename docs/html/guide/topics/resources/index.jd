@@ -1,6 +1,6 @@
 page.title=App Resources
 page.landing=true
-page.landing.intro=It takes more than just code to build a great app. Resources are the additional files and static content that your code uses, such as bitmaps, layout definitions, user interface strings, animation instructions, and more.  
+page.landing.intro=It takes more than just code to build a great app. Resources are the additional files and static content that your code uses, such as bitmaps, layout definitions, user interface strings, animation instructions, and more.
 page.landing.image=images/develop/resources.png
 page.image=/images/develop/resources.png
 page.metaDescription=Developer guide about how to use resources in your Android apps.
@@ -16,8 +16,8 @@ page.metaDescription=Developer guide about how to use resources in your Android 
 href="http://android-developers.blogspot.com/2011/07/new-tools-for-managing-screen-sizes.html">
       <h4>New Tools For Managing Screen Sizes</h4>
       <p>Android 3.2 includes new tools for supporting devices with a wide range of screen sizes.
-One important result is better support for a new size of screen; what is typically called a ?7-inch?
-tablet. This release also offers several new APIs to simplify developers? work in adjusting to
+One important result is better support for a new size of screen; what is typically called a "7-inch"
+tablet. This release also offers several new APIs to simplify developers' work in adjusting to
 different screen sizes.</p>
     </a>
 
@@ -27,7 +27,7 @@ different screen sizes.</p>
 difficult to design an app with a single predictable look and feel. We set out to improve this
 situation for the developer community in Ice Cream Sandwich and beyond.</p>
     </a>
-    
+
     <a
 href="http://android-developers.blogspot.com/2011/07/new-mode-for-apps-on-large-screens.html">
       <h4>New Mode for Apps on Large Screens</h4>
@@ -47,7 +47,7 @@ compatibility mode that makes these apps more usable on tablets.</p>
 resources and other features so your app can provide an optimized user experience on a variety of
 Android-compatible devices, using a single application package (APK).</p>
     </a>
-    
+
     <a href="http://developer.android.com/training/multiscreen/index.html">
       <h4>Designing for Multiple Screens</h4>
       <p>This class shows you how to implement a user interface that's optimized for several screen

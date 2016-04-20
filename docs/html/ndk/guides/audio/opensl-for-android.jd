@@ -1,0 +1,881 @@
+page.title=Native Audio: OpenSL ES&#8482; for Android
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#inherited">Features Inherited from the Reference Specification</a></li>
+        <li><a href="#ae">Android Extensions</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+This page provides details about how the NDK implementation of OpenSL ES™ differs
+from the reference specification for OpenSL ES 1.0.1. When using sample code from the
+specification, you may need to modify it to work on Android.
+</p>
+
+<h2 id="inherited">Features Inherited from the Reference Specification</h2>
+
+<p>
+The Android NDK implementation of OpenSL ES inherits much of the feature set from
+the reference specification, although with certain limitations.
+</p>
+
+<h3>Global entry points</h3>
+
+<p>
+OpenSL ES for Android supports all of the global entry points in the Android specification.
+These entry points include:
+</p>
+
+<ul>
+<li>{@code slCreateEngine}
+</li>
+<li>{@code slQueryNumSupportedEngineInterfaces}</code>
+</li>
+<li>{@code slQuerySupportedEngineInterfaces}</code>
+</li>
+</ul>
+
+<h3>Objects and interfaces</h3>
+
+<p>
+Table 1 shows which objects and interfaces the Android NDK implementation of
+OpenSL ES supports. Green cells indicate features available in this implementation.
+</p>
+
+<p class="table-caption" id="Objects-and-interfaces">
+  <strong>Table 1.</strong> Android NDK support for objects and interfaces.</p>
+<table>
+  <tr>
+    <th scope="col">Feature</th>
+    <th scope="col">Audio player</th>
+    <th scope="col">Audio recorder</th>
+    <th scope="col">Engine</th>
+    <th scope="col">Output mix</th>
+  </tr>
+  <tr>
+    <td>Bass boost</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Buffer queue</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Dynamic interface management</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Effect send</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Engine</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Environmental reverb</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Equalizer</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Metadata extraction</td>
+    <td>Yes: Decode to PCM</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Mute solo</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Object</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Play</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Playback rate</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Prefetch status</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Preset reverb</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Record</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Seek</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Virtualizer</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Volume</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Buffer queue data locator</td>
+    <td>Yes: Source</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>I/O device data locator</td>
+    <td>No</td>
+    <td>Yes: Source</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Output mix locator</td>
+    <td>Yes: Sink</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>URI data locator</td>
+    <td>Yes: Source</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  </table>
+
+The next section explains limitations of some of these features.
+
+<h3>Limitations</h3>
+
+<p>
+Certain limitations apply to the features in Table 1. These limitations
+represent differences from the reference specification. The rest of this section provides
+information about these differences.</p>
+
+<h4>Dynamic interface management</h4>
+
+<p>
+OpenSL ES for Android does not support {@code RemoveInterface} or
+{@code ResumeInterface}.
+</p>
+
+<h4>Effect combinations: environment reverb and preset reverb</h4>
+
+<p>
+You cannot have both environmental reverb and preset reverb on the same output mix.
+</p>
+<p>
+The platform might ignore effect requests if it estimates that the
+CPU load would be too high.
+</p>
+
+<h4>Effect send</h4>
+
+<p>
+<code>SetSendLevel()</code> supports a single send level per audio player.
+</p>
+
+<h4>Environmental reverb</h4>
+
+<p>
+Environmental reverb does not support the <code>reflectionsDelay</code>,
+<code>reflectionsLevel</code>, or <code>reverbDelay</code> fields of
+the <code>SLEnvironmentalReverbSettings</code> struct.
+</p>
+
+<h4>MIME data format</h4>
+
+<p>
+You can use the MIME data format only with the URI data locator, and only for an audio
+player. You cannot use this data format for an audio recorder.
+</p>
+<p>
+The Android implementation of OpenSL ES requires you to initialize <code>mimeType</code>
+to either <code>NULL</code> or a valid UTF-8 string. You must also initialize
+<code>containerType</code> to a valid value.
+In the absence of other considerations, such as portability to other
+implementations, or content format that an app cannot identify by header,
+we recommend that you
+set <code>mimeType</code> to <code>NULL</code> and <code>containerType</code>
+to <code>SL_CONTAINERTYPE_UNSPECIFIED</code>.
+</p>
+<p>
+OpenSL ES for Android supports the following audio formats, so long as the
+Android platform supports them as well:</p>
+
+<ul>
+<li>WAV PCM</li>
+<li>WAV alaw</li>
+<li>WAV ulaw</li>
+<li>MP3 Ogg Vorbis</li>
+<li>AAC LC</li>
+<li>HE-AACv1 (AAC+)</li>
+<li>HE-AACv2 (enhanced AAC+)</li>
+<li>AMR</li>
+<li>FLAC</li>
+</ul>
+
+<p>
+For a list of audio formats that Android supports, see
+<a href="{@docRoot}guide/appendix/media-formats.html">Supported Media Formats</a>.
+</p>
+
+<p>
+The following limitations apply to handling of these and other formats in this
+implementation of OpenSL ES:
+</p>
+
+<ul>
+<li>AAC formats must be reside within an MP4 or ADTS container.</li>
+<li>OpenSL ES for Android does not support MIDI.</li>
+<li>WMA is not part of <a class="external-link" href="https://source.android.com/">AOSP</a>, and we
+have not verified its compatibility with OpenSL ES for Android.</li>
+<li>The Android NDK implementation of OpenSL ES does not support direct
+playback of DRM or encrypted content. To play back protected audio content, you must
+decrypt it in your application before playing, with your app enforcing any DRM
+restrictions.</li>
+</ul>
+
+<h4>Object-related methods</h4>
+
+<p>
+OpenSL ES for Android does not support the following methods for manipulating objects:
+</p>
+
+<ul>
+<li>{@code Resume()}</li>
+<li>{@code RegisterCallback()}</li>
+<li>{@code AbortAsyncOperation()}</li>
+<li>{@code SetPriority()}</li>
+<li>{@code GetPriority()}</li>
+<li>{@code SetLossOfControlInterfaces()}</li>
+</ul>
+
+<h4>PCM data format</h4>
+
+<p>
+PCM is the only data format you can use with buffer queues. Supported PCM
+playback configurations have the following characteristics:
+</p>
+
+<ul>
+<li>8-bit unsigned or 16-bit signed.</li>
+<li>Mono or stereo.</li>
+<li>Little-endian byte ordering.</li>
+<li>Sample rates of: 8,000, 11,025, 12,000, 16,000, 22,050, 24,000, 32,000, 44,100, or
+48,000 Hz.</li>
+</ul>
+
+<p>
+The configurations that OpenSL ES for Android supports for recording are
+device-dependent; usually, 16,000 Hz mono 16-bit signed is available regardless of device.
+</p>
+<p>
+The value of the <code>samplesPerSec</code> field is in units of milliHz, despite the misleading
+name. To avoid accidentally using the wrong value, we recommend that you initialize this field using
+one of the symbolic constants defined for this purpose, such as {@code SL_SAMPLINGRATE_44_1}.
+</p>
+<p>
+Android 5.0 (API level 21) and above support <a href="#fp">floating-point data</a>.
+</p>
+
+<h4>Playback rate</h4>
+
+<p>
+An OpenSL ES <i>playback rate</i> indicates the speed at which an
+object presents data, expressed in thousandths of normal speed, or <i>per mille</i>. For example,
+a playback rate of 1,000 per mille is 1,000/1,000, or normal speed.
+A <i>rate range</i> is a closed interval that expresses possible rate ranges.
+</p>
+
+<p>
+Support for playback-rate ranges and other capabilities may vary depending
+on the platform version and implementation. Your app can determine these capabilities at runtime by
+using <code>PlaybackRate::GetRateRange()</code> or
+<code>PlaybackRate::GetCapabilitiesOfRate()</code> to query the device.
+</p>
+
+<p>
+A device typically supports the same rate range for a data source in PCM format, and a unity rate
+range of 1000 per mille to 1000 per mille for other formats: that is, the unity rate range is
+effectively a single value.
+</p>
+
+<h4>Record</h4>
+
+<p>
+OpenSL ES for Android does not support the <code>SL_RECORDEVENT_HEADATLIMIT</code>
+or <code>SL_RECORDEVENT_HEADMOVING</code> events.
+</p>
+
+<h4>Seek</h4>
+
+<p>
+The <code>SetLoop()</code> method enables whole-file looping. To enable looping,
+set the <code>startPos</code> parameter to 0, and the value of the <code>endPos</code> parameter
+to <code>SL_TIME_UNKNOWN</code>.
+</p>
+
+<h4>Buffer queue data locator</h4>
+
+<p>
+An audio player or recorder with a data locator for a buffer queue supports PCM data format only.
+</p>
+
+<h4>I/O Device data locator</h4>
+
+<p>
+OpenSL ES for Android only supports use of an I/O device data locator when you have
+specified the locator as the data source for <code>Engine::CreateAudioRecorder()</code>.
+Initialize the device data locator using the values contained in the following code snippet.
+</p>
+
+<pre>
+SLDataLocator_IODevice loc_dev =
+  {SL_DATALOCATOR_IODEVICE, SL_IODEVICE_AUDIOINPUT,
+  SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
+</pre>
+
+<h4>URI data locator</h4>
+
+<p>
+OpenSL ES for Android can only use the URI data locator with MIME data format,
+and only for an audio player. You cannot use this data format for an audio recorder. It supports
+{@code http:} and {@code file:} schemes. It does not support other schemes, such as {@code https:},
+{@code ftp:}, or
+{@code content:}.
+</p>
+
+<p>
+We have not verified support for {@code rtsp:} with audio on the Android platform.
+</p>
+
+<h2 id="ae">Android Extensions</h2>
+
+<p>
+OpenSL ES for Android extends the reference OpenSL ES specification to make it compatible with
+Android, and to take advantage of the power and flexibility of the Android platform.
+</p>
+
+<p>
+The definition of the API for the Android extensions resides in <code>OpenSLES_Android.h</code>
+and the header files that it includes. Consult {@code OpenSLES_Android.h}
+for details about these extensions. This file is located under your installation root, in the
+{@code platforms/android-&lt;version&gt;/&lt;abi&gt;/include/SLES} directory. Unless otherwise
+noted, all interfaces are explicit.
+</p>
+
+<p>
+These extensions limit your application's portability to
+other OpenSL ES implementations, because they are Android-specific. You can mitigate this issue by
+avoiding use of the extensions or by using {@code #ifdef} to exclude them at compile time.
+</p>
+
+<p>
+Table 2 shows the Android-specific interfaces and data locators that Android OpenSL ES supports
+for each object type. Green cells indicate interfaces and data locators available for each
+object type.
+</p>
+
+<p class="table-caption" id="Android-extensions">
+  <strong>Table 2.</strong> Interfaces and data locators, by object type.</p>
+<table>
+  <tr>
+    <th scope="col">Feature</th>
+    <th scope="col">Audio player</th>
+    <th scope="col">Audio recorder</th>
+    <th scope="col">Engine</th>
+    <th scope="col">Output mix</th>
+  </tr>
+  <tr>
+    <td>Android buffer queue</td>
+    <td>Yes: Source (decode)</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android configuration</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android effect</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Android effect capabilities</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android effect send</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android simple buffer queue</td>
+    <td>Yes: Source (playback) or sink (decode)</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android buffer queue data locator</td>
+    <td>Yes: Source (decode)</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android file descriptor data locator</td>
+    <td>Yes: Source</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+  <tr>
+    <td>Android simple buffer queue data locator</td>
+    <td>Yes: Source (playback) or sink (decode)</td>
+    <td>Yes: Sink</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+</table>
+
+<h3>Android configuration interface</h3>
+
+<p>
+The Android configuration interface provides a means to set
+platform-specific parameters for objects. This interface is different from other OpenSL ES
+1.0.1 interfaces in that your app can use it before instantiating the corresponding object; thus,
+you can configure the object before instantiating it. The
+{@code OpenSLES_AndroidConfiguration.h} header file</code>, which resides at
+{@code platforms/android-&lt;version&gt;/&lt;abi&gt;/include/SLES},
+documents the following available configuration keys and values:
+</p>
+
+<ul>
+<li>Stream type for audio players (default <code>SL_ANDROID_STREAM_MEDIA</code>).</li>
+<li>Record profile for audio recorders (default <code>SL_ANDROID_RECORDING_PRESET_GENERIC</code>).
+</li>
+</ul>
+
+<p>
+The following code snippet shows an example of how to set the Android audio stream type on an audio
+player:
+</p>
+
+<pre>
+// CreateAudioPlayer and specify SL_IID_ANDROIDCONFIGURATION
+// in the required interface ID array. Do not realize player yet.
+// ...
+SLAndroidConfigurationItf playerConfig;
+result = (*playerObject)-&gt;GetInterface(playerObject,
+    SL_IID_ANDROIDCONFIGURATION, &amp;playerConfig);
+assert(SL_RESULT_SUCCESS == result);
+SLint32 streamType = SL_ANDROID_STREAM_ALARM;
+result = (*playerConfig)-&gt;SetConfiguration(playerConfig,
+    SL_ANDROID_KEY_STREAM_TYPE, &amp;streamType, sizeof(SLint32));
+assert(SL_RESULT_SUCCESS == result);
+// ...
+// Now realize the player here.
+</pre>
+
+<p>
+You can use similar code to configure the preset for an audio recorder:
+</p>
+<pre>
+// ... obtain the configuration interface as the first four lines above, then:
+SLuint32 presetValue = SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION;
+result = (*playerConfig)-&gt;SetConfiguration(playerConfig,
+    RECORDING_PRESET, &amp;presetValue, sizeof(SLuint32));
+</pre>
+
+<h3>Android effects interfaces</h3>
+
+<p>
+Android's effect, effect send, and effect capabilities interfaces provide
+a generic mechanism for an application to query and use device-specific
+audio effects. Device manufacturers should document any available device-specific audio effects
+that they provide.
+</p>
+
+<h3>Android file descriptor data locator</h3>
+
+<p>
+The Android file descriptor data locator permits you to specify the source for an
+audio player as an open file descriptor with read access. The data format must be MIME.
+</p>
+<p>
+This extension is especially useful in conjunction with the native asset manager, because
+the app reads assets from the APK via a file descriptor.
+</p>
+
+<h3 id="simple">Android simple buffer queue data locator and interface</h3>
+
+<p>
+The Android simple buffer queue data locator and interface are
+identical to those in the OpenSL ES 1.0.1 reference specification, with two exceptions: You
+can also use Android simple buffer queues with both audio players and audio recorders.  Also, PCM
+is the only data format you can use with these queues.
+In the reference specification, buffer queues are for audio players only, but
+compatible with data formats beyond PCM.
+</p>
+<p>
+For recording, your app should enqueue empty buffers. When a registered callback sends
+notification that the system has finished writing data to the buffer, the app can
+read the buffer.
+</p>
+<p>
+Playback works in the same way. For future source code
+compatibility, however, we suggest that applications use Android simple
+buffer queues instead of OpenSL ES 1.0.1 buffer queues.
+</p>
+
+<h3>Dynamic interfaces at object creation</h3>
+
+<p>
+For convenience, the Android implementation of OpenSL ES 1.0.1
+permits your app to specify dynamic interfaces when it instantiates an object.
+This is an alternative to using <code>DynamicInterfaceManagement::AddInterface()</code>
+to add these interfaces after instantiation.
+</p>
+
+<h3>Buffer queue behavior</h3>
+
+<p>
+The Android implementation does not include the
+reference specification's requirement that the play cursor return to the beginning
+of the currently playing buffer when playback enters the {@code SL_PLAYSTATE_STOPPED}
+state. This implementation can conform to that behavior, or it can leave the location of the play
+cursor unchanged.
+</p>
+
+<p>
+As a result, your app cannot assume that either behavior occurs. Therefore,
+you should explicitly call the <code>BufferQueue::Clear()</code> method after a transition to
+<code>SL_PLAYSTATE_STOPPED</code>. Doing so sets the buffer queue to a known state.
+</p>
+
+<p>
+Similarly, there is no specification governing whether the trigger for a buffer queue callback must
+be a transition to <code>SL_PLAYSTATE_STOPPED</code> or execution of
+<code>BufferQueue::Clear()</code>. Therefore, we recommend against creating a dependency on
+one or the other; instead, your app should be able to handle both.
+</p>
+
+<h3>Reporting of extensions</h3>
+<p>
+There are three methods for querying whether the platform supports the Android extensions. These
+methods are:
+</p>
+
+<ul>
+<li><code>Engine::QueryNumSupportedExtensions()</code></li>
+<li><code>Engine::QuerySupportedExtension()</code></li>
+<li><code>Engine::IsExtensionSupported()</code></li>
+</ul>
+
+<p>
+Any of these methods returns <code>ANDROID_SDK_LEVEL_&lt;API-level&gt;</code>,
+where {@code API-level} is the platform API level; for example, {@code ANDROID_SDK_LEVEL_23}.
+A platform API level of 9 or higher means that the platform supports the extensions.
+</p>
+
+
+<h3 id="da">Decode audio to PCM</h3>
+
+<p>
+This section describes a deprecated Android-specific extension to OpenSL ES 1.0.1
+for decoding an encoded stream to PCM without immediate playback.
+The table below gives recommendations for use of this extension and alternatives.
+</p>
+
+<table>
+<tr>
+  <th>API level</th>
+  <th>Alternatives</th>
+</tr>
+<tr>
+  <td>13 and below</td>
+  <td>An open-source codec with a suitable license.</td>
+</tr>
+<tr>
+  <td>14 to 15</td>
+  <td>An open-source codec with a suitable license.</td>
+</tr>
+<tr>
+  <td>16 to 20</td>
+  <td>
+    The {@link android.media.MediaCodec} class or an open-source codec with a suitable license.
+  </td>
+</tr>
+<tr>
+  <td>21 and above</td>
+  <td>
+    NDK MediaCodec in the {@code &lt;media/NdkMedia*.h&gt;} header files, the
+    {@link android.media.MediaCodec} class, or an open-source codec with a suitable license.
+  </td>
+</tr>
+</table>
+
+<p>
+A standard audio player plays back to an audio device, specifying the output mix as the data sink.
+The Android extension differs in that an audio player instead
+acts as a decoder if the app has specified the data source either as a URI or as an Android
+file descriptor data locator described in MIME data format. In such a case, the data sink is
+an Android simple buffer queue data locator with PCM data format.
+</p>
+
+<p>
+This feature is primarily intended for games to pre-load their audio assets when changing to a
+new game level, similar to the functionality that the {@link android.media.SoundPool} class
+provides.
+</p>
+
+<p>
+The application should initially enqueue a set of empty buffers in the Android simple
+buffer queue. After that, the app fills the buffers with with PCM data. The Android simple
+buffer queue callback fires after each buffer is filled. The callback handler processes
+the PCM data, re-enqueues the now-empty buffer, and then returns. The application is responsible for
+keeping track of decoded buffers; the callback parameter list does not include
+sufficient information to indicate which buffer contains data or which buffer to enqueue next.
+</p>
+
+<p>
+The data source implicitly reports the end of stream (EOS) by delivering a
+<code>SL_PLAYEVENT_HEADATEND</code> event at the end of the stream. After the app has decoded
+all of the data it received, it makes no further calls to the Android simple buffer queue callback.
+</p>
+<p>
+The sink's PCM data format typically matches that of the encoded data source
+with respect to sample rate, channel count, and bit depth. However, you can decode to a different
+sample rate, channel count, or bit depth.
+For information about a provision to detect the actual PCM format, see <a href="#meta">
+Determining the format of decoded PCM data via metadata</a>.
+</p>
+<p>
+OpenSL ES for Android's PCM decoding feature supports pause and initial seek; it does not support
+volume control, effects, looping, or playback rate.
+</p>
+<p>
+Depending on the platform implementation, decoding may require resources
+that cannot be left idle.  Therefore, we recommend that you make sure to provide
+sufficient numbers of empty PCM buffers; otherwise, the decoder starves. This may happen,
+for example, if your app returns from the Android simple buffer queue callback without
+enqueueing another empty buffer.  The result of decoder starvation is
+unspecified, but may include: dropping the decoded
+PCM data, pausing the decoding process, or terminating the decoder outright.
+</p>
+
+<p class="note"><strong>Note: </strong>
+To decode an encoded stream to PCM but not play back immediately, for apps running on
+Android 4.x (API levels 16&ndash;20), we recommend using the {@link android.media.MediaCodec} class.
+For new applications running on Android 5.0 (API level 21) or higher, we recommend using the NDK
+equivalent, {@code &lt;NdkMedia*.h&gt;}. These header files reside under
+the {@code media/} directory, under your installation root.
+</p>
+
+<h3>Decode streaming ADTS AAC to PCM</h3>
+
+<p>
+An audio player acts as a streaming decoder if the data source is an
+Android buffer queue data locator with MIME data format, and the data
+sink is an Android simple buffer queue data locator with PCM data format.
+Configure the MIME data format as follows:
+</p>
+
+<ul>
+<li>Container: {@code SL_CONTAINERTYPE_RAW}</li>
+<li>MIME type string: {@code SL_ANDROID_MIME_AACADTS}</li>
+</ul>
+
+<p>
+This feature is primarily intended for streaming media applications that
+deal with AAC audio but need to perform custom audio processing
+prior to playback.  Most applications that need to decode audio to PCM
+should use the method that <a href="#da">Decode audio to PCM</a> describes,
+as that method is simpler and handles more audio formats.  The technique described
+here is a more specialized approach, to be used only if both of these
+conditions apply:
+</p>
+
+<ul>
+<li>The compressed audio source is a stream of AAC frames contained in ADTS headers.
+</li>
+<li>The application manages this stream. The data is <em>not</em> located within
+a network resource whose identifier is a URI or within a local file whose identifier is
+a file descriptor.
+</li>
+</ul>
+
+<p>
+The application should initially enqueue a set of filled buffers in the Android buffer queue.
+Each buffer contains one or more complete ADTS AAC frames.
+The Android buffer queue callback fires after each buffer is emptied.
+The callback handler should refill and re-enqueue the buffer, and then return.
+The application need not keep track of encoded buffers; the callback parameter
+list includes sufficient information to indicate which buffer to enqueue next.
+The end of stream is explicitly marked by enqueuing an EOS item.
+After EOS, no more enqueues are permitted.
+</p>
+
+<p>
+We recommend that you make sure to provide full
+ADTS AAC buffers, to avoid starving the decoder. This may happen, for example, if your app
+returns from the Android buffer queue callback without enqueueing another full buffer.
+The result of decoder starvation is unspecified.
+</p>
+
+<p>
+In all respects except for the data source, the streaming decode method is the same as
+the one that <a href="#da">Decode audio to PCM</a> describes.
+</p>
+<p>
+Despite the similarity in names, an Android buffer queue is <em>not</em>
+the same as an <a href="#simple">Android simple buffer queue</a>. The streaming decoder
+uses both kinds of buffer queues: an Android buffer queue for the ADTS
+AAC data source, and an Android simple buffer queue for the PCM data
+sink.  For more information about the Android simple buffer queue API, see <a href="#simple">Android
+simple buffer queue data locator and interface</a>.
+For more information about the Android buffer queue API, see the {@code index.html} file in
+the {@code docs/Additional_library_docs/openmaxal/} directory under the installation root.
+</p>
+
+<h3 id="meta">Determining the format of decoded PCM data via metadata</h3>
+
+<p>
+The <code>SLMetadataExtractionItf</code> interface is part of the reference specification.
+However, the metadata keys that indicate the actual format of decoded PCM data are specific to
+Android. The <code>OpenSLES_AndroidMetadata.h</code> header file defines these metadata keys.
+This header file resides under your installation root, in the
+{@code platforms/android-&lt;version&gt;/&lt;abi&gt;/include/SLES} directory.
+</p>
+
+<p>
+The metadata key indices are available immediately after
+the <code>Object::Realize()</code> method finishes executing. However, the associated values are not
+available until after the app decodes the first encoded data.  A good
+practice is to query for the key indices in the main thread after calling the {@code
+Object::Realize} method, and to read the PCM format metadata values in the Android simple
+buffer queue callback handler when calling it for the first time. Consult the
+<a href="https://github.com/googlesamples/android-ndk">example code in the NDK package</a>
+for examples of working with this interface.
+</p>
+
+<p>
+Metadata key names are stable, but the key indices are not documented,
+and are subject to change.  An application should not assume that indices
+are persistent across different execution runs, and should not assume that
+multiple object instances share indices within the same run.
+</p>
+
+<h3 id="fp">Floating-point data</h3>
+
+<p>
+An app running on Android 5.0 (API level 21) and higher can supply data to an AudioPlayer in
+single-precision, floating-point format.
+</p>
+<p>
+In following example code, the {@code Engine::CreateAudioPlayer} method creates an audio player
+that uses floating-point data:
+</p>
+
+<pre>
+#include &lt;SLES/OpenSLES_Android.h&gt;
+...
+SLAndroidDataFormat_PCM_EX pcm;
+pcm.formatType = SL_ANDROID_DATAFORMAT_PCM_EX;
+pcm.numChannels = 2;
+pcm.sampleRate = SL_SAMPLINGRATE_44_1;
+pcm.bitsPerSample = 32;
+pcm.containerSize = 32;
+pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
+pcm.representation = SL_ANDROID_PCM_REPRESENTATION_FLOAT;
+...
+SLDataSource audiosrc;
+audiosrc.pLocator = ...
+audiosrc.pFormat = &amp;pcm;
+</pre>
