@@ -1678,7 +1678,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Checks if app was added or removed to the blacklist.
         if ((oldPolicy == POLICY_NONE && policy == POLICY_REJECT_METERED_BACKGROUND)
                 || (oldPolicy == POLICY_REJECT_METERED_BACKGROUND && policy == POLICY_NONE)) {
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
+            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 1, null)
                     .sendToTarget();
         }
     }
@@ -1970,10 +1970,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // ...but always persists the whitelist request.
             writePolicyLocked();
         }
-        if (mRestrictBackground && !oldStatus && needFirewallRules) {
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
-                    .sendToTarget();
-        }
+        int changed = (mRestrictBackground && !oldStatus && needFirewallRules) ? 1 : 0;
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, changed,
+                Boolean.TRUE).sendToTarget();
     }
 
     @Override
@@ -1983,10 +1982,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             changed = removeRestrictBackgroundWhitelistedUidLocked(uid, false, true);
         }
-        if (changed) {
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
-                    .sendToTarget();
-        }
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, changed ? 1 : 0,
+                Boolean.FALSE).sendToTarget();
     }
 
     /**
@@ -2924,10 +2921,40 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return true;
                 }
                 case MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED: {
+                    // MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED can be called in 2 occasions:
+                    // - when an app is whitelisted
+                    // - when an app is blacklisted
+                    //
+                    // Whether the internal listeners (INetworkPolicyListener implementations) or
+                    // app broadcast receivers are notified depend on the following rules:
+                    //
+                    // - App receivers are only notified when the app status changed (msg.arg2 = 1)
+                    // - Listeners are only notified when app was whitelisted (msg.obj is not null),
+                    //   since blacklist notifications are handled through MSG_RULES_CHANGED).
                     final int uid = msg.arg1;
+                    final boolean changed = msg.arg2 == 1;
+                    final Boolean whitelisted = (Boolean) msg.obj;
+
+                    if (whitelisted != null) {
+                        final int length = mListeners.beginBroadcast();
+                        for (int i = 0; i < length; i++) {
+                            // First notify internal listeners...
+                            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                            if (listener != null) {
+                                try {
+                                    listener.onRestrictBackgroundWhitelistChanged(uid,
+                                            whitelisted.booleanValue());
+                                } catch (RemoteException e) {
+                                }
+                            }
+                        }
+                        mListeners.finishBroadcast();
+                    }
+
                     final PackageManager pm = mContext.getPackageManager();
                     final String[] packages = pm.getPackagesForUid(uid);
-                    if (packages != null) {
+                    if (changed && packages != null) {
+                        // ...then notify apps listening to ACTION_RESTRICT_BACKGROUND_CHANGED
                         final int userId = UserHandle.getUserId(uid);
                         for (String packageName : packages) {
                             final Intent intent = new Intent(
@@ -2936,8 +2963,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                             mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
                         }
-                    } else {
-                        Slog.w(TAG, "no packages for uid " + uid);
                     }
                     return true;
                 }

@@ -89,6 +89,10 @@ public class DataSaverController {
                 }
             });
         }
+
+        @Override
+        public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
+        }
     };
 
     public interface Listener {
