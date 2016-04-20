@@ -16,8 +16,14 @@
 
 package android.webkit;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.content.Context;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Manages settings state for a WebView. When a WebView is first created, it
@@ -1362,18 +1368,32 @@ public abstract class WebSettings {
     public abstract boolean getOffscreenPreRaster();
 
     /**
+     * @hide
+     */
+    @IntDef(flag = true,
+            value = {
+                    MENU_ITEM_NONE,
+                    MENU_ITEM_SHARE,
+                    MENU_ITEM_WEB_SEARCH,
+                    MENU_ITEM_PROCESS_TEXT
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.PARAMETER, ElementType.METHOD})
+    private @interface MenuItemFlags {}
+
+    /**
      * Disables the action mode menu items according to {@code menuItems} flag.
      * @param menuItems an integer field flag for the menu items to be disabled.
      */
-    public abstract void setDisabledActionModeMenuItems(int menuItems);
+    public abstract void setDisabledActionModeMenuItems(@MenuItemFlags int menuItems);
 
     /**
      * Gets the action mode menu items that are disabled, expressed in an integer field flag.
      * The default value is {@link #MENU_ITEM_NONE}
      *
-     * @return all the disabled menu item flags combined with OR.
+     * @return all the disabled menu item flags combined with bitwise OR.
      */
-    public abstract int getDisabledActionModeMenuItems();
+    public abstract @MenuItemFlags int getDisabledActionModeMenuItems();
 
     /**
      * Used with {@link #setDisabledActionModeMenuItems}.
