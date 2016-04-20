@@ -48219,16 +48219,13 @@ package java.lang {
     method public static java.lang.Class<?> forName(java.lang.String, boolean, java.lang.ClassLoader) throws java.lang.ClassNotFoundException;
     method public A getAnnotation(java.lang.Class<A>);
     method public java.lang.annotation.Annotation[] getAnnotations();
-    method public T[] getAnnotationsByType(java.lang.Class<T>);
     method public java.lang.String getCanonicalName();
     method public java.lang.ClassLoader getClassLoader();
     method public java.lang.Class<?>[] getClasses();
     method public java.lang.Class<?> getComponentType();
     method public java.lang.reflect.Constructor<T> getConstructor(java.lang.Class<?>...) throws java.lang.NoSuchMethodException, java.lang.SecurityException;
     method public java.lang.reflect.Constructor<?>[] getConstructors() throws java.lang.SecurityException;
-    method public T getDeclaredAnnotation(java.lang.Class<T>);
     method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
-    method public T[] getDeclaredAnnotationsByType(java.lang.Class<T>);
     method public java.lang.Class<?>[] getDeclaredClasses();
     method public java.lang.reflect.Constructor<T> getDeclaredConstructor(java.lang.Class<?>...) throws java.lang.NoSuchMethodException, java.lang.SecurityException;
     method public java.lang.reflect.Constructor<?>[] getDeclaredConstructors() throws java.lang.SecurityException;
@@ -48259,7 +48256,6 @@ package java.lang {
     method public java.lang.Class<? super T> getSuperclass();
     method public synchronized java.lang.reflect.TypeVariable<java.lang.Class<T>>[] getTypeParameters();
     method public boolean isAnnotation();
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isAnonymousClass();
     method public boolean isArray();
     method public boolean isAssignableFrom(java.lang.Class<?>);
@@ -48802,10 +48798,10 @@ package java.lang {
   public class Package implements java.lang.reflect.AnnotatedElement {
     method public A getAnnotation(java.lang.Class<A>);
     method public java.lang.annotation.Annotation[] getAnnotations();
-    method public T[] getAnnotationsByType(java.lang.Class<T>);
-    method public java.lang.annotation.Annotation getDeclaredAnnotation(java.lang.Class<T>);
+    method public A[] getAnnotationsByType(java.lang.Class<A>);
+    method public A getDeclaredAnnotation(java.lang.Class<A>);
     method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
-    method public T[] getDeclaredAnnotationsByType(java.lang.Class<T>);
+    method public A[] getDeclaredAnnotationsByType(java.lang.Class<A>);
     method public java.lang.String getImplementationTitle();
     method public java.lang.String getImplementationVendor();
     method public java.lang.String getImplementationVersion();
@@ -48815,7 +48811,6 @@ package java.lang {
     method public java.lang.String getSpecificationTitle();
     method public java.lang.String getSpecificationVendor();
     method public java.lang.String getSpecificationVersion();
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isCompatibleWith(java.lang.String) throws java.lang.NumberFormatException;
     method public boolean isSealed();
     method public boolean isSealed(java.net.URL);
@@ -49514,12 +49509,8 @@ package java.lang.reflect {
     ctor protected AccessibleObject();
     method public T getAnnotation(java.lang.Class<T>);
     method public java.lang.annotation.Annotation[] getAnnotations();
-    method public T[] getAnnotationsByType(java.lang.Class<T>);
-    method public java.lang.annotation.Annotation getDeclaredAnnotation(java.lang.Class<T>);
     method public java.lang.annotation.Annotation[] getDeclaredAnnotations();
-    method public T[] getDeclaredAnnotationsByType(java.lang.Class<T>);
     method public boolean isAccessible();
-    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public static void setAccessible(java.lang.reflect.AccessibleObject[], boolean) throws java.lang.SecurityException;
     method public void setAccessible(boolean) throws java.lang.SecurityException;
   }
@@ -49527,11 +49518,11 @@ package java.lang.reflect {
   public abstract interface AnnotatedElement {
     method public abstract T getAnnotation(java.lang.Class<T>);
     method public abstract java.lang.annotation.Annotation[] getAnnotations();
-    method public abstract T[] getAnnotationsByType(java.lang.Class<T>);
-    method public abstract java.lang.annotation.Annotation getDeclaredAnnotation(java.lang.Class<T>);
+    method public default T[] getAnnotationsByType(java.lang.Class<T>);
+    method public default java.lang.annotation.Annotation getDeclaredAnnotation(java.lang.Class<T>);
     method public abstract java.lang.annotation.Annotation[] getDeclaredAnnotations();
-    method public abstract T[] getDeclaredAnnotationsByType(java.lang.Class<T>);
-    method public abstract boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
+    method public default T[] getDeclaredAnnotationsByType(java.lang.Class<T>);
+    method public default boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
   }
 
   public final class Array {
@@ -49595,6 +49586,7 @@ package java.lang.reflect {
     method public java.lang.String getName();
     method public short getShort(java.lang.Object) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException;
     method public java.lang.Class<?> getType();
+    method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isEnumConstant();
     method public boolean isSynthetic();
     method public void set(java.lang.Object, java.lang.Object) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException;
