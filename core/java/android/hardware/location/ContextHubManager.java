@@ -43,6 +43,12 @@ public final class ContextHubManager {
     private Handler mCallbackHandler;
 
     /**
+     * @deprecated Use {@code mCallback} instead.
+     */
+    @Deprecated
+    private ICallback mLocalCallback;
+
+    /**
      * An interface to receive asynchronous communication from the context hub.
      */
     public abstract static class Callback {
@@ -61,6 +67,24 @@ public final class ContextHubManager {
                 int hubHandle,
                 int nanoAppHandle,
                 ContextHubMessage message);
+    }
+
+    /**
+     * @deprecated Use {@link Callback} instead.
+     * @hide
+     */
+    @Deprecated
+    public interface ICallback {
+        /**
+         * Callback function called on message receipt from context hub.
+         *
+         * @param hubHandle Handle (system-wide unique identifier) of the hub of the message.
+         * @param nanoAppHandle Handle (unique identifier) for app instance that sent the message.
+         * @param message The context hub message.
+         *
+         * @see ContextHubMessage
+         */
+        void onMessageReceipt(int hubHandle, int nanoAppHandle, ContextHubMessage message);
     }
 
     /**
@@ -223,6 +247,20 @@ public final class ContextHubManager {
     }
 
     /**
+     * @deprecated Use {@link #registerCallback(Callback)} instead.
+     * @hide
+     */
+    @Deprecated
+    public int registerCallback(ICallback callback) {
+        if (mLocalCallback != null) {
+            Log.w(TAG, "Max number of local callbacks reached!");
+            return -1;
+        }
+        mLocalCallback = callback;
+        return 0;
+    }
+
+    /**
      * Set a callback to receive messages from the context hub
      *
      * @param callback Callback object
@@ -266,6 +304,19 @@ public final class ContextHubManager {
       return 0;
     }
 
+    /**
+     * @deprecated Use {@link #unregisterCallback(Callback)} instead.
+     * @hide
+     */
+    public synchronized int unregisterCallback(ICallback callback) {
+        if (callback != mLocalCallback) {
+            Log.w(TAG, "Cannot recognize local callback!");
+            return -1;
+        }
+        mLocalCallback = null;
+        return 0;
+    }
+
     private IContextHubCallback.Stub mClientCallback = new IContextHubCallback.Stub() {
         @Override
         public void onMessageReceipt(final int hubId, final int nanoAppId,
@@ -281,6 +332,12 @@ public final class ContextHubManager {
                             callback.onMessageReceipt(hubId, nanoAppId, message);
                         }
                     });
+                }
+            } else if (mLocalCallback != null) {
+                // we always ensure that mCallback takes precedence, because mLocalCallback is only
+                // for internal compatibility
+                synchronized (this) {
+                    mLocalCallback.onMessageReceipt(hubId, nanoAppId, message);
                 }
             } else {
                 Log.d(TAG, "Context hub manager client callback is NULL");
