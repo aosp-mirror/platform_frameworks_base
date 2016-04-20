@@ -29,15 +29,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="8dp"
-        android:paddingStart="8dp">
+        android:paddingStart="8dp"
+        android:animateLayoutChanges="true" >
 
         <!-- volume rows added and removed here! :-) -->
-        <LinearLayout
-                android:id="@+id/volume_row_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/volume_button_size"
-                android:orientation="vertical"/>
 
         <include layout="@layout/volume_zen_footer" />
 

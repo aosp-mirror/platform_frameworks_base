@@ -100,7 +100,6 @@ public class VolumeDialog implements TunerService.Tunable {
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
     private ViewGroup mDialogContentView;
-    private ViewGroup mVolumeRowContainer;
     private ImageButton mExpandButton;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private final SpTexts mSpTexts;
@@ -207,8 +206,6 @@ public class VolumeDialog implements TunerService.Tunable {
             }
         });
         mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
-        mVolumeRowContainer =
-                (ViewGroup) mDialogContentView.findViewById(R.id.volume_row_container);
         mExpanded = false;
         mExpandButton = (ImageButton) mDialogView.findViewById(R.id.volume_expand_button);
         mExpandButton.setOnClickListener(mClickExpand);
@@ -309,7 +306,7 @@ public class VolumeDialog implements TunerService.Tunable {
         if (!mRows.isEmpty()) {
             addSpacer(row);
         }
-        mVolumeRowContainer.addView(row.view);
+        mDialogContentView.addView(row.view, mDialogContentView.getChildCount() - 2);
         mRows.add(row);
     }
 
@@ -321,7 +318,7 @@ public class VolumeDialog implements TunerService.Tunable {
             if (i > 0) {
                 addSpacer(row);
             }
-            mVolumeRowContainer.addView(row.view);
+            mDialogContentView.addView(row.view, mDialogContentView.getChildCount() - 2);
         }
     }
 
@@ -332,7 +329,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 .getDimensionPixelSize(R.dimen.volume_slider_interspacing);
         final LinearLayout.LayoutParams lp =
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h);
-        mVolumeRowContainer.addView(v, lp);
+        mDialogContentView.addView(v, mDialogContentView.getChildCount() - 2, lp);
         row.space = v;
     }
 
@@ -613,8 +610,8 @@ public class VolumeDialog implements TunerService.Tunable {
             if (row.ss == null || !row.ss.dynamic) continue;
             if (!mDynamic.get(row.stream)) {
                 mRows.remove(i);
-                mVolumeRowContainer.removeView(row.view);
-                mVolumeRowContainer.removeView(row.space);
+                mDialogContentView.removeView(row.view);
+                mDialogContentView.removeView(row.space);
             }
         }
     }
