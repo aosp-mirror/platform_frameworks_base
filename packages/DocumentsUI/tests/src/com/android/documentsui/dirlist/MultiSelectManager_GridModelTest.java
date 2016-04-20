@@ -448,6 +448,11 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
             return false;
         }
 
+        @Override
+        public boolean hasView(int adapterPosition) {
+            return true;
+        }
+
         public static final class Item {
             public String name;
             public Rect rect;
