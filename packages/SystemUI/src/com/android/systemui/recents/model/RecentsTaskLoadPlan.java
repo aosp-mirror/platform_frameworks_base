@@ -196,7 +196,7 @@ public class RecentsTaskLoadPlan {
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
-            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false);
+            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false /* loadIfNotCached */);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&
@@ -256,7 +256,8 @@ public class RecentsTaskLoadPlan {
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null || isRunningTask) {
                     if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, true);
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
+                                true /* loadIfNotCached */);
                     } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
                         loadQueue.addTask(task);
                     }

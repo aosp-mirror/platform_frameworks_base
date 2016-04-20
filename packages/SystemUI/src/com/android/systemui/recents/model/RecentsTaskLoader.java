@@ -36,7 +36,9 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -623,5 +625,15 @@ public class RecentsTaskLoader {
                 mActivityInfoCache.remove(cn);
             }
         }
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.println(TAG);
+        writer.print(prefix); writer.println("Icon Cache");
+        mIconCache.dump(innerPrefix, writer);
+        writer.print(prefix); writer.println("Thumbnail Cache");
+        mThumbnailCache.dump(innerPrefix, writer);
     }
 }

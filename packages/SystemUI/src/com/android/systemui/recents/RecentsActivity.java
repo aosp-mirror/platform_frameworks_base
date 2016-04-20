@@ -777,6 +777,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         super.dump(prefix, fd, writer, args);
         EventBus.getDefault().dump(prefix, writer);
+        Recents.getTaskLoader().dump(prefix, writer);
 
         String id = Integer.toHexString(System.identityHashCode(this));
 
