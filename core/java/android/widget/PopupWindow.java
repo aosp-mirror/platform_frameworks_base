@@ -54,6 +54,8 @@ import java.lang.ref.WeakReference;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * <p>
@@ -1305,15 +1307,15 @@ public class PopupWindow {
     private PopupBackgroundView createBackgroundView(View contentView) {
         final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
         final int height;
-        if (layoutParams != null && layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (layoutParams != null && layoutParams.height == WRAP_CONTENT) {
+            height = WRAP_CONTENT;
         } else {
-            height = ViewGroup.LayoutParams.MATCH_PARENT;
+            height = MATCH_PARENT;
         }
 
         final PopupBackgroundView backgroundView = new PopupBackgroundView(mContext);
         final PopupBackgroundView.LayoutParams listParams = new PopupBackgroundView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, height);
+                MATCH_PARENT, height);
         backgroundView.addView(contentView, listParams);
 
         return backgroundView;
@@ -1328,14 +1330,14 @@ public class PopupWindow {
     private PopupDecorView createDecorView(View contentView) {
         final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
         final int height;
-        if (layoutParams != null && layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (layoutParams != null && layoutParams.height == WRAP_CONTENT) {
+            height = WRAP_CONTENT;
         } else {
-            height = ViewGroup.LayoutParams.MATCH_PARENT;
+            height = MATCH_PARENT;
         }
 
         final PopupDecorView decorView = new PopupDecorView(mContext);
-        decorView.addView(contentView, ViewGroup.LayoutParams.MATCH_PARENT, height);
+        decorView.addView(contentView, MATCH_PARENT, height);
         decorView.setClipChildren(false);
         decorView.setClipToPadding(false);
 
@@ -1522,11 +1524,15 @@ public class PopupWindow {
         // to fill in real width and height values.
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
-        if (width < 0) {
+        if (width == MATCH_PARENT) {
             width = displayFrame.right - displayFrame.left;
+        } else if (width == WRAP_CONTENT) {
+            width = mContentView.getMeasuredWidth();
         }
-        if (height < 0) {
+        if (height == MATCH_PARENT) {
             height = displayFrame.bottom - displayFrame.top;
+        } else if (height == WRAP_CONTENT) {
+            height = mContentView.getMeasuredHeight();
         }
 
 
