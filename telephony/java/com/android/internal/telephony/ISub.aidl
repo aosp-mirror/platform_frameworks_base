@@ -118,6 +118,17 @@ interface ISub {
     int setDisplayName(String displayName, int subId);
 
     /**
+     * Set Sim Provisioning Status by subscription ID
+     * @param simProvisionStatus with the subscription:
+     * {@See SubscriptionManager#SIM_PROVISIONED}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_COLD}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_OUT_OF_CREDIT}
+     * @param subId the unique SubInfoRecord index in database
+     * @return the number of records updated
+     */
+    int setSimProvisioningStatus(int simProvisioningStatus, int subId);
+
+    /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
