@@ -71,7 +71,7 @@ run during Direct Boot mode, such as triggering a scheduled alarm.</p>
 intent filter for <code>LOCKED_BOOT_COMPLETED</code>, in the app manifest:</p>
 
 <pre>
-&lt;receiever
+&lt;receiver
   android:directBootAware="true" &gt;
   ...
   &lt;intent-filter&gt;
