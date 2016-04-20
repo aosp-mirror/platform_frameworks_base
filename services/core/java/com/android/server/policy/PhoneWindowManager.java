@@ -404,8 +404,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
     volatile boolean mGoingToSleep;
+    volatile boolean mRecentsVisible;
+    volatile boolean mTvPictureInPictureVisible;
 
-    boolean mRecentsVisible;
     int mRecentAppsHeldModifiers;
     boolean mLanguageSwitchKeyPressed;
 
@@ -712,7 +713,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
-    private static final int MSG_REQUEST_TV_PICTURE_IN_PICTURE = 17;
+    private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 17;
     private static final int MSG_BACK_LONG_PRESS = 18;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
@@ -775,8 +776,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         requestTransientBars(targetBar);
                     }
                     break;
-                case MSG_REQUEST_TV_PICTURE_IN_PICTURE:
-                    requestTvPictureInPictureInternal();
+                case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
+                    showTvPictureInPictureMenuInternal();
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
@@ -1457,22 +1458,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void requestTvPictureInPicture(KeyEvent event) {
-        if (DEBUG_INPUT) Log.d(TAG, "requestTvPictureInPicture event=" + event);
-        mHandler.removeMessages(MSG_REQUEST_TV_PICTURE_IN_PICTURE);
-        Message msg = mHandler.obtainMessage(MSG_REQUEST_TV_PICTURE_IN_PICTURE);
+    private void showTvPictureInPictureMenu(KeyEvent event) {
+        if (DEBUG_INPUT) Log.d(TAG, "showTvPictureInPictureMenu event=" + event);
+        mHandler.removeMessages(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
+        Message msg = mHandler.obtainMessage(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
         msg.setAsynchronous(true);
         msg.sendToTarget();
     }
 
-    private void requestTvPictureInPictureInternal() {
-        try {
-            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-            if (statusbar != null) {
-                statusbar.requestTvPictureInPicture();
-            }
-        } catch (IllegalArgumentException e) {
-            Slog.e(TAG, "Cannot handle picture-in-picture key", e);
+    private void showTvPictureInPictureMenuInternal() {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.showTvPictureInPictureMenu();
         }
     }
 
@@ -3787,6 +3784,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
         mNavigationBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
         mRecentsVisible = (visibility & View.RECENT_APPS_VISIBLE) > 0;
+        mTvPictureInPictureVisible = (visibility & View.TV_PICTURE_IN_PICTURE_VISIBLE) > 0;
 
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.
@@ -5674,10 +5672,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             case KeyEvent.KEYCODE_WINDOW: {
                 if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
-                    if (!down) {
-                        requestTvPictureInPicture(event);
+                    if (mTvPictureInPictureVisible) {
+                        // Consumes the key only if picture-in-picture is visible
+                        // to show picture-in-picture control menu.
+                        // This gives a chance to the foreground activity
+                        // to customize PIP key behavior.
+                        if (!down) {
+                            showTvPictureInPictureMenu(event);
+                        }
+                        result &= ~ACTION_PASS_TO_USER;
                     }
-                    result &= ~ACTION_PASS_TO_USER;
                 }
                 break;
             }

@@ -41,8 +41,10 @@ import android.util.Pair;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.statusbar.tv.TvStatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,23 +227,11 @@ public class PipManager {
     }
 
     /**
-     * Request PIP.
-     * It could either start PIP if there's none, and show PIP menu otherwise.
+     * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
-    public void requestTvPictureInPicture() {
-        if (DEBUG) Log.d(TAG, "requestTvPictureInPicture()");
-        if (!isPipShown()) {
-            startPip();
-        } else if (mState == STATE_PIP_OVERLAY) {
+    public void showTvPictureInPictureMenu() {
+        if (mState == STATE_PIP_OVERLAY) {
             resizePinnedStack(STATE_PIP_MENU);
-        }
-    }
-
-    private void startPip() {
-        try {
-            mActivityManager.moveTopActivityToPinnedStack(FULLSCREEN_WORKSPACE_STACK_ID, mPipBounds);
-        } catch (RemoteException|IllegalArgumentException e) {
-            Log.e(TAG, "moveTopActivityToPinnedStack failed", e);
         }
     }
 
@@ -268,6 +258,7 @@ public class PipManager {
             mListeners.get(i).onPipActivityClosed();
         }
         mHandler.removeCallbacks(mClosePipRunnable);
+        updatePipVisibility(false);
     }
 
     /**
@@ -622,6 +613,7 @@ public class PipManager {
             for (int i = mListeners.size() - 1; i >= 0; i--) {
                 mListeners.get(i).onPipEntered();
             }
+            updatePipVisibility(true);
         }
 
         @Override
@@ -705,5 +697,12 @@ public class PipManager {
      */
     public PipRecentsOverlayManager getPipRecentsOverlayManager() {
         return mPipRecentsOverlayManager;
+    }
+
+    private void updatePipVisibility(boolean visible) {
+        TvStatusBar statusBar = ((SystemUIApplication) mContext).getComponent(TvStatusBar.class);
+        if (statusBar != null) {
+            statusBar.updatePipVisibility(visible);
+        }
     }
 }

@@ -2002,6 +2002,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 return true;
             }
+
+            case KeyEvent.KEYCODE_WINDOW: {
+                if (!event.isCanceled()) {
+                    enterPictureInPictureMode();
+                }
+                return true;
+            }
         }
 
         return false;
