@@ -87,11 +87,9 @@ implement watch faces. Browse the
 <a href="{@docRoot}reference/android/support/wearable/watchface/package-summary.html">API reference
 documentation</a> for the Wearable Support Library.</p>
 
-<h3 id="LibEclipse">Download the Wearable Support Library for Eclipse ADT</h3>
-
-<p>If you are using the ADT plugin for Eclipse, download the
-<a href="{@docRoot}shareables/training/wearable-support-lib.zip">Wearable Support Library</a> and
-include it as a dependency in your project.</p>
+<p class="note"><strong>Note:</strong> We recommend using <a
+href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development, as
+it provides project setup, library inclusion, and packaging conveniences.</p>
 
 <h3 id="Permissions">Declare Permissions</h3>
 

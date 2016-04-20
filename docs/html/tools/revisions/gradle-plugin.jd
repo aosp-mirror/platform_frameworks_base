@@ -36,10 +36,145 @@ plugin you are using, check the version declaration in the project-level
 <p>For a summary of known issues in Android Plugin for Gradle, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.5.0</a> <em>(November 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+      <li>Integrated the Data Binding Plugin into the Android Plugin for Gradle. To enable it, add
+        the following code to each per-project <code>build.gradle</code> file that uses the
+        plugin:</li>
+<pre>
+android {
+    dataBinding {
+        enabled = true
+    }
+}
+</pre>
+      <li>Added a new <a href="http://google.github.io/android-gradle-dsl/javadoc/1.5/" class="external-link">Transform API</a>
+       to allow third-party plugins to manipulate compiled <code>.class</code> files before they’re
+       converted to <code>.dex</code> files. The Transform API simplifies injecting custom class
+       manipulations while offering more flexibility regarding what you can manipulate. To insert a
+       transform into a build, create a new class implementing one of the <code>Transform</code>
+       interfaces, and register it with <code>android.registerTransform(theTransform)</code> or
+       <code>android.registerTransform(theTransform, dependencies)</code>. There’s no need to
+       wire tasks together. Note the following about the Transform API:</li>
+       <ul>
+        <li>A transform can apply to one or more of the following: the current project, subprojects,
+          and external libraries.</li>
+          <li>A transform must be registered globally, which applies them to all variants.</li>
+          <li>Internal code processing, through the Java Code Coverage Library (JaCoCo), ProGuard,
+            and MultiDex, now uses the Transform API. However, the Java Android Compiler Kit
+            (Jack) doesn’t use this API: only the <code>javac/dx</code> code path does.</li>
+          <li>Gradle executes the transforms in this order: JaCoCo, third-party plugins, ProGuard.
+          The execution order for third-party plugins matches the order in which the transforms are
+          added by the third party plugins; third-party plugin developers can't control the execution
+          order of the transforms through an API.</li>
+      </ul>
+      <li>Deprecated the <code>dex</code> getter from the <code>ApplicationVariant</code> class.
+        You can't access the <code>Dex</code> task through the variant API anymore because it’s now
+        accomplished through a transform. There's
+        currently no replacement for controlling the dex process.</li>
+      <li>Fixed incremental support for assets.</li>
+      <li>Improved MultiDex support by making it available for test projects, and
+        tests now automatically have the <code>com.android.support:multidex-instrumentation</code>
+        dependency.</li>
+      <li>Added the ability to properly fail a Gradle build and report the underlying error cause
+        when the Gradle build invokes asynchronous tasks and there’s a failure in the worker
+        process.</li>
+      <li>Added support for configuring a specific Application Binary Interface (ABI) in variants
+        that contain multiple ABIs.</li>
+      <li>Added support for a comma-separated list of device serial numbers for the
+        <code>ANDROID_SERIAL</code> environment variable when installing or running tests.</li>
+      <li>Fixed an installation failure on devices running Android 5.0 (API level 20) and higher
+        when the APK name contains a space.</li>
+      <li>Fixed various issues related to the Android Asset Packaging Tool (AAPT) error output.</li>
+      <li>Added JaCoCo incremental instrumentation support for faster incremental builds. The
+        Android Plugin for Gradle now invokes the JaCoCo instrumenter directly. To force a newer
+        version of the JaCoCo instrumenter, you need to add it as a build script dependency.</li>
+      <li>Fixed JaCoCo support so it ignores files that aren’t classes.</li>
+      <li>Added vector drawable support for generating PNGs at build time for backward-compatibility.
+        Android Plugin for Gradle generates PNGs for every vector drawable found in a resource
+        directory that doesn’t specify an API version or specifies an
+        <code>android:minSdkVersion</code> attribute of 20 or lower in the
+        <code>&lt;uses-sdk&gt;</code> element in the app manifest. You can set PNG densities by
+        using the <code>generatedDensities</code> property in the <code>defaultConfig</code> or
+        <code>productFlavor</code> sections of a <code>build.gradle</code> file.</li>
+      <li>Added sharing of the mockable <code>android.jar</code>, which the plugin generates only
+        once and uses for unit testing. Multiple modules, such as <code>app</code> and
+        <code>lib</code>, now share it. Delete <code>$rootDir/build</code> to regenerate it. </li>
+      <li>Changed the processing of Java resources to occur before the obfuscation tasks instead of
+        during the packaging of the APK. This change allows the obfuscation tasks to have a chance
+        to adapt the Java resources following packages obfuscation.</li>
+      <li>Fixed an issue with using Java Native Interface (JNI) code in the experimental library
+        plugin.</li>
+      <li>Added the ability to set the platform version separately from the
+        <code>android:compileSdkVersion</code> attribute in the experimental library
+        plugin.</li>
+     </ul>
+    </dd>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.3.1</a> <em>(August 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+      <li>Fixed the <a href="{@docRoot}tools/help/zipalign.html">ZipAlign</a> task to properly
+        consume the output of the previous task when using a customized filename. </li>
+      <li>Fixed <a href="{@docRoot}guide/topics/renderscript/compute.html">Renderscript</a>
+        packaging with the <a href="{@docRoot}tools/sdk/ndk/index.html">NDK</a>. </li>
+      <li>Maintained support for the <code>createDebugCoverageReport</code> build task. </li>
+      <li>Fixed support for customized use of the <code>archiveBaseName</code> property
+        in the <code>build.gradle</code> build> file. </li>
+      <li>Fixed the <code>Invalid ResourceType</code>
+        <a href="{@docRoot}tools/help/lint.html">lint</a> warning caused by parameter method
+        annotation lookup when running
+        <a href="{@docRoot}tools/help/lint.html">lint</a> outside of Android Studio.</li>
+     </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.3.0</a> <em>(July 2015)</em>
   </p>
 
@@ -139,7 +274,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.2.0</a> <em>(April 2015)</em>
   </p>
 
@@ -206,7 +341,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.3</a> <em>(March 2015)</em>
   </p>
 
@@ -236,7 +371,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.2</a> <em>(February 2015)</em>
   </p>
 
@@ -268,7 +403,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.1</a> <em>(February 2015)</em>
   </p>
 
@@ -305,7 +440,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -375,7 +510,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.0.1</a> <em>(January 2015)</em>
   </p>
 
@@ -416,7 +551,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.0.0</a> <em>(December 2014)</em>
   </p>
 
@@ -449,9 +584,9 @@ android {
 
 <h2>Updating the Android Plugin for Gradle Version</h2>
 <p>The Android Plugin for Gradle version is specified in the
-<strong>File &gt; Project Structure</strong> menu or the project-level
+<strong>File &gt; Project Structure &gt; Project</strong> menu and the project-level
 <code>build.gradle</code> file. The plugin version applies to all modules built in that
-Android Studio project. This example updates the Android Plugin for Gradle to version 1.1.0:
+Android Studio project. This example sets the Android Plugin for Gradle to version 1.1.0 from the <code>build.gradle</code> file:
 <pre>
 ...
      dependencies {
@@ -465,8 +600,8 @@ Android Studio project. This example updates the Android Plugin for Gradle to ve
 version numbers. Using this feature can cause unexpected version updates and difficulty
 resolving version differences. </p>
 
-<p>If you're building with Gradle but using not Android Studio, the build process downloads the
-latest Android Plugin for Gradle plugin when it runs. </p>
+<p>If you're building with Gradle but not using Android Studio, the build process downloads the
+latest Android Plugin for Gradle when it runs. </p>
 
 
 
@@ -474,8 +609,8 @@ latest Android Plugin for Gradle plugin when it runs. </p>
 
 <p>Android Studio requires Gradle version 2.2.1 or later. To view and
 update the Gradle version, edit the Gradle distribution reference in the
-<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example shows the
-Android Plugin for Gradle version set to 2.2.1.</p>
+<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example sets the
+Gradle version to 2.2.1.</p>
 
 <pre>
 ...
@@ -483,14 +618,6 @@ distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
 ...
 </pre>
 
-
-
-
 <p>For more details about the supported Android Plugin for Gradle properties and syntax, click
 the link to the
 <a href="{@docRoot}tools/building/plugin-for-gradle.html">Plugin Language Reference</a>.</p>
-
-
-
-
-

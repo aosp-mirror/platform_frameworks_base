@@ -228,6 +228,27 @@ supported by Android TV.</p>
   design guide.
 </p>
 
+<h3 id="transition-color">Change the launcher color</h3>
+
+<p>When a TV app launches, the system displays an animation that resembles an expanding, filled
+  circle. To customize the color of this animation, set the <code>android:colorPrimary</code>
+  attribute of your TV app or activity to a specific color. You should also set two additional
+  transition overlap attributes to <code>true</code>, as shown in the following snippet from a
+  theme resource XML file:</p>
+
+<pre>
+&lt;resources&gt;
+    &lt;style ... &gt;
+      &lt;item name="android:colorPrimary"&gt;&#64;color/primary&lt;/item&gt;
+      &lt;item name="android:windowAllowReturnTransitionOverlap"&gt;true&lt;/item&gt;
+      &lt;item name="android:windowAllowEnterTransitionOverlap"&gt;true&lt;/item&gt;
+    &lt;/style&gt;
+&lt;/resources&gt;
+</pre>
+
+<p>For more information about working with themes and styles, see
+<a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
+
 <h2 id="tv-libraries">Add TV Support Libraries</h3>
 
 <p>
@@ -346,7 +367,5 @@ supported by Android TV.</p>
   For more information about using emulators see, <a href="{@docRoot}tools/devices/emulator.html">
   Using the Emulator</a>. For more information on deploying apps from Android Studio to virtual
   devices, see <a href="{@docRoot}sdk/installing/studio-debug.html">Debugging with Android
-  Studio</a>. For more information about deploying apps to emulators from Eclipse with ADT, see
-  <a href="{@docRoot}tools/building/building-eclipse.html">Building and Running from Eclipse with
-  ADT</a>.
+  Studio</a>.
 </p>

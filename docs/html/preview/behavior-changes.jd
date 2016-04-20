@@ -1,442 +1,529 @@
 page.title=Behavior Changes
 page.keywords=preview,sdk,compatibility
-sdk.platform.apiLevel=MNC
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
 @jd:body
+
 
 <div id="qv-wrapper">
 <div id="qv">
 
 <h2>In this document</h2>
 
-<ol id="toc44" class="hide-nested">
-    <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
-    <li><a href="#behavior-power">Power-Saving Optimizations</a></li>
-    <li><a href="#behavior-adoptable-storage">Adoptable Storage Devices</a></li>
-    <li><a href="#behavior-apache-http-client">Apache HTTP Client Removal</a></li>
-    <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
-    <li><a href="#behavior-notifications">Notifications</a></li>
-    <li><a href="#behavior-test-selection">Text Selection</a></li>
-    <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
-    <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
-    <li><a href="#behavior-camera">Camera Service Changes</a></li>
-    <li><a href="#behavior-runtime">Runtime</a></li>
-    <li><a href="#behavior-hardware-id">Access to Hardware Identifier</a></li>
-    <li><a href="#behavior-apk-validation">APK Validation</a></li>
-    <li><a href="#behavior-usb">USB Connection</a></li>
-    <li><a href="#behavior-afw">Android for Work Changes</a></li>
-</ol>
-
-<h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}preview/download.html">API level 22 to M Preview &raquo;</a> </li>
+  <li><a href="#perf">Performance Improvements</a>
+    <ol>
+      <li><a href="#doze">Doze</a></li>
+      <li><a href="#bg-opt">Background Optimizations</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">Permissions Changes</a>
+    <ol>
+      <li><a href="#permfilesys">File System Permission Changes</a></li>
+    </ol>
+  </li>
+  <li><a href="#accessibility">Accessibility Improvements</a>
+    <ol>
+      <li><a href="#screen-zoom">Screen Zoom</a></li>
+      <li><a href="#vision-settings">Vision Settings in Setup Wizard</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">NDK Apps Linking to Platform Libraries</a></li>
+  <li><a href="#afw">Android for Work</a></li>
 </ol>
-
 
 <h2>See Also</h2>
 <ol>
-<li><a href="{@docRoot}preview/api-overview.html">M Developer Preview API Overview</a> </li>
+  <li><a href="{@docRoot}preview/api-overview.html">
+    Android N API Overview</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>Along with new features and capabilities, the M Developer Preview includes a variety of
-system changes and API behavior changes. This document highlights
-some of the key changes that you should understand and account for in your apps.</p>
 
-<p>If you have previously published an app for Android, be aware that these changes in the
-platform affect your app.</p>
-
-<h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
-<p>This preview introduces a new permissions model, where users can now directly manage
-app permissions at runtime. This model gives users improved visibility and control over
-permissions, while streamlining the installation and auto-update processes for app developers.
-Users can grant or revoke permissions individually for installed apps. </p>
-
-<p>On your apps that target the M Preview release or higher, make sure to check for and request
-permissions at runtime. To determine if your app has been granted a permission, call the
-new {@link android.content.Context#checkSelfPermission(java.lang.String) checkSelfPermission()}
-method. To request a permission, call the new
-{@link android.app.Activity#requestPermissions(java.lang.String[], int) requestPermissions()}
-method. Even if your app is not targeting the M Preview release, you should test your app under
-the new permissions model.</p>
-
-<p>For details on supporting the new permissions model in your app, see the
-<a href="{@docRoot}preview/features/runtime-permissions.html">
-Permissions</a> developer preview page. For tips on how to assess the impact on your app,
-see the <a href="{@docRoot}preview/testing/guide.html#runtime-permissions">Testing Guide</a></p>
-
-<h2 id="behavior-power">Power-Saving Optimizations</h2>
-<p>This preview introduces new power-saving optimizations for idle devices and apps.</p>
-<ul>
-<li><strong>Doze</strong>: If a user unplugs a device and leaves it stationary, with its screen off,
-for a period of time, the device goes into <em>Doze</em> mode, where it attempts to keep the system
-in a sleep state. In this mode, devices periodically resume normal operations for brief periods of
-time so that app syncing can occur and the system can perform any pending operations.
-<li><strong>App Standby</strong>: App Standby allows the system to determine that an app is idle
-when the user is not actively using it. The system makes this determination when the user does not
-touch the app for a certain period of time. If the device is unplugged, the system disables network
-access and suspends syncs and jobs for the apps it deems idle.</li>
-</ul>
-
-<p>To learn more about these power-saving changes, see
-<a href="{@docRoot}preview/features/power-mgmt.html">Power-Saving Optimizations</a>.</p>
-
-<h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
 <p>
-With this preview, users can <em>adopt</em> external storage devices such as SD cards. Adopting an
-external storage device encrypts and formats the device to behave like internal storage. This
-feature allows users to move both apps and private data of those apps between storage devices. When
-moving apps, the system respects the
-<a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code android:installLocation}</a>
-preference in the manifest.</p>
+  Along with new features and capabilities, Android N
+  includes a variety of system and API behavior changes. This document
+  highlights some of the key changes that you should understand and account for
+  in your apps.
+</p>
 
-<p>If your app accesses the following APIs or fields, be aware that the file paths they return
-will dynamically change when the app is moved between internal and external storage devices.
-When building file paths, it is strongly recommended that you always call these APIs dynamically.
-Don’t use hardcoded file paths or persist fully-qualified file paths that were built previously.</p>
+<p>
+  If you have previously published an app for Android, be aware that your app
+  might be affected by these changes in the platform.
+</p>
+
+
+<h2 id="perf">Performance Improvements</h2>
+
+<p>
+  Android N contains system behavior changes aimed at improving the battery
+  life of devices, RAM usage, and app performance. These changes can impact the
+  availability of system resources and system notifications to your app. You
+  should review these changes and evaluate how your app may need to adjust to
+  them.
+</p>
+
+<h3 id="doze">Doze</h3>
+
+<p>
+  Introduced in Android 6.0 (API level 23), Doze improves battery life by
+  deferring CPU and network activities when a user leaves a device unplugged,
+  stationary, and with the screen turned off. Android N brings further
+  enhancements to Doze by applying a subset of CPU and network restrictions
+  while the device is unplugged with the screen turned off, but not necessarily
+  stationary, for example, when a handset is traveling in a user’s pocket.
+</p>
+
+
+<img src="{@docRoot}preview/images/doze-diagram-1.png"
+  alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Illustration of how Doze applies a first level of
+  system activity restrictions to improve battery life.
+</p>
+
+<p>
+  When a device is on battery power, and the screen has been off for a certain
+  time, the device enters Doze and applies the first subset of restrictions: It
+  shuts off app network access, and defers jobs and syncs. If the device is
+  stationary for a certain time after entering Doze, the system applies the
+  rest of the Doze restrictions to {@link android.os.PowerManager.WakeLock},
+  {@link android.app.AlarmManager} alarms, GPS, and Wi-Fi scans. Regardless of
+  whether some or all Doze restrictions are being applied, the system wakes the
+  device for brief maintenance windows, during which applications are allowed
+  network access and can execute any deferred jobs/syncs.
+</p>
+
+
+<img src="{@docRoot}preview/images/doze-diagram-2.png"
+  alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Illustration of how Doze applies a second level of
+  system activity restrictions after the device is stationary for a certain time.
+</p>
+
+<p>
+  Note that activating the screen on or plugging in the device exits Doze and
+  removes these processing restrictions. The additional behavior does not
+  affect recommendations and best practices in adapting your app to the prior
+  version of Doze introduced in Android 6.0 (API level 23), as discussed in
+  <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
+  Optimizing for Doze and App Standby</a>. You should still
+  follow those recommendations, such as using Google Cloud Messaging (GCM) to
+  send and receive messages, and start planning updates to accomodate the
+  additional Doze behavior.
+</p>
+
+
+<h3 id="bg-opt">Project Svelte: Background Optimizations</h3>
+
+<p>
+  Android N removes three implicit broadcasts in order to help optimize both
+  memory use and power consumption. This change is necessary because implicit
+  broadcasts frequently start apps that have registered to listen for them in
+  the background. Removing these broadcasts can substantially benefit device
+  performance and user experience.
+</p>
+
+<p>
+  Mobile devices experience frequent connectivity changes, such as when moving
+  between Wi-Fi and mobile data. Currently, apps can monitor for changes in
+  connectivity by registering a receiver for the implicit {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcast in their
+  manifest. Since many apps register to receive this broadcast, a single
+  network switch can cause them all to wake up and process the broadcast at
+  once.
+</p>
+
+<p>
+  Similarly, apps can register to receive implicit {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} and {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts from other apps, such as
+  Camera. When a user takes a picture with the Camera app, these apps wake up
+  to process the broadcast.
+</p>
+
+<p>
+  To alleviate these issues, Android N applies the following
+  optimizations:
+</p>
 
 <ul>
-<li>{@link android.content.Context} methods:
-    <ul>
-        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
-        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
-        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
-        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
-        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
-        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
-        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
-        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
-        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
-    </ul>
-</li>
-<li>{@link android.content.pm.ApplicationInfo} fields:
-    <ul>
-        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
-        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
-        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
-    </ul>
-</li>
+  <li>Apps targeting Android N do not receive {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
+  have manifest entries to request notification of these events. Apps running
+  in the foreground can still listen for {@code CONNECTIVITY_CHANGE} on their
+  main thread if they request notification with a {@link
+  android.content.BroadcastReceiver}.
+  </li>
+
+  <li>Apps cannot send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
+  affects all apps, not only those targeting Android N.
+  </li>
 </ul>
 
-<p>To debug this feature in the developer preview, you can enable adoption of a USB drive that is
-connected to an Android device through a USB On-The-Go (OTG) cable, by running this command:</p>
+<p>If your app uses any of these intents, you should remove dependencies
+  on them as soon as possible so that you can target Android N devices properly.
+  The Android framework provides several solutions to mitigate the need for
+  these implicit broadcasts. For example, the {@link
+  android.app.job.JobScheduler} API provides a robust mechanism to schedule
+  network operations when specified conditions, such as connection to an
+  unmetered network, are met. You can even use {@link
+  android.app.job.JobScheduler} to react to changes to content providers.
+</p>
 
-<pre class="no-prettyprint">
-$ adb shell sm set-force-adoptable true
+<p>
+  For more information about background optimizations in N and how to adapt your app,
+  see <a href=
+  "{@docRoot}preview/features/background-optimization.html">Background
+  Optimizations</a>.
+</p>
+
+
+<h2 id="perm">Permissions Changes</h2>
+
+<p>
+  Android N includes changes to permissions that may affect your app,
+  including user accounts permissions and a new permission for writing to
+  external storage. Here is a summary of the permissions that have changed in
+  the preview:
+</p>
+
+<ul>
+  <li>{@code GET_ACCOUNTS} (Deprecated)
+    <p>
+      The GET_ACCOUNTS permission is now deprecated. The system ignores this
+      permission for apps that target Android N.
+    </p>
+  </li>
+
+</ul>
+
+<h3 id="permfilesys">File system permission changes</h3>
+
+<p>
+  In order to improve the security of private files, the private directory of
+  apps targeting Android N or higher has restricted access (0700). This prevents
+  leakage of metadata of private files, such as their size or existence. This
+  has multiple side effects:
+</p>
+
+<ul>
+  <li>
+    Private files’ file permissions can no longer be relaxed by the owner, and
+    an attempt to do so using
+    {@link android.content.Context#MODE_WORLD_READABLE} and/or
+    {@link android.content.Context#MODE_WORLD_WRITEABLE}, will trigger a
+    {@link java.lang.SecurityException}.
+  </li>
+  <li>
+    Passing <code>file://</code> URIs outside the package domain may leave the
+    receiver with an unaccessible path. Therefore, attempts to pass a
+    <code>file://</code> URI trigger a
+    <code>FileUriExposedException</code>. The recommended way to share the
+    content of a private file is using the {@link
+    android.support.v4.content.FileProvider}.
+  </li>
+  <li>
+    The {@link android.app.DownloadManager} can no longer share privately
+    stored files by filename. Legacy applications may end up with an
+    unaccessible path when accessing {@link
+    android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Apps targeting
+    Android N or higher trigger a {@link java.lang.SecurityException} when
+    attempting to access
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
+    Legacy applications that set the download location to a public location by
+    using
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir} or
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir}
+    can still access the path in
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}, however, this
+    method is strongly discouraged. The preferred way of accessing a file
+    exposed by the {@link android.app.DownloadManager} is using
+    {@link android.content.ContentResolver#openFileDescriptor}.
+  </li>
+</ul>
+
+<h2 id="accessibility">Accessibility Improvements</h2>
+
+<p>
+  Android N includes changes intended to improve the usability of the
+  platform for users with low or impaired vision. These changes should
+  generally not require code changes in your app, however you should review
+  these feature and test them with your app to assess potential impacts to user
+  experience.
+</p>
+
+
+<h3 id="screen-zoom">Screen Zoom</h3>
+
+<p>
+  Android N enables users to set <strong>Display size</strong>which magnifies
+  or shrinks all elements on the screen, thereby improving device accessibility
+  for users with low vision. Users cannot zoom the screen past a minimum screen
+  width of <a href=
+  "http://developer.android.com/guide/topics/resources/providing-resources.html">
+  sw320dp</a>, which is the width of a Nexus 4, a common medium-sized phone.
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>Figure 3.</strong> The screen on the right shows the effect of
+  increasing the Display size of a device running an Android N system image.
+</p>
+
+
+<p>
+  When the device density changes, the system notifies running apps in the
+  following ways:
+</p>
+
+<ul>
+  <li>If an app targets API level 23 or lower, the system automatically kills
+  all its background processes. This means that if a user switches away from
+  such an app to open the <em>Settings</em> screen and changes the
+  <strong>Display size</strong> setting, the system kills the app in the same
+  manner that it would in a low-memory situation. If the app has any foreground
+  processes, the system notifies those processes of the configuration change as
+  described in <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling
+  Runtime Changes</a>, just as if the device's orientation had changed.
+  </li>
+
+  <li>If an app targets Android N, all of its processes
+  (foreground and background) are notified of the configuration change as
+  described in <a href=
+  "{@docRoot}guide/topics/resources/runtime-changes.html">Handling
+  Runtime Changes</a>.
+  </li>
+</ul>
+
+<p>
+  Most apps do not need to make any changes to support this feature, provided
+  the apps follow Android best practices. Specific things to check for:
+</p>
+
+<ul>
+  <li>Test your app on a device with screen width <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+  and be sure it performs adequately.
+  </li>
+
+  <li>When the device configuration changes, update any density-dependent
+  cached information, such as cached bitmaps or resources loaded from the
+  network. Check for configuration changes when the app resumes from the paused
+  state.
+    <p class="note">
+      <strong>Note:</strong> If you cache configuration-dependent data, it's a
+      good idea to include relevant metadata such as the appropriate screen
+      size or pixel density for that data. Saving this metadata allows you to
+      decide whether you need to refresh the cached data after a configuration
+      change.
+    </p>
+  </li>
+
+  <li>Avoid specifying dimensions with px units, since they do not scale with
+  screen density. Instead, specify dimensions with <a href=
+  "{@docRoot}guide/practices/screens_support.html">density-independent
+  pixel</a> (<code>dp</code>) units.
+  </li>
+</ul>
+
+<h3 id="vision-settings">Vision Settings in Setup Wizard</h3>
+
+<p>
+  Android N includes Vision Settings on the Welcome screen, where users can
+  set up the following accessibility settings on a new device:
+  <strong>Magnification gesture</strong>, <strong>Font size</strong>,
+  <strong>Display size</strong> and <strong>TalkBack</strong>. This change
+  increases the visibility of bugs related to different screen settings. To
+  assess the impact of this feature, you should test your apps with these
+  settings enabled. You can find the settings under <strong>Settings &gt;
+  Accessibility</strong>.
+</p>
+
+<h2 id="ndk">NDK Apps Linking to Platform Libraries</h2>
+
+<p>
+  Android N includes namespace changes to prevent loading of non-public APIs.
+  If you use the NDK, you should only be using public APIs from the Android
+  platform. Using non-public APIs in the next official release of Android
+  can cause your app to crash.
+</p>
+
+<p>
+  In order to alert you to use of non-public APIs, apps running on an Android N
+  device generate an error in logcat output when an app calls a non-public API.
+  This error is also displayed on the device screen as a message to help
+  raise awareness of this situation. You should review your app code to
+  remove use of non-public platform APIs and thoroughly test your apps using
+  a preview device or emulator.
+</p>
+
+<p>
+  If your app depends on platform libraries, see the NDK documentation for
+  typical fixes for replacing common private APIs with public API equivalents.
+  You may also be linking to platform libraries without realizing it,
+  especially if your app uses a library that is part of the platform (such as
+  <code>libpng</code>), but is not part of the NDK. In that case, ensure that
+  your APK contains all the .so files you intended to link against.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> Some third-party libraries may link to non-public
+  APIs. If your app uses these libraries, your app may crash when running
+  on the next official release of Android.
+</p>
+
+<p>
+  Apps should not depend on or use native libraries that are not included in
+  the NDK, because they may change, or be removed from one Android release to
+  another. The switch from OpenSSL to BoringSSL is an example of such a change.
+  Also, different devices may offer different levels of compatibility, because
+  there are no compatibility requirements for platform libraries not included
+  in the NDK. If you must access non-NDK libraries on older devices, make the
+  loading dependent on the Android API level.
+</p>
+
+<p>
+  To help you diagnose these types problems here are some example Java and NDK
+  errors you might encounter when attempting to build your app with Android N:
+</p>
+
+<p>Example Java error:</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
 </pre>
 
-<h2 id="behavior-apache-http-client">Apache HTTP Client Removal</h2>
-<p>This preview removes support for the Apache HTTP client. If your app is using this client and
-targets Android 2.3 (API level 9) or higher, use the {@link java.net.HttpURLConnection} class
-instead. This API is more efficient because it reduces network use through transparent compression
-and response caching, and minimizes power consumption. To continue using the Apache HTTP APIs, you
-must first declare the following compile-time dependency in your {@code build.gradle} file:
+<p>Example NDK error:</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  Here are some typical fixes for apps encountering these types of errors:
 </p>
+
+<ul>
+  <li>Use of getJavaVM and getJNIEnv from libandroid_runtime.so can be replaced
+  with standard JNI functions:
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>Use of {@code property_get} symbol from {@code libcutils.so} can be
+    replaced with the public {@code alternative __system_property_get}.
+   To do this, use {@code __system_property_get} with the following include:
 <pre>
-android {
-    useLibrary 'org.apache.http.legacy'
-}
+#include &lt;sys/system_properties.h&gt;
 </pre>
-<p>Android is moving away from OpenSSL to the
-<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
-library. If you’re using the Android NDK in your app, don't link against cryptographic libraries
-that are not a part of the NDK API, such as {@code libcrypto.so} and {@code libssl.so}. These
-libraries are not public APIs, and may change or break without notice across releases and devices.
-In addition, you may expose yourself to security vulnerabilities. Instead, modify your
-native code to call the Java cryptography APIs via JNI or to statically link against a
-cryptography library of your choice.</p>
+  </li>
 
-<h2 id="behavior-audiomanager-Changes">AudioManager Changes</h2>
-<p>Setting the volume directly or muting specific streams via the {@link android.media.AudioManager}
-class is no longer supported. The {@link android.media.AudioManager#setStreamSolo(int,boolean)
-setStreamSolo()} method is deprecated, and you should call the
-{@link android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int) requestAudioFocus()}
-method instead. Similarly, the
-{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} method is
-deprecated; instead, call the {@link android.media.AudioManager#adjustStreamVolume(int, int, int)
-adjustStreamVolume()} method and pass in the direction value
-{@link android.media.AudioManager#ADJUST_MUTE} or
-{@link android.media.AudioManager#ADJUST_UNMUTE}.</p>
+  <li>Use of {@code SSL_ctrl} symbol from {@code libcrypto.so} should be
+  replaced with an app local version. For example, you should statically link
+  {@code libcyrpto.a} in your {@code .so} file or include your own dynamically
+  {@code libcrypto.so} from BoringSSL or OpenSSL in your app.
+  </li>
+</ul>
 
-<h2 id="behavior-notifications">Notifications</h2>
+<h2 id="afw">Android for Work</h2>
 <p>
-This release removes the {@code Notification.setLatestEventInfo()} method. Use the
-{@link android.app.Notification.Builder} class instead to construct notifications. To update a
-notification repeatedly, reuse the {@link android.app.Notification.Builder} instance. Call the
-{@link android.app.Notification.Builder#build()} method to get
-updated {@link android.app.Notification} instances.
+  Android N contains changes for apps that target Android for Work, including
+  changes to certificate installation, password resetting, secondary user
+  management, and access to device identifiers. If you are building apps for
+  Android for Work environments, you should review these changes and modify
+  your app accordingly.
 </p>
-<p>The {@code adb shell dumpsys notification} command no longer prints out your notification text.
-Use the {@code adb shell dumpsys notification --noredact} command instead to print out the text
-in a notification object.</p>
 
-<h2 id="behavior-test-selection">Text Selection</h2>
-
-<img src="{@docRoot}preview/images/text-selection.gif"
-style="float:right; margin:0 0 20px 30px" width="360" height="640" />
-
-<p>When users select text in your app, you can now display text selection actions such as
-<em>Cut</em>, <em>Copy</em>, and <em>Paste</em> in a
-<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection"
-class="external-link">floating toolbar</a>. The user interaction implementation is similar to that
-for the contextual action bar, as described in
-<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">
-Enabling the contextual action mode for individual views</a>.</p>
-
-<p>To implement a floating toolbar for text selection, make the following changes in your existing
-apps:</p>
-<ol>
-<li>In your {@link android.view.View} or {@link android.app.Activity} object, change your
-{@link android.view.ActionMode} calls from
-{@code startActionMode(Callback)} to {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
-<li>Take your existing implementation of {@code ActionMode.Callback} and make it extend
-{@link android.view.ActionMode.Callback2} instead.</li>
-<li>Override the
-{@link android.view.ActionMode.Callback2#onGetContentRect(android.view.ActionMode, android.view.View, android.graphics.Rect) onGetContentRect()}
-method to provide the coordinates of the content {@link android.graphics.Rect} object
-(such as a text selection rectangle) in the view.</li>
-<li>If the rectangle positioning is no longer valid, and this is the only element to be invalidated,
-call the {@link android.view.ActionMode#invalidateContentRect() invalidateContentRect()} method.</li>
-</ol>
-
-<p>If you are using <a href="{@docRoot}tools/support-library/index.html">
-Android Support Library</a> revision 22.2, be aware that floating toolbars are not
-backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects by
-default. This prevents floating toolbars from being displayed. To enable
-{@link android.view.ActionMode} support in an
-{@link android.support.v7.app.AppCompatActivity}, call
-{@link android.support.v7.app.AppCompatActivity#getDelegate()}, then call
-{@link android.support.v7.app.AppCompatDelegate#setHandleNativeActionModesEnabled(boolean)
-setHandleNativeActionModesEnabled()} on the returned
-{@link android.support.v7.app.AppCompatDelegate} object and set the input
-parameter to {@code false}. This call returns control of {@link android.view.ActionMode} objects to
-the framework. In devices running the M Preview, that allows the framework to support
-{@link android.support.v7.app.ActionBar} or floating toolbar modes, while on pre-M Preview devices,
-only the {@link android.support.v7.app.ActionBar} modes are supported.</p>
-
-<h2 id="behavior-keystore">Android Keystore Changes</h2>
-<p>With this preview, the
-<a href="{@docRoot}training/articles/keystore.html">Android Keystore provider</a> no longer supports
-DSA. ECDSA is still supported.</p>
-
-<p>Keys which do not require encryption at rest will no longer be deleted when secure lock screen
-is disabled or reset (for example, by the user or a Device Administrator). Keys which require
-encryption at rest will be deleted during these events.</p>
-
-<h2 id="behavior-network">Wi-Fi and Networking Changes</h2>
-
-<p>This preview introduces the following behavior changes to the Wi-Fi and networking APIs.</p>
 <ul>
-<li>Your apps can now change the state of {@link android.net.wifi.WifiConfiguration} objects only
-if you created these objects. You are not permitted to modify or delete
-{@link android.net.wifi.WifiConfiguration} objects created by the user or by other apps.
+  <li>You must install a delegated certificate installer before the DPC can set
+  it. For both profile and device-owner apps targeting the N SDK, you should
+  install the delegated certificate installer before the device policy
+  controller (DPC) calls
+  <code>DevicePolicyManager.setCertInstallerPackage()</code>. If the installer
+  is not already installed, the system throws an
+  <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>Reset password restrictions for device admins now apply to profile
+  owners. Device admins can no longer use
+  <code>DevicePolicyManager.resetPassword()</code> to clear passwords or change
+  ones that are already set. Device admins can still set a password, but only
+  when the device has no password, PIN, or pattern.
+  </li>
+
+  <li>Device and profile owners can manage accounts even if restrictions are
+  set. Device owners and profile owners can call the Account Management APIs
+  even if <code>DISALLOW_MODIFY_ACCOUNTS</code> user restrictions are in place.
+  </li>
+
+  <li>Device owners can manage secondary users more easily. When a device is
+  running in device owner mode, the <code>DISALLOW_ADD_USER</code> restriction
+  is automatically set. This prevents users from creating unmanaged secondary
+  users. In addition, the <code>CreateUser()</code> and
+  <code>createAndInitial()</code> methods are deprecated; the new
+  <code>DevicePolicyManager.createAndManageUser()</code> method replaces them.
+  </li>
+
+  <li>Device owners can access device identifiers. A Device owner can access the
+  Wi-Fi MAC address of a device, using
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code>. If Wi-Fi has never
+  been enabled on the device, this method returns a value of {@code null}.
+  </li>
+</ul>
+
+<p>
+  For more information about changes to Android for Work in Android N, see
+  <a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.
+</p>
+
+<h2 id="other">Other important points</h2>
+
+<ul>
+<li>When an app is running on Android N, but targets a lower API level,
+and the user changes display size, the app process is killed. The app
+must be able to gracefully handle this scenario. Otherwise, it crashes
+when the user restores it from Recents.
+
+<p>
+You should test your app to ensure
+that this behavior does not occur.
+You can do so by causing an identical crash
+when killing the app manually via DDMS.
+</p>
+
+<p>
+Apps targeting N and above are not automatically killed on density changes;
+however, they may still respond poorly to configuration changes.
+</p>
 </li>
+
 <li>
-Previously, if an app forced the device to connect to a specific Wi-Fi network by using
-{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} with the
-{@code disableAllOthers=true} setting, the device disconnected from other networks such as
-cellular data. In this preview, the device no longer disconnects from such other networks. If
-your app’s {@code targetSdkVersion} is {@code “20”} or lower, it is pinned to the selected
-Wi-Fi network. If your app’s {@code targetSdkVersion} is {@code “21”} or higher, use the
-multinetwork APIs (such as
-{@link android.net.Network#openConnection(java.net.URL) openConnection()},
-{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()}, and the new
-{@link android.net.ConnectivityManager#bindProcessToNetwork(android.net.Network)
-bindProcessToNetwork()} method) to ensure that its network traffic is sent on the selected network.</li>
-</ul>
-
-<h2 id="behavior-camera">Camera Service Changes</h2>
-<p>In this preview, the model for accessing shared resources in the camera service has been changed
-from the previous “first come, first serve” access model to an access model where high-priority
-processes are favored.  Changes to the service behavior include:</p>
-<ul>
-<li>Access to camera subsystem resources, including opening and configuring a camera device, is
-awarded based on the “priority” of the client application process. Application processes with
-user-visible or foreground activities are generally given a higher-priority, making camera resource
-acquisition and use more dependable.</li>
-<li>Active camera clients for lower priority apps may be “evicted” when a higher priority
-application attempts to use the camera.  In the deprecated {@link android.hardware.Camera} API,
-this results in
-{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()} being
-called for the evicted client. In the {@link android.hardware.camera2 Camera2} API, it results in
-{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}
-being called for the evicted client.</li>
-<li>On devices with appropriate camera hardware, separate application processes are able to
-independently open and use separate camera devices simultaneously. However, multi-process use
-cases, where simultaneous access causes significant degradation of performance or capabilities of
-any of the open camera devices, are now detected and disallowed by the camera service. This change
-may result in “evictions” for lower priority clients even when no other app is directly
-attempting to access the same camera device.
-</li>
-<li>
-Changing the current user causes active camera clients in apps owned by the previous user account
-to be evicted.  Access to the camera is limited to user profiles owned by the current device user.
-In practice, this means that a “Guest” account, for example, will not be able to leave running
-processes that use the camera subsystem when the user has switched to a different account.
+Apps on Android N should be able to gracefully handle configuration changes,
+and should not crash on subsequent starts. You can verify app behavior
+by changing font size (<strong>Setting</strong> >
+<strong>Display</strong> > <strong>Font size</strong>), and then restoring
+the app from Recents.
 </li>
 </ul>
 
-<h2 id="behavior-runtime">Runtime</h2>
-<p>The ART runtime now properly implements access rules for the
-{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method. This
-change fixes a problem where Dalvik was checking access rules incorrectly in previous versions.
-If your app uses the
-{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method and you
-want to override access checks, call the
-{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} method with the input
-parameter set to {@code true}. If your app uses the
-<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat library</a> or the
-<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview library</a>,
-you must update your app to use to the latest versions of these libraries. Otherwise, make sure that
-any custom classes referenced from XML are updated so that their class constructors are accessible.</p>
-
-<p>This preview updates the behavior of the dynamic linker. The dynamic linker now understands the
-difference between a library’s {@code soname} and its path
-(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
-public bug 6670</a>), and search by {@code soname} is now
-implemented. Apps which previously worked that have bad {@code DT_NEEDED} entries
-(usually absolute paths on the build machine’s file system) may fail when loaded.</p>
-
-<p>The {@code dlopen(3) RTLD_LOCAL} flag is now correctly implemented. Note that
-{@code RTLD_LOCAL} is the default, so calls to {@code dlopen(3)} that didn’t explicitly use
-{@code RTLD_LOCAL} will be affected (unless your app explicitly used {@code RTLD_GLOBAL}). With
-{@code RTLD_LOCAL}, symbols will not be made available to libraries loaded by later calls to
-{@code dlopen(3)} (as opposed to being referenced by {@code DT_NEEDED} entries).</p>
-</p>
-
-<h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
-<p>To provide users with greater data protection, starting in this release, Android
-removes programmatic access to the device’s local hardware identifier for
-apps using the Wi-Fi and Bluetooth APIs. The
-{@link android.net.wifi.WifiInfo#getMacAddress() WifiInfo.getMacAddress()} and the
-{@link android.bluetooth.BluetoothAdapter#getAddress() BluetoothAdapter.getAddress()} methods
-now return a constant value of {@code 02:00:00:00:00:00}.</p>
-
-<p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
-your app must now have the following permissions:</p>
-<ul>
-<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}:
-Your app must have {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}:
-Your app must have {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-<li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
-BluetoothLeScanner.startScan()}: Your app must have
-{@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.</li>
-</ul>
-
-<p class="note"><strong>Note</strong>: When a device running M Developer Preview initiates a
-background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
-originating from a randomized MAC address.</p>
-
-<h2 id="behavior-apk-validation">APK Validation</h2>
-<p>The platform now performs stricter validation of APKs. An APK is considered corrupt if a file is
-declared in the manifest but not present in the APK itself. An APK must be re-signed if any of the
-contents are removed.</p>
-
-<h2 id="behavior-usb">USB Connection</h2>
-<p>Device connections through the USB port are now set to charge-only mode by default. To access
-the device and its content over a USB connection, users must explicitly grant permission for such
-interactions. If your app supports user interactions with the device over a USB port, take into
-consideration that the interaction must be explicitly enabled.
-</p>
-
-<h2 id="behavior-afw">Android for Work Changes</h2>
-<p>This preview includes the following behavior changes for Android for Work:</p>
-<ul>
-  <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
-Call Log now displays work contacts when the user views past calls.
-Setting
-{@link android.app.admin.DevicePolicyManager#setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean) setCrossProfileCallerIdDisabled()}
-to {@code true} hides the work profile contacts in the Google Dialer Call Log. Work contacts can be
-displayed along with personal contacts to devices over Bluetooth only if
-you set {@link android.app.admin.DevicePolicyManager#setBluetoothContactSharingDisabled(android.content.ComponentName, boolean)
-setBluetoothContactSharingDisabled()} to {@code false}. By default, it is set to {@code true}.
-  </li>
-  <li><strong>Wi-Fi configuration removal:</strong> Wi-Fi configurations added by a Profile Owner
-(for example, through calls to the
-{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
-addNetwork()} method) are now removed if that work profile is deleted.
-  </li>
-  <li><strong>Wi-Fi configuration lockdown:</strong> Any Wi-Fi configuration created by
-  an active Device Owner can no longer be modified or deleted by the user if
-  {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} is non-zero.
-  The user can still create and modify their own Wi-Fi configurations. Active Device
-  Owners have the privilege of editing or removing any Wi-Fi configurations, including
-  those not created by them.
-  </li>
-<li><strong>Download Work Policy Controller via Google account addition:</strong> When a Google
-account that requires management via a Work Policy Controller (WPC) app is added to a device
-outside of a managed context, the add account flow now prompts the user to install the
-appropriate WPC. This behavior also applies to accounts added via
-<strong>Settings > Accounts</strong> and in the initial device setup wizard.</li>
-<li><strong>Changes to specific {@link android.app.admin.DevicePolicyManager} API behaviors:</strong>
-  <ul>
-  <li>Calling the
-{@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
-method affects the camera for the calling user only; calling it from the managed profile doesn’t
-affect camera apps running on the primary user.</li>
-  <li>In addition, the
-{@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
-    method is now available for Profile Owners, as well as to Device Owners. </li>
-  <li>A Profile Owner can set these keyguard restrictions:
-    <ul>
-    <li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} and
-    {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}, which affect the
-    keyguard settings for the profile’s parent user.</li>
-    <li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, which
-    only affects notifications generated by applications in the managed profile.</li>
-    </ul>
-  </li>
-  <li>The {@link android.app.admin.DevicePolicyManager#createAndManageUser(android.content.ComponentName, java.lang.String, android.content.ComponentName, android.os.PersistableBundle, int) createAndManageUser()} method replaces createAndInitializeUser(), which has been removed.</li>
-  <li>The {@link android.app.admin.DevicePolicyManager#setScreenCaptureDisabled(android.content.ComponentName, boolean) setScreenCaptureDisabled()}
-method now also blocks the assist structure when an app of the given user is in the foreground. </li>
-  <li>{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}
-now defaults to SHA-256. SHA-1 is still supported for backwards compatibility but will be removed
-in future.
-{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM}
-now only accepts SHA-256.</li>
-  <li>Device initializer APIs which existed in the M Developer Preview are now removed.</li>
-    <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump
-provisioning cannot programmatically unlock a factory reset protected device.</li>
-<li>You can now use the {@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
-extra to pass data to the device owner app during NFC provisioning of the managed device.</li>
-    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles,
-assist layer, and others. New {@link android.app.admin.DevicePolicyManager} permission APIs don't
-affect pre-M apps.</li>
-<li>When users back out of the synchronous part of the setup flow initiated through an
-{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} or
-{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_DEVICE} intent, the system
-now returns a {@link android.app.Activity#RESULT_CANCELED} result code.</li>
-    </ul></li>
-
-<li><strong>Changes to other APIs</strong>:
-<ul>
-    <li>Data Usage: The {@code android.app.usage.NetworkUsageStats} class has been renamed
-{@link android.app.usage.NetworkStats}.</li>
-</ul>
-    </li>
-
-    <li><strong>Changes to global settings</strong>:
-    <ul>
-    <li>These settings can no longer be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}</code>:
-<ul>
-    <li><code>BLUETOOTH_ON</code></li>
-    <li><code>DEVELOPMENT_SETTINGS_ENABLED</code></li>
-    <li><code>MODE_RINGER</code></li>
-    <li><code>NETWORK_PREFERENCE</code></li>
-    <li><code>WIFI_ON</code></li>
-</ul>
-    </li>
-    <li>These global settings can now be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}:
-    <ul>
-    <li>{@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
-    </ul>
-    </li>
-    </ul>
-</ul>

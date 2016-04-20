@@ -17,7 +17,7 @@ parent.link=available-resources.html
 that you can apply as a color, but will actually change colors, depending on the state of
 the {@link android.view.View} object to which it is applied. For example, a {@link
 android.widget.Button} widget can exist in one of several different states (pressed, focused,
-or niether) and, using a color state list, you can provide a different color during each state.</p>
+or neither) and, using a color state list, you can provide a different color during each state.</p>
 
 <p>You can describe the state list in an XML file. Each color is defined in an {@code
 <item>} element inside a single {@code <selector>} element. Each {@code <item>}

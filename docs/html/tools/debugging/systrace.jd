@@ -43,7 +43,7 @@ user interface (UI).</p>
 systems on an Android device. It puts together system and application thread execution on a common
 timeline. In order to analyze your app with Systrace, you first collect a trace log of your app, and
 the system activity. The generated trace allows you to view highly detailed, interactive reports
-showing everything happening the system for the traced duration.</p>
+showing everything happening in the system for the traced duration.</p>
 
 <img src="{@docRoot}images/systrace/overview.png" alt="Systrace example overview" id="figure1" />
 <p class="img-caption">

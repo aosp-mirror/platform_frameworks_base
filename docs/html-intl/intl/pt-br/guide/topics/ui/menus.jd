@@ -1,0 +1,1031 @@
+page.title=Menus
+parent.title=Interface do usuário
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Neste documento</h2>
+<ol>
+  <li><a href="#xml">Definição de um menu em XML</a></li>
+  <li><a href="#options-menu">Criação de um menu de opções</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">Tratamento de eventos de clique</a></li>
+      <li><a href="#ChangingTheMenu">Alteração de itens de menu em tempo de execução</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">Criação de menus contextuais</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">Criação de um menu de contexto flutuante</a></li>
+      <li><a href="#CAB">Uso do modo de ação contextual</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">Criação de um menu pop-up</a>
+    <ol>
+      <li><a href="#PopupEvents">Tratamento de eventos de clique</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">Criação de grupos de menu</a>
+    <ol>
+      <li><a href="#checkable">Uso de itens de menu marcáveis</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">Adição de itens de menu com base em uma intenção</a>
+    <ol>
+      <li><a href="#AllowingToAdd">Permissão para a atividade ser adicionada a outros menus</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Classes principais</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>Veja também</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Barra de ação</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Recurso de menu</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Diga
+adeus ao botão de menu</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Menus são componentes comuns da interface do usuário em diversos tipos de aplicativos. Para fornecer uma experiência
+familiar e consistente ao usuário, você deve usar APIs de {@link android.view.Menu} para apresentar
+ações de usuário e outras opções em suas atividades.</p>
+
+<p>Começando com Android 3.0 (API de nível 11), dispositivos Android não são mais necessários
+para fornecer um botão de <em>Menu</em> dedicado. Com esta alteração, os aplicativos do Android devem migrar de uma dependência
+no painel de menu 6 itens tradicional para fornecer uma barra de ação para apresentar as ações comuns
+de usuário.</p>
+
+<p>Apesar de o design e a experiência do usuário para alguns dos itens do menu terem passado por mudanças, a semântica para definir
+um conjunto de ações e opções ainda baseia-se em APIs de {@link android.view.Menu} . Este guia
+mostra como criar os três tipos fundamentais de menus ou apresentações de ação
+em todas as versões do Android:</p>
+
+<dl>
+  <dt><strong>Menu de opções e barra de ação</strong></dt>
+    <dd>O <a href="#options-menu">menu de opções</a> é a coleção principal de itens de menu
+para uma atividade. É onde deve-se colocar as ações que têm impacto global no aplicativo,
+como "Buscar", "Escrever e-mail" e "Configurações".
+  <p>Se estiver desenvolvendo para Android 2.3 ou anterior, os usuários
+podem revelar o painel do menu de opções pressionando o botão <em>Menu</em>.</p>
+  <p>No Android 3.0 ou em posteriores, os itens do menu de opções são apresentados pela <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a> como uma combinação de itens
+de ação na tela e opções de estouro. A partir do Android 3.0, o botão <em>Menu</em> é censurado (alguns
+dispositivos
+não têm), então você deve migrar usando a barra de ação para fornecer acesso a ações
+e outras opções.</p>
+  <p>Consulte a seção <a href="#options-menu">Criação de um menu de opções</a>.</p>
+    </dd>
+    
+  <dt><strong>Modo de ação contextual e menu de contexto</strong></dt>
+  
+   <dd>Um menu de contexto é um <a href="#FloatingContextMenu">menu flutuante</a> que aparece quando
+o usuário realiza um clique longo em um elemento. Ele fornece ações que afetam o conteúdo selecionado
+ou a estrutura do contexto.
+  <p>Ao desenvolver para Android 3.0 ou posterior, você deve usar o <a href="#CAB">modo de ação contextual</a> para ativar as ações no conteúdo selecionado. Este modo exibe os itens de ação
+que afetam o conteúdo selecionado em uma barra no topo da tela e permite que o usuário
+selecione vários itens.</p>
+  <p>Consulte a seção <a href="#context-menu">Criação de menus contextuais</a>.</p>
+</dd>
+    
+  <dt><strong>Menu pop-up</strong></dt>
+    <dd>Um menu pop-up exibe itens em uma lista vertical ancorada à vista
+que apresentou o menu. É bom para fornecer um estouro de ações relacionado a conteúdo específico
+ou opções de fornecimento de uma segunda parte de um comando. As ações em um menu pop-up
+<strong>não</strong> devem afetar diretamente o conteúdo correspondente &mdash; é para isso que servem
+as ações contextuais. Preferivelmente, o menu pop-up serve para ações estendidas que relacionam as regiões de conteúdo
+na atividade.
+  <p>Consulte a seção <a href="#PopupMenu">criar um menu pop-up</a>.</p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">Definição de um menu em XML</h2>
+
+<p>Para todos os tipos de menu, o Android fornece um formato XML padrão para definir os itens de menu.
+Em vez de criar um menu no código da atividade, você deve definir um menu e todos os seus itens
+em um <a href="{@docRoot}guide/topics/resources/menu-resource.html">recurso de menu</a> XML. É possível, assim,
+inflar o recurso do menu (carregá-lo como um objeto {@link android.view.Menu}) na atividade, ou
+no fragmento.</p>
+
+<p>Usar um recurso de menu é uma boa prática por alguns motivos:</p>
+<ul>
+  <li>É mais fácil para visualizar a estrutura do menu em XML.</li>
+  <li>Ele separa o conteúdo do menu do código comportamental do aplicativo.</li>
+  <li>Ele permite criar configurações alternativas de menu para versões diferentes de plataforma,
+de tamanhos de tela e de outras configurações aproveitando a estrutura dos <a href="{@docRoot}guide/topics/resources/index.html">recursos do aplicativo</a>.</li>
+</ul>
+
+<p>Para definir o menu, crie um arquivo XML dentro do diretório <code>res/menu/</code>
+do projeto e crie o menu com os seguintes elementos:</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>Define um {@link android.view.Menu}, que é um recipiente para os itens de menu. Um elemento
+<code>&lt;menu></code> deve ser o nódulo raiz para o arquivo e pode reter um ou mais elementos
+<code>&lt;item></code> e <code>&lt;group></code>.</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>Cria um {@link android.view.MenuItem}, que representa um único item em um menu. Este
+elemento pode conter um elemento <code>&lt;menu></code> aninhado para criar um submenu.</dd>
+    
+  <dt><code>&lt;group></code></dt>
+    <dd>Um recipiente invisível e opcional para os elementos {@code &lt;item&gt;}. Ele permite que você categorize
+itens de menu para que eles compartilhem propriedades como estado ativo e visibilidade. Para obter mais informações,
+consulte a seção <a href="#groups">Criação de grupos de menu</a>.</dd>
+</dl>
+
+
+<p>A seguir há um exemplo de menu chamado <code>game_menu.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>O elemento <code>&lt;item></code> é compatível com vários atributos que você pode usar para definir a aparência ou o comportamento
+de um item. Os itens no menu acima incluem os seguintes atributos:</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>Um ID de recurso que é único para o item. Ele permite que o aplicativo reconheça o item
+quando o usuário o seleciona.</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>Uma referência a um desenhável para usar como o ícone do item.</dd>
+  <dt>{@code android:title}</dt>
+    <dd>Uma referência a uma string para usar como o título do item.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>Especifica quando e como este item deve aparecer como um item de ação na <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>.</dd>
+</dl>
+
+<p>Esses são os atributos mais importantes que devem ser usados, mas há vários outros disponíveis.
+Para obter informações sobre todos os atributos compatíveis, consulte o documento <a href="{@docRoot}guide/topics/resources/menu-resource.html">Recurso de menu</a>.</p>
+
+<p>É possível adicionar um submenu a um item em qualquer menu (exceto a um submenu) adicionando um elemento {@code &lt;menu&gt;}
+como filho de um {@code &lt;item&gt;}. Os submenus são úteis quando o aplicativo
+tem várias funções que podem ser organizadas em tópicos, como itens em uma barra de menu do aplicativo do PC (arquivo,
+editar, visualizar etc.). Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Para usar o menu em sua atividade, você precisa inflar o recurso do menu (converter o recurso
+XML em um objeto programável) usando {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}. Nas seções a seguir, você verá como inflar um menu para cada
+tipo de menu.</p>
+
+
+
+<h2 id="options-menu">Criação de um menu de opções</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>Figura 1.</strong> Menu de opções
+no navegador, no Android 2.3.</p>
+</div>
+
+<p>O menu de opções é onde você deve incluir ações e outras opções que são relevantes
+para o contexto de atividade atual, como "Buscar", "Escrever e-mail" e "Configurações".</p>
+
+<p>O local onde os itens no menu de opções aparecem na tela depende da versão em que o aplicativo
+foi desenvolvido:</p>
+
+<ul>
+  <li>Caso tenha desenvolvido o aplicativo para <strong>Android 2.3.x (API de nível 10) ou 
+inferior</strong>, os conteúdos do menu de opções aparecerão na parte inferior da tela, quando o usuário
+pressionar o botão <em>Menu</em>, como exibido na figura 1. Quando aberto, a primeira parte visível é
+o menu
+de ícones, que possui até seis itens de menu. Se o menu incluir mais de seis itens, o Android
+colocará o sexto item e o resto em um menu flutuante, que o usuário poderá abrir selecionando
+<em>Mais</em>.</li>
+
+  <li>Se você desenvolveu o aplicativo para <strong>Android 3.0 (API de nível 11) ou
+superior</strong>, os itens do menu de opções estão disponíveis na <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>. Por padrão, o sistema
+posiciona todos os itens na ação de estouro, que o usuário pode revelar com o ícone de estouro de ação
+no lado direito da barra de ação (ou pressionando o botão <em>Menu</em>, se disponível). Para
+ativar
+o acesso rápido a ações importantes, é possível promover alguns itens para aparecerem na barra de ação adicionando
+{@code android:showAsAction="ifRoom"} aos elementos {@code &lt;item&gt;} correspondentes (veja a figura
+2). <p>Para obter mais informações sobre os itens de ação e outros comportamentos da barra de ação, consulte o guia <a href="{@docRoot}guide/topics/ui/actionbar.html">Barra de ação</a>. </p>
+<p class="note"><strong>Observação:</strong> Mesmo se <em>não</em> estiver desenvolvendo para Android 3.0 ou
+posteriores, é possível compilar seu próprio layout de barra de ação para obter um efeito semelhante. Para obter um exemplo de como é possível
+suportar versões mais antigas do Android com uma barra de ação, consulte o exemplo <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">Compatibilidade da barra de ação</a>
+.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Figura 2.</strong> Barra de ação do aplicativo <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>, exibindo
+guias de navegação e um item de ação de câmera (além do botão de estouro de ação).</p>
+
+<p>É possível declarar itens para o menu de opções da subclasse {@link android.app.Activity}
+ou de uma subclasse {@link android.app.Fragment}. Se a atividade e os fragmentos
+declararem itens para o menu de opções, eles estarão combinados na IU. O item da atividade aparece primeiro,
+seguido de cada um desses fragmentos na ordem em que são adicionados
+à atividade. Se necessário, é possível reorganizar os itens do menu com o atributo {@code android:orderInCategory}
+em cada {@code &lt;item&gt;} que precisar mover.</p>
+
+<p>Para especificar o menu de opções para uma atividade, substitua {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (os fragmentos fornecem
+o próprio retorno de chamada de {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}). Neste método
+, é possível inflar o recurso de menu (<a href="#xml">definido no XML</a>) em um {@link
+android.view.Menu} fornecido no retorno de chamada. Por exemplo:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>Também é possível adicionar itens de menu usando {@link android.view.Menu#add(int,int,int,int)
+add()} e recuperar os itens com {@link android.view.Menu#findItem findItem()} para revisar
+as propriedades com APIs de {@link android.view.MenuItem}.</p>
+
+<p>Caso tenha desenvolvido o aplicativo para Android 2.3.x e anteriores, o sistema chamará {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} para criar o menu de opções
+quando o usuário abrir o menu pela primeira vez. Caso tenha desenvolvido para Android 3.0 e posteriores,
+o sistema chama {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+ao iniciar a atividade para mostrar os itens para a barra de ação.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">Tratamento de eventos de clique</h3>
+
+<p>Quando o usuário seleciona um item para o menu de opções (incluindo os itens de ação na barra de ação),
+o sistema chama o método {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} da atividade. Este método passa o {@link android.view.MenuItem} selecionado. É possível
+identificar o item chamando {@link android.view.MenuItem#getItemId()}, que retorna o ID único
+para o item de menu (definido pelo atributo {@code android:id} no recurso de menu ou em um número inteiro
+dado ao método {@link android.view.Menu#add(int,int,int,int) add()}). É possível combinar este ID
+com itens de menu conhecidos para realizar a ação adequada. Por exemplo:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Ao lidar com um item de menu, retorne {@code true}. Se não lidar com o item de menu,
+ você deverá chamar a implementação de superclasse de {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} (a implementação
+padrão retornará como falsa).</p>
+
+<p>Se a atividade incluir fragmentos, o sistema chamará primeiro {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} para a atividade e, em seguida,
+para cada fragmento (na ordem em que cada fragmento foi adicionado) até um retornar como
+{@code true} ou até todos os fragmentos serem chamados.</p>
+
+<p class="note"><strong>Dica:</strong> o Android 3.0 adiciona a possibilidade de definir o comportamento do clique
+para um item de menu em XML, usando o atributo {@code android:onClick}. O valor do atributo
+deve ser o nome de um método definido pela atividade usando o menu. O método
+deve ser público e aceitar um único parâmetro {@link android.view.MenuItem} &mdash; quando o sistema chamar este método,
+ ele passará o item de menu selecionado. Para obter mais informações e um exemplo, consulte o documento <a href="{@docRoot}guide/topics/resources/menu-resource.html">Recurso de menu</a>.</p>
+
+<p class="note"><strong>Dica:</strong> se o aplicativo contiver várias atividades
+e algumas delas fornecerem o mesmo menu de opções,
+considere criar uma atividade que não implemente nada exceto os métodos {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} e {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()}. Em seguida, estenda esta classe para cada atividade que deve compartilhar
+o mesmo menu de opções. Desta maneira, é possível gerenciar um conjunto de códigos para lidar com ações de menu
+e cada classe descendente herda os comportamentos do menu.
+Se quiser adicionar itens de menu a uma das atividades descendentes,
+substitua {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} nesta atividade. Chame {@code super.onCreateOptionsMenu(menu)} para que os itens de menu originais
+sejam criados e, em seguida, adicione os novos itens de menu com {@link
+android.view.Menu#add(int,int,int,int) menu.add()}. Você também pode substituir o comportamento
+da superclasse para itens de menu individuais.</p>
+
+
+<h3 id="ChangingTheMenu">Alteração dos itens de menu em tempo de execução</h3>
+
+<p>Depois que o sistema chamar {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}, ele reterá uma instância do {@link android.view.Menu} que você populará
+e não chamará {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+novamente, a não ser que o menu seja invalidado por algum motivo. No entanto, você deve usar {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} somente para criar o estado inicial do menu
+e não para realizar alterações durante o ciclo de vida da atividade.</p>
+
+<p>Caso queira modificar o menu de opções com base
+em eventos que ocorrem durante o ciclo de vida da atividade, é possível fazê-lo
+no método {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Este método
+passa a você o objeto {@link android.view.Menu}, já que ele existe para que seja possível modificá-lo,
+como com adição, remoção ou desativação de itens. (Os fragmentos também fornecem um retorno de chamada {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()}.)</p>
+
+<p>No Android 2.3.x e em anteriores, o sistema chamará {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()} sempre que o usuário abrir o menu de opções (pressionar o botão <em>Menu</em>
+).</p>
+
+<p>No Android 3.0 e posteriores, avalia-se o menu de opções quanto a sempre estar aberto quando os itens de menu
+são apresentados na barra de ação. Quando um evento ocorre e você quer realizar uma atualização de menu,
+você deve chamar {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} para pedir
+que o sistema chame {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
+
+<p class="note"><strong>Observação:</strong> 
+você nunca deve alterar os itens no menu de opções com base no {@link android.view.View} atualmente
+em foco. Quando estiver no modo de toque (quando o usuário não está usando cursor de bola ou um teclado), as vistas
+não podem ter foco, então você nunca deve usar o foco como base para modificar
+os itens no menu de opções. Se quiser fornecer itens de menu que sejam sensíveis a contexto para um {@link
+android.view.View}, use um <a href="#context-menu">menu de contexto</a>.</p>
+
+
+
+
+<h2 id="context-menu">Criação de menus contextuais</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>Figura 3.</strong> Capturas de tela de um menu de contexto flutuante (esquerda)
+e a barra de ação contextual (direita).</p>
+</div>
+
+<p>Um menu contextual oferece ações que afetam um item ou estrutura de contexto específica na IU.
+É possível fornecer um menu de contexto para qualquer vista, mas ele é geralmente usado para itens em um {@link
+android.widget.ListView}, {@link android.widget.GridView}, ou em outras coleções de vistas
+em que o usuário pode realizar ações diretas em cada item.</p>
+
+<p>Há duas formas de fornecer ações contextuais:</p>
+<ul>
+  <li>Em um <a href="#FloatingContextMenu">menu de contexto flutuante</a>. Um menu aparece como uma lista flutuante
+de itens de menu (semelhante a uma caixa de diálogo) quando o usuário realiza um clique longo (pressiona e segura)
+em uma vista que declara suporte para um menu de contexto. Os usuários podem realizar uma ação contextual
+em um item por vez.</li>
+
+  <li>No <a href="#CAB">modo de ação contextual</a>. Este modo é uma implementação de sistema de
+{@link android.view.ActionMode} que exibe uma <em>barra de ação contextual</em> no topo da tela
+com itens de ação que afetam os itens selecionados. Quando este modo está ativo,
+os usuários podem realizar uma ação em vários itens por vez (se o aplicativo permitir).</li>
+</ul>
+
+<p class="note"><strong>Observação:</strong> o modo de ação contextual está disponível no Android 3.0 (API
+de nível 11) e em posteriores e é a técnica preferencial para exibir ações contextuais
+quando disponível. Se o aplicativo for compatível com versões mais antigas que a 3.0, então você deve retornar a um menu
+de contexto flutuante nestes dispositivos.</p>
+
+
+<h3 id="FloatingContextMenu">Criação de um menu de contexto flutuante</h3>
+
+<p>Para fornecer um menu de contexto flutuante:</p>
+<ol>
+  <li>Registre o {@link android.view.View} ao qual o menu de contexto deve estar associado
+chamando {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} e passe-o
+para {@link android.view.View}.
+  <p>Se a atividade usar {@link android.widget.ListView} ou {@link android.widget.GridView}
+e você quiser que cada item forneça o mesmo menu de contexto, registre todos os itens para um menu de contexto
+passando {@link android.widget.ListView} ou {@link android.widget.GridView} para {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
+</li>
+
+  <li>Implemente o método {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+em {@link android.app.Activity} ou {@link android.app.Fragment}.
+  <p>Quando a vista registrada receber um evento de clique longo, o sistema chamará o método {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+. É aqui que você define os itens de menu, geralmente inflando um recurso de menu. Por
+exemplo:</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} permite que você infle o menu de contexto de um <a href="{@docRoot}guide/topics/resources/menu-resource.html">recurso de menu</a>. Os parâmetros do método
+de retorno de chamada incluem o {@link android.view.View}
+que o usuário selecionou e um objeto {@link android.view.ContextMenu.ContextMenuInfo} que fornece
+informações adicionais sobre o item selecionado. Se sua atividade tiver várias vistas, em que cada uma forneça
+um menu de contexto diferente, você deve usar esses parâmetros para determinar qual menu de contexto
+deve ser inflado.</p>
+</li>
+
+<li>Implemente {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}.
+  <p>Quando o usuário selecionar um item de menu, o sistema chamará este método para que você possa realizar
+a ação adequada. Por exemplo:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>O método {@link android.view.MenuItem#getItemId()} consulta o ID
+para o item de menu selecionado, o qual pode ser atribuído a cada item de menu no XML usando o atributo {@code
+android:id}, como exibido na seção <a href="#xml">Definição de um menu em
+XML</a>.</p>
+
+<p>Ao lidar com um item de menu, retorne {@code true}. Se não lidar com o item de menu,
+você deverá passar o item de menu para a implementação de superclasse. Se a atividade incluir fragmentos,
+ela receberá este retorno de chamada primeiro. Ao chamar a superclasse ao não lidar, o sistema
+passará o evento para o respectivo método de retorno de chamada em cada fragmento, um por vez (na ordem
+em que cada fragmento foi adicionado) até que {@code true} ou {@code false} seja retornado. (A implementação
+padrão para {@link android.app.Activity} e {@code android.app.Fragment} retorna {@code
+false}, então você deve sempre chamar a superclasse ao não tratar de um item de menu.)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">Uso do modo de ação contextual</h3>
+
+<p>O modo de ação contextual é uma implementação de sistema de {@link android.view.ActionMode}
+que direciona a interação do usuário a efetuar ações contextuais. Quando um usuário
+ativa este modo selecionando um item, uma <em>barra de ação contextual</em> aparece na parte superior da tela
+para apresentar as ações que o usuário pode realizar nos itens selecionados. Enquanto este modo estiver ativo,
+o usuário pode selecionar vários itens (se você permitir), desmarcar itens e continuar
+a navegar dentro da atividade (o tanto que você permitir). O modo de ação
+é desativado e a barra de ação contextual desaparece quando o usuário desmarca todos os itens, pressiona o botão VOLTAR,
+ou seleciona a ação <em>Pronto</em> na lateral esquerda da barra.</p>
+
+<p class="note"><strong>Observação:</strong> a barra de ação contextual não é necessariamente
+associada à <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>. Elas operam de forma independente,
+apesar de a barra de ação contextual ocupar visualmente a posição
+da barra de ação.</p>
+
+<p>Caso esteja desenvolvendo para Android 3.0 (API de nível 11) e posteriores,
+você deve usar o modo de ação contextual para apresentar ações contextuais, em vez de usar o <a href="#FloatingContextMenu">menu de contexto flutuante</a>.</p>
+
+<p>Para oferecer vistas que fornecem ações contextuais, você deve invocar o modo de ação contextual
+sobre um dos eventos (ou ambos):</p>
+<ul>
+  <li>O usuário realiza um clique longo na vista.</li>
+  <li>O usuário seleciona uma caixa de seleção ou um componente de IU semelhante dentro da vista.</li>
+</ul>
+
+<p>A maneira do aplicativo de invocar o modo de ação contextual e definir o comportamento
+para cada ação depende do seu projeto. Há basicamente dois projetos:</p>
+<ul>
+  <li>Para ações contextuais em vistas arbitrárias individuais.</li>
+  <li>Para ações contextuais de agrupadas em itens em um {@link
+android.widget.ListView} ou {@link android.widget.GridView} (permitindo que o usuário selecione vários itens
+e realize uma ação em todos eles).</li>
+</ul>
+
+<p>As seguintes seções descrevem a configuração necessária para cada cenário.</p>
+
+
+<h4 id="CABforViews">Ativação do modo de ação contextual para vistas individuais</h4>
+
+<p>Caso queira invocar o modo de ação contextual somente quando o usuário selecionar
+vistas específicas, você deve:</p>
+<ol>
+  <li>Implementar a interface {@link android.view.ActionMode.Callback}. Em seus métodos de retorno de chamada,
+é possível especificar as ações da barra de ação contextual, responder aos eventos de clique em itens de ação,
+e tratar de outros eventos de ciclo de vida do modo de ação.</li>
+  <li>Chame {@link android.app.Activity#startActionMode startActionMode()} quando quiser exibir
+a barra (como quando o usuário realiza cliques longos na visualização).</li>
+</ol>
+
+<p>Por exemplo:</p>
+
+<ol>
+  <li>Implementar a interface {@link android.view.ActionMode.Callback ActionMode.Callback}:
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>Observe que esses retornos de chamada de eventos são quase exatamente iguais aos retornos de chamada do <a href="#options-menu">menu de opções</a>, exceto que cada um deles também passa o objeto {@link
+android.view.ActionMode} associado ao evento. É possível usar APIs de {@link
+android.view.ActionMode} para realizar várias alterações ao CAB, como revisar um título e um subtítulo
+com {@link android.view.ActionMode#setTitle setTitle()} e {@link
+android.view.ActionMode#setSubtitle setSubtitle()} (útil para indicar quantos itens
+são selecionados).</p>
+
+<p>Observe também que os exemplos acima definem a variável {@code mActionMode} como nula quando
+o modo de ação é destruído. Na etapa a seguir, você verá como ela é inicializada
+e quão útil salvar a variável do membro na atividade ou no fragmento pode ser.</p>
+</li>
+
+  <li>Chame {@link android.app.Activity#startActionMode startActionMode()} para ativar o modo de ação contextual
+quando apropriado, como em resposta a um clique longo em um {@link
+android.view.View}:</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>Ao chamar {@link android.app.Activity#startActionMode startActionMode()}, o sistema
+retorna o {@link android.view.ActionMode} criado. Ao salvar isto em uma variável do membro,
+é possível realizar alterações na barra de ação contextual em resposta a outros eventos. No exemplo acima,
+{@link android.view.ActionMode} é usado para garantir que a instância {@link android.view.ActionMode}
+não seja recriada se já estiver ativa, verificando se o membro é nulo antes de iniciar
+o modo de ação.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">Ativação de ações contextuais agrupadas em ListView ou GridView</h4>
+
+<p>Se tiver uma coleção de itens em um {@link android.widget.ListView} ou {@link
+android.widget.GridView} (ou outra extensão de {@link android.widget.AbsListView}) e quiser
+permitir que os usuários realizem ações de agrupamento, você deve:</p>
+
+<ul>
+  <li>Implementar a interface {@link android.widget.AbsListView.MultiChoiceModeListener} e defini-la
+para o grupo de visualização com {@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}. Nos métodos de retorno de chamada da escuta, é possível especificar as ações
+para a barra de ação contextual, responder a eventos de clique em itens de ação e lidar com outros retornos de chamada
+herdados da interface {@link android.view.ActionMode.Callback}.</li>
+
+  <li>Chame {@link android.widget.AbsListView#setChoiceMode setChoiceMode()} com o argumento {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.</li>
+</ul>
+
+<p>Por exemplo:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>É isso. Agora, quando o usuário selecionar um item com um clique longo, o sistema chamará o método {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+e exibirá a barra de ação contextual com as ações especificadas. Enquanto a barra de ação contextual
+estiver visível, os usuários poderão selecionar itens adicionais.</p>
+
+<p>Em alguns casos em que as ações contextuais fornecem itens de ação comuns, você pode
+querer adicionar uma caixa de seleção ou um elemento de IU semelhante que permite que os usuários selecionem itens,
+pois eles podem não descobrir o comportamento do clique longo. Quando um usuário seleciona a caixa de seleção,
+é possível invocar o modo de ação contextual definindo o respectivo item de lista
+para o estado marcado com {@link android.widget.AbsListView#setItemChecked setItemChecked()}.</p>
+
+
+
+
+<h2 id="PopupMenu">Criação de um menu pop-up</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>Figura 4.</strong> Um menu pop-up no aplicativo do Gmail, ancorado ao botão
+de estouro no cando direito superior.</p>
+</div>
+
+<p>Um {@link android.widget.PopupMenu} é um menu modal ancorado a uma {@link android.view.View}.
+Ele aparece sob a vista de âncora se tiver espaço, ou sobre a vista. Ele é útil para:</p>
+<ul>
+  <li>Fornecer um menu de estilo de estouro para ações que <em>se relacionam</em> com o conteúdo específico (como
+cabeçalhos de e-mail do Gmail, exibidos na figura 4).
+    <p class="note"><strong>Observação:</strong> Isto não é igual ao menu de contexto,
+que geralmente é usado para ações que <em>afetam</em> o conteúdo selecionado. Para ações que afetam o conteúdo
+selecionado, use o <a href="#CAB">modo de ação contextual</a> ou o <a href="#FloatingContextMenu">menu de contexto flutuante</a>.</p></li>
+  <li>Fornecer uma segunda parte de uma sentença de comando (como um botão marcado como "Adicionar"
+que produz um menu pop-up com opções diferentes de "Adicionar").</li>
+  <li>Fornecer um menu suspenso semelhante a {@link android.widget.Spinner} que não retenha
+uma seleção persistente.</li>
+</ul>
+
+
+<p class="note"><strong>Observação:</strong> {@link android.widget.PopupMenu} está disponível com a API
+de nível 11 ou posteriores.</p>
+
+<p>Se <a href="#xml">definir o menu em XML</a>, abaixo é exposto o modo de exibir o menu pop-up:</p>
+<ol>
+  <li>Represente um {@link android.widget.PopupMenu} com seu construtor,
+que usa o aplicativo {@link android.content.Context} e {@link android.view.View} atual ao qual o menu
+deve ser ancorado.</li>
+  <li>Use {@link android.view.MenuInflater} para inflar o recurso de menu no objeto {@link
+android.view.Menu} retornado por {@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. Em APIs de nível 14 ou posteriores, é possível usar
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()}.</li>
+  <li>Chame {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
+</ol>
+
+<p>Por exemplo, a seguir há um botão com o atributo {@link android.R.attr#onClick android:onClick}
+que exibe um menu pop-up:</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>A atividade pode então exibir o menu pop-up desta forma:</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>Em APIs de nível 14 ou posteriores, é possível combinar as duas linhas que inflam o menu com {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}.</p>
+
+<p>O menu é dispensado quando o usuário seleciona um item ou toca fora
+da área do menu. É possível ouvir o evento de dispensa usando {@link
+android.widget.PopupMenu.OnDismissListener}.</p>
+
+<h3 id="PopupEvents">Tratamento de eventos de clique</h3>
+
+<p>Para realizar uma ação
+quando o usuário seleciona um item de menu, você deve implementar a interface {@link
+android.widget.PopupMenu.OnMenuItemClickListener} e registrá-la com {@link
+android.widget.PopupMenu} chamando {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}. Quando o usuário seleciona um item, o sistema chama o retorno de chamada {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()}
+na interface.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">Criação de grupos de menu</h2>
+
+<p>Um grupo de menu é uma coleção de itens de menu que compartilham certas peculiaridades. Com um grupo,
+é possível:</p>
+<ul>
+  <li>Exibir ou ocultar todos os itens com {@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()}</li>
+  <li>Ativar ou desativar todos os itens com {@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()}</li>
+  <li>Especificar se todos os itens são marcáveis com {@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</li>
+</ul>
+
+<p>É possível criar um grupo aninhando elementos {@code &lt;item&gt;} dentro de um elemento {@code &lt;group&gt;}
+no recurso de menu ou especificando um ID de grupo com o método {@link
+android.view.Menu#add(int,int,int,int) add()}.</p>
+
+<p>Abaixo há um exemplo de recurso de menu que inclui um grupo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Os itens que estão no grupo aparecem no mesmo nível que o primeiro item &mdash; todos os três itens
+no menu são irmãos. No entanto, é possível modificar as peculiaridades dos dois itens
+no grupo mencionando o ID do grupo e usando os métodos listados acima. O sistema
+também nunca separará os itens agrupados. Por exemplo, se você declarar {@code
+android:showAsAction="ifRoom"} para cada item, eles aparecerão na barra de ação
+ou no estouro de ação.</p>
+
+
+<h3 id="checkable">Uso de itens de menu marcáveis</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>Figura 5.</strong> Captura de tela de um submenu
+com itens marcáveis.</p>
+</div>
+
+<p>Um menu como uma interface pode ser útil para ativar e desativar as opções, usar uma caixa de seleção
+para opções independentes ou botões de rádio para grupos
+de opções mutuamente exclusivas. A figura 5 mostra um submenu com itens marcáveis
+com botões de rádio.</p>
+
+<p class="note"><strong>Observação:</strong> os itens de menu no menu de ícones (do menu de opções)
+não podem exibir uma caixa de seleção ou um botão de rádio. Caso escolha tornar marcáveis os itens no menu de ícones,
+você deverá indicar manualmente o estado marcado arrastando o ícone e/ou digitando
+sempre que o estado for alterado.</p>
+
+<p>É possível definir o comportamento marcável para itens individuais de menu usando o atributo {@code
+android:checkable} no elemento {@code &lt;item&gt;}, ou para um grupo inteiro
+com o atributo {@code android:checkableBehavior} no elemento {@code &lt;group&gt;}. Por exemplo,
+todos os itens neste grupo de menu são marcáveis com um botão de rádio:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>O atributo {@code android:checkableBehavior} aceita:
+<dl>
+  <dt>{@code single}</dt>
+    <dd>Somente um item do grupo pode ser marcado (botões de rádio)</dd>
+  <dt>{@code all}</dt>
+    <dd>Todos os itens podem ser marcados (caixas de seleção)</dd>
+  <dt>{@code none}</dt>
+    <dd>Nenhum item é marcável</dd>
+</dl>
+
+<p>É possível aplicar um estado marcado padrão a um item usando o atributo {@code android:checked}
+no elemento {@code &lt;item&gt;} e alterar o seu código com o método {@link
+android.view.MenuItem#setChecked(boolean) setChecked()}.</p>
+
+<p>Quando um item marcável é selecionado, o sistema chama o respectivo método retorno de chamada do item selecionado
+(como {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). É aqui
+que você deve definir o estado da caixa de seleção, pois a caixa de seleção ou o botão de rádio
+não altera o seu estado automaticamente. É possível consultar o estado do item (como ele era antes
+do usuário selecioná-lo) com {@link android.view.MenuItem#isChecked()} e, em seguida, definir o estado marcado com 
+{@link android.view.MenuItem#setChecked(boolean) setChecked()}. Por exemplo:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Caso você não defina o estado marcado desta maneira, o estado visível do item (a caixa de seleção
+ou o botão de rádio)
+não se alterará quando o usuário selecioná-lo. Quando o estado é definido, a atividade preserva o estado marcado
+do item para que, quando o usuário abrir o menu posteriormente, o estado marcado
+definido esteja visível.</p>
+
+<p class="note"><strong>Observação:</strong>
+os itens de menu marcáveis servem para serem usados somente em uma base por sessão e não são salvos quando
+o aplicativo é destruído. Caso tenha configurações de aplicativo que gostaria de salvar para o usuário,
+você deve armazenar os dados usando as <a href="{@docRoot}guide/topics/data/data-storage.html#pref">preferências compartilhadas</a>.</p>
+
+
+
+<h2 id="intents">Adição de itens de menu com base em uma intenção</h2>
+
+<p>Às vezes, você desejará que um item de menu inicie uma atividade usando uma {@link android.content.Intent}
+(se é uma atividade no seu ou em outro aplicativo). Quando você sabe qual intenção
+quer usar e tem um item de menu específico que deve iniciar a intenção, é possível executá-la
+com {@link android.app.Activity#startActivity(Intent) startActivity()} durante
+o método de retorno de chamada selecionado no item (como o retorno de chamada {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}).</p>
+
+<p>No entanto, caso não tenha certeza de que o dispositivo
+do usuário contém um aplicativo que lida com a intenção, adicionar um item que o invoca
+resulta em um item de menu que não funciona, pois a intenção pode não se resolver
+em uma atividade. Para resolver isto, o Android permite que você adicione itens de menu dinamicamente ao seu menu
+quando encontra atividades no dispositivo que lidam com a intenção.</p>
+
+<p>Para adicionar itens de menu com base nas atividades disponíveis que aceitam uma intenção:</p>
+<ol>
+  <li>Defina a intenção
+com a categoria {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+e/ou {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE}, além de quaisquer outros requisitos.</li>
+  <li>Chame {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}. O Android procura um aplicativo que possa realizar a intenção
+e adiciona-o ao seu menu.</li>
+</ol>
+
+<p>Se não houver nenhum aplicativo instalado
+que satisfaça a intenção, nenhum item de menu será adicionado.</p>
+
+<p class="note"><strong>Observação:</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} é usado para lidar com o elemento atualmente selecionado
+na tela. Portanto, ele deve ser usado apenas ao criar um menu em {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()}.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>Para cada atividade encontrada que fornece um filtro de intenção correspondente à intenção definida,
+um item de menu é adicionado, usando o valor no <code>android:label</code> do filtro de intenção
+como o título do item e o ícone do aplicativo como o ícone do item de menu. O método
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} retorna o número de itens de menu adicionados.</p>
+
+<p class="note"><strong>Observação:</strong> Ao chamar {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()}, ele substitui todos os itens de menu no grupo do menu especificado
+no primeiro argumento.</p>
+
+
+<h3 id="AllowingToAdd">Permissão para a atividade ser adicionada a outros menus</h3>
+
+<p>Você pode também oferecer os serviços da sua atividade para outros aplicativos,
+para que o aplicativo possa ser incluído no menu de outros (revertendo as funções descritas acima).</p>
+
+<p>Para ser incluído nos menus de outros aplicativos, você precisa definir
+um filtro de intenção como normalmente faz, mas certificando-se de incluir os valores {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+e/ou {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} para a categoria
+do filtro de intenção. Por exemplo:</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>Leia mais sobre a criação de filtros de intenção no documento 
+<a href="/guide/components/intents-filters.html">Intenções e filtros de intenções</a>.</p>
+
+<p>Para obter um exemplo de aplicativo que usa esta técnica, consulte o código de exemplo do 
+<a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Bloco
+de notas</a>.</p>

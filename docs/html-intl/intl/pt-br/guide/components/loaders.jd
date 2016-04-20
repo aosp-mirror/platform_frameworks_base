@@ -1,0 +1,494 @@
+page.title=Carregadores
+parent.title=Atividades
+parent.link=activities.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Neste documento</h2>
+    <ol>
+    <li><a href="#summary">Resumo de API de carregador</a></li>
+    <li><a href="#app">Uso de carregadores em um aplicativo</a>
+      <ol>
+        <li><a href="#requirements"></a></li>
+        <li><a href="#starting">Início de um carregador</a></li>
+        <li><a href="#restarting">Reinício de um carregador</a></li>
+        <li><a href="#callback">Uso dos retornos de chamada de LoaderManager</a></li>
+      </ol>
+    </li>
+    <li><a href="#example">Exemplo</a>
+       <ol>
+         <li><a href="#more_examples">Mais exemplos</a></li>
+        </ol>
+    </li>
+  </ol>
+    
+  <h2>Classes principais</h2>
+    <ol>
+      <li>{@link android.app.LoaderManager}</li>
+      <li>{@link android.content.Loader}</li>
+
+    </ol>   
+    
+    <h2>Exemplos relacionados</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a></li>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>Introduzidos no Android 3.0, os carregadores facilitam o carregamento assíncrono de dados
+em uma atividade ou fragmento. Os carregadores têm as seguintes características:</p>
+  <ul>
+    <li>Eles estão disponíveis para cada {@link android.app.Activity} e {@link
+android.app.Fragment}.</li>
+    <li>Eles fornecem carregamento assíncrono de dados.</li>
+    <li>Eles monitoram a origem dos dados e fornecem novos resultados
+quando o conteúdo é alterado.</li>
+    <li>Eles reconectam-se automaticamente ao cursor do último carregador
+quando são recriados após uma alteração de configuração. Portanto, eles não precisam reconsultar
+os dados.</li>
+  </ul>
+ 
+<h2 id="summary">Resumo da API de carregador</h2>
+
+<p>Há várias classes e interfaces que podem ser envolvidas no uso
+de carregadores em um aplicativo. Elas são resumidas nesta tabela:</p>
+
+<table>
+  <tr>
+    <th>Classe/Interface</th>
+    <th>Descrição</th>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager}</td>
+    <td>Uma classe abstrata associada a {@link android.app.Activity} ou
+{@link android.app.Fragment} para gerenciar uma ou mais instâncias de {@link
+android.content.Loader}. Isto ajuda um aplicativo a gerenciar
+operações executadas por longos períodos juntamente com o ciclo de vida de {@link android.app.Activity}
+ou {@link android.app.Fragment}; o uso mais comum disto é com 
+{@link android.content.CursorLoader}. No entanto, os aplicativos têm a liberdade de criar
+os próprios carregadores para outros tipos de dados.
+    <br />
+    <br />
+    Há apenas um {@link android.app.LoaderManager} por atividade ou fragmento. No entanto, um {@link android.app.LoaderManager} pode ter
+vários carregadores.</td>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager.LoaderCallbacks}</td>
+    <td>Uma interface de retorno de chamada para um cliente interagir com {@link
+android.app.LoaderManager}. Por exemplo, usa-se o método de retorno de chamada {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+para criar um novo carregador.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.Loader}</td>
+    <td>Uma classe abstrata que realiza carregamento assíncrono de dados. Esta é a classe de base
+de um carregador. Geralmente, você usaria {@link
+android.content.CursorLoader}, mas é possível implementar subclasse própria. Enquanto os carregadores
+estiverem ativos, devem monitorar a origem dos dados e fornecer
+novos resultados quando o conteúdo for alterado. </td>
+  </tr>
+  <tr>
+    <td>{@link android.content.AsyncTaskLoader}</td>
+    <td>Um carregador abstrato que fornece uma {@link android.os.AsyncTask} para realizar o trabalho.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.CursorLoader}</td>
+    <td>Uma subclasse de {@link android.content.AsyncTaskLoader} que consulta
+{@link android.content.ContentResolver} e retorna um {@link
+android.database.Cursor}. Esta classe implementa o protocolo {@link
+android.content.Loader} de forma padrão para cursores de consulta,
+compilando em {@link android.content.AsyncTaskLoader} para realizar a consulta de cursor
+em um encadeamento de segundo plano para que a IU do aplicativo não seja bloqueada. Usar
+este carregador é a melhor maneira de carregar dados de forma assíncrona a partir de um {@link
+android.content.ContentProvider}, em vez de realizar uma consulta gerenciada pelas
+APIs da atividade ou do fragmento.</td>
+  </tr>
+</table>
+
+<p>As classes e interfaces na tabela acima são os componentes essenciais
+que você usará para implementar um carregador no aplicativo. Você não precisará de todos eles
+para cada carregador criado, mas sempre precisará de uma referência a {@link
+android.app.LoaderManager} para inicializar um carregador e uma implementação
+de uma classe {@link android.content.Loader}, como {@link
+android.content.CursorLoader}. As seguintes seções mostram como usar
+essas classes e interfaces em um aplicativo.</p>
+
+<h2 id ="app">Uso de carregadores em um aplicativo</h2>
+<p>Esta seção descreve como usar os carregadores em um aplicativo do Android. Um aplicativo
+que usa os carregadores, geralmente, inclui o seguinte:</p>
+<ul>
+  <li>Uma {@link android.app.Activity} ou um {@link android.app.Fragment}.</li>
+  <li>Uma instância de {@link android.app.LoaderManager}.</li>
+  <li>Um {@link android.content.CursorLoader} para carregar dados baseados em um {@link
+android.content.ContentProvider}. Alternativamente, é possível implementar a própria subclasse
+de {@link android.content.Loader} ou {@link android.content.AsyncTaskLoader}
+para carregar dados de outra origem.</li>
+  <li>Uma implementação de {@link android.app.LoaderManager.LoaderCallbacks}.
+É aqui que é possível criar novos carregadores e gerenciar as referências
+a carregadores existentes.</li> 
+<li>Uma maneira de exibir os dados do carregador, como um {@link
+android.widget.SimpleCursorAdapter}.</li>
+  <li>Uma origem de dados, como um {@link android.content.ContentProvider}, ao usar
+{@link android.content.CursorLoader}.</li>
+</ul>
+<h3 id="starting">Início de um carregador</h3>
+
+<p>O {@link android.app.LoaderManager} gerencia uma ou mais instâncias de {@link
+android.content.Loader} dentro de uma {@link android.app.Activity}
+ou um {@link android.app.Fragment}. Há apenas um {@link
+android.app.LoaderManager} por atividade ou fragmento.</p> 
+
+<p>Geralmente,
+inicializa-se um {@link android.content.Loader} dentro do método {@link
+android.app.Activity#onCreate onCreate()} da atividade, ou dentro do método
+{@link android.app.Fragment#onActivityCreated onActivityCreated()} do fragmento. Faça
+isso da seguinte maneira:</p>
+
+<pre>// Prepare the loader.  Either re-connect with an existing one,
+// or start a new one.
+getLoaderManager().initLoader(0, null, this);</pre>
+
+<p>O método {@link android.app.LoaderManager#initLoader initLoader()}
+recebe os seguintes parâmetros:</p>
+<ul>
+  <li>Um ID único que identifica o carregador. Neste exemplo, o ID é 0.</li>
+<li>Argumentos opcionais para fornecer ao carregador
+em construção (<code>null</code> neste exemplo).</li> 
+
+<li>Uma implementação de {@link android.app.LoaderManager.LoaderCallbacks},
+que {@link android.app.LoaderManager} chama para relatar eventos do carregador. Nesse exemplo,
+ a classe local implementa a interface de {@link
+android.app.LoaderManager.LoaderCallbacks}, para que ela passe uma referência
+para si, {@code this}.</li> 
+</ul>
+<p>A chamada de {@link android.app.LoaderManager#initLoader initLoader()} garante que o carregador
+foi inicializado e que está ativo. Ela possui dois possíveis resultados:</p>
+<ul>
+  <li>Se o carregador especificado pelo ID já existir, o último carregador
+criado será usado novamente.</li>
+  <li>Se o carregador especificado pelo ID <em>não</em> existir,
+{@link android.app.LoaderManager#initLoader initLoader()} ativará o método
+{@link android.app.LoaderManager.LoaderCallbacks} {@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}.
+É aqui que você implementa o código para instanciar e retornar um novo carregador.
+Para obter mais informações, consulte a seção <a href="#onCreateLoader">onCreateLoader</a>.</li>
+</ul>
+<p>Em qualquer um dos casos, a implementação de {@link android.app.LoaderManager.LoaderCallbacks}
+fornecida é associada ao carregador e será chamada quando o estado
+do carregador mudar.  Se, no momento desta chamada, o autor dela
+estiver no estado inicializado e o carregador solicitado já existir e tiver
+gerado seus dados, o sistema chamará {@link
+android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+imediatamente (durante{@link android.app.LoaderManager#initLoader initLoader()}),
+então prepare-se para tais situações. Consulte <a href="#onLoadFinished">
+onLoadFinished</a> para obter mais informações sobre este retorno de chamada</p>
+
+<p>Observe que o método {@link android.app.LoaderManager#initLoader initLoader()}
+retorna o {@link android.content.Loader} que é criado, mas você não precisará
+capturar uma referência para ele. O {@link android.app.LoaderManager} gerencia
+a vida do carregador automaticamente. O {@link android.app.LoaderManager}
+inicia e interrompe o carregamento quando necessário, além de manter o estado do carregador
+e do conteúdo associado. À medida que isso ocorre, você raramente interage com os carregadores
+diretamente (para ver um exemplo de métodos para aprimorar o comportamento
+de um carregador, consulte o exemplo de <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>). 
+Geralmente, usam-se os métodos {@link
+android.app.LoaderManager.LoaderCallbacks} para intervir no processo de carregamento
+quando determinados eventos ocorrem. Para obter mais informações sobre este assunto, consulte <a href="#callback">Uso dos retornos de chamada de LoaderManager</a>.</p>
+
+<h3 id="restarting">Reinício de um carregador</h3>
+
+<p>Ao usar {@link android.app.LoaderManager#initLoader initLoader()},
+como mostrado acima, ele usará um carregador existente com o ID especificado, se houver um.
+Caso contrário, um carregador será criado. No entanto, às vezes, você quer descartar os dados antigos
+e começar do início.</p>
+
+<p>Para descartar os dados antigos, use {@link
+android.app.LoaderManager#restartLoader restartLoader()}. Por exemplo,
+esta implementação de {@link android.widget.SearchView.OnQueryTextListener} reinicia
+o carregador quando a consulta do usuário é alterada. O carregador precisa ser reiniciado
+para que possa usar o filtro de busca revisado para realizar uma nova consulta:</p>
+
+<pre>
+public boolean onQueryTextChanged(String newText) {
+    // Called when the action bar search text has changed.  Update
+    // the search filter, and restart the loader to do a new query
+    // with this filter.
+    mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+    getLoaderManager().restartLoader(0, null, this);
+    return true;
+}</pre>
+
+<h3 id="callback">Uso dos retornos de chamada de LoaderManager</h3>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} é uma interface de retorno de chamada
+que permite que um cliente interaja com o {@link android.app.LoaderManager}. </p>
+<p>Carregadores, em determinado {@link android.content.CursorLoader}, devem
+reter os dados após serem interrompidos. Isto permite que os aplicativos
+mantenham os dados dos métodos {@link android.app.Activity#onStop
+onStop()} e {@link android.app.Activity#onStart onStart()} do fragmento ou da atividade
+para que, quando os usuários voltarem a um aplicativo, não tenham que esperar
+o recarregamento dos dados. Você usa os métodos {@link android.app.LoaderManager.LoaderCallbacks}
+para saber quando deve criar um novo carregador, e para dizer ao aplicativo quando
+ deve interromper o uso dos dados de um carregador.</p>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} inclui
+esses métodos:</p>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}  —
+instancia e retorna um novo {@link android.content.Loader} para o ID fornecido.
+</li></ul>
+<ul>
+  <li> {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+— chamado quando um carregador anteriormente criado termina o seu carregamento.
+</li></ul>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}  
+    — chamado quando um carregador anteriormente criado é reiniciado,
+tornando os dados indisponíveis.
+</li>
+</ul>
+<p>Esses métodos são descritos com mais informações nas seguintes seções.</p>
+
+<h4 id ="onCreateLoader">onCreateLoader</h4>
+
+<p>Ao tentar acessar um carregador (por exemplo, por meio de {@link
+android.app.LoaderManager#initLoader initLoader()}), ele verifica
+se o carregador especificado pelo ID existe. Se não existir, ele ativa o método {@link
+android.app.LoaderManager.LoaderCallbacks} {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}. É aqui
+que você pode criar um novo carregador. Geralmente, será um {@link
+android.content.CursorLoader}, mas é possível implementar a própria subclasse de {@link
+android.content.Loader}. </p>
+
+<p>Nesse exemplo, o método de retorno de chamada de {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+cria um {@link android.content.CursorLoader}. Você deve compilar
+{@link android.content.CursorLoader} usando o método construtor,
+que exige um conjunto completo de informações necessárias para realizar uma consulta ao {@link
+android.content.ContentProvider}. Especificamente, ele precisa de:</p>
+<ul>
+  <li><em>uri</em> — a URI do conteúdo a ser recuperado. </li>
+  <li><em>projection</em> — uma lista de quais colunas devem ser retornadas. Passar
+<code>null</code> retornará todas as colunas, o que é ineficiente. </li>
+  <li><em>selection</em> — um filtro que declara quais linhas devem retornar,
+formatado por uma cláusula SQL WHERE (excluindo WHERE). Passar
+<code>null</code> retornará todas as linhas da URI em questão. </li>
+  <li><em>selectionArgs</em> — é possível incluir interrogações na seleção,
+que serão substituídas pelos valores de <em>selectionArgs</em>, na ordem em que aparecem
+na seleção. Os valores serão vinculados como Strings. </li>
+  <li><em>sortOrder</em> — como ordenar as linhas, formatadas em uma cláusula SQL
+ORDER BY (excluindo ORDER BY). Passar <code>null</code>
+usará a ordem de classificação padrão, que pode ser desordenada.</li>
+</ul>
+<p>Por exemplo:</p>
+<pre>
+ // If non-null, this is the current filter the user has provided.
+String mCurFilter;
+...
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+    // This is called when a new Loader needs to be created.  This
+    // sample only has one Loader, so we don't care about the ID.
+    // First, pick the base URI to use depending on whether we are
+    // currently filtering.
+    Uri baseUri;
+    if (mCurFilter != null) {
+        baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                  Uri.encode(mCurFilter));
+    } else {
+        baseUri = Contacts.CONTENT_URI;
+    }
+
+    // Now create and return a CursorLoader that will take care of
+    // creating a Cursor for the data being displayed.
+    String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+            + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+            + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+    return new CursorLoader(getActivity(), baseUri,
+            CONTACTS_SUMMARY_PROJECTION, select, null,
+            Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+}</pre>
+<h4 id="onLoadFinished">onLoadFinished</h4>
+
+<p>Este método é chamado quando um carregador anteriormente criado terminar o seu carregamento.
+Este método certamente será chamado antes da liberação dos últimos dados
+que forem fornecidos por este carregador.  Neste ponto, você deve remover todo o uso
+dos dados antigos (já que serão liberados em breve), mas não deve fazer
+a liberação dos dados, já que pertencem ao carregador e ele lidará com isso.</p>
+
+
+<p>O carregador liberará os dados quando souber
+que o aplicativo não está mais usando-os.  Por exemplo, se os dados forem um cursor de um {@link
+android.content.CursorLoader}, você não deve chamar {@link
+android.database.Cursor#close close()} por conta própria. Se o cursor estiver
+sendo colocado em um {@link android.widget.CursorAdapter}, você deve usar o método {@link
+android.widget.SimpleCursorAdapter#swapCursor swapCursor()}  para que o antigo
+{@link android.database.Cursor} não seja fechado. Por exemplo:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.<br
+/>SimpleCursorAdapter mAdapter;
+...
+
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+    // Swap the new cursor in.  (The framework will take care of closing the
+    // old cursor once we return.)
+    mAdapter.swapCursor(data);
+}</pre>
+
+<h4 id="onLoaderReset">onLoaderReset</h4>
+
+<p>Este método é chamado quando um carregador anteriormente criado é reiniciado,
+tornando os dados indisponíveis. Este retorno de chamada permite que você descubra quando os dados
+estão prestes a serem liberados para que seja possível remover a referência a eles.  </p>
+<p>Esta implementação chama 
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
+com um valor de <code>null</code>:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.
+SimpleCursorAdapter mAdapter;
+...
+
+public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+    // This is called when the last Cursor provided to onLoadFinished()
+    // above is about to be closed.  We need to make sure we are no
+    // longer using it.
+    mAdapter.swapCursor(null);
+}</pre>
+
+
+<h2 id="example">Exemplo</h2>
+
+<p>Como exemplo, a seguir há uma implementação completa de um {@link
+android.app.Fragment} que exibe uma {@link android.widget.ListView} contendo
+os resultados de uma consulta aos provedores de conteúdo de contatos. Ela usa um {@link
+android.content.CursorLoader} para gerenciar a consulta no provedor.</p>
+ 
+<p>Para um aplicativo acessar os contatos de um usuário, como neste exemplo,
+o manifesto deverá incluir a permissão
+{@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>
+
+<pre>
+public static class CursorLoaderListFragment extends ListFragment
+        implements OnQueryTextListener, LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+
+    // This is the Adapter being used to display the list's data.
+    SimpleCursorAdapter mAdapter;
+
+    // If non-null, this is the current filter the user has provided.
+    String mCurFilter;
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Give some text to display if there is no data.  In a real
+        // application this would come from a resource.
+        setEmptyText(&quot;No phone numbers&quot;);
+
+        // We have a menu item to show in action bar.
+        setHasOptionsMenu(true);
+
+        // Create an empty adapter we will use to display the loaded data.
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2, null,
+                new String[] { Contacts.DISPLAY_NAME, Contacts.CONTACT_STATUS },
+                new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Place an action bar item for searching.
+        MenuItem item = menu.add(&quot;Search&quot;);
+        item.setIcon(android.R.drawable.ic_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        SearchView sv = new SearchView(getActivity());
+        sv.setOnQueryTextListener(this);
+        item.setActionView(sv);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(String query) {
+        // Don't care about this.
+        return true;
+    }
+
+    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        // Insert desired behavior here.
+        Log.i(&quot;FragmentComplexList&quot;, &quot;Item clicked: &quot; + id);
+    }
+
+    // These are the Contacts rows that we will retrieve.
+    static final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.DISPLAY_NAME,
+        Contacts.CONTACT_STATUS,
+        Contacts.CONTACT_PRESENCE,
+        Contacts.PHOTO_ID,
+        Contacts.LOOKUP_KEY,
+    };
+    public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader, so we don't care about the ID.
+        // First, pick the base URI to use depending on whether we are
+        // currently filtering.
+        Uri baseUri;
+        if (mCurFilter != null) {
+            baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                    Uri.encode(mCurFilter));
+        } else {
+            baseUri = Contacts.CONTENT_URI;
+        }
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+                + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+                + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+        return new CursorLoader(getActivity(), baseUri,
+                CONTACTS_SUMMARY_PROJECTION, select, null,
+                Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+    }
+
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+}</pre>
+<h3 id="more_examples">Mais exemplos</h3>
+
+<p>Há alguns exemplos variados na <strong>ApiDemos</strong>
+que ilustra o uso de carregadores:</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a> — uma versão completa do
+fragmento exibido acima.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> — um exemplo de como usar o regulador
+para reduzir o número de consultas que o provedor de conteúdo realiza quando os dados são alterados.</li>
+</ul>
+
+<p>Para obter mais informações sobre o download e a instalação de exemplos de SDK, consulte <a href="http://developer.android.com/resources/samples/get.html">Obtenção
+dos exemplos</a>. </p>
+

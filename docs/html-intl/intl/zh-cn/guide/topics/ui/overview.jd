@@ -1,0 +1,71 @@
+page.title=UI 概览
+@jd:body
+
+
+<p>Android 应用中的所有用户界面元素都是使用 {@link android.view.View} 和
+{@link android.view.ViewGroup} 对象构建而成。{@link android.view.View}
+对象用于在屏幕上绘制可供用户交互的内容。{@link android.view.ViewGroup}
+对象用于储存其他 {@link android.view.View}（和
+{@link android.view.ViewGroup}）对象，以便定义界面的局部。</p>
+
+<p>Android 提供了一系列
+{@link android.view.View} 和 {@link
+android.view.ViewGroup} 子类，可为您提供常用输入控件（如按钮和文本字段）和各种布局模式（如线性布局或相对布局）。</p>
+
+
+<h2 id="Layout">用户界面布局</h2>
+
+<p>如图 1 所示，每个应用组件的用户界面都是使用 {@link
+android.view.View} 和 {@link android.view.ViewGroup} 对象的层次结构定义的。每个视图组都是一个用于组织子视图的不可见容器，而子视图可以是输入控件或其他可绘制某一
+UI
+部分的小工具。此层次结构树可繁可简，随需而定（但是简单的结构可提供最佳性能）。
+
+</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>图 1. </strong>视图层次结构的图示，它定义了一个 UI
+布局。</p>
+
+<p>要声明布局，您可以实例化代码中的 {@link android.view.View} 对象并开始构建树，但是定义布局最简单且最有效的方法是使用 XML
+文件。如同 HTML 一样，XML
+也为布局提供了一种用户可读结构。</p>
+
+<p>视图的 XML 元素名称与其代表的 Android 类相对应。因此，
+<code>&lt;TextView&gt;</code> 元素用于在 UI 中创建一个 {@link android.widget.TextView} 小工具，而
+<code>&lt;LinearLayout&gt;</code> 元素用于创建一个 {@link android.widget.LinearLayout}
+视图组。 </p>
+
+<p>例如，包含文本视图和按钮的简单垂直布局如下所示：</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>在应用中加载布局资源时，Android
+会将布局的每个节点初始化为运行时对象，供您定义其他行为、查询对象状态或修改布局。
+</p>
+
+<p>有关创建 UI 布局的完整指南，请参阅 <a href="declaring-layout.html">XML
+布局</a>。
+
+  
+<h2 id="UIComponents">用户界面组件</h2>
+
+<p>您无需使用 {@link android.view.View} 和 {@link
+android.view.ViewGroup} 对象构建所有 UI。Android 提供了几个带有标准 UI 布局的应用组件，您只需定义内容。
+这些 UI
+组件均拥有一组唯一的 API，具体描述可参阅相应的文档，如<a href="{@docRoot}guide/topics/ui/actionbar.html">操作栏</a>、<a href="{@docRoot}guide/topics/ui/dialogs.html">对话框</a>和<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">状态通知</a>。</p>
+
+

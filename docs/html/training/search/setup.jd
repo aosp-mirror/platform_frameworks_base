@@ -10,7 +10,7 @@ next.link=search.html
       <h2>This lesson teaches you to</h2>
 
       <ul>
-        <li><a href="{@docRoot}training/search/setup.html#add-sv">Add the Search View to the Action
+        <li><a href="{@docRoot}training/search/setup.html#add-sv">Add the Search View to the App
         Bar</a></li>
 
         <li><a href="{@docRoot}training/search/setup.html#create-sc">Create a Searchable
@@ -23,30 +23,30 @@ next.link=search.html
       <h2>You should also read:</h2>
 
       <ul>
-        <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+        <li><a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a></li>
       </ul>
     </div>
   </div>
 
   <p>Beginning in Android 3.0, using the {@link android.widget.SearchView} widget as an item in
-  the action bar is the preferred way to provide search in your app. Like with all items in
-  the action bar, you can define the {@link android.widget.SearchView} to show at all times, only
+  the app bar is the preferred way to provide search in your app. Like with all items in
+  the app bar, you can define the {@link android.widget.SearchView} to show at all times, only
   when there is room, or as a collapsible action, which displays the {@link
-  android.widget.SearchView} as an icon initially, then takes up the entire action bar as a search
+  android.widget.SearchView} as an icon initially, then takes up the entire app bar as a search
   field when the user clicks the icon.</p>
 
   <p class="note"><strong>Note:</strong> Later in this class, you will learn how to make your
   app compatible down to Android 2.1 (API level 7) for devices that do not support
   {@link android.widget.SearchView}.</p>
 
-  <h2 id="add-sv">Add the Search View to the Action Bar</h2>
+  <h2 id="add-sv">Add the Search View to the App Bar</h2>
 
-  <p>To add a {@link android.widget.SearchView} widget to the action bar, create a file named
+  <p>To add a {@link android.widget.SearchView} widget to the app bar, create a file named
   <code>res/menu/options_menu.xml</code> in your project and add the following code to the file.
   This code defines how to create the search item, such as the icon to use and the title of the
   item. The <code>collapseActionView</code> attribute allows your {@link android.widget.SearchView}
-  to expand to take up the whole action bar and collapse back down into a
-  normal action bar item when not in use. Because of the limited action bar space on handset devices,
+  to expand to take up the whole app bar and collapse back down into a
+  normal app bar item when not in use. Because of the limited app bar space on handset devices,
   using the <code>collapsibleActionView</code> attribute is recommended to provide a better
   user experience.</p>
   <pre>
@@ -63,7 +63,7 @@ next.link=search.html
   <p class="note"><strong>Note:</strong> If you already have an existing XML file for your menu
   items, you can add the <code>&lt;item&gt;</code> element to that file instead.</p>
 
-  <p>To display the {@link android.widget.SearchView} in the action bar, inflate the XML menu
+  <p>To display the {@link android.widget.SearchView} in the app bar, inflate the XML menu
   resource (<code>res/menu/options_menu.xml</code>) in the {@link
   android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} method of your activity:</p>
   <pre>
@@ -76,7 +76,7 @@ public boolean onCreateOptionsMenu(Menu menu) {
 }
 </pre>
 
-  <p>If you run your app now, the {@link android.widget.SearchView} appears in your app's action
+  <p>If you run your app now, the {@link android.widget.SearchView} appears in your app's app
   bar, but it isn't functional. You now need to define <em>how</em> the {@link
   android.widget.SearchView} behaves.</p>
 

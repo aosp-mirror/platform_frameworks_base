@@ -47,13 +47,13 @@ starts a new activity when the user clicks the Send button.</p>
 <h2 id="RespondToButton">Respond to the Send Button</h2>
 
 <ol>
-<li>In Android Studio, from the <code>res/layout</code> directory, edit the <code>activity_my.xml</code>
+<li>In Android Studio, from the <code>res/layout</code> directory, edit the <code>content_my.xml</code>
 file.</li>
-<li>To the {@link android.widget.Button &lt;Button>} element, add the <a
+<li>Add the <a
 href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
-attribute.
+attribute to the {@link android.widget.Button &lt;Button&gt;} element.
 
-<p class="code-caption">res/layout/activity_my.xml</p>
+<p class="code-caption">res/layout/content_my.xml</p>
 <pre>
 &lt;Button
     android:layout_width="wrap_content"
@@ -199,7 +199,7 @@ key name in the first parameter and the value in the second parameter.</p>
 follows:
 <p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
 <pre>
-public class MyActivity extends ActionBarActivity {
+public class MyActivity extends AppCompatActivity {
     public final static String EXTRA_MESSAGE = "com.mycompany.myfirstapp.MESSAGE";
     ...
 }
@@ -253,13 +253,9 @@ the activity performs the initial setup of the activity components.</p>
 
 <h3>Create a new activity using Android Studio</h3>
 
-<div class="figure" style="width:400px">
-<img src="{@docRoot}images/training/firstapp/studio-new-activity.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The new activity wizard in Android Studio.</p>
-</div>
-
 <p>Android Studio includes a stub for the
-{@link android.app.Activity#onCreate onCreate()} method when you create a new activity.</p>
+{@link android.app.Activity#onCreate onCreate()} method when you create a new activity. The
+<em>New Android Activity</em> window appears.</p>
 
 <ol>
   <li>In Android Studio, in the <code>java</code> directory, select the package,
@@ -279,10 +275,8 @@ the activity performs the initial setup of the activity components.</p>
 <li>Open the {@code DisplayMessageActivity.java} file.
 
 <p>The class already includes an implementation of the required
-{@link android.app.Activity#onCreate onCreate()} method. You will update the implementation of this
-method later. It also includes an implementation of
-{@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}, which handles the action
-bar's <em>Up</em> behavior. Keep these two methods as they are for now.</p>
+{@link android.app.Activity#onCreate onCreate()} method. You update the implementation of this
+method later.</p>
 
 <!-- Android Studio does not create a Fragment placeholder
 <p>Also, the file includes a <code>PlaceholderFragment</code> class that extends
@@ -293,10 +287,6 @@ For more information on fragments, see the
 <a href="{@docRoot}training/basics/fragments/index.html">Building A Dynamic UI with Fragments</a>.
 </p>
 -->
-</li>
-
-<li> Remove the {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} method.
-<p>You won't need it for this app.</p>
 </li>
 </ol>
 
@@ -322,7 +312,7 @@ directory, next to the original {@code MyActivity.java} file.</li>
 <li>Add the following code to the file:
 
 <pre>
-public class DisplayMessageActivity extends ActionBarActivity {
+public class DisplayMessageActivity extends AppCompatActivity {
 
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -337,8 +327,8 @@ public class DisplayMessageActivity extends ActionBarActivity {
 
     &#64;Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
+        // Handle app bar item clicks here. The app bar
+        // automatically handles clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
@@ -437,10 +427,6 @@ within the intent.</p>
 <ol>
 <li>In the <code>java/com.mycompany.myfirstapp</code> directory, edit the
   {@code DisplayMessageActivity.java} file.</li>
-<li>In the {@link android.app.Activity#onCreate onCreate()} method, remove the following line:
-<pre>
-  setContentView(R.layout.activity_display_message);
-</pre>
 <li>Get the intent and assign it to a local variable.
 <pre>
 Intent intent = getIntent();
@@ -460,6 +446,19 @@ String message = intent.getStringExtra(MyActivity.EXTRA_MESSAGE);
 <h2 id="DisplayMessage">Display the Message</h2>
 
 <ol>
+<li>In the res/layout directory, edit the {@code content_display_message.xml} file.</li>
+<li>Add an {@code android:id} attribute to the {@code RelativeLayout}.
+You need this attribute to reference the object from your app code.</li>
+
+<pre>
+&lt; RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+...
+android:id="@+id/content"&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+<li>Switch back to editing {@code DisplayMessageActivity.java}.</li>
+
+
 <li>In the {@link android.app.Activity#onCreate onCreate()} method, create a {@link android.widget.TextView} object.
 <pre>
 TextView textView = new TextView(this);
@@ -471,10 +470,11 @@ textView.setTextSize(40);
 textView.setText(message);
 </pre>
 </li>
-<li>Then add the {@link android.widget.TextView} as the root view of the activity’s layout by
-passing it to {@link android.app.Activity#setContentView setContentView()}.
+<li>Add the {@link android.widget.TextView} to the {@link android.widget.RelativeLayout}
+identified by {@code R.id.content}.
 <pre>
-setContentView(textView);
+RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
+layout.addView(textView);
 </pre>
 </li>
 <li>At the top of the file, import the {@link android.widget.TextView} class.
@@ -487,29 +487,36 @@ DisplayMessageActivity} now looks like this:</p>
 
 <pre>
 &#64;Override
-public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+protected void onCreate(Bundle savedInstanceState) {
+   super.onCreate(savedInstanceState);
+   setContentView(R.layout.activity_display_message);
+   Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+   setSupportActionBar(toolbar);
 
-    // Get the message from the intent
-    Intent intent = getIntent();
-    String message = intent.getStringExtra(MyActivity.EXTRA_MESSAGE);
+   FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+   fab.setOnClickListener(new View.OnClickListener() {
+       &#64;Override
+       public void onClick(View view) {
+           Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                   .setAction("Action", null)
+                   .show();
+       }
+   });
+   getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-    // Create the text view
-    TextView textView = new TextView(this);
-    textView.setTextSize(40);
-    textView.setText(message);
+   Intent intent = getIntent();
+   String message = intent.getStringExtra(MyActivity.EXTRA_MESSAGE);
+   TextView textView = new TextView(this);
+   textView.setTextSize(40);
+   textView.setText(message);
 
-    // Set the text view as the activity layout
-    setContentView(textView);
-}
+   RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
+   layout.addView(textView);
 </pre>
 
-<p>You can now run the app. When it opens, type a message in the text field, click Send,
-  and the message appears on the second activity.</p>
-
-<img src="{@docRoot}images/training/firstapp/firstapp.png" />
-<p class="img-caption"><strong>Figure 2.</strong> Both activities in the final app, running
-on Android 4.4.
+<p>You can now run the app. When it opens, type a message in the text field, and click
+<strong>Send</strong>. The second activity replaces the first one on the screen, showing
+the message you entered in the first activity.</p>
 
 <p>That's it, you've built your first Android app!</p>
 

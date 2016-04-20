@@ -137,7 +137,7 @@ directly:</p>
 
 <pre>
 PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-Wakelock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
         "MyWakelockTag");
 wakeLock.acquire();</pre>
 

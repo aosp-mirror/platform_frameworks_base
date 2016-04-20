@@ -1,0 +1,61 @@
+page.title=Material Design para desenvolvedores
+page.type=design
+page.image=images/cards/material_2x.png
+page.metaDescription=Saiba como aplicar o Material Design em seus aplicativos.
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependências e pré-requisitos</h2>
+  <ul>
+    <li>Android 5.0 (API de nível 21)</li>
+  </ul>
+</div>
+</div>
+
+<p>O Material Design é um guia abrangente para design visual, de movimento e de interação para
+diversas plataformas e dispositivos. Para usar o Material Design nos aplicativos Android, siga as orientações
+descritas nas
+<a href="http://www.google.com/design/spec/material-design/introduction.html">especificações do
+Material Design</a> e use os novos componentes e funcionalidades disponíveis no Android 5.0
+(API de nível 21).</p>
+
+<p>Essa lição mostra como criar aplicativos do Material Design com os seguintes elementos:</p>
+
+<ul>
+<li>O tema do Material</li>
+<li>Widgets para cartões e listas</li>
+<li>Sombras personalizadas e recorte de visualizações</li>
+<li>Desenháveis de vetor</li>
+<li>Animações personalizadas</li>
+</ul>
+
+<p>Esta lição também ensina a manter a compatibilidade com versões anteriores ao Android
+5.0 (API de nível 21) ao usar recursos do Material Design no aplicativo.</p>
+
+<h2>Lições</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">Como iniciar</a></dt>
+  <dd>Aprenda a atualizar o aplicativo com recursos do Material Design.</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">Como usar o tema do Material</a></dt>
+  <dd>Saiba como aplicar estilos do Material Design ao aplicativo.</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">Como criar listas e cartões</a></dt>
+  <dd>Aprenda a criar listas e cartões com uma aparência consistente usando widgets do sistema.</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">Como definir sombras e recortar visualizações</a></dt>
+  <dd>Saiba como definir elevação para as visualizações para criar sombras personalizadas e como recortar visualizações.</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">Como trabalhar com desenháveis</a></dt>
+  <dd>Aprenda a criar desenháveis de vetor e a colorir recursos desenháveis.</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">Como definir animações personalizadas</a></dt>
+  <dd>Saiba como criar animações personalizadas para visualizações e transições de atividades com elementos compartilhados.</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">Como manter a compatibilidade</a></dt>
+  <dd>Aprenda a manter a compatibilidade com versões de plataforma anteriores ao Android 5.0.</dd>
+</dl>

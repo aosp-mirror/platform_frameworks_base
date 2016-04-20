@@ -1,5 +1,5 @@
 page.title=APK Expansion Files
-page.metaDescription=If your app needs more than the 50MB APK max, use free APK expansion files from Google Play.
+page.metaDescription=If your app needs more than the 100MB APK max, use free APK expansion files from Google Play.
 page.tags="apk size, apk max, large assets"
 @jd:body
 
@@ -8,7 +8,7 @@ page.tags="apk size, apk max, large assets"
 <div id="qv">
 <h2>Quickview</h2>
 <ul>
-  <li>Recommended for most apps that exceed the 50MB APK limit</li>
+  <li>Recommended for most apps that exceed the 100MB APK limit</li>
   <li>You can provide up to 4GB of additional data for each APK</li>
   <li>Google Play hosts and serves the expansion files at no charge</li>
   <li>The files can be any file type you want and are saved to the device's shared storage</li>
@@ -63,10 +63,10 @@ APK Support</a></li>
 
 
 
-<p>Google Play currently requires that your APK file be no more than 50MB. For most
+<p>Google Play currently requires that your APK file be no more than 100MB. For most
 applications, this is plenty of space for all the application's code and assets.
 However, some apps need more space for high-fidelity graphics, media files, or other large assets.
-Previously, if your app exceeded 50MB, you had to host and download the additional resources
+Previously, if your app exceeded 100MB, you had to host and download the additional resources
 yourself when the user opens the app. Hosting and serving the extra files can be costly, and the
 user experience is often less than ideal. To make this process easier for you and more pleasant
 for users, Google Play allows you to attach two large expansion files that supplement your
@@ -131,7 +131,7 @@ considers them opaque binary blobs and renames the files using the following sch
   <dt>{@code main} or {@code patch}</dt>
     <dd>Specifies whether the file is the main or patch expansion file. There can be
 only one main file and one patch file for each APK.</dd>
-  <dt>{@code <expansion-version>}</dt>
+  <dt>{@code &lt;expansion-version&gt;}</dt>
     <dd>This is an integer that matches the version code of the APK with which the expansion is
 <em>first</em> associated (it matches the application's <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
@@ -139,7 +139,7 @@ value).
     <p>"First" is emphasized because although the Developer Console allows you to
 re-use an uploaded expansion file with a new APK, the expansion file's name does not change&mdash;it
 retains the version applied to it when you first uploaded the file.</p></dd>
-  <dt>{@code <package-name>}</dt>
+  <dt>{@code &lt;package-name&gt;}</dt>
     <dd>Your application's Java-style package name.</dd>
 </dl>
 
@@ -162,9 +162,9 @@ itself, you must save the files to the exact same location.</p>
 </pre>
 
 <ul>
-  <li>{@code <shared-storage>} is the path to the shared storage space, available from
+  <li>{@code &lt;shared-storage&gt;} is the path to the shared storage space, available from
 {@link android.os.Environment#getExternalStorageDirectory()}.</li>
-  <li>{@code <package-name>} is your application's Java-style package name, available
+  <li>{@code &lt;package-name&gt;} is your application's Java-style package name, available
 from {@link android.content.Context#getPackageName()}.</li>
 </ul>
 
@@ -241,9 +241,9 @@ code from you.</p>
 application:</p>
 
 <ol>
-  <li>First determine whether your application absolutely requires more than 50MB per installation.
+  <li>First determine whether your application absolutely requires more than 100MB per installation.
 Space is precious and you should keep your total application size as small as possible. If your app
-uses more than 50MB in order to provide multiple versions of your graphic assets for multiple screen
+uses more than 100MB in order to provide multiple versions of your graphic assets for multiple screen
 densities, consider instead publishing <a
 href="{@docRoot}google/play/publishing/multiple-apks.html">multiple APKs</a> in which each APK
 contains only the assets required for the screens that it targets.</li>
@@ -450,37 +450,36 @@ receives updates about the download progress.</li>
 download two packages from the SDK Manager and add the appropriate libraries to your
 application.</p>
 
-<p>First, open the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>, expand
-<em>Extras</em> and download:</p>
+<p>First, open the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>
+(<strong>Tools > Android > SDK Manager</strong>), and under
+<em>Appearance & Behavior > System Settings > Android SDK</em>, select
+the <em>SDK Tools</em> tab to select and download:</p>
 <ul>
   <li><em>Google Play Licensing Library package</em></li>
   <li><em>Google Play APK Expansion Library package</em></li>
 </ul>
 
-<p>If you're using Eclipse, create a project for each library and add it to your app:</p>
+<p>Create a new library module for the License Verification Library and Downloader
+Library. For each library:</p>
 <ol>
-  <li>Create a new Library Project for the License Verification Library and Downloader
-Library. For each library:
-    <ol>
-      <li>Begin a new Android project.</li>
-      <li>Select <strong>Create project from existing
-source</strong> and choose the library from the {@code <sdk>/extras/google/} directory
-({@code market_licensing/} for the License Verification Library or {@code
-market_apk_expansion/downloader_library/} for the Downloader Library).</li>
-      <li>Specify a <em>Project Name</em> such as "Google Play License Library" and "Google Play
-Downloader
-Library"</li>
-      <li>Click <strong>Finish</strong>.</li>
-    </ol>
+  <li>Select <strong>File > New > New Module</strong>.</li>
+  <li>In the <em>Create New Module</em> window, select <strong>Android Library</strong>,
+and then select <strong>Next</strong>.</li>
+  <li>Specify an <em>Application/Library name</em> such as "Google Play License Library"
+and "Google Play Downloader Library", choose <em>Minimum SDK level</em>, then select
+<strong>Finish</strong>.</li>
+  <li>Select <strong>File > Project Structure</strong>.</li>
+  <li>Select the <em>Properties</em> tab and in <em>Library
+Repository</em>, enter the library from the {@code &lt;sdk&gt;/extras/google/} directory
+({@code play_licensing/} for the License Verification Library or {@code
+play_apk_expansion/downloader_library/} for the Downloader Library).</li>
+  <li>Select <strong>OK</strong> to create the new module.</li>
+</ol>
+
 <p class="note"><strong>Note:</strong> The Downloader Library depends on the License
 Verification Library. Be sure to add the License
-Verification Library to the Downloader Library's project properties (same process as
-steps 2 and 3 below).</p>
+Verification Library to the Downloader Library's project properties.</p>
   </li>
-  <li>Right-click the Android project in which you want to use APK expansion files and
-select <strong>Properties</strong>.</li>
-  <li>In the <em>Library</em> panel, click <strong>Add</strong> to select and add each of the
-libraries to your application.</li>
 </ol>
 
 <p>Or, from a command line, update your project to include the libraries:</p>
@@ -717,7 +716,7 @@ application's {@code SampleDownloaderActivity} class for details.)</p>
   </li>
   <li>Start the download by calling the static method {@code
 DownloaderClientMarshaller.startDownloadServiceIfRequired(Context c, PendingIntent
-notificationClient, Class<?> serviceClass)}.
+notificationClient, Class&lt;?> serviceClass)}.
     <p>The method takes the following parameters:</p>
     <ul>
       <li><code>context</code>: Your application's {@link android.content.Context}.</li>
@@ -781,7 +780,7 @@ public void onCreate(Bundle savedInstanceState) {
   </li>
   <li>When the {@code startDownloadServiceIfRequired()} method returns anything <em>other
 than</em> {@code NO_DOWNLOAD_REQUIRED}, create an instance of {@code IStub} by
-calling {@code DownloaderClientMarshaller.CreateStub(IDownloaderClient client, Class<?>
+calling {@code DownloaderClientMarshaller.CreateStub(IDownloaderClient client, Class&lt;?>
 downloaderService)}. The {@code IStub} provides a binding between your activity to the downloader
 service such that your activity receives callbacks about the download progress.
     <p>In order to instantiate your {@code IStub} by calling {@code CreateStub()}, you must pass it
@@ -957,7 +956,7 @@ which explains how to implement a license policy such as this one.</p>
 depends on the type of file you've used. As discussed in the <a href="#Overview">overview</a>, your
 expansion files can be any kind of file you
 want, but are renamed using a particular <a href="#Filename">file name format</a> and are saved to
-{@code <shared-storage>/Android/obb/<package-name>/}.</p>
+{@code &lt;shared-storage&gt;/Android/obb/&lt;package-name&gt;/}.</p>
 
 <p>Regardless of how you read your files, you should always first check that the external
 storage is available for reading. There's a chance that the user has the storage mounted to a
@@ -1060,7 +1059,7 @@ option to specify the file suffixes that should not be compressed:</p>
 
 <p>The Google Market Apk Expansion package includes a library called the APK
 Expansion Zip Library (located in {@code
-<sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
+&lt;sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
 helps you read your expansion
 files when they're saved as ZIP files. Using this library allows you to easily read resources from
 your ZIP expansion files as a virtual file system.</p>

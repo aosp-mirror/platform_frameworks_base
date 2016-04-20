@@ -266,18 +266,16 @@ permissions, use the <code>allOf</code> attribute. The following example annotat
 public abstract void setWallpaper(Bitmap bitmap) throws IOException;
 </pre>
 
-<p>This example requires the caller of the
-<code>updateVisitedHistory</code> method to have both read and write bookmark history permissions. </p>
-
+<p>This example requires the caller of the {@code copyFile()} method to have both read and write
+permissions to external storage:</p>
 <pre>
 &#64;RequiresPermission(allOf = {
-    Manifest.permission.READ_HISTORY_BOOKMARKS,
-    Manifest.permission.WRITE_HISTORY_BOOKMARKS})
-public static final void updateVisitedHistory(ContentResolver cr, String url, boolean real) {
+    Manifest.permission.READ_EXTERNAL_STORAGE,
+    Manifest.permission.WRITE_EXTERNAL_STORAGE})
+public static final void copyFile(String dest, String source) {
     ...
 }
 </pre>
-
 
 <h2 id="check-result">Adding CheckResults Annotations</h2>
 <p>Use the <code>@CheckResults</code> annotation to

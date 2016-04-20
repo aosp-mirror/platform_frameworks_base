@@ -1,0 +1,658 @@
+page.title=バインドされたサービス
+parent.title=サービス
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>本書の内容</h2>
+<ol>
+  <li><a href="#Basics">基本</a></li>
+  <li><a href="#Creating">バインドされたサービスを作成する</a>
+    <ol>
+      <li><a href="#Binder">Binder クラスを拡張する</a></li>
+      <li><a href="#Messenger">メッセンジャーを使用する</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">サービスにバインドする</a></li>
+  <li><a href="#Lifecycle">バインドされたサービスのライフサイクルを管理する</a></li>
+</ol>
+
+<h2>キークラス</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>サンプル</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">サービス</a></li>
+</ol>
+</div>
+
+
+<p>バインドされたサービスは、クライアントサーバー インターフェースにおけるサーバーになります。バインドされたサービスでは、コンポーネント（アクティビティなど）をサービスにバインドしたり、送信を要求したり、受信を応答したり、さらにはプロセス間通信（IPC）を実行したりできるようにします。
+
+通常、バインドされたサービスは他のアプリケーション コンポーネントを提供している間だけ機能し、バックグラウンドで無期限に実行されることはありません。
+</p>
+
+<p>このドキュメントでは、他のアプリケーション コンポーネントからのサービスにバインドする方法を含む、バインドされたサービスの作成方法について説明します。
+ただし、サービスから通知を配信する方法や、フォアグラウンドでサービスを実行するよう設定する方法など、サービス全般の詳細については、「<a href="{@docRoot}guide/components/services.html">サービス</a>」のドキュメントをご覧ください。
+
+</p>
+
+
+<h2 id="Basics">基本</h2>
+
+<p>バインドされたサービスは、他のアプリケーションのバインドとやり取りを可能にする {@link android.app.Service} クラスの実装です。
+サービスのバインドを提供するには、{@link android.app.Service#onBind onBind()} コールバック メソッドを実装する必要があります。
+このメソッドでは {@link android.os.IBinder} オブジェクトが返されます。このオブジェクトはクライアントがサービスとのやり取りに使用するプログラミング インターフェースを定義します。
+
+</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>開始されたサービスにバインドする</h3>
+
+<p><a href="{@docRoot}guide/components/services.html">サービス</a> ドキュメントで説明されているように、開始されるサービスとバインドされるサービスの両方を作成できます。
+つまり、{@link android.content.Context#startService startService()} を呼び出して開始されるサービスは無期限に実行でき、クライアントが {@link
+android.content.Context#bindService bindService()} を呼び出してサービスにバインドできます。
+
+
+  <p>サービスの開始とバインドを許可すると、サービスが開始するとすべてのクライアントがアンバインドしても、システムによってサービスが破棄されることは<em>ありません</em>。
+代わりに、{@link android.app.Service#stopSelf stopSelf()} や {@link
+android.content.Context#stopService stopService()} を呼び出して、サービスを明示的に停止する必要があります。
+</p>
+
+<p>通常実装するのは、{@link android.app.Service#onBind onBind()}
+<em> か </em>{@link android.app.Service#onStartCommand onStartCommand()} のどちらかですが、両方の実装が必要な場合もあります。
+たとえば、音楽プレーヤーの場合はサービスを無期限に実行しつつ、バインドも提供できると便利な場合があります。
+この方法であれば、アクティビティがサービスを開始して音楽を再生し、ユーザーがアプリケーションから離れた場合も音楽を再生し続けることができます。
+次にユーザーがアプリケーションに戻ったとき、アクティビティがサービスにバインドして再生のコントロールをもう一度行えるようになります。
+</p>
+
+<p>開始されたサービスにバインドを追加する際のサービスのライフサイクルの詳細については、<a href="#Lifecycle">バインドされたサービスのライフサイクルを管理する</a>を必ずご覧ください。
+
+</p>
+</div>
+</div>
+
+<p>クライアントは、{@link android.content.Context#bindService
+bindService()} を呼び出せばサービスにバインドできます。バインドするときは、サービスとの接続を監視する {@link
+android.content.ServiceConnection} を実装する必要があります。{@link
+android.content.Context#bindService bindService()} メソッドは値なしですぐに返されますが、Android システムがクライアントとサービス間の接続を作成すると {@link
+android.content.ServiceConnection} の {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} が呼び出され、クライアントがサービスとの通信に使用できる {@link android.os.IBinder} が配信されます。
+
+
+</p>
+
+<p>複数のクライアントが同時にサービスに接続できます。ただし、1 つ目のクライアントのバインドの際にのみ、システムはサービスの {@link android.app.Service#onBind onBind()} メソッドを呼び出して{@link android.os.IBinder} を取得します。
+
+その後システムは {@link android.app.Service#onBind onBind()} を呼び出すことなく、同じ {@link android.os.IBinder} をバインドしたすべてのクライアントに配信します。
+</p>
+
+<p>最後のクライアントがサービスからアンバインドされると、システムはサービスを破棄します（サービスが {@link android.content.Context#startService startService()} でも開始された場合を除く）。
+</p>
+
+<p>バインドされたサービスを実装するときに最も重要なのは、{@link android.app.Service#onBind onBind()} コールバック メソッドが返すインターフェースを定義することです。
+サービスの {@link android.os.IBinder} インターフェースの定義には複数の方法があり、次のセクションではそれぞれのテクニックについて説明していきます。
+
+</p>
+
+
+
+<h2 id="Creating">バインドされたサービスを作成する</h2>
+
+<p>バインドを提供するサービスを作成するとき、クライアントがサービスとのやり取りに使用するプログラミング インターフェースを提供する {@link android.os.IBinder} を提示する必要があります。
+インターフェースを定義するには、次の 3 つの方法があります。
+</p>
+
+<dl>
+  <dt><a href="#Binder">Binder クラスを拡張する</a></dt>
+  <dd>サービスが独自のアプリケーション専用であり、クライアントと同じプロセスで実行する場合（ほとんどのケースに該当）、{@link android.os.Binder} クラスを拡張して {@link android.app.Service#onBind onBind()} からそのインスタンスを返すことでインターフェースを作成します。
+
+
+クライアントは {@link android.os.Binder} を受け取り、それを使用して {@link android.os.Binder} の実装や {@link android.app.Service} で利用できる public メソッドに直接アクセスできます。
+
+
+  <p>サービスが単にアプリケーションのバックグラウンド ワーカーである場合は、この方法が適しています。
+この方法が適していない唯一のケースは、サービスが他のアプリケーションや、別のプロセス間で使用されている場合です。
+</dd>
+
+  <dt><a href="#Messenger">メッセンジャーを使用する</a></dt>
+  <dd>別のプロセス間で動作するインターフェースが必要な場合は、{@link android.os.Messenger} を使用してサービス用のインターフェースを作成できます。
+この方法では、サービスが異なるタイプの {@link
+android.os.Message} オブジェクトに応答する {@link android.os.Handler} を定義します。
+この {@link android.os.Handler} を基本として {@link android.os.Messenger} は {@link android.os.IBinder} をクライアントと共有でき、 クライアントは {@link
+android.os.Message} オブジェクトを使用してサービスにコマンドを送信できるようになります。
+
+さらに、クライアントはサービスがメッセージを返信できるように独自の {@link android.os.Messenger} を定義できます。
+
+  <p>これは、最も簡単にプロセス間通信（IPC）を実行する方法であり、{@link
+android.os.Messenger} がすべてのリクエストを 1 つのスレッドにキューイングするため、サービスをスレッドセーフにデザインする必要がありません。
+</p>
+  </dd>
+
+  <dt>AIDL を使用する</dt>
+  <dd>AIDL（Android インターフェース定義言語）は、オブジェクトをオペーレーティングシステムが理解できるプリミティブに分解するためのすべての処理のを実行し、プロセス間でそれを整理して IPC 実行します。{@link android.os.Messenger} を使用する前の方法は、実際には AIDL を基本構造としています。
+
+
+前述したように、{@link android.os.Messenger} はすべてのクライアントの要求のキューを 1 つのスレッドに作成するため、サービスは要求を一度に受け取ります。
+ただし、サービスで複数の要求を同時に処理する場合は、AIDL を直接使用できます。
+
+その場合、サービスがマルチスレッドに対応しており、スレッドセーフで構築されている必要があります。
+  <p>AIDL を直接使用するには、プログラミング インターフェースを定義する {@code .aidl} ファイルを作成する必要があります。
+Android SDK ツールはこのファイルを使用して、インターフェースを実装して IPC を処理する抽象クラスを生成し、それをサービス内に拡張できます。
+
+</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>注:</strong> ほとんどのアプリケーションにおいて、マルチスレッド化が必要な点や、結果的により複雑な実装となってしまうことから、AIDL を使ったバインドされたサービスの作成は<strong>お勧めしません</strong>。
+
+AIDL はほとんどのアプリケーションに適していないため、このドキュメントではサービスでの AIDL の使用方法については取り上げません。
+どうしても AIDL の直接使用が必要な場合は、「<a href="{@docRoot}guide/components/aidl.html">AIDL</a>」のドキュメントをご覧ください。
+
+</p>
+
+
+
+
+<h3 id="Binder">Binder クラスを拡張する</h3>
+
+<p>サービスがローカルのアプリケーションでのみ使用されていて、プロセス間での作業が必要ない場合は、クライアントがサービスの public メソッドに直接アクセスできるようにする独自の {@link android.os.Binder} クラスを実装できます。
+
+</p>
+
+<p class="note"><strong>注:</strong> この方法は、クライアントとサービスが同じアプリケーションとプロセスにある場合（最も一般的なケース）のみ使用できます。
+たとえば、バックグラウンドで音楽を再生する独自のサービスに、アクティビティをバインドする必要のある音楽アプリケーションに適しています。
+
+</p>
+
+<p>セットアップ方法は次のとおりです。</p>
+<ol>
+  <li>サービスで次のいずれかに該当する {@link android.os.Binder} のインスタンスを作成します。
+    <ul>
+      <li>クライアントが呼び出せる public メソッドを含んでいる</li>
+      <li>クライアントが呼び出せる public メソッドのある現在の {@link android.app.Service} インスタンスを返す
+</li>
+      <li>クライアントが呼び出せる public メソッドのあるサービスでホストされた他のクラスのインスタンスを返す
+</li>
+    </ul>
+  <li>{@link android.os.Binder} のインスタンスを {@link
+android.app.Service#onBind onBind()} コールバック メソッドから返します。</li>
+  <li>クライアントで、{@link android.os.Binder} を {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} コールバック メソッドから受け取り、提供されたメソッドを使用してバインドされたサービスを呼び出します。
+</li>
+</ol>
+
+<p class="note"><strong>注:</strong> サービスとクライアントが同じアプリケーションになければならない理由は、クライアントが返されたオブジェクトをキャストでき、その API を適切に呼び出せるようにするためです。
+また、サービスとクライアントが同じプロセスになければならない理由は、この方法ではプロセス間の整理が一切行われないためです。
+
+</p>
+
+<p>以下は、{@link android.os.Binder} の実装を介してサービスのメソッドにクライアントアクセスを提供するサービスの例です。
+</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>{@code LocalBinder} が {@code LocalService} の現在のインスタンスを取り出すための {@code getService()}メソッドをクライアントに提供します。
+これにより、クライアントがサービス内の public メソッドを呼び出せるようになります。
+たとえば、クライアントはサービスから {@code getRandomNumber()} を呼び出すことができます。</p>
+
+<p>以下は、{@code LocalService} にバインドして、ボタンがクリックされたときに {@code getRandomNumber()} を呼び出すアクティビティの例です。
+</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>上の例は、{@link android.content.ServiceConnection} の実装と {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} コールバックを使用してクライアントがサービスにバインドする方法を示しています。
+次のセクションでは、サービスへのバインドのプロセスについて詳しく説明していきます。
+</p>
+
+<p class="note"><strong>注:</strong> 上記の例ではサービスから明示的にアンバウンドしていませんが、すべてのクライアントは適切なタイミング（アクティビティが一時停止したときなど）でアンバウンドする必要があります。
+</p>
+
+<p>他のサンプル コードについては、<a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a> の <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> クラスと <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a> クラスをご覧ください。</p>
+
+
+
+
+
+<h3 id="Messenger">メッセンジャーを使用する</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>AIDL との比較</h4>
+  <p>IPC を実行する必要がある場合、インターフェースで {@link android.os.Messenger} を使う方が AIDL で実装するよりも簡単です。{@link android.os.Messenger} がすべての呼び出しをサービスにキューイングするのに対して、純粋な AIDL インターフェースでは同時に複数の要求をサービスに送るため、マルチスレッドの処理が必要になるためです。
+
+
+</p>
+  <p>ほとんどのアプリケーションにおいて、サービスはマルチスレッドを実行する必要がないため、{@link
+android.os.Messenger} を使用することでサービスが一度に 1 つの呼び出しを処理できます。サービスのマルチスレッド化が重視されている場合は、<a href="{@docRoot}guide/components/aidl.html">AIDL</a> を使用してインターフェースを定義してください。
+</p>
+</div>
+</div>
+
+<p>リモート プロセスと通信するサービスが必要な場合は、{@link android.os.Messenger} を使用してサービスのインターフェースを提供できます。
+この方法では、AIDL を使用する必要なくプロセス間通信（IPC）を実行できます。
+</p>
+
+<p>{@link android.os.Messenger} の使用方法の概要は以下のとおりです。</p>
+
+<ul>
+  <li>クライアントからの呼び出しごとにコールバックを受け取る{@link android.os.Handler} をサービスが実装します。
+</li>
+  <li>{@link android.os.Handler} を使用して {@link android.os.Messenger} オブジェクトを作成します（
+{@link android.os.Handler} への参照になります）。</li>
+  <li>{@link android.os.Messenger} が、サービスが {@link android.app.Service#onBind onBind()} からクライアントに返す {@link android.os.IBinder} を作成します。
+</li>
+  <li>クライアントが {@link android.os.IBinder} を使用して、（サービスの {@link android.os.Handler} を参照する）{@link android.os.Messenger} をインスタンス化し、これを使用してクライアントが {@link android.os.Message} オブジェクトをサービスに送ります。
+
+</li>
+  <li>サービスが {@link
+android.os.Handler}、具体的には、{@link android.os.Handler#handleMessage
+handleMessage()} メソッドで、それぞれの {@link android.os.Message} を受け取ります。&mdash;</li>
+</ul>
+
+
+<p>この方法には、クライアントがサービスで呼び出す「メソッド」はありません。代わりに、クライアントはサービスが {@link android.os.Handler} で受け取る「メッセージ（{@link android.os.Message} オブジェクト）」を配信します。
+
+</p>
+
+<p>以下は、{@link android.os.Messenger} インターフェースを使用するサービスの簡単な例です。</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>{@link android.os.Handler} の {@link android.os.Handler#handleMessage handleMessage()} メソッドが、サービスが {@link android.os.Message} を受け取る場所であり、{@link android.os.Message#what} メンバーに基づいてその後の操作を決める場面であることに注目してください。
+
+</p>
+
+<p>クライアントで必要な操作は、サービスから返された {@link
+android.os.IBinder} に基づいて {@link android.os.Messenger} を作成し、{@link
+android.os.Messenger#send send()} を使用してメッセージを送信するだけです。例として、サービスにバインドして {@code MSG_SAY_HELLO} メッセージをサービスに送信する簡単なアクティビティを次に示します。
+</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>この例では、サービスがクライアントにどのように応答できるのかは示されていません。サービスが応答するようにするには、クライアントで {@link android.os.Messenger} も作成する必要があります。
+その後、クライアントが {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()} コールバックを受け取るとき、{@link android.os.Messenger#send send()} メソッドの {@link android.os.Message#replyTo} パラメータにクライアントの{@link android.os.Messenger} を含めてサービスに {@link android.os.Message} を送信します。
+
+
+</p>
+
+<p>双方向メッセージを提供する方法のサンプルについては、<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a>（サービス）と <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a>（クライアント）のサンプルをご覧ください。</p>
+
+
+
+
+
+<h2 id="Binding">サービスにバインドする</h2>
+
+<p>アプリケーションのコンポーネント（クライアント）は、{@link android.content.Context#bindService bindService()} を呼び出してサービスにバインドできます。
+次に Android システムがサービスの {@link android.app.Service#onBind
+onBind()} メソッドを呼び出し、そこからサービスとのやり取りに必要な {@link android.os.IBinder} が返されます。
+</p>
+
+<p>バインドは非同期的に行われます。{@link android.content.Context#bindService
+bindService()} は瞬時に返され、{@link android.os.IBinder} はクライアントには<em>返されません</em>。
+{@link android.os.IBinder} を受け取るには、クライアントが {@link
+android.content.ServiceConnection} のインスタンスを作成し、それを {@link android.content.Context#bindService
+bindService()} に渡す必要があります。{@link android.content.ServiceConnection} にはシステムが {@link android.os.IBinder} の配信用に呼び出すコールバック メソッドが含まれています。
+</p>
+
+<p class="note"><strong>注:</strong> サービスにバインドできるのは、アクティビティ、サービス、コンテンツ プロバイダのみです。ブロードキャスト レシーバーからサードパーティビスにはバインド<strong>できません</strong>。
+&mdash;</p>
+
+<p>そのため、クライアントからサービスにバインドするには次の操作が必要です。 </p>
+<ol>
+  <li>{@link android.content.ServiceConnection} を実装する。
+    <p>実装では次の 2 つのコールバック メソッドをオーバーライドする必要があります。</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>システムがこれを呼び出して、サービスの {@link android.app.Service#onBind onBind()} メソッドから返された {@link android.os.IBinder} を配信します。
+</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>サービスがクラッシュしたり強制終了されたりした場合など、サービスへの接続が予期せず失われたときに、Android システムがこれを呼び出します。
+これは、クライアントのアンバウンドの際には<em>呼び出されません</em>。
+</dd>
+    </dl>
+  </li>
+  <li>{@link
+android.content.Context#bindService bindService()} を呼び出して、{@link
+android.content.ServiceConnection} の実装を渡します。 </li>
+  <li>システムが {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()} コールバック メソッドを呼び出すと、インターフェースで定義されたメソッドを使用してサービスへの呼び出しを開始できます。
+</li>
+  <li>サービスとの接続を切断するには、{@link
+android.content.Context#unbindService unbindService()} を呼び出します。
+    <p>クライアントが破棄されたときにはサービスからアンバウンドしますが、サービスが使用されていないときはシャットダウンできるよう、サービスとのやり取りが終了したときや、アクティビティが停止したときは常にアンバウンドする必要があります
+
+（バインドとアンバインドの適切なタイミングについては後半でさらに詳しく説明します）。
+</p>
+  </li>
+</ol>
+
+<p>たとえば、次のスニペットは <a href="#Binder"> Binder クラスを拡張</a>して先ほど作成したサービスにクライアントを接続しており、返された {@link android.os.IBinder} を {@code LocalService} クラスにキャストして、{@code
+LocalService} インスタンスを要求することだけが必要になります。
+
+</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>この {@link android.content.ServiceConnection} を使用して、クライアントは {@link android.content.Context#bindService bindService()} に渡すことでサービスにバインドできます。
+次に例を示します。</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>{@link android.content.Context#bindService bindService()} の最初のパラメータは、バインドするサービス名を明示的に指定する {@link android.content.Intent} です（インテントは暗黙的である場合があります）。
+
+</li>
+<li>2 つ目のパラメータは {@link android.content.ServiceConnection} オブジェクトです。</li>
+<li>3 つ目のパラメータはバインドのオプションを示すフラグです。通常は {@link
+android.content.Context#BIND_AUTO_CREATE} でサービスがまだ存在していない場合にサービスを作成します。他の有効な値は、{@link android.content.Context#BIND_DEBUG_UNBIND} と {@link android.content.Context#BIND_NOT_FOREGROUND} か、未指定の {@code 0} です。
+
+</li>
+</ul>
+
+
+<h3>その他の注意点</h3>
+
+<p>サービスへのバインドに関する重要な注意点は次のとおりです。</p>
+<ul>
+  <li>接続が切れたときに投げられる {@link android.os.DeadObjectException} 例外は、常に処理する必要があります。
+リモート メソッドから投げられる例外はこれのみです。</li>
+  <li>オブジェクトはプロセス間で有効な参照です。 </li>
+  <li>通常は、クライアントのライフサイクルの立ち上がりと終了のタイミングに合わせて、その間でバインドとアンバインドをペア設定します。
+次に例を示します。
+    <ul>
+      <li>アクティビティが見えている間のみサービスとやり取りする必要がある場合は、
+{@link android.app.Activity#onStart onStart()} の間にバインドし、{@link
+android.app.Activity#onStop onStop()} の間にアンバインドします。</li>
+      <li>アクティビティがバックグラウンドで停止している間も応答を受け取りたい場合は、{@link android.app.Activity#onCreate onCreate()} の間にバインドし、{@link android.app.Activity#onDestroy onDestroy()} の間にアンバインドします。
+
+つまり、アクティビティの実行中は（バックグラウンドも含む）常にサービスを使用する必要があるため、サービスが別のプロセスにある場合は、プロセスの重みを上げて、システムに強制終了させやすいようにします。
+
+
+</li>
+    </ul>
+    <p class="note"><strong>注:</strong> 通常、アクティビティの {@link android.app.Activity#onResume onResume()} と {@link
+android.app.Activity#onPause onPause()} の間にはバインドとアンバインドは<strong>行いません</strong>。これは、これらのコールバックがライフサイクルの遷移すべてで発生するため、その遷移で発生するプロセスを最小限に抑える必要があるためです。
+
+また、アプリケーションの複数のアクティビティが同一サービスにバインドしていて、そのなかの 2 つのアクティビティ間の遷移が生じる場合、現在のアクティビティは次のアクティビティがバインドする（再開中）前にアンバインドされる（停止中）ため、サービスが破棄されて再作成される場合があります
+
+
+（ライフサイクルと連携したアクティビティの遷移の詳細については、「<a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Activities</a>」のドキュメントをご覧ください）。
+
+</p>
+</ul>
+
+<p>他のサンプル コードについては、 <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a> の <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> クラスをご覧ください。</p>
+
+
+
+
+
+<h2 id="Lifecycle">バインドされたサービスのライフサイクルを管理する</h2>
+
+<p>サービスがすべてのクライアントからアンバインドされると、Android システムがそれを破棄します（{@link android.app.Service#onStartCommand onStartCommand()} でも開始された場合を除く）。
+純粋にバインドされたサービスであれば、サービスのライフサイクルを管理する必要はありません。サービスがクライアントにバインドされているかどうかに基づいて Android システムがそれを管理します。
+
+&mdash;</p>
+
+<p>ただし、{@link android.app.Service#onStartCommand
+onStartCommand()} コールバック メソッドを実装する場合は、サービスは <em>開始された</em>とみなされるため、明示的に停止する必要があります。
+この場合、クライアントにバインドされているかどうかにかかわらず、サービスが {@link android.app.Service#stopSelf()} で自ら停止するまで、または他のコンポーネントが {@link
+android.content.Context#stopService stopService()} を呼び出すまで実行し続けます。
+
+</p>
+
+<p>さらに、サービスが開始されてバインドを許可する場合、システムが {@link android.app.Service#onUnbind onUnbind()} メソッドを呼び出すとき、次回クライアントがサービスにバインドするときに {@link android.app.Service#onRebind
+onRebind()} への呼び出しを受け取りたい場合は、{@code true} を返すようにすることもできます（{@link
+android.app.Service#onBind onBind()} への呼び出しを受け取る代わりに）。{@link android.app.Service#onRebind
+onRebind()} からは void が返されますが、クライアントは {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} コールバックで {@link android.os.IBinder} を受け取ります。下の図 1 は、ライフサイクルのこの種の論理を表しています。
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>図 1.</strong> 開始されたサービスでバインドを許可するサービスのライフサイクル
+</p>
+
+
+<p>開始されたサービスのライフサイクルの詳細については、「<a href="{@docRoot}guide/components/services.html#Lifecycle">サービス</a>」のドキュメントをご覧ください。</p>
+
+
+
+

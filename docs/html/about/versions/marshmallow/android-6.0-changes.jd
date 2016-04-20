@@ -1,0 +1,418 @@
+page.title=Android 6.0 Changes
+page.keywords=marshmallow,android60,sdk,compatibility
+meta.tags=marshmallow,api23,android60,androidm
+sdk.platform.apiLevel=23
+page.image=images/cards/samples-new_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
+    <li><a href="#behavior-power">Doze and App Standby</a></li>
+    <li><a href="#behavior-apache-http-client">Apache HTTP Client Removal</a></li>
+    <li><a href="#behavior-apache-http-client">BoringSSL</a></li>
+    <li><a href="#behavior-hardware-id">Access to Hardware Identifiers</a></li>
+    <li><a href="#behavior-notifications">Notifications</a></li>
+    <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
+    <li><a href="#behavior-text-selection">Text Selection</a></li>
+    <li><a href="#behavior-bookmark-browser">Browser Bookmark Changes</a></li>
+    <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
+    <li><a href="#behavior-network">Wi-Fi and Networking Changes</a></li>
+    <li><a href="#behavior-camera">Camera Service Changes</a></li>
+    <li><a href="#behavior-runtime">Runtime</a></li>
+    <li><a href="#behavior-apk-validation">APK Validation</a></li>
+    <li><a href="#behavior-usb">USB Connection</a></li>
+    <li><a href="#behavior-afw">Android for Work Changes</a></li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23 &raquo;</a> </li>
+</ol>
+
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/marshmallow/android-6.0.html">Android 6.0 API Overview</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>Along with new features and capabilities, Android 6.0 (API level 23) includes a variety of
+system changes and API behavior changes. This document highlights
+some of the key changes that you should understand and account for in your apps.</p>
+
+<p>If you have previously published an app for Android, be aware that these changes in the
+platform affect your app.</p>
+
+<h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
+<p>This release introduces a new permissions model, where users can now directly manage
+app permissions at runtime. This model gives users improved visibility and control over
+permissions, while streamlining the installation and auto-update processes for app developers.
+Users can grant or revoke permissions individually for installed apps. </p>
+
+<p>On your apps that target Android 6.0 (API level 23) or higher, make sure to check for and request
+permissions at runtime. To determine if your app has been granted a permission, call the
+new {@link android.content.Context#checkSelfPermission(java.lang.String) checkSelfPermission()}
+method. To request a permission, call the new
+{@link android.app.Activity#requestPermissions(java.lang.String[], int) requestPermissions()}
+method. Even if your app is not targeting Android 6.0 (API level 23), you should test your app under
+the new permissions model.</p>
+
+<p>For details on supporting the new permissions model in your app, see
+<a href="{@docRoot}training/permissions/index.html">
+Working with System Permissions</a>. For tips on how to assess the impact on your app,
+see <a href="{@docRoot}training/permissions/best-practices.html#testing">Permissions Best Practices</a>.</p>
+
+<h2 id="behavior-power">Doze and App Standby</h2>
+<p>This release introduces new power-saving optimizations for idle devices and apps. These
+features affect all apps so make sure to test your apps in these new modes.</p>
+<ul>
+<li><strong>Doze</strong>: If a user unplugs a device and leaves it stationary, with its screen off,
+for a period of time, the device goes into <em>Doze</em> mode, where it attempts to keep the system
+in a sleep state. In this mode, devices periodically resume normal operations for brief periods of
+time so that app syncing can occur and the system can perform any pending operations.
+<li><strong>App Standby</strong>: App Standby allows the system to determine that an app is idle
+when the user is not actively using it. The system makes this determination when the user does not
+touch the app for a certain period of time. If the device is unplugged, the system disables network
+access and suspends syncs and jobs for the apps it deems idle.</li>
+</ul>
+
+<p>To learn more about these power-saving changes, see
+<a href="{@docRoot}training/monitoring-device-state/doze-standby.html">Optimizing for Doze and App Standby</a>.</p>
+
+<h2 id="behavior-apache-http-client">Apache HTTP Client Removal</h2>
+
+<p>Android 6.0 release removes support for the Apache HTTP client. If your app is using this client and
+targets Android 2.3 (API level 9) or higher, use the {@link java.net.HttpURLConnection} class
+instead. This API is more efficient because it reduces network use through transparent compression
+and response caching, and minimizes power consumption. To continue using the Apache HTTP APIs, you
+must first declare the following compile-time dependency in your {@code build.gradle} file:
+</p>
+<pre>
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+
+<h2 id="boringSSL">BoringSSL </h2>
+
+<p>Android is moving away from OpenSSL to the
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
+library. If you’re using the Android NDK in your app, don't link against cryptographic libraries
+that are not a part of the NDK API, such as {@code libcrypto.so} and {@code libssl.so}. These
+libraries are not public APIs, and may change or break without notice across releases and devices.
+In addition, you may expose yourself to security vulnerabilities. Instead, modify your
+native code to call the Java cryptography APIs via JNI or to statically link against a
+cryptography library of your choice.</p>
+
+<h2 id="behavior-hardware-id">Access to Hardware Identifier</h2>
+<p>To provide users with greater data protection, starting in this release, Android
+removes programmatic access to the device’s local hardware identifier for
+apps using the Wi-Fi and Bluetooth APIs. The
+{@link android.net.wifi.WifiInfo#getMacAddress() WifiInfo.getMacAddress()} and the
+{@link android.bluetooth.BluetoothAdapter#getAddress() BluetoothAdapter.getAddress()} methods
+now return a constant value of {@code 02:00:00:00:00:00}.</p>
+
+<p>To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans,
+your app must now have the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+{@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permissions:</p>
+<ul>
+<li>{@link android.net.wifi.WifiManager#getScanResults() WifiManager.getScanResults()}</li>
+<li>{@link android.bluetooth.BluetoothDevice#ACTION_FOUND BluetoothDevice.ACTION_FOUND}</li>
+<li>{@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback)
+BluetoothLeScanner.startScan()}</li>
+</ul>
+
+<p class="note"><strong>Note</strong>: When a device running Android 6.0 (API level 23) initiates a
+background Wi-Fi or Bluetooth scan, the operation is visible to external devices as
+originating from a randomized MAC address.</p>
+
+<h2 id="behavior-notifications">Notifications</h2>
+<p>
+This release removes the {@code Notification.setLatestEventInfo()} method. Use the
+{@link android.app.Notification.Builder} class instead to construct notifications. To update a
+notification repeatedly, reuse the {@link android.app.Notification.Builder} instance. Call the
+{@link android.app.Notification.Builder#build()} method to get
+updated {@link android.app.Notification} instances.
+</p>
+<p>The {@code adb shell dumpsys notification} command no longer prints out your notification text.
+Use the {@code adb shell dumpsys notification --noredact} command instead to print out the text
+in a notification object.</p>
+
+<h2 id="behavior-audiomanager-Changes">AudioManager Changes</h2>
+<p>Setting the volume directly or muting specific streams via the {@link android.media.AudioManager}
+class is no longer supported. The {@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} method is deprecated, and you should call the
+{@link android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int) requestAudioFocus()}
+method instead. Similarly, the
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} method is
+deprecated; instead, call the {@link android.media.AudioManager#adjustStreamVolume(int, int, int)
+adjustStreamVolume()} method and pass in the direction value
+{@link android.media.AudioManager#ADJUST_MUTE} or
+{@link android.media.AudioManager#ADJUST_UNMUTE}.</p>
+
+
+<h2 id="behavior-text-selection">Text Selection</h2>
+
+<img src="{@docRoot}images/android-6.0/text-selection.gif"
+style="float:right; margin:0 0 20px 30px" width="360" height="640" />
+
+<p>When users select text in your app, you can now display text selection actions such as
+<em>Cut</em>, <em>Copy</em>, and <em>Paste</em> in a
+<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection"
+class="external-link">floating toolbar</a>. The user interaction implementation is similar to that
+for the contextual action bar, as described in
+<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">
+Enabling the contextual action mode for individual views</a>.</p>
+
+<p>To implement a floating toolbar for text selection, make the following changes in your existing
+apps:</p>
+<ol>
+<li>In your {@link android.view.View} or {@link android.app.Activity} object, change your
+{@link android.view.ActionMode} calls from
+{@code startActionMode(Callback)} to {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
+<li>Take your existing implementation of {@code ActionMode.Callback} and make it extend
+{@link android.view.ActionMode.Callback2} instead.</li>
+<li>Override the
+{@link android.view.ActionMode.Callback2#onGetContentRect(android.view.ActionMode, android.view.View, android.graphics.Rect) onGetContentRect()}
+method to provide the coordinates of the content {@link android.graphics.Rect} object
+(such as a text selection rectangle) in the view.</li>
+<li>If the rectangle positioning is no longer valid, and this is the only element to be invalidated,
+call the {@link android.view.ActionMode#invalidateContentRect() invalidateContentRect()} method.</li>
+</ol>
+
+<p>If you are using <a href="{@docRoot}tools/support-library/index.html">
+Android Support Library</a> revision 22.2, be aware that floating toolbars are not
+backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects by
+default. This prevents floating toolbars from being displayed. To enable
+{@link android.view.ActionMode} support in an
+{@link android.support.v7.app.AppCompatActivity}, call
+{@link android.support.v7.app.AppCompatActivity#getDelegate()}, then call
+{@link android.support.v7.app.AppCompatDelegate#setHandleNativeActionModesEnabled(boolean)
+setHandleNativeActionModesEnabled()} on the returned
+{@link android.support.v7.app.AppCompatDelegate} object and set the input
+parameter to {@code false}. This call returns control of {@link android.view.ActionMode} objects to
+the framework. In devices running Android 6.0 (API level 23), that allows the framework to support
+{@link android.support.v7.app.ActionBar} or floating toolbar modes, while on devices running
+Android 5.1 (API level 22) or lower, only the {@link android.support.v7.app.ActionBar} modes are
+supported.</p>
+
+<h2 id="behavior-bookmark-browser">Browser Bookmark Changes</h2>
+<p>This release removes support for global bookmarks. The
+{@code android.provider.Browser.getAllBookmarks()} and {@code android.provider.Browser.saveBookmark()}
+methods are now removed. Likewise, the {@code READ_HISTORY_BOOKMARKS} and {@code WRITE_HISTORY_BOOKMARKS}
+permissions are removed. If your app targets Android 6.0 (API level 23) or higher, don't access
+bookmarks from the global provider or use the bookmark permissions. Instead, your app should store
+bookmarks data internally.</p>
+
+<h2 id="behavior-keystore">Android Keystore Changes</h2>
+<p>With this release, the
+<a href="{@docRoot}training/articles/keystore.html">Android Keystore provider</a> no longer supports
+DSA. ECDSA is still supported.</p>
+
+<p>Keys which do not require encryption at rest will no longer be deleted when secure lock screen
+is disabled or reset (for example, by the user or a Device Administrator). Keys which require
+encryption at rest will be deleted during these events.</p>
+
+<h2 id="behavior-network">Wi-Fi and Networking Changes</h2>
+
+<p>This release introduces the following behavior changes to the Wi-Fi and networking APIs.</p>
+<ul>
+<li>Your apps can now change the state of {@link android.net.wifi.WifiConfiguration} objects only
+if you created these objects. You are not permitted to modify or delete
+{@link android.net.wifi.WifiConfiguration} objects created by the user or by other apps.
+</li>
+<li>
+Previously, if an app forced the device to connect to a specific Wi-Fi network by using
+{@link android.net.wifi.WifiManager#enableNetwork(int,boolean) enableNetwork()} with the
+{@code disableAllOthers=true} setting, the device disconnected from other networks such as
+cellular data. In This release, the device no longer disconnects from such other networks. If
+your app’s {@code targetSdkVersion} is {@code “20”} or lower, it is pinned to the selected
+Wi-Fi network. If your app’s {@code targetSdkVersion} is {@code “21”} or higher, use the
+multinetwork APIs (such as
+{@link android.net.Network#openConnection(java.net.URL) openConnection()},
+{@link android.net.Network#bindSocket(java.net.Socket) bindSocket()}, and the new
+{@link android.net.ConnectivityManager#bindProcessToNetwork(android.net.Network)
+bindProcessToNetwork()} method) to ensure that its network traffic is sent on the selected network.</li>
+</ul>
+
+<h2 id="behavior-camera">Camera Service Changes</h2>
+<p>In This release, the model for accessing shared resources in the camera service has been changed
+from the previous “first come, first serve” access model to an access model where high-priority
+processes are favored.  Changes to the service behavior include:</p>
+<ul>
+<li>Access to camera subsystem resources, including opening and configuring a camera device, is
+awarded based on the “priority” of the client application process. Application processes with
+user-visible or foreground activities are generally given a higher-priority, making camera resource
+acquisition and use more dependable.</li>
+<li>Active camera clients for lower priority apps may be “evicted” when a higher priority
+application attempts to use the camera.  In the deprecated {@link android.hardware.Camera} API,
+this results in
+{@link android.hardware.Camera.ErrorCallback#onError(int,android.hardware.Camera) onError()} being
+called for the evicted client. In the {@link android.hardware.camera2 Camera2} API, it results in
+{@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected(android.hardware.camera2.CameraDevice) onDisconnected()}
+being called for the evicted client.</li>
+<li>On devices with appropriate camera hardware, separate application processes are able to
+independently open and use separate camera devices simultaneously. However, multi-process use
+cases, where simultaneous access causes significant degradation of performance or capabilities of
+any of the open camera devices, are now detected and disallowed by the camera service. This change
+may result in “evictions” for lower priority clients even when no other app is directly
+attempting to access the same camera device.
+</li>
+<li>
+Changing the current user causes active camera clients in apps owned by the previous user account
+to be evicted.  Access to the camera is limited to user profiles owned by the current device user.
+In practice, this means that a “Guest” account, for example, will not be able to leave running
+processes that use the camera subsystem when the user has switched to a different account.
+</li>
+</ul>
+
+<h2 id="behavior-runtime">Runtime</h2>
+<p>The ART runtime now properly implements access rules for the
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method. This
+change fixes a problem where Dalvik was checking access rules incorrectly in previous versions.
+If your app uses the
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method and you
+want to override access checks, call the
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} method with the input
+parameter set to {@code true}. If your app uses the
+<a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat library</a> or the
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview library</a>,
+you must update your app to use to the latest versions of these libraries. Otherwise, make sure that
+any custom classes referenced from XML are updated so that their class constructors are accessible.</p>
+
+<p>This release updates the behavior of the dynamic linker. The dynamic linker now understands the
+difference between a library’s {@code soname} and its path
+(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
+public bug 6670</a>), and search by {@code soname} is now
+implemented. Apps which previously worked that have bad {@code DT_NEEDED} entries
+(usually absolute paths on the build machine’s file system) may fail when loaded.</p>
+
+<p>The {@code dlopen(3) RTLD_LOCAL} flag is now correctly implemented. Note that
+{@code RTLD_LOCAL} is the default, so calls to {@code dlopen(3)} that didn’t explicitly use
+{@code RTLD_LOCAL} will be affected (unless your app explicitly used {@code RTLD_GLOBAL}). With
+{@code RTLD_LOCAL}, symbols will not be made available to libraries loaded by later calls to
+{@code dlopen(3)} (as opposed to being referenced by {@code DT_NEEDED} entries).</p>
+</p>
+
+<p>
+On previous versions of Android, if your app requested the system to load a shared library with
+text relocations, the system displayed a warning but still allowed the library to be loaded.
+Beginning in this release, the system rejects this library if your app's target SDK version is 23
+or higher. To help you detect if a library failed to load, your app should log the
+{@code dlopen(3)} failure, and include the problem description text that the {@code dlerror(3)}
+call returns. To learn more about handling text relocations, see this
+<a href="https://wiki.gentoo.org/wiki/Hardened/Textrels_Guide" class="external-link">guide</a>.</p>
+
+<h2 id="behavior-apk-validation">APK Validation</h2>
+<p>The platform now performs stricter validation of APKs. An APK is considered corrupt if a file is
+declared in the manifest but not present in the APK itself. An APK must be re-signed if any of the
+contents are removed.</p>
+
+<h2 id="behavior-usb">USB Connection</h2>
+<p>Device connections through the USB port are now set to charge-only mode by default. To access
+the device and its content over a USB connection, users must explicitly grant permission for such
+interactions. If your app supports user interactions with the device over a USB port, take into
+consideration that the interaction must be explicitly enabled.
+</p>
+
+<h2 id="behavior-afw">Android for Work Changes</h2>
+<p>This release includes the following behavior changes for Android for Work:</p>
+<ul>
+  <li><strong>Work contacts in personal contexts.</strong> The Google Dialer
+Call Log now displays work contacts when the user views past calls.
+Setting
+{@link android.app.admin.DevicePolicyManager#setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean) setCrossProfileCallerIdDisabled()}
+to {@code true} hides the work profile contacts in the Google Dialer Call Log. Work contacts can be
+displayed along with personal contacts to devices over Bluetooth only if
+you set {@link android.app.admin.DevicePolicyManager#setBluetoothContactSharingDisabled(android.content.ComponentName, boolean)
+setBluetoothContactSharingDisabled()} to {@code false}. By default, it is set to {@code true}.
+  </li>
+  <li><strong>Wi-Fi configuration removal:</strong> Wi-Fi configurations added by a Profile Owner
+(for example, through calls to the
+{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()} method) are now removed if that work profile is deleted.
+  </li>
+  <li><strong>Wi-Fi configuration lockdown:</strong> Any Wi-Fi configuration created by
+  an active Device Owner can no longer be modified or deleted by the user if
+  {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} is non-zero.
+  The user can still create and modify their own Wi-Fi configurations. Active Device
+  Owners have the privilege of editing or removing any Wi-Fi configurations, including
+  those not created by them.
+  </li>
+<li><strong>Download device policy controller via Google account addition:</strong> When a Google
+account that requires management via a device policy controller (DPC) app is added to a device
+outside of a managed context, the add account flow now prompts the user to install the
+appropriate WPC. This behavior also applies to accounts added via
+<strong>Settings > Accounts</strong> and in the initial device setup wizard.</li>
+<li><strong>Changes to specific {@link android.app.admin.DevicePolicyManager} API behaviors:</strong>
+  <ul>
+  <li>Calling the
+{@link android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName,boolean) setCameraDisabled()}
+method affects the camera for the calling user only; calling it from the managed profile doesn’t
+affect camera apps running on the primary user.</li>
+  <li>In addition, the
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures(android.content.ComponentName,int) setKeyguardDisabledFeatures()}
+    method is now available for Profile Owners, as well as to Device Owners. </li>
+  <li>A Profile Owner can set these keyguard restrictions:
+    <ul>
+    <li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} and
+    {@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_FINGERPRINT}, which affect the
+    keyguard settings for the profile’s parent user.</li>
+    <li>{@link android.app.admin.DevicePolicyManager#KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, which
+    only affects notifications generated by applications in the managed profile.</li>
+    </ul>
+  </li>
+  <li>The {@code DevicePolicyManager.createAndInitializeUser()} and {@code DevicePolicyManager.createUser()} methods have been deprecated.</li>
+  <li>The {@link android.app.admin.DevicePolicyManager#setScreenCaptureDisabled(android.content.ComponentName, boolean) setScreenCaptureDisabled()}
+method now also blocks the assist structure when an app of the given user is in the foreground. </li>
+  <li>{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}
+now defaults to SHA-256. SHA-1 is still supported for backwards compatibility but will be removed
+in future.
+{@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM}
+now only accepts SHA-256.</li>
+  <li>Device initializer APIs which existed in the Android 6.0 (API level 23) are now removed.</li>
+    <li><code>EXTRA_PROVISIONING_RESET_PROTECTION_PARAMETERS</code> is removed so NFC bump
+provisioning cannot programmatically unlock a factory reset protected device.</li>
+<li>You can now use the {@link android.app.admin.DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
+extra to pass data to the device owner app during NFC provisioning of the managed device.</li>
+    <li>Android for Work APIs are optimized for M runtime permissions, including Work profiles,
+assist layer, and others. New {@link android.app.admin.DevicePolicyManager} permission APIs don't
+affect pre-M apps.</li>
+<li>When users back out of the synchronous part of the setup flow initiated through an
+{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} or
+{@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_DEVICE} intent, the system
+now returns a {@link android.app.Activity#RESULT_CANCELED} result code.</li>
+    </ul></li>
+
+<li><strong>Changes to other APIs</strong>:
+<ul>
+    <li>Data Usage: The {@code android.app.usage.NetworkUsageStats} class has been renamed
+{@link android.app.usage.NetworkStats}.</li>
+</ul>
+    </li>
+
+    <li><strong>Changes to global settings</strong>:
+    <ul>
+    <li>These settings can no longer be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}</code>:
+<ul>
+    <li><code>BLUETOOTH_ON</code></li>
+    <li><code>DEVELOPMENT_SETTINGS_ENABLED</code></li>
+    <li><code>MODE_RINGER</code></li>
+    <li><code>NETWORK_PREFERENCE</code></li>
+    <li><code>WIFI_ON</code></li>
+</ul>
+    </li>
+    <li>These global settings can now be set via {@link android.app.admin.DevicePolicyManager#setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String) setGlobalSettings()}:
+    <ul>
+    <li>{@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
+    </ul>
+    </li>
+    </ul>
+</ul>

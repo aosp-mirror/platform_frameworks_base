@@ -1,0 +1,93 @@
+page.title=Ease-of-use and fast turnaround time benefits Indian Rummy.
+page.metaDescription=Games4All localized their apps based upon popularity.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/g4a-indian-rummy.jpg
+page.timestamp=1456340902
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/indian-rummy-icon.png"
+  height="113" />
+</div>
+
+<p>
+  Games4All (G4A) develops a variety of games that they distribute broadly to
+  users around the world.
+</p>
+
+<p>
+  After noticing that certain apps — including
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=org.games4all.android.games.indianrummy.prod">
+  Indian Rummy</a>, a card game in which players try to form sets and sequences
+  of cards — had become especially popular in specific countries, they decided
+  to localize those apps.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Initially they used a local agency to do the translations and got great
+  results — the release of localized versions increased the number of users
+  tremendously.
+</p>
+
+<p>
+  Building on that success, G4A expanded their localization goals, but found
+  that translation quality varied among their vendors and costs limited the
+  language/game combinations they could translate. That's when G4A decided to try
+  the App Translation Service.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" class="style:376px">
+  <img
+   src="{@docRoot}images/distribute/stories/indian-rummy-screenshot.jpg"
+   srcset=
+  "{@docRoot}images/distribute/stories/indian-rummy-screenshot.jpg 1x
+  {@docRoot}images/distribute/stories/indian-rummy-screenshot_2x.jpg 2x">
+  <p class="img-caption">
+    Dutch version of Indian Rummy
+  </p>
+</div>
+
+<p>
+  G4A found that the cost per translation was much lower with the App Translation Service compared to local companies. The process was much easier too, G4A simply had to provide texts in the strings.xml format.
+</p>
+
+<p>
+  Initially, G4A translated Indian Rummy into five languages through the App
+  Translation Service. As a result they’ve <b>doubled the number of users</b>
+  in French and German languages and seen a <b>300 percent increase in user
+  engagement</b> with the localized versions.
+</p>
+
+<p>
+  They also found that making slight changes to games rules based on local
+  nuances was key to the game's success.
+</p>
+
+<p>
+  “In contrast [to the App Translation Service], our previous experiences with
+  translation agencies were much more difficult: files often required extensive
+  conversion operations to make them usable, and turnaround times varied
+  wildly,” says G4A founder Pieter Olivier. He continues, "With the App
+  Translation Service, the turnaround time is usually measured in days instead
+  of weeks that we were used to with traditional translation agencies."
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about the
+  <a href="http://developer.android.com/distribute/tools/localization-checklist.html#gp-trans">
+  App Translation Service</a> and read the full
+<a href="https://developer.android.com/distribute/tools/localization-checklist.html">
+  Localization checklist</a> to simplify the process of localizing your app or
+  game for users across the globe.
+</p>

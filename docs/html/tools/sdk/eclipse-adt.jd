@@ -52,7 +52,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
       alt=""/>ADT 23.0.7</a> <em>(August 2015)</em>
   </p>
 
@@ -85,7 +85,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 23.0.6</a> <em>(March 2015)</em>
   </p>
 
@@ -119,7 +119,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 23.0.4</a> <em>(October 2014)</em>
   </p>
 
@@ -153,7 +153,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 23.0.3</a> <em>(August 2014)</em>
   </p>
 
@@ -189,7 +189,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 23.0.2</a> <em>(July 2014)</em>
   </p>
 
@@ -224,7 +224,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 23.0.0</a> <em>(June 2014)</em>
   </p>
 
@@ -256,7 +256,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.6.3</a> <em>(April 2014)</em>
   </p>
 
@@ -296,7 +296,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.6.2</a> <em>(March 2014)</em>
   </p>
 
@@ -341,7 +341,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.6.1</a> <em>(March 2014)</em>
   </p>
 
@@ -389,7 +389,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.6.0</a> <em>(March 2014)</em>
   </p>
 
@@ -453,7 +453,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.3.0</a> <em>(October 2013)</em>
   </p>
 
@@ -490,7 +490,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.2.1</a> <em>(September 2013)</em>
   </p>
 
@@ -524,7 +524,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.2</a> <em>(September 2013)</em>
   </p>
 
@@ -562,7 +562,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.0.5</a> <em>(July 2013)</em>
   </p>
 
@@ -597,7 +597,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.0.4</a> <em>(July 2013)</em>
   </p>
 
@@ -634,7 +634,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.0.1</a> <em>(May 2013)</em>
   </p>
 
@@ -671,7 +671,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 22.0.0</a> <em>(May 2013)</em>
   </p>
 
@@ -715,7 +715,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 21.1.0</a> <em>(February 2013)</em>
   </p>
 
@@ -773,7 +773,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 21.0.1</a> <em>(December 2012)</em>
   </p>
 
@@ -893,7 +893,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 21.0.0</a> <em>(November 2012)</em>
   </p>
 
@@ -1015,7 +1015,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 20.0.3</a> <em>(August 2012)</em>
   </p>
 
@@ -1050,7 +1050,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 20.0.2</a> <em>(July 2012)</em>
   </p>
 
@@ -1086,7 +1086,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 20.0.1</a> <em>(July 2012)</em>
   </p>
 
@@ -1128,7 +1128,7 @@ unprotected receivers for default Android actions.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 20.0.0</a> <em>(June 2012)</em>
   </p>
 
@@ -1252,7 +1252,7 @@ functions.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 18.0.0</a> <em>(April 2012)</em>
   </p>
 
@@ -1288,7 +1288,7 @@ functions.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 17.0.0</a> <em>(March 2012)</em>
   </p>
 
@@ -1391,7 +1391,7 @@ select. (<a href="http://code.google.com/p/android/issues/detail?id=20589">Issue
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 16.0.1</a> <em>(December 2011)</em>
   </p>
 
@@ -1426,7 +1426,7 @@ select. (<a href="http://code.google.com/p/android/issues/detail?id=20589">Issue
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 16.0.0</a> <em>(December 2011)</em>
   </p>
 
@@ -1459,7 +1459,7 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 15.0.1</a> <em>(November 2011)</em>
   </p>
 
@@ -1494,7 +1494,7 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 15.0.0</a> <em>(October 2011)</em>
   </p>
 
@@ -1527,7 +1527,7 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 14.0.0</a> <em>(October 2011)</em>
   </p>
 
@@ -1647,7 +1647,7 @@ Linux</a>.</dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 12.0.0</a> <em>(July 2011)</em>
   </p>
 
@@ -1701,7 +1701,7 @@ the Android SDK Manager to do so.</dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 11.0.0</a> <em>(June 2011)</em>
   </p>
 
@@ -1837,7 +1837,7 @@ href="http://tools.android.com/recent">Android Tools Project Site</a>.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 10.0.1</a> <em>(March 2011)</em>
   </p>
 
@@ -1868,7 +1868,7 @@ requires Eclipse 3.5 or higher (as of 10.0.0).</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 10.0.0</a> <em>(February 2011)</em>
   </p>
 
@@ -1918,7 +1918,7 @@ so.</dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 9.0.0</a> <em>(January 2011)</em>
   </p>
 
@@ -2027,7 +2027,7 @@ so.</dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 8.0.1</a> <em>(December 2010)</em>
   </p>
 
@@ -2056,7 +2056,7 @@ so.</p></dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 8.0.0</a> <em>(December 2010)</em>
   </p>
 
@@ -2103,7 +2103,7 @@ example, ADT 8.x is for SDK Tools r8.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.9</a> <em>(September 2010)</em>
   </p>
 
@@ -2131,7 +2131,7 @@ so.</p></dd>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.8</a> <em>(September 2010)</em>
   </p>
 
@@ -2180,7 +2180,7 @@ project.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.7</a> <em>(May 2010)</em>
   </p>
 
@@ -2206,7 +2206,7 @@ project support through the Ant build system.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.6</a> <em>(March 2010)</em>
   </p>
 
@@ -2275,7 +2275,7 @@ targets for application launches.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.5</a> <em>(December 2009)</em>
   </p>
 
@@ -2305,7 +2305,7 @@ see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>ADT 0.9.4</a> <em>(October 2009)</em>
   </p>
 

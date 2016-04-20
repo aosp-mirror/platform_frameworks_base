@@ -4,13 +4,18 @@ parent.link=index.html
 @jd:body
 
 
-<p class="note"><strong>Note: </strong>The Android <code>layoutopt</code> tool has been replaced by the {@code lint} tool beginning in ADT and SDK Tools revision 16. The {@code lint} tool reports UI layout performance issues in a similar way as <code>layoutopt</code>, and detects additional problems.</p>
-<p>For more information about using {@code lint}, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a> and the <a  href="{@docRoot}tools/help/lint.html">lint reference documentation</a>.</p>
+<p class="note"><strong>Note: </strong>The Android <code>layoutopt</code> tool has been replaced 
+by the {@code lint} tool beginning in SDK Tools revision 16. The {@code lint} tool reports UI 
+layout performance issues in a similar way as <code>layoutopt</code>, and detects additional problems.</p>
+<p>For more information about using {@code lint}, see 
+<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a> and the 
+<a href="{@docRoot}tools/help/lint.html">lint reference documentation</a>.</p>
 
 <p><code>layoutopt</code> is a command-line tool that helps you optimize the
 layouts and layout hierarchies of your applications.<p>
 
-<p>This document is a reference to the available command line options. For more information and sample
+<p>This document is a reference to the available command line options. For more information and 
+sample
 output of the tool, see <a
 href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">Optimizing layouts with
 layoutopt</a>.</p>

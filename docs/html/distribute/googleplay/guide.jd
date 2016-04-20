@@ -1,7 +1,8 @@
-page.title=Finding Success on Google Play
-page.metaDescription=A guide to help you find success with your app or game business on Google Play.
-meta.tags="distribute", "bestpractices"
-page.tags="google play", "business", "monetize", "engagement"
+page.title=Find Success on Google Play
+page.metaDescription=The updated guide that helps you find success with your app or game business on Google Play.
+page.tags="play,protips"
+page.timestamp=1447437450
+meta.tags="secrets, success, play, google"
 page.image=distribute/images/play_dev_guide.png
 
 @jd:body
@@ -9,63 +10,34 @@ page.image=distribute/images/play_dev_guide.png
 <p>
   We’ve created a downloadable guide to help you find success with your app or
   game business on Google Play. In it, you’ll find features, tips, and best
-  practices to help you build an effective strategy.
+  practices to help you build an effective strategy to improve the quality,
+  reach, retention, and monetization of your apps and games.
 </p>
 
-<p>
-  The guide is separated into the following sections:
-</p>
-<ul>
-  <li>
-    <strong>Publishing on Google Play</strong> &mdash; using the Google Play
-    Developer Console to distribute your app to over 1 billion Android users
-    worldwide.
-  </li>
+<a href="https://play.google.com/store/books/details?id=O2a5CgAAQBAJ&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1">
+  <img src="{@docRoot}images/distribute/secrets_v2_banner.jpg">
+</a>
 
-  <li>
-    <strong>Quality</strong> &mdash; The fundamentals of building a great app
-    and an insight into the Google Play guidelines and policies.
-  </li>
+<div style="text-align:center">
+  <a href="https://play.google.com/store/books/details?id=O2a5CgAAQBAJ&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1">
+  <img alt="Get it on Google Play"
+   src="https://play.google.com/intl/en_us/badges/images/books/en-play-badge-border.png"
+   style="height:60px" />
+  </a>
+</div>
 
-  <li>
-    <strong>Discoverability &amp; reach</strong> &mdash; Maximizing your app's
-    discoverability and reaching the widest audience possible.
-  </li>
-
-  <li>
-    <strong>Engagement &amp; retention</strong> &mdash; Converting
-    installations into active users and improving user retention.
-  </li>
-
-  <li>
-    <strong>Monetization</strong> &mdash; Monetization strategies to generate
-    ongoing, growing revenue streams.
-  </li>
-
-  <li>
-    <strong>Measurement with Google Analytics</strong> &mdash; Understanding
-    your users and improving your app experience, conversions, and marketing.
-  </li>
-
-  <li>
-    <strong>Going global</strong> &mdash; Launching your app in local markets
-    around the world.
-  </li>
-</ul>
-
-<p>
-  Download the guide by clicking the image below or <a href=
-  "http://goo.gl/DFjbrS">get it on Google Play</a>.
+<p><a
+  href="https://docs.google.com/forms/d/1KFE9D7NlOrxM_jzmyMeZGaczgg1xo57jBoGq0R5nnsU/viewform">Sign
+  up to be notified</a> when the guide is released in the following languages:
+  Bahasa Indonesia, Deutsch, español (Latinoamérica), le français, português do
+  Brasil, <span style="white-space: nowrap;">tiếng Việt</span>, <span style="white-space:
+  nowrap;">русский язы́к</span>, <span style="white-space: nowrap;">ไทย</span>,
+  <span style="white-space: nowrap;">한국어</span>, <span style="white-space: nowrap;">中文
+  (简体)</span>, <span style="white-space: nowrap;">中文 (繁體)</span>, and <span style="white-space:
+  nowrap;">日本語</span>.
 </p>
 
-<p>
-  We’ll release the guide in more languages in the coming months. Check back to
-  this website regularly as we post information on new features and best
-  practices to help you distribute and monetize your app.
+<p>You can also <a
+  href="{@docRoot}shareables/distribute/secrets_play/v2/web/secrets_to_app_success_v2_en.pdf">download
+  the pdf</a>.
 </p>
-  <div class="resource-widget resource-flow-layout col-16"
-    data-query="collection:play_dev_guide"
-    data-cardSizes="9x6"
-    data-maxResults="1">
-  </div>
-

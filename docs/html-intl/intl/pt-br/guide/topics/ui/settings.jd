@@ -1,0 +1,1202 @@
+page.title=Configurações
+page.tags=preferência,preferenceactivity,preferencefragment
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+<ol>
+  <li><a href="#Overview">Visão geral</a>
+    <ol>
+      <li><a href="#SettingTypes">Preferências</a></li>
+    </ol>
+  </li>
+  <li><a href="#DefiningPrefs">Definição de preferências em XML</a>
+    <ol>
+      <li><a href="#Groups">Criação de grupos de configuração</a></li>
+      <li><a href="#Intents">Uso de intenções</a></li>
+    </ol>
+  </li>
+  <li><a href="#Activity">Criação de uma atividade de preferência</a></li>
+  <li><a href="#Fragment">Uso de fragmentos de preferência</a></li>
+  <li><a href="#Defaults">Configuração de valores padrão</a></li>
+  <li><a href="#PreferenceHeaders">Uso de cabeçalhos de preferência</a>
+    <ol>
+      <li><a href="#CreateHeaders">Criação do arquivo de cabeçalhos</a></li>
+      <li><a href="#DisplayHeaders">Exibição de cabeçalhos</a></li>
+      <li><a href="#BackCompatHeaders">Compatibilidade de versões mais antigas com cabeçalhos de preferência</a></li>
+    </ol>
+  </li>
+  <li><a href="#ReadingPrefs">Leitura de preferências</a>
+    <ol>
+      <li><a href="#Listening">Escuta de alterações de preferência</a></li>
+    </ol>
+  </li>
+  <li><a href="#NetworkUsage">Gerenciamento de uso de rede</a></li>
+  <li><a href="#Custom">Composição de uma preferência personalizada</a>
+    <ol>
+      <li><a href="#CustomSelected">Especificação da interface do usuário</a></li>
+      <li><a href="#CustomSave">Salvamento do valor da configuração</a></li>
+      <li><a href="#CustomInitialize">Inicialização do valor atual</a></li>
+      <li><a href="#CustomDefault">Fornecimento de um valor padrão</a></li>
+      <li><a href="#CustomSaveState">Salvamento e restauração do estado da preferência</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Classes principais</h2>
+<ol>
+  <li>{@link android.preference.Preference}</li>
+  <li>{@link android.preference.PreferenceActivity}</li>
+  <li>{@link android.preference.PreferenceFragment}</li>
+</ol>
+
+
+<h2>Veja também</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/settings.html">Guia de projeto de configurações</a></li>
+</ol>
+</div>
+</div>
+
+
+
+
+<p>Geralmente os aplicativos contêm configurações que permitem aos usuários modificar características e comportamentos do aplicativo. Por
+exemplo: alguns aplicativos permitem aos usuários especificar se as notificações estão ativadas ou especificar a frequência
+com que o aplicativo sincroniza dados com a nuvem.</p>
+
+<p>Para fornecer configurações ao aplicativo, é preciso usar
+as APIs {@link android.preference.Preference} do Android para programar uma interface coerente
+com a experiência do usuário em outros aplicativos Android (inclusive as configurações do sistema). Este documento descreve
+como programar as configurações do aplicativo por meio de APIs {@link android.preference.Preference}.</p>
+
+<div class="note design">
+<p><strong>Projeto de configurações</strong></p>
+  <p>Para obter mais informações sobre o projeto de configurações, leia o guia de projeto <a href="{@docRoot}design/patterns/settings.html">Configurações</a>.</p>
+</div>
+
+
+<img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
+<p class="img-caption"><strong>Figura 1.</strong> Capturas de tela das configurações do aplicativo Mensagens
+do Android. A seleção de um item definido por uma {@link android.preference.Preference} 
+abre uma interface para alterar a configuração.</p>
+
+
+
+
+<h2 id="Overview">Visão geral</h2>
+
+<p>Em vez de usar objetos {@link android.view.View} para criar a interface do usuário, as configurações
+são criadas por meio de várias subclasses da classe {@link android.preference.Preference}
+declaradas em um arquivo XML.</p>
+
+<p>Os objetos {@link android.preference.Preference} são as peças fundamentais de uma única
+configuração. Cada {@link android.preference.Preference} aparece como um item em uma lista e oferece a IU
+adequada para que os usuários modifiquem a configuração. Por exemplo: uma {@link
+android.preference.CheckBoxPreference} cria um item de lista que exibe uma caixa de seleção e uma {@link
+android.preference.ListPreference} cria um item que abre uma caixa de diálogo com uma lista de opções.</p>
+
+<p>Cada {@link android.preference.Preference} adicionada tem um par de valor-chave correspondente
+que o sistema usa para salvar a configuração em um arquivo
+{@link android.content.SharedPreferences} padrão para as configurações do aplicativo. Quando o usuário altera uma configuração, o sistema atualiza o valor
+correspondente no arquivo {@link android.content.SharedPreferences}. O único momento em que
+se deve interagir diretamente com o arquivo {@link android.content.SharedPreferences} associado
+é no momento de ler o valor para determinar o comportamento do aplicativo com base na configuração do usuário.</p>
+
+<p>O valor salvo em {@link android.content.SharedPreferences} para cada configuração pode ser
+um dos seguintes tipos de dados:</p>
+
+<ul>
+  <li>Boolean</li>
+  <li>Float</li>
+  <li>Int</li>
+  <li>Long</li>
+  <li>String</li>
+  <li>String {@link java.util.Set}</li>
+</ul>
+
+<p>Como a IU de configurações do aplicativo é criada com objetos {@link android.preference.Preference}
+ em vez de objetos 
+{@link android.view.View}, é preciso usar uma subclasse {@link android.app.Activity} ou 
+{@link android.app.Fragment} especializada para exibir as configurações de lista:</p>
+
+<ul>
+  <li>Se o aplicativo for compatível com versões do Android anteriores à 3.0 (nível da API 10 ou anterior), será
+necessário criar a atividade como uma extensão da classe {@link android.preference.PreferenceActivity}.</li>
+  <li>No Android 3.0 ou versões posteriores, deve-se usar um {@link android.app.Activity} tradicional
+que hospeda um {@link android.preference.PreferenceFragment} que exige as configurações do aplicativo.
+No entanto, pode-se também usar {@link android.preference.PreferenceActivity} para criar um layout de dois painéis
+para telas maiores quando há vários grupos de configurações.</li>
+</ul>
+
+<p>Veja como configurar a {@link android.preference.PreferenceActivity} e instâncias de {@link
+android.preference.PreferenceFragment} nas seções sobre a <a href="#Activity">Criação de uma atividade de preferência</a> e <a href="#Fragment">Uso
+de fragmentos de preferência</a>.</p>
+
+
+<h3 id="SettingTypes">Preferências</h3>
+
+<p>Toda configuração do aplicativo é representada por uma subclasse específica da classe {@link
+android.preference.Preference}. Cada subclasse contém um conjunto de propriedades essenciais que permitem
+especificar itens como o título da configuração e o valor padrão. Cada subclasse também oferece
+suas propriedades e interface do usuário especializadas. Por exemplo: a figura 1 ilustra uma captura de tela
+das configurações do aplicativo Mensagens. Cada item de lista na tela de configurações tem, como fundo, um objeto {@link
+android.preference.Preference} diferente.</p>
+
+<p>A seguir há algumas das preferências mais comuns:</p>
+
+<dl>
+  <dt>{@link android.preference.CheckBoxPreference}</dt>
+  <dd>Exibe um item com uma caixa de seleção para uma configuração que esteja ativada ou desativada. O valor
+salvo é um booleano (<code>true</code> se estiver selecionada).</dd>
+
+  <dt>{@link android.preference.ListPreference}</dt>
+  <dd>Abre uma caixa de diálogo com uma lista de botões de opção. O valor salvo
+pode ser qualquer um dos tipos de valor compatíveis (listados acima).</dd>
+
+  <dt>{@link android.preference.EditTextPreference}</dt>
+  <dd>Abre uma caixa de diálogo com um widget {@link android.widget.EditText}. O valor salvo é um {@link
+java.lang.String}.</dd>
+</dl>
+
+<p>Consulte a classe {@link android.preference.Preference} para ver uma lista de todas as outras subclasses e
+as propriedades correspondentes.</p>
+
+<p>É claro que as classes embutidas não acomodam todas as necessidades e o aplicativo pode exigir
+algo mais especializado. Por exemplo: a plataforma atualmente não fornece nenhuma classe {@link
+android.preference.Preference} para selecionar um número ou data. Portanto, pode ser necessário definir
+a própria subclasse {@link android.preference.Preference}. Veja mais informações na seção sobre <a href="#Custom">Composição de uma preferência personalizada</a>.</p>
+
+
+
+<h2 id="DefiningPrefs">Definição de preferências em XML</h2>
+
+<p>Embora se possa instanciar novos objetos {@link android.preference.Preference} em tempo de execução,
+deve-se definir uma lista de configurações no XML com uma hierarquia
+de objetos {@link android.preference.Preference}. Recomenda-se o uso de um arquivo XML para definir a coleção de configurações porque o arquivo
+oferece uma estrutura fácil de ler e simples de atualizar. Além disso, as configurações do aplicativo
+geralmente são predeterminadas, embora ainda seja possível modificar a coleção em tempo de execução.</p>
+
+<p>Cada subclasse {@link android.preference.Preference} pode ser declarada com um elemento XML
+correspondente ao nome da classe, como {@code &lt;CheckBoxPreference&gt;}.</p>
+
+<p>É preciso salvar o arquivo XML no diretório {@code res/xml/}. Embora seja possível nomear livremente
+o arquivo, é mais frequente vê-lo com o nome {@code preferences.xml}. Geralmente só é necessário um arquivo
+porque as ramificações na hierarquia (que abrem sua própria lista de configurações) são declaradas
+por meio de instâncias aninhadas de {@link android.preference.PreferenceScreen}.</p>
+
+<p class="note"><strong>Observação:</strong> se você deseja criar um layout de vários painéis
+para as configurações, serão necessários arquivos XML separados para cada fragmento.</p>
+
+<p>O nó raiz do arquivo XML deve ser um elemento {@link android.preference.PreferenceScreen
+&lt;PreferenceScreen&gt;}. É dentro desse elemento que se adiciona cada {@link
+android.preference.Preference}. Cada filho adicionado dentro do elemento
+{@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;} é exibido com um item
+único na lista de configurações.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;CheckBoxPreference
+        android:key="pref_sync"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summ"
+        android:defaultValue="true" />
+    &lt;ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_syncConnectionType"
+        android:dialogTitle="@string/pref_syncConnectionType"
+        android:entries="@array/pref_syncConnectionTypes_entries"
+        android:entryValues="@array/pref_syncConnectionTypes_values"
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Nesse exemplo, existe um {@link android.preference.CheckBoxPreference} e um {@link
+android.preference.ListPreference}. Os dois itens contêm estes três atributos:</p>
+
+<dl>
+  <dt>{@code android:key}</dt>
+  <dd>Esse atributo é necessário para preferências que persistem a um valor de dados. Ele especifica a chave
+exclusiva (uma string) que o sistema usa ao salvar o valor dessa configuração em {@link
+android.content.SharedPreferences}. 
+  <p>As únicas instâncias em que esse atributo é <em>dispensável</em> ocorrem quando a preferência é um 
+{@link android.preference.PreferenceCategory} ou {@link android.preference.PreferenceScreen},
+ou quando a preferência especifica um {@link android.content.Intent} para invocar (com um elemento <a href="#Intents">{@code &lt;intent&gt;}</a>) ou um {@link android.app.Fragment} para exibir (com um atributo <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
+android:fragment}</a>).</p>
+  </dd>
+  <dt>{@code android:title}</dt>
+  <dd>Fornece à configuração um nome visível ao usuário.</dd>
+  <dt>{@code android:defaultValue}</dt>
+  <dd>Especifica o valor inicial que o sistema deve definir no arquivo {@link
+android.content.SharedPreferences}. Deve-se fornecer um valor padrão para
+todas as configurações.</dd>
+</dl>
+
+<p>Para mais informações sobre todos os outros atributos compatíveis, consulte a documentação {@link
+android.preference.Preference} (e subclasse respectiva).</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/ui/settings/settings-titles.png" alt="" />
+  <p class="img-caption"><strong>Figura 2.</strong> Definição de categorias
+com títulos. <br/><b>1.</b> A categoria é especificada pelo elemento {@link
+android.preference.PreferenceCategory &lt;PreferenceCategory&gt;}. <br/><b>2.</b> O título
+é especificado com o atributo {@code android:title}.</p>
+</div>
+
+
+<p>Quando a lista de configurações excede cerca de 10 itens, pode ser necessário adicionar títulos
+para definir grupos de configurações ou exibir esses grupos
+em uma tela separada. Essas opções são descritas nas seções a seguir.</p>
+
+
+<h3 id="Groups">Criação de grupos de configuração</h3>
+
+<p>Se você apresentar uma lista de 10 ou mais configurações,
+os usuários podem ter dificuldade de percorrê-las, compreendê-las e processá-las. Para solucionar isso,
+pode-se dividir algumas ou todas as configurações em grupos, transformando uma longa lista
+em várias listas mais curtas. Um grupo de configurações relacionadas pode ser apresentado de uma das seguintes formas:</p>
+
+<ul>
+  <li><a href="#Titles">Uso de títulos</a></li>
+  <li><a href="#Subscreens">Uso de subtelas</a></li>
+</ul>
+
+<p>Pode-se usar uma ou ambas as técnicas de agrupamento para organizar as configurações do aplicativo. Ao decidir
+qual delas usar e como dividir as configurações, deve-se seguir as diretrizes do guia
+<a href="{@docRoot}design/patterns/settings.html">Configurações</a> de Projeto do Android.</p>
+
+
+<h4 id="Titles">Uso de títulos</h4>
+
+<p>Para usar divisores com cabeçalhos entre grupos de configurações (como ilustrado na figura 2),
+coloca-se cada grupo de objetos {@link android.preference.Preference} dentro de {@link
+android.preference.PreferenceCategory}.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;PreferenceCategory 
+        android:title="&#64;string/pref_sms_storage_title"
+        android:key="pref_key_storage_settings">
+        &lt;CheckBoxPreference
+            android:key="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_auto_delete"
+            android:title="&#64;string/pref_title_auto_delete"
+            android:defaultValue="false"... />
+        &lt;Preference 
+            android:key="pref_key_sms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_sms_delete"... />
+        &lt;Preference 
+            android:key="pref_key_mms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_mms_delete" ... />
+    &lt;/PreferenceCategory>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h4 id="Subscreens">Uso de subtelas</h4>
+
+<p>Para usar grupos de configurações em uma subtela (como ilustrado na figura 3), coloque o grupo 
+de objetos {@link android.preference.Preference} dentro de {@link
+android.preference.PreferenceScreen}.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
+<p class="img-caption"><strong>Figura 3.</strong> Subtelas de configuração. O elemento {@code
+&lt;PreferenceScreen&gt;} cria
+um item que, quando selecionado, abre uma lista separada para exibir as configurações aninhadas.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&lt;PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- opens a subscreen of settings -->
+    &lt;PreferenceScreen
+        android:key="button_voicemail_category_key"
+        android:title="&#64;string/voicemail"
+        android:persistent="false">
+        &lt;ListPreference
+            android:key="button_voicemail_provider_key"
+            android:title="&#64;string/voicemail_provider" ... />
+        &lt;!-- opens another nested subscreen -->
+        &lt;PreferenceScreen
+            android:key="button_voicemail_setting_key"
+            android:title="&#64;string/voicemail_settings"
+            android:persistent="false">
+            ...
+        &lt;/PreferenceScreen>
+        &lt;RingtonePreference
+            android:key="button_voicemail_ringtone_key"
+            android:title="&#64;string/voicemail_ringtone_title"
+            android:ringtoneType="notification" ... />
+        ...
+    &lt;/PreferenceScreen>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h3 id="Intents">Uso de intenções</h3>
+
+<p>Em alguns casos, pode ser necessário que um item de preferência abra em um atividade diferente
+e não na tela de configuração, como um navegador da web para exibir uma página da web. Para invocar um {@link
+android.content.Intent} quando o usuário seleciona um item de preferência, adicione um elemento {@code &lt;intent&gt;}
+como filho do elemento {@code &lt;Preference&gt;} correspondente.</p>
+
+<p>Por exemplo, a seguir apresenta-se como usar um item de preferência para abrir uma página da web:</p>
+
+<pre>
+&lt;Preference android:title="@string/prefs_web_page" >
+    &lt;intent android:action="android.intent.action.VIEW"
+            android:data="http://www.example.com" />
+&lt;/Preference>
+</pre>
+
+<p>É possível criar intenções implícitas e explícitas usando os seguintes atributos:</p>
+
+<dl>
+  <dt>{@code android:action}</dt>
+    <dd>A ação a atribuir, conforme o método {@link android.content.Intent#setAction setAction()}.
+</dd>
+  <dt>{@code android:data}</dt>
+    <dd>Os dados a atribuir, conforme o método {@link android.content.Intent#setData setData()}.</dd>
+  <dt>{@code android:mimeType}</dt>
+    <dd>O tipo MIME atribuir, conforme o método {@link android.content.Intent#setType setType()}.
+</dd>
+  <dt>{@code android:targetClass}</dt>
+    <dd>A parte de classe do nome do componente, conforme o método {@link android.content.Intent#setComponent
+setComponent()}.</dd>
+  <dt>{@code android:targetPackage}</dt>
+    <dd>A parte de pacote do nome do componente, conforme o método {@link
+android.content.Intent#setComponent setComponent()}.</dd>
+</dl>
+
+
+
+<h2 id="Activity">Criação de uma atividade de preferência</h2>
+
+<p>Para exibir as configurações em uma atividade, estenda a classe {@link
+android.preference.PreferenceActivity}. É uma extensão da classe tradicional {@link
+android.app.Activity} que exibe uma lista de configurações com base em uma hierarquia de objetos {@link
+android.preference.Preference}. A {@link android.preference.PreferenceActivity}
+automaticamente persiste às configurações associadas a cada {@link
+android.preference.Preference} quando o usuário faz uma alteração.</p>
+
+<p class="note"><strong>Observação:</strong> ao desenvolver um aplicativo para Android 3.0
+ou superior, deve-se usar o {@link android.preference.PreferenceFragment}. Consulte a próxima
+seção sobre o <a href="#Fragment">Uso de fragmentos de preferência</a>.</p>
+
+<p>O mais importante é não carregar um layout de vistas durante o retorno de chamada {@link
+android.preference.PreferenceActivity#onCreate onCreate()}. Em vez disso, chama-se {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}
+para adicionar à atividade as preferências declaradas em um arquivo XML. Por exemplo: abaixo há o código mínimo
+necessário para um {@link android.preference.PreferenceActivity} funcional:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+</pre>
+
+<p>Na verdade, esse código é suficiente para alguns aplicativos porque, assim que o usuário modifica uma preferência,
+o sistema salva as alterações em um arquivo padrão {@link android.content.SharedPreferences}
+que os componentes do outro aplicativo poderá ler quando for necessário verificar as configurações do usuário. No entanto,
+muitos aplicativos exigem um pouco mais de código para escutar as alterações que ocorrem nas preferências.
+Para informações sobre a escuda de alterações no arquivo {@link android.content.SharedPreferences},
+consulte a seção sobre <a href="#ReadingPrefs">Leitura de preferências</a>.</p>
+
+
+
+
+<h2 id="Fragment">Uso de fragmentos de preferência</h2>
+
+<p>Ao desenvolver para Android 3.0 (nível da API 11) ou versões posteriores, deve-se usar um {@link
+android.preference.PreferenceFragment} para exibir a lista de objetos {@link android.preference.Preference}.
+ Pode-se adicionar um {@link android.preference.PreferenceFragment} a qualquer atividade &mdash; não é
+necessário usar {@link android.preference.PreferenceActivity}.</p>
+
+<p>Os <a href="{@docRoot}guide/components/fragments.html">fragmentos</a> permitem uma arquitetura
+mais flexível para o aplicativo em comparação com o uso de apenas atividades para qualquer
+tipo de atividade criada. Assim, sugerimos usar {@link
+android.preference.PreferenceFragment} para controlar a exibição das configurações em vez de {@link
+android.preference.PreferenceActivity} sempre que possível.</p>
+
+<p>A implementação de {@link android.preference.PreferenceFragment} pode ser tão simples
+quanto definir o método {@link android.preference.PreferenceFragment#onCreate onCreate()} para carregar
+um arquivo de preferências com {@link android.preference.PreferenceFragment#addPreferencesFromResource
+addPreferencesFromResource()}. Por exemplo:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+}
+</pre>
+
+<p>É possível adicionar esse fragmento a um {@link android.app.Activity} como se faria com qualquer outro
+{@link android.app.Fragment}. Por exemplo:</p>
+
+<pre>
+public class SettingsActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+}
+</pre>
+
+<p class="note"><strong>Observação:</strong> um {@link android.preference.PreferenceFragment} não tem
+seu próprio objeto {@link android.content.Context}. Se for necessário um objeto {@link android.content.Context}
+, é possível chamar {@link android.app.Fragment#getActivity()}. No entanto, tome cuidado para chamar
+{@link android.app.Fragment#getActivity()} somente quando o fragmento estiver anexado a uma atividade. Quando
+o fragmento ainda não estiver anexado, ou tiver sido separado durante o fim do seu ciclo de vida, {@link
+android.app.Fragment#getActivity()} retornará como nulo.</p>
+
+
+<h2 id="Defaults">Configuração de valores padrão</h2>
+
+<p>As preferências criadas provavelmente definem alguns comportamentos importantes do aplicativo, portanto
+é necessário inicializar o arquivo {@link android.content.SharedPreferences} associado
+com os valores padrão de cada {@link android.preference.Preference} quando o usuário abre o aplicativo
+pela primeira vez.</p>
+
+<p>A primeira coisa a fazer é especificar o valor padrão de cada objeto {@link
+android.preference.Preference}
+no arquivo XML com o atributo {@code android:defaultValue}. O valor pode ser qualquer tipo de dados
+apropriado para o objeto {@link android.preference.Preference} correspondente. Por
+exemplo:</p>
+
+<pre>
+&lt;!-- default value is a boolean -->
+&lt;CheckBoxPreference
+    android:defaultValue="true"
+    ... />
+
+&lt;!-- default value is a string -->
+&lt;ListPreference
+    android:defaultValue="@string/pref_syncConnectionTypes_default"
+    ... />
+</pre>
+
+<p>Em seguida, a partir do método {@link android.app.Activity#onCreate onCreate()} na atividade principal
+do aplicativo &mdash; e em qualquer outra atividade pela qual o usuário possa entrar no aplicativo pela
+primeira vez &mdash;, chame {@link android.preference.PreferenceManager#setDefaultValues
+setDefaultValues()}:</p>
+
+<pre>
+PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+</pre>
+
+<p>Essa chamada durante {@link android.app.Activity#onCreate onCreate()} garante que o aplicativo
+seja adequadamente inicializado com as configurações padrão, que o aplicativo pode precisar ler
+para determinar alguns comportamentos (se, por exemplo, baixará dados enquanto estiver
+em uma rede de celular).</p>
+
+<p>Esse método usa três argumentos:</p>
+<ul>
+  <li>O {@link android.content.Context} do aplicativo.</li>
+  <li>O ID de recurso do arquivo XML de preferências para o qual você deseja definir os valores padrão.</li>
+  <li>Booleano que indica se os valores padrão devem ser definidos mais de uma vez.
+<p>Quando <code>false</code>, o sistema define os valores parão somente se esse método nunca tiver
+sido chamado (ou se {@link android.preference.PreferenceManager#KEY_HAS_SET_DEFAULT_VALUES}
+no arquivo de preferências compartilhadas do valor padrão for falso).</p></li>
+</ul>
+
+<p>Enquanto o terceiro argumento estiver definido como <code>false</code>, pode-se chamar esse método com segurança
+toda vez que a atividade iniciar sem substituir as preferências salvas do usuário redefinindo-as
+para os padrões. No entanto, se ele for definido como <code>true</code>, todos os valores anteriores
+serão substituídos pelos padrões.</p>
+
+
+
+<h2 id="PreferenceHeaders">Uso de cabeçalhos de preferência</h2>
+
+<p>Em casos raros, pode ser necessário projetar as configurações de forma que a primeira tela
+exiba somente uma lista de <a href="#Subscreens">subtelas</a> (como as do aplicativo Configurações
+conforme ilustrado nas figuras 4 e 5). Ao desenvolver um projeto desse tipo para Android 3.0 ou versão posterior,
+deve-se usar um novo recurso "cabeçalhos" no Android 3.0 em vez de criar subtelas com elementos
+{@link android.preference.PreferenceScreen} aninhados.</p>
+
+<p>Para criar as configurações com cabeçalhos, é preciso:</p>
+<ol>
+  <li>Separar cada grupo de configurações em instâncias separadas de {@link
+android.preference.PreferenceFragment}. Ou seja, cada grupo de configurações precisa de um arquivo
+XML separado.</li>
+  <li>Criar um arquivo XML de cabeçalhos que lista cada grupo de configurações e declara que fragmento
+contém a lista correspondente de configurações.</li>
+  <li>Estender a classe {@link android.preference.PreferenceActivity} para hospedar as configurações.</li>
+  <li>Implementar o retorno de chamada {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} para especificar
+o arquivo de cabeçalhos.</li>
+</ol>
+
+<p>Um grande benefício de usar esse modelo é que {@link android.preference.PreferenceActivity}
+automaticamente apresenta o layout de dois painéis ilustrado na figura 4 ao executar em telas grandes.</p>
+
+<p>Mesmo se o aplicativo for compatível com versões de Android anteriores à 3.0, é possível programar
+o aplicativo para usar {@link android.preference.PreferenceFragment} para uma apresentação em dois painéis
+em dispositivos mais novos e ser compatível com a hierarquia tradicional multitelas
+em dispositivos mais antigos (veja a seção sobre <a href="#BackCompatHeaders">Compatibilidade de versões
+mais antigas com cabeçalhos de preferência</a>).</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
+<p class="img-caption"><strong>Figura 4.</strong> Layout de dois painéis com cabeçalhos. <br/><b>1.</b> Os cabeçalhos
+são definidos com um arquivo XML de cabeçalhos. <br/><b>2.</b> Cada grupo de configurações é definido por um
+{@link android.preference.PreferenceFragment} especificado por um elemento {@code &lt;header&gt;}
+no arquivo de cabeçalhos.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
+<p class="img-caption"><strong>Figura 5.</strong> Um dispositivo celular com cabeçalhos de configuração. Quando
+um item é selecionado o {@link android.preference.PreferenceFragment} associado substitui
+os cabeçalhos.</p>
+
+
+<h3 id="CreateHeaders" style="clear:left">Criação do arquivo de cabeçalhos</h3>
+
+<p>Cada grupo de configurações na lista de cabeçalhos é especificado por um único elemento {@code &lt;header&gt;}
+dentro de um elemento raiz {@code &lt;preference-headers&gt;}. Por exemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;!-- key/value pairs can be included as arguments for the fragment. -->
+        &lt;extra android:name="someKey" android:value="someHeaderValue" />
+    &lt;/header>
+&lt;/preference-headers>
+</pre>
+
+<p>Com o atributo {@code android:fragment}, cada cabeçalho declara uma instância de {@link
+android.preference.PreferenceFragment} que deve abrir quando o usuário selecionar o cabeçalho.</p>
+
+<p>O elemento {@code &lt;extras&gt;} permite passar os pares de valores-chave para o fragmento em um {@link
+android.os.Bundle}. O fragmento pode recuperar os argumentos chamando {@link
+android.app.Fragment#getArguments()}. Há vários motivos para passar argumentos ao fragmento,
+mas um bom motivo é reutilizar a mesma subclasse de {@link
+android.preference.PreferenceFragment} para cada grupo e usar o argumento para especificar
+o arquivo XML de preferências que o fragmento deve carregar.</p>
+
+<p>Por exemplo, a seguir há um fragmento que pode ser reutilizado em vários grupos de configurações, quando
+cada cabeçalho define um argumento {@code &lt;extra&gt;} com a chave {@code "settings"}:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String settings = getArguments().getString("settings");
+        if ("notifications".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_wifi);
+        } else if ("sync".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_sync);
+        }
+    }
+}
+</pre>
+
+
+
+<h3 id="DisplayHeaders">Exibição de cabeçalhos</h3>
+
+<p>Para exibir os cabeçalhos de preferência, é preciso implementar o método de retorno de chamada {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} e chamar 
+{@link android.preference.PreferenceActivity#loadHeadersFromResource
+loadHeadersFromResource()}. Por exemplo:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onBuildHeaders(List&lt;Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+}
+</pre>
+
+<p>Quando o usuário seleciona um item de uma lista de cabeçalhos, o sistema abre o {@link
+android.preference.PreferenceFragment} associado.</p>
+
+<p class="note"><strong>Observação:</strong> ao usar cabeçalhos de preferência, a subclasse de {@link
+android.preference.PreferenceActivity} não precisa implementar o método {@link
+android.preference.PreferenceActivity#onCreate onCreate()} porque a única tarefa
+necessária para a atividade é carregar os cabeçalhos.</p>
+
+
+<h3 id="BackCompatHeaders">Compatibilidade de versões mais antigas com cabeçalhos de preferência</h3>
+
+<p>Se o aplicativo for compatível com versões de Android anteriores à 3.0, ainda será possível usar cabeçalhos
+para fornecer um layout em dois painéis ao executar no Android 3.0 e versões posteriores. Basta criar um arquivo XML de preferências
+adicional que usa elementos básicos {@link android.preference.Preference
+&lt;Preference&gt;} que se comportam como os itens de cabeçalho (para uso das versões mais antigas
+do Android).</p>
+
+<p>No entanto, em vez de abrir um novo {@link android.preference.PreferenceScreen}, cada elemento {@link
+android.preference.Preference &lt;Preference&gt;} envia um {@link android.content.Intent}
+ao {@link android.preference.PreferenceActivity} que especifica que arquivo XML de preferência
+carregar.</p>
+
+<p>Por exemplo, abaixo há um arquivo XML de cabeçalhos de preferência usado no Android 3.0
+e posterior ({@code res/xml/preference_headers.xml}):</p> 
+
+<pre>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header 
+        android:fragment="com.example.prefs.SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" />
+&lt;/preference-headers>
+</pre>
+
+<p>E apresenta-se também um arquivo de preferências que fornece os mesmos cabeçalhos de versões de Android
+mais antigas que a 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;Preference 
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one"  >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_ONE" />
+    &lt;/Preference>
+    &lt;Preference 
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;intent 
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_TWO" />
+    &lt;/Preference>
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Como a compatibilidade com {@code &lt;preference-headers&gt;} foi adicionada no Android 3.0, o sistema chama
+{@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} em seu {@link
+android.preference.PreferenceActivity} somente ao executar em Androd 3.0 ou posterior. Para carregar
+o arquivo de cabeçalhos de “legado" ({@code preference_headers_legacy.xml}), é preciso verificar a versãodo Android
+e, se a versão for mais antiga que o Android 3.0 ({@link
+android.os.Build.VERSION_CODES#HONEYCOMB}), chama {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}
+para carregar o arquivo de cabeçalho legado. Por exemplo:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+
+// Called only on Honeycomb and later
+&#64;Override
+public void onBuildHeaders(List&lt;Header> target) {
+   loadHeadersFromResource(R.xml.preference_headers, target);
+}
+</pre>
+
+<p>Depois só resta tratar o {@link android.content.Intent} passado para a atividade
+para identificar que arquivo de preferências carregar. Portanto, para recuperar a ação da intenção e compará-la
+com strings de ações conhecidas usadas nas tags de {@code &lt;intent&gt;} do XML de preferências:</p>
+
+<pre>
+final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";
+...
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    String action = getIntent().getAction();
+    if (action != null &amp;&amp; action.equals(ACTION_PREFS_ONE)) {
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+
+    else if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+</pre>
+
+<p>Observe que chamadas consecutivas a {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()}
+empilharão todas as preferências em uma única lista, portanto certifique-se de que seja chamado somente uma vez, encadeando
+as condições com declarações else-if.</p>
+
+
+
+
+
+<h2 id="ReadingPrefs">Leitura de preferências</h2>
+
+<p>Por padrão, todas as preferências do aplicativo são salvas em um arquivo acessível de qualquer lugar
+dentro do aplicativo chamando o método estático {@link
+android.preference.PreferenceManager#getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences()}. Isso retorna o objeto {@link
+android.content.SharedPreferences} que contém todos os pares de valores-chave associados
+aos objetos {@link android.preference.Preference} usados em {@link
+android.preference.PreferenceActivity}.</p>
+
+<p>Por exemplo, abaixo apresenta-se como ler um dos valores de preferência de outra atividade
+no aplicativo:</p>
+
+<pre>
+SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+</pre>
+
+
+
+<h3 id="Listening">Escuta de alterações de preferência</h3>
+
+<p>Há alguns motivos pelos quais pode ser necessário ser notificado assim que o usuário altera
+uma das preferências. Para receber um retorno de chamada quando acontece uma alteração em alguma das preferências,
+implemente a interface {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
+SharedPreference.OnSharedPreferenceChangeListener} e registre a escuta
+para o objeto {@link android.content.SharedPreferences} chamando {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}.</p>
+
+<p>A interface tem somente um método de retorno de chamada, {@link
+android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+onSharedPreferenceChanged()}, e pode ser mais fácil implementar a interface como parte
+da atividade. Por exemplo:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity
+                              implements OnSharedPreferenceChangeListener {
+    public static final String KEY_PREF_SYNC_CONN = "pref_syncConnectionType";
+    ...
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        String key) {
+        if (key.equals(KEY_PREF_SYNC_CONN)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+}
+</pre>
+
+<p>Nesse exemplo, o método verifica se a configuração alterada se destina a uma chave de preferência conhecida. Ele
+chama {@link android.preference.PreferenceActivity#findPreference findPreference()} para obter
+o objeto {@link android.preference.Preference} alterado para que possa modificar o sumário
+do item como uma descrição da seleção do usuário. Ou seja, quando a configuração for uma {@link
+android.preference.ListPreference} ou outra configuração de múltipla escolha, deve-se chamar {@link
+android.preference.Preference#setSummary setSummary()} quando a configuração for alterada para exibir
+o status atual (como a configuração Suspensão mostrada na figura 5).</p>
+
+<p class="note"><strong>Observação:</strong> conforme descrito no documento do Projeto para Android sobre <a href="{@docRoot}design/patterns/settings.html">Configurações</a>, recomendamos atualizar
+o sumário de {@link android.preference.ListPreference} a cada vez que o usuário alterar a preferência
+para descrever a configuração atual.</p>
+
+<p>Para um gerenciamento adequado do ciclo de vida na atividade, recomendamos registrar e remover o registro
+de {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener} durante os retornos de chamada de {@link
+android.app.Activity#onResume} e {@link android.app.Activity#onPause} respectivamente:</p>
+
+<pre>
+&#64;Override
+protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
+}
+</pre>
+
+<p class="caution"><strong>Atenção:</strong> ao chamar {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}, o gerenciador de preferências
+não armazena atualmente uma referência à escuta. É preciso armazenar uma referência
+forte à escuta, senão ela será suscetível à coleta de lixo. Recomendamos
+manter uma referência à escuta nos dados de instância de um objeto
+que existirá enquanto a escuta for necessária.</p>
+
+<p>Por exemplo: no código a seguir, o autor da chamada não mantém nenhuma
+referência à escuta. Como resultado, a escuta estará sujeita à coleta de lixo
+e falhará futuramente em algum momento indeterminado:</p>
+
+<pre>
+prefs.registerOnSharedPreferenceChangeListener(
+  // Bad! The listener is subject to garbage collection!
+  new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+});
+</pre>
+
+<p>Em vez disso, armazene uma referência à escuta nos dados de instância de um objeto
+que existirá enquanto a escuta for necessária:</p>
+
+<pre>
+SharedPreferences.OnSharedPreferenceChangeListener listener =
+    new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+};
+prefs.registerOnSharedPreferenceChangeListener(listener);
+</pre>
+
+<h2 id="NetworkUsage">Gerenciamento de uso de rede</h2>
+
+
+<p>A partir do Android 4.0, o aplicativo Configurações do sistema permite aos usuários ver o quanto
+de dados de rede que os aplicativos usam em primeiro e segundo plano. Portanto, os usuários
+podem desativar os dados em segundo plano de aplicativos individuais. Para evitar que os usuários desativem
+o acesso do aplicativo a dados em segundo plano, deve-se usar a conexão de dados de forma eficiente
+e permitir aos usuários refinar o uso de dados do aplicativo por meio das configurações do aplicativo.<p>
+
+<p>Por exemplo: deve-se permitir ao usuário controlar a frequência de sincronização dos dados do aplicativo para
+uploads/downloads somente quando estiver em Wi-Fi, o aplicativo usar dados em deslocamento etc. Com esses
+controles disponíveis para eles, é bem menos provável que os usuários desativem o acesso do aplicativo a dados
+quando eles se aproximam dos limites que definem nas Configurações do sistema porque, em vez disso, podem controlar
+precisamente a quantidade de dados que o aplicativo usa.</p>
+
+<p>Depois de adicionadas as preferências necessárias em {@link android.preference.PreferenceActivity}
+para controlar os hábitos de dados do aplicativo, deve-se adicionar um filtro de intenções para {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} no arquivo de manifesto. Por exemplo:</p>
+
+<pre>
+&lt;activity android:name="SettingsActivity" ... >
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Esse filtro de intenções indica ao sistema que se trata da atividade que controla
+o uso de dados do aplicativo. Assim, quando o usuário inspeciona a quantidade de dados que o aplicativo está usando
+no aplicativo Configurações do sistema, um botão <em>Exibir configurações de aplicativo</em> fica disponível e inicia
+{@link android.preference.PreferenceActivity} para que o usuário refine a quantidade de dados que
+o aplicativo usa.</p>
+
+
+
+
+
+
+
+<h2 id="Custom">Composição de uma preferência personalizada</h2>
+
+<p>A estrutura do Android contém uma variedade de subclasses {@link android.preference.Preference} que permitem
+criar uma IU com diferentes tipos de configurações.
+No entanto, pode ser necessário descobrir uma configuração pra a qual não há nenhuma solução embutida,
+como um seletor de números ou seletor de datas. Nesse caso, será preciso criar uma preferência personalizada, estendendo
+a classe {@link android.preference.Preference} ou uma das outras subclasses.</p>
+
+<p>Ao estender a classe {@link android.preference.Preference}, há algumas coisas importantes
+a fazer:</p>
+
+<ul>
+  <li>Especificar a interface do usuário exibida quando o usuário seleciona as configurações.</li>
+  <li>Salvar os valores da configuração conforme apropriado.</li>
+  <li>Inicializar {@link android.preference.Preference} com o valor atual (ou padrão)
+quando ela é exibida.</li>
+  <li>Fornecer o valor padrão quando solicitado pelo sistema.</li>
+  <li>Se {@link android.preference.Preference} fornece sua própria IU (como uma caixa de diálogo, por exemplo), salve
+e restaure o estado para tratar de alterações de ciclo de vida (como quando o usuário gira a tela).</li>
+</ul>
+
+<p>As seções a seguir descrevem como executar cada uma dessas tarefas.</p>
+
+
+
+<h3 id="CustomSelected">Especificação da interface do usuário</h3>
+
+  <p>Se a classe {@link android.preference.Preference} for estendida, será preciso implementar
+{@link android.preference.Preference#onClick()} para definir a ação que ocorre quando
+o usuário a seleciona. No entanto, a maioria das configurações personalizadas estendem {@link android.preference.DialogPreference}
+para exibir uma caixa de diálogo, o que simplifica o procedimento. Quando se estende {@link
+android.preference.DialogPreference}, é preciso chamar {@link
+android.preference.DialogPreference#setDialogLayoutResource setDialogLayoutResourcs()} na classe
+do construtor para especificar o layout da caixa de diálogo.</p>
+
+  <p>Por exemplo, eis o construtor de um {@link
+android.preference.DialogPreference} personalizado que declara o layout e especifica o texto dos botões padrão
+da caixa de diálogo positiva e negativa:</p>
+
+<pre>
+public class NumberPickerPreference extends DialogPreference {
+    public NumberPickerPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        
+        setDialogLayoutResource(R.layout.numberpicker_dialog);
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+        
+        setDialogIcon(null);
+    }
+    ...
+}
+</pre>
+
+
+
+<h3 id="CustomSave">Salvamento do valor da configuração</h3>
+
+<p>Para salvar um valor da configuração a qualquer momento, chame um dos métodos {@code persist*()} da classe {@link
+android.preference.Preference}, como {@link
+android.preference.Preference#persistInt persistInt()} se o valor da configuração for um inteiro
+ou {@link android.preference.Preference#persistBoolean persistBoolean()} para salvar um booleano.</p>
+
+<p class="note"><strong>Observação:</strong> cada {@link android.preference.Preference} pode salvar somente
+um tipo de dados, portanto é preciso usar o método {@code persist*()} adequado para o tipo de dados usado pela
+{@link android.preference.Preference} personalizada.</p>
+
+<p>Quando se opta por persistir, a configuração pode depender da classe {@link
+android.preference.Preference} estendida. Se {@link
+android.preference.DialogPreference} for estendida, deve-se persistir o valor somente quando a caixa de diálogo
+fecha devido a um resultado positivo (o usuário seleciona o botão "OK").</p>
+
+<p>Quando uma {@link android.preference.DialogPreference} fecha, o sistema chama o método {@link
+android.preference.DialogPreference#onDialogClosed onDialogClosed()}. O método contém um argumento
+booleano que especifica se o resultado do usuário é "positivo" &mdash; se o valor é
+<code>true</code> e, em seguida, o usuário selecionou o botão positivo e você deve salvar o novo valor. Por
+exemplo:</p>
+
+<pre>
+&#64;Override
+protected void onDialogClosed(boolean positiveResult) {
+    // When the user selects "OK", persist the new value
+    if (positiveResult) {
+        persistInt(mNewValue);
+    }
+}
+</pre>
+
+<p>Nesse exemplo, <code>mNewValue</code> é um membro da classe que retém o valor atual
+da configuração. A chamada de {@link android.preference.Preference#persistInt persistInt()} salva o valor
+no arquivo {@link android.content.SharedPreferences} (usando automaticamente a chave
+especificada no arquivo XML dessa {@link android.preference.Preference}).</p>
+
+
+<h3 id="CustomInitialize">Inicialização do valor atual</h3>
+
+<p>Quando o sistema adiciona o {@link android.preference.Preference} à tela, ele chama
+{@link android.preference.Preference#onSetInitialValue onSetInitialValue()} para notificar
+se a configuração tem um valor persistido. Se não houver valor persistido, essa chamada fornece
+o valor padrão.</p>
+
+<p>O método {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} passa
+um booleano, <code>restorePersistedValue</code>, para indicar se um valor já foi persistido
+para a configuração. Se for <code>true</code>, deve-se recuperar o valor persistindo chamando-se
+ um dos métodos {@code getPersisted*()} da classe {@link
+android.preference.Preference}, como {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} para um valor inteiro. Geralmente
+se recupera o valor persistido para atualizar adequadamente a IU de forma a refletir
+o valor salvo anteriormente.</p>
+
+<p>Se <code>restorePersistedValue</code> for <code>false</code>, deve-se
+usar o valor padrão passado no segundo argumento.</p>
+
+<pre>
+&#64;Override
+protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+    if (restorePersistedValue) {
+        // Restore existing state
+        mCurrentValue = this.getPersistedInt(DEFAULT_VALUE);
+    } else {
+        // Set default state from the XML attribute
+        mCurrentValue = (Integer) defaultValue;
+        persistInt(mCurrentValue);
+    }
+}
+</pre>
+
+<p>Cada método {@code getPersisted*()} pega um argumento que especifica o valor
+padrão a usar caso não haja nenhum valor persistido ou se a chave não existir. No
+exemplo acima, uma constante local é usada para especificar o valor padrão se {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} não puder retornar um valor persistido.</p>
+
+<p class="caution"><strong>Atenção:</strong> <strong>não</strong> é possível usar
+<code>defaultValue</code> como valor padrão no método {@code getPersisted*()} porque
+seu valor é sempre nulo quando <code>restorePersistedValue</code> é <code>true</code>.</p>
+
+
+<h3 id="CustomDefault">Fornecimento de um valor padrão</h3>
+
+<p>Se a instância da classe {@link android.preference.Preference} especificar um valor padrão
+(com o atributo {@code android:defaultValue}),
+o sistema chama {@link android.preference.Preference#onGetDefaultValue
+onGetDefaultValue()} quando instancia o objeto para recuperar o valor. É preciso
+implementar esse método para que o sistema salve o valor padrão em {@link
+android.content.SharedPreferences}. Por exemplo:</p>
+
+<pre>
+&#64;Override
+protected Object onGetDefaultValue(TypedArray a, int index) {
+    return a.getInteger(index, DEFAULT_VALUE);
+}
+</pre>
+
+<p>Os argumentos do método oferecem todo o necessário: a matriz de atributos e a posição
+do índice do {@code android:defaultValue}, que é preciso recuperar. É preciso implementar esse método
+para extrair o valor padrão do atributo porque deve-se especificar um valor padrão
+local para o atributo caso o valor seja indefinido.</p>
+
+
+
+<h3 id="CustomSaveState">Salvamento e restauração do estado da preferência</h3>
+
+<p>Como um {@link android.view.View} em um layout, a subclasse {@link android.preference.Preference}
+é responsável por salvar e restaurar seu estado caso a atividade ou fragmento seja
+reiniciado (como ocorre quando o usuário gira a tela). Para salvar e restaurar
+adequadamente o estado da classe {@link android.preference.Preference}, é preciso implementar
+os métodos de retorno de chamada do ciclo de vida {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} e {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}.</p>
+
+<p>O estado de {@link android.preference.Preference} é definido por um objeto que implementa
+a interface {@link android.os.Parcelable}. A estrutura do Android fornece esse objeto
+como um ponto inicial para definir o objeto de estado: a classe {@link
+android.preference.Preference.BaseSavedState}.</p>
+
+<p>Para definir como a classe {@link android.preference.Preference} salva seu estado, deve-se estender
+a classe {@link android.preference.Preference.BaseSavedState}. É preciso substituir
+alguns métodos e definir o objeto {@link android.preference.Preference.BaseSavedState#CREATOR}.
+</p>
+
+<p>Na maioria dos aplicativos, é possível copiar a implementação a seguir e simplesmente alterar as linhas
+que tratam o {@code value} se a subclasse {@link android.preference.Preference} salvar um tipo
+de dados que não seja um inteiro.</p>
+
+<pre>
+private static class SavedState extends BaseSavedState {
+    // Member that holds the setting's value
+    // Change this data type to match the type saved by your Preference
+    int value;
+
+    public SavedState(Parcelable superState) {
+        super(superState);
+    }
+
+    public SavedState(Parcel source) {
+        super(source);
+        // Get the current preference's value
+        value = source.readInt();  // Change this to read the appropriate data type
+    }
+
+    &#64;Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        // Write the preference's value
+        dest.writeInt(value);  // Change this to write the appropriate data type
+    }
+
+    // Standard creator object using an instance of this class
+    public static final Parcelable.Creator&lt;SavedState> CREATOR =
+            new Parcelable.Creator&lt;SavedState>() {
+
+        public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+        }
+
+        public SavedState[] newArray(int size) {
+            return new SavedState[size];
+        }
+    };
+}
+</pre>
+
+<p>Com a implementação acima de {@link android.preference.Preference.BaseSavedState} adicionada
+ao aplicativo (geralmente como uma subclasse da subclasse {@link android.preference.Preference}),
+é preciso implementar os métodos {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} e {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}
+da subclasse {@link android.preference.Preference}.</p>
+
+<p>Por exemplo:</p>
+
+<pre>
+&#64;Override
+protected Parcelable onSaveInstanceState() {
+    final Parcelable superState = super.onSaveInstanceState();
+    // Check whether this Preference is persistent (continually saved)
+    if (isPersistent()) {
+        // No need to save instance state since it's persistent,
+        // use superclass state
+        return superState;
+    }
+
+    // Create instance of custom BaseSavedState
+    final SavedState myState = new SavedState(superState);
+    // Set the state's value with the class member that holds current
+    // setting value
+    myState.value = mNewValue;
+    return myState;
+}
+
+&#64;Override
+protected void onRestoreInstanceState(Parcelable state) {
+    // Check whether we saved the state in onSaveInstanceState
+    if (state == null || !state.getClass().equals(SavedState.class)) {
+        // Didn't save the state, so call superclass
+        super.onRestoreInstanceState(state);
+        return;
+    }
+
+    // Cast state to custom BaseSavedState and pass to superclass
+    SavedState myState = (SavedState) state;
+    super.onRestoreInstanceState(myState.getSuperState());
+    
+    // Set this Preference's widget to reflect the restored state
+    mNumberPicker.setValue(myState.value);
+}
+</pre>
+

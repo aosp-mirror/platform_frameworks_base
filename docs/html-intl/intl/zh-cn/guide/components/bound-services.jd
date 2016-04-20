@@ -1,0 +1,658 @@
+page.title=绑定服务
+parent.title=服务
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>本文内容</h2>
+<ol>
+  <li><a href="#Basics">基础知识</a></li>
+  <li><a href="#Creating">创建绑定服务</a>
+    <ol>
+      <li><a href="#Binder">扩展 Binder 类</a></li>
+      <li><a href="#Messenger">使用 Messenger</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">绑定到服务</a></li>
+  <li><a href="#Lifecycle">管理绑定服务的生命周期</a></li>
+</ol>
+
+<h2>关键类</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>示例</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>另请参阅</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">服务</a></li>
+</ol>
+</div>
+
+
+<p>绑定服务是客户端-服务器接口中的服务器。绑定服务可让组件（例如 Activity）绑定到服务、发送请求、接收响应，甚至执行进程间通信 (IPC)。
+
+绑定服务通常只在为其他应用组件服务时处于活动状态，不会无限期在后台运行。
+</p>
+
+<p>本文向您介绍如何创建绑定服务，包括如何绑定到来自其他应用组件的服务。
+不过，您还应参阅<a href="{@docRoot}guide/components/services.html">服务</a>文档，了解有关一般服务的更多信息，例如：如何利用服务传送通知、如何将服务设置为在前台运行等等。
+
+</p>
+
+
+<h2 id="Basics">基础知识</h2>
+
+<p>绑定服务是 {@link android.app.Service}
+类的实现，可让其他应用与其绑定和交互。要提供服务绑定，您必须实现 {@link android.app.Service#onBind onBind()}
+回调方法。该方法返回的
+{@link android.os.IBinder}
+对象定义了客户端用来与服务进行交互的编程接口。</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>绑定到已启动服务</h3>
+
+<p>正如<a href="{@docRoot}guide/components/services.html">服务</a>文档中所述，您可以创建同时具有已启动和绑定两种状态的服务。
+也就是说，可通过调用
+{@link android.content.Context#startService startService()}
+启动该服务，让服务无限期运行；此外，还可通过调用 {@link
+android.content.Context#bindService bindService()} 使客户端绑定到服务。
+  <p>如果您确实允许服务同时具有已启动和绑定状态，则服务启动后，系统“绝对不会”<em></em>在所有客户端都取消绑定时销毁服务。
+为此，您必须通过调用
+{@link android.app.Service#stopSelf stopSelf()} 或 {@link
+android.content.Context#stopService stopService()} 显式停止服务。</p>
+
+<p>尽管您通常应该实现
+{@link android.app.Service#onBind onBind()}
+<em>或</em> {@link android.app.Service#onStartCommand onStartCommand()}，但有时需要同时实现这两者。例如，音乐播放器可能发现让其服务无限期运行并同时提供绑定很有用处。
+这样一来，Activity 便可启动服务进行音乐播放，即使用户离开应用，音乐播放也不会停止。
+然后，当用户返回应用时，Activity 可绑定到服务，重新获得回放控制权。
+</p>
+
+<p>请务必阅读<a href="#Lifecycle">管理绑定服务的生命周期</a>部分，详细了解有关添加绑定已启动服务时该服务的生命周期信息。
+
+</p>
+</div>
+</div>
+
+<p>客户端可通过调用 {@link android.content.Context#bindService
+bindService()} 绑定到服务。调用时，它必须提供 {@link
+android.content.ServiceConnection} 的实现，后者会监控与服务的连接。{@link
+android.content.Context#bindService bindService()} 方法会立即无值返回，但当
+Android
+系统创建客户端与服务之间的连接时，会调用 {@link
+android.content.ServiceConnection} 上的 {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}，向客户端传递用来与服务通信的
+{@link android.os.IBinder}。</p>
+
+<p>多个客户端可同时连接到一个服务。不过，只有在第一个客户端绑定时，系统才会调用服务的
+{@link android.app.Service#onBind onBind()}
+方法来检索 {@link android.os.IBinder}。系统随后无需再次调用
+{@link android.app.Service#onBind onBind()}，便可将同一 {@link android.os.IBinder} 传递至任何其他绑定的客户端。</p>
+
+<p>当最后一个客户端取消与服务的绑定时，系统会将服务销毁（除非
+{@link android.content.Context#startService startService()} 也启动了该服务）。</p>
+
+<p>当您实现绑定服务时，最重要的环节是定义您的
+{@link android.app.Service#onBind onBind()} 回调方法返回的接口。您可以通过几种不同的方法定义服务的
+{@link android.os.IBinder}
+接口，下文对这些方法逐一做了阐述。</p>
+
+
+
+<h2 id="Creating">创建绑定服务</h2>
+
+<p>创建提供绑定的服务时，您必须提供 {@link android.os.IBinder}，用以提供客户端用来与服务进行交互的编程接口。
+您可以通过三种方法定义接口：
+</p>
+
+<dl>
+  <dt><a href="#Binder">扩展 Binder 类</a></dt>
+  <dd>如果服务是供您的自有应用专用，并且在与客户端相同的进程中运行（常见情况），则应通过扩展
+{@link android.os.Binder}
+类并从 {@link android.app.Service#onBind onBind()}
+返回它的一个实例来创建接口。客户端收到 {@link android.os.Binder}
+后，可利用它直接访问 {@link android.os.Binder} 实现中乃至 {@link android.app.Service}
+中可用的公共方法。
+  <p>如果服务只是您的自有应用的后台工作线程，则优先采用这种方法。
+不以这种方式创建接口的唯一原因是，您的服务被其他应用或不同的进程占用。
+</dd>
+
+  <dt><a href="#Messenger">使用 Messenger</a></dt>
+  <dd>如需让接口跨不同的进程工作，则可使用
+{@link android.os.Messenger} 为服务创建接口。服务可以这种方式定义对应于不同类型
+{@link
+android.os.Message} 对象的 {@link android.os.Handler}。此 {@link android.os.Handler}
+是 {@link android.os.Messenger} 的基础，后者随后可与客户端分享一个 {@link android.os.IBinder}，从而让客户端能利用 {@link
+android.os.Message}
+对象向服务发送命令。此外，客户端还可定义自有
+{@link android.os.Messenger}，以便服务回传消息。
+  <p>这是执行进程间通信 (IPC) 的最简单方法，因为 {@link
+android.os.Messenger}
+会在单一线程中创建包含所有请求的队列，这样您就不必对服务进行线程安全设计。</p>
+  </dd>
+
+  <dt>使用 AIDL</dt>
+  <dd>AIDL（Android
+接口定义语言）执行所有将对象分解成原语的工作，操作系统可以识别这些原语并将它们编组到各进程中，以执行
+IPC。之前采用 {@link android.os.Messenger} 的方法实际上是以 AIDL
+作为其底层结构。如上所述，{@link android.os.Messenger}
+会在单一线程中创建包含所有客户端请求的队列，以便服务一次接收一个请求。不过，如果您想让服务同时处理多个请求，则可直接使用
+AIDL。
+在此情况下，您的服务必须具备多线程处理能力，并采用线程安全式设计。
+  <p>如需直接使用
+AIDL，您必须创建一个定义编程接口的 {@code .aidl} 文件。Android SDK
+工具利用该文件生成一个实现接口并处理 IPC
+的抽象类，您随后可在服务内对其进行扩展。</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>注：</strong>大多数应用“都不会”<strong></strong>使用
+AIDL
+来创建绑定服务，因为它可能要求具备多线程处理能力，并可能导致实现的复杂性增加。因此，AIDL
+并不适合大多数应用，本文也不会阐述如何将其用于您的服务。如果您确定自己需要直接使用
+AIDL，请参阅 <a href="{@docRoot}guide/components/aidl.html">AIDL</a>
+文档。</p>
+
+
+
+
+<h3 id="Binder">扩展 Binder 类</h3>
+
+<p>如果您的服务仅供本地应用使用，不需要跨进程工作，则可以实现自有
+{@link android.os.Binder}
+类，让您的客户端通过该类直接访问服务中的公共方法。</p>
+
+<p class="note"><strong>注：</strong>此方法只有在客户端和服务位于同一应用和进程内这一最常见的情况下方才有效。
+例如，对于需要将 Activity 绑定到在后台播放音乐的自有服务的音乐应用，此方法非常有效。
+
+</p>
+
+<p>以下是具体的设置方法：</p>
+<ol>
+  <li>在您的服务中，创建一个可满足下列任一要求的 {@link android.os.Binder} 实例：
+    <ul>
+      <li>包含客户端可调用的公共方法</li>
+      <li>返回当前 {@link android.app.Service}
+实例，其中包含客户端可调用的公共方法</li>
+      <li>或返回由服务承载的其他类的实例，其中包含客户端可调用的公共方法
+</li>
+    </ul>
+  <li>从 {@link
+android.app.Service#onBind onBind()} 回调方法返回此 {@link android.os.Binder} 实例。</li>
+  <li>在客户端中，从 {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} 回调方法接收
+{@link android.os.Binder}，并使用提供的方法调用绑定服务。</li>
+</ol>
+
+<p class="note"><strong>注：</strong>之所以要求服务和客户端必须在同一应用内，是为了便于客户端转换返回的对象和正确调用其
+API。服务和客户端还必须在同一进程内，因为此方法不执行任何跨进程编组。
+
+</p>
+
+<p>例如，以下这个服务可让客户端通过
+{@link android.os.Binder} 实现访问服务中的方法：</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>{@code LocalBinder} 为客户端提供 {@code getService()} 方法，以检索 {@code LocalService}
+的当前实例。这样，客户端便可调用服务中的公共方法。
+例如，客户端可调用服务中的 {@code getRandomNumber()}。</p>
+
+<p>点击按钮时，以下这个 Activity 会绑定到 {@code LocalService} 并调用
+{@code getRandomNumber()}：</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>上例说明了客户端如何使用 {@link android.content.ServiceConnection} 的实现和 {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}
+回调绑定到服务。下文更详细介绍了绑定到服务的过程。
+</p>
+
+<p class="note"><strong>注：</strong>上例并未显式取消与服务的绑定，但所有客户端都应在适当的时间（例如当 Activity 暂停时）取消绑定。
+</p>
+
+<p>如需查看更多示例代码，请参阅 <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a> 中的 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> 类和 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a> 类。</p>
+
+
+
+
+
+<h3 id="Messenger">使用 Messenger</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>与 AIDL 比较</h4>
+  <p>当您需要执行 IPC 时，为您的接口使用 {@link android.os.Messenger}
+要比使用 AIDL 实现它更加简单，因为 {@link android.os.Messenger}
+会将所有服务调用排入队列，而纯粹的 AIDL
+接口会同时向服务发送多个请求，服务随后必须应对多线程处理。</p>
+  <p>对于大多数应用，服务不需要执行多线程处理，因此使用 {@link
+android.os.Messenger} 可让服务一次处理一个调用。如果您的服务必须执行多线程处理，则应使用 <a href="{@docRoot}guide/components/aidl.html">AIDL</a>
+来定义接口。</p>
+</div>
+</div>
+
+<p>如需让服务与远程进程通信，则可使用 {@link android.os.Messenger}
+为您的服务提供接口。利用此方法，您无需使用
+AIDL 便可执行进程间通信 (IPC)。</p>
+
+<p>以下是 {@link android.os.Messenger} 的使用方法摘要：</p>
+
+<ul>
+  <li>服务实现一个
+{@link android.os.Handler}，由其接收来自客户端的每个调用的回调</li>
+  <li>{@link android.os.Handler} 用于创建 {@link android.os.Messenger}
+对象（对 {@link android.os.Handler} 的引用）</li>
+  <li>{@link android.os.Messenger} 创建一个 {@link android.os.IBinder}，服务通过 {@link android.app.Service#onBind onBind()}
+使其返回客户端</li>
+  <li>客户端使用 {@link android.os.IBinder}
+将 {@link android.os.Messenger}（引用服务的 {@link android.os.Handler}）实例化，然后使用后者将 {@link android.os.Message}
+对象发送给服务</li>
+  <li>服务在其 {@link
+android.os.Handler} 中（具体地讲，是在 {@link android.os.Handler#handleMessage
+handleMessage()} 方法中）接收每个 {@link android.os.Message}</li>
+</ul>
+
+
+<p>这样，客户端并没有调用服务的“方法”。而客户端传递的“消息”（{@link android.os.Message}
+对象）是服务在其 {@link android.os.Handler}
+中接收的。</p>
+
+<p>以下是一个使用 {@link android.os.Messenger} 接口的简单服务示例：</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>请注意，服务就是在 {@link android.os.Handler}
+的 {@link android.os.Handler#handleMessage handleMessage()} 方法中接收传入的
+{@link android.os.Message}，并根据 {@link android.os.Message#what} 成员决定下一步操作。</p>
+
+<p>客户端只需根据服务返回的 {@link
+android.os.IBinder} 创建一个 {@link android.os.Messenger}，然后利用 {@link
+android.os.Messenger#send send()} 发送一条消息。例如，以下就是一个绑定到服务并向服务传递
+{@code MSG_SAY_HELLO} 消息的简单 Activity：</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>请注意，此示例并未说明服务如何对客户端作出响应。如果您想让服务作出响应，则还需要在客户端中创建一个
+{@link android.os.Messenger}。然后，当客户端收到 {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()} 回调时，会向服务发送一条
+{@link android.os.Message}，并在其
+{@link android.os.Messenger#send send()} 方法的 {@link android.os.Message#replyTo}
+参数中包含客户端的 {@link android.os.Messenger}。</p>
+
+<p>如需查看如何提供双向消息传递的示例，请参阅 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a>（服务）和 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a>（客户端）示例。</p>
+
+
+
+
+
+<h2 id="Binding">绑定到服务</h2>
+
+<p>应用组件（客户端）可通过调用 {@link android.content.Context#bindService bindService()}
+绑定到服务。Android
+系统随后调用服务的 {@link android.app.Service#onBind
+onBind()} 方法，该方法返回用于与服务交互的 {@link android.os.IBinder}。</p>
+
+<p>绑定是异步的。{@link android.content.Context#bindService
+bindService()} 会立即返回，“绝对不会”<em></em>使 {@link android.os.IBinder}
+返回客户端。要接收 {@link android.os.IBinder}，客户端必须创建一个 {@link
+android.content.ServiceConnection} 实例，并将其传递给 {@link android.content.Context#bindService
+bindService()}。{@link android.content.ServiceConnection} 包括一个回调方法，系统通过调用它来传递
+{@link android.os.IBinder}。</p>
+
+<p class="note"><strong>注：</strong>只有 Activity、服务和内容提供程序可以绑定到服务&mdash;您<strong>无法</strong>从广播接收器绑定到服务。
+</p>
+
+<p>因此，要想从您的客户端绑定到服务，您必须： </p>
+<ol>
+  <li>实现 {@link android.content.ServiceConnection}。
+    <p>您的实现必须重写两个回调方法：</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>系统会调用该方法以传递服务的　{@link android.app.Service#onBind onBind()}
+方法返回的 {@link android.os.IBinder}。</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>Android
+系统会在与服务的连接意外中断时（例如当服务崩溃或被终止时）调用该方法。当客户端取消绑定时，系统“绝对不会”<em></em>调用该方法。
+</dd>
+    </dl>
+  </li>
+  <li>调用 {@link
+android.content.Context#bindService bindService()} 以传递 {@link
+android.content.ServiceConnection} 实现。 </li>
+  <li>当系统调用您的 {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}
+回调方法时，您可以使用接口定义的方法开始调用服务。</li>
+  <li>要断开与服务的连接，请调用 {@link
+android.content.Context#unbindService unbindService()}。
+    <p>当您的客户端被销毁时，它将取消与服务的绑定，但您应该始终在完成与服务的交互时或您的 Activity 暂停时取消绑定，以便服务能够在未被占用时关闭。
+
+（下文更详细地阐述了绑定和取消绑定的适当时机。）
+</p>
+  </li>
+</ol>
+
+<p>例如，以下代码段通过<a href="#Binder">扩展
+Binder 类</a>将客户端与上面创建的服务相连，因此它只需将返回的 {@link android.os.IBinder}
+转换为 {@code LocalService} 类并请求 {@code
+LocalService} 实例：</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>客户端可通过将此 {@link android.content.ServiceConnection} 传递至 {@link android.content.Context#bindService bindService()}
+绑定到服务。例如：</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>{@link android.content.Context#bindService bindService()}
+的第一个参数是一个
+{@link android.content.Intent}，用于显式命名要绑定的服务（但 Intent 可能是隐式的）</li>
+<li>第二个参数是 {@link android.content.ServiceConnection} 对象</li>
+<li>第三个参数是一个指示绑定选项的标志。它通常应该是 {@link
+android.content.Context#BIND_AUTO_CREATE}，以便创建尚未激活的服务。
+其他可能的值为 {@link android.content.Context#BIND_DEBUG_UNBIND}
+和 {@link android.content.Context#BIND_NOT_FOREGROUND}，或 {@code 0}（表示无）。</li>
+</ul>
+
+
+<h3>附加说明</h3>
+
+<p>以下是一些有关绑定到服务的重要说明：</p>
+<ul>
+  <li>您应该始终捕获
+{@link android.os.DeadObjectException} 异常，它们是在连接中断时引发的。这是远程方法引发的唯一异常</li>
+  <li>对象是跨进程计数的引用 </li>
+  <li>您通常应该在客户端生命周期的匹配引入 (bring-up) 和退出 (tear-down) 时刻期间配对绑定和取消绑定。
+例如：
+    <ul>
+      <li>如果您只需要在 Activity 可见时与服务交互，则应在 {@link android.app.Activity#onStart onStart()}
+期间绑定，在 {@link
+android.app.Activity#onStop onStop()} 期间取消绑定。</li>
+      <li>如果您希望 Activity 在后台停止运行状态下仍可接收响应，则可在
+{@link android.app.Activity#onCreate onCreate()} 期间绑定，在 {@link android.app.Activity#onDestroy onDestroy()}
+期间取消绑定。请注意，这意味着您的 Activity 在其整个运行过程中（甚至包括后台运行期间）都需要使用服务，因此如果服务位于其他进程内，那么当您提高该进程的权重时，系统终止该进程的可能性会增加
+
+
+</li>
+    </ul>
+    <p class="note"><strong>注：</strong>通常情况下，<strong>切勿</strong>在 Activity 的 {@link android.app.Activity#onResume onResume()}
+和 {@link
+android.app.Activity#onPause onPause()}
+期间绑定和取消绑定，因为每一次生命周期转换都会发生这些回调，您应该使发生在这些转换期间的处理保持在最低水平。此外，如果您的应用内的多个 Activity 绑定到同一服务，并且其中两个 Activity 之间发生了转换，则如果当前 Activity 在下一次绑定（恢复期间）之前取消绑定（暂停期间），系统可能会销毁服务并重建服务。
+
+
+（<a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Activity</a>文档中介绍了这种有关 Activity 如何协调其生命周期的 Activity 转换。）
+
+</p>
+</ul>
+
+<p>如需查看更多显示如何绑定到服务的示例代码，请参阅 <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a> 中的 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> 类。</p>
+
+
+
+
+
+<h2 id="Lifecycle">管理绑定服务的生命周期</h2>
+
+<p>当服务与所有客户端之间的绑定全部取消时，Android
+系统便会销毁服务（除非还使用 {@link android.app.Service#onStartCommand onStartCommand()} 启动了该服务）。因此，如果您的服务是纯粹的绑定服务，则无需对其生命周期进行管理&mdash;Android
+系统会根据它是否绑定到任何客户端代您管理。
+</p>
+
+<p>不过，如果您选择实现 {@link android.app.Service#onStartCommand
+onStartCommand()}
+回调方法，则您必须显式停止服务，因为系统现在已将服务视为<em>已启动</em>。在此情况下，服务将一直运行到其通过 {@link android.app.Service#stopSelf()}
+自行停止，或其他组件调用 {@link
+android.content.Context#stopService stopService()}
+为止，无论其是否绑定到任何客户端。</p>
+
+<p>此外，如果您的服务已启动并接受绑定，则当系统调用您的 {@link android.app.Service#onUnbind onUnbind()} 方法时，如果您想在客户端下一次绑定到服务时接收 
+{@link android.app.Service#onRebind
+onRebind()} 调用（而不是接收 {@link
+android.app.Service#onBind onBind()} 调用），则可选择返回
+{@code true}。{@link android.app.Service#onRebind
+onRebind()} 返回空值，但客户端仍在其 {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} 回调中接收
+{@link android.os.IBinder}。下文图 1
+说明了这种生命周期的逻辑。</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>图 1.  </strong>允许绑定的已启动服务的生命周期。
+</p>
+
+
+<p>如需了解有关已启动服务生命周期的详细信息，请参阅<a href="{@docRoot}guide/components/services.html#Lifecycle">服务</a>文档。</p>
+
+
+
+

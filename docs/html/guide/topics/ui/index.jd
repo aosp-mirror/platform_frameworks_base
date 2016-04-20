@@ -1,6 +1,6 @@
 page.title=User Interface
 page.landing=true
-page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-build UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.  
+page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-built UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.  
 page.landing.image=images/ui/ui_index.png
 page.landing.next=overview.html
 
@@ -10,7 +10,7 @@ page.landing.next=overview.html
 
   <div class="col-6">
     <h3>Blog Articles</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">
       <h4>Say Goodbye to the Menu Button</h4>
       <p>As Ice Cream Sandwich rolls out to more devices, it’s important that you begin to migrate
@@ -35,7 +35,7 @@ it probably won’t be too long before you’ll need to implement horizontally s
 
   <div class="col-6">
     <h3>Training</h3>
-    
+
     <a href="http://developer.android.com/training/implementing-navigation/index.html">
       <h4>Implementing Effective Navigation</h4>
       <p>This class shows you how to plan out the high-level screen hierarchy for your application

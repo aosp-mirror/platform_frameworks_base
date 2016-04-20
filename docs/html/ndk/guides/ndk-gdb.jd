@@ -27,15 +27,13 @@ does not support using the legacy {@code make APP=<name>} method to build.</p></
 {@code <application>} element that sets the {@code android:debuggable} attribute to {@code
 true}.</li>
 <li>Build your app to run on Android 2.2 (Android API level 8) or higher.</li>
-<li>Debug on a device or emulator running Android 2.2 or higher. For debugging purposes, the target
+<li>Debug on a device or emulator running Android 2.2 or higher.
+ For debugging purposes, the target
 API level that you declare in your {@code AndroidManifest.xml} file does not matter.</li>
 <li>Develop your app in a Unix shell. On Windows, use <a href="https://www.cygwin.com/">Cygwin</a>
 or the experimental {@code ndk-gdb-py} <a href="https://www.python.org/">Python</a>
 implementation.</li>
-<li>Use GNU Make 3.81 or higher.</li>
-<li>If you are building your app from
-<a href="{@docRoot}sdk/installing/installing-adt.html">Eclipse</a>, build it
-using version 0.9.7 or higher of the ADT plug-in.</li>
+<li>Use GNU Make 3.81 or higher.</li></ul>
 
 <h2 id="use">Usage</h2>
   To invoke the {@code ndk-gdb} script, change into the application directory or any directory under
@@ -223,14 +221,6 @@ Python version of {@code ndk-gdb}.</p></td>
 <p>If your app runs on a platform older than Android 2.3 (API level 9), {@code ndk-gdb}
 cannot debug native threads properly. The debugger can only debug the main thread, abd completely
 ignores the execution of other threads.</p>
-
-<p>Using a version of Android prior to 2.3 causes {@code ndk-gdb} to display the following message
-prior to showing the GDB prompt:</p>
-
-<pre class="no-pretty-print">
-Thread debugging is unsupported on this Android platform!
-</pre>
-
 
 <p>If you place a breakpoint on a function executed on a non-main thread, the program exits, and
 GDB displays the following message:</p>

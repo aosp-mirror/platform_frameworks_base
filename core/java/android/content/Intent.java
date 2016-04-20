@@ -115,7 +115,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *   </li>
  *   <li> <p><b>{@link #ACTION_VIEW} <i>tel:123</i></b> -- Display
  *     the phone dialer with the given number filled in.  Note how the
- *     VIEW action does what what is considered the most reasonable thing for
+ *     VIEW action does what is considered the most reasonable thing for
  *     a particular URI.</p>
  *   </li>
  *   <li> <p><b>{@link #ACTION_DIAL} <i>tel:123</i></b> -- Display
@@ -186,7 +186,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *
  * <p>There are a variety of standard Intent action and category constants
  * defined in the Intent class, but applications can also define their own.
- * These strings use java style scoping, to ensure they are unique -- for
+ * These strings use Java-style scoping, to ensure they are unique -- for
  * example, the standard {@link #ACTION_VIEW} is called
  * "android.intent.action.VIEW".</p>
  *
@@ -339,7 +339,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *     &lt;action android:name="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
  *     &lt;action android:name="{@link #ACTION_PICK android.intent.action.PICK}" /&gt;
  *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;data mimeType:name="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>This declares the things that the activity can do on a directory of
  * notes.  The type being supported is given with the &lt;type&gt; tag, where
@@ -358,7 +358,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
  *     &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
- * <p>This filter describes the ability return to the caller a note selected by
+ * <p>This filter describes the ability to return to the caller a note selected by
  * the user without needing to know where it came from.  The data type
  * <code>vnd.android.cursor.item/vnd.google.note</code> is a URI from which
  * a Cursor of exactly one (<code>vnd.android.cursor.item</code>) item can
@@ -1324,14 +1324,14 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ASSIST_INPUT_DEVICE_ID";
 
     /**
-     * Activity Action: List all available applications
+     * Activity Action: List all available applications.
      * <p>Input: Nothing.
      * <p>Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     /**
-     * Activity Action: Show settings for choosing wallpaper
+     * Activity Action: Show settings for choosing wallpaper.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
      */
@@ -2070,7 +2070,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
-     * that is being installed does <em>not</em> receive this Intent.
+     * that is being removed does <em>not</em> receive this Intent.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid previously assigned
      * to the package.
@@ -2104,9 +2104,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_FULLY_REMOVED
             = "android.intent.action.PACKAGE_FULLY_REMOVED";
     /**
-     * Broadcast Action: An existing application package has been changed (e.g.
-     * a component has been enabled or disabled).  The data contains the name of
-     * the package.
+     * Broadcast Action: An existing application package has been changed (for
+     * example, a component has been enabled or disabled).  The data contains
+     * the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST} containing the class name
@@ -2202,9 +2202,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
 
     /**
-     * Broadcast Action: Sent to the installer package of an application
-     * when that application is first launched (that is the first time it
-     * is moved out of the stopped state).  The data contains the name of the package.
+     * Broadcast Action: Sent to the installer package of an application when
+     * that application is first launched (that is the first time it is moved
+     * out of the stopped state).  The data contains the name of the package.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -2232,8 +2232,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_VERIFIED = "android.intent.action.PACKAGE_VERIFIED";
 
     /**
-     * Broadcast Action: Sent to the system intent filter verifier when an intent filter
-     * needs to be verified. The data contains the filter data hosts to be verified against.
+     * Broadcast Action: Sent to the system intent filter verifier when an
+     * intent filter needs to be verified. The data contains the filter data
+     * hosts to be verified against.
      * <p class="note">
      * This is a protected intent that can only be sent by the system.
      * </p>

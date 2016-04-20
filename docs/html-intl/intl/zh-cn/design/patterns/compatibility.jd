@@ -1,0 +1,70 @@
+page.title=向后兼容性
+page.tags="support"
+page.metaDescription=关于 Android 4.x 如何让其 UI 设计适应早期硬件和操作系统版本的说明。
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>开发者文档</h3>
+    <p>支持不同设备</p>
+  </div>
+</a>
+
+<p>Android 3.0 中的重大更改包括：</p>
+<ul>
+<li>弃用导航硬按键（返回、菜单、搜索、主屏幕），改为通过虚拟控件（返回、主屏幕、最近使用记录）处理导航。
+</li>
+<li>使用操作栏中的菜单的可靠模式。</li>
+</ul>
+<p>Android 4.0 将这些针对平板电脑的更改引入手机平台。</p>
+
+<h2 id="older-hardware">让 Android 4.0 适应早期硬件和应用</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>带有虚拟导航控件的手机</h4>
+<p>针对 Android 3.0 和后续版本编写的 Android 应用在操作栏中显示操作。操作栏中放不下或者不够重要因而不值得显示在操作栏顶级菜单中的操作将显示在操作溢出菜单中。
+
+</p>
+<p>用户可通过在操作栏中触摸操作溢出菜单来访问该菜单。</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>带有实体导航按键的手机</h4>
+<p>带有传统导航硬按键的 Android 手机在屏幕底部不会显示虚拟导航栏。
+其操作溢出菜单可从硬按键菜单中进行访问。其形成的操作弹出菜单与上例风格相同，但显示在屏幕底部。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>带有虚拟导航控件的手机上的传统应用</h4>
+<p>当您在带有虚拟导航控件的手机上运行为 Android 2.3 或更早版本编写的应用时，在虚拟导航栏的右侧将会显示操作溢出菜单控件。
+您可以触摸这些控件，以传统 Android 菜单风格显示应用的操作。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

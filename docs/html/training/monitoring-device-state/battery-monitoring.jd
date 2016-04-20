@@ -3,12 +3,14 @@ parent.title=Optimizing Battery Life
 parent.link=index.html
 
 trainingnavtop=true
-next.title=Determining and Monitoring the Docking State and Type
-next.link=docking-monitoring.html
-
+parent.link=index.html
+previous.title=Optimizing for Doze and App Standby
+previous.link=doze-standby.html
+next.title= Determining and Monitoring the Connectivity Status
+next.link=connectivity-monitoring.html
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -24,9 +26,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>When you're altering the frequency of your background updates to reduce the effect of those
 updates on battery life, checking the current battery level and charging state is a good place to
 start.</p>
@@ -41,8 +43,8 @@ prolong the battery life.</p>
 even stopping&mdash;your updates when the battery charge is nearly exhausted.</p>
 
 
-<h2 id="DetermineChargeState">Determine the Current Charging State</h2> 
- 
+<h2 id="DetermineChargeState">Determine the Current Charging State</h2>
+
 <p>Start by determining the current charge status. The {@link android.os.BatteryManager}
 broadcasts all battery and charging details in a sticky {@link android.content.Intent} that includes
 the charging status.</p>
@@ -74,13 +76,13 @@ connected to an AC charger, reduce the rate if the charge is over USB, and lower
 further if the battery is discharging.</p>
 
 
-<h2 id="MonitorChargeState">Monitor Changes in Charging State</h2> 
+<h2 id="MonitorChargeState">Monitor Changes in Charging State</h2>
 
 <p>The charging status can change as easily as a device can be plugged in, so it's important to
 monitor the charging state for changes and alter your refresh rate accordingly.</p>
 
 <p>The {@link android.os.BatteryManager} broadcasts an action whenever the device is connected or
-disconnected from power. It's important to to receive these events even while your app isn't
+disconnected from power. It's important to receive these events even while your app isn't
 running&mdash;particularly as these events should impact how often you start your app in order to
 initiate a background update&mdash;so you should register a {@link
 android.content.BroadcastReceiver} in your manifest to listen for both events by defining the
@@ -99,11 +101,11 @@ the current charging state and method as described in the previous step.</p>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
@@ -111,7 +113,7 @@ the current charging state and method as described in the previous step.</p>
 }</pre>
 
 
-<h2 id="CurrentLevel">Determine the Current Battery Level</h2> 
+<h2 id="CurrentLevel">Determine the Current Battery Level</h2>
 
 <p>In some cases it's also useful to determine the current battery level. You may choose to reduce
 the rate of your background updates if the battery charge is below a certain level.</p>
@@ -125,7 +127,7 @@ int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">Monitor Significant Changes in Battery Level</h2> 
+<h2 id="MonitorLevel">Monitor Significant Changes in Battery Level</h2>
 
 <p>You can't easily continually monitor the battery state, but you don't need to.</p>
 
@@ -153,4 +155,7 @@ can make use of it.</p>
 <p>In many cases, the act of charging a device is coincident with putting it into a dock. The next
 lesson shows you how to determine the current dock state and monitor for changes in device
 docking.</p>
+
+
+
 

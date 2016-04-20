@@ -1,0 +1,131 @@
+page.title=使用材料設計風格
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#ColorPalette">自訂色板</a></li>
+  <li><a href="#StatusBar">自訂狀態列</a></li>
+  <li><a href="#Inheritance">設計風格個別視圖</a></li>
+</ol>
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料設計規格</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 上的材料設計</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>新的材料設計風格提供：</p>
+
+<ul>
+  <li>可設定其色板的系統小工具</li>
+  <li>系統小工具的輕觸回饋動畫</li>
+  <li>操作行為轉換動畫</li>
+</ul>
+
+<p>您可根據品牌特性，使用您控制的色板以自訂材料設計風格的外觀。
+您可以使用風格主題屬性，為行為欄和狀態列著色，如<a href="#fig3">圖 3</a> 所示。
+</p>
+
+<p>系統小工具經過全新設計，有輕觸回饋動畫。您可以為應用程式自訂色板、輕觸回饋動畫，以及操作行為轉換。
+</p>
+
+<p>材料設計風格定義為：</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (深色版本)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (淺色版本)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>如需您可以使用的材料樣式清單，請參閱 {@link android.R.style R.style} 的 API 參考資料。
+</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>圖 1</strong>.深色材料設計風格</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>圖 2</strong>.淺色材料設計風格</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>注意：</strong>材料設計風格只能在 Android 5.0 (API 級別 21) 及以上版本中使用。
+<a href="{@docRoot}tools/support-library/features.html#v7">v7 支援程式庫</a>針對某些小工具提供使用材料設計樣式的設計風格，並支援自訂色板。
+
+如需詳細資訊，請參閱<a href="{@docRoot}training/material/compatibility.html">維持相容性</a>。
+
+</p>
+
+
+<h2 id="ColorPalette">自訂色板</h2>
+
+<p style="margin-bottom:30px">如要自訂設計風格的基礎顏色來搭配您的品牌，在繼承材料設計風格時，請使用設計風格屬性定義您的自訂顏色：
+</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>圖 3.</strong>自訂材料設計風格。</p>
+</div>
+
+
+<h2 id="StatusBar">自訂狀態列</h2>
+
+<p>材料設計風格可讓您輕鬆自訂狀態列，因此，您可指定符合品牌的顏色，並提供足夠的對比來顯示白色的狀態圖示。
+如要設定狀態列的自訂顏色，請在延伸材料設計風格時使用 <code>android:statusBarColor</code> 屬性。
+
+<code>android:statusBarColor</code> 預設會繼承 <code>android:colorPrimaryDark</code> 的值。
+</p>
+
+<p>您也可以自行繪製狀態列。例如，若您想在相片上面顯示透明的狀態列，卻想搭配一點深色的漸層以確保白色的狀態圖示清晰可見。
+
+請將 <code>android:statusBarColor</code> 屬性設定為 <code>&#64;android:color/transparent</code>，並且視需要調整視窗標幟。
+您也可以使用 {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} 方法顯示動畫或進行淡化。
+
+</p>
+
+<p class="note">
+<strong>注意：</strong>狀態列應該與主要工具列有清楚區分的輪廓，除非您想在這些列後面顯示全版的豐富圖像或媒體內容，或使用漸層以確保圖示清晰可見。
+
+
+</p>
+
+<p>當您自訂瀏覽列和狀態列時，請讓兩者都變成透明，或者只修改狀態列。
+在其他所有狀況下，瀏覽列都必須保持黑色。</p>
+
+
+<h2 id="Inheritance">設計風格個別視圖</h3>
+
+<p>XML 版面配置定義中的元素可以指定 <code>android:theme</code> 屬性，參考設計風格資源。
+此屬性會修改元素和所有子元素的設計風格，對於改變介面特定部份的設計風格色板非常實用。
+
+</p>

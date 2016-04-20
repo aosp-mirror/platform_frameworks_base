@@ -1,0 +1,133 @@
+page.title=シャドウとクリッピング ビューの定義
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#Elevation">ビューにエレベーションを割り当てる</a></li>
+  <li><a href="#Shadows">ビューシャドウとアウトラインをカスタマイズする</a></li>
+  <li><a href="#Clip">ビューをクリップする</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+<p>マテリアル デザインでは、UI 要素に Elevation（エレベーション、高度）を導入しています。エレベーションによって、ユーザーは 1 つの要素が他の要素と比べて重要であることを理解でき、目前の作業に集中できるようになります。
+</p>
+
+<p>ビューのエレベーションは Z プロパティで表され、シャドウビューの見た目を決定します。Z 値が高くなればシャドウも大きく、滑らかになります。
+Z 値が高いビューは Z 値が低いビューを覆い隠しますが、Z 値がビューのサイズに影響することはありません。
+</p>
+
+<p>シャドウは、エレベーションが設定された親ビューによって描かれ、標準的なビュー クリッピングの対象になります。デフォルトでは親ビューによってクリップされます。
+</p>
+
+<p>エレベーションは、何らかのアクションでビューの平面上にウィジェットが浮き上がるようなアニメーションを作成する際にも役立ちます。
+</p>
+
+<p>マテリアル デザインのエレベーションの詳細については、
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">3D スペースのオブジェクト</a>をご覧ください。
+</p>
+
+
+<h2 id="Elevation">ビューにエレベーションを割り当てる</h2>
+
+<p>ビューの Z 値には次の 2 つのコンポーネントがあります。
+
+<ul>
+<li>Elevation （エレベーション）: 静的なコンポーネントです。</li>
+<li>Translation （トランスレーション）: アニメーションに使われる動的なコンポーネントです。</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>図 1</strong> - 異なるビュー エレベーションのシャドウ。</p>
+
+<p>レイアウトの定義でビューのエレベーションを設定するには、<code>android:elevation</code>
+ 属性を使用します。アクティビティのコードでビューのエレベーションを設定するには、
+{@link android.view.View#setElevation View.setElevation()} メソッドを使用します。</p>
+
+<p>ビューのトランスレーションを設定するには、{@link android.view.View#setTranslationZ
+View.setTranslationZ()} メソッドを使用します。</p>
+
+<p>新しい {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} メソッドや {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} メソッドを使用すると、ビューのエレベーションに簡単にアニメーションを付けられます。
+詳細については、API リファレンスの
+{@link android.view.ViewPropertyAnimator} と、デベロッパー ガイドの<a href="{@docRoot}guide/topics/graphics/prop-animation.html">プロパティ アニメーション</a>をご覧ください。
+</p>
+
+<p>また、{@link android.animation.StateListAnimator} を使用してアニメーションを宣言的に指定することも可能です。
+これは、ユーザーがボタンを押したときなど、状態の変化によってアニメーションを動作する場合に特に役立ちます。
+詳細については、
+<a href="{@docRoot}training/material/animations.html#ViewState">ビューの状態遷移にアニメーションを付ける</a>をご覧ください。</p>
+
+<p>Z 値は dp（密度非依存ピクセル）で測られます。</p>
+
+
+<h2 id="Shadows">ビューシャドウとアウトラインをカスタマイズする</h2>
+
+<p>ビュー背景のドローアブルの範囲によってシャドウのデフォルトの形状が決まります。
+<strong>Outlines</strong> はグラフィック オブジェクトの外形を表し、タッチ フィードバックのリップル（波紋）の領域を定義します。
+</p>
+
+<p>背景ドローアブルで定義されたビューについて考えてみます。</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>背景ドローアブルが角が丸い長方形として定義されます。</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>背景ドローアブルによってビューの外形が定義されるため、このビューは角が丸いシャドウを付与します。
+カスタム アウトラインを使えば、ビューシャドウのデフォルトの形状を更新できます。</p>
+
+<p>コードでビューのカスタム アウトラインを定義するには: <p>
+
+<ol>
+<li>{@link android.view.ViewOutlineProvider} クラスを拡張します。</li>
+<li>{@link android.view.ViewOutlineProvider#getOutline getOutline()} メソッドを上書きします。</li>
+<li>{@link
+android.view.View#setOutlineProvider View.setOutlineProvider()} メソッドで、ビューに新しい OutlineProvider を割り当てます。</li>
+</ol>
+
+<p>
+{@link android.graphics.Outline} クラスのメソッドを使用して、楕円形や角が丸い長方形のアウトラインを作成できます。ビューのデフォルトの OutlineProvider は、ビューの背景から外形を決定します。
+ビューがシャドウを付与しないようにするには、OutlineProvider を <code>null</code> に設定します。
+</p>
+
+
+<h2 id="Clip">ビューをクリップする</h2>
+
+<p>ビューをクリップすると、ビューの形を簡単に変更できます。ビューをクリップすることで、他のデザイン要素との統一性を保ったり、ユーザーのインプットに応じてビューの形を変えたりできます。
+
+{@link android.view.View#setClipToOutline
+View.setClipToOutline()} メソッドか <code>android:clipToOutline</code> 属性を使用すると、ビューをそのアウトラインの範囲にクリップできます。
+{@link android.graphics.Outline#canClip Outline.canClip()} メソッドで指定されているように、クリップがサポートされるのは長方形、円形、角が丸い長方形のみです。
+</p>
+
+<p>上述のように、ドローアブルの範囲でビューをクリップするには、ドローアブルをビューの背景として設定し、{@link android.view.View#setClipToOutline View.setClipToOutline()}
+メソッドを呼び出します。
+</p>
+
+<p>ビューのクリップは負荷の高い操作であるため、ビューのクリップに使用する形状にはアニメーションを付けないでください。
+この効果を発揮させるには、<a href="{@docRoot}training/material/animations.html#Reveal">出現エフェクト</a>アニメーションを使用します。</p>

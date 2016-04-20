@@ -1,0 +1,247 @@
+page.title=Permissions Best Practices
+page.tags=permissions
+helpoutsWidget=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#perms-vs-intents">Consider Using an Intent</a></li>
+
+  <li><a href="#dont-overwhelm">Don't Overwhelm the User</a></li>
+
+  <li><a href="#explain">Explain Why You Need Permissions</a></li>
+
+  <li><a href="#testing">Test for Both Permissions Models</a></li>
+
+</ul>
+
+<h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}training/basics/intents/index.html">Interacting
+      with Other Apps</a></li>
+  </ul>
+
+</div>
+</div>
+
+
+<p>
+It's easy for an app to overwhelm a user with permission requests. If a user
+finds the app frustrating to use, or the user is worried about what the app
+might be doing with the user's information, they may avoid using the app or
+uninstall it entirely. The following best practices can help you avoid such
+bad user experiences.
+</p>
+
+<h2 id="perms-vs-intents">Consider Using an Intent</h2>
+
+<p>
+  In many cases, you can choose between two ways for your app to perform a
+  task. You can have your app ask for permission to perform the operation
+  itself. Alternatively, you can have the app use an <em>intent</em> to have
+  another app perform the task.
+</p>
+
+<p>
+  For example, suppose your app needs to be able to take pictures with the
+  device camera. Your app can request the {@link
+  android.Manifest.permission#CAMERA CAMERA} permission, which allows your app
+  to access the camera directly. Your app would then use the camera APIs to
+  control the camera and take a picture. This approach gives your app full
+  control over the photography process, and lets you incorporate the camera UI
+  into your app.
+</p>
+
+<p>
+  However, if you don't need such complete control, you can use an {@link
+  android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} intent
+  to request an image. When you send the intent, the system prompts the user to
+  choose a camera app (if there isn't already a default camera app).
+  The user takes a picture with the selected camera app, and that app returns
+  the picture to your app's {@link
+  android.app.Activity#onActivityResult onActivityResult()} method.
+</p>
+
+<p>
+  Similarly, if you need to make a phone call, access the user's contacts, and
+  so on, you can do that by creating an appropriate intent, or you can request
+  the permission and access the appropriate objects directly. There are
+  advantages and disadvantages to each approach.
+</p>
+
+<p>
+  If you use permissions:
+</p>
+
+<ul>
+  <li>Your app has full control over the user experience when you perform the
+  operation. However, such broad control adds to the complexity of your task,
+  since you need to design an appropriate UI.
+  </li>
+
+  <li>The user is prompted to give permission once, either at run time or at
+  install time (depending on the user's Android version). After that, your app
+  can perform the operation without requiring additional interaction from the
+  user. However, if the user doesn't grant the permission (or revokes it later
+  on), your app becomes unable to perform the operation at all.
+  </li>
+</ul>
+
+<p>
+  If you use an intent:
+</p>
+
+<ul>
+  <li>You do not have to design the UI for the operation. The app that handles
+  the intent provides the UI. However, this means you have
+  no control over the user experience. The user could be interacting with an
+  app you've never seen.
+  </li>
+
+  <li>If the user does not have a default app for the operation, the system
+  prompts the user to choose an app. If the user does not designate a default
+  handler, they may have to go
+  through an extra dialog every time they perform the operation.
+  </li>
+</ul>
+
+<h2 id="ask-neccessary">Only Ask for Permissions You Need</h2>
+
+<p>
+  Every time you ask for a permission, you force the user to make a decision.
+  You should minimize the number of times you make these requests. If the user
+  is running Android 6.0 (API level 23) or later, every time the user tries
+  some new app feature that requires a permission, the app has to interrupt the
+  user's work with a permission request. If the user is running an earlier
+  version of Android, the user has to grant every one of the app's permissions
+  when installing the app; if the list is too long or seems inappropriate, the
+  user may decide not to install your app at all. For these reasons, you should
+  minimize the number of permissions your app needs.
+</p>
+
+<p>
+  Quite often your app can avoid requesting a permission by using an
+  <em>intent</em> instead. If a feature is not a core part of your app's
+  functionality, you should consider handing the work over to another app, as
+  described in <a href="#perms-vs-intents">Consider Using An Intent</a>.
+</p>
+
+<h2 id="dont-overwhelm">Don't Overwhelm the User</h2>
+
+<p>
+  If the user is running Android 6.0 (API level 23) or later, the user has to
+  grant your app its permissions while they are running the app. If you
+  confront the user with a lot of requests for permissions at once, you may
+  overwhelm the user and cause them to quit your app. Instead, you should ask
+  for permissions as you need them.
+</p>
+
+<p>
+  In some cases, one or more permissions might be absolutely essential to your
+  app. It might make sense to ask for all of those permissions as soon as the
+  app launches. For example, if you make a photography app, the app would need
+  access to the device camera. When the user launches the app for the first
+  time, they won't be surprised to be asked for permission to use the camera.
+  But if the same app also had a feature to share photos with the user's
+  contacts, you probably should <em>not</em> ask for the {@link
+  android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission at first
+  launch. Instead, wait until the user tries to use the "sharing" feature and
+  ask for the permission then.
+</p>
+
+<p>
+  If your app provides a tutorial, it may make sense to request the app's
+  essential permissions at the end of the tutorial sequence.
+</p>
+
+<h2 id="explain">Explain Why You Need Permissions</h2>
+
+<p>
+  The permissions dialog shown by the system when you call
+  {@link android.support.v4.app.ActivityCompat#requestPermissions
+  requestPermissions()} says what permission your app wants, but doesn't say
+  why. In some cases, the user may find that puzzling. It's a good idea to
+  explain to the user why your app wants the permissions before calling
+  {@link android.support.v4.app.ActivityCompat#requestPermissions
+  requestPermissions()}.
+</p>
+
+<p>
+  For example, a photography app might want to use location services so it can
+  geotag the photos. A typical user might not understand that a photo can
+  contain location information, and would be puzzled why their photography app
+  wants to know the location. So in this case, it's a good idea for the app to
+  tell the user about this feature <em>before</em> calling
+  {@link android.support.v4.app.ActivityCompat#requestPermissions
+  requestPermissions()}.
+</p>
+
+<p>
+  One way to inform the user is to incorporate these requests into an app
+  tutorial. The tutorial can show each of the app's features in turn, and as it
+  does this, it can explain what permissions are needed. For example, the
+  photography app's tutorial could demonstrate its "share photos with your
+  contacts" feature, then tell the user that they need to give permission for
+  the app to see the user's contacts. The app could then call {@link
+  android.support.v4.app.ActivityCompat#requestPermissions
+  requestPermissions()} to ask the user for that access. Of course, not every
+  user is going to follow the tutorial, so you still need to check for and
+  request permissions during the app's normal operation.
+</p>
+
+<h2 id="testing">Test for Both Permissions Models</h2>
+
+<p>
+  Beginning with Android 6.0 (API level 23), users grant and revoke app
+  permissions at run time, instead of doing so when they install the app. As a
+  result, you'll have to test your app under a wider range of conditions. Prior
+  to Android 6.0, you could reasonably assume that if your app is running at
+  all, it has all the permissions it declares in the app manifest. Under the
+  new permissions model, you can no longer make that assumption.
+</p>
+
+<p>
+  The following tips will help you identify permissions-related code problems
+  on devices running API level 23 or higher:
+</p>
+
+<ul>
+  <li>Identify your app’s current permissions and the related code paths.
+  </li>
+
+  <li>Test user flows across permission-protected services and data.
+  </li>
+
+  <li>Test with various combinations of granted or revoked permissions. For
+  example, a camera app might list {@link android.Manifest.permission#CAMERA
+  CAMERA}, {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}, and
+  {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
+  in its manifest. You should test the app with each of these permissions
+  turned on and off, to make sure the app can handle all permission
+  configurations gracefully. Remember, beginning with Android 6.0 the user can
+  turn permissions on or off for <em>any</em> app, even an app that targets API
+  level 22 or lower.
+  </li>
+
+  <li>Use the <a href="{@docRoot}tools/help/adb.html">adb</a> tool to manage
+  permissions from the command line:
+    <ul>
+      <li>List permissions and status by group:
+
+        <pre class="no-pretty-print">$ adb shell pm list permissions -d -g</pre>
+      </li>
+
+      <li>Grant or revoke one or more permissions:
+
+        <pre class="no-pretty-print">$ adb shell pm [grant|revoke] &lt;permission-name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+
+  <li>Analyze your app for services that use permissions.
+  </li>
+</ul>
