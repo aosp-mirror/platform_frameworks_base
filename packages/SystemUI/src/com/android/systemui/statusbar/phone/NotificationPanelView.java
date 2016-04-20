@@ -701,7 +701,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isFalseTouch() {
-        if (mStatusBarState != StatusBarState.KEYGUARD) {
+        if (!needsAntiFalsing()) {
             return false;
         }
         if (mFalsingManager.isClassiferEnabled()) {
@@ -1938,6 +1938,11 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public float getAffordanceFalsingFactor() {
         return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+    }
+
+    @Override
+    public boolean needsAntiFalsing() {
+        return mStatusBarState == StatusBarState.KEYGUARD;
     }
 
     @Override
