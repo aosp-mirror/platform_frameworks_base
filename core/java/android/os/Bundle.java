@@ -38,12 +38,9 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     public static final Bundle EMPTY;
 
-    static final Parcel EMPTY_PARCEL;
-
     static {
         EMPTY = new Bundle();
         EMPTY.mMap = ArrayMap.EMPTY;
-        EMPTY_PARCEL = BaseBundle.EMPTY_PARCEL;
     }
 
     /**
@@ -1155,7 +1152,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @Override
     public synchronized String toString() {
         if (mParcelledData != null) {
-            if (mParcelledData == EMPTY_PARCEL) {
+            if (isEmptyParcel()) {
                 return "Bundle[EMPTY_PARCEL]";
             } else {
                 return "Bundle[mParcelledData.dataSize=" +
