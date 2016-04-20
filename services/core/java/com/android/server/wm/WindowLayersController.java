@@ -59,6 +59,7 @@ public class WindowLayersController {
     private int mHighestApplicationLayer = 0;
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
+    private ArrayDeque<WindowState> mInputMethodWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
 
@@ -166,6 +167,7 @@ public class WindowLayersController {
     private void clear() {
         mHighestApplicationLayer = 0;
         mPinnedWindows.clear();
+        mInputMethodWindows.clear();
         mDockedWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
@@ -178,6 +180,10 @@ public class WindowLayersController {
         }
         if (w.mWillReplaceWindow) {
             mReplacingWindows.add(w);
+        }
+        if (w.mIsImWindow) {
+            mInputMethodWindows.add(w);
+            return;
         }
         final TaskStack stack = w.getStack();
         if (stack == null) {
@@ -200,12 +206,9 @@ public class WindowLayersController {
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
 
-        if (mDockDivider != null && mDockDivider.isVisibleLw()
-                && mService.mInputMethodWindow != null) {
-            layer = assignAndIncreaseLayerIfNeeded(mService.mInputMethodWindow, layer);
-            for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
-                final WindowState dialog = mService.mInputMethodDialogs.get(i);
-                layer = assignAndIncreaseLayerIfNeeded(dialog, layer);
+        if (mDockDivider != null && mDockDivider.isVisibleLw()) {
+            while (!mInputMethodWindows.isEmpty()) {
+                layer = assignAndIncreaseLayerIfNeeded(mInputMethodWindows.remove(), layer);
             }
         }
 
