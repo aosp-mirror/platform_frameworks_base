@@ -143,7 +143,6 @@ public final class PowerManagerService extends SystemService
     private static final int WAKE_LOCK_STAY_AWAKE = 1 << 5; // only set if already awake
     private static final int WAKE_LOCK_DOZE = 1 << 6;
     private static final int WAKE_LOCK_DRAW = 1 << 7;
-    private static final int WAKE_LOCK_SUSTAINED_PERFORMANCE = 1 << 8;
 
     // Summarizes the user activity state.
     private static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
@@ -162,7 +161,6 @@ public final class PowerManagerService extends SystemService
 
     // Power hints defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_HINT_LOW_POWER = 5;
-    private static final int POWER_HINT_SUSTAINED_PERFORMANCE = 6;
     private static final int POWER_HINT_VR_MODE = 7;
 
     // Power features defined in hardware/libhardware/include/hardware/power.h.
@@ -470,9 +468,6 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in light device idle mode.
     private boolean mLightDeviceIdleMode;
 
-    // True if we are currently in sustained performance mode.
-    private boolean mSustainedPerformanceMode;
-
     // Set of app ids that we will always respect the wake locks for.
     int[] mDeviceIdleWhitelist = new int[0];
 
@@ -480,8 +475,6 @@ public final class PowerManagerService extends SystemService
     int[] mDeviceIdleTempWhitelist = new int[0];
 
     private final SparseIntArray mUidState = new SparseIntArray();
-
-    private final SparseIntArray mSustainedPerformanceUid = new SparseIntArray();
 
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
@@ -879,12 +872,6 @@ public final class PowerManagerService extends SystemService
                     throw new IllegalArgumentException("Wake lock is already dead.");
                 }
                 mWakeLocks.add(wakeLock);
-
-                if ((flags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                        == PowerManager.SUSTAINED_PERFORMANCE_WAKE_LOCK) {
-                    int numberWakelock = mSustainedPerformanceUid.get(uid);
-                    mSustainedPerformanceUid.put(uid, numberWakelock + 1);
-                }
                 setWakeLockDisabledStateLocked(wakeLock);
                 notifyAcquire = true;
             }
@@ -951,17 +938,6 @@ public final class PowerManagerService extends SystemService
 
             if ((flags & PowerManager.RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY) != 0) {
                 mRequestWaitForNegativeProximity = true;
-            }
-
-
-            if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                    == PowerManager.SUSTAINED_PERFORMANCE_WAKE_LOCK) {
-                int numberWakelock = mSustainedPerformanceUid.get(wakeLock.mOwnerUid);
-                if (numberWakelock == 1) {
-                    mSustainedPerformanceUid.delete(wakeLock.mOwnerUid);
-                } else {
-                    mSustainedPerformanceUid.put(wakeLock.mOwnerUid, numberWakelock - 1);
-                }
             }
 
             wakeLock.mLock.unlinkToDeath(wakeLock, 0);
@@ -1586,10 +1562,6 @@ public final class PowerManagerService extends SystemService
                         break;
                     case PowerManager.DRAW_WAKE_LOCK:
                         mWakeLockSummary |= WAKE_LOCK_DRAW;
-                    case PowerManager.SUSTAINED_PERFORMANCE_WAKE_LOCK:
-                        if (!wakeLock.mDisabled) {
-                            mWakeLockSummary |= WAKE_LOCK_SUSTAINED_PERFORMANCE;
-                        }
                         break;
                 }
             }
@@ -2288,14 +2260,6 @@ public final class PowerManagerService extends SystemService
         if (autoSuspend && mDecoupleHalAutoSuspendModeFromDisplayConfig) {
             setHalAutoSuspendModeLocked(true);
         }
-
-        if (mSustainedPerformanceMode
-                && (mWakeLockSummary & WAKE_LOCK_SUSTAINED_PERFORMANCE) == 0) {
-            setSustainedPerformanceModeLocked(false);
-        } else if (!mSustainedPerformanceMode
-                && (mWakeLockSummary & WAKE_LOCK_SUSTAINED_PERFORMANCE) != 0) {
-            setSustainedPerformanceModeLocked(true);
-        }
     }
 
     /**
@@ -2392,12 +2356,6 @@ public final class PowerManagerService extends SystemService
             updateLowPowerModeLocked();
             return true;
         }
-    }
-
-    private void setSustainedPerformanceModeLocked(boolean mode) {
-            mSustainedPerformanceMode = mode;
-            powerHintInternal(POWER_HINT_SUSTAINED_PERFORMANCE,
-                              mSustainedPerformanceMode ? 1 : 0);
     }
 
     boolean isDeviceIdleModeInternal() {
@@ -2531,7 +2489,7 @@ public final class PowerManagerService extends SystemService
     void updateUidProcStateInternal(int uid, int procState) {
         synchronized (mLock) {
             mUidState.put(uid, procState);
-            if (mDeviceIdleMode || mSustainedPerformanceUid.get(uid) != 0) {
+            if (mDeviceIdleMode) {
                 updateWakeLockDisabledStatesLocked();
             }
         }
@@ -2552,9 +2510,7 @@ public final class PowerManagerService extends SystemService
         for (int i = 0; i < numWakeLocks; i++) {
             final WakeLock wakeLock = mWakeLocks.get(i);
             if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                    == PowerManager.PARTIAL_WAKE_LOCK
-                    || (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                    == PowerManager.SUSTAINED_PERFORMANCE_WAKE_LOCK) {
+                    == PowerManager.PARTIAL_WAKE_LOCK) {
                 if (setWakeLockDisabledStateLocked(wakeLock)) {
                     changed = true;
                     if (wakeLock.mDisabled) {
@@ -2573,9 +2529,9 @@ public final class PowerManagerService extends SystemService
     }
 
     private boolean setWakeLockDisabledStateLocked(WakeLock wakeLock) {
-        boolean disabled = false;
         if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
                 == PowerManager.PARTIAL_WAKE_LOCK) {
+            boolean disabled = false;
             if (mDeviceIdleMode) {
                 final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
                 // If we are in idle mode, we will ignore all partial wake locks that are
@@ -2589,16 +2545,10 @@ public final class PowerManagerService extends SystemService
                     disabled = true;
                 }
             }
-        } else if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                == PowerManager.SUSTAINED_PERFORMANCE_WAKE_LOCK
-                && mUidState.get(wakeLock.mOwnerUid,
-                                 ActivityManager.PROCESS_STATE_CACHED_EMPTY)
-                > ActivityManager.PROCESS_STATE_TOP) {
-            disabled = true;
-        }
-        if (wakeLock.mDisabled != disabled) {
-            wakeLock.mDisabled = disabled;
-            return true;
+            if (wakeLock.mDisabled != disabled) {
+                wakeLock.mDisabled = disabled;
+                return true;
+            }
         }
         return false;
     }
@@ -2806,7 +2756,6 @@ public final class PowerManagerService extends SystemService
             pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
             pw.println("  mLightDeviceIdleMode=" + mLightDeviceIdleMode);
             pw.println("  mDeviceIdleMode=" + mDeviceIdleMode);
-            pw.println("  mSustainedPerformanceMode=" + mSustainedPerformanceMode);
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
@@ -2920,14 +2869,6 @@ public final class PowerManagerService extends SystemService
 
             pw.println();
             pw.println("Display Power: " + mDisplayPowerCallbacks);
-
-            pw.println();
-            pw.println("Sustained Performance UIDs:");
-            for (int i=0; i<mSustainedPerformanceUid.size(); i++) {
-                pw.print("  UID "); UserHandle.formatUid(pw, mSustainedPerformanceUid.keyAt(i));
-                pw.print(": "); pw.println(mSustainedPerformanceUid.valueAt(i));
-            }
-
 
             wcd = mWirelessChargerDetector;
         }
