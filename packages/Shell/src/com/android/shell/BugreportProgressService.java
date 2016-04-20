@@ -1075,16 +1075,17 @@ public class BugreportProgressService extends Service {
             addEntry(zos, "title.txt", info.title);
             addEntry(zos, "description.txt", info.description);
         } catch (IOException e) {
-            info.addingDetailsToZip = false;
             Log.e(TAG, "exception zipping file " + tmpZip, e);
             return;
+        } finally {
+            // Make sure it only tries to add details once, even it fails the first time.
+            info.addedDetailsToZip = true;
+            info.addingDetailsToZip = false;
         }
 
         if (!tmpZip.renameTo(info.bugreportFile)) {
             Log.e(TAG, "Could not rename " + tmpZip + " to " + info.bugreportFile);
         }
-        info.addedDetailsToZip = true;
-        info.addingDetailsToZip = false;
     }
 
     private static void addEntry(ZipOutputStream zos, String entry, String text)
