@@ -22,5 +22,6 @@ oneway interface INetworkPolicyListener {
     void onUidRulesChanged(int uid, int uidRules);
     void onMeteredIfacesChanged(in String[] meteredIfaces);
     void onRestrictBackgroundChanged(boolean restrictBackground);
+    void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted);
 
 }
