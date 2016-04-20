@@ -18,6 +18,7 @@ package android.app;
 
 import android.os.Trace;
 import android.util.ArrayMap;
+import com.android.internal.os.PathClassLoaderFactory;
 import dalvik.system.PathClassLoader;
 
 class ApplicationLoaders {
@@ -51,23 +52,18 @@ class ApplicationLoaders {
                 if (loader != null) {
                     return loader;
                 }
-    
+
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
 
-                PathClassLoader pathClassloader =
-                    new PathClassLoader(zip, librarySearchPath, parent);
+                PathClassLoader pathClassloader = PathClassLoaderFactory.createClassLoader(
+                                                      zip,
+                                                      librarySearchPath,
+                                                      libraryPermittedPath,
+                                                      parent,
+                                                      targetSdkVersion,
+                                                      isBundled);
 
-                String errorMessage = createClassloaderNamespace(pathClassloader,
-                                                                 targetSdkVersion,
-                                                                 librarySearchPath,
-                                                                 libraryPermittedPath,
-                                                                 isBundled);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-                if (errorMessage != null) {
-                    throw new UnsatisfiedLinkError("Unable to create namespace for the classloader " +
-                                                   pathClassloader + ": " + errorMessage);
-                }
 
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
@@ -80,14 +76,7 @@ class ApplicationLoaders {
         }
     }
 
-    private static native String createClassloaderNamespace(ClassLoader classLoader,
-                                                            int targetSdkVersion,
-                                                            String librarySearchPath,
-                                                            String libraryPermittedPath,
-                                                            boolean isShared);
-
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();
 
-    private static final ApplicationLoaders gApplicationLoaders
-        = new ApplicationLoaders();
+    private static final ApplicationLoaders gApplicationLoaders = new ApplicationLoaders();
 }
