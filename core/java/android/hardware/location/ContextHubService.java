@@ -19,6 +19,7 @@ package android.hardware.location;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -57,19 +58,17 @@ public class ContextHubService extends IContextHubService.Stub {
     private static final int OS_APP_INSTANCE = -1;
 
     private final Context mContext;
-
-    private HashMap<Integer, NanoAppInstanceInfo> mNanoAppHash;
-    private ContextHubInfo[] mContextHubInfo;
-    private IContextHubCallback mCallback;
+    private final HashMap<Integer, NanoAppInstanceInfo> mNanoAppHash = new HashMap<>();
+    private final ContextHubInfo[] mContextHubInfo;
+    private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
+            new RemoteCallbackList<>();
 
     private native int nativeSendMessage(int[] header, byte[] data);
     private native ContextHubInfo[] nativeInitialize();
 
-
     public ContextHubService(Context context) {
         mContext = context;
         mContextHubInfo = nativeInitialize();
-        mNanoAppHash = new HashMap<Integer, NanoAppInstanceInfo>();
 
         for (int i = 0; i < mContextHubInfo.length; i++) {
             Log.d(TAG, "ContextHub[" + i + "] id: " + mContextHubInfo[i].getId()
@@ -80,9 +79,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
-        synchronized (this) {
-            mCallback = callback;
-        }
+        mCallbacksList.register(callback);
         return 0;
     }
 
@@ -237,26 +234,26 @@ public class ContextHubService extends IContextHubService.Stub {
         if (header == null || data == null || header.length < MSG_HEADER_SIZE) {
             return  -1;
         }
-
-        synchronized (this) {
-            if (mCallback != null) {
-                ContextHubMessage msg = new ContextHubMessage(header[MSG_FIELD_TYPE],
-                                                              header[MSG_FIELD_VERSION],
-                                                              data);
-
-                try {
-                    mCallback.onMessageReceipt(header[MSG_FIELD_HUB_HANDLE],
-                                               header[MSG_FIELD_APP_INSTANCE],
-                                               msg);
-                } catch (Exception e) {
-                    Log.w(TAG, "Exception " + e + " when calling remote callback");
-                    return -1;
-                }
-            } else {
-                Log.d(TAG, "Message Callback is NULL");
+        int callbacksCount = mCallbacksList.beginBroadcast();
+        if (callbacksCount < 1) {
+            Log.v(TAG, "No message callbacks registered.");
+            return 0;
+        }
+        ContextHubMessage message =
+                new ContextHubMessage(header[MSG_FIELD_TYPE], header[MSG_FIELD_VERSION], data);
+        for (int i = 0; i < callbacksCount; ++i) {
+            IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
+            try {
+                callback.onMessageReceipt(
+                        header[MSG_FIELD_HUB_HANDLE],
+                        header[MSG_FIELD_APP_INSTANCE],
+                        message);
+            } catch (RemoteException e) {
+                Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
+                continue;
             }
         }
-
+        mCallbacksList.finishBroadcast();
         return 0;
     }
 
