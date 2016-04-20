@@ -85,6 +85,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
@@ -5278,6 +5279,10 @@ public class PackageParser {
             if (p.applicationInfo.enabled != enabled) {
                 return true;
             }
+        }
+        boolean suspended = (p.applicationInfo.flags & FLAG_SUSPENDED) != 0;
+        if (state.suspended != suspended) {
+            return true;
         }
         if (!state.installed || state.hidden) {
             return true;
