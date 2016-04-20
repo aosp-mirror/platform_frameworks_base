@@ -630,6 +630,20 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
 
     /**
+     * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
+     * a package name and activity name can be provided to launch a supported carrier application
+     * that check the sim provisioning status
+     * The first element is the package name and the second element is the activity name
+     * of the provisioning app
+     * example:
+     * <item>com.google.android.carrierPackageName</item>
+     * <item>com.google.android.carrierPackageName.CarrierActivityName</item>
+     * @hide
+     */
+     public static final String KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY =
+            "sim_state_detection_carrier_app_string_array";
+
+    /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
      * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
      * are allowed in emergency callback mode.
@@ -798,6 +812,10 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
+
+        // Used for Sim card State detection app
+        sDefaults.putStringArray(KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY,
+                null);
     }
 
     /**
