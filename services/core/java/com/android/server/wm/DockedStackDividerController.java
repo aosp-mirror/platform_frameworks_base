@@ -116,6 +116,11 @@ public class DockedStackDividerController implements DimLayerUser {
     private boolean mAnimatingForIme;
     private boolean mAdjustedForIme;
     private WindowState mDelayedImeWin;
+    private boolean mAdjustedForDivider;
+    private float mDividerAnimationStart;
+    private float mDividerAnimationTarget;
+    private float mLastAnimationProgress;
+    private float mLastDividerProgress;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -208,16 +213,18 @@ public class DockedStackDividerController implements DimLayerUser {
         return mLastVisibility;
     }
 
-    void setAdjustedForIme(boolean adjusted, boolean animate, WindowState imeWin) {
-        if (mAdjustedForIme != adjusted) {
-            mAdjustedForIme = adjusted;
+    void setAdjustedForIme(
+            boolean adjustedForIme, boolean adjustedForDivider,
+            boolean animate, WindowState imeWin) {
+        if (mAdjustedForIme != adjustedForIme || mAdjustedForDivider != adjustedForDivider) {
             if (animate) {
-                startImeAdjustAnimation(adjusted, imeWin);
+                startImeAdjustAnimation(adjustedForIme, adjustedForDivider, imeWin);
             } else {
-
                 // Animation might be delayed, so only notify if we don't run an animation.
-                notifyAdjustedForImeChanged(adjusted, 0 /* duration */);
+                notifyAdjustedForImeChanged(adjustedForIme || adjustedForDivider, 0 /* duration */);
             }
+            mAdjustedForIme = adjustedForIme;
+            mAdjustedForDivider = adjustedForDivider;
         }
     }
 
@@ -457,11 +464,25 @@ public class DockedStackDividerController implements DimLayerUser {
         mAnimationTarget = to;
     }
 
-    private void startImeAdjustAnimation(boolean adjusted, WindowState imeWin) {
+    private void startImeAdjustAnimation(
+            boolean adjustedForIme, boolean adjustedForDivider, WindowState imeWin) {
         mAnimatingForIme = true;
         mAnimationStarted = false;
-        mAnimationStart = adjusted ? 0 : 1;
-        mAnimationTarget = adjusted ? 1 : 0;
+
+        // If we're not in an animation, the starting point depends on whether we're adjusted
+        // or not. If we're already in an animation, we start from where the current animation
+        // left off, so that the motion doesn't look discontinuous.
+        if (!mAnimatingForIme) {
+            mAnimationStart = mAdjustedForIme ? 1 : 0;
+            mDividerAnimationStart = mAdjustedForDivider ? 1 : 0;
+            mLastAnimationProgress = mAnimationStart;
+            mLastDividerProgress = mDividerAnimationStart;
+        } else {
+            mAnimationStart = mLastAnimationProgress;
+            mDividerAnimationStart = mLastDividerProgress;
+        }
+        mAnimationTarget = adjustedForIme ? 1 : 0;
+        mDividerAnimationTarget = adjustedForDivider ? 1 : 0;
 
         final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
         for (int i = stacks.size() - 1; i >= 0; --i) {
@@ -492,10 +513,12 @@ public class DockedStackDividerController implements DimLayerUser {
                 if (mDelayedImeWin != null) {
                     mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
                 }
-                notifyAdjustedForImeChanged(adjusted, IME_ADJUST_ANIM_DURATION);
+                notifyAdjustedForImeChanged(
+                        adjustedForIme || adjustedForDivider, IME_ADJUST_ANIM_DURATION);
             };
         } else {
-            notifyAdjustedForImeChanged(adjusted, IME_ADJUST_ANIM_DURATION);
+            notifyAdjustedForImeChanged(
+                    adjustedForIme || adjustedForDivider, IME_ADJUST_ANIM_DURATION);
         }
     }
 
@@ -539,11 +562,15 @@ public class DockedStackDividerController implements DimLayerUser {
         for (int i = stacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = stacks.get(i);
             if (stack != null && stack.isAdjustedForIme()) {
-                if (t >= 1f && mAnimationTarget == 0f) {
+                if (t >= 1f && mAnimationTarget == 0f && mDividerAnimationTarget == 0f) {
                     stack.resetAdjustedForIme(true /* adjustBoundsNow */);
                     updated = true;
                 } else {
-                    updated |= stack.updateAdjustForIme(getInterpolatedAnimationValue(t),
+                    mLastAnimationProgress = getInterpolatedAnimationValue(t);
+                    mLastDividerProgress = getInterpolatedDividerValue(t);
+                    updated |= stack.updateAdjustForIme(
+                            mLastAnimationProgress,
+                            mLastDividerProgress,
                             false /* force */);
                 }
                 if (t >= 1f) {
@@ -555,6 +582,8 @@ public class DockedStackDividerController implements DimLayerUser {
             mService.mWindowPlacerLocked.performSurfacePlacement();
         }
         if (t >= 1.0f) {
+            mLastAnimationProgress = mAnimationTarget;
+            mLastDividerProgress = mDividerAnimationTarget;
             mAnimatingForIme = false;
             return false;
         } else {
@@ -594,6 +623,10 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private float getInterpolatedAnimationValue(float t) {
         return t * mAnimationTarget + (1 - t) * mAnimationStart;
+    }
+
+    private float getInterpolatedDividerValue(float t) {
+        return t * mDividerAnimationTarget + (1 - t) * mDividerAnimationStart;
     }
 
     /**
