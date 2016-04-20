@@ -70,6 +70,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     private QSCustomizer mCustomizePanel;
     private Record mDetailRecord;
+    private boolean mTriggeredExpand;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -387,8 +388,16 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     protected void handleShowDetail(Record r, boolean show) {
-        if (show && !mExpanded) {
-            mHost.animateExpandQS();
+        if (show) {
+            if (!mExpanded) {
+                mTriggeredExpand = true;
+                mHost.animateToggleQSExpansion();
+            } else {
+                mTriggeredExpand = false;
+            }
+        } else if (mTriggeredExpand) {
+            mHost.animateToggleQSExpansion();
+            mTriggeredExpand = false;
         }
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);

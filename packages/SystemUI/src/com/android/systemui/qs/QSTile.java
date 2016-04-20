@@ -401,7 +401,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         void startRunnableDismissingKeyguard(Runnable runnable);
         void warn(String message, Throwable t);
         void collapsePanels();
-        void animateExpandQS();
+        void animateToggleQSExpansion();
         void openPanels();
         Looper getLooper();
         Context getContext();
