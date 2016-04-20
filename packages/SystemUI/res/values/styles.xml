@@ -350,7 +350,7 @@
     </style>
 
     <style name="TextAppearance.NotificationGuts.Radio">
-        <item name="android:alpha">.87</item>
+        <item name="android:alpha">.54</item>
     </style>
 
     <style name="TextAppearance.NotificationGuts.Button">
