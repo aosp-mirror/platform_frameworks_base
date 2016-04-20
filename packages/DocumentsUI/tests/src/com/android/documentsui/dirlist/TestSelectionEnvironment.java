@@ -100,4 +100,9 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     public boolean isLayoutItem(int adapterPosition) {
         return false;
     }
+
+    @Override
+    public boolean hasView(int adapterPosition) {
+        return true;
+    }
 }

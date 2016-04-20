@@ -154,6 +154,10 @@ public final class MultiSelectManager {
                         // Update the selection to remove any disappeared IDs.
                         mSelection.cancelProvisionalSelection();
                         mSelection.intersect(mModelIds);
+
+                        if (mBandManager != null && mBandManager.isActive()) {
+                            mBandManager.endBandSelect();
+                        }
                     }
 
                     @Override
@@ -940,6 +944,10 @@ public final class MultiSelectManager {
          * Layout items are excluded from the GridModel.
          */
         boolean isLayoutItem(int adapterPosition);
+        /**
+         * Items may be in the adapter, but without an attached view.
+         */
+        boolean hasView(int adapterPosition);
     }
 
     /** Recycler view facade implementation backed by good ol' RecyclerView. */
@@ -1060,6 +1068,11 @@ public final class MultiSelectManager {
                 default:
                     return true;
             }
+        }
+
+        @Override
+        public boolean hasView(int pos) {
+            return mView.findViewHolderForAdapterPosition(pos) != null;
         }
     }
 
@@ -1473,10 +1486,14 @@ public final class MultiSelectManager {
          *     y-value.
          */
         void startSelection(Point relativeOrigin) {
+            recordVisibleChildren();
+            if (isEmpty()) {
+                // The selection band logic works only if there is at least one visible child.
+                return;
+            }
+
             mIsActive = true;
             mPointer = mHelper.createAbsolutePoint(relativeOrigin);
-
-            recordVisibleChildren();
             mRelativeOrigin = new RelativePoint(mPointer);
             mRelativePointer = new RelativePoint(mPointer);
             computeCurrentSelection();
@@ -1530,12 +1547,23 @@ public final class MultiSelectManager {
         private void recordVisibleChildren() {
             for (int i = 0; i < mHelper.getVisibleChildCount(); i++) {
                 int adapterPosition = mHelper.getAdapterPositionAt(i);
-                if (!mHelper.isLayoutItem(adapterPosition) &&
+                // Sometimes the view is not attached, as we notify the multi selection manager
+                // synchronously, while views are attached asynchronously. As a result items which
+                // are in the adapter may not actually have a corresponding view (yet).
+                if (mHelper.hasView(adapterPosition) &&
+                        !mHelper.isLayoutItem(adapterPosition) &&
                         !mKnownPositions.get(adapterPosition)) {
                     mKnownPositions.put(adapterPosition, true);
                     recordItemData(mHelper.getAbsoluteRectForChildViewAt(i), adapterPosition);
                 }
             }
+        }
+
+        /**
+         * Checks if there are any recorded children.
+         */
+        private boolean isEmpty() {
+            return mColumnBounds.size() == 0 || mRowBounds.size() == 0;
         }
 
         /**
