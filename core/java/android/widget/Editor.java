@@ -3251,6 +3251,7 @@ public class Editor {
         private final SuggestionSpanInfo mMisspelledSpanInfo = new SuggestionSpanInfo();
         private int mContainerMarginWidth;
         private int mContainerMarginTop;
+        private LinearLayout mContainerView;
 
         private class CustomPopupWindow extends PopupWindow {
             @Override
@@ -3288,20 +3289,19 @@ public class Editor {
         protected void initContentView() {
             final LayoutInflater inflater = (LayoutInflater) mTextView.getContext().
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final ViewGroup relativeLayout = (ViewGroup) inflater.inflate(
+            mContentView = (ViewGroup) inflater.inflate(
                     mTextView.mTextEditSuggestionContainerLayout, null);
 
-            final LinearLayout suggestionWindowContainer =
-                    (LinearLayout) relativeLayout.findViewById(
-                            com.android.internal.R.id.suggestionWindowContainer);
+            mContainerView = (LinearLayout) mContentView.findViewById(
+                    com.android.internal.R.id.suggestionWindowContainer);
             ViewGroup.MarginLayoutParams lp =
-                    (ViewGroup.MarginLayoutParams) suggestionWindowContainer.getLayoutParams();
+                    (ViewGroup.MarginLayoutParams) mContainerView.getLayoutParams();
             mContainerMarginWidth = lp.leftMargin + lp.rightMargin;
             mContainerMarginTop = lp.topMargin;
             mClippingLimitLeft = lp.leftMargin;
             mClippingLimitRight = lp.rightMargin;
 
-            mSuggestionListView = (ListView) relativeLayout.findViewById(
+            mSuggestionListView = (ListView) mContentView.findViewById(
                     com.android.internal.R.id.suggestionContainer);
 
             mSuggestionsAdapter = new SuggestionAdapter();
@@ -3314,9 +3314,7 @@ public class Editor {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
 
-            mContentView = relativeLayout;
-
-            mAddToDictionaryButton = (TextView) relativeLayout.findViewById(
+            mAddToDictionaryButton = (TextView) mContentView.findViewById(
                     com.android.internal.R.id.addToDictionaryButton);
             mAddToDictionaryButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -3349,7 +3347,7 @@ public class Editor {
                 }
             });
 
-            mDeleteButton = (TextView) relativeLayout.findViewById(
+            mDeleteButton = (TextView) mContentView.findViewById(
                     com.android.internal.R.id.deleteButton);
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -3461,7 +3459,8 @@ public class Editor {
             mDeleteButton.measure(horizontalMeasure, verticalMeasure);
             width = Math.max(width, mDeleteButton.getMeasuredWidth());
 
-            width += mContainerMarginWidth;
+            width += mContainerView.getPaddingLeft() + mContainerView.getPaddingRight()
+                    + mContainerMarginWidth;
 
             // Enforce the width based on actual text widths
             mContentView.measure(
