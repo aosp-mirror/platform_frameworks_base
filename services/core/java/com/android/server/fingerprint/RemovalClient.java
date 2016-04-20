@@ -30,14 +30,12 @@ import android.util.Slog;
  */
 public abstract class RemovalClient extends ClientMonitor {
     private int mFingerId;
-    private int mUserIdForRemove;
 
     public RemovalClient(Context context, long halDeviceId, IBinder token,
-            IFingerprintServiceReceiver receiver, int userId, int groupId, int fingerId,
+            IFingerprintServiceReceiver receiver, int fingerId, int groupId, int userId,
             boolean restricted, String owner) {
         super(context, halDeviceId, token, receiver, userId, groupId, restricted, owner);
         mFingerId = fingerId;
-        mUserIdForRemove = userId;
     }
 
     @Override
@@ -72,25 +70,21 @@ public abstract class RemovalClient extends ClientMonitor {
      */
     private boolean sendRemoved(int fingerId, int groupId) {
         IFingerprintServiceReceiver receiver = getReceiver();
-        if (receiver == null)
-            return true; // client not listening
         try {
-            receiver.onRemoved(getHalDeviceId(), fingerId, groupId);
-            return fingerId == 0;
+            if (receiver != null) {
+                receiver.onRemoved(getHalDeviceId(), fingerId, groupId);
+            }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to notify Removed:", e);
         }
-        return false;
+        return fingerId == 0;
     }
 
     @Override
     public boolean onRemoved(int fingerId, int groupId) {
         if (fingerId != 0) {
-            if (fingerId != mFingerId)
             FingerprintUtils.getInstance().removeFingerprintIdForUser(getContext(), fingerId,
-                    mUserIdForRemove);
-        } else {
-            mUserIdForRemove = UserHandle.USER_NULL;
+                    getTargetUserId());
         }
         return sendRemoved(fingerId, getGroupId());
     }
