@@ -504,20 +504,7 @@ public class WifiTracker {
     }
 
     private void updateWifiState(int state) {
-        if (state == WifiManager.WIFI_STATE_ENABLED) {
-            if (mScanner != null) {
-                // We only need to resume if mScanner isn't null because
-                // that means we want to be scanning.
-                mScanner.resume();
-            }
-        } else {
-            mLastInfo = null;
-            mLastNetworkInfo = null;
-            if (mScanner != null) {
-                mScanner.pause();
-            }
-        }
-        mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, state, 0).sendToTarget();
+        mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_WIFI_STATE, state, 0).sendToTarget();
     }
 
     public static List<AccessPoint> getCurrentAccessPoints(Context context, boolean includeSaved,
@@ -609,6 +596,7 @@ public class WifiTracker {
         private static final int MSG_UPDATE_ACCESS_POINTS = 0;
         private static final int MSG_UPDATE_NETWORK_INFO = 1;
         private static final int MSG_RESUME = 2;
+        private static final int MSG_UPDATE_WIFI_STATE = 3;
 
         public WorkHandler(Looper looper) {
             super(looper);
@@ -625,6 +613,23 @@ public class WifiTracker {
                     break;
                 case MSG_RESUME:
                     handleResume();
+                    break;
+                case MSG_UPDATE_WIFI_STATE:
+                    if (msg.arg1 == WifiManager.WIFI_STATE_ENABLED) {
+                        if (mScanner != null) {
+                            // We only need to resume if mScanner isn't null because
+                            // that means we want to be scanning.
+                            mScanner.resume();
+                        }
+                    } else {
+                        mLastInfo = null;
+                        mLastNetworkInfo = null;
+                        if (mScanner != null) {
+                            mScanner.pause();
+                        }
+                    }
+                    mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, msg.arg1, 0)
+                            .sendToTarget();
                     break;
             }
         }
