@@ -94,9 +94,9 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                     additionalSummaryView.setText(
                             isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
                     additionalSummaryView.setVisibility(View.VISIBLE);
+                } else {
+                    additionalSummaryView.setVisibility(View.GONE);
                 }
-            } else {
-                additionalSummaryView.setVisibility(View.GONE);
             }
         } else {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
@@ -106,9 +106,9 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                             isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
                     summaryView.setVisibility(View.VISIBLE);
                 }
+                // No need to change the visibility to GONE in the else case here since Preference
+                // class would have already changed it if there is no summary to display.
             }
-            // No need to change the visibility to GONE in the else case here since Preference class
-            // would have already changed it if there is no summary to display.
         }
     }
 
