@@ -605,7 +605,7 @@
     <string name="dessert_case">Dessert Case</string>
 
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
-    <string name="start_dreams">Daydream</string>
+    <string name="start_dreams">Screen saver</string>
 
     <!-- Textual description of Ethernet connections -->
     <string name="ethernet_label">Ethernet</string>
