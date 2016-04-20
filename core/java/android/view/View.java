@@ -20617,6 +20617,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    /**
+     * Updates the drag shadow for the ongoing drag and drop operation.
+     *
+     * @param shadowBuilder A {@link android.view.View.DragShadowBuilder} object for building the
+     * new drag shadow.
+     */
     public final void updateDragShadow(DragShadowBuilder shadowBuilder) {
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "updateDragShadow");
