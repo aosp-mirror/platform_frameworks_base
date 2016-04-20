@@ -212,7 +212,7 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         if (userManager == null) {
             return null;
         }
-        return userManager.getProfileIdsWithDisabled(ActivityManager.getCurrentUser());
+        return userManager.getEnabledProfileIds(ActivityManager.getCurrentUser());
     }
 
     public static ArraySet<ComponentName> loadComponentNames(PackageManager pm, int userId,
