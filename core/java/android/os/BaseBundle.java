@@ -65,11 +65,12 @@ public class BaseBundle {
         sShouldDefuse = shouldDefuse;
     }
 
+    // A parcel cannot be obtained during compile-time initialization. Put the
+    // empty parcel into an inner class that can be initialized separately. This
+    // allows to initialize BaseBundle, and classes depending on it.
     /** {@hide} */
-    static final Parcel EMPTY_PARCEL;
-
-    static {
-        EMPTY_PARCEL = Parcel.obtain();
+    static final class NoImagePreloadHolder {
+        public static final Parcel EMPTY_PARCEL = Parcel.obtain();
     }
 
     // Invariant - exactly one of mMap / mParcelledData will be null
@@ -156,8 +157,8 @@ public class BaseBundle {
      */
     BaseBundle(BaseBundle b) {
         if (b.mParcelledData != null) {
-            if (b.mParcelledData == EMPTY_PARCEL) {
-                mParcelledData = EMPTY_PARCEL;
+            if (b.isEmptyParcel()) {
+                mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
             } else {
                 mParcelledData = Parcel.obtain();
                 mParcelledData.appendFrom(b.mParcelledData, 0, b.mParcelledData.dataSize());
@@ -236,7 +237,7 @@ public class BaseBundle {
                     + "clobber all data inside!", new Throwable());
         }
 
-        if (mParcelledData == EMPTY_PARCEL) {
+        if (isEmptyParcel()) {
             if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
                     + ": empty");
             if (mMap == null) {
@@ -282,6 +283,13 @@ public class BaseBundle {
      */
     public boolean isParcelled() {
         return mParcelledData != null;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isEmptyParcel() {
+        return mParcelledData == NoImagePreloadHolder.EMPTY_PARCEL;
     }
 
     /** @hide */
@@ -1368,7 +1376,7 @@ public class BaseBundle {
         // Keep implementation in sync with writeToParcel() in
         // frameworks/native/libs/binder/PersistableBundle.cpp.
         if (mParcelledData != null) {
-            if (mParcelledData == EMPTY_PARCEL) {
+            if (isEmptyParcel()) {
                 parcel.writeInt(0);
             } else {
                 int length = mParcelledData.dataSize();
@@ -1416,7 +1424,7 @@ public class BaseBundle {
 
         } else if (length == 0) {
             // Empty Bundle or end of data.
-            mParcelledData = EMPTY_PARCEL;
+            mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
             return;
         }
 
