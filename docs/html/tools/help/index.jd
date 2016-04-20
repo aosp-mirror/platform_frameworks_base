@@ -43,6 +43,7 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/android.html">android</a></dt>
     <dd>Lets you manage AVDs, projects, and the installed components of the SDK.</dd>
 
+
   <dt><a href="{@docRoot}tools/help/hierarchy-viewer.html">Hierarchy Viewer (hierarchyviewer)</a></dt>
     <dd>Provides a visual representation of the layout's View hierarchy with performance information
         for each node in the layout, and a magnified view of the display to closely examine the
@@ -58,12 +59,17 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/sqlite3.html">sqlite3</a></dt>
     <dd>Lets you access the SQLite data files created and used by Android applications.</dd>
 
+
 </dl>
 
 
 
 <h3 id="tools-debugging">Debugging Tools</h3>
 <dl>
+
+  <dt><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></dt>
+    <dd>Android Monitor is integrated into Android Studio and provides logcat, memory, CPU, GPU, and
+      network monitors for app debugging and analysis.</dd>
 
   <dt><a href="{@docRoot}tools/help/adb.html">adb</a></dt>
     <dd>Android Debug Bridge (adb) is a versatile command line tool that lets you communicate with
@@ -73,9 +79,8 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/shell.html">ADB Shell Commands</a></dt>
     <dd>Learn the commands available for advanced command-line operations.</dd>
 
-  <dt><a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor
-Server (ddms)</a></dt>
-    <dd>Lets you debug Android applications.</dd>
+  <dt><a href="{@docRoot}tools/debugging/ddms.html">Dalvik Debug Monitor Server (ddms)</a></dt>
+    <dd>Lets you debug Android apps.</dd>
 
   <dt><a href="{@docRoot}tools/help/monitor.html">Device Monitor</a></dt>
     <dd>Android Device Monitor is a stand-alone tool that provides a graphical user interface for
@@ -99,6 +104,11 @@ you can view the file in a profiling tool of your choice.</dd>
 
   <dt><a href="{@docRoot}tools/help/traceview.html">traceview</a></dt>
     <dd>Provides a graphical viewer for execution logs saved by your application.</dd>
+
+  <dt><a href="{@docRoot}tools/help/gltracer.html">Tracer for OpenGL ES</a></dt>
+    <dd>Allows you to capture <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES</a>
+      commands and frame-by-frame images to help you understand how your app is executing
+      graphics commands.</dd>
 
 </dl>
 
@@ -134,10 +144,6 @@ content is allowed.</dd>
     <dd>A command line utility that lets you encode PNG images to the ETC1 compression standard and
     decode ETC1 compressed images back to PNG.</dd>
 
-  <dt><a href="{@docRoot}tools/help/gltracer.html">Tracer for OpenGL ES</a></dt>
-    <dd>Allows you to capture OpenGL ES commands and frame by frame images to help you understand
-    how your graphics commands are being executed.</dd>
-
 </dl>
 
 
@@ -153,8 +159,8 @@ device.</p>
 
 <p>The other platform tools, such as <a href="{@docRoot}guide/components/aidl.html">aidl</a>,
 <code>aapt</code>, <code>dexdump</code>, and <code>dx</code>, are typically called by the Android
-build tools or Android Development Tools (ADT), so you rarely need to invoke these tools directly.
-As a general rule, you should rely on the build tools or the ADT plugin to call them as needed.</p>
+build tools, so you rarely need to invoke these tools directly.
+As a general rule, you should rely on the build tools to call them as needed.</p>
 
 <p class="note"><strong>Note:</strong> The Android SDK provides additional shell tools that can
 be accessed through <code>adb</code>, such as <a href="{@docRoot}tools/help/bmgr.html">bmgr</a> and

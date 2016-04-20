@@ -1,7 +1,7 @@
-page.title=Material Design
+page.title=Material Design para Android
 page.tags=Material,design
 page.type=design
-page.image=design/material/images/MaterialLight.png
+page.image=images/cards/design-material-for-android_2x.jpg
 
 @jd:body
 
@@ -41,11 +41,11 @@ page.image=design/material/images/MaterialLight.png
 
 <p itemprop="description">Material Design es una guía integral para el diseño visual, de movimientos y
 de interacción en distintas plataformas y dispositivos. Android ahora es compatible con las aplicaciones de
-Material Design. Para usar Material Design en sus aplicaciones de Android, siga las pautas descritas
-en la <a href="http://www.google.com/design/spec">especificación de Material Design</a> y use los
+Material Design. Para usar Material Design en tus aplicaciones de Android, sigue las pautas descritas
+en la <a href="http://www.google.com/design/spec">especificación de Material Design</a> y usa los
 nuevos componentes y funcionalidades disponibles en Android 5.0 (nivel de API 21) y versiones posteriores.</p>
 
-<p>En Android, se proporcionan los siguientes elementos que le permitirán crear aplicaciones en Material Design:</p>
+<p>En Android, se proporcionan los siguientes elementos que te permitirán crear aplicaciones en Material Design:</p>
 
 <ul>
   <li>un tema nuevo;</li>
@@ -53,13 +53,13 @@ nuevos componentes y funcionalidades disponibles en Android 5.0 (nivel de API 21
   <li>nuevas API (interfaces de programación de aplicaciones) para sombras y animaciones personalizadas.</li>
 </ul>
 
-<p>Para obtener más información sobre la implementación de Material Design en Android, consulte
+<p>Para obtener más información sobre la implementación de Material Design en Android, consulta
 <a href="{@docRoot}training/material/index.html">Creación de aplicaciones con Material Design</a>.</p>
 
 
 <h3>Tema Material</h3>
 
-<p>El tema Material le ofrece un nuevo estilo para su aplicación, widgets del sistema que le permiten configurar
+<p>El tema Material te ofrece un nuevo estilo para tu aplicación, widgets del sistema que te permiten configurar
 la paleta de colores y animaciones predeterminadas para información táctil y transiciones de actividades.</p>
 
 <!-- two columns -->
@@ -79,7 +79,7 @@ la paleta de colores y animaciones predeterminadas para información táctil y t
 <br style="clear:left"/>
 </div>
 
-<p>Para obtener más información, consulte <a href="{@docRoot}training/material/theme.html">Uso del tema
+<p>Para obtener más información, consulta <a href="{@docRoot}training/material/theme.html">Uso del tema
 Material</a>.</p>
 
 
@@ -97,13 +97,13 @@ animaciones de Material Design:</p>
 </div>
 <div style="float:left;width:250px;margin-right:0px;">
   <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
-  <p>El nuevo widget <code>CardView</code> le permite mostrar extractos de información importante dentro de
+  <p>El nuevo widget <code>CardView</code> te permite mostrar extractos de información importante dentro de
  tarjetas que tienen apariencia y estilo coherentes.</p>
 </div>
 <br style="clear:left"/>
 </div>
 
-<p>Para obtener más información, consulte <a href="{@docRoot}training/material/lists-cards.html">Creación de listas
+<p>Para obtener más información, consulta <a href="{@docRoot}training/material/lists-cards.html">Creación de listas
 y tarjetas</a>.</p>
 
 
@@ -126,24 +126,24 @@ propiedad Z. Esta propiedad nueva representa la elevación de una vista, que det
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-    <em>Para volver a reproducir la película, haga clic en la pantalla del dispositivo.</em>
+    <em>Para volver a reproducir la película, haz clic en la pantalla del dispositivo.</em>
   </div>
 </div>
 
-<p>Para obtener más información, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Definición
+<p>Para obtener más información, consulta <a href="{@docRoot}training/material/shadows-clipping.html">Definición
 de vistas de recorte y sombras</a>.</p>
 
 
 <h3>Animaciones</h3>
 
-<p>Las nuevas API de animaciones le permiten crear animaciones personalizadas para la información táctil en los controles de IU,
+<p>Las nuevas API de animaciones te permiten crear animaciones personalizadas para la información táctil en los controles de IU,
 además de realizar cambios en el estado de las vistas y transiciones entre actividades.</p>
 
-<p>Estas API le permiten hacer lo siguiente:</p>
+<p>Estas API te permiten hacer lo siguiente:</p>
 
 <ul>
 <li style="margin-bottom:15px">
-responder a los eventos táctiles de sus vistas mediante animaciones de <strong>información táctil</strong>;
+responder a los eventos táctiles de tus vistas mediante animaciones de <strong>información táctil</strong>;
 </li>
 <li style="margin-bottom:15px">
 ocultar y mostrar vistas con animaciones con <strong>efecto circular</strong>;
@@ -163,24 +163,24 @@ mostrar animaciones en los <strong>elementos de diseño de la lista de estados</
 </ul>
 
 <p>Las animaciones de la información táctil se concentran en diferentes vistas estándar, como los botones. Las nuevas API
-le permiten personalizar estas animaciones y agregarlas a sus vistas personalizadas.</p>
+te permiten personalizar estas animaciones y agregarlas a tus vistas personalizadas.</p>
 
-<p>Para obtener más información, consulte <a href="{@docRoot}training/material/animations.html">Definición de animaciones
+<p>Para obtener más información, consulta <a href="{@docRoot}training/material/animations.html">Definición de animaciones
 personalizadas</a>.</p>
 
 
 <h3>Elementos de diseño</h3>
 
-<p>Estas nuevas capacidades para los elementos de diseño le permiten implementar aplicaciones de Material Design:</p>
+<p>Estas nuevas capacidades para los elementos de diseño te permiten implementar aplicaciones de Material Design:</p>
 
 <ul>
 <li>Los <strong>dibujables en vector</strong> se pueden escalar sin perder definición y son perfectos
 para los iconos de las aplicaciones de un solo color.</li>
-<li>El <strong>teñido de los dibujables</strong> le permite definir mapas de bits como máscaras alfa y pintarlos con
+<li>El <strong>teñido de los dibujables</strong> te permite definir mapas de bits como máscaras alfa y pintarlos con
 un color durante el tiempo de ejecución.</li>
-<li>La <strong>extracción de color</strong> le permite extraer automáticamente colores prominentes de una
+<li>La <strong>extracción de color</strong> te permite extraer automáticamente colores prominentes de una
 imagen del mapa de bits.</li>
 </ul>
 
-<p>Para obtener más información, consulte <a href="{@docRoot}training/material/drawables.html">Trabajo con
+<p>Para obtener más información, consulta <a href="{@docRoot}training/material/drawables.html">Trabajo con
 elementos de diseño</a>.</p>

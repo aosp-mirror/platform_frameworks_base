@@ -100,7 +100,7 @@ project and override similar module file settings.</p>
 
    <dt><code>build</code></dt>
 
-   <dd>This directory stories the build output for all project modules.</dd>
+   <dd>This directory stores the build output for all project modules.</dd>
 
 
     <dt><code>gradle</code></dt>
@@ -176,8 +176,9 @@ project and override similar module file settings.</p>
     <dt><code>src/</code></dt>
 
     <dd>Contains your stub Activity file, which is stored at
-    <code>src<em>/main/java/<namespace.applicationname>/ActivityName></em>.java</code>. All other source
-    code files (such as <code>.java</code> or <code>.aidl</code> files) go here as well.</dd>
+    <code>src<em>/main/java/&lt;namespace.appname&gt;/&lt;ActivityName&gt;</em>.java</code>. All
+    other source code files (such as <code>.java</code> or <code>.aidl</code> files) go here as
+    well.</dd>
 
      <dl>
        <dt><code>androidTest/</code></dt>
@@ -185,7 +186,7 @@ project and override similar module file settings.</p>
        <dd>Contains the instrumentation tests. For more information, see the
        <a href="{@docRoot}tools/testing/index.html">Android Test documentation</a>.</dd>
 
-       <dt><code>main/java/com.&gt;project&lt;.&gt;app&lt;</code></dt>
+       <dt><code>main/java/com.&lt;project&gt;.&lt;app&gt;</code></dt>
 
        <dd>Contains Java code source for the app activities.</dd>
 

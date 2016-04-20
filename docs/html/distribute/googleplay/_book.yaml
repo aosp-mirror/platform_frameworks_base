@@ -1,0 +1,100 @@
+toc:
+- title: The Google Play Opportunity
+  path: /distribute/googleplay/about.html
+  custom_link_attributes:
+  - es-lang="La oportunidad de Google Play"
+  - ja-lang="Google Play の可能性"
+  - ko-lang="Google Play 활용 기회"
+  - pt-br-lang="A oportunidade do Google Play"
+  - ru-lang="Возможности Google Play"
+  - zh-cn-lang="Google Play 蕴藏的机会"
+  - zh-tw-lang="Google Play商機"
+
+- title: Get Started with Publishing
+  path: /distribute/googleplay/start.html
+  custom_link_attributes:
+  - es-lang="Comienza a publicar"
+  - ja-lang="アプリを公開する"
+  - ko-lang="게시 시작하기"
+  - pt-br-lang="Introdução à publicação"
+  - ru-lang="Первые шаги в публикациях"
+  - zh-cn-lang="开始发布"
+  - zh-tw-lang="開始發行"
+
+- title: Developer Console
+  path: /distribute/googleplay/developer-console.html
+  custom_link_attributes:
+  - es-lang="Consola para desarrolladores"
+  - ja-lang="デベロッパー コンソール"
+  - ko-lang="개발자 콘솔"
+  - pt-br-lang="Console do Desenvolvedor"
+  - ru-lang="Консоль разработчика"
+  - zh-cn-lang="开发者控制台"
+
+- title: Distribute to Android Wear
+  path: /distribute/googleplay/wear.html
+  custom_link_attributes:
+  - es-lang="Distribución para Android Wear"
+  - ja-lang="Android Wear への配布"
+  - ko-lang="Android Wear에 배포"
+  - pt-br-lang="Distribuindo para Android Wear"
+  - ru-lang="Распространение приложений Android Wear"
+  - zh-cn-lang="分发到 Android Wear"
+  - zh-tw-lang="散佈至 Android Wear"
+
+- title: Distribute to Android TV
+  path: /distribute/googleplay/tv.html
+  custom_link_attributes:
+  - es-lang="Distribución para Android TV"
+  - ja-lang="Android TV への配布"
+  - ko-lang="Android TV에 배포"
+  - pt-br-lang="Distribuindo para Android TV"
+  - ru-lang="Распространение приложений в Android TV"
+  - zh-cn-lang="分发到 Android TV"
+  - zh-tw-lang="散佈至 Android 電視"
+
+- title: Distribute to Android Auto
+  path: /distribute/googleplay/auto.html
+  custom_link_attributes:
+  - es-lang="Distribución para Android Auto"
+  - ja-lang="Android Auto への配布"
+  - ko-lang="Android Auto에 배포"
+  - pt-br-lang="Distribuindo para o Android Auto"
+  - ru-lang="Распространение приложений для Android Auto"
+  - zh-cn-lang="分发到 Android Auto"
+  - zh-tw-lang="散佈至 Android Auto"
+
+- title: Designed for Families
+  path: /distribute/googleplay/families/about.html
+  custom_link_attributes:
+  - es-lang="Diseñado para la familia"
+  - ru-lang="Для всей семьи"
+  - zh-cn-lang="为家庭设计"
+
+- title: Google Play for Work
+  path: /distribute/googleplay/work/about.html
+
+- title: Google Play for Education
+  path: /distribute/googleplay/edu/about.html
+  section:
+  - title: Publish Apps
+    path: /distribute/googleplay/edu/start.html
+  - title: Video Resources
+    path: /distribute/googleplay/edu/videos.html
+
+- title: Stream Your Content with Cast
+  path: /distribute/googleplay/cast.html
+
+- title: Build VR with Cardboard
+  path: /distribute/googleplay/cardboard.html
+
+- title: Find Success on Google Play
+  path: /distribute/googleplay/guide.html
+  custom_link_attributes:
+  - es-lang="Cómo tener éxito en Google Play"
+  - ja-lang="Google Play で成功を手にする"
+  - ko-lang="Google Play에서 성공 모색"
+  - pt-br-lang="Obtendo sucesso no Google Play"
+  - ru-lang="Найдите свой путь к успеху в Google Play"
+  - zh-cn-lang="在 Google Play 上取得成功"
+  - zh-tw-lang="在 Google Play 上尋找成功"

@@ -1,0 +1,1094 @@
+page.title=リソースの提供
+parent.title=アプリケーション リソース
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>クイックビュー</h2>
+  <ul>
+    <li>{@code res/} のそれぞれのサブディレクトリにはさまざまなタイプのリソースがある</li>
+    <li>代替リソースは設定固有のリソース ファイルを提供する</li>
+    <li>特定の端末設定に依存しないように、デフォルトのリソースを常に入れておく
+</li>
+  </ul>
+  <h2>本書の内容</h2>
+  <ol>
+    <li><a href="#ResourceTypes">リソースタイプをグループ化する</a></li>
+    <li><a href="#AlternativeResources">代替リソースを提供する</a>
+      <ol>
+        <li><a href="#QualifierRules">修飾子の名前のルール</a></li>
+        <li><a href="#AliasResources">エイリアス リソースを作成する</a></li>
+      </ol>
+    </li>
+    <li><a href="#Compatibility">リソースとの最適な端末の互換性を提供する</a></li>
+    <li><a href="#BestMatch">Android が最適なリソースを見つける仕組み</a></li>
+  </ol>
+
+  <h2>関連ドキュメント</h2>
+  <ol>
+    <li><a href="accessing-resources.html">リソースへのアクセス</a></li>
+    <li><a href="available-resources.html">Resource Types</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">複数のスクリーンをサポートする</a>
+</li>
+  </ol>
+</div>
+</div>
+
+<p>画像や文字列といったアプリケーション リソースは、常にコードの外部に置くようにすることで、独立して保持できるようになります。
+さらに、特別に名前を設定したリソース ディレクトリにグループ化することで、特定の端末設定に代替リソースを提供する必要があります。
+実行時には、現在の設定に基づいて、Android は適切なリソースを使用します。
+たとえば、画面サイズに応じて異なる UI レイアウトを提供したり、言語設定に応じて異なる文字列を提供したりできます。
+
+</p>
+
+<p>アプリケーション リソースを外部化したら、プロジェクトの {@code R} クラスで生成されるリソース ID を使用してそれらのリソースにアクセスできます。
+アプリケーションでのリソースの使用方法については、「<a href="accessing-resources.html">リソースへのアクセス</a>」をご覧ください。
+
+このドキュメントでは、Android プロジェクトでリソースをグループ化する方法と、特定の端末設定に代替リソースを提供する方法を説明します。
+</p>
+
+
+<h2 id="ResourceTypes">リソースタイプをグループ化する</h2>
+
+<p>それぞれのタイプのリソースを、プロジェクトの {@code res/} ディレクトリの特定のサブディレクトリに配置する必要があります。
+次は、単純なプロジェクトのファイル階層の例です。</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    src/  <span style="color:black">
+        MyActivity.java  </span>
+    res/
+        drawable/  <span style="color:black">
+            graphic.png  </span>
+        layout/  <span style="color:black">
+            main.xml
+            info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
+        values/  <span style="color:black">
+            strings.xml  </span>
+</pre>
+
+<p>この例を見てわかるように、{@code res/} ディレクトリには、画像リソース、2 つのレイアウト リソース、ランチャー アイコンの {@code mipmap/} ディレクトリ、文字列リソース ファイルといった、すべてのリソース（サブディレクトリ内）が入ります。
+
+リソース ディレクトリ名は重要です。表 1 に説明があります。
+</p>
+
+<p class="note"><strong>注:</strong> Mipmap フォルダの使用方法については、「<a href="{@docRoot}tools/projects/index.html#mipmap">Managing Projects Overview</a>」をご覧ください。
+</p>
+
+<p class="table-caption" id="table1"><strong>表 1.</strong> プロジェクト {@code res/} ディレクトリ内でサポートされているリソース ディレクトリ。
+</p>
+
+<table>
+  <tr>
+    <th scope="col">ディレクトリ</th>
+    <th scope="col">リソースタイプ</th>
+  </tr>
+
+  <tr>
+    <td><code>animator/</code></td>
+    <td><a href="{@docRoot}guide/topics/graphics/prop-animation.html">プロパティ アニメーション</a>を定義する XML ファイル。
+</td>
+  </tr>
+
+  <tr>
+    <td><code>anim/</code></td>
+    <td><a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">トゥイーン アニメーション</a>を定義する XML ファイル。
+（プロパティ アニメーションをこのディレクトリに保存することもできますが、2 つのタイプを区別するために、プロパティ アニメーションは {@code animator/} ディレクトリに保存することをお勧めします）。
+
+</td>
+  </tr>
+
+  <tr>
+    <td><code>color/</code></td>
+    <td>色の状態リストを定義する XML ファイル。「<a href="color-list-resource.html">Color State List Resource</a>」をご覧ください。
+</td>
+  </tr>
+
+  <tr>
+    <td><code>drawable/</code></td>
+
+    <td><p>ビットマップ ファイル（{@code .png}、{@code .9.png}、{@code .jpg}、{@code .gif}）または次のドローアブル リソース サブタイプにコンパイルされる XML ファイル: 
+</p>
+      <ul>
+        <li>ビットマップ ファイル</li>
+        <li>Nine-Patche（リサイズ可能なビットマップ）</li>
+        <li>状態リスト</li>
+        <li>形状</li>
+        <li>アニメーション ドローアブル</li>
+        <li>その他のドローアブル</li>
+      </ul>
+      <p>「<a href="drawable-resource.html">Drawable Resources</a>」をご覧ください。</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>さまざまなランチャー アイコン密度のドローアブル ファイル。{@code mipmap/} フォルダによるランチャー アイコンの管理方法については、「<a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>」をご覧ください。
+
+</td>
+  </tr>
+
+  <tr>
+    <td><code>layout/</code></td>
+    <td>ユーザー インターフェースのレイアウトを定義する XML ファイル。
+        「<a href="layout-resource.html">Layout Resource</a>」をご覧ください。</td>
+  </tr>
+
+  <tr>
+    <td><code>menu/</code></td>
+    <td>オプション メニュー、コンテキスト メニュー、サブ メニューといった、アプリケーション メニューを定義する XML ファイル。
+「<a href="menu-resource.html">Menu Resource</a>」をご覧ください。</td>
+  </tr>
+
+  <tr>
+    <td><code>raw/</code></td>
+    <td><p>未加工の形式で保存する任意のファイル。これらのリソースを未加工の {@link java.io.InputStream} で開くには、{@link android.content.res.Resources#openRawResource(int)
+Resources.openRawResource()} をリソース ID（{@code R.raw.ファイル名<em></em>}）とともに呼び出します。
+</p>
+      <p>ただし、元のファイル名とファイル階層にアクセスする必要がある場合は、一部のリソースを {@code
+assets/} ディレクトリ（{@code res/raw/} の代わりに）に保存することを検討します。
+{@code assets/} のファイルにはリソース ID が付与されていないため、読み込むには {@link android.content.res.AssetManager} が必要です。
+</p></td>
+  </tr>
+
+  <tr>
+    <td><code>values/</code></td>
+    <td><p>文字列、整数、色など、単純な値を含む XML ファイル。</p>
+      <p>その他の {@code res/} サブディレクトリの XML リソース ファイルは XML ファイル名に基づいて 1 つのリソースを定義しますが、{@code values/} ディレクトリのファイルは複数のリソースを表します。このディレクトリのファイルの場合、{@code &lt;resources&gt;} 要素のそれぞれの子が 1 つのリソースを定義します。
+
+
+たとえば、{@code &lt;string&gt;} 要素は {@code R.string} リソースを作成し、{@code &lt;color&gt;} 要素は {@code R.color} リソースを作成します。
+
+</p>
+      <p>各リソースの定義には XML 要素を使用するため、ファイルには任意の名前を設定でき、1 つのファイル内にさまざまなリソースを配置できます。
+ただし、わかりやすくするために、一意のリソースタイプをそれぞれのファイルに配置することもできます。
+次は、このディレクトリで作成できるリソースのファイル名の変換例です。
+</p>
+      <ul>
+        <li>リソースの配列の場合 arrays.xml（<a href="more-resources.html#TypedArray">型付き配列</a>）。</li>
+        <li><a href="more-resources.html#Color">色の値</a>の場合 colors.xml </li>
+        <li><a href="more-resources.html#Dimension">寸法の値</a>の場合 dimens.xml。</li>
+        <li><a href="string-resource.html">文字列の値</a>の場合 strings.xml。
+</li>
+        <li><a href="style-resource.html">スタイル</a>の場合 styles.xml。</li>
+      </ul>
+      <p>「<a href="string-resource.html">String Resources</a>」、「<a href="style-resource.html">Style Resource</a>」、「<a href="more-resources.html">More Resource Types</a>」をご覧ください。
+
+</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>xml/</code></td>
+    <td>{@link
+android.content.res.Resources#getXml(int) Resources.getXML()} を呼び出すことによって、実行時に読み込むことができる任意の XML ファイル。ここには、<a href="{@docRoot}guide/topics/search/searchable-config.html">検索可能な設定</a>など、各種の XML 設定ファイルが保存されます。
+
+<!-- or preferences configuration. --></td>
+  </tr>
+</table>
+
+<p class="caution"><strong>警告:</strong> リソース ファイルを {@code res/} ディレクトリに直接保存しないでください。&mdash;コンパイラー エラーの原因になります。
+</p>
+
+<p>リソースの特定のタイプの詳細は、「<a href="available-resources.html">Resource Types</a>」のドキュメントをご覧ください。</p>
+
+<p>表 1 で定義したサブディレクトリに保存するリソースは、「デフォルト」のリソースとなります。
+つまり、これらのリソースはアプリケーションのデフォルトのデザインとコンテンツを定義します。ただし、Android が搭載された端末では別のタイプのリソースが呼び出されることがあります。たとえば、端末の画面サイズが通常のものよりも大きな場合、追加の画面スペースを利用する別のレイアウト リソースを提供する必要があります。
+
+
+また、端末の言語設定が異なる場合、使用するユーザー インターフェースのテキストを翻訳する、別の文字列リソースを提供します。
+
+さまざまな端末設定にこれらの異なるリソースを提供するには、デフォルトのリソースに加えて、代替リソースを提供する必要があります。
+
+</p>
+
+
+<h2 id="AlternativeResources">代替リソースを提供する</h2>
+
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>図 1.</strong> 別のレイアウト リソースを使用する、2 つの異なる端末。</p>
+</div>
+
+<p>ほぼすべてのアプリケーションが、特定の端末設定をサポートするための代替リソースを提供します。
+たとえば、画面密度が異なる場合は代替ドローアブル リソースを含め、言語が異ならう場合は代替文字列リソースを含めます。
+実行時には、Android が現在の端末設定を検出し、アプリケーションに合ったリソースを読み込みます。
+
+</p>
+
+<p>一連のリソースに設定固有の代替リソースを指定するには:</p>
+<ol>
+  <li>{@code
+<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>} の形式で名前を付けた {@code res/} に新しいディレクトリを作成します。
+    <ul>
+      <li><em>{@code &lt;resources_name&gt;}</em> は、対応するディレクトリ リソースのディレクトリ名です（表 1 で定義）。
+</li>
+      <li><em>{@code &lt;qualifier&gt;}</em> は、リソースを使用する個々の設定を指定する名前です（表 2 で定義）。
+</li>
+    </ul>
+    <p>1 つ以上の <em>{@code &lt;qualifier&gt;}</em> を末尾に追加できます。それぞれの修飾子はダッシュを使用して区切ります。
+</p>
+    <p class="caution"><strong>警告:</strong> 複数の修飾子を末尾に追加する場合は、表 2 に記載されているのと同じ順番で配置する必要があります。
+修飾子の順番に誤りがあると、リソースが無視されます。
+</p>
+  </li>
+  <li>それぞれの代替リソースをこの新しいディレクトリに保存します。リソース ファイルの名前は、デフォルトのリソース ファイルと同じものにする必要があります。
+</li>
+</ol>
+
+<p>次に、デフォルト リソースと代替リソースの例を示します。</p>
+
+<pre class="classic no-pretty-print">
+res/
+    drawable/   <span style="color:black">
+        icon.png
+        background.png    </span>
+    drawable-hdpi/  <span style="color:black">
+        icon.png
+        background.png  </span>
+</pre>
+
+<p>{@code hdpi} 修飾子は、ディレクトリ内のリソースが高密度画面を持つ端末用であることを表します。
+これらのドローアブル ディレクトリの画像は特定の画面密度に合わせたサイズになっていますが、ファイル名は完全に同じになります。
+
+このように、{@code icon.png} や {@code
+background.png} 画像を参照するのに使用するリソース ID は常に同じになりますが、Android はリソース ディレクトリ名の修飾子により端末設定情報を比較して、各リソースの現在の端末に最適なバージョンを選択します。
+
+</p>
+
+<p>Android では複数の設定修飾子をサポートしており、それぞれの修飾子をダッシュで区切ることで、1 つのディレクトリ名に複数の修飾子を追加できます。
+表 2 には、有効な設定修飾子が優先度順に記載されています。&mdash;参照ディレクトリに複数の修飾子を使用する場合、表に記載されている順番にディレクトリ名に追加する必要があります。
+
+
+</p>
+
+
+<p class="table-caption" id="table2"><strong>表 2.</strong> 設定修飾子の名前。
+</p>
+<table>
+    <tr>
+        <th>設定</th>
+        <th>修飾子の値</th>
+        <th>説明</th>
+    </tr>
+    <tr id="MccQualifier">
+      <td>MCC と MNC</td>
+      <td>例: <br/>
+        <code>mcc310</code><br/>
+        <code><nobr>mcc310-mnc004</nobr></code><br/>
+        <code>mcc208-mnc00</code><br/>
+        など
+      </td>
+      <td>
+        <p>モバイル カントリーコード（MCC）です。端末の SIM カードにあるモバイル ネットワーク コード（MNC）が続くことがあります。
+たとえば、<code>mcc310</code> は米国の任意の携帯通信会社、<code>mcc310-mnc004</code> は米国の Verizon、<code>mcc208-mnc00</code> はフランスの Orange となります。
+
+</p>
+        <p>端末が無線通信接続（GSM 電話）を使用する場合、MCC と MNC の値は SIM カードの値となります。
+</p>
+        <p>さらに、MCC のみを使用することもできます（たとえば、アプリケーションに国固有の法に関するリソースを含める場合）。
+言語のみに基づいて指定する場合は、代わりに<em>言語と地域</em>の修飾子（次のセクションで解説）を使用します。
+MCC と MNC 修飾子を使用する場合は、慎重に設定し、予測のとおりに機能することをテストします。
+</p>
+        <p>さらに、設定フィールド {@link
+android.content.res.Configuration#mcc}、{@link
+android.content.res.Configuration#mnc} もご覧ください。これらは、それぞれ、現在のモバイル カントリーコードとモバイル ネットワーク コードを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="LocaleQualifier">
+      <td>言語と地域</td>
+      <td>例: <br/>
+        <code>en</code><br/>
+        <code>fr</code><br/>
+        <code>en-rUS</code><br/>
+        <code>fr-rFR</code><br/>
+        <code>fr-rCA</code><br/>
+        など
+      </td>
+      <td><p>言語は 2 文字の <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO 639-1</a> 言語コードで定義し、オプションで、2 文字の <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO 3166-1-alpha-2</a> 地域コードを後ろに追加します（先頭に小文字の「{@code r}」が付きます）。
+
+
+
+        </p><p>
+        コードでは大文字と小文字が区別されません。<em></em>地域を区別するには、{@code r} 接頭辞を使用します。
+
+        地域のみは指定できません。</p>
+        <p>ユーザーがシステム設定で言語を変更すると、アプリケーションの実行中にこの値が変更されます。
+実行時のアプリケーションに与える影響については、<a href="runtime-changes.html">実行時の変更の処理</a>をご覧ください。
+</p>
+        <p>アプリケーションを他の言語にローカライズするための詳細なガイドは、「<a href="localization.html">Localization</a>」をご覧ください。
+</p>
+        <p>さらに、{@link android.content.res.Configuration#locale} 設定フィールドもご覧ください。これは、現在のロケールを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>レイアウトの方向</td>
+      <td><code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>アプリケーションのレイアウトの方向です。{@code ldrtl} は、「レイアウト方向は右から左」という意味になります。{@code ldltr} は、「レイアウト方向は左から右」という意味になります。この設定が暗黙的にデフォルト値となります。
+
+      </p>
+      <p>この設定は、レイアウト、ドローアブル、値など、任意のリソースに適用できます。
+      </p>
+      <p>たとえば、アラビア語に何らかの特定なレイアウトを提供し、その他の「右から左」の言語（ペルシャ語やヘブライ語）に汎用的なレイアウトを提供する場合、次のように設定します。
+
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(Default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(Specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(Any "right-to-left" language, except
+                  for Arabic, because the "ar" language qualifier
+                  has a higher precedence.)
+</pre>
+        <p class="note"><strong>注:</strong> アプリで右から左のレイアウト機能を有効にするには、<a href="{@docRoot}guide/topics/manifest/application-element.html#supportsrtl">{@code
+        supportsRtl}</a> を {@code "true"} に設定し、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> を 17 以上に設定します。
+</p>
+        <p>API レベル 17 で追加。<em></em></p>
+      </td>
+    </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>smallestWidth</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        例: <br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        など
+      </td>
+      <td>
+        <p>使用可能な画面領域の最小寸法で指定する、画面の基本サイズ。
+具体的には、端末の smallestWidth は画面に使用できる高さと幅の最小サイズとなります（画面の「使用できる最小幅」と考えることもできます）。
+画面の現在の方向に関係なく、この修飾子を使用することで、アプリケーションの UI に少なくとも {@code &lt;N&gt;} dps の幅を使用できます。
+
+</p>
+        <p>たとえば、画面領域のレイアウトの最小寸法を常に 600 dp とする必要がある場合、この修飾子を使用してレイアウト リソース {@code
+res/layout-sw600dp/} を作成できます。
+システムは、600dp の側が縦になるか横になるか関係なく、使用可能な画面の最小寸法が 600dp 以上の場合にのみこれらのリソースを使用します。
+
+smallestWidth は端末の固定された画面サイズ特性です。<strong>画面の向きが変わっても、端末の smallestWidth は変更されません。</strong>
+</p>
+        <p>端末の smallestWidth では画面の装飾とシステム UI が考慮されます。たとえば、端末の画面に smallestWidth の軸に沿ったスペースを考慮した固定 UI 要素がある場合、これらの画面ピクセルは UI に使用できないことから、システムは実際の画面サイズよりも小さな smallestWidth を宣言します。つまり、使用する値は、レイアウトが必要とする実際の最小寸法とする必要があります（通常は、この値は、画面の現在の向きに関係なく、レイアウトがサポートする「最小幅」となります）。<em></em>
+
+
+
+
+</p>
+        <p>次に、一般的な画面サイズに使用する値を示します。</p>
+        <ul>
+          <li>320。次のような画面設定を持つ端末。
+            <ul>
+              <li>240x320 ldpi（QVGA ハンドセット）</li>
+              <li>320x480 mdpi（ハンドセット）</li>
+              <li>480x800 hdpi（高密度ハンドセット）</li>
+            </ul>
+          </li>
+          <li>480。480x800 mdpi（タブレットやハンドセット）などの画面。</li>
+          <li>600。600x1024 mdpi（7 インチタブレット）などの画面。</li>
+          <li>720。720x1280 mdpi（10 インチタブレット）などの画面。</li>
+        </ul>
+        <p>アプリケーションで smallestWidth 修飾子の値が異なる複数のリソース ディレクトリを提供する場合、システムは端末の smallestWidth に最も近い（かつ超過しない）ものを使用します。
+
+ </p>
+        <p>API レベル 13 で追加。<em></em></p>
+        <p>さらに、<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">{@code
+android:requiresSmallestWidthDp}</a> 属性もご覧ください。これは、アプリケーションが互換性を持つ最小の smallestWidth と、端末の smallestWidth 値を保持する {@link
+android.content.res.Configuration#smallestScreenWidthDp} 設定フィールドを宣言します。
+
+</p>
+        <p>さまざまな画面の設計とこの修飾子の使用方法についての詳細は、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」のデベロッパー ガイドをご覧ください。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>使用可能な幅</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        例: <br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        など
+      </td>
+      <td>
+        <p>リソースを使用する、使用可能な最小の画面幅を {@code dp} 単位で指定します。&mdash;<code>&lt;N&gt;</code> の値で定義します。
+画面の向きの縦と横を変更すると、現在の実際の幅に合わせて、この設定値が変更されます。
+
+</p>
+        <p>アプリケーションでこの設定が異なる複数のリソース ディレクトリを提供する場合、システムは端末の現在の画面の幅に最も近い（かつ超過しない）ものを使用します。
+
+この値は画面の装飾を考慮します。つまり、端末のディスプレイの左や右に何らかの固定 UI 要素がある場合、これらの UI 要素を考慮し、アプリケーションの使用可能なスペースを減らして、実際の画面サイズよりも小さな幅を使用します。
+
+
+
+</p>
+        <p>API レベル 13 で追加。<em></em></p>
+        <p>さらに、{@link android.content.res.Configuration#screenWidthDp} 設定フィールドもご覧ください。これは現在の画面の幅を保持します。
+</p>
+        <p>さまざまな画面の設計とこの修飾子の使用方法についての詳細は、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」のデベロッパー ガイドをご覧ください。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>使用可能な高さ</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        例: <br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        など
+      </td>
+      <td>
+        <p>リソースを使用する、使用可能な最小の画面幅を「dp」単位で指定します。&mdash;<code>&lt;N&gt;</code> の値で定義します。
+画面の向きの縦と横を変更すると、現在の実際の高さに合わせて、この設定値が変更されます。
+
+</p>
+        <p>アプリケーションでこの設定が異なる複数のリソース ディレクトリを提供する場合、システムは端末の現在の画面の高さに最も近い（かつ超過しない）ものを使用します。
+
+この値は画面の装飾を考慮します。つまり、端末のディスプレイの上や下に何らかの固定 UI 要素がある場合、これらの UI 要素を考慮し、アプリケーションの使用可能なスペースを減らして、実際の画面サイズよりも小さな高さを使用します。
+
+
+
+固定されていない画面の装飾（全画面にした場合に非表示になる携帯電話のステータスバーなど）や、タイトルバーやアクションバーなどのウィンドウの装飾は、ここでは考慮されません。そのため、アプリケーションでは指定したスペースよりもやや小さなサイズに対処できるように準備をし置く必要があります。<em></em>
+
+
+
+
+        <p>API レベル 13 で追加。<em></em></p>
+        <p>さらに、{@link android.content.res.Configuration#screenHeightDp} 設定フィールドもご覧ください。これは現在の画面の幅を保持します。
+</p>
+        <p>さまざまな画面の設計とこの修飾子の使用方法についての詳細は、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」のデベロッパー ガイドをご覧ください。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenSizeQualifier">
+      <td>画面サイズ</td>
+      <td>
+        <code>small</code><br/>
+        <code>normal</code><br/>
+        <code>large</code><br/>
+        <code>xlarge</code>
+      </td>
+      <td>
+        <ul class="nolist">
+        <li>{@code small}: 低密度 QVGA 画面と同等のサイズを持つ画面です。
+小さい画面の最小レイアウト サイズは約 320x426 dp 単位です。
+たとえば、QVGA 低密度や VGA 高密度です。
+</li>
+        <li>{@code normal}: 中密度 HVGA 画面と同等のサイズを持つ画面です。
+通常の画面の最小レイアウト サイズは約 320x470 dp 単位です。
+たとえば、WQVGA 低密度、HVGA 中密度、WVGA 高密度といった画面になります。
+
+</li>
+        <li>{@code large}: 中密度 VGA 画面と同等のサイズを持つ画面です。
+
+        大きな画面の最小レイアウト サイズは約 480x640 dp 単位です。
+        たとえば、VGA や WVGA の中密度といった画面です。</li>
+        <li>{@code xlarge}: 従来の中密度 HVGA 画面よりもはるかに大きなサイズの画面です。
+特大の画面の最小レイアウト サイズは約 720x960 dp 単位です。
+ほとんどの場合、特大の画面を持つ端末はポケットに入れて持ち運ぶことができないほど大きく、タブレット スタイルの端末になります。
+
+API レベル 9 で追加。<em></em></li>
+        </ul>
+        <p class="note"><strong>注:</strong> サイズ識別子を持つ場合でも、リソースがそのサイズの画面以外には対応しないということではありません。<em></em>
+現在の端末に最適な識別子を持つ代替リソースを提供していない場合でも、システムによって<a href="#BestMatch">最適な</a>リソースが使用されることがあります。
+
+</p>
+        <p class="caution"><strong>警告:</strong> すべてのリソースが現在の画面よりも大きなサイズ識別子を使用している場合、システムはそれらのリソースを使用せず、アプリケーションが実行時にクラッシュしてしまいます（たとえば、すべてのリソースに {@code
+xlarge} 識別子のタグが付いているが、端末は通常サイズの画面である場合）。<em></em><strong></strong>
+
+</p>
+        <p>API レベル 4 で追加。<em></em></p>
+        
+        <p>詳細については、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」をご覧ください。
+</p>
+        <p>さらに、{@link android.content.res.Configuration#screenLayout} 設定フィールドもご覧ください。これは、画面のサイズが小、中、大のいずれかであるかを表します。
+
+</p>
+      </td>
+    </tr>
+    <tr id="ScreenAspectQualifier">
+      <td>画面アスペクト</td>
+      <td>
+        <code>long</code><br/>
+        <code>notlong</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code long}: WQVGA、WVGA、FWVGA のような長い画面</li>
+          <li>{@code notlong}: QVGA、HVGA、VGA のように長くない画面</li>
+        </ul>
+        <p>API レベル 4 で追加。<em></em></p>
+        <p>これは純粋に画面のアスペクト比を基準とします（「長い」画面は幅広の画面になります）。これは画面の向きには関係ありません。
+</p>
+        <p>さらに、{@link android.content.res.Configuration#screenLayout} 設定フィールドもご覧ください。これは、画面のサイズが長いかどうかを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="OrientationQualifier">
+      <td>画面の向き</td>
+      <td>
+        <code>port</code><br/>
+        <code>land</code>  <!-- <br/>
+        <code>square</code>  -->
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code port}: 端末は縦向き（垂直）になっています</li>
+          <li>{@code land}: 端末は横向き（水平）になっています</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
+        <p>ユーザーが画面を回転すると、アプリケーションの実行中にこの値が変更されます。
+実行時のアプリケーションに与える影響については、「<a href="runtime-changes.html">実行時の変更の処理</a>」をご覧ください。
+</p>
+        <p>さらに、{@link android.content.res.Configuration#orientation} 設定フィールドもご覧ください。これは、現在の端末の画面の向きを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="UiModeQualifier">
+      <td>UI モード</td>
+      <td>
+        <code>car</code><br/>
+        <code>desk</code><br/>
+        <code>television</code><br/>
+        <code>appliance</code>
+        <code>watch</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code car}: 端末は車載ドックで表示されています</li>
+          <li>{@code desk}: 端末はデスクドックで表示されています</li>
+          <li>{@code television}: 端末はテレビで表示されており、「10 フィート」離れた位置からの操作が可能です。UI はユーザーから離れた場所にある大きな画面に表示され、主に十字キーやポインタ以外のやり取りで操作します。
+
+
+</li>
+          <li>{@code appliance}: 端末をアプライアンスとして使用します。ディスプレイはありません
+</li>
+          <li>{@code watch}: 端末にはディスプレイがあり、手首に装着して使用します</li>
+        </ul>
+        <p>API レベル 8 で追加。television は API 13 で追加。watch は API 20 で追加。<em></em></p>
+        <p>端末をホルダーに装着したり、取り外したりしたときのアプリの反応については、「<a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Determining and Monitoring the Docking State and Type</a>」をご覧ください。
+
+</p>
+        <p>ユーザーが端末をドックに装着すると、アプリケーションの実行中にこの値が変更されます。
+{@link
+android.app.UiModeManager} を使用すると、これらのモードの一部を有効または無効にできます。実行時のアプリケーションに与える影響については、「<a href="runtime-changes.html">実行時の変更の処理</a>」をご覧ください。
+</p>
+      </td>
+    </tr>
+    <tr id="NightQualifier">
+      <td>ナイトモード</td>
+      <td>
+        <code>night</code><br/>
+        <code>notnight</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code night}: 夜間</li>
+          <li>{@code notnight}: 昼間</li>
+        </ul>
+        <p>API レベル 8 で追加。<em></em></p>
+        <p>ナイトモードを自動モード（デフォルト）のままにしておくと、時間を基準にしてモードが変更された場合に、アプリケーションの実行中にこの値が変更されます。
+{@link android.app.UiModeManager} を使用すると、このモードを有効または無効にできます。
+実行時のアプリケーションに与える影響については、「<a href="runtime-changes.html">実行時の変更の処理</a>」をご覧ください。
+</p>
+      </td>
+    </tr>
+    <tr id="DensityQualifier">
+      <td>画面ピクセル密度（dpi）</td>
+      <td>
+        <code>ldpi</code><br/>
+        <code>mdpi</code><br/>
+        <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
+        <code>nodpi</code><br/>
+        <code>tvdpi</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code ldpi}: 低密度の画面。約 120dpi です。</li>
+          <li>{@code mdpi}: 中密度（従来の HVGA）の画面。約 160dpi です。
+</li>
+          <li>{@code hdpi}: 高密度の画面。約 240dpi です。</li>
+          <li>{@code xhdpi}: 超高密度の画面。約 320dpi です。API レベル 8 で追加。<em></em>
+</li>
+          <li>{@code xxhdpi}: 超超高密度の画面。約 480dpi です。API レベル 16 で追加。<em></em>
+</li>
+          <li>{@code xxxhdpi}: 超超高密度が使用（ランチャー アイコンのみ。「Supporting Multiple Screens」の<a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">注</a>をご覧ください）。約 640dpi です。<em></em>
+
+API レベル 18 で追加。<em></em>
+</li>
+          <li>{@code nodpi}: 端末の密度に合わせてサイズを変更しないビットマップ リソースに使用します。
+</li>
+          <li>{@code tvdpi}: 密度が mdpi と hdpi の間の画面。約 213dpi です。これは「プライマリ」の密度グループとしては認識されません。
+ほとんどの場合、テレビ向けのものであり、大部分のアプリは必要としません。&mdash;通常、アプリの場合は mdpi と hdpi リソースを提供すれば十分であり、システムが必要に応じてサイズを変更します。
+
+この識別子は API レベル 13 で導入されました。</li>
+        </ul>
+        <p>6 つのプライマリ密度のサイズの比率は 3:4:6:8:12:16 です（tvdpi 密度を除く）。
+そのため、ldpi では 9x9 のビットマップ、mdpi では 12x12 のビットマップ、hdpi では 18x18 のビットマップ、xhdpi では 24x24 のビットマップとなります。
+</p>
+        <p>画像リソースがテレビや他の特定の端末で正常に表示されず、tvdpi リソースを試す場合、拡張係数は 1.33*mdpi になります。
+たとえば、画面向けの 100px x 100px 画像は、tvdpi 向けにすると 133px x 133px となります。
+</p>
+        <p class="note"><strong>注:</strong> 密度識別子を持つ場合でも、リソースがその密度の画面以外には対応しないということではありません。<em></em>
+現在の端末に最適な識別子を持つ代替リソースを提供していない場合でも、システムによって<a href="#BestMatch">最適な</a>リソースが使用されることがあります。
+
+</p>
+        <p>異なる画面密度を処理する方法や、Android が現在の密度に合わせてビットマップのサイズを変更する方法については、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」をご覧ください。
+
+</p>
+       </td>
+    </tr>
+    <tr id="TouchscreenQualifier">
+      <td>タッチスクリーン タイプ</td>
+      <td>
+        <code>notouch</code><br/>
+        <code>finger</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}: 端末にはタッチスクリーンが搭載されていません。</li>
+          <li>{@code finger}: 端末には、ユーザーの指先による指示操作で使用するためのタッチスクリーンが搭載されています。
+</li>
+        </ul>
+        <p>{@link android.content.res.Configuration#touchscreen} 設定フィールドもご覧ください。これは、端末上のタッチスクリーンのタイプを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="KeyboardAvailQualifier">
+      <td>キーボードの使用可能状況</td>
+      <td>
+        <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
+        <code>keyssoft</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code keysexposed}: 端末ではキーボードを使用できます。端末でソフトウェア キーボードが有効な（と想定される）場合、端末にハードウェア キーボードが接続されておらず、ハードウェア キーボードがユーザーに提示されていない場合でも、この値が使用されることがあります。<em></em>
+
+ソフトウェア キーボードが提供されていない、または無効になっている場合は、ハードウェア キーボードが認識された場合にのみ使用されます。
+
+</li>
+          <li>{@code keyshidden}: 端末には使用可能なハードウェア キーボードがありますが非表示になっています。また、端末ではソフトウェア キーボードが有効になっていません。<em></em><em></em>
+</li>
+          <li>{@code keyssoft}: 表示されているかどうかに関係なく、端末ではソフトウェア キーボードが有効になっています。
+</li>
+        </ul>
+        <p><code>keysexposed</code> リソースを提供するが、<code>keyssoft</code> リソースを提供しない場合、システムのソフトウェア キーボードが有効になっている場合は、キーボードが表示されているかに関係なく、システムは <code>keysexposed</code> リソースを使用します。
+
+</p>
+        <p>ユーザーがハードウェア キーボードを開くと、アプリケーションの実行中にこの値が変更されます。
+実行時のアプリケーションに与える影響については、「<a href="runtime-changes.html">実行時の変更の処理</a>」をご覧ください。
+</p>
+        <p>さらに、設定フィールド {@link
+android.content.res.Configuration#hardKeyboardHidden} と {@link
+android.content.res.Configuration#keyboardHidden} もご覧ください。これは、ハードウェア キーボードの可視性、任意のキーボード（ソフトウェアを含む）の可視性、それぞれの可視性を表します。
+</p>
+      </td>
+    </tr>
+    <tr id="ImeQualifier">
+      <td>主なテキストの入力方法</td>
+      <td>
+        <code>nokeys</code><br/>
+        <code>qwerty</code><br/>
+        <code>12key</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}: 端末にはテキスト入力用のハードウェア キーはありません。</li>
+          <li>{@code qwerty}: ユーザーに表示されているかどうかに関係なく、端末にはハードウェア クワーティ キーボードが搭載されています。
+
+</li>
+          <li>{@code 12key}: ユーザーに表示されているかどうかに関係なく、端末にはハードウェア 12key キーボードが搭載されています。
+</li>
+        </ul>
+        <p>さらに、{@link android.content.res.Configuration#keyboard} 設定フィールドもご覧ください。これは、使用可能な主なテキストの入力方法を表します。
+</p>
+      </td>
+    </tr>
+    <tr id="NavAvailQualifier">
+      <td>ナビゲーション キーの使用可能状況</td>
+      <td>
+        <code>navexposed</code><br/>
+        <code>navhidden</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code navexposed}: ユーザーはナビゲーション キーを使用できます。</li>
+          <li>{@code navhidden}: ナビゲーション キーは使用できません（閉じられた lid の背後になっている場合など）。
+</li>
+        </ul>
+        <p>ユーザーがナビゲーション キーを表示させると、アプリケーションの実行中にこの値が変更されます。
+実行時のアプリケーションに与える影響については、「<a href="runtime-changes.html">実行時の変更の処理</a>」をご覧ください。
+</p>
+        <p>さらに、{@link android.content.res.Configuration#navigationHidden} 設定フィールドもご覧ください。これは、ナビゲーション キーが非表示になっているかどうかを表します。
+</p>
+      </td>
+    </tr>
+    <tr id="NavigationQualifier">
+      <td>タップ以外の主なナビゲーション方法</td>
+      <td>
+        <code>nonav</code><br/>
+        <code>dpad</code><br/>
+        <code>trackball</code><br/>
+        <code>wheel</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}: 端末には、タッチスクリーン以外のナビゲーション機能がありません。
+</li>
+          <li>{@code dpad}: 端末にはナビゲーション用の方向キー（十字キー）があります。</li>
+          <li>{@code trackball}: 端末にはナビゲーション用のトラックボールがあります。</li>
+          <li>{@code wheel}: 端末にはナビゲーション用の方向ホイールがあります（特殊）。</li>
+        </ul>
+        <p>{@link android.content.res.Configuration#navigation} 設定フィールドもご覧ください。これは、利用可能なナビゲーション方法のタイプを表します。
+</p>
+      </td>
+    </tr>
+<!-- DEPRECATED
+    <tr>
+      <td>Screen dimensions</td>
+      <td>Examples:<br/>
+        <code>320x240</code><br/>
+        <code>640x480</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>The larger dimension must be specified first. <strong>This configuration is deprecated
+and should not be used</strong>. Instead use "screen size," "wider/taller screens," and "screen
+orientation" described above.</p>
+      </td>
+    </tr>
+-->
+    <tr id="VersionQualifier">
+      <td>プラットフォーム バージョン（API レベル）</td>
+      <td>例: <br/>
+        <code>v3</code><br/>
+        <code>v4</code><br/>
+        <code>v7</code><br/>
+        など</td>
+      <td>
+        <p>端末がサポートする API レベル。たとえば、<code>v1</code> は API レベル 1（Android 1.0 以降の端末）、<code>v4</code> は API レベル 4（Android 1.6 以降の端末）となります。
+
+これらの値の詳細については、「<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API levels</a>」のドキュメントをご覧ください。
+</p>
+      </td>
+    </tr>
+</table>
+
+
+<p class="note"><strong>注:</strong> Android 1.0 以降、いくつかの設定識別子が追加されているため、すべてのバージョンの Android がすべての識別子をサポートしているわけではありません。
+新しい識別子を使用すると、旧式の端末がその識別子を無視できるように、プラットフォーム バージョンの識別子が暗黙的に追加されます。
+たとえば、available-width の識別子は API レベル 13 で新たに追加されたため、<code>w600dp</code> 識別子を使用すると、自動的に <code>v13</code> 識別子が追加されます。
+
+問題を回避するために、常に一連のデフォルト リソースを含めるようにします（識別子のない一連のリソース）。<em></em>
+詳細は、<a href="#Compatibility">リソースとの最適な端末の互換性を提供する</a>セクションをご覧ください。
+
+</p>
+
+
+
+<h3 id="QualifierRules">修飾子の名前のルール</h3>
+
+<p>ここでは、設定修飾子の名前の使用方法に関するルールを説明します。</p>
+
+<ul>
+    <li>リソースの 1 つのセットに複数の修飾子を指定できます。その場合は、ダッシュで区切ります。たとえば、<code>drawable-en-rUS-land</code> は画面が横向きの米国英語の端末に適用されます。
+
+</li>
+    <li>識別子は<a href="#table2">表 2</a> の順番で使用します。次に例を示します。
+
+      <ul>
+        <li>誤: <code>drawable-hdpi-port/</code></li>
+        <li>正: <code>drawable-port-hdpi/</code></li>
+      </ul>
+    </li>
+    <li>代替リソースのディレクトリはネストできません。<code>res/drawable/drawable-en/</code> などは使用できません。
+</li>
+    <li>値は大文字と小文字を区別します。大文字と小文字を区別するファイル システムの問題を回避するために、処理前にリソース コンパイラーがディレクトリ名を小文字に変換します。
+
+読みやすくする場合にのみ、名前に大文字を使用します。</li>
+    <li>それぞれの修飾子タイプに使用できる値は 1 つだけです。たとえば、スペインとフランスの両方に同じドローアブル ファイルを使用する場合も、ディレクトリ名を <code>drawable-rES-rFR/</code> とすることはできません。<em></em>
+
+その代わりに、該当するファイルを含む <code>drawable-rES/</code> と <code>drawable-rFR/</code> という名前の 2 つのリソース ディレクトリが必要になります。ただし、実際のところ、両方の場所で同じファイルを重複させる必要はありません。
+
+代わりに、リソースのエイリアスを作成できます。
+後述の<a href="#AliasResources">エイリアス リソースを作成する</a>をご覧ください。
+</li>
+</ul>
+
+<p>これらの修飾子を名前に持つディレクトリに代替リソースを保存すると、現在の端末設定に基づいて、Android がアプリケーションにリソースを自動的に適用します。
+
+リソースが要求されるたびに、Android は要求されたリソース ファイルを持つ代替リソース ディレクトリを探し、<a href="#BestMatch">最適なリソースを見つけます</a>（後述）。
+
+特定の端末設定に合う代替リソースがない場合、Android は対応するデフォルト リソース（設定識別子を含まない特定のリソースタイプ用の一連のリソース）を使用します。
+
+
+</p>
+
+
+
+<h3 id="AliasResources">エイリアス リソースを作成する</h3>
+
+<p>複数の端末で使用するリソースがある場合（ただし、デフォルト リソースとして提供しない場合）、同じリソースを複数の代替リソース ディレクトリに配置する必要はありません。
+
+その代わりに、（場合によっては）デフォルト リソースのディレクトリに保存したリソースのエイリアスとして機能する代替リソースを作成できます。
+
+</p>
+
+<p class="note"><strong>注:</strong> すべてのリソースに、別のリソースへのエイリアスを作成できるメカニズムが備わっているわけではありません。
+特に、アニメーション、メニュー、未加工、{@code xml/} で指定されていないその他のリソースにはこの機能を使用できません。
+</p>
+
+<p>たとえば、アプリケーション アイコン {@code icon.png} について、ロケールごとに一意のバージョンが必要になるという状況を考えてみます。
+ただし、英語カナダとフランス語カナダの 2 つのロケールでは同じバージョンを使用する必要があります。
+英語カナダとフランス語カナダの両方のリソース ディレクトリに同じ画像をコピーする必要は実際にはありません。
+
+代わりに、両方に使用する画像を {@code icon_ca.png} という名前（{@code icon.png} 以外の名前）で保存し、デフォルトの {@code res/drawable/} ディレクトリに配置します。
+
+次に {@code &lt;bitmap&gt;} 要素を使用して {@code icon_ca.png} リソースを参照する {@code icon.xml} ファイルを {@code
+res/drawable-en-rCA/} と {@code res/drawable-fr-rCA/} に作成します。
+これにより、PNG ファイルを 1 つだけ作成し、それを指す小さな XML ファイルを 2 つ作成するだけで済みます
+（次に、XML ファイルの例を示します）。</p>
+
+
+<h4>ドローアブル</h4>
+
+<p>既存のドローアブルのエイリアスを作成するには、{@code &lt;bitmap&gt;} 要素を使用します。次に例を示します。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon_ca" />
+</pre>
+
+<p>このファイルを {@code icon.xml} として（{@code res/drawable-en-rCA/} などの代替リソース ディレクトリに）保存すると、{@code R.drawable.icon} として参照可能なリソースにコンパイルされますが、実際のところ、これは（{@code res/drawable/} に保存されている）{@code
+R.drawable.icon_ca} リソースのエイリアスです。
+
+</p>
+
+
+<h4>レイアウト</h4>
+
+<p>既存のレイアウトのエイリアスを作成するには、{@code &lt;merge&gt;} にラップされる {@code &lt;include&gt;} 要素を使用します。
+次に例を示します。</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;merge>
+    &lt;include layout="@layout/main_ltr"/>
+&lt;/merge>
+</pre>
+
+<p>このファイルを {@code main.xml} として保存すると、{@code R.layout.main} として参照可能なリソースにコンパイルされますが、実際のところ、これは {@code R.layout.main_ltr} リソースのエイリアスです。
+
+</p>
+
+
+<h4>文字列とその他の単純な値</h4>
+
+<p>既存の文字列のエイリアスを作成するには、単に、目的の文字列のリソース ID を新しい文字列の値として使用します。
+次に例を示します。</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello&lt;/string>
+    &lt;string name="hi">@string/hello&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>{@code R.string.hi} リソースは {@code R.string.hello} のエイリアスになりました。</p>
+
+<p> <a href="{@docRoot}guide/topics/resources/more-resources.html">その他の単純な値</a>も同様に機能します。
+次に色の例を示します。</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;color name="yellow">#f00&lt;/color>
+    &lt;color name="highlight">@color/red&lt;/color>
+&lt;/resources>
+</pre>
+
+
+
+
+<h2 id="Compatibility">リソースとの最適な端末の互換性を提供する</h2>
+
+<p>アプリケーションで複数の端末設定をサポートするには、アプリケーションが使用するそれぞれのタイプのリソースに常にデフォルト リソースを提供することが重要です。
+</p>
+
+<p>たとえば、アプリケーションが複数の言語をサポートする場合は、<a href="#LocaleQualifier">言語と地域の修飾子</a>を<em>持たない</em> {@code
+values/} ディレクトリ（文字列の保存先）を常に用意します。すべての文字列ファイルをすべて言語と地域の修飾子を持つディレクトリに配置してしまうと、自分の文字列がサポートしていない言語に設定された端末でアプリケーションを実行すると、アプリケーションがクラッシュしてしまいます。
+
+ただし、デフォルトの {@code values/} リソースを提供しておけば、アプリケーションは適切に実行されます（ユーザーがその言語を理解できない場合でも。&mdash;クラッシュは避けられます）。
+
+</p>
+
+<p>同様に、画面の向きに基づいた異なるレイアウト リソースを提供する場合も、いずれかの方向をデフォルトに設定する必要があります。
+たとえば、横向きの {@code
+layout-land/} と縦向きの {@code layout-port/} にレイアウト リソースを提供する代わりに、横向きの {@code layout/} と縦向きの {@code layout-port/} のようなリソースをデフォルトとして保存しておきます。
+</p>
+
+<p>予測しなかった設定でアプリケーションが実行されるだけでなく、新しいバージョンの Android では古いバージョンではサポートされない設定修飾子が追加されることもあるため、デフォルト リソースの提供が重要になります。
+
+新しいリソース修飾子を使用するが、古いバージョンの Android とのコードの互換性を保持する場合、古いバージョンの Android でアプリケーションを実行するときにデフォルト リソースが提供されていないと、古いバージョンの Android では新しい修飾子の付いたリソースを使用できないために、アプリケーションがクラッシュします。
+
+
+たとえば、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> が 4 に設定されている場合に、<a href="#NightQualifier">ナイトモード</a>（API レベル 8 で追加された {@code night} または {@code notnight}）を使用してすべてのドローアブル リソースの修飾子を設定すると、API レベル 4 端末はドローアブル リソースにアクセスできず、クラッシュします。
+この場合、{@code notnight} をデフォルト リソースにする場合、その修飾子を除外することになるため、ドローアブル リソースは {@code drawable/} または {@code drawable-night/} のいずれかになります。
+
+</p>
+
+<p>そこで、端末の最適な互換性を提供するには、アプリケーションを適切に実行するのに必要なリソースに常にデフォルト リソースを提供するようにします。
+次に、設定修飾子を使用して、特定の端末設定向けの代替リソースを作成します。
+</p>
+
+<p>このルールには次の例外があります。アプリケーションの <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> が 4 以上の場合、<a href="#DensityQualifier">画像密度</a>修飾子で代替のドローアブル リソースを提供するときには、デフォルトのドローアブル リソースを提供する必要はありません。<em></em>
+
+デフォルトのドローアブル リソースがない場合でも、Android は代替の画面密度のなかで最適なものを見つけて、必要に応じてビットマップのサイズを変更できます。
+
+ただし、すべてのタイプに最適な操作性を提供するには、密度の 3 つのタイプすべてに代替ドローアブルを提供する必要があります。
+</p>
+
+
+
+<h2 id="BestMatch">Android が最適なリソースを見つける仕組み</h2>
+
+<p>代替を提供するリソースを要求すると、現在の端末設定に応じて Android が実行時に使用する代替リソースを選択します。
+Android が代替リソースを選択する方法説明するために、次のドローアブル ディレクトリを想定します。それぞれに同じ画像の異なるバージョンが入っています。
+
+</p>
+
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+
+<p>さらに、次のような端末設定を想定します。</p>
+
+<p style="margin-left:1em;">
+ロケール = <code>en-GB</code> <br/>
+画面の向き = <code>port</code> <br/>
+画面ピクセル密度 = <code>hdpi</code> <br/>
+タッチスクリーン タイプ = <code>notouch</code> <br/>
+主なテキストの入力方法 = <code>12key</code>
+</p>
+
+<p>端末設定を使用可能な代替リソースに比較して、Android は {@code drawable-en-port} からドローアブルを選択します。
+</p>
+
+<p>システムは、次のロジックを使用して、使用するリソースを決定します。
+</p>
+
+
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
+<p class="img-caption"><strong>図 2.</strong> Android が最適なリソースを見つける仕組みを示したフローチャート。
+</p>
+</div>
+
+
+<ol>
+  <li>端末設定に矛盾するリソース ファイルを排除します。
+    <p><code>en-GB</code> ロケールに矛盾するため、<code>drawable-fr-rCA/</code> ディレクトリが排除されます。
+</p>
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+<strike>drawable-fr-rCA/</strike>
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+<p class="note"><strong>例外:</strong> 画面ピクセル密度は、矛盾により排除されない修飾子の 1 つです。
+それぞれの画面密度はその時点で最適であると判断されたものであるため、端末の画面密度が hdpi の場合でも、<code>drawable-port-ldpi/</code> は排除されません。
+
+詳細は、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」のドキュメントをご覧ください。
+</p></li>
+
+  <li>リスト（<a href="#table2">表 2</a>）にある（次に）優先される修飾子を選択します（MCC から順に下がっていきます）。
+ </li>
+  <li>この修飾子を含むリソース ディレクトリがあるかどうかを確認します。  </li>
+    <ul>
+      <li>ない場合は、ステップ 2 に戻り、次の修飾子を調べます（この例では、言語識別子になるまですべて「いいえ」になります）。
+</li>
+      <li>「はい」の場合は、ステップ 4 に進みます。</li>
+    </ul>
+  </li>
+
+  <li>この修飾子を持たないリソース ディレクトリを排除します。この例では、システムによって言語修飾子を含まないすべてのディレクトリが排除されます。
+</li>
+<pre class="classic no-pretty-print">
+<strike>drawable/</strike>
+drawable-en/
+drawable-en-port/
+drawable-en-notouch-12key/
+<strike>drawable-port-ldpi/</strike>
+<strike>drawable-port-notouch-12key/</strike>
+</pre>
+<p class="note"><strong>例外:</strong> 対象となる修飾子が画面ピクセル密度の場合、Android は端末の画像密度に最も近いオプションを選択します。一般的に、Android では小さな元画像を拡大するよりも、大きな元画像を縮小する方法が使用されます。
+
+
+「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」をご覧ください。
+</p>
+  </li>
+
+  <li>残るディレクトリが 1 つになるまで、元に戻ってステップ 2、3、4 を繰り返します。このレイでは、次にマッチングするのが画面の向きの修飾子です。そのため、画面の向きを指定しないリソースは排除されます。
+
+
+<pre class="classic no-pretty-print">
+<strike>drawable-en/</strike>
+drawable-en-port/
+<strike>drawable-en-notouch-12key/</strike>
+</pre>
+<p>{@code drawable-en-port} ディレクトリが残ります。</p>
+  </li>
+</ol>
+
+<p>この手順は要求した各リソースに対して実行されますが、システムはさらにいくつかの最適化を行います。
+たとえば、端末の設定が判明すると、マッチングしない代替リソースが排除されたりします。
+たとえば、設定言語が英語（「en」）の場合、言語修飾子が英語以外に設定されているリソース ディレクトリはチェック対象のリソースのプールに入ることはありません（言語修飾子のないリソース ディレクトリはそのままプールに入ります）。<em></em>
+
+
+</p>
+
+<p>画面サイズ修飾子に基づいてリソースを選択する場合、最適なリソースがない場合、システムは現在の画面よりも小さな画面向けのリソースを使用します（たとえば、必要に応じて大きなサイズの画面が通常サイズの画面のリソースを使用します）。
+
+ただし、使用できるリソースが現在の画面よりも大きなサイズのものしかない場合は、システムはそれらのリソースを<strong>使用せず</strong>、端末設定にあるその他のリソースがないときは、アプリケーションがクラッシュします（たとえば、すべてのリソースに {@code xlarge} 識別子のタグが付いているが、端末は通常サイズの画面である場合）<em></em>
+
+
+
+</p>
+
+<p class="note"><strong>注:</strong> （<a href="#table2">表 2</a> の）上位にある修飾子の方が、端末に正確に一致する修飾子の数よりも重要になります。<em></em>
+たとえば、上のステップ 4 では、<code>drawable-en</code> には一致するパラメータが 1 つしかありませんが（言語）、リストの最後の選択肢には、端末に正確に一致する修飾子が 3 つあります（画面の向き、タッチスクリーン タイプ、入力方法）。
+
+
+ただし、言語はこれらの他の修飾子よりも優先されるため、<code>drawable-port-notouch-12key</code> は排除されます。
+</p>
+
+<p>アプリケーションでのリソースの使用方法については、「<a href="accessing-resources.html">リソースへのアクセス</a>」をご覧ください。</p>

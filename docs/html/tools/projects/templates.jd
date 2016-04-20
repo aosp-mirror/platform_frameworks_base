@@ -1,6 +1,6 @@
 page.title=Using Code Templates
 page.image=images/cards/card-using-code-templates_16x9_2x.png
-page.metaDescription=Quickly create Android app projects with various UI or functional components. 
+page.metaDescription=Quickly create Android app projects with various UI or functional components.
 page.tags=studio,templates,firstapp
 @jd:body
 
@@ -29,7 +29,6 @@ page.tags=studio,templates,firstapp
     </div>
   </div>
 
-<img style="float:right" src="{@docRoot}images/cards/card-using-code-templates_16x9_2x.png">
 <p>The SDK tools provide templates for quickly creating Android application projects with the basic
   structure or for adding components to your existing application modules. The code templates
   provided by the Android SDK follow the Android design and development guidelines to get you on the
@@ -45,6 +44,18 @@ page.tags=studio,templates,firstapp
   <li><a href="#object-templates">Other Templates</a></li>
 </ul>
 
+<p>
+  The templates use <a href=
+  "{@docRoot}tools/support-library/features.html">support library</a> objects
+  if such objects are available. The support library objects make new features
+  available on the widest range of platforms. For example, since the templates
+  use the <a href=
+  "{@docRoot}tools/support-library/features.html#v7-appcompat">appcompat
+  library</a>, apps based on the templates use <a href=
+  "{@docRoot}design/material/index.html">material design</a> user interface
+  principles even if they are running on older Android devices that do not
+  directly support material design.
+</p>
 
 <h2 id="app-templates">Application Templates</h2>
 

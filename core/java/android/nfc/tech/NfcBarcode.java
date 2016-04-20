@@ -113,10 +113,10 @@ public final class NfcBarcode extends BasicTagTechnology {
      * <p>Does not cause any RF activity and does not block.
      *
      * @return a byte array containing the barcode
-     * @see <a href="http://www.kovio.com/docs/kovionfcbarcode.pdf">
-     *      Kovio 128-bit NFC barcode datasheet</a>
-     * @see <a href="http://kovio.com/docs/kovio-128-nfc-barcode-data-format.pdf">
-     *      Kovio 128-bit NFC barcode data format</a>
+     * @see <a href="http://www.thinfilm.no/docs/thinfilm-nfc-barcode-datasheet.pdf">
+     *      Thinfilm NFC Barcode tag specification (previously Kovio NFC Barcode)</a>
+     * @see <a href="http://www.thinfilm.no/docs/thinfilm-nfc-barcode-data-format.pdf">
+     *      Thinfilm NFC Barcode data format (previously Kovio NFC Barcode)</a>
      */
     public byte[] getBarcode() {
         switch (mType) {

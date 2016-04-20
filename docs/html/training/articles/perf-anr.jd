@@ -91,7 +91,7 @@ or database operations, or computationally expensive calculations such as
 resizing bitmaps should be done in a worker thread (or in the case of databases
 operations, via an asynchronous request).</p>
 
-<p>The most effecive way to create a worker thread for longer
+<p>The most effective way to create a worker thread for longer
 operations is with the {@link android.os.AsyncTask}
 class. Simply extend {@link android.os.AsyncTask} and implement the
 {@link android.os.AsyncTask#doInBackground doInBackground()} method to perform the work.
@@ -168,7 +168,7 @@ broadcast.</p>
 <p class="note"><strong>Tip:</strong>
 You can use {@link android.os.StrictMode} to help find potentially
 long running operations such as network or database operations that
-you might accidentally be doing your main thread.</p>
+you might accidentally be doing on your main thread.</p>
 
 
 

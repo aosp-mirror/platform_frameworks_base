@@ -169,7 +169,7 @@ src="{@docRoot}images/tools/performance/profile-gpu-rendering/gettingstarted_ima
     screen asynchronously. In certain situations, the GPU can have too much work to do,
     and your CPU will have to wait before it can submit new commands.
     When this happens, you'll see spikes in the Process (orange bar) and Execute (red bar)
-    stages, and the sommand submission will block until more room is made on the
+    stages, and the command submission will block until more room is made on the
     GPU command queue.
   </p>
 

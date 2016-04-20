@@ -79,6 +79,10 @@ href="https://www.youtube.com/watch?v=S8sugXgUVEI">
      Learn how to retrieve the last known location of an Android device, which
      is usually equivalent to the user's current location.
   </dd> <dt>
+    <b><a href="change-location-settings.html">Changing Location Settings</a></b>
+  <dt> <dd>
+    Learn how to detect and apply system settings for location features.
+  </dd> <dt>
     <b><a href="receive-location-updates.html">Receiving Location
     Updates</a></b>
   </dt> <dd>

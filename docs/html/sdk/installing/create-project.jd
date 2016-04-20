@@ -1,4 +1,4 @@
-page.title=Managing Projects from Android Studio
+page.title=Managing Projects with Android Studio
 
 @jd:body
 
@@ -8,13 +8,6 @@ page.title=Managing Projects from Android Studio
 
       <ol>
         <li><a href="#CreatingAProject">Creating an Android Project</a></li>
-        <ol>
-          <li><a href="#Step1CreatingAProject">Create a New Project</a> </li>
-          <li><a href="#Step2SelectFormFactor">Select Form Factors and API Level</a> </li>
-          <li><a href="#Step3AddActivity">Add an Activity</a> </li>
-          <li><a href="#Step4ConfigureActivity">Configure Your App</a> </li>
-          <li><a href="#Step5DevelopYourApp">Develop Your App</a> </li>
-        </ol>
 
         <li><a href="#CreatingAModule">Creating an Android Module</a></li>
 
@@ -190,8 +183,8 @@ with complete source files for each of them as shown in figure 6.</p>
         <li>Select a <strong>Theme</strong>. This setting specifies which standard Android
         <a href="{@docRoot}design/style/themes.html">visual style</a> is applied to your
         application. Select activity template. For more information about Android code templates, see
-        <a href="{@docRoot}tools/projects/templates.html">Using Code Templates</a>Leave the <strong>
-        Create activity</strong> option checked so you can start your
+        <a href="{@docRoot}tools/projects/templates.html">Using Code Templates</a>. Leave the
+        <strong>Create activity</strong> option checked so you can start your
         application with some essential components. </li>
 
         <li>Click the check box for the required Support Libraries then click <strong>Next</strong>.</li>
@@ -359,10 +352,6 @@ Android project view:</p>
 per resource type.</li>
 </ul>
 
-
-
-<h2 id="enable-view">Use the Android Project View</h2>
-
 <p>The <em>Android</em> project view is enabled by default and shows all the build files at
 the top level of the project hierarchy under <strong>Gradle Scripts</strong>. The project module
 appears as a folder at the top level of the project hierarchy and contains these three elements
@@ -386,12 +375,3 @@ from this representation and maintains the traditional project structure.</p>
 &nbsp;&nbsp;&nbsp;
 <img src="{@docRoot}images/tools/projectview-p2.png" alt="" style="width:240px" " />
 <p class="img-caption"><strong>Figure 10:</strong> Android and Traditional project view </p>
-
-
-
-
-
-
-
-
-

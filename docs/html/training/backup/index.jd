@@ -1,0 +1,47 @@
+page.title=Backing up App Data to the Cloud
+page.tags=cloud,sync,backup
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.2 (API level 8) and higher</li>
+</ul>
+</div>
+</div>
+
+<p>Users often invest significant time and effort creating data and setting
+preferences within apps. Preserving that data for users if they replace a broken
+device or upgrade to a new one is an important part of ensuring a great user
+experience.</p>
+
+<p>This class covers techniques for backing up data to the cloud so that
+users can restore their data when recovering from a data loss (such as a factory
+reset) or installing your application on a new device.</p>
+
+<p>It is important to note that the API for cloud backup changed with the
+release of Android 6.0 (API level 23). For your app to support backup both
+on devices running Android 6.0, and those running Android 5.1 (API level
+22) and lower, you must implement both techniques that this class explains.</p>
+
+<h2>Lessons</h2>
+
+<dl>
+	<dt><strong><a href="autosyncapi.html">Configuring Auto Backup for Apps</a></strong></dt>
+	<dd>This lesson applies to Android 6.0 (API level 23) and higher. Learn how to accomplish
+  seamless app data backup and restore with zero additional lines of application code.</dd>
+</dl>
+
+<dl>
+  <dt><strong><a href="backupapi.html">Using the Backup API</a></strong></dt>
+  <dd>This lesson applies to Android 5.1 (API level 22) and lower. Learn how to integrate the Backup
+  API into your Android app, so all of that  app's user data, such as preferences, notes, and high
+  scores, updates seamlessly across all devices linked to that Google account.</dd>
+</dl>
+

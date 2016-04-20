@@ -1,0 +1,133 @@
+page.title=Định nghĩa Đổ bóng và Dạng xem Cắt hình
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#Elevation">Gán Độ cao cho Dạng xem của Bạn</a></li>
+  <li><a href="#Shadows">Tùy chỉnh Đổ bóng và Viền của Dạng xem</a></li>
+  <li><a href="#Clip">Dạng xem Cắt hình</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Material design giới thiệu độ cao cho phần tử UI. Độ cao giúp người dùng hiểu được
+tầm quan trọng tương đối của từng phần tử và tập chung sự chú ý của họ vào tác vụ hiện có.</p>
+
+<p>Độ cao của một dạng xem, được biểu diễn bằng thuộc tính Z, sẽ xác định diện mạo trực quan của
+bóng đổ: dạng xem có giá trị Z cao hơn sẽ đổ bóng lớn hơn, mềm hơn. Dạng xem có giá trị Z cao hơn sẽ che khuất dạng xem 
+có giá trị Z thấp hơn; tuy nhiên, giá trị Z của một dạng xem không ảnh hưởng tới kích cỡ của dạng xem.</p>
+
+<p>Đổ bóng được vẽ bởi dạng xem mẹ của dạng xem cao hơn, do vậy nó phụ thuộc vào tiêu chuẩn cắt dạng xem,
+được cắt bởi dạng xem mẹ theo mặc định.</p>
+
+<p>Độ cao cũng hữu ích trong việc tạo hoạt hình ở nơi widget tạm thời dâng cao hơn
+mặt phẳng dạng xem khi thực hiện một hành động nào đó.</p>
+
+<p>Để biết thêm thông tin về độ cao trong material design, hãy xem
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">Đối tượng
+trong không gian 3D</a>.</p>
+
+
+<h2 id="Elevation">Gán Độ cao cho Dạng xem của Bạn</h2>
+
+<p>Giá trị Z của một dạng xem có hai thành phần:
+
+<ul>
+<li>Độ cao: Thành phần tĩnh.</li>
+<li>Độ dịch: Thành phần động được sử dụng cho hoạt hình.</li>
+</ul>
+
+<p><code>Z = elevation + translationZ</code></p>
+
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt="" />
+<p class="img-caption"><strong>Hình 1</strong> - Đổ bóng cho các độ cao dạng xem khác nhau.</p>
+
+<p>Để đặt độ cao của dạng xem trong một định nghĩa bố trí, hãy sử dụng thuộc tính <code>android:elevation</code>
+. Để đặt độ cao của dạng xem trong mã của một hoạt động, hãy sử dụng phương thức 
+{@link android.view.View#setElevation View.setElevation()}.</p>
+
+<p>Để đặt độ dịch của dạng xem, hãy sử dụng phương thức {@link android.view.View#setTranslationZ
+View.setTranslationZ()}.</p>
+
+<p>Các phương thức {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} và {@link
+android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} mới cho phép
+bạn dễ dàng tạo hiệu ứng hoạt hình cho độ cao của dạng xem. Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho 
+{@link android.view.ViewPropertyAnimator} và hướng dẫn cho nhà phát triển về <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Hoạt hình Thuộc tính</a>
+.</p>
+
+<p>Bạn cũng có thể sử dụng {@link android.animation.StateListAnimator} để
+quy định những hoạt hình này bằng cách khai báo. Điều này đặc biệt hữu ích đối với trường hợp các thay đổi
+trạng thái sẽ kích hoạt hoạt hình như khi người dùng nhấn một nút. Để biết thêm thông tin, hãy xem phần
+<a href="{@docRoot}training/material/animations.html#ViewState">Tạo Hiệu ứng Hoạt hình Thay đổi Trạng thái Xem</a>.</p>
+
+<p>Giá trị Z được đo bằng dp (điểm ảnh độc lập với mật độ).</p>
+
+
+<h2 id="Shadows">Tùy chỉnh Đổ bóng và Viền của Dạng xem</h2>
+
+<p>Các giới hạn nội dung vẽ được của nền dạng xem sẽ xác định hình dạng mặc định của bóng.
+<strong>Viền</strong> biểu thị hình dạng ngoài của một đối tượng đồ họa và định nghĩa vùng
+gợn sóng cho phản hồi chạm.</p>
+
+<p>Hãy cân nhắc dạng xem sau được định nghĩa với nội dung vẽ được làm nền:</p>
+
+<pre>
+&lt;TextView
+    android:id="@+id/myview"
+    ...
+    android:elevation="2dp"
+    android:background="@drawable/myrect" />
+</pre>
+
+<p>Nội dung vẽ được làm nền được định nghĩa là một hình chữ nhật với góc bo tròn:</p>
+
+<pre>
+&lt;!-- res/drawable/myrect.xml -->
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    &lt;solid android:color="#42000000" />
+    &lt;corners android:radius="5dp" />
+&lt;/shape>
+</pre>
+
+<p>Dạng xem sẽ tạo đổ bóng có góc bo tròn do nội dung vẽ được làm nền sẽ định nghĩa
+viền của dạng xem. Khi cung cấp viền tùy chỉnh, nó ghi đè hình dạng mặc định của bóng đổ dạng xem.</p>
+
+<p>Để định nghĩa viền tùy chỉnh cho một dạng xem trong mã của bạn:<p>
+
+<ol>
+<li>Mở rộng lớp {@link android.view.ViewOutlineProvider}.</li>
+<li>Ghi đè phương thức {@link android.view.ViewOutlineProvider#getOutline getOutline()}.</li>
+<li>Gán trình cung cấp viền mới cho dạng xem của bạn bằng phương thức {@link
+android.view.View#setOutlineProvider View.setOutlineProvider()}.</li>
+</ol>
+
+<p>Bạn có thể tạo viền hình bầu dục và hình chữ nhật có góc bo tròn bằng cách sử dụng các phương thức trong lớp
+{@link android.graphics.Outline}. Trình cung cấp viền mặc định cho dạng xem sẽ lấy viền
+từ nền của dạng xem. Để ngăn dạng xem đổ bóng, hãy đặt trình cung cấp viền của nó
+thành <code>null</code>.</p>
+
+
+<h2 id="Clip">Dạng xem Cắt hình</h2>
+
+<p>Dạng xem cắt hình cho phép bạn dễ dàng thay đổi hình dạng của một dạng xem. Bạn có thể cắt hình dạng xem để
+nhất quán với các phần tử thiết kế khác hoặc để thay đổi hình dạng của một dạng xem để đáp ứng lại thông tin đầu vào của người dùng.
+Bạn có thể cắt một dạng xem thành vùng viền của nó bằng cách sử dụng phương thức {@link android.view.View#setClipToOutline
+View.setClipToOutline()} hoặc thuộc tính <code>android:clipToOutline</code>. Chỉ
+viền là hình chữ nhật, hình tròn và hình chữ nhật bo tròn mới hỗ trợ cắt hình như được xác định bởi phương thức
+{@link android.graphics.Outline#canClip Outline.canClip()}.</p>
+
+<p>Để cắt dạng xem thành hình dạng của một nội dung vẽ được, hãy đặt nội dung vẽ được làm nền của dạng xem
+(như minh họa bên trên) và gọi phương thức {@link android.view.View#setClipToOutline View.setClipToOutline()}
+.</p>
+
+<p>Cắt dạng xem là một thao tác tốn kém, vì vậy đừng tạo hiệu ứng hoạt hình cho hình dạng bạn sử dụng để
+cắt dạng xem. Để đạt được hiệu ứng này, hãy sử dụng hoạt hình <a href="{@docRoot}training/material/animations.html#Reveal">Hiệu ứng Lộ ra</a>.</p>

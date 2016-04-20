@@ -1,0 +1,61 @@
+page.title=面向开发者的材料设计
+page.type=设计
+page.image=images/cards/material_2x.png
+page.metaDescription=学习如何将材料设计运用到您的应用中。
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>依赖项和先决条件</h2>
+  <ul>
+    <li>Android 5.0（API 级别 21）</li>
+  </ul>
+</div>
+</div>
+
+<p>材料设计是专为设计适用于多个平台和设备的视觉、运动与互动效果而制定的综合指南。
+如果要在您的 Android 应用中使用材料设计，请遵循<a href="http://www.google.com/design/spec/material-design/introduction.html">材料设计规范</a>内所述的指导方针，并使用 Android 5.0（API 级别 21）所提供的新组件与功能。
+
+
+
+</p>
+
+<p>本课程将向您介绍如何利用下列元素创建材料设计应用：</p>
+
+<ul>
+<li>材料主题</li>
+<li>用于创建卡片与列表的小组件</li>
+<li>定制阴影以及视图裁剪</li>
+<li>矢量图片</li>
+<li>定制动画</li>
+</ul>
+
+<p>本课程也将向您展示在您的应用中使用材料设计功能时应如何保持与 Android
+5.0（API 级别 21）之前的 Android 版本的兼容性。</p>
+
+<h2>课程</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">入门指南</a></dt>
+  <dd>了解如何使用材料设计功能更新您的应用。</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">使用材料主题</a></dt>
+  <dd>了解如何在您的应用中使用材料设计风格。</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">创建列表与卡片</a></dt>
+  <dd>了解如何使用系统小组件创建拥有一致的呈现方式与风格的列表与卡片。</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">定义阴影与裁剪视图</a></dt>
+  <dd>了解如何为您的视图设置高度以便创建定制阴影以及如何裁剪视图。</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">使用 Drawables</a></dt>
+  <dd>了解如何创建矢量图片以及如何为资源着色。</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">定义定制动画</a></dt>
+  <dd>了解如何为视图以及拥有共享元素的操作行为创建定制动画。</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">维护兼容性</a></dt>
+  <dd>了解如何维护与 Android 5.0 之前各种平台版本的兼容性。</dd>
+</dl>

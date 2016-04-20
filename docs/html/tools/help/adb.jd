@@ -29,7 +29,7 @@ three components: </p>
 
 <ul>
   <li>A client, which runs on your development machine. You can invoke a client from a shell
-by issuing an adb command. Other Android tools such as the ADT plugin and DDMS also create
+by issuing an adb command. Other Android tools such as DDMS also create
 adb clients. </li>
   <li>A server, which runs as a background process on your development machine. The server
 manages communication between the client and the adb daemon running on an emulator or device. </li>
@@ -361,7 +361,7 @@ the hardware device.
 <p>For more information about how to create an .apk file that you can install on an emulator/device
 instance, see <a href="{@docRoot}tools/building/index.html">Building and Running</a></p>
 
-<p>Note that, if you are using the Eclipse IDE and have the ADT plugin installed, you do not need to use adb (or aapt) directly to install your application on the emulator/device. Instead, the ADT plugin handles the packaging and installation of the application for you. </p>
+<p>Note that, if you are using Android Studio, you do not need to use adb (or aapt) directly to install your application on the emulator/device. Instead, Android Studio handles the packaging and installation of the application for you. </p>
 
 
 

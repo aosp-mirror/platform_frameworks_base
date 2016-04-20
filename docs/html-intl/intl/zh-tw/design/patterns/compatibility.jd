@@ -1,0 +1,70 @@
+page.title=向下相容性
+page.tags="support"
+page.metaDescription=有關 Android 4.x 改寫針對舊硬體和 OS 版本設計的 UI 之備註。
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>開發人員文件</h3>
+    <p>支援不同裝置</p>
+  </div>
+</a>
+
+<p>Android 3.0 主要更新包含：</p>
+<ul>
+<li>淘汰導覽硬體鍵 (返回、選單、搜尋、首頁)，以虛擬控制按鍵取代實體導覽按鍵 (返回、首頁、最近使用記錄)。
+</li>
+<li>健全的動作列選單使用模式。</li>
+</ul>
+<p>Android 4.0 版本將平板電腦的變更套用於手機平台。</p>
+
+<h2 id="older-hardware">針對舊版本的硬體及應用程式，改寫 Android 4.0</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>使用虛擬導覽控制鍵的手機</h4>
+<p>專為 Android 3.0 及之後版本設計的應用程式會在動作列中顯示動作。擠不進動作列或重要性不足的動作，會顯示在動作溢位中。
+
+</p>
+<p>使用者可輕觸動作列中的動作溢位以存取它。</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>使用實體導覽鍵的手機</h4>
+<p>使用實體導覽鍵的 Android 手機不會在螢幕底部顯示虛擬導覽列。
+如要存取動作溢位，請使用選單硬體按鍵。所產生的動作彈出式選單的風格與先前範例相同，但會顯示在螢幕頂部。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>在使用虛擬導覽控制鍵的手機上執行舊版應用程式</h4>
+<p>當您在具備虛擬導覽控制鍵的手機上，執行為 Android 2.3 或之前版本所設計的應用程式時，動作溢位控制會顯示在虛擬導覽列的右側。
+您可以輕觸控制鍵，以顯示傳統 Android 選單風格的應用程式動作。
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

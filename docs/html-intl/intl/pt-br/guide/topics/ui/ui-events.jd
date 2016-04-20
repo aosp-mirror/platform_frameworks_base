@@ -1,0 +1,291 @@
+page.title=Eventos de entrada
+parent.title=Interface do usuário
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#EventListeners">Escutas de evento</a></li>
+    <li><a href="#EventHandlers">Manipuladores de evento</a></li>
+    <li><a href="#TouchMode">Modo de toque</a></li>
+    <li><a href="#HandlingFocus">Tratamento de foco</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>No Android, há mais de uma maneira de interceptar os eventos da interação de um usuário com o aplicativo.
+Ao considerar os eventos dentro da interface do usuário, a abordagem é capturar os eventos
+de um objeto de View específico com o qual o usuário interage. A classe View fornece os meios para fazer isto.</p>
+
+<p>Dentro das várias classes View que você usará para compor o layout, é possível notar vários métodos
+públicos de retorno de chamada que parecem úteis para eventos de IU. Esses métodos são chamados pela estrutura do Android quando
+a ação respectiva ocorre neste objeto. Por exemplo, quando uma View (como um botão) é tocada,
+o método <code>onTouchEvent()</code> é chamado neste objeto. No entanto, para interceptar isto, você deve estender
+a classe e substituir o método. No entanto, estender todos os objetos de View
+para lidar com tal evento não seria algo prático. É por isso que a classe View também contém
+uma coleção de interfaces aninhadas com retornos de chamada que podem ser definidas com muito mais facilidade. Essas interfaces,
+chamadas de <a href="#EventListeners">escutas de evento</a>, são a sua passagem para capturar a interação do usuário com a IU.</p>
+
+<p>Geralmente, as escutas de evento são usadas para escutar a interação do usuário.
+No entanto, há casos em que você pode querer estender uma classe View para criar um componente personalizado. 
+Talvez você queira estender a classe {@link android.widget.Button}
+para deixar algo mais extravagante. Neste caso, você poderá definir os comportamentos de evento padrão
+para a classe usando <a href="#EventHandlers">manipuladores de evento</a>.</p>
+
+
+<h2 id="EventListeners">Escutas de evento</h2>
+
+<p>Uma escuta de evento é uma interface na classe {@link android.view.View} que contém
+um único método de retorno de chamada. Esses métodos serão chamados pela estrutura do Android, quando a View para a qual a escuta
+estiver registrada for ativada pela interação do usuário com o item na IU.</p>
+
+<p>Inclusos nas interfaces da escuta de evento estão os seguintes métodos de retorno de chamada:</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>De {@link android.view.View.OnClickListener}. 
+    Isto é chamado quando o usuário toca no item
+    (no modo de toque), ou atribui foco ao item com as teclas de navegação ou cursor de bola
+    e pressiona a tecla "enter" adequada ou pressiona o cursor de bola.</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>De {@link android.view.View.OnLongClickListener}. 
+    Isto é chamado quando o usuário toca e mantém o item pressionado (no modo de toque),
+ ou atribui foco ao item com as teclas de navegação ou cursor de bola
+    e mantém pressionada a tecla "enter" adequada ou o cursor de bola (por um segundo).</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>De {@link android.view.View.OnFocusChangeListener}. 
+    Isto é chamado quando o usuário navega no ou do item, usando as teclas de navegação ou cursor de bola.</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>De {@link android.view.View.OnKeyListener}. 
+    Isto é chamado quando o usuário está com foco no item ou solta uma tecla de hardware no dispositivo.</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>De {@link android.view.View.OnTouchListener}. 
+    Isto é chamado quando o usuário realiza uma ação qualificada como um toque de evento, incluindo o pressionamento, a liberação,
+    ou qualquer outro gesto de movimento na tela (dentro dos limites do item).</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>De {@link android.view.View.OnCreateContextMenuListener}. 
+    Isto é chamado quando um menu de contexto está sendo construído (como resultado de um "clique longo"). Consulte a discussão
+    sobre menus de contexto no guia do desenvolvedor <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menus</a>
+.</dd>
+</dl>
+
+<p>Esses métodos são os únicos habitantes de suas respectivas interfaces. Para definir um desses métodos
+e lidar com seus eventos, implemente a interface aninhada na atividade ou defina-a como uma classe anônima.
+Em seguida, passe uma instância da implementação
+para o respectivo método <code>View.set...Listener()</code>. (Ex.:, chame 
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code> 
+e passe-o à implementação de {@link android.view.View.OnClickListener OnClickListener}.)</p>
+
+<p>O exemplo abaixo mostra como registrar uma escuta de clique para um botão. </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>Você também pode achar mais conveniente implementar OnClickListener como parte da atividade.
+Isto evitará carga adicional na classe e a alocação do objeto. Por exemplo:</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>Observe que o retorno de chamada <code>onClick()</code> no exemplo acima
+não tem valor de retorno, mas outros métodos de escuta de evento podem retornar um booleano. O motivo
+depende do evento. Para os poucos que retornam, apresenta-se a razão:</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> - 
+    Isto retorna um booleano para indicar se você consumiu o evento e se ele deve ser levado adiante. 
+    Ou seja, ele retorna <em>verdadeiro</em> para indicar que você lidou com o evento e não deve seguir adiante; 
+    ou retorna <em>falso</em> caso você não tenha lidado com ele e/ou o evento deva continuar para qualquer
+    outra escuta de clique.</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> - 
+    Isto retorna um booleano para indicar se você consumiu o evento e se ele deve ser levado adiante.
+        Ou seja, ele retorna <em>verdadeiro</em> para indicar que você lidou com o evento e não deve seguir adiante; 
+    ou retorna <em>falso</em> caso você não tenha lidado com ele e/ou o evento deva continuar para qualquer
+    outra escuta de tecla.</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> - 
+    Isto retorna um booleano para indicar se a escuta consome este evento. O importante é que este evento
+    pode possuir várias ações que se seguem mutuamente. Portanto, se retornar <em>falso</em> quando
+    o evento de ação inferior for recebido, você indicará que não consumiu o evento e que não está
+    interessado em ações subsequentes deste evento. Logo, você não será chamado para outras ações
+    dentro do evento, como um gesto de dedo ou um evento de ação para cima eventual.</li>
+</ul>
+
+<p>Lembre-se de que os eventos de tecla de hardware sempre são entregues à vista atualmente em foco. Eles são enviados a partir da parte superior
+da hierarquia de vistas e segue à parte inferior até atingir o destino adequado. Se a vista (ou um filho da vista)
+estiver em foco, é possível ver o percurso do evento pelo método <code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code>. Como uma alternativa para capturar eventos de tecla por meio da vista, também é possível
+receber todos os eventos dentro da Atividade com <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>
+e <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code>.</p>
+
+<p>Além disso, ao pensar sobre a entrada de texto para o aplicativo, lembre-se de que vários dispositivos possuem apenas
+métodos de entrada de software. Tais métodos não precisam ser baseados em teclas; alguns podem usar entrada de texto por voz, por escrita e outros. Mesmo se um método de entrada
+apresentar uma interface parecida com teclado, geralmente ele <strong>não</strong> ativa
+a família de eventos <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>. Nunca deve-se compilar
+uma IU que exija pressionamentos de teclas específicas para ser controlada, a não ser que você queira limitar o aplicativo a dispositivos
+com um teclado físico. Em particular, não confie nestes métodos para validar a entrada quando o usuário pressiona a tecla
+de retorno; em vez disso, use ações como {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} para sinalizar
+ao método de entrada como o aplicativo espera reagir para que ele possa alterar a IU de forma significativa. Evite suposições
+sobre como um método de entrada de software deve funcionar e confie apenas no fornecimento do texto já formatado para o aplicativo.</p>
+
+<p class="note"><strong>Observação:</strong> o Android chamará manipuladores de evento e, em seguida, manipuladores adequados padrão
+a partir da segunda definição de classe. Logo, retornar <em>verdadeiro</em> destas escutas de evento
+interromperá a propagação do evento para outras escutas de evento e também bloqueará o retorno de chamada
+para o manipulador de evento padrão na vista. Portanto, certifique-se de que quer encerrar o evento ao retornar <em>verdadeiro</em>.</p>
+
+
+<h2 id="EventHandlers">Manipuladores de evento</h2>
+
+<p>Se estiver compilando um componente personalizado a partir de View, então você poderá definir vários métodos de retorno de chamada
+usados como manipuladores de evento padrão.
+No documento sobre <a href="{@docRoot}guide/topics/ui/custom-components.html">Componentes
+personalizados</a>, você aprenderá a ver alguns dos retornos de chamada usados para lidar com eventos,
+incluindo:</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - Chamado quando um novo evento de tecla ocorre.</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - Chamado quando um evento de tecla para cima ocorre.</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - Chamado quando um evento de movimento do cursor de bola ocorre.</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - Chamado quando um evento de movimento de toque ocorre.</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - Chamado quando a vista ganha ou perde foco.</li>
+</ul>
+<p>Há alguns outros métodos que você deve ter ciência que não fazem parte da classe View,
+mas podem ter impacto direto na maneira de lidar com os eventos. Portanto, ao gerenciar eventos mais complexos
+dentro de um layout, considere esses outros métodos:</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - Isto permite que {@link 
+    android.app.Activity} intercepte todos os evento de toque antes de serem enviados à janela.</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - Isto permite que {@link
+    android.view.ViewGroup} assista aos eventos à medida que são enviados para as vistas filho.</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - Chame isto
+    sobre uma Vista pai para indicar que ela não deve interceptar eventos de toque com <code>{@link 
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code>.</li>
+</ul>
+
+<h2 id="TouchMode">Modo de toque</h2>
+<p>
+Quando um usuário está navegando em uma interface do usuário com teclas direcionais ou cursor de bola,
+é necessário fornecer foco para itens de ação (como botões) para que o usuário possa
+ver o que aceitará entrada.  Se o dispositivo tiver capacidades de toque, no entanto, e o usuário
+começar a interagir com a interface por meio de toque, então não é mais necessário
+destacar itens ou fornecer foco para uma vista específica.  Contudo, há um modo
+de interação chamado "modo de toque". 
+</p>
+<p>
+Para dispositivos com capacidades de toque, quando o usuário toca na tela, o dispositivo
+entra no modo de toque.  A partir deste ponto, somente vistas que tiverem
+{@link android.view.View#isFocusableInTouchMode} como verdadeiro poderão ter foco, como widgets de edição de texto.
+Outras vistas tocáveis, como botões, não receberão foco ao serem tocadas. Em vez disso,
+elas simplesmente dispararão escutas de clique quando forem pressionadas.
+</p>
+<p>
+Sempre que um usuário pressionar teclas direcionais ou rolar com o cursor de bola, o dispositivo
+sairá do modo de toque e encontrará uma vista para atribuir foco. Agora, o usuário pode retomar a interação
+com a interface do usuário sem tocar na tela.
+</p>
+<p>
+O estado de modo de toque é mantido em todo o sistema (todas as janelas e atividades). 
+Para consultar o estado atual, é possível chamar
+{@link android.view.View#isInTouchMode} para ver se o dispositivo está no modo de toque no momento.
+</p>
+
+
+<h2 id="HandlingFocus">Tratamento de foco</h2>
+
+<p>A estrutura lidará com a rotina de movimento de foco em resposta à entrada do usuário.
+Isto inclui a mudança de foco à medida que as vistas são removidas ou ocultadas, ou à medida que novas
+vistas se tornem disponíveis. As vistas indicam a prontidão para receber foco
+por meio do método <code>{@link android.view.View#isFocusable()}</code>. Para determinar se uma vista pode receber
+foco, chame <code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code>.  Quando no modo de toque,
+é possível consultar se uma vista permite foco com <code>{@link android.view.View#isFocusableInTouchMode()}</code>.
+É possível alterar isto com <code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code>.
+</p>
+
+<p>O movimento de foco é baseado em um algoritmo que encontra um semelhante mais próximo
+em uma dada direção. Em casos raros, o algoritmo padrão pode não corresponder
+ao comportamento pretendido do desenvolvedor. Nessas situações, é possível
+fornecer substituições explícitas com os seguintes atributos XML no arquivo do layout:
+<var>nextFocusDown</var>, <var>nextFocusLeft</var>, <var>nextFocusRight</var>e
+<var>nextFocusUp</var>. Adicione um desses atributos à vista <em>a partir</em>
+do foco que ela está abandonando. Defina o valor do atributo para ser o ID da vista
+<em>para</em> o foco que deve ser fornecido. Por exemplo:</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>Geralmente, neste layout vertical, navegar para cima a partir do primeiro botão
+não resultaria em nada, nem navegar para baixo a partir do segundo botão. Agora que o botão superior
+definiu o botão do fundo como <var>nextFocusUp</var> (e vice-versa), o foco da navegação
+alternará de "cima para baixo" e "baixo para cima".</p>
+
+<p>Caso queira declarar uma vista como alvo de foco na IU (quando tradicionalmente não é),
+adicione o atributo XML <code>android:focusable</code> à vista, na declaração do layout.
+Defina o valor <var>como verdadeiro</var>. Também é possível declarar uma vista
+como alvo de foco no Modo de Toque com <code>android:focusableInTouchMode</code>.</p>
+<p>Para solicitar foco a uma determinada Vista, chame <code>{@link android.view.View#requestFocus()}</code>.</p>
+<p>Para ouvir eventos de foco (receber notificações quando uma vista receber ou perder foco), use
+<code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code>,
+como discutido na seção <a href="#EventListeners">Escutas de evento</a> acima.</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+   
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

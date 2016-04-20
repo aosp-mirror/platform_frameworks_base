@@ -78,7 +78,7 @@ page.article=true
          alt=""
          width="300px" />
       <p class="img-caption">
-        <strong>Figure 1. </strong>Starting Memory Monitor.
+        <strong>Figure 1. </strong>Enable ADB Integration.
       </p>
     </div>
 
@@ -87,24 +87,63 @@ page.article=true
     <li>Open your application in Android Studio, build the source,
       and run it on your device or emulator.</li>
 
-    <li>In Android Studio, choose <strong> Tools &gt; Android &gt; Memory Monitor</strong>. You
-      can also click the <em>Android</em> tab in the lower-left corner of the application
-      window to launch the Android runtime window. The CPU and Memory Monitor views appear.</li>
- 
+    <li>In Android Studio, choose <strong>Tools &gt; Android &gt; Enable ADB Integration</strong>.
+
  </ol>
 </div></li>
 
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="4">
+
+    <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image001b.png"
+         alt=""
+         width="240px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>The Android Monitor tab.
+      </p>
+    </div>
+
+    <li>Click the <strong>Android Monitor</strong> tab at the bottom of the runtime window.</li>
+
+    <li>Click the <strong>Memory</strong> tab to show the Memory Monitor tool.</li>
+
+ </ol>
+</div></li>
 
 <li><div style="overflow:hidden">
 <hr>
-  <ol class="padded" start="7">
+  <ol class="padded" start="6">
+
+    <div class="figure" style="">
+  <img src="/images/tools/performance/memory-monitor/gettingstarted_image002.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>The Memory Monitor pane.
+      </p>
+    </div>
+
+    <li>Choose your device from the drop-down menu at the top left of the pane.
+    </li>
+
+    <li>Choose the Activity to monitor from the drop-down menu at the top right of the pane.
+    </li>
+
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="8">
 
     <div class="figure" style="">
   <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image003.png"
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 1. </strong>Allocated and free memory in Memory Monitor.
+        <strong>Figure 4. </strong>Allocated and free memory in Memory Monitor.
       </p>
     </div>
 
@@ -130,14 +169,14 @@ page.article=true
 
 <li><div style="overflow:hidden">
 <hr>
-  <ol class="padded" start="11">
+  <ol class="padded" start="12">
 
     <div class="figure" style="">
   <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image005.png"
          alt=""
          width="400px" />
       <p class="img-caption">
-        <strong>Figure 2. </strong>Forcing a GC (Garbage Collection) event.
+        <strong>Figure 5. </strong>Forcing a GC (Garbage Collection) event.
       </p>
     </div>
 

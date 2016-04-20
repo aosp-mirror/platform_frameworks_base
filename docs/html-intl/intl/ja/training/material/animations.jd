@@ -1,0 +1,550 @@
+page.title=カスタム アニメーションの定義
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#Touch">タッチ フィードバックをカスタマイズする</a></li>
+  <li><a href="#Reveal">出現エフェクトを使用する</a></li>
+  <li><a href="#Transitions">アクティビティ遷移をカスタマイズする</a></li>
+  <li><a href="#ViewState">ビューの状態遷移にアニメーションを付ける</a></li>
+  <li><a href="#AnimVector">ベクター型ドローアブルにアニメーションを付ける</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>マテリアル デザインのアニメーションは、ユーザーの操作に応じて反応し、アプリの操作にともない連続した動きを見せます。
+マテリアル テーマでは、ボタンやアクティビティの遷移にデフォルトのアニメーションが用意されており、Android 5.0（API レベル 21）以降では次のようなアニメーションをカスタマイズして新しいアニメーションを作成できます。
+
+</p>
+
+<ul>
+<li>タッチ フィードバック</li>
+<li>円形状の出現</li>
+<li>アクティビティ遷移</li>
+<li>曲線モーション</li>
+<li>ビューの状態遷移</li>
+</ul>
+
+
+<h2 id="Touch">タッチ フィードバックをカスタマイズする</h2>
+
+<p>マテリアル デザインのタッチ フィードバックは、ユーザーが UI 要素に触れて操作した時点で、視覚的な反応を瞬時に表します。
+ボタンに対するデフォルトのタッチ フィードバック アニメーションでは、新しい {@link android.graphics.drawable.RippleDrawable} クラスを使用して、状態の切り替わりをリップル（波紋）効果で表現しています。
+
+</p>
+
+<p>ほとんどの場合、次のようにビューの背景を指定することでビュー XML にこの機能を適用できます。
+</p>
+
+<ul>
+<li>範囲が限定された波紋: <code>?android:attr/selectableItemBackground</code>。</li>
+<li>ビューの範囲外まで広がる波紋: <code>?android:attr/selectableItemBackgroundBorderless</code>。
+これは、背景が null ではない最も近くにある親ビュー上に表示されますが、その外側にはみ出ることはありません。
+</li>
+</ul>
+
+<p class="note"><strong>注:</strong> <code>selectableItemBackgroundBorderless</code> は API レベル 21 で導入された新しい属性です。
+</p>
+
+
+<p>または、<code>ripple</code> 要素を使って {@link android.graphics.drawable.RippleDrawable}
+を XML リソースとしても定義できます。</p>
+
+<p>{@link android.graphics.drawable.RippleDrawable} オブジェクトには、色を割り当てることができます。タッチ フィードバックのデフォルトの色を変更するには、テーマの <code>android:colorControlHighlight</code>
+属性を使用します。
+</p>
+
+<p>詳細については、API リファレンスの {@link
+android.graphics.drawable.RippleDrawable} クラスをご覧ください。</p>
+
+
+<h2 id="Reveal">出現エフェクトを使用する</h2>
+
+<p>Reveal（出現）アニメーションを使用すると、UI 要素のグループを表示したり非表示にしたりするときに連続した印象をユーザーに与えます。
+{@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} メソッドでは、ビューを表示したり非表示にしたりする際に円形のアニメーションを付けることができます。
+</p>
+
+<p>この効果を使って、非表示のビューを表示するには:</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+
+// create the animator for this view (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+
+// make the view visible and start the animation
+myView.setVisibility(View.VISIBLE);
+anim.start();
+</pre>
+
+<p>この効果を使って、表示されているビューを非表示にするには: </p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">アクティビティ遷移をカスタマイズする</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>図 1</strong> - 共有要素を使った画面遷移。
+</p>
+    <em>端末の画像をクリックすると動画を再生できます</em>
+  </div>
+</div>
+
+<p>マテリアル デザイン アプリの Activity transitions （アクティビティ遷移）では、共通する要素の間での動作や変化を通じて、状態の切り替えに視覚的なつながりを持たせます。
+Enter と Exit の遷移や、アクティビティ間での Shared elements 遷移にカスタム アニメーションを指定できます。
+</p>
+
+<ul>
+<li><strong>Enter</strong>（入口）遷移は、アクティビティのビューがどのように画面に入ってくるかを決定します。
+たとえば <em>Explode</em> の Enter 遷移の場合、ビューが画面外から画面の中心に向かって飛び込むように現れます。
+</li>
+
+<li><strong>Exit</strong> 遷移は、アクティビティのビューがどのように画面から出ていくかを決定します。同じく <em>Explode</em> の Exit 遷移の場合、画面の中心から外側に向かってビューが出ていきます。
+
+</li>
+
+<li><strong>Shared Elements</strong> 遷移は、2 つのアクティビティで共有されているビューが、各アクティビティの間でどのように遷移するかを決定します。
+たとえば、2 つのアクティビティで同じ画像を異なる位置とサイズで使用している場合、<em>changeImageTransform</em> 共有要素の遷移によって、2 つのアクティビティの間でスムーズに画像が変換されスケーリングされます。
+
+</li>
+</ul>
+
+<p>Android 5.0（API レベル 21）では、次の Enter 遷移と Exit 遷移がサポートされています。</p>
+
+<ul>
+<li><em>explode</em> （爆発状） - ビューをシーン中心から外側へ移動したり外側から中心へ移動したりします。</li>
+<li><em>slide</em> （スライド） - ビューをシーンの端から移動したり端へ移動したりします。</li>
+<li><em>fade</em> （フェード） - 不透明度を変化させながらビューをシーンに追加したりシーンから削除したりします。</li>
+</ul>
+
+<p>{@link android.transition.Visibility} クラスを拡張する Transition はすべて、EnterTransition または ExitTransition としてサポートされます。
+詳細については、API リファレンスの 
+{@link android.transition.Transition} クラスをご覧ください。</p>
+
+<p>Android 5.0（API レベル 21）では、次の共有要素遷移もサポートしています。</p>
+
+<ul>
+<li><em>changeBounds</em> - 対象ビューのレイアウト範囲での変化にアニメーションを付けます。</li>
+<li><em>changeClipBounds</em> - 対象ビューのクリップ範囲での変化にアニメーションを付けます。</li>
+<li><em>changeTransform</em> - 対象ビューのスケールや向きの変化にアニメーションを付けます。</li>
+<li><em>changeImageTransform</em> - 対象画像のサイズやスケールの変化にアニメーションを付けます。</li>
+</ul>
+
+<p>アプリにアクティビティ遷移を適用すると、アクティビティの開始と終了の間でデフォルトのクロス フェーディング遷移が有効になります。
+</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
+<p class="img-caption">
+  <strong>図 2</strong> - 1 つの共有要素とシーンの遷移。
+</p>
+
+<h3>カスタム遷移を指定する</h3>
+
+<p>まず、マテリアル テーマから継承したスタイルを定義するときに、<code>android:windowContentTransitions</code>
+ 属性で windowContentTransitions を有効にします。また、次のように Enter、Exit、Shared Element の Transitions をスタイルの定義で指定できます。
+</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>この例の <code>change_image_transform</code> 遷移は、次のように定義されています。</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p><code>changeImageTransform</code> 要素は 
+{@link android.transition.ChangeImageTransform} クラスに対応します。詳細については、API リファレンスの {@link android.transition.Transition} をご覧ください。
+</p>
+
+<p>代わりに、コードで windowContentTransitions を有効にするには、
+{@link android.view.Window#requestFeature Window.requestFeature()} メソッドを呼び出します。</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>コードで遷移を指定するには、{@link
+android.transition.Transition} オブジェクトで次のメソッドを呼び出します。</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>{@link android.view.Window#setExitTransition setExitTransition()} と {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} メソッドは、呼び出し元のアクティビティの ExitTransition を定義します。
+{@link android.view.Window#setEnterTransition
+setEnterTransition()} と {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} メソッドは、呼び出し先のアクティビティの EnterTransition を定義します。</p>
+
+<p>遷移の効果を完全に表すには、呼び出し元と呼び出し先のアクティビティ双方で windowContentTransitions を有効にする必要があります。
+有効にしていないと、呼び出し元のアクティビティが Exit 遷移を開始したあと、window 遷移（スケールやフェードなど）が起きます。
+</p>
+
+<p>Enter 遷移をできるだけ早く開始するには、呼び出し先のアクティビティで 
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+ メソッドを使用します。これにより、さらに印象的な Enter 遷移になります。</p>
+
+<h3>遷移を使ってアクティビティを開始する</h3>
+
+<p>遷移を有効にしてアクティビティで ExitTransition を設定した場合、次のように別のアクティビティを開始したときに Exit 遷移がアクティベートされます。
+</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>2 つ目のアクティビティに EnterTransition を設定している場合は、そのアクティビティの開始時に Enter 遷移も発生します。
+別のアクティビティ開始時の遷移を無効にするには、<code>null</code> のオプション バンドルを付与します。
+</p>
+
+<h3>共有要素を使ってアクティビティを開始する</h3>
+
+<p>共有要素を持つ 2 つのアクティビティの間で画面遷移のアニメーションを作成するには: </p>
+
+<ol>
+<li>テーマで windowContentTransitions を有効にします。</li>
+<li>スタイルで SharedElementsTransition を指定します。</li>
+<li>遷移を XML リソースとして定義します。</li>
+<li>
+<code>android:transitionName</code> 属性を用いて、双方のレイアウトで共有要素に同じ名前を割り当てます。</li>
+<li>{@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()} メソッドを使用します。</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>コードで生成した共有の動的ビューでは、
+{@link android.view.View#setTransitionName View.setTransitionName()} メソッドを使用して両方のアクティビティに共通の要素名を指定します。
+</p>
+
+<p>2 つ目のアクティビティが終了したときにシーンの切り替えアニメーションを逆回転させるには、{@link android.app.Activity#finish Activity.finish()} の代わりに 
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+ メソッドを呼び出します。</p>
+
+<h3>複数の共有要素を使ってアクティビティを開始する</h3>
+
+<p>複数の共有要素を持つ 2 つのアクティビティの間にシーンの切り替えアニメーションを付けるには、双方のレイアウトで <code>android:transitionName</code>
+属性を使用（または双方のアクティビティで {@link android.view.View#setTransitionName View.setTransitionName()} メソッドを使用）して共有要素を定義して、次のように {@link android.app.ActivityOptions} オブジェクトを作成します。
+
+</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">曲線モーションを使用する</h2>
+
+<p>マテリアル デザインのアニメーションは、時間的な間を補ったり立体的な動作パターンを表現するために曲線を多く用いています。
+Android 5.0（API レベル 21）以降では、カスタムのタイミングで描かれる曲線や曲線モーションのパターンをアニメーションで定義できます。
+</p>
+
+<p>{@link android.view.animation.PathInterpolator} クラスはベジェ曲線や {@link android.graphics.Path} オブジェクトに基づく新しい Interpolator（補間）です。
+この Interpolator は 1x1 の正方形に動作曲線を指定します。アンカー ポイントは（0,0）と（1,1）、制御点はコンストラクタ引数を使用して指定します。
+
+または、PathInterpolator を XML リソースとしても定義できます。</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>マテリアル デザインの仕様では、次の 3 つの基本的な曲線を XML リソースとして提供しています。
+</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>{@link android.view.animation.PathInterpolator} オブジェクトは {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()} メソッドに渡すことができます。</p>
+
+<p>{@link android.animation.ObjectAnimator} クラスには新しいコンストラクタがあり、一度に 2 つ以上のプロパティを使用して経路に沿ったアニメーションを作ることができます。
+たとえば、次の animator では {@link android.graphics.Path} オブジェクトを使ってビューの X と Y プロパティを指定しています。
+</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">ビューの状態遷移にアニメーションを付ける</h2>
+
+<p>{@link android.animation.StateListAnimator} クラスを使って、ビューの状態が変化したときに実行されるアニメーションを定義できます。
+次の例は、{@link
+android.animation.StateListAnimator} を XML リソースとして定義する方法を示しています。</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>ビューの状態についてのカスタム アニメーションをビューに付与するには、この例のように XML リソース ファイルの
+<code>selector</code> 要素を使用して animator を定義し、それを <code>android:stateListAnimator</code> 属性でビューに割り当てます。
+コードで StateListAnimator をビューに割り当てるには、{@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} メソッドを使用して
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()} メソッドでビューに animator を割り当てます。
+</p>
+
+<p>テーマがマテリアル テーマに拡張されると、ボタンにはデフォルトで Z アニメーションが設定されます。これを避けるためには、<code>android:stateListAnimator</code> 属性を
+<code>@null</code> に設定します。
+</p>
+
+<p>{@link android.graphics.drawable.AnimatedStateListDrawable} クラスを使用すると、関連するビューの状態遷移にアニメーションを表示するドローアブルを作成できます。
+Android 5.0 の一部のシステム ウィジェットでは、デフォルトでこれらのアニメーションを使用しています。
+次の例は、{@link android.graphics.drawable.AnimatedStateListDrawable} を XML リソースとして定義する方法を示しています。
+</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">ベクター型ドローアブルにアニメーションを付ける</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">ベクター型ドローアブル</a>は定義を失わずにスケールできます。
+{@link android.graphics.drawable.AnimatedVectorDrawable}
+クラスを使うと、ベクター型ドローアブルのプロパティを指定してアニメーションを付けられます。</p>
+
+<p>通常は、次に示す 3 つの XML ファイルで AnimatedVectorDrawable を定義します。</p>
+
+<ul>
+<li><code>res/drawable/</code> の
+<code>&lt;vector&gt;</code> 要素を持つ vectordrawable の xml ファイル</li>
+<li><code>res/drawable/</code> の
+<code>&lt;animated-vector&gt;</code> 要素を持つ AnimatedVectorDrawable の xml ファイル</li>
+<li><code>res/anim/</code> の
+<code>&lt;objectAnimator&gt;</code> 要素を持つ 1 つ以上の ObjectAnimator の xml ファイル</li>
+</ul>
+
+<p>AnimatedVectorDrawable では、<code>&lt;group&gt;</code> 要素と
+<code>&lt;path&gt;</code> 要素の属性にアニメーションを付けることができます。<code>&lt;group&gt;</code> 要素は一連の経路やサブグループを定義し、<code>&lt;path&gt;</code> 要素は描く経路を定義します。
+</p>
+
+<p>アニメーションを付けたいベクター型ドローアブルを定義するときは、<code>android:name</code>
+属性を使用してグループや経路に一意の名前を割り当てれば animator の定義からそれらを参照できるようになります。
+以下に例を示します。</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>AnimatedVectorDrawable の定義では、次のようにベクター型ドローアブルのグループや経路をその名前で参照します。
+</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>アニメーションの定義は {@link android.animation.ObjectAnimator} オブジェクトか {@link
+android.animation.AnimatorSet} オブジェクトを示します。この例の最初の animator は、次のように対象グループを 360 度回転させています。
+</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>この例の 2 つ目の animator は、ベクター型ドローアブルの経路をある形から別の形へと変化させています。
+両方の経路が形の変化に対応できる必要があります。つまり同じ数のコマンドと、各コマンドで同じ数のパラメーターを保持している必要があります。
+</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>詳細については、API リファレンスの {@link
+android.graphics.drawable.AnimatedVectorDrawable} をご覧ください。</p>

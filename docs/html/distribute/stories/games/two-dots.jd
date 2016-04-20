@@ -1,0 +1,77 @@
+page.title=Two Dots increased installs by 7 percent using Store Listing Experiments
+page.metaDescription=Two Dots, the sequel to the popular game Dots, is a free-to-play puzzle game launched by Playdots, Inc. Playdots decided to use Store Listing Experiments to see if adding a call to action in the games’ store listing short descriptions had an impact on installs.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/two-dots.png
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/two-dots-icon.png"
+  height="113" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.weplaydots.twodotsandroid&hl=en">
+  Two Dots</a>, the sequel to the popular game
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.nerdyoctopus.gamedots&hl=en">
+  Dots</a>, is a free-to-play puzzle game launched by Playdots, Inc. in May
+  2014. Since launch it has gained over 30 million downloads, seen over five
+  billion games played, and achieved 15 times the revenue of the original Dots
+  game within a year. Dots decided to use
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> to see if adding a call to action in the games'
+  store listing short descriptions had an impact on installs.
+
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Dots used localized store listing experiments in the Google Play Developer
+  Console to test both games’ short descriptions. They compared the games’
+  current descriptions — the control, with no call to action — against variant
+  descriptions, targeting half of their traffic with the variant descriptions.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The results showed that the addition of a call to action in the short
+  description had a positive impact on installs.
+</p>
+
+
+  <img
+   src="{@docRoot}images/distribute/stories/two-dots-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/two-dots-screenshot.png 1x
+  {@docRoot}images/distribute/stories/two-dots-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+
+
+<p>
+  In Dots, the conversion rate increased by 2 percent with a simple call to
+  action in the variant text. In Two Dots, where a call to action was combined
+  with messaging that the game is the “best puzzle game on Android”, conversion
+  rates increased by 7 percent compared to the control description.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Learn how to run
+  <a clas="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> and read our best practices for
+  <a href="https://developer.android.com/distribute/users/experiments.html">
+  running successful experiments</a>.
+</p>
