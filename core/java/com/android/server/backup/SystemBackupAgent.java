@@ -76,26 +76,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
-        // We only back up the data under the current "wallpaper" schema with metadata
-        IWallpaperManager wallpaper = (IWallpaperManager)ServiceManager.getService(
-                Context.WALLPAPER_SERVICE);
-        String[] files = new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO };
-        String[] keys = new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY };
-        if (wallpaper != null) {
-            try {
-                final String wallpaperName = wallpaper.getName();
-                if (wallpaperName != null && wallpaperName.length() > 0) {
-                    // When the wallpaper has a name, back up the info by itself.
-                    // TODO: Don't rely on the innards of the service object like this!
-                    // TODO: Send a delete for any stored wallpaper image in this case?
-                    files = new String[] { WALLPAPER_INFO };
-                    keys = new String[] { WALLPAPER_INFO_KEY };
-                }
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Couldn't get wallpaper name\n" + re);
-            }
-        }
-        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this, files, keys));
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
@@ -107,30 +87,20 @@ public class SystemBackupAgent extends BackupAgentHelper {
 
     @Override
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
-        // At present we back up only the wallpaper
-        fullWallpaperBackup(data);
-    }
-
-    private void fullWallpaperBackup(FullBackupDataOutput output) {
-        // Back up the data files directly.  We do them in this specific order --
-        // info file followed by image -- because then we need take no special
-        // steps during restore; the restore will happen properly when the individual
-        // files are restored piecemeal.
-        FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
-        FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
+        // At present we don't back up anything
     }
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
+        // Slot in a restore helper for the older wallpaper backup schema to support restore
+        // from devices still generating data in that format.
         mWallpaperHelper = new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
                 new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} );
         addHelper(WALLPAPER_HELPER, mWallpaperHelper);
 
-        // On restore, we also support a previous data schema "system_files"
+        // On restore, we also support a long-ago wallpaper data schema "system_files"
         addHelper("system_files", new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
