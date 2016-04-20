@@ -61,8 +61,7 @@ well-designed class, though, a custom view should:
     existing view
     subclasses, such as {@link android.widget.Button}.</p>
 
-<p>To allow the <a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools
-</a> to interact with your view, at a minimum you must provide a constructor that takes a
+<p>To allow Android Studio to interact with your view, at a minimum you must provide a constructor that takes a
 {@link android.content.Context} and an {@link android.util.AttributeSet} object as parameters.
 This constructor allows the layout editor to create and edit an instance of your view.</p>
 

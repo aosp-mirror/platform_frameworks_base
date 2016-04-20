@@ -1,0 +1,269 @@
+page.title=Permissions and User Data
+page.metaDescription=An overview of permissions on Android and how to manage them.
+page.tags="user data","permissions","identifiers"
+page.image=images/cards/card-user_2x.png
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#permission_groups">Permission Groups</a></li>
+      <li><a href="#permission_requests_and_app_downloads">Permission
+      Requests and App Downloads</a></li>
+      <li><a href="#permission_requests_trend_downward">Permission Requests
+      Trend Downward</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/security/permissions.html">System Permissions</a></li>
+      <li><a href="{@docRoot}training/permissions/index.html">Working with System
+      Permissions</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Permissions protect sensitive information available from a device and should
+  only be used when access to information is necessary for the functioning of
+  your app.
+</p>
+
+<p>
+  This document provides a high-level overview on how permissions work in
+  Android so you can make better, more informed decisions about the permissions
+  you're requesting. The information in this document is not use-case specific
+  and avoids complex, low-level discussions of the underlying code.
+</p>
+
+<p>
+  For specific recommendations on how to manage permissions, please see
+  <a href="{@docRoot}training/articles/user-data-permissions.html">Best
+  Practices for App Permissions</a>. For best practices on using unique
+  identifiers on Android, please see <a href=
+  "{@docRoot}training/articles/user-data-ids.html">Best Practices for Unique
+  Identifiers</a>. For details on how to work with permissions in your code,
+  see <a href="{@docRoot}training/permissions/index.html">Working with System
+  Permissions</a>.
+</p>
+
+
+<h2 id="introduction">Introduction</h2>
+
+<p>
+  Every Android application must have a <em>manifest file</em> that presents
+  essential information about the app to the Android system. The Android system
+  also requires apps to request permission when they want to access sensitive
+  device or user information, and these requests must be documented in advance
+  as a part of your app's manifest. Moreover, accessing sensitive information
+  can affect user behavior, so it's important to make sure you are only making
+  permission requests when that information is necessary for the functioning of
+  your app.
+</p>
+
+
+<h2 id="permission_groups">Permission Groups</h2>
+
+<p>
+  Permissions in Android are organized into <code><a href=
+  "{@docRoot}guide/topics/security/permissions.html#perm-groups">permission
+  groups</a></code> that organize, and group, permissions related to a device's
+  capabilities or features. Under this system, permission requests are handled
+  at the group level and a <em><strong>single permission group</strong></em>
+  corresponds to <em><strong>several permission declarations</strong></em> in
+  the app manifest; for example, the SMS group includes both the
+  <code>READ_SMS</code> and the <code>RECEIVE_SMS</code> declarations.
+</p>
+
+
+<div class="wrap">
+   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-flow01.jpg">
+</div>
+
+<p>
+  This arrangement is simpler and more informative for users; once an app is
+  granted permission to access the group, it can use API calls within that
+  group and users with auto-update enabled will not be asked for additional
+  permissions because they have already granted access to the group. Grouping
+  permissions in this way enables the user to make more meaningful and informed
+  choices, without being overwhelmed by complex and technical permission
+  requests.
+</p>
+
+<p>
+  This also means that when you request access to a particular API call or
+  query a content provider behind a permission, the user will be presented with
+  a request to grant permission for the whole group rather than the specific
+  API call. For example, if you request the <code>WRITE_CALL_LOG</code>
+  permission, the user will be asked to grant access to the <em>PHONE</em>
+  group (in API level 23 and higher), which is composed of the
+  <code>READ_PHONE_STATE</code>, <code>CALL_PHONE</code>,
+   <code>READ_CALL_LOG</code>, <code>WRITE_CALL_LOG</code>,
+  <code>ADD_VOICEMAIL</code>,  <code>USE_SIP</code>, and
+  <code>PROCESS_OUTGOING_CALLS</code> permissions, and
+  all their associated methods.
+</p>
+
+<div class="wrap">
+   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-flow02.png">
+</div>
+
+<p>
+  One consequence of grouping permissions is that a single API call within your
+  app can have a multiplying effect in terms of the number of permissions
+  requested by your app.
+</p>
+
+<ol>
+<li>API Call →</li>
+<li stydle="margin-left:.5em;">Triggers a specific <em>Permission Group</em> access
+request →</li>
+<li stydle="margin-left:1em;">Successful request grants access to all permissions in
+group (if auto-update
+enabled) →</li>
+<li stydle="margin-left:1.5em;">Each permission grants access to all APIs under that
+permission</li>
+</ol>
+
+<p>
+  As another example, let's assume your application uses one or more <a href=
+  "{@docRoot}reference/android/telephony/TelephonyManager.html"><code>TelephonyManager</code></a>
+  methods, such as:
+</p>
+
+<pre class="prettyprint">
+TelephonyManager.getDeviceId()
+TelephonyManager.getSubscriberId()
+TelephonyManager.getSimSerialNumber()
+TelephonyManager.getLine1Number()
+TelephonyManager.getVoiceMailNumber()
+</pre>
+
+<p>
+  To use these methods, the <code>READ_PHONE_STATE</code> permission must be
+  declared in the app's manifest, and the associated permission group,
+  <em>PHONE</em>, will be surfaced to the user. This
+  is important, because it means the user will be asked to grant permission for
+  the relevant group and all its associated permissions and API calls, rather
+  than for the specific API call you're requesting.
+</p>
+
+<p>For a full mapping between permissions and their associated permission groups,
+please refer to the appropriate version-specific documentation below:</p>
+
+<ul>
+  <!--<li> <a href="">pre-M Android OS versions</a>.</li> -->
+  <li> <a href="{@docRoot}guide/topics/security/permissions.html#perm-groups">Permission
+  groups, Android 6.0 Marshmallow (API level 23) and later</a>.</li>
+</ul>
+
+
+<h2 id="permission_requests_and_app_downloads">Permission Requests and App Downloads</h2>
+
+<div style="padding:.5em 2em;">
+<div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
+<p><em>I'm currently using the READ_PHONE_STATE permission in Android to pause my
+media player when there's a call, and to resume playback when the call is over.
+The permission seems to scare a lot of people</em>...<span
+style="font-size:.8em;color:#777"><sup><em><a
+href="#references" style="color:#777;padding-left:.1em;">1</a></em></sup></span></p>
+</div>
+</div>
+
+<p>
+  Research shows that among apps that are otherwise identical (e.g.,
+  functionality, brand recognition), requesting fewer permissions leads to more
+  downloads. Publicly available sources exist that assign grades to apps based
+  on their permissions usage and allow users to compare related apps by score;
+  such grades exist for many of the current Android apps and users pay close
+  attention to the related rankings.
+</p>
+
+<p>
+  One study<span style="font-size:.8em;color:#777"><sup><em><a href=
+  "#references" style=
+  "color:#777;padding-left:.1em;">2</a></em></sup></span>, in which users
+  were shown two unbranded apps with similar ratings that had the same
+  functionality but different sets of permission requests, showed that users
+  were, on average, 3 times more likely to install the app with fewer
+  permissions requests. And a similar study <span style=
+  "font-size:.8em;color:#777"><sup><em><a href="#references" style=
+  "color:#777;padding-left:.1em;">3</a></em></sup></span> showed that users are 1.7
+  times more likely, on average, to select the application with fewer
+  permission requests.
+</p>
+
+<p>
+  Finally, permissions usage is not evenly distributed across apps within
+  a similar category of Play apps. For example, 39.3% of arcade game apps in
+  the Play store request no permissions that are surfaced to the user while
+  only 1.5% of arcade games request the Phone permission group (see Figure
+  1).
+</p>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-16of16">
+   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-groups.png">
+    <p class="figure-caption"><strong>Figure 1.</strong> Distribution of
+    permission groups use across Arcade Games category.</p>
+    </div>
+  </div>
+</div>
+
+<p>
+  Users comparing your app to other similar apps may determine that it is
+  making unusual permission requests for that category - in this case, Arcade
+  Games apps accessing the <em>Phone</em> permission group. As a result, they
+  may install a similar app in that category that avoids those
+  requests.<span style="font-size:.8em;color:#777"><sup><em><a href=
+  "#references" style="color:#777;padding-left:.1em;">4</a></em></sup></span>
+</p>
+
+
+<h2 id="permission_requests_trend_downward">Permission Requests Trend Downward</h2>
+
+<p>
+  A recent analysis of Play store apps over time indicated that many developers
+  trim permissions after first publishing their apps, suggesting that they may
+  be employing more caution around which permission groups they declare.
+</p>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-16of16">
+   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-usage.jpg">
+    <p class="figure-caption"><strong>Figure 2.</strong> Developer usage of popular
+    permissions has decreased over time.</p>
+    </div>
+  </div>
+</div>
+
+<p>
+  The graph in <em>Figure 2</em> illustrates this trend. There has been a
+  steady decrease in the average percentage of developers' apps requesting at
+  least one of the three most popular permissions in the Play store
+  (<code>READ_PHONE_STATE</code>, <code>ACCESS_FINE_LOCATION</code>, and
+  <code>ACCESS_COARSE_LOCATION</code>). These results indicate that developers
+  are reducing the permissions their apps request in response to user behavior.
+</p>
+
+<p>
+  The bottom line is that providing the same functionality to the user with
+  minimal access to sensitive information means more downloads for your app.
+  For specific recommendations on how to achieve this, please see <a href=
+  "{@docRoot}training/articles/user-data-permissions.html">Best Practices for
+  Application Permissions</a>.
+</p>
+
+
+<h2 id="references">References</h2>
+
+<p>[1] Developer quote on StackOverflow. <em>(<a
+    href="http://stackoverflow.com/questions/24374701/alternative-to-read-phone-state-permission-for-getting-notified-of-call">source</a>)</em></p>
+<p>[2] <em>Using Personal Examples to Improve Risk Communication for Security and Privacy Decisions</em>, by M. Harbach, M. Hettig, S. Weber, and M. Smith. In Proceedings of ACM CHI 2014.</p>
+<p>[3] <em>Modeling Users’ Mobile App Privacy Preferences: Restoring Usability in a Sea of Permission Settings</em>, by J. Lin B. Liu, N. Sadeh and J. Hong. In Proceedings of SOUPS 2014.</p>
+<p>[4] <em>Teens and Mobile Apps Privacy. (<a href="http://www.pewinternet.org/files/old-media/Files/Reports/2013/PIP_Teens%20and%20Mobile%20Apps%20Privacy.pdf">source</a>)</em></p> 

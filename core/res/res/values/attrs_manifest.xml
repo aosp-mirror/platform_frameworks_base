@@ -2248,7 +2248,7 @@
         <attr name="name" />
     </declare-styleable>
 
-    <!-- Associate declared KeySets with upgrading capability -->
+    <!-- Associate declared KeySets with upgrading capability. -->
     <declare-styleable name="AndroidManifestUpgradeKeySet" parent="AndroidManifest">
       <attr name="name" />
     </declare-styleable>

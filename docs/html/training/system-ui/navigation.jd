@@ -10,7 +10,7 @@ trainingnavtop=true
 <!-- table of contents -->
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#40">Hide the Navigation Bar on 4.0 and Higher</a></li>
+  <li><a href="#40">Hide the Navigation Bar</a></li>
   <li><a href="#behind">Make Content Appear Behind the Navigation Bar</a></li>
 </ol>
 
@@ -20,7 +20,7 @@ trainingnavtop=true
 
 <ul>
     <li>
-        <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API Guide
+        <a href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>
     </li>
     <li>
         <a href="{@docRoot}design/index.html">
@@ -56,9 +56,9 @@ user experience. </p>
 
 
 
-<h2 id="40">Hide the Navigation Bar on 4.0 and Higher</h2>
+<h2 id="40">Hide the Navigation Bar</h2>
 
-<p>You can hide the navigation bar on Android 4.0 and higher using the
+<p>You can hide the navigation bar using the
 {@link android.view.View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} flag. This snippet hides both
 the navigation bar and the status bar:</p>
 <pre>View decorView = getWindow().getDecorView();

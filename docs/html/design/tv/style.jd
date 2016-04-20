@@ -51,9 +51,11 @@ page.title=Style for TV
 
 <img src="{@docRoot}design/tv/images/overscan.png" alt="Overscan borders for TV" />
 
-<p>Build a 10% margin into your TV screen designs to account for overscan area the TV may not
-  display correctly. On a 1920 x 1080 pixel screen, this margin should be a minimum of 27px from the
-  top and bottom edges and a minimum of 48px from the right and left edges of the picture.</p>
+<p>Build a 5% margin into your TV screen designs to account for overscan area the TV may not
+  display correctly. On a 1920 x 1080 screen, this margin should be a minimum of 27 pixels
+  from the top and bottom edges and a minimum of 48 pixels from the right and left edges of the
+  picture.
+  </p>
 
 
 <h2>Color</h2>

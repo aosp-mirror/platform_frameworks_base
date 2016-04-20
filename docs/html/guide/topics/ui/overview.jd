@@ -67,7 +67,7 @@ Layouts</a>.
 android.view.ViewGroup} objects. Android provides several app components that offer
 a standard UI layout for which you simply need to define the content. These UI components each
 have a unique set of APIs that are described in their respective documents, such as <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, <a
+href="{@docRoot}training/appbar/index.html">Adding the App Bar</a>, <a
 href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a>, and <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Notifications</a>.</p>
 

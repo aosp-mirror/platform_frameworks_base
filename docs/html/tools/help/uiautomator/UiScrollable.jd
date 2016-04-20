@@ -38,7 +38,7 @@ be used with horizontally or vertically scrollable controls.</p>
 
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.android.uiautomator.core.UiObject" class="jd-expando-trigger closed"
           ><img id="inherited-constants-com.android.uiautomator.core.UiObject-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>From class
 <a href="UiObject.html">com.android.uiautomator.core.UiObject</a>
 <div id="inherited-constants-com.android.uiautomator.core.UiObject">
@@ -696,7 +696,7 @@ be used with horizontally or vertically scrollable controls.</p>
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.android.uiautomator.core.UiCollection" class="jd-expando-trigger closed"
           ><img id="inherited-methods-com.android.uiautomator.core.UiCollection-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -798,7 +798,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.android.uiautomator.core.UiObject" class="jd-expando-trigger closed"
           ><img id="inherited-methods-com.android.uiautomator.core.UiObject-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
@@ -1606,7 +1606,7 @@ From class
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
+          src="../../../../../assets/images/styles/disclosure_down.png"
           class="jd-expando-trigger-img" /></a>
 From class
 

@@ -1,0 +1,74 @@
+page.title=Android 简介
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>要了解应用的工作原理，请从<a href="{@docRoot}guide/components/fundamentals.html">应用基础知识</a>开始入手。
+</p>
+<p>要立即开始编码，请仔细阅读<a href="{@docRoot}training/basics/firstapp/index.html">开发您的第一款应用</a>。</p>
+</div>
+
+<p>Android
+提供了一个内容丰富的应用框架，支持您在 Java 语言环境中为移动设备开发创新应用和游戏。在左侧导航窗格列出的文档中，提供了有关如何使用各种
+Android API 开发应用的详细信息。</p>
+
+<p>如果您是 Android 应用开发新手，则需了解以下有关
+Android 应用框架的基本概念，这一点至关重要：</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>应用提供多个入口点</h4>
+
+<p>Android
+应用都是将各种可单独调用的不同组件加以组合构建而成。例如，组件可以是为用户界面提供一个屏幕的单个“Activity”，也可以是在后台独立执行工作的“服务”。
+
+<em></em><em></em></p>
+
+<p>您可以使用<em> Intent </em>从一个组件启动另一个组件。甚至，您还可以启动不同应用中的组件，例如，启动地图应用中的 Activity 以显示地址。
+此模式可为单个应用提供多个入口点，并使任何应用均能够像用户“默认设置”一样处理其他应用可能调用的操作。
+
+</p>
+
+
+<p><b>了解详情</b>：</p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">应用基础知识</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Intent 和 Intent 过滤器</a>
+<li><a href="{@docRoot}guide/components/activities.html">Activity</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>应用可适应不同的设备</h4>
+
+<p>Android
+提供了一个自适应应用框架，您可以利用它为不同的设备配置提供独特的资源。例如，您可以针对不同的屏幕尺寸创建不同的
+XML
+布局文件，系统将根据当前设备的屏幕尺寸确定要应用的布局。</p>
+
+<p>如有任何应用功能需要相机等特定的硬件，则可在运行时查询设备功能的可用性。
+如有必要，您还可以声明您的应用所必需的功能，使
+Google Play
+商店等应用市场不得在不支持这些功能的设备上安装您的应用。</p>
+
+
+<p><b>了解详情</b>：</p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">设备兼容性</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">资源概览</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">用户界面概览</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

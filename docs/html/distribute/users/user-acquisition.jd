@@ -1,0 +1,102 @@
+page.title=Understand Where Your Users Come From
+page.metaDescription=Use the Developer Console to identify the channels that bring the greatest volume of high-value users.
+page.image=images/cards/distribute/users/user-acquisition.jpg
+page.tags="user acquisition, reports, cohorts"
+Xnonavpage=true
+
+@jd:body
+
+<!--
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li>TOC item</li>
+    </ol>
+  </div>
+</div>
+-->
+
+<p>
+  Whether you pay to acquire users or not, you want to focus your acquisition
+  efforts on the channels that bring you the greatest volume of high-value
+  users. It’s now easy to identify those channels from the User Acquisition
+  page in the Developer Console.
+</p>
+
+<img src="{@docRoot}images/distribute/googleplay/dev-console_conversion-funnel.png"
+  srcset="{@docRoot}images/distribute/googleplay/dev-console_conversion-funnel.png 1x,
+      {@docRoot}images/distribute/googleplay/dev-console_conversion-funnel_2x.png 2x"
+ width="500">
+
+<p>
+  From the performance report you can follow users — whether originating as
+  organic or paid traffic — from discovery to installation then onto their
+  purchase of your in-app products, with convenient predefined reporting
+  criteria. With the improved understanding of where your most valuable users
+  come from, you can better focus your efforts.
+</p>
+
+<p>
+  Learn more about how to <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6263332"
+  class="external-link">measure your app’s user acquisition channels.</a>
+</p>
+
+<h2 id="how-to">How to use the User Acquisition performance report</h2>
+
+<ul>
+  <li>
+    <strong>Compare cohorts:</strong> In this report, a <em>cohort</em> is a
+    group of users who’ve visited your app’s store listing during a selected
+    date range. For example, if you update your app’s icon on the Play Store,
+    you’ll want to see how the change affects installs and in-app purchases.
+    You can do this by selecting cohorts before and after your app update, and
+    measure how your change impacted conversion rates.
+  </li>
+
+  <li>
+    <strong>Examine acquisition channels:</strong> For your defined cohort, you
+    can explore how user behaviour and value differ between acquisition
+    channels, such as organic Play Store traffic, AdWords campaigns, tracked
+    channels, and searches. Drill down into specific channels to explore user
+    behaviour in detail.
+  </li>
+
+  <li>
+    <strong>See users:</strong> Get stats for all the <strong>store listing
+    visitors</strong> (users who visited your app’s store listing) and
+    <strong>installers</strong>. This helps you understand how prospects are
+    converting into users.
+  </li>
+
+  <li>
+    <strong>See buyers:</strong> If you sell in-app products, the funnel report
+    can also tell you about <strong>new buyers</strong> and <strong>repeat
+    buyers</strong>. This helps you understand how quickly your in-app products
+    and subscriptions are gaining traction with users.
+  </li>
+</ul>
+
+<p class="aside">
+  <strong>Tip:</strong> If you’re directing your users to your mobile app from
+  your website, you can track conversions by adding a UTM campaign source and a
+  campaign name tag to the <a href=
+  "https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder"
+  class="external-link">Google Play store URL.</a>
+</p>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/useracquisition/related"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

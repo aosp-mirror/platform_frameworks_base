@@ -1,0 +1,323 @@
+page.title=Requesting Permissions on Android Wear
+page.tags="Permissions"
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>In this document</h2>
+<ol class="nolist">
+  <li><a href="#scenarios">Permission Scenarios</a></li>
+  <li><a href="#requesting">Requesting Permissions</a></li>
+  <li><a href="#services">Permissions for Services</a></li>
+  <li><a href="#settings">Settings</a></li>
+</ol>
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li><a href="{@docRoot}about/versions/marshmallow/index.html">Android 6.0</a>
+  (API Level 23) or higher on the wearable and accompanying device</li>
+  <li><a href="{@docRoot}google/play-services/index.html">Google Play
+services</a> 8.3 or higher</li>
+  <li>An <a href="{@docRoot}wear/index.html">Android Wear</a> device</li>
+</ul>
+<h2>See also</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/security/permissions.html">System Permissions</a></li>
+  <li><a href="{@docRoot}training/permissions/index.html">Working with System Permissions</a></li>
+</ul>
+</div></div>
+
+<p><a href="{@docRoot}about/versions/marshmallow/index.html">Android 6.0</a> (API level 23)
+introduces a new <a href="{@docRoot}training/permissions/requesting.html">permissions model</a>,
+bringing some changes that are specific to Wear, and other changes that apply to all Android-powered
+devices.</p>
+
+<p>The user must now grant permissions to Wear apps separately from the handset versions of the
+apps. Previously, when a user installed a Wear app, it automatically inherited the set of
+permissions that the user had granted to the handset version of the app. However, from Android 6.0
+(API level 23), the Wear app no longer inherits these permissions. Thus, for example,
+a user might grant a handset app permission to use location data, and subsequently
+have to grant the same permission to the Wear version of the app.</p>
+
+<p>For both Wear and handset apps, the Android 6.0 (API level 23) permissions model also
+streamlines app installation and upgrade by eliminating the requirement that the user grant upfront
+every permission an app may ever need. Instead, the app does not request permissions until it
+actually needs them.</p>
+
+<p class="note"><strong>Note: </strong> For an app to use the new permissions model, it must
+specify a value of {@code 23} for both
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code uses-sdk-element}</a>
+and <a href="{@docRoot}tools/building/configuring-gradle.html">{@code compileSdkVersion}</a>.</p>
+
+<p>The rest of this document discusses how to use the Android 6.0 (API level 23) permissions model
+when developing Android Wear apps.</p>
+
+<h2 id="scenarios">Permission Scenarios</h2>
+
+<p>Broadly speaking, there are four scenarios you may encounter when requesting
+<a href="{@docRoot}guide/topics/security/permissions.html#normal-dangerous">dangerous permissions</a>
+on Android Wear:</p>
+
+<ul>
+   <li>The <em>Wear app</em> requests permissions for an app running on the <em>wearable</em>
+   device.</li>
+
+   <li>The <em>Wear app</em> requests permissions for an app running on the <em>handset</em>.</li>
+
+   <li>The <em>handset app</em> requests permissions for an app running on the
+   <em>wearable</em> device.</li>
+
+   <li>The wearable app uses a <em>different permission model</em> from its handset counterpart.
+   </li>
+</ul>
+
+<p>The rest of this section explains each of these scenarios. For more detailed information
+about requesting permissions, see <a href="#requesting">Requesting Permissions</a>.</p>
+
+<h3 id="wear-app-wear-perm">Wear app requests permission for an app running on the wearable
+device</h3>
+
+<p>When the Wear app requests a permission for an app running on the wearable device, the system
+displays a dialog to prompt the user for that permission. An app or service can only call the
+{@link android.support.v4.app.ActivityCompat#requestPermissions requestPermissions()}
+method from an activity. If the user interacts with your app
+<a href="#services">via a service</a>, such as
+a watch face, the service must open an activity before requesting the permission.</p>
+
+<p>Your app requests permissions in context when it’s clear why the
+permissions are needed to perform a given operation. If it's obvious that your app requires
+certain permissions, your app can prompt for them on launch. If it may not be so obvious,
+you may choose to provide additional education before prompting for a permission.</p>
+
+<p>If an app or watch face requires more than one permission at a time,
+permission requests appear one after the other.</p>
+
+<img src="{@docRoot}images/training/wear/multiple_permissions.png"
+srcset="{@docRoot}images/training/wear/multiple_permissions.png 1x,
+{@docRoot}images/training/wear/multiple_permissions_2x.png 2x"
+alt="Multiple permission screens, one after another." width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Permission screens appearing in succession.
+</p>
+
+<p class="note"><strong>Note:</strong> From Android 6.0 (API level 23), Android Wear
+automatically syncs Calendar, Contact, and Location data to the Wear device. As a result, this
+scenario is the applicable one when Wear requests this data.</p>
+
+<h3>Wear app requests handset permission</h3>
+
+<p>When the Wear app requests a handset permission, the
+Wear app must send the user to the handset to accept the permission. There, the handset app can
+provide additional education to the user via an activity. The activity should include two buttons:
+one for granting, and one for denying, the permission.</p>
+
+<img src="{@docRoot}images/training/wear/open_on_phone.png"
+srcset="{@docRoot}images/training/wear/open_on_phone.png 1x,
+{@docRoot}images/training/wear/open_on_phone_2x.png 2x"
+alt="The Wear app sends the user to the handset to grant permission." width="700"
+height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Sending the user to the handset to grant permission.
+</p>
+<h3>Handset app requests wearable permission</h3>
+
+<p>When the user is in a handset app and the app requires a wearable permission, the
+handset app must send the user to the wearable to accept the permission.
+The handset app uses the
+{@link android.support.v4.app.ActivityCompat#requestPermissions requestPermissions()}
+method on the wearable to trigger the system permissions dialog.</p>
+
+<img src="{@docRoot}images/training/wear/phone_requests_wear.png"
+srcset="{@docRoot}images/training/wear/phone_requests_wear.png 1x,
+{@docRoot}images/training/wear/phone_requests_wear_2x.png 2x"
+alt="The handset app sends the user to the wearable to grant permission."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 3.</strong> Sending the user to the wearable to grant permission.
+</p>
+
+<h3>Mismatching permission models between wearable and handset app</h3>
+
+<p>If your handset app begins using the Android 6.0 (API level 23) model but your
+wearable app does not, the system downloads the Wear app, but does not install it.
+The first time the user launches the app, the system prompts them to grant all pending permissions.
+Once they do so, it installs the app.
+If your app, for example a watch face, does not have a launcher, the system displays a
+stream notification asking the user to grant the permissions the app needs.
+</p>
+
+<h2 id="requesting">Permission-Request Patterns</h2>
+
+<p>There are different patterns for requesting permission from users. In order of
+priority, they are:</p>
+
+<ul>
+   <li><a href="#aic">Ask in context</a> when the permission is obviously necessary for a specific
+   functionality, but is not necessary for the app to run at all.</li>
+
+   <li><a href="#eic">Educate in context</a> when the reason for requesting the permission is
+   not obvious, and the permission is not necessary for the app to run at all.</li>
+
+   <li><a href="#auf">Ask up front</a> when the need for the permission is obvious, and the
+   permission is required in order for the app to run at all.</li>
+
+   <li><a href="#euf">Educate up front</a> when the need for the permission is not obvious, but
+   the permission is required in order for the app to run at all.</li>
+</ul>
+
+<h3 id="aic">Ask in context</h3>
+
+<p>Your app should request permissions when it’s clear why they are needed in order to perform a
+given operation. Users are more likely to grant a permission when they understand its connection to
+the feature they want to use.</p>
+
+<p>For example, an app may require a user’s location in order to show nearby
+places of interest. When the user taps to search for nearby places, the app can
+immediately request the location permission, because there is a clear
+relationship between searching for nearby places and the need for the location
+permission. The obviousness of this relationship makes it unnecessary for the app to display
+additional education screens.</p>
+
+<img src="{@docRoot}images/training/wear/ask_in_context.png"
+srcset="{@docRoot}images/training/wear/ask_in_context.png 1x,
+{@docRoot}images/training/wear/ask_in_context_2x.png 2x"
+alt="The app requests permission when it's obviously necessary."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 4.</strong> Asking in context.
+
+<h3 id="eic">Educate in context</h3>
+
+<p>If necessary, you may choose to provide additional education before prompting
+for a permission. Again, your app should do this in context of a specific
+action, if it’s unclear why your app needs access to the requested permission
+in order to complete that action.</p>
+
+<p>Figure 5 shows an example of in-context education. The app does not require permissions
+in order to start the timer, but an inline educational cue shows that part of the
+activity (location detection) is locked. When the user taps the cue, a permission-request screen
+appears, allowing the user to unlock location-detection.</p>
+
+<p>You can use the {@link
+  android.support.v4.app.ActivityCompat#shouldShowRequestPermissionRationale
+  shouldShowRequestPermissionRationale()} method to help your app decide whether to provide more
+  information. For additional details, see <a
+  href="{@docRoot}training/permissions/requesting.html#explain">Requesting Permissions
+  at Run Time</a>.</p>
+
+
+<img src="{@docRoot}images/training/wear/educate_in_context.png"
+srcset="{@docRoot}images/training/wear/educate_in_context.png 1x,
+{@docRoot}images/training/wear/educate_in_context_2x.png 2x"
+alt="When the need for the permission arises, the app explains why the permission is necessary."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 5.</strong> Educating in context.
+
+<h3 id="auf">Ask up front</h3>
+
+<p>If your app clearly requires a permission in order to work at all, you can prompt for that
+permission when the user launches the app. For example, a maps app clearly requires access
+to the device’s location to run its expected activities. No further education
+is necessary for this permission.</p>
+
+<img src="{@docRoot}images/training/wear/ask_up_front.png"
+srcset="{@docRoot}images/training/wear/ask_up_front.png 1x,
+{@docRoot}images/training/wear/ask_up_front_2x.png 2x"
+alt="If the app obviously needs a permission to run at all, it can ask for it immediately on
+launch."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 6.</strong> Asking up front.
+
+
+<h3 id="euf">Educate up front</h3>
+
+<p>In some cases, the app requires a permission for basic functionality, but the need for that
+permission is not obvious. In these cases, when the user first
+starts the app or sets a watch face, the app or watch face may choose to educate the user and
+ask for the permission.</p>
+
+<img src="{@docRoot}images/training/wear/educate_up_front.png"
+srcset="{@docRoot}images/training/wear/educate_up_front.png 1x,
+{@docRoot}images/training/wear/educate_up_front_2x.png 2x"
+alt="When requesting a permission on launch, the app can explain why it needs the permission."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 7.</strong> Educating up front.
+
+<h3 id="nope">Handling Rejection</h3>
+
+<p>If a user denies a requested permission that is not critical to an intended
+activity, do not block them from continuing the activity.  If certain parts of
+the activity are disabled by the denied permission, provide visual, actionable
+feedback. Figure 8 shows the use of a lock icon to indicate that a feature is
+locked because the user did not grant permission to use it.</p>
+
+<img src="{@docRoot}images/training/wear/deny.png"
+srcset="{@docRoot}images/training/wear/deny.png 1x,
+{@docRoot}images/training/wear/deny_2x.png 2x"
+alt="When the user denies permission, a lock icon is shown alongside the associated feature."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 8.</strong> Lock icon, showing a feature is locked because of denied permission.
+</p>
+<p>When a previously denied wearable permission dialog appears a second
+time, it includes a <strong>Deny, don't show again</strong> option. If the user
+chooses this option, then the only way for them to allow this permission in the
+future is to go into the wearable's Settings app.</p>
+
+<img src="{@docRoot}images/training/wear/ask_again.png"
+srcset="{@docRoot}images/training/wear/ask_again.png 1x,
+{@docRoot}images/training/wear/ask_again_2x.png 2x"
+alt="The system offers to stop requesting permission."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 9.</strong> Offering not to show the permission-request screen anymore.
+
+<h2 id="services">Permissions for Services</h2>
+
+<p>As mentioned above, only an activity can call the
+{@link android.support.v4.app.ActivityCompat#requestPermissions requestPermissions()}
+method, so if the user interacts with your app via a service,
+for example a watch face, the service must open a background activity before requesting
+the permission. This activity could provide additional education, or it could simply
+be an invisible activity that brings up the system dialog.</p>
+
+<p>If your wearable app runs a service that is not a watch face, and the user does not launch
+an app in which it might make sense to request a permission,
+you can post an educational notification on the wearable. The notification can
+provide an action to open an activity that then triggers the system permissions
+dialog.</p>
+
+<p class="note"><strong>Note:</strong> This is the only acceptable use of a stream notification
+for permissions requests.</p>
+
+<img src="{@docRoot}images/training/wear/for_services.png"
+srcset="{@docRoot}images/training/wear/for_services.png 1x,
+{@docRoot}images/training/wear/for_services_2x.png 2x"
+alt="The user may need to grant a permission when indirectly interacting with an app, via a
+service."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 10.</strong> A service requesting permission.
+
+<h2 id="settings">Settings</h2>
+
+<p>As with the handset, the user can change a Wear app’s permissions in Settings at any time.
+Therefore, when the user tries to do something that requires a
+permission, the app should always first call the
+{@link android.support.v4.content.ContextCompat#checkSelfPermission(android.content.Context,java.lang.String) checkSelfPermission()}
+method to see if the app currently has permission to perform this operation. The app should perform
+this check even if it knows the user has previously granted that permission, since the
+user might have subsequently revoked that permission.</p>
+
+<img src="{@docRoot}images/training/wear/for_settings.png"
+srcset="{@docRoot}images/training/wear/for_settings.png 1x,
+{@docRoot}images/training/wear/for_settings_2x.png 2x"
+alt="The user can change permissions through the Settings app."
+width="700" height="" id="permission-flow" />
+<p class="img-caption">
+  <strong>Figure 11.</strong> Changing settings via the Settings app.

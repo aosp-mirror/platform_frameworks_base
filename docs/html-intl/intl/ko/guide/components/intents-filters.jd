@@ -1,0 +1,899 @@
+page.title=인텐트 및 인텐트 필터
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#Types">인텐트 유형</a></li>
+  <li><a href="#Building">인텐트 구축</a>
+    <ol>
+      <li><a href="#ExampleExplicit">명시적 인텐트 예시</a></li>
+      <li><a href="#ExampleSend">암시적 인텐트 예시</a></li>
+      <li><a href="#ForceChooser">앱 선택기 강제 적용하기</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">암시적 인텐트 수신하기</a>
+    <ol>
+      <li><a href="#ExampleFilters">필터 예시</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">보류 인텐트 사용하기</a></li>
+  <li><a href="#Resolution">인텐트 확인</a>
+    <ol>
+      <li><a href="#ActionTest">작업 테스트</a></li>
+      <li><a href="#CategoryTest">카테고리 테스트</a></li>
+      <li><a href="#DataTest">데이터 테스트</a></li>
+      <li><a href="#imatch">인텐트 일치</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>참고 항목</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">다른 앱과 상호 작용하기</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">콘텐츠 공유하기</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent}는 일종의 메시지 객체입니다. 이것을 사용해 다른
+<a href="{@docRoot}guide/components/fundamentals.html#Components">앱 구성 요소</a>로부터 작업을 요청할 수 있습니다.
+인텐트가 여러 구성 요소 사이의 통신을 용이하게 하는 데에는 몇 가지 방법이 있지만,
+기본적인 사용 사례는 다음과 같은 세 가지입니다.</p>
+
+<ul>
+<li><b>액티비티 시작하기:</b>
+<p>{@link android.app.Activity}는 앱 안의 화면 하나를 나타냅니다.
+{@link android.app.Activity}의 새 인스턴스를 시작하려면 {@link android.content.Intent}를
+{@link android.content.Context#startActivity startActivity()}로 전달하면 됩니다. {@link android.content.Intent}는
+시작할 액티비티를 설명하고 모든 필수 데이터를 담고 있습니다.</p>
+
+<p>액티비티가 완료되었을 때 결과를 수신하려면,
+{@link android.app.Activity#startActivityForResult
+startActivityForResult()}를 호출합니다. 액티비티는 해당 결과를 액티비티의 {@link
+android.app.Activity#onActivityResult onActivityResult()} 콜백에서 별도의
+{@link android.content.Intent} 객체로 수신합니다.
+자세한 정보는 <a href="{@docRoot}guide/components/activities.html">액티비티</a> 가이드를 참조하십시오.</p></li>
+
+<li><b>서비스 시작하기:</b>
+<p>{@link android.app.Service}는 사용자 인터페이스 없이
+배경에서 작업을 수행하는 구성 요소입니다. 서비스를 시작하여 일회성 작업을 수행하도록 하려면(예: 파일 다운로드)
+{@link android.content.Intent}를
+{@link android.content.Context#startService startService()}에 전달하면 됩니다. {@link android.content.Intent}는
+ 시작할 서비스를 설명하고 모든 필수 데이터를 담고 있습니다.</p>
+
+<p>서비스가 클라이언트-서버 인터페이스로 설계된 경우, 다른 구성 요소로부터
+서비스에 바인딩하려면 {@link android.content.Intent}를 {@link
+android.content.Context#bindService bindService()}에 전달하면 됩니다.</code> 자세한 정보는 <a href="{@docRoot}guide/components/services.html">서비스</a> 가이드를 참조하십시오.</p></li>
+
+<li><b>브로드캐스트 전달하기:</b>
+<p>브로드캐스트는 모든 앱이 수신할 수 있는 메시지입니다. 시스템은 여러 시스템 이벤트에 대해 다양한
+브로드캐스트를 전달합니다. 예를 들어 시스템이 부팅될 때 또는 기기가 변경되기 시작할 때 등이 해당됩니다.
+다른 여러 앱에 브로드캐스트를 전달하려면 {@link android.content.Intent}를
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()},
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()} 또는 {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}에 전달하면 됩니다.</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">인텐트 유형</h2>
+
+<p>인텐트에는 두 가지 유형이 있습니다.</p>
+
+<ul>
+<li><b>명시적 인텐트</b>는 시작할 구성 요소를 이름으로 지정합니다(완전히
+정규화된 클래스 이름). 명시적 인텐트는 일반적으로 본인의 앱 안에서 구성 요소를 시작할 때 씁니다.
+시작하고자 하는 액티비티 또는 서비스의 클래스 이름을 알고 있기 때문입니다. 예를 들어,
+사용자 작업에 응답하여 새 액티비티를 시작하거나 배경에서 파일을 다운로드하기 위해
+서비스를 시작하는 것 등이 여기에 해당됩니다.</li>
+
+<li><b>암시적 인텐트</b>는 특정 구성 요소의 이름을 대지 않지만, 그 대신 수행할 일반적일 작업을
+선언하여 또 다른 앱의 구성 요소가 이를 처리할 수 있도록 해줍니다. 예를 들어, 사용자에게 지도에 있는 한 위치를
+표시해주고자 하는 경우, 암시적 인텐트를 사용하여 다른, 해당 기능을 갖춘 앱이
+지정된 위치를 지도에 표시하도록 요청할 수 있습니다.</li>
+</ul>
+
+<p>명시적 인텐트를 생성하여 액티비티나 서비스를 시작하도록 하면, 시스템이 즉시
+{@link android.content.Intent} 객체에서 지정된 앱 구성 요소를 시작합니다.</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>그림 1.</strong> 암시적 인텐트가 시스템을 통해 전달되어
+다른 액티비티를 시작하게 하는 방법을 그림으로 나타낸 것입니다. <b>[1]</b> <em>액티비티 A</em>가 작업 설명이 들어 있는
+{@link android.content.Intent}를 생성하여 이를 {@link
+android.content.Context#startActivity startActivity()}에 전달합니다. <b>[2]</b> Android 시스템이
+해당 인텐트와 일치하는 인텐트 필터를 찾아 모든 앱을 검색합니다. 일치하는 것을 찾으면, <b>[3]</b> 시스템이
+일치하는 액티비티(<em>액티비티 B</em>)를 시작하기 위해 그 액티비티의 {@link
+android.app.Activity#onCreate onCreate()} 메서드를 호출하여 이를 {@link android.content.Intent}에 전달합니다.
+</p>
+</div>
+
+<p>암시적 인텐트를 생성하면 Android 시스템이 시작시킬 적절한 구성 요소를 찾습니다.
+이때 인텐트의 내용을 기기에 있는 다른 여러 앱의 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">매니페스트 파일</a>에서 선언된 <em>인텐트 필터</em>와 비교하는 방법을
+씁니다. 해당 인텐트와 일치하는 인텐트 필터가 있으면 시스템이 해당 구성 요소를 시작하고 이에
+{@link android.content.Intent} 객체를 전달합니다. 호환되는 인텐트 필터가 여러 개인 경우, 시스템은
+대화를 표시하여 사용자가 어느 앱을 사용할지 직접 선택할 수 있게 합니다.</p>
+
+<p>인텐트 필터란 앱의 매니페스트 파일에 들어 있는 표현으로,
+해당 구성 요소가 수신하고자 하는 인텐트의 유형을
+나타낸 것입니다. 예를 들어 액티비티에 대한 인텐트 필터를 선언하면
+다른 여러 앱이 특정한 종류의 인텐트를 가지고 여러분의 액티비티를 직접 시작할 수 있습니다.
+이와 마찬가지로, 액티비티에 대한 인텐트 필터를 전혀 선언하지 <em>않으면</em> 명시적 인텐트로만
+시작할 수 있습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 앱의 보안을 보장하려면
+{@link android.app.Service}를 시작할 때에는 항상 명시적 인텐트만 사용하고 서비스에 대한 인텐트 필터는
+선언하지 마십시오. 암시적 인텐트를 사용하여 서비스를 시작하면
+보안 위험을 초래합니다. 인텐트에 어느 서비스가 응답할 것인지 확신할 수 없고, 사용자가
+어느 서비스가 시작되는지 볼 수 없기 때문입니다. Android 5.0(API 레벨 21)부터 시스템은 개발자가 암시적 인텐트로
+{@link android.content.Context#bindService bindService()}를
+호출하면 예외를 발생시킵니다.</p>
+
+
+
+
+
+<h2 id="Building">인텐트 구축</h2>
+
+<p>{@link android.content.Intent} 객체에는 Android 시스템이
+어느 구성 요소를 시작할지 판별하는 데 사용하는 정보가 담겨 있습니다(예를 들어 정확한 구성 요소 이름 또는 인텐트를
+수신해야 하는 구성 요소 카테고리 등). 또한 수신자 구성 요소가 작업을 적절히 수행하기 위해
+사용할 정보(예: 수행할 작업 및 조치를 취할 데이터 위치 등)도 이 안에 담겨 있습니다.</p>
+
+
+<p>{@link android.content.Intent} 내에 들어 있는 기본 정보는 다음과 같습니다.</p>
+
+<dl>
+
+<dt><b>구성 요소 이름</b></dt>
+<dd>시작할 구성 요소의 이름입니다.
+
+<p>이것은 선택 항목이지만, 이것이 바로 인텐트를
+<b>명시적</b>인 것으로 만들어주는 중요한 정보입니다. 다시 말해 이 인텐트는 구성 요소 이름이 정의한 앱 구성 요소에만
+전달되어야 한다는 뜻입니다. 구성 요소 이름이 없으면 해당 인텐트는 <b>암시적</b>이며,
+인텐트를 수신해야 하는 구성 요소는 다른 인텐트 정보를 기반으로 시스템이
+결정합니다(예를 들어 작업, 데이터 및 카테고리 &mdash; 아래 설명 참조). 따라서 앱에서 특정한 구성 요소를
+시작해야 하는 경우에는, 구성 요소 이름을 지정해야 합니다.</p>
+
+<p class="note"><strong>참고:</strong> {@link android.app.Service}를 시작하는 경우,
+<strong>항상 구성 요소 이름을 지정</strong>해야 합니다. 그렇지 않으면 인텐트에 어느 서비스가 응답할지 확신할 수 없고,
+사용자도 어느 서비스가 시작되는지 볼 수 없게 됩니다.</p>
+
+<p>{@link android.content.Intent}의 필드는
+{@link android.content.ComponentName} 객체로, 이것을 지정하려면 대상 구성 요소의 완전히
+정규화된 클래스 이름(앱의 패키지 이름 포함)을 사용해야 합니다. 예를 들면
+{@code com.example.ExampleActivity}를 쓰십시오. 구성 요소 이름을 설정하려면 {@link
+android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()}을 사용하거나, 아니면
+{@link android.content.Intent} 생성자를 사용하면 됩니다.</p>
+
+</dd>
+
+<p><dt><b>작업</b></dt>
+<dd>수행할 일반적인 작업을 나타내는 문자열입니다(예: <em>보기</em> 또는 <em>선택</em>).
+
+<p>브로드캐스트 인텐트의 경우, 이것이 발생한 작업이자 보고되는 것이기도 합니다.
+인텐트의 나머지 부분이 어떻게 구조화될지는 대부분 작업이 결정합니다. 특히,
+데이터 안에 들어 있는 것과 추가 항목 등이 해당됩니다.
+
+<p>본인의 앱 내에 있는 인텐트가 사용할 작업(또는 다른 앱이 사용하여
+본인의 앱 안의 구성 요소를 호출하도록 함)을 직접 지정할 수도 있지만, 보통은
+{@link android.content.Intent} 클래스나 다른 프레임워크 클래스가 정의한 작업 상수를 써야 합니다. 다음은
+액티비티를 시작하는 데 쓰이는 보편적인 작업입니다.</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>이 작업은 액티비티가 사용자에게 표시할 수 있는 어떤 정보를 가지고 있을 때 {@link
+   android.content.Context#startActivity startActivity()}가 있는 인텐트에서
+사용합니다. 예를 들어 갤러리 앱에서 볼 사진이나 지도 앱에서 볼 주소 등이
+이에 해당됩니다.</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>이것은 다른 이름으로 "공유" 인텐트라고도 합니다. 이것은 사용자가 다른 앱을 통해 공유할 수 있는 데이터를 가지고 있을 때 {@link
+   android.content.Context#startActivity startActivity()}가 있는 인텐트에서 사용합니다. 예를 들어
+이메일 앱 또는 소셜 공유 앱 등이 이에 해당됩니다.</dd>
+</dl>
+
+<p>일반적인 작업을 정의하는 상수에 대한 자세한 내용은 {@link android.content.Intent} 클래스
+참조를 확인하십시오.  다른 작업은 Android 프레임워크의 다른 곳에서 정의됩니다. 예를 들어
+시스템의 설정 앱에서 특정 화면을 여는 작업의 경우 {@link android.provider.Settings}에서
+정의됩니다.</p>
+
+<p>인텐트에 대한 작업을 지정하려면 {@link android.content.Intent#setAction
+setAction()} 또는 {@link android.content.Intent} 생성자를 사용하면 됩니다.</p>
+
+<p>나름의 작업을 직접 정의하는 경우, 앱의 패키지 이름을 접두사로 포함시켜야
+합니다. 예:</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>데이터</b></dt>
+<dd>작업을 수행할 데이터 및/또는 해당 데이터의 MIME 유형을 참조하는 URI({@link android.net.Uri}
+객체)입니다. 제공된 데이터의 유형을 나타내는 것은 일반적으로 인텐트의 작업입니다. 예를 들어
+인텐트가 {@link android.content.Intent#ACTION_EDIT}인 경우, 데이터에
+편집할 문서의 URI가 들어있어야 합니다.
+
+<p>인텐트를 생성할 때에는
+URI외에도 데이터의 유형(MIME 유형)을 지정하는 것이 중요한 경우가 많습니다.
+예를 들어, 이미지를 표시할 수 있는 액티비티는 아마도 오디오 파일을 재생할 수 없을 가능성이
+큽니다. 두 가지 기능의 URI 형식은 비슷할지라도 말입니다.
+그러므로 데이터의 MIME 유형을 지정해두면 Android 시스템이
+인텐트를 수신할 최상의 구성 요소를 찾는 데 도움이 됩니다.
+하지만, MIME 유형은 URI에서 추론되는 경우도 종종 있습니다. 특히 데이터가
+{@code content:} URI인 경우 더욱 그러한데, 이는 데이터가 기기에 위치하고 있으며
+{@link android.content.ContentProvider}가 제어한다는 것을 나타내어 해당 데이터 MIME 유형이 시스템에 표시되도록 합니다.</p>
+
+<p>데이터 URI만 설정하려면 {@link android.content.Intent#setData setData()}를 호출하십시오.
+MIME 유형만 설정하려면, {@link android.content.Intent#setType setType()}을 호출합니다. 필요한 경우,
+두 가지를 모두 명시적으로 설정해도 됩니다. 이때는 {@link
+android.content.Intent#setDataAndType setDataAndType()}을 사용하십시오.</p>
+
+<p class="caution"><strong>주의:</strong> URI와 MIME 유형을 둘 다 설정하고자 하는 경우, {@link android.content.Intent#setData setData()} 및
+{@link android.content.Intent#setType setType()}을 호출하면
+<strong>안 됩니다</strong>. 이 둘은 서로의 값을 무효화하기 때문입니다. URI와 MIME 유형을 둘 모두 설정하려면
+항상 {@link android.content.Intent#setDataAndType setDataAndType()}을
+사용하십시오.</p>
+</dd>
+
+<p><dt><b>카테고리</b></dt>
+<dd>인텐트를 처리해야 하는 구성 요소의 종류에 관한 추가 정보를 담은
+문자열입니다.  인텐트 안에는 카테고리 설명이
+얼마든지 들어있을 수 있지만, 대부분의 인텐트에는 카테고리가 없어도 됩니다.
+다음은 몇 가지 보편적인 카테고리입니다.
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>대상 액티비티가 스스로 웹 브라우저가 자신을 시작해도 되도록 허용하여
+링크로 참조된 데이터를 표시하게 합니다. 예컨대 이미지나 이메일 메시지 등이 이에 해당합니다.
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>이 액티비티가 작업의 최초 액티비티이며, 이것이 시스템의 애플리케이션 시작 관리자에
+목록으로 게재되어 있습니다.
+  </dd>
+</dl>
+
+<p>카테고리의 전체 목록을 보려면 {@link android.content.Intent}
+클래스 설명을 참조하십시오.</p>
+
+<p>카테고리를 지정하려면 {@link android.content.Intent#addCategory addCategory()}를 사용하면 됩니다.</p>
+</dd>
+</dl>
+
+
+<p>위에 목록으로 나열된 이러한 특성(구성 요소 이름, 작업, 데이터 및 카테고리)은 인텐트를 정의하는 특성을
+나타냅니다. Android 시스템은 이와 같은 속성을 읽어
+어느 앱 구성 요소를 시작해야 할지 확인할 수 있습니다.</p>
+
+<p>그러나 인텐트는 앱 구성 요소로 확인되는 방법에 영향을 미치지 않는
+추가 정보도 담고 있을 수 있습니다. 인텐트가 제공할 수 있는 기타 정보는 다음과 같습니다.</p>
+
+<dl>
+<dt><b>추가 사항</b></dt>
+<dd>요청한 작업을 수행하기 위해 필요한 추가 정보를 담고 있는 키-값 쌍입니다.
+몇몇 작업이 특정한 종류의 데이터 URI를 사용하는 것과 마찬가지로, 몇몇 작업은 특정한 추가 사항도 사용합니다.
+
+<p>추가 데이터를 추가하려면 여러 가지 {@link android.content.Intent#putExtra putExtra()} 메서드를
+사용할 수 있습니다. 이들은 각기 두 개의 매개변수를 허용합니다. 즉 키 이름과 값입니다.
+모든 추가 데이터를 가진 {@link android.os.Bundle} 객체를 생성할 수도 있고, 그런 다음
+{@link android.os.Bundle}을 {@link android.content.Intent}에 {@link
+android.content.Intent#putExtras putExtras()}로 삽입해도 됩니다.</p>
+
+<p>예를 들어
+{@link android.content.Intent#ACTION_SEND}로 이메일을 전송할 인텐트를 생성하는 경우 "받는 사람" 수신자를 지정할 때
+{@link android.content.Intent#EXTRA_EMAIL} 키를 사용한 다음 "제목"은
+{@link android.content.Intent#EXTRA_SUBJECT} 키로 지정하면 됩니다.</p>
+
+<p>{@link android.content.Intent} 클래스는 표준화된 데이터 유형에 대해 수많은 {@code EXTRA_*} 상수를
+지정합니다. 나름의 추가 키를 선언해야 하는 경우(본인의 앱이 수신할
+인텐트에 대하여), 앱의 패키지 이름을 접두사로 포함시커야
+합니다. 예:</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>플래그</b></dt>
+<dd>{@link android.content.Intent} 클래스에서 정의된 플래그로, 인텐트에 대한 메타데이터와 같은 기능을
+합니다. 이런 플래그는 Android 시스템에 액티비티를 시작할 방법에 대한 지침을 줄 수도 있고(예를 들어 액티비티가 어느
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">작업</a>에 소속되어야 하는지 등)
+ 액티비티를 시작한 다음에 어떻게 처리해야 하는지도 알려줄 수 있습니다(예를 들어 해당 액티비티가 최근
+액티비티 목록에 소속되는지 여부).
+
+<p>자세한 정보는 {@link android.content.Intent#setFlags setFlags()} 메서드를 참조하십시오.</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">명시적 인텐트 예시</h3>
+
+<p>명시적 인텐트는 특정한 앱 구성 요소를 시작하기 위해 사용하는 것입니다. 예를 들어 앱 내의
+특정 액티비티나 서비스를 말합니다. 명시적 인텐트를 생성하려면
+{@link android.content.Intent} 객체에 대한 구성 요소 이름을 정의합니다. 다른
+인텐트 속성은 모두 선택 사항입니다.</p>
+
+<p>예를 들어 앱 안에 {@code DownloadService}라는 서비스를 구축했다고 합시다.
+이 서비스는 웹 상에서 파일을 다운로드하도록 설계된 것입니다. 이것을 시작하려면 다음과 같은 코드를 사용하면 됩니다.</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>{@link android.content.Intent#Intent(Context,Class)}
+ 생성자가 앱에 {@link android.content.Context}를 제공하고
+구성 요소에 {@link java.lang.Class} 객체를 제공합니다. 이처럼,
+이 인텐트는 앱 내의 {@code DownloadService} 클래스를 명시적으로 시작합니다.</p>
+
+<p>서비스를 구축하고 시작하는 데 대한 자세한 정보는
+<a href="{@docRoot}guide/components/services.html">서비스</a> 가이드를 참조하십시오.</p>
+
+
+
+
+<h3 id="ExampleSend">암시적 인텐트 예시</h3>
+
+<p>암시적 인텐트는 작업을 지정하여 기기에서 해당 작업을 수행할 수 있는 모든 앱을 호출할 수
+있도록 합니다. 암시적 인텐트를 사용하면 본인의 앱은 작업을 수행할 수 없지만 다른 앱은 아마도 할 수 있을 때,
+그리고 사용자로 하여금 어느 앱을 사용할지 선택하도록 하고자 할 때 유용합니다.</p>
+
+<p>예를 들어 사용자가 다른 사람들과 공유했으면 하는 콘텐츠를 가지고 있는 경우,
+{@link android.content.Intent#ACTION_SEND} 작업이 있는 인텐트를 생성한 다음
+공유할 콘텐츠를 지정하는 추가 정보를 추가하면 됩니다. 해당 인텐트로
+{@link android.content.Context#startActivity startActivity()}를 호출하면
+사용자가 어느 앱을 통해 콘텐츠를 공유할지 선택할 수 있습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 개발자가 {@link android.content.Context#startActivity
+startActivity()}로 전송한 암시적 인텐트를 처리할 앱이 사용자에게 <em>전혀</em>
+표시되지 않을 수도 있습니다. 이런 일이 발생하면, 호출이 실패하고 앱 작동이 중단됩니다. 어느 액티비티든
+이 인텐트를 수신하도록 확실히 하려면, {@link android.content.Intent} 객체의 {@link android.content.Intent#resolveActivity
+resolveActivity()}를 호출합니다. 결과가 null이 아닌 경우,
+인텐트를 처리할 수 있는 앱이 최소한 하나는 있다는 뜻이며
+{@link android.content.Context#startActivity startActivity()}를 호출해도 안전합니다. 결과가 null이면,
+해당 인텐트를 사용해서는 안 되며 가능한 경우 해당 인텐트를 발생시키는 기능을 비활성화해야
+합니다.</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>참고:</strong> 이 경우에서는 URI를 사용하지 않았지만 인텐트의 데이터 유형이 정의되어
+추가 정보가 담고 있는 콘텐츠를 지정하였습니다.</p>
+
+
+<p>{@link android.content.Context#startActivity startActivity()}를 호출하면 시스템이
+설치된 앱을 모두 살펴보고 이런 종류의 인텐트를 처리할 수 있는 앱이 어느 것인지 알아봅니다(
+{@link android.content.Intent#ACTION_SEND} 작업이 있는 인텐트이며 "텍스트/일반"
+데이터가 담긴 것). 이것을 처리할 수 있는 앱이 하나뿐이면, 해당 앱이 즉시 열리고 이 앱에 인텐트가
+주어집니다. 인텐트를 허용하는 액티비티가 여러 개인 경우, 시스템은
+대화를 표시하여 사용자가 어느 앱을 사용할지 직접 선택할 수 있게 합니다.</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>그림 2.</strong> 선택기 대화입니다.</p>
+</div>
+
+<h3 id="ForceChooser">앱 선택기 강제 적용하기</h3>
+
+<p>암시적 인텐트에 응답하는 앱이 하나 이상인 경우,
+사용자가 어느 앱을 사용할지 선택할 수 있으며 해당 앱을 이 작업에 대한 기본 선택으로 만들 수
+있습니다. 이는 사용자가 이제부터 계속 같은 앱을 사용하고자 할 것이라고 추정되는 작업을
+수행할 때 좋습니다. 예를 들어 웹 페이지를 열 때가 이에 해당됩니다(대다수 사용자가
+웹 브라우저는 하나만 사용하는 것을 선호합니다).</p>
+
+<p>그러나, 인텐트에 응답할 수 있는 앱이 여러 개이고 사용자가 매번 다른 앱을 사용하기를 원할 수도 있는
+경우라면, 선택기 대화를 명시적으로 표시해야 합니다. 선택기 대화 상자는
+사용자가 작업에 사용할 앱을 매번 선택하도록 물어봅니다(사용자는 작업에 사용할
+기본 앱을 선택할 수 없습니다). 예를 들어 앱이 {@link
+android.content.Intent#ACTION_SEND} 작업에 "공유"를 수행하는 경우, 사용자는 각자의 현재 상황에 따라 여러 가지 다른 앱을 사용하여 공유하기를
+원할 수도 있습니다. 따라서 항상 선택기 대화를 사용해야 합니다(그림 2 참조).</p>
+
+
+
+
+<p>선택기를 표시하려면 {@link
+android.content.Intent#createChooser createChooser()}를 사용하여 {@link android.content.Intent}를 생성한 후 {@link
+android.app.Activity#startActivity startActivity()}에 전달합니다. 예:</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>이 예시는 {@link
+android.content.Intent#createChooser createChooser()} 메서드에 전달된 인텐트에 응답하는 앱 목록이 포함된 대화 상자를 표시하고 제공된 텍스트를
+대화 상자 제목으로 사용합니다.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">암시적 인텐트 수신하기</h2>
+
+<p>본인의 앱이 수신할 수 있는 암시적 인텐트가 어느 것인지 알리려면,
+각 앱 구성 요소에 대한 하나 이상의 인텐트 필터를 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+ 요소로 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">매니페스트 파일</a>에 선언합니다.
+각 인텐트 필터가 인텐트의 작업, 데이터 및 카테고리를 근거로 어느 유형의 인텐트를
+허용하는지 나타냅니다. 시스템이 앱 구성 요소에 암시적 인텐트를 전달하는 것은 인텐트가 개발자의 인텐트 필터 중 하나를
+통과해 지나갈 수 있는 경우뿐입니다.</p>
+
+<p class="note"><strong>참고:</strong> 명시적 인텐트는 항상 자신의 대상에 전달되며,
+이는 구성 요소가 어떤 인텐트 필터를 선언하든 무관합니다.</p>
+
+<p>앱 구성 요소는 자신이 수행할 수 있는 각 고유한 작업에 대해 별도의 필터를 선언해야 합니다.
+예를 들어 이미지 갤러리 앱에 있는 한 액티비티에 두 개의 필터가 있을 수 있습니다. 필터 하나는
+이미지를 보고, 또 다른 필터는 이미지를 편집하는 것입니다. 액티비티가 시작되면, 이는
+{@link android.content.Intent}를 검사한 다음
+{@link android.content.Intent}에 있는 정보를 근거로 어떻게 동작할 것인지 결정합니다(편집기 제어 항목을 표시할 것인지 말 것인지 등).</p>
+
+<p>각 인텐트 필터는 앱의 매니페스트 파일에 있는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+요소가 정의하며, 이는 상응하는 앱 구성 요소에 중첩되어
+있습니다(예: <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+요소). <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 내부에서는
+다음과 같은 세 가지 요소 중 하나 이상을 사용하여 허용할 인텐트 유형을 지정할 수
+있습니다.</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>허용된 인텐트 작업을 {@code name} 속성에서 선언합니다. 이 값은
+어떤 작업의 리터럴 문자열 값이어야 하며, 클래스 상수가 아닙니다.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>허용된 데이터 유형을 선언합니다. 이때
+데이터 URI(<code>scheme</code>, <code>host</code>, <code>port</code>,
+<code>path</code> 등)와 MIME 유형의 여러 가지 측면을 나타내는 하나 이상의 속성을 사용하는 방법을 씁니다.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>허용된 인텐트 카테고리를 {@code name} 속성에서 선언합니다. 이 값은
+어떤 작업의 리터럴 문자열 값이어야 하며, 클래스 상수가 아닙니다.
+
+  <p class="note"><strong>참고:</strong> 암시적 인텐트를 수신하려면 인텐트 필터 안에
+
+{@link android.content.Intent#CATEGORY_DEFAULT} 카테고리를 <strong>반드시 포함</strong>해야 합니다.
+{@link android.app.Activity#startActivity startActivity()} 및
+{@link android.app.Activity#startActivityForResult startActivityForResult()} 메서드는
+모든 인텐트를 마치 {@link android.content.Intent#CATEGORY_DEFAULT} 카테고리를 선언한 것처럼 취급합니다.
+  이 카테고리를 인텐트 필터에서 선언하지 않으면 액티비티에 어떤 암시적 인텐트도
+확인되지 않습니다.</p>
+  </dd>
+</dl>
+
+<p>예를 들어, 다음은 데이터 유형이 텍스트인 경우
+{@link android.content.Intent#ACTION_SEND} 인텐트를 수신할 인텐트 필터가 있는 액티비티 선언입니다.</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 또는
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>의 인스턴스가 하나 이상 포함된 필터를 생성해도 됩니다.
+그렇게 하는 경우, 그저 해당 구성 요소가 그와 같은 필터 요소의 모든 조합을 처리할 수 있도록
+확실히 하기만 하면 됩니다.</p>
+
+<p>여러 가지 종류의 인텐트를 처리하고자 하되 특정 조합의 작업, 데이터 및 카테고리 유형으로만 한정하고자 한다면
+여러 가지 인텐트 필터를 생성해야 합니다.</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>구성 요소로의 액세스 제한</h2>
+<p>인텐트 필터를 사용하는 것은 다른 앱이 여러분의 구성 요소를 시작하지 못하도록 방지하기에
+안전한 방식은 아닙니다. 인텐트 필터는 구성 요소로 하여금 특정한 종류의 암시적 인텐트에만
+응답하도록 제한하기는 하지만, 다른 앱이 여러분의 앱 구성 요소를 시작할 가능성도 있습니다.
+해당 개발자가 여러분의 구성 요소 이름을 알아내는 경우 명시적 인텐트를 사용하면 됩니다.
+구성 요소 중 하나를 시작하는 것은 <em>오직 본인 소유의 앱</em>으로 한정하는 것이 중요한 경우, 해당 구성 요소에 대하여
+<a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> 속성을 {@code "false"}로 설정하십시오.
+</p>
+</div>
+</div>
+
+<p>암시적 인텐트를 필터에 대해 테스트하려면 인텐트를 세 가지 요소에 대해 각기
+비교합니다. 인텐트가 구성 요소에 전달되려면 해당 인텐트는 세 개의 테스트를 모두 통과해야 합니다.
+하나라도 일치하지 못하고 실패하면 Android 시스템이 해당 인텐트를 구성 요소에 전달하지
+않습니다.  그러나 구성 요소에는 여러 개의 인텐트 필터가 있을 수도 있으므로, 구성 요소의
+필터 중 하나를 통과하지 않는 인텐트도 다른 필터를 통하면 성공할 수 있습니다.
+시스템이 인텐트를 확인하는 방법에 대한 자세한 정보는
+<a href="#Resolution">인텐트 확인</a>에 대해 다룬 아래 섹션에 제공되어 있습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 부주의로 다른 앱의
+{@link android.app.Service}를 실행하는 일을 피하려면, 항상 명시적 인텐트를 사용하여 본인의 서비스를 시작하고 서비스에 대한
+인텐트 필터는 선언하지 마십시오.</p>
+
+<p class="note"><strong>참고:</strong>
+액티비티 전체에 대해 인텐트 필터를 매니페스트 파일에서 선언해야 합니다.
+다만 브로드캐스트 수신기에 대한 필터의 경우 동적으로 등록할 수도 있습니다.
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()}를 호출하면 됩니다. 그런 다음 해당 수신기를 등록 해제하려면 {@link
+android.content.Context#unregisterReceiver unregisterReceiver()}를 사용하십시오. 이렇게 하면 앱이
+실행되는 동안에 정해진 기간 동안 특정한 브로드캐스트에 대해 수신 대기할 수
+있습니다.</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">필터 예시</h3>
+
+<p>몇 가지 인텐트 필터 동작에 대해 이해를 돕기 위해 소셜 공유 앱의 매니페스트 파일에서
+가져온 다음 조각을 참조하십시오.</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>첫 번째 액티비티인 {@code MainActivity}는 앱의 주요 진입 지점입니다. 즉 이것이
+사용자가 시작 관리자 아이콘을 사용하여 앱을 처음 시작할 때 열리는 액티비티입니다.</p>
+<ul>
+  <li>{@link android.content.Intent#ACTION_MAIN} 작업은
+이것이 주요 진입 지점이며 어느 인텐트 데이터도 기대하지 않는다는 것을 나타냅니다.</li>
+  <li>{@link android.content.Intent#CATEGORY_LAUNCHER} 카테고리는
+이 액티비티의 아이콘이 시스템의 앱 시작 관리자에 배치되어야 한다는 것을 나타냅니다. <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 요소가
+아이콘을 {@code icon}으로 지정하지 않은 경우, 시스템은 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+ 요소로부터 가져온 아이콘을 사용합니다.</li>
+</ul>
+<p>이들 두 가지가 함께 페어링되어야 액티비티가 앱 시작 관리자에 나타날 수 있습니다.</p>
+
+<p>두 번째 액티비티인 {@code ShareActivity}는 텍스트와 미디어 콘텐츠 공유를
+용이하게 할 목적으로 만들어진 것입니다. 사용자가 {@code MainActivity}에서 이 액티비티를 향해 이동하다가 이 안에 진입할 수도 있지만,
+두 가지 인텐트 필터 중 하나와 일치하는 암시적 인텐트를 발생시키는 또 다른 앱에서 {@code ShareActivity}에 직접 진입할 수도
+있습니다.</p>
+
+<p class="note"><strong>참고:</strong> MIME 유형, 즉
+<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>는 파노라마 사진을 나타내는
+특수 데이터 유형으로, 이것은 <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
+파노라마</a> API로 처리할 수 있습니다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">보류 인텐트 사용하기</h2>
+
+<p>{@link android.app.PendingIntent} 객체는 {@link
+android.content.Intent} 객체 주변을 감싸는 래퍼입니다. {@link android.app.PendingIntent}의
+기본 목적은 외래 애플리케이션에 권한을 허가하여 안에 들어 있는
+{@link android.content.Intent}를
+마치 본인 앱의 자체 프로세스에서 실행하는 것처럼 사용하게 하는 것입니다.</p>
+
+<p>보류 인텐트의 주요 사용 사례는 다음과 같습니다.</p>
+<ul>
+  <li>사용자가 여러분의 <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">알림</a>으로
+작업을 수행할 때 인텐트가 실행되도록 선언합니다(Android 시스템의 {@link android.app.NotificationManager}가
+{@link android.content.Intent}를 실행합니다).
+  <li>사용자가 여러분의
+<a href="{@docRoot}guide/topics/appwidgets/index.html">앱 위젯</a>으로
+작업을 수행할 때 인텐트가 실행되도록 선언합니다(메인 스크린 앱이 {@link android.content.Intent}를 실행합니다).
+  <li>향후 지정된 시간에 인텐트가 실행되도록 선언합니다(Android
+시스템의 {@link android.app.AlarmManager}가 {@link android.content.Intent}를 실행합니다).
+</ul>
+
+<p>각 {@link android.content.Intent} 객체는 특정한 유형의
+앱 구성 요소가({@link android.app.Activity}, {@link android.app.Service} 또는
+{@link android.content.BroadcastReceiver}) 처리하도록 설계되어 있기 때문에, {@link android.app.PendingIntent}도
+같은 고려 사항을 염두에 두고 생성해야 합니다. 보류 인텐트를 사용하는 경우, 여러분의 앱은
+{@link android.content.Context#startActivity
+startActivity()}와 같은 호출이 있는 앱을 실행하지 않게 됩니다. 대신
+{@link android.app.PendingIntent}를 생성할 때 원래 의도한 구성 요소 유형을 선언해야 합니다. 이때 각각의 생성자 메서드를 호출하는 방법을 씁니다.</p>
+
+<ul>
+  <li>{@link android.app.Activity}를 시작하는 {@link android.content.Intent}의 경우,
+{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()}</li>
+  <li>{@link android.app.Service}를 시작하는 {@link android.content.Intent}의 경우,
+{@link android.app.PendingIntent#getService PendingIntent.getService()}</li>
+  <li>{@link android.content.BroadcastReceiver}를 시작하는 {@link android.content.Intent}의 경우,
+{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()}</li>
+</ul>
+
+<p>여러분의 앱이 다른 여러 앱에서 보류 인텐트를 <em>수신</em>하는 것이 아닌 한,
+위의 메서드를 사용하여 {@link android.app.PendingIntent}를 생성하는 것이 아마도 여러분에게 필요한 유일한
+{@link android.app.PendingIntent} 메서드일 것입니다.</p>
+
+<p>각 메서드는 현재 앱의 {@link android.content.Context}, 래핑하고자 하는
+{@link android.content.Intent}와 인텐트의 적절한 사용 방식을 나타내는
+ 하나 이상의 플래그(인텐트를 한 번 이상 사용할 수 있는지 등) 등을 취합니다.</p>
+
+<p>보류 인텐트 사용에 관한 자세한 정보는 각 해당되는 사용 사례에 대한 문서에
+제공되어 있습니다. 예를 들어 <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">알림</a>
+ 및 <a href="{@docRoot}guide/topics/appwidgets/index.html">앱 위젯</a> API 가이드가 이에 해당됩니다.</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">인텐트 확인</h2>
+
+
+<p>시스템이 액티비티를 시작하라는 암시적 인텐트를 수신하면, 시스템은 해당 인텐트에 대한 최선의 액티비티를 검색합니다.
+이때 다음과 같은 세 가지 측면을 근거로 인텐트를 인텐트 필터에 비교해 보는 방법을 씁니다.</p>
+
+<ul>
+  <li>인텐트 작업
+  <li>인텐트 데이터(URI와 데이터 유형 둘 다)
+  <li>인텐트 카테고리
+</ul>
+
+<p>다음 섹션에서는 인텐트 필터가 앱의 매니페스트 파일에서 어떻게 선언되었는지와 관련하여
+인텐트가 적절한 구성 요소에 일치되는 방식을 설명합니다.</p>
+
+
+<h3 id="ActionTest">작업 테스트</h3>
+
+<p>허용된 인텐트 작업을 나타내려면 인텐트 필터는 0개 이상의
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> 요소를 선언할 수 있습니다.  예:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>이 필터를 통과하려면 {@link android.content.Intent}에
+지정된 작업이 필터에 목록으로 나열된 작업 중 하나와 일치해야만 합니다.</p>
+
+<p>필터에 목록으로 나열된 작업이 없는 경우, 인텐트가 일치될 대상이 아무것도 없으므로
+모든 인텐트가 테스트에 실패합니다. 그러나, {@link android.content.Intent}가
+작업을 지정하지 않는 경우, 테스트를 통과하게 됩니다(필터에 최소한 한 개 이상의 작업이
+들어있지 않은 한).</p>
+
+
+
+<h3 id="CategoryTest">카테고리 테스트</h3>
+
+<p>허용된 인텐트 카테고리를 나타내려면 인텐트 필터는 0개 이상의
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> 요소를 선언할 수 있습니다.  예:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>인텐트가 카테고리 테스트를 통과하려면 {@link android.content.Intent} 내의
+모든 카테고리가 필터 내의 카테고리에 일치해야 합니다. 이 반대로는 반드시 성립하지 않아도 됩니다. 인텐트 필터가
+{@link android.content.Intent}에서 지정된 것보다 더 많은 카테고리를 선언할 수도 있지만 그래도
+{@link android.content.Intent}는 통과합니다. 그러므로, 카테고리가 없는 인텐트라면 이 테스트를 항상 통과하는 것이 맞습니다.
+이는 필터에 어떤 카테고리가 선언되어 있는지와는 무관합니다.</p>
+
+<p class="note"><strong>참고:</strong>
+Android는 {@link android.content.Intent#CATEGORY_DEFAULT} 카테고리를
+{@link
+android.content.Context#startActivity startActivity()} 및 {@link
+android.app.Activity#startActivityForResult startActivityForResult()}에 전달된 모든 암시적 인텐트에 적용합니다.
+따라서 액티비티가 암시적 인텐트를 수신하기를 원하는 경우,
+그 인텐트 필터 내에 {@code "android.intent.category.DEFAULT"}에 대한 카테고리가 반드시 포함되어 있어야 합니다(이전의
+{@code &lt;intent-filter&gt;} 예시에서 표시된 내용 참조).</p>
+
+
+
+<h3 id="DataTest">데이터 테스트</h3>
+
+<p>허용된 인텐트 데이터를 나타내려면 인텐트 필터는 0개 이상의
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> 요소를 선언할 수 있습니다.  예:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>각 <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+요소는 URI 구조와 데이터 유형(MIME 미디어 유형)을 나타낼 수 있습니다.  URI의 각 부분에 대해 별도의
+속성&mdash;{@code scheme}, {@code host}, {@code port}
+및 {@code path}&mdash;이 있습니다.
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+예:
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>이 URI에서 구성표는 {@code content}이고 호스트는 {@code com.example.project},
+포트는 {@code 200}이며 경로는 {@code folder/subfolder/etc}입니다.
+</p>
+
+<p>이와 같은 속성은 각각 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 요소에서 선택 항목이지만,
+이들 사이에 선형적 종속 관계가 있습니다.</p>
+<ul>
+  <li>구성표가 지정되지 않으면 호스트가 무시됩니다.</li>
+  <li>호스트가 지정되지 않으면 포트가 무시됩니다.</li>
+  <li>구성표와 호스트가 둘 다 지정되지 않으면 경로가 무시됩니다.</li>
+</ul>
+
+<p>인텐트 안의 URI가 필터 안의 URI 사양에 비교되는 경우, 이것은 필터 내에 포함된 URI의
+몇몇 부분에만 비교되는 것입니다. 예:</p>
+<ul>
+  <li>필터가 구성표만 지정하는 경우, 해당 구성표가 있는 모든 URI가 필터와
+일치합니다.</li>
+  <li>필터가 구성표와 권한은 지정하지만 경로는 지정하지 않는 경우, 같은 구성표와 권한이 있는
+모든 URI가 경로와 관계 없이 필터를 통과합니다.</li>
+  <li>필터가 구성표, 권한과 경로를 지정하는 경우 같은 구성표,
+권한과 경로가 있는 URI만 해당 필터를 통과합니다.</li>
+</ul>
+
+<p class="note"><strong>참고:</strong> 경로 사양에는 경로 이름이
+부분적으로만 일치하도록 요구하기 위해 와일드카드 별표(*)가 들어 있을 수 있습니다.</p>
+
+<p>데이터 테스트는 인텐트 안의 URI와 MIME 유형 둘 모두를 필터 안에서
+지정된 MIME 유형과 비교합니다.  규칙은 다음과 같습니다.
+</p>
+
+<ol type="a">
+<li>URI도 MIME 유형도 들어 있지 않은 인텐트가 테스트를 통과하는 것은
+필터가 URI나 MIME 유형을 전혀 지정하지 않은 경우뿐입니다.</li>
+
+<li>URI는 들어 있지만 MIME 유형은 없는 인텐트(URI로부터는
+명시적이지도 않고 추론할 수도 없음)가 테스트를 통과하는 것은 그 URI가 필터의 URI 형식과 일치하며
+필터가 인텐트와 마찬가지로 MIME 유형을 지정하지 않는 경우뿐입니다.</li>
+
+<li>MIME 유형은 들어 있지만 URI는 없는 인텐트가 테스트를 통과하는 것은
+해당 필터가 같은 MIME 유형을 목록으로 나열하지만 URI 형식은 지정하지 않은 경우뿐입니다.</li>
+
+<li>URI와 MIME 유형이 둘 다 들어 있는 인텐트(URI로부터는
+명시적이지도 않고 추론할 수도 없음)가 테스트의 MIME 유형 부분을 통과하는 것은 해당 유형이
+필터 내에 목록으로 나열된 한 유형에 일치하는 경우뿐입니다.  이것이 테스트의 URI 부분을 통과하는 것은
+URI가 필터 내의 URI와 일치하거나, {@code content:}
+ 또는 {@code file:} URI가 있고 필터가 URI를 지정하지 않은 경우뿐입니다. 달리 말하면,
+구성 요소는 필터가 MIME 유형 <em>하나만</em> 목록으로 나열하는 경우 {@code content:} 및 {@code file:} 데이터를
+지원하는 것으로 간주한다는 뜻입니다.</p></li>
+</ol>
+
+<p>
+마지막 규칙인 규칙 (d)는
+구성 요소가 파일이나 콘텐츠 제공자로부터 로컬 파일을 가져올 수 있는지에 대한 기대 수준을 반영합니다.
+따라서 이러한 필터는 데이터 유형만 목록으로 나열해도 되고,
+{@code content:} 및 {@code file:} 구성표의 이름을 명시적으로 제시하지 않아도 됩니다.
+이것이 일반적인 경우입니다.  예를 들어, 다음 예시와 같은 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 요소는
+Android에 구성 요소가 콘텐츠 제공자에서 이미지 데이터를 가져와 표시할 수 있다고
+알립니다.
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+대부분의 사용 가능한 데이터는 콘텐츠 제공자가 제공하는 것이므로, 데이터 유형은
+지정하지만 URI는 지정하지 않는 필터가 아마 가장 보편적인 유형일 것입니다.
+</p>
+
+<p>
+또 다른 보편적인 구성을 예로 들자면 구성표와 데이터 유형을 가진 필터가 있겠습니다.  예를 들어
+다음 예시와 같은 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
+ 요소는 Android에 구성 요소가
+작업을 수행하기 위해 네트워크에서 비디오 데이터를 검색할 수 있다고 알립니다.
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">인텐트 일치</h3>
+
+<p>인텐트를 인텐트 필터에 비교해 일치시키면 활성화할 대상 구성 요소를
+찾아낼 수 있을 뿐만 아니라, 기기에 있는 일련의 구성 요소에 대해
+무언가 알아낼 수도 있습니다.  예를 들어 홈 앱이 앱 시작 관리자를 채우려면
+
+{@link android.content.Intent#ACTION_MAIN} 작업과
+{@link android.content.Intent#CATEGORY_LAUNCHER} 카테고리를 지정하는 인텐트 필터를 가진 액티비티를 모두 찾아야 합니다.</p>
+
+<p>여러분의 애플리케이션도 인텐트 일치를 이와 비슷한 방식으로 사용할 수 있습니다.
+{@link android.content.pm.PackageManager}에는 {@code query...()}
+ 메서드 집합이 있어 특정 인텐트를 허용하는 구성 요소를 모두 반환할 수 있고,
+이와 유사한 일련의 {@code resolve...()} 메서드도 있어 한 인텐트에 응답하는 데
+가장 좋은 구성 요소를 판별할 수 있습니다.  예를 들어,
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()}는 인수로 통과한
+인텐트를 수행할 수 있는 모든 액티비티의 목록을 반환하며 {@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()}는 이와 비슷한 서비스 목록을 반환합니다.
+양쪽 메서드 모두 구성 요소를 활성화하지는 않습니다. 다만 응답할 수 있는 것들을 목록으로
+나열할 뿐입니다.  이와 비슷한 메서드인
+{@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()}는 브로드캐스트 수신기에 쓰입니다.
+</p>
+
+
+
+

@@ -1,0 +1,798 @@
+page.title=ダイアログ
+page.tags=alertdialog,dialogfragment
+
+@jd:body
+
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本書の内容</h2>
+<ol>
+  <li><a href="#DialogFragment">Dialog Fragment を作成する</a></li>
+  <li><a href="#AlertDialog">アラート ダイアログをビルドする</a>
+    <ol>
+      <li><a href="#AddingButtons">ボタンを追加する</a></li>
+      <li><a href="#AddingAList">リストを追加する</a></li>
+      <li><a href="#CustomLayout">カスタム レイアウトを作成する</a></li>
+    </ol>
+  </li>
+  <li><a href="#PassingEvents">ダイアログのホストにイベントを渡す</a></li>
+  <li><a href="#ShowingADialog">ダイアログを表示する</a></li>
+  <li><a href="#FullscreenDialog">全画面でまたは埋め込まれたフラグメントとしてダイアログを表示する</a>
+    <ol>
+      <li><a href="#ActivityAsDialog">大画面でアクティビティをダイアログとして表示する</a></li>
+    </ol>
+  </li>
+  <li><a href="#DismissingADialog">ダイアログを閉じる</a></li>
+</ol>
+
+    <h2>キークラス</h2>
+    <ol>
+      <li>{@link android.app.DialogFragment}</li>
+      <li>{@link android.app.AlertDialog}</li>
+    </ol>
+    
+    <h2>関連ドキュメント</h2>
+    <ol>
+      <li><a href="{@docRoot}design/building-blocks/dialogs.html">ダイアログ デザインのガイド</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/controls/pickers.html">ピッカー</a>（日付ダイアログと時刻ダイアログ）</li>
+    </ol>
+  </div>
+</div>
+
+<p>ダイアログは、ユーザーによる意思決定や追加情報の入力用に表示される小さなウィンドウです。
+ダイアログは全画面に表示されることはなく、通常はユーザーが処理を続ける前にアクションを起こす必要があるモーダル イベントに使用されます。
+</p>
+
+<div class="note design">
+<p><strong>ダイアログ デザイン</strong></p>
+  <p>ダイアログをデザインする方法について（言語に対する推奨を含む）は、<a href="{@docRoot}design/building-blocks/dialogs.html">ダイアログ</a> デザインのガイドをお読みください。
+</p>
+</div>
+
+<img src="{@docRoot}images/ui/dialogs.png" />
+
+<p>{@link android.app.Dialog} クラスは、ダイアログの基本クラスですが、{@link android.app.Dialog} ディレクトリのインスタンスを作成することは避けてください。代わりに、次のいずれかのサブクラスを使用します。
+
+</p>
+<dl>
+  <dt>{@link android.app.AlertDialog}</dt>
+  <dd>タイトル、最大 3 つのボタン、選択可能なアイテムやカスタム レイアウトのリストを表示できるダイアログ。
+</dd>
+  <dt>{@link android.app.DatePickerDialog} または {@link android.app.TimePickerDialog}</dt>
+  <dd>ユーザーが日付または時刻を選択できるようにあらかじめ定義された UI を含むダイアログ。</dd>
+</dl>
+
+<div class="sidebox">
+<h2>ProgressDialog を使用しない</h2>
+<p>Android には、進捗バーを含むダイアログを表示する {@link android.app.ProgressDialog} という別のダイアログ クラスがあります。
+ただし、読み込み中または不確定な進捗状況を表示する必要がある場合は、<a href="{@docRoot}design/building-blocks/progress.html">Progress &amp; Activity</a> のデザイン ガイドラインに従って、レイアウトで {@link android.widget.ProgressBar} を使用してください。
+
+
+</p>
+</div>
+
+<p>これらのクラスでは、ダイアログのスタイルと構造が定義されますが、ダイアログのコンテナとして {@link android.support.v4.app.DialogFragment} を使用してください。{@link android.support.v4.app.DialogFragment} クラスでは、{@link android.app.Dialog} オブジェクトでメソッドを呼び出す代わりに、ダイアログの作成と表示の管理に必要なすべてのコントロールが提供されます。
+
+
+
+</p>
+
+<p>{@link android.support.v4.app.DialogFragment} を使ってダイアログを管理すると、ライフサイクル イベント（[<em>戻る</em>] ボタンを押したときや画面を回転したときなど）が正しく処理されます。
+
+{@link
+android.support.v4.app.DialogFragment} クラスを使用すると、従来の {@link
+android.support.v4.app.Fragment} のように、大きな UI で埋め込み可能なコンポーネントとしてダイアログの UI を再利用することもできます（ダイアログ UI を大小の画面で異なって表示させる場合など）。
+
+</p>
+
+<p>このガイドの次のセクションでは、{@link android.app.AlertDialog} オブジェクトと組み合わせて {@link
+android.support.v4.app.DialogFragment} を使用する方法について説明します。
+日付や時刻ピッカーを作成する場合は、「<a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>」のガイドをご覧ください。
+</p>
+
+<p class="note"><strong>注:</strong> {@link android.app.DialogFragment} クラスは 元々 Android 3.0（API レベル 11）で追加されたため、このドキュメントでは<a href="{@docRoot}tools/support-library/index.html">サポート ライブラリ</a>と一緒に提供される {@link
+android.support.v4.app.DialogFragment} クラスの使用方法について説明します。
+
+アプリにこのライブラリを追加すると、Android 1.6 以降を実行する端末で、{@link android.support.v4.app.DialogFragment} とその他のさまざまな API を使うことができます。
+
+アプリの最小バージョンで API レベル 11 以降がサポートされている場合、{@link
+android.app.DialogFragment} のフレームワーク バージョンを使用できますが、このドキュメントのリンクはサポート ライブラリ API 向けであることにご注意ください。
+
+サポート ライブラリを使用するときは、<code>android.app.DialogFragment</code> <em>ではなく</em>、<code>android.support.v4.app.DialogFragment</code> クラス をインポートしてください。
+
+</p>
+
+
+<h2 id="DialogFragment">Dialog Fragment を作成する</h2>
+
+<p>{@link android.support.v4.app.DialogFragment} を拡張して {@link android.support.v4.app.DialogFragment#onCreateDialog
+onCreateDialog()} コールバック メソッドで {@link android.app.AlertDialog} を作成することで、さまざまなダイアログ デザイン（カスタム レイアウトや<a href="{@docRoot}design/building-blocks/dialogs.html">ダイアログ</a>のデザインガイドで説明されているものを含む）を実現できます。
+
+
+
+</p>
+
+<p>{@link android.support.v4.app.DialogFragment} で管理される基本的な {@link android.app.AlertDialog} を次に示します。
+</p>
+
+<pre>
+public class FireMissilesDialogFragment extends DialogFragment {
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // FIRE ZE MISSILES!
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        // Create the AlertDialog object and return it
+        return builder.create();
+    }
+}
+</pre>
+
+<div class="figure" style="width:290px;margin:0 0 0 20px">
+<img src="{@docRoot}images/ui/dialog_buttons.png" alt="" />
+<p class="img-caption"><strong>図 1</strong> 
+メッセージと 2 つのアクション ボタンを含むダイアログ</p>
+</div>
+
+<p>このクラスのインスタンスを作成してオブジェクトで {@link
+android.support.v4.app.DialogFragment#show show()} を呼び出すと、図 1 のようなダイアログが表示されます。
+</p>
+
+<p>次のセクションでは、{@link android.app.AlertDialog.Builder} API を使ったダイアログの作成について詳細を説明します。
+</p>
+
+<p>ダイアログの複雑さに応じて、{@link android.support.v4.app.DialogFragment} ですべての基本的な<a href="{@docRoot}guide/components/fragments.html#Lifecycle">フラグメントのライフサイクル メソッド</a>を含む、他のさまざまなコールバック メソッドを実装できます。
+
+
+
+
+
+
+
+<h2 id="AlertDialog">アラート ダイアログをビルドする</h2>
+
+
+<p>{@link android.app.AlertDialog} クラスを使って、さまざまなダイアログ デザインをビルドできます。ほとんどの場合、必要なダイアログ クラスはこれだけです。図 2 のように、アラート ダイアログには 3 つの領域があります。
+
+</p>
+
+<div class="figure" style="width:311px;margin-top:0">
+<img src="{@docRoot}images/ui/dialogs_regions.png" alt="" style="margin-bottom:0" />
+<p class="img-caption"><strong>図 2.</strong> ダイアログのレイアウト。</p>
+</div>
+
+<ol>
+<li><b>タイトル</b>
+  <p>この領域は省略可能で、コンテンツ エリアが詳細メッセージ、リスト、カスタム レイアウトで占有されている場合にのみ使う必要があります。
+単純なメッセージや質問（図 1 にあるダイアログなど）を記述する場合は、タイトルは必要ありません。
+</li>
+<li><b>コンテンツ エリア</b>
+  <p>メッセージ、リスト、その他のカスタム レイアウトを表示できます。</p></li>
+<li><b>アクション ボタン</b>
+  <p>1 つのダイアログ内に置くアクション ボタンは、3 つ以内にする必要があります。</p></li>
+</ol>
+
+<p>{@link android.app.AlertDialog.Builder} クラスでは、カスタム レイアウトなど、これらの種類のコンテンツを含む {@link android.app.AlertDialog} を作成できます。
+
+</p>
+
+<p>{@link android.app.AlertDialog} をビルドするには: </p>
+
+<pre>
+<b>// 1. Instantiate an {@link android.app.AlertDialog.Builder} with its constructor</b>
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+<b>// 2. Chain together various setter methods to set the dialog characteristics</b>
+builder.setMessage(R.string.dialog_message)
+       .setTitle(R.string.dialog_title);
+
+<b>// 3. Get the {@link android.app.AlertDialog} from {@link android.app.AlertDialog.Builder#create()}</b>
+AlertDialog dialog = builder.create();
+</pre>
+
+<p>次のトピックでは、{@link android.app.AlertDialog.Builder} クラスを使ってさまざまなダイアログの属性を定義する方法を示します。
+</p>
+
+
+
+
+<h3 id="AddingButtons">ボタンを追加する</h3>
+
+<p>図 2 のようなアクション ボタンを追加するには、{@link android.app.AlertDialog.Builder#setPositiveButton setPositiveButton()} と {@link android.app.AlertDialog.Builder#setNegativeButton setNegativeButton()} メソッドを呼び出します。
+
+</p>
+
+<pre style="clear:right">
+AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+// Add the buttons
+builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User clicked OK button
+           }
+       });
+builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+               // User cancelled the dialog
+           }
+       });
+// Set other dialog properties
+...
+
+// Create the AlertDialog
+AlertDialog dialog = builder.create();
+</pre>
+
+<p><code>set...Button()</code> メソッドには、ボタンのタイトル（<a href="{@docRoot}guide/topics/resources/string-resource.html">文字列リソースで指定</a>）と、ユーザーがボタンを押したときに実行するアクションを定義する {@link android.content.DialogInterface.OnClickListener} が必要です。
+
+
+</p>
+
+<p>追加できるアクション ボタンは、次の 3 つです。</p>
+<dl>
+  <dt>Positive</dt>
+  <dd>アクションを受け入れて続ける場合に使います（「OK」アクション）。</dd>
+  <dt>Negative</dt>
+  <dd>アクションをキャンセルする場合に使います。</dd>
+  <dt>Neutral</dt>
+  <dd>ユーザーがアクションを続けたくない可能性があり、キャンセルしたいとは限らない場合に使います。
+ポジティブ ボタンとネガティブ ボタンの間に表示されます。
+たとえば、「後で通知する」のようなアクションの場合です。</dd> 
+</dl>
+
+<p>各ボタンタイプのいずれか 1 つのみを {@link
+android.app.AlertDialog} に追加できます。つまり、2 つ以上の「ポジティブ」ボタンを置くことはできません。</p>
+
+
+
+<div class="figure" style="width:290px;margin:0 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_list.png" alt="" />
+<p class="img-caption"><strong>図 3</strong> 
+タイトルとリストを含むダイアログ</p>
+</div>
+
+<h3 id="AddingAList">リストを追加する</h3>
+
+<p>{@link android.app.AlertDialog} API で使用できるリストは次の 3 種類です。</p>
+<ul>
+<li>従来の排他的選択リスト</li>
+<li>固定の排他的選択リスト（ラジオボタン）</li>
+<li>固定の複数選択リスト（チェックボックス）</li>
+</ul>
+
+<p>図 3 のように、排他的選択リストを作成するには、{@link android.app.AlertDialog.Builder#setItems setItems()} メソッドを使います。
+</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setTitle(R.string.pick_color)
+           .setItems(R.array.colors_array, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int which) {
+               // The 'which' argument contains the index position
+               // of the selected item
+           }
+    });
+    return builder.create();
+}
+</pre>
+
+<p>リストは、ダイアログのコンテンツ エリアに表示されるため、ダイアログにはメッセージとリストの両方は表示できません。{@link android.app.AlertDialog.Builder#setTitle setTitle()} でダイアログのタイトルを設定してください。
+
+リストのアイテムを指定するには、{@link
+android.app.AlertDialog.Builder#setItems setItems()} を呼び出して配列を渡します。{@link
+android.app.AlertDialog.Builder#setAdapter setAdapter()} を使ってリストを指定することもできます。
+
+こうすることで、{@link android.widget.ListAdapter} を使って、データベースからなど、ダイナミック データを含むリストを返すことができます。
+</p>
+
+<p>{@link android.widget.ListAdapter} を使ってリストを返すことを選択する場合は、必ず {@link android.support.v4.content.Loader} を使ってコンテンツが非同期で読み込まれるようにします。
+
+この詳細については、「<a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Building Layouts with an Adapter</a>」と「<a href="{@docRoot}guide/components/loaders.html">ローダ</a>」のガイドをご覧ください。
+
+
+</p>
+
+<p class="note"><strong>注:</strong> デフォルトでは、次の固定選択リストのいずれかを使っていない場合、リストアイテムをタップするとダイアログが閉じられます。
+</p>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_checkboxes.png" />
+<p class="img-caption"><strong>図 4.</strong>複数選択アイテムのリスト。
+</p>
+</div>
+
+
+<h4 id="Checkboxes">固定の複数選択または排他的選択リストを追加する</h4>
+
+<p>複数選択アイテム（チェックボックス）または排他的選択アイテム（ラジオボタン）のリストを追加するには、{@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} または {@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} メソッドをそれぞれ使用します。
+
+
+</p>
+
+<p>{@link java.util.ArrayList} で選択されたアイテムを保存する、図 4 にあるような複数選択リストを作成する方法を次に示します。
+
+</p>
+
+<pre style="clear:right">
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    mSelectedItems = new ArrayList();  // Where we track the selected items
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Set the dialog title
+    builder.setTitle(R.string.pick_toppings)
+    // Specify the list array, the items to be selected by default (null for none),
+    // and the listener through which to receive callbacks when items are selected
+           .setMultiChoiceItems(R.array.toppings, null,
+                      new DialogInterface.OnMultiChoiceClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int which,
+                       boolean isChecked) {
+                   if (isChecked) {
+                       // If the user checked the item, add it to the selected items
+                       mSelectedItems.add(which);
+                   } else if (mSelectedItems.contains(which)) {
+                       // Else, if the item is already in the array, remove it 
+                       mSelectedItems.remove(Integer.valueOf(which));
+                   }
+               }
+           })
+    // Set the action buttons
+           .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // User clicked OK, so save the mSelectedItems results somewhere
+                   // or return them to the component that opened the dialog
+                   ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   ...
+               }
+           });
+
+    return builder.create();
+}
+</pre>
+
+<p>従来のリストとラジオボタンを含むリストでは、「排他的選択」アクションが提供されますが、ユーザーの選択を固定させたい場合は、{@link
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} を使用してください。つまり、ダイアログを後でもう一度開く場合は、ユーザーの現在の選択を表示し、ラジオボタンを含むリストを作成します。
+
+
+</p>
+
+
+
+
+
+<h3 id="CustomLayout">カスタム レイアウトを作成する</h3>
+
+<div class="figure" style="width:290px;margin:-30px 0 0 40px">
+<img src="{@docRoot}images/ui/dialog_custom.png" alt="" />
+<p class="img-caption"><strong>図 5.</strong> カスタム ダイアログのレイアウト。</p>
+</div>
+
+<p>ダイアログでカスタム レイアウトが必要な場合は、レイアウトを作成し、{@link
+android.app.AlertDialog.Builder} オブジェクトで {@link
+android.app.AlertDialog.Builder#setView setView()} を呼び出して {@link android.app.AlertDialog} にそのレイアウトを追加します。
+</p>
+
+<p>デフォルトでは、カスタム レイアウトは、ダイアログ ウィンドウ全体に表示されますが、{@link android.app.AlertDialog.Builder} メソッドを使ってボタンとタイトルを追加できます。
+</p>
+
+<p>以下は、図 5 にあるダイアログのレイアウト ファイルです。</p>
+
+<p style="clear:right" class="code-caption">res/layout/dialog_signin.xml</p>
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    &lt;ImageView
+        android:src="@drawable/header_logo"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:scaleType="center"
+        android:background="#FFFFBB33"
+        android:contentDescription="@string/app_name" />
+    &lt;EditText
+        android:id="@+id/username"
+        android:inputType="textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="@string/username" />
+    &lt;EditText
+        android:id="@+id/password"
+        android:inputType="textPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"
+        android:hint="@string/password"/>
+&lt;/LinearLayout>
+</pre>
+
+<p class="note"><strong>ヒント:</strong> デフォルトでは、{@code "textPassword"} 入力タイプを使うために、{@link android.widget.EditText} 要素を設定すると、フォント ファミリーが monospace に設定されるため、フォント ファミリーを {@code "sans-serif"} に変えて、両方のテキスト フィールドで同じフォント スタイルが使用されるようにしてください。
+
+
+</p>
+
+<p>{@link android.support.v4.app.DialogFragment} でレイアウトをインフレートするには、{@link android.app.Activity#getLayoutInflater()} で {@link android.view.LayoutInflater} を取得して {@link android.view.LayoutInflater#inflate inflate()} を呼び出します。最初のパラメータは、レイアウト リソース ID で、2 番目のパラメータはレイアウトの親ビューです。その後、{@link android.app.AlertDialog#setView setView()} を呼び出してダイアログのレイアウトを配置できます。
+
+
+
+
+
+</p>
+
+<pre>
+&#64;Override
+public Dialog onCreateDialog(Bundle savedInstanceState) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    // Get the layout inflater
+    LayoutInflater inflater = getActivity().getLayoutInflater();
+
+    // Inflate and set the layout for the dialog
+    // Pass null as the parent view because its going in the dialog layout
+    builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+    // Add action buttons
+           .setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
+               &#64;Override
+               public void onClick(DialogInterface dialog, int id) {
+                   // sign in the user ...
+               }
+           })
+           .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+               public void onClick(DialogInterface dialog, int id) {
+                   LoginDialogFragment.this.getDialog().cancel();
+               }
+           });      
+    return builder.create();
+}
+</pre>
+
+<div class="note">
+<p><strong>ヒント:</strong> カスタム ダイアログが必要な場合は、{@link android.app.Dialog} API を使う代わりに、{@link android.app.Activity} をダイアログとして表示できます。
+
+アクティビティを作り、<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> マニフェスト要素でそのテーマを {@link android.R.style#Theme_Holo_Dialog Theme.Holo.Dialog} に設定します。
+
+</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.Dialog" >
+</pre>
+<p>これだけです。これで、アクティビティは全画面でなく、ダイアログ ウィンドウに表示されるようになります。</p>
+</div>
+
+
+
+<h2 id="PassingEvents">ダイアログのホストにイベントを渡す</h2>
+
+<p>ユーザーがダイアログのアクション ボタンのいずれかをタップするか、そのリストからアイテムを選択すると、{@link android.support.v4.app.DialogFragment} によって必要なアクションが実行される場合がありますが、ダイアログを開くアクティビティやフラグメントにイベントを配信したい場合もよくあります。
+
+
+これを行うには、クリック イベントの各タイプのメソッドでインターフェースを定義します。次に、ダイアログからアクション イベントを受け取るホスト コンポーネントでインターフェースを実装します。
+
+</p>
+
+<p>ホスト アクティビティにイベントを配信するインターフェースを定義する {@link android.support.v4.app.DialogFragment} を次に示します。
+</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    
+    /* The activity that creates an instance of this dialog fragment must
+     * implement this interface in order to receive event callbacks.
+     * Each method passes the DialogFragment in case the host needs to query it. */
+    public interface NoticeDialogListener {
+        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogNegativeClick(DialogFragment dialog);
+    }
+    
+    // Use this instance of the interface to deliver action events
+    NoticeDialogListener mListener;
+    
+    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (NoticeDialogListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>ダイアログをホスティングするアクティビティによって、ダイアログ フラグメントのコンストラクタを使ってダイアログのインスタンスが作成され、{@code NoticeDialogListener} インターフェースの実装によってダイアログのイベントが受信されます。
+
+</p>
+
+<pre>
+public class MainActivity extends FragmentActivity
+                          implements NoticeDialogFragment.NoticeDialogListener{
+    ...
+    
+    public void showNoticeDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new NoticeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
+    }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    &#64;Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button
+        ...
+    }
+
+    &#64;Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+        ...
+    }
+}
+</pre>
+
+<p>ホスト アクティビティによって、上記の {@link android.support.v4.app.Fragment#onAttach onAttach()} コールバック メソッドで適用される {@code NoticeDialogListener} が実装されるため、ダイアログ フラグメントではインターフェース コールバック メソッドを使ってアクティビティにクリック イベントを配信できます。
+
+
+</p>
+
+<pre>
+public class NoticeDialogFragment extends DialogFragment {
+    ...
+
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Build the dialog and set up the button click handlers
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.dialog_fire_missiles)
+               .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the positive button event back to the host activity
+                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
+                   }
+               })
+               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // Send the negative button event back to the host activity
+                       mListener.onDialogNegativeClick(NoticeDialogFragment.this);
+                   }
+               });
+        return builder.create();
+    }
+}
+</pre>
+
+
+
+<h2 id="ShowingADialog">ダイアログを表示する</h2>
+
+<p>ダイアログを表示する場合、{@link
+android.support.v4.app.DialogFragment} のインスタンスを作成して {@link android.support.v4.app.DialogFragment#show
+show()} を呼び出し、{@link android.support.v4.app.FragmentManager} とダイアログ フラグメントのタグ名を渡します。
+</p>
+
+<p>{@link android.support.v4.app.FragmentActivity} から {@link android.support.v4.app.FragmentActivity#getSupportFragmentManager()} を、または {@link
+android.support.v4.app.Fragment} から {@link
+android.support.v4.app.Fragment#getFragmentManager()} を呼び出して {@link android.support.v4.app.FragmentManager} を取得できます。
+
+次に例を示します。</p>
+
+<pre>
+public void confirmFireMissiles() {
+    DialogFragment newFragment = new FireMissilesDialogFragment();
+    newFragment.show(getSupportFragmentManager(), "missiles");
+}
+</pre>
+
+<p>2 番目の引数 {@code "missiles"} は、固有のタグ名で、システムはこれを使って必要な時にフラグメントの状態を保存して復元します。
+そのタグを使って、{@link android.support.v4.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} を呼び出してフラグメントを操作することもできます。
+</p>
+
+
+
+
+<h2 id="FullscreenDialog">全画面でまたは埋め込まれたフラグメントとしてダイアログを表示する</h2>
+
+<p>場合によっては、UI の一部をダイアログとして表示させ、それ以外の場合には、たとえば端末の画面の大小に応じて、全画面や埋め込まれたフラグメントとして表示させるよう UI を設計できます。
+
+{@link android.support.v4.app.DialogFragment} クラスは、埋め込み可能な {@link
+android.support.v4.app.Fragment} として動作できるため、この柔軟性を実現できます。
+</p>
+
+<p>ただし、この場合は、{@link android.app.AlertDialog.Builder AlertDialog.Builder} やその他の {@link android.app.Dialog} オブジェクトを使ってダイアログをビルドできません。
+{@link android.support.v4.app.DialogFragment} を埋め込み可能にする場合、レイアウトでダイアログの UI を定義し、{@link android.support.v4.app.DialogFragment#onCreateView
+onCreateView()} コールバックでレイアウトを読み込んでください。
+
+
+</p>
+
+<p>ダイアログまたは埋め込み可能なフラグメントのいずれかとして（<code>purchase_items.xml</code> という名前のレイアウトを使って）表示できる {@link android.support.v4.app.DialogFragment} の例を次に示します。
+</p>
+
+<pre>
+public class CustomDialogFragment extends DialogFragment {
+    /** The system calls this to get the DialogFragment's layout, regardless
+        of whether it's being displayed as a dialog or an embedded fragment. */
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        // Inflate the layout to use as dialog or embedded fragment
+        return inflater.inflate(R.layout.purchase_items, container, false);
+    }
+  
+    /** The system calls this only when creating the layout in a dialog. */
+    &#64;Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // The only reason you might override this method when using onCreateView() is
+        // to modify any dialog characteristics. For example, the dialog includes a
+        // title by default, but your custom layout might not need it. So here you can
+        // remove the dialog title, but you must call the superclass to get the Dialog.
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
+    }
+}
+</pre>
+
+<p>画面サイズに基づいて、フラグメントをダイアログとしてまたは全画面の UI として表示するかどうかを決めるコードの一例も示します。
+</p>
+
+<pre>
+public void showDialog() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    CustomDialogFragment newFragment = new CustomDialogFragment();
+    
+    if (mIsLargeLayout) {
+        // The device is using a large layout, so show the fragment as a dialog
+        newFragment.show(fragmentManager, "dialog");
+    } else {
+        // The device is smaller, so show the fragment fullscreen
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                   .addToBackStack(null).commit();
+    }
+}
+</pre>
+
+<p>フラグメントのトランザクション実行の詳細については、「<a href="{@docRoot}guide/components/fragments.html">フラグメント</a>」のガイドをご覧ください。
+</p>
+
+<p>この例では、<code>mIsLargeLayout</code> ブール値によって、現在の端末でアプリの大きなレイアウト デザインを使う（その結果、全画面でなく、このフラグメントをダイアログとして表示する）かどうかが指定されます。
+
+この種のブール値を設定する最良の方法は、異なる画面サイズに対して<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">別のリソース値</a>で<a href="{@docRoot}guide/topics/resources/more-resources.html#Bool">ブールリソース値</a>を宣言することです。
+
+次に、異なる画面サイズのブールリソースを 2 種類示します。
+</p>
+
+<p class="code-caption">res/values/bools.xml</p>
+<pre>
+&lt;!-- Default boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">false&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p class="code-caption">res/values-large/bools.xml</p>
+<pre>
+&lt;!-- Large screen boolean values -->
+&lt;resources>
+    &lt;bool name="large_layout">true&lt;/bool>
+&lt;/resources>
+</pre>
+
+<p>アクティビティの {@link android.app.Activity#onCreate onCreate()} メソッド中に、{@code mIsLargeLayout} 値を初期化できます。
+</p>
+
+<pre>
+boolean mIsLargeLayout;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
+}
+</pre>
+
+
+
+<h3 id="ActivityAsDialog">大画面でアクティビティをダイアログとして表示する</h3>
+
+<p>小画面のときにダイアログを全画面の UI として表示するのではなく、大画面のときに {@link android.app.Activity} をダイアログとして表示することで、同じ結果を得ることができます。
+
+どちらの方法を選択するかはアプリのデザインによって異なりますが、アプリが小画面で設計されていて、存在期間が短いアクティビティをダイアログとして示すことでタブレットでの使用感を改善するときには、ほとんどの場合、アクティビティをダイアログとして表示する方法が役立ちます。
+
+
+</p>
+
+<p>大画面のときにのみ、アクティビティをダイアログとして表示するには、{@link android.R.style#Theme_Holo_DialogWhenLarge Theme.Holo.DialogWhenLarge} テーマを <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> マニフェスト要素に適用します。
+
+</p>
+
+<pre>
+&lt;activity android:theme="&#64;android:style/Theme.Holo.DialogWhenLarge" >
+</pre>
+
+<p>テーマを使ったアクティビティのスタイル指定についての詳細は、「<a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>」をご覧ください。</p>
+
+
+
+<h2 id="DismissingADialog">ダイアログを閉じる</h2>
+
+<p>{@link android.app.AlertDialog.Builder} で作成したアクション ボタンのいずれかがタップされると、システムはダイアログを閉じます。
+</p>
+
+<p>また、リストでラジオボタンやチェックボックスが使われている場合を除き、ダイアログ リストでアイテムがタップされると、ダイアログが閉じます。
+それ以外の場合は、{@link
+android.support.v4.app.DialogFragment} で {@link android.support.v4.app.DialogFragment#dismiss()} を呼び出してダイアログを手動で閉じることができます。
+</p>
+
+<p>ダイアログが閉じるときに、特定のアクションを実行する必要がある場合は、{@link
+android.support.v4.app.DialogFragment} で {@link
+android.support.v4.app.DialogFragment#onDismiss onDismiss()} メソッドを実装できます。
+</p>
+
+<p>ダイアログを<em>キャンセル</em>することもできます。これは、ユーザーがタスクを完了せずに、明示的にダイアログを離れたことを示す特別なイベントです。
+ユーザーが [<em>戻る</em>] ボタンを押す、ダイアログ領域外の画面をタップする、または開発者が {@link
+android.app.Dialog} で明示的に {@link android.app.Dialog#cancel()} を呼び出す（ダイアログの [キャンセル] ボタンに応じてなど）場合に実行されます。
+
+</p>
+
+<p>上記の例のように、{@link
+android.support.v4.app.DialogFragment} クラスで {@link android.support.v4.app.DialogFragment#onCancel onCancel()} を実装してキャンセル イベントに応答できます。
+</p>
+
+<p class="note"><strong>注:</strong> システムによって、{@link android.support.v4.app.DialogFragment#onCancel onCancel()} コールバックを呼び出す各イベントで {@link android.support.v4.app.DialogFragment#onDismiss onDismiss()} が呼び出されます。
+
+ただし、{@link android.app.Dialog#dismiss Dialog.dismiss()} や {@link
+android.support.v4.app.DialogFragment#dismiss DialogFragment.dismiss()} を呼び出す場合、システムによって {@link android.support.v4.app.DialogFragment#onDismiss onDismiss()} が呼び出されますが、{@link android.support.v4.app.DialogFragment#onCancel onCancel()} は<em>呼び出されません</em>。
+
+
+通常は、ユーザーがダイアログの<em>ポジティブ</em>ボタンを押すときに、{@link android.support.v4.app.DialogFragment#dismiss dismiss()} を呼び出して、ビューからダイアログが削除されるようにしてください。
+
+</p>
+
+

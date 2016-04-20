@@ -27,8 +27,7 @@ page.metaDescription=Starting point for building apps for Auto, with guidelines,
   For more information, follow the links below to learn how to extend your Android app to support
   use in vehicles.
 </p>
-
-
+ 
 <h2 id="overview">Get Started</h2>
 
 <p>
@@ -81,4 +80,21 @@ page.metaDescription=Starting point for building apps for Auto, with guidelines,
   data-query="collection:training/auto/distribute"
   data-cardSizes="9x3"
   data-maxResults="6">
+</div>
+
+<h2 id="training">Video Training</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-1of2">
+      <p>If you prefer to learn through interactive video training,
+      check out this online course about extending your apps to work with Android Auto.</p>
+      <p><a href="https://www.udacity.com/course/ud875C" class="button">
+        Start the video course</a>
+      </p>
+    </div>
+    <div class="col-1of2">
+      <iframe width="300" height="169" src="https://www.youtube.com/embed/pK2HQMTdq6Y?utohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+    </div>
+  </div>
 </div>

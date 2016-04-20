@@ -1,0 +1,812 @@
+page.title=프래그먼트
+parent.title=액티비티
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>이 문서의 내용</h2>
+  <ol>
+    <li><a href="#Design">디자인 철학</a></li>
+    <li><a href="#Creating">프래그먼트 생성</a>
+      <ol>
+        <li><a href="#UI">사용자 인터페이스 추가하기</a></li>
+        <li><a href="#Adding">액티비티에 프래그먼트 추가</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">프래그먼트 관리</a></li>
+    <li><a href="#Transactions">프래그먼트 트랜잭션 수행</a></li>
+    <li><a href="#CommunicatingWithActivity">액티비티와 통신</a>
+      <ol>
+        <li><a href="#EventCallbacks">액티비티로의 이벤트 콜백 생성</a></li>
+        <li><a href="#ActionBar">작업 모음에 항목 추가</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">프래그먼트 수명 주기 처리</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">액티비티 수명 주기와 조화</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">예</a></li>
+  </ol>
+
+  <h2>Key 클래스</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+  
+  <h2>참고 항목</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">프래그먼트로 동적 UI 구축하기</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">태블릿
+및 핸드셋 지원</a></li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment}는 동작 또는 
+{@link android.app.Activity} 내에서 사용자 인터페이스의 일부를 나타냅니다. 여러 개의 프래그먼트를 하나의 액티비티에 
+조합하여 창이 여러 개인 UI를 구축할 수 있으며, 하나의 프래그먼트를 여러 액티비티에서 재사용할 수 있습니다. 프래그먼트는 자체 수명 주기를 가지고, 자체 입력 이벤트를 받으며, 
+액티비티 실행 중에 추가 및 제거가 가능한 액티비티의 모듈식 섹션이라고 
+생각하면 됩니다(다른 액티비티에 
+재사용할 수 있는 "하위 액티비티"와 같은 개념).</p>
+
+<p>프래그먼트는 항상 액티비티 내에 포함되어 있어야 하며 해당 프래그먼트의 수명 주기는 
+호스트 액티비티의 수명 주기에 직접적으로 영향을 받습니다. 예를 들어 액티비티가 일시정지되는 경우, 그 안의 모든 프래그먼트도 
+일시정지되며 액티비티가 소멸되면 모든 프래그먼트도 마찬가지로 소멸됩니다. 그러나 액티비티가 실행 중인 
+동안에는(<em>재개됨</em> <a href="{@docRoot}guide/components/activities.html#Lifecycle">수명 주기 상태</a>에 있을 때를 말합니다) 
+각 프래그먼트를 추가 또는 제거하는 등 개별적으로 조작할 수 있습니다. 그와 같은 프래그먼트 트랜잭션을 
+수행할 때에는 이를 액티비티가 관리하는 백 스택에도 
+추가할 수 있습니다. 각 백 스택 항목이 발생한 프래그먼트 트랜잭션의 
+기록이 됩니다. 이 백 스택을 사용하면 사용자가 프래그먼트 트랜잭션을 거꾸로 돌릴 수 있습니다(뒤로 이동).
+이때 <em>뒤로</em> 버튼을 누르면 됩니다.</p>
+
+<p>프래그먼트를 액티비티 레이아웃의 일부로 추가하는 경우, 이는 액티비티의 보기 계층 내부의 {@link
+android.view.ViewGroup} 안에 살며, 해당 프래그먼트가 자신의 보기 
+레이아웃을 정의합니다.
+프래그먼트를 액티비티 레이아웃에 삽입하려면 해당 프래그먼트를 
+액티비티의 레이아웃 파일에서 {@code &lt;fragment&gt;} 요소로 선언하거나, 애플리케이션 코드에서 이를 
+기존의 {@link android.view.ViewGroup}에 추가하면 됩니다. 그러나 프래그먼트가 
+액티비티 레이아웃의 일부분이어야만 하는 것은 아닙니다. 나름의 UI가 없는 프래그먼트도 액티비티를 위한 
+보이지 않는 작업자로 사용할 수 있습니다.</p>
+
+<p>이 문서에서는 프래그먼트를 사용하도록 애플리케이션을 구축하는 법을 
+설명합니다. 그중에는 프래그먼트를 액티비티의 백 스택에 추가했을 때 프래그먼트가 자신의 상태를 유지하는 방법, 
+액티비티 및 액티비티 내의 다른 프래그먼트와 이벤트를 공유하는 방법과 액티비티의 
+작업 모음에 참가하는 법 등등 여러 가지가 포함됩니다.</p>
+
+
+<h2 id="Design">디자인 철학</h2>
+
+<p>Android가 프래그먼트를 처음 도입한 것은 Android 3.0(API 레벨 11)부터입니다. 기본적으로 
+태블릿과 같은 큰 화면에서 보다 역동적이고 유연한 UI 디자인을 지원하는 것이 목적이었습니다. 태블릿의 화면은 
+핸드셋 화면보다 훨씬 크기 때문에 UI 구성 요소를 조합하고 상호 교환할 공간이 
+더 많습니다. 프래그먼트는 개발자가 보기 계층에 복잡한 변경 내용을 관리하지 않아도 
+그러한 디자인을 사용할 수 있도록 해주는 것입니다. 한 액티비티의 레이아웃을 여러 프래그먼트로 나누면 
+런타임에 액티비티의 외관을 수정할 수도 있고 그러한 변경 내용을 해당 액티비티가 관리하는 
+백 스택에 보존할 수도 있습니다.</p>
+
+<p>예를 들어 뉴스 애플리케이션이라면 하나의 프래그먼트를 사용하여 
+왼쪽에 기사 목록을 표시하도록 하고 또 다른 프래그먼트로 오른쪽에 기사 내용을 표시하도록 할 수 있습니다. 두 프래그먼트 모두 
+한 액티비티에서 양쪽으로 나란히 나타나며, 각 프래그먼트에 나름의 수명 주기 콜백 메서드가 있고 
+각자 사용자 입력 이벤트를 따로 처리하게 됩니다. 따라서, 사용자는 기사를 선택하는 데 한 액티비티를 쓰고 
+기사를 읽는 데 또 다른 액티비티를 선택하는 대신에 같은 액티비티 안에서 기사를 선택하고 읽는 과정을 
+모두 끝낼 수 있는 것입니다. 이것은 그림 1에 나타낸 태블릿 레이아웃과 같습니다.</p>
+
+<p>프래그먼트를 디자인할 때에는 각 프래그먼트를 모듈식이며 재사용 가능한 액티비티 구성 요소로 만들어야 합니다. 
+다시 말해, 각 프래그먼트가 나름의 레이아웃을 따로 정의하고 자기만의 수명 주기 콜백으로 자기 나름의 동작을 정의하기 때문에 
+한 프래그먼트를 여러 액티비티에 포함시킬 수 있습니다. 그러므로 재사용을 염두에 두고 디자인하며 
+한 프래그먼트를 또 다른 프래그먼트로부터 직접 조작하는 것은 삼가야 합니다. 이것은 특히 모듈식 프래그먼트를 사용하면 
+프래그먼트 조합을 여러 가지 화면 크기에 맞춰 변경할 수 있도록 해주기 때문에 중요한 요점입니다. 태블릿과 핸드셋을 모두 지원하는 
+애플리케이션을 디자인하는 경우, 사용 가능한 화면 공간을 토대로 사용자 경험을 최적화하도록 프래그먼트를 
+여러 레이아웃 구성에 재사용할 수 있습니다. 예를 들어 핸드셋에서의 경우 
+프래그먼트를 분리해서 단일 창 UI를 제공하도록 해야할 수 있습니다. 같은 액티비티 안에 하나 이상이 들어가지 않을 수 
+있기 때문입니다.</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>그림 1.</strong> 프래그먼트가 정의한 두 가지 UI 모듈이 
+태블릿 디자인에서는 하나의 액티비티로 조합될 수 있는 반면 핸드셋 디자인에서는 분리될 수 있다는 것을 
+예시로 나타낸 것입니다.</p>
+
+<p>예를 들어&mdash;뉴스 애플리케이션 예시를 계속 사용하겠습니다&mdash;이 애플리케이션을 태블릿 크기의 기기에서 실행하는 경우, 
+애플리케이션 내의 <em>액티비티 A</em> 안에 두 개의 프래그먼트를 포함시킬 수 있습니다. 그러나 
+핸드셋 크기의 화면에서라면 두 프래그먼트를 모두 쓸 만큼 공간이 충분치 않습니다. 
+따라서 <em>액티비티 A</em>에는 기사 목록에 해당되는 프래그먼트만 포함하고, 사용자가 기사를 하나 선택하면 이것이 
+<em>액티비티 B</em>를 시작합니다. 여기에 기사를 읽을 두 번째 프래그먼트가 포함되어 있습니다. 따라서 이 애플리케이션은 
+서로 다른 조합으로 프래그먼트를 재사용함으로써 태블릿과 핸드셋을 둘 다 지원하는 
+것입니다(그림 1 참조).</p>
+
+<p>여러 가지 화면 구성에 맞게 여러 가지 프래그먼트 조합으로 애플리케이션을 디자인하는 법에 대한 자세한 정보는 
+<a href="{@docRoot}guide/practices/tablets-and-handsets.html">태블릿 및 핸드셋 지원</a>에 대한 가이드를 참조하십시오.</p>
+
+
+
+<h2 id="Creating">프래그먼트 생성</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>그림 2.</strong> 프래그먼트의 수명 주기(
+소속 액티비티가 실행 중일 때).</p>
+</div>
+
+<p>프래그먼트를 생성하려면 {@link android.app.Fragment}의 하위 클래스(또는 이의 기존
+하위 클래스)를 생성해야 합니다. {@link android.app.Fragment} 클래스에는 
+{@link android.app.Activity}와 아주 유사해 보이는 코드가 있습니다. 여기에는 액티비티와 비슷한 콜백 메서드가 들어 있습니다. 
+예를 들어 {@link android.app.Fragment#onCreate onCreate()}, {@link android.app.Fragment#onStart onStart()},
+{@link android.app.Fragment#onPause onPause()} 및 {@link android.app.Fragment#onStop onStop()} 등입니다. 사실, 
+기존 Android 애플리케이션을 변환하여 프래그먼트를 사용하도록 하려면 그저 
+액티비티의 콜백 메서드에서 프래그먼트에 해당되는 콜백 메서드로 코드를 옮기기만 하면 
+될 수도 있습니다.</p>
+
+<p>보통은 최소한 다음과 같은 수명 주기 메서드를 구현해야 합니다.</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>시스템은 프래그먼트를 생성할 때 이것을 호출합니다. 구현 내에서 프래그먼트의 기본 구성 요소 중 
+프래그먼트가 일시정지되거나 중단되었다가 재개되었을 때 유지하고자 하는 것을 
+초기화해야 합니다.</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>시스템은 프래그먼트가 자신의 사용자 인터페이스를 처음으로 그릴 시간이 되면 
+이것을 호출합니다. 프래그먼트에 맞는 UI를 그리려면 메서드에서 {@link android.view.View}를 반환해야 합니다. 
+이 메서드는 프래그먼트 레이아웃의 루트입니다. 프래그먼트가 UI를 제공하지 않는 경우 null을 반환하면 
+됩니다.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>시스템이 이 메서드를 호출하는 것은 사용자가 프래그먼트를 떠난다는 
+첫 번째 신호입니다(다만 이것이 항상 프래그먼트가 소멸 중이라는 뜻은 아닙니다). 현재 사용자 세션을 넘어서 
+지속되어야 하는 변경 사항을 커밋하려면 보통 이곳에서 해아 합니다(사용자가 
+돌아오지 않을 수 있기 때문입니다).</dd>
+</dl>
+
+<p>대부분의 애플리케이션은 각각의 프래그먼트에 이와 같은 메서드를 최소한 세 개씩 
+구현해야 하지만, 프래그먼트 수명 주기의 여러 단계를 처리하려면 사용해야 하는 다른 콜백 메서드도 
+많이 있습니다. 모든 수명 주기 콜백 메서드는 나중에 
+<a href="#Lifecycle">프래그먼트 수명 주기 처리</a> 섹션에서 더욱 상세히 논의할 것입니다.</p>
+
+
+<p>이외에도, 기본적인 {@link
+android.app.Fragment} 클래스 대신 확장하고자 하는 하위 클래스도 몇 개 있을 수 있습니다.</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>부동 대화 창을 표시합니다. 이 클래스를 사용하여 대화를 생성하면 
+{@link android.app.Activity} 클래스의 대화 도우미 메서드를 사용하는 것의 
+좋은 대안책이 됩니다. 이렇게 하면 프래그먼트 대화를 액티비티가 관리하는 프래그먼트의 백 스택에 통합시킬 수 있어, 
+사용자가 무시된 프래그먼트를 반환할 수 있도록 해주기 때문입니다.</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>어댑터가 관리하는 항목의 목록(예: {@link
+android.widget.SimpleCursorAdapter})을 표시하며, {@link android.app.ListActivity}와 비슷합니다. 
+이것은 목록 보기를 관리하는 데 쓰는 몇 가지 메서드를 제공합니다. 예를 들어 {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()} 콜백을 
+제공하여 클릭 이벤트를 처리하는 것 등입니다.</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>{@link android.preference.Preference} 객체의 계층을 목록으로 표시하며, 
+{@link android.preference.PreferenceActivity}와 비슷합니다. 이것은 
+애플리케이션에 대한 "설정" 액티비티를 생성할 때 유용합니다.</dd>
+</dl>
+
+
+<h3 id="UI">사용자 인터페이스 추가하기</h3>
+
+<p>프래그먼트는 일반적으로 액티비티에 속한 사용자 인터페이스의 일부분으로 사용되며 
+자기 나름의 레이아웃으로 액티비티에 참가합니다.</p>
+
+<p>프래그먼트에 대해 레이아웃을 제공하려면 반드시 {@link
+android.app.Fragment#onCreateView onCreateView()} 콜백 메서드를 구현해야 합니다. 
+이것은 프래그먼트가 자신의 레이아웃을 그릴 때가 되면 Android 시스템이 호출하는 것입니다. 이 메서드의 구현은 반드시 
+{@link android.view.View}를 반환해야 합니다. 이것은 프래그먼트 레이아웃의 루트입니다.</p>
+
+<p class="note"><strong>참고:</strong> 프래그먼트가 {@link
+android.app.ListFragment}의 하위 클래스인 경우, 기본 구현이 
+{@link android.app.Fragment#onCreateView onCreateView()}로부터 {@link android.widget.ListView}를 반환하므로 이를 구현하지 않아도 됩니다.</p>
+
+<p>{@link
+android.app.Fragment#onCreateView onCreateView()}로부터 레이아웃을 반환하려면 이를 XML에서 정의된 <a href="{@docRoot}guide/topics/resources/layout-resource.html">레이아웃 리소스</a>로부터 팽창시키면 됩니다. 이를 돕기 위해 
+{@link android.app.Fragment#onCreateView onCreateView()}가 
+{@link android.view.LayoutInflater} 객체를 제공합니다.</p>
+
+<p>예를 들어 다음은 {@link android.app.Fragment}의 하위 클래스입니다. 이것이 
+{@code example_fragment.xml} 파일로부터 레이아웃을 로딩합니다.</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>레이아웃 생성</h3>
+  <p>위의 샘플에서 {@code R.layout.example_fragment}는 
+애플리케이션 리소스에 저장된 {@code example_fragment.xml}이라는 레이아웃 리소스에 대한 참조입니다. 레이아웃을 
+XML로 생성하는 방법에 대한 정보는 <a href="{@docRoot}guide/topics/ui/index.html">사용자 인터페이스</a>
+ 문서를 참조하십시오.</p>
+</div>
+</div>
+
+<p>{@link android.app.Fragment#onCreateView
+onCreateView()}로 전달된 {@code container} 매개변수가 상위 {@link android.view.ViewGroup}이며(액티비티의 레이아웃으로부터), 
+이 안에 프래그먼트 레이아웃이 삽입됩니다.
+ {@code savedInstanceState} 매개변수는 일종의 {@link android.os.Bundle}로, 
+이것은 프래그먼트가 재개되는 중인 경우 프래그먼트의 이전 인스턴스에 대한 데이터를 
+제공합니다(상태를 복원하는 것은 <a href="#Lifecycle">프래그먼트 수명 주기 
+처리</a>에서 좀 더 논의합니다).</p>
+
+<p>{@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()} 메서드는 
+다음과 같은 세 개의 인수를 취합니다.</p>
+<ul>
+  <li>팽창시키고자 하는 레이아웃의 리소스 ID.</li>
+  <li>팽창된 레이아웃의 상위가 될 {@link android.view.ViewGroup}. {@code
+container}를 전달해야 시스템이 레이아웃 매개변수를 팽창된 레이아웃의 루트 보기에 실행 중인 상위 보기에서 지정한 것과 같이 
+적용할 수 있으므로 이는 중요한 부분입니다.</li>
+  <li>팽창된 레이아웃이 팽창 중에 {@link
+android.view.ViewGroup}(두 번째 매개변수)에 첨부되어야 하는지를 나타내는 부울 값 (이 경우, 
+이것은 거짓입니다. 시스템이 이미 팽창된 레이아웃을 {@code
+container} 안에 삽입하고 있기 때문입니다. 참을 전달하면 최종 레이아웃에 중복된 보기 그룹을 생성하게 됩니다).</li>
+</ul>
+
+<p>이제 레이아웃을 제공하는 프래그먼트 생성하는 법을 알게 되셨습니다. 다음은 프래그먼트를 
+액티비티에 추가해야 합니다.</p>
+
+
+
+<h3 id="Adding">액티비티에 프래그먼트 추가</h3>
+
+<p>프래그먼트는 보통 UI의 일부분으로 호스트 액티비티에 참가합니다. 이는 해당 액티비티의 
+전반적인 보기 계층의 일부분으로 포함되게 됩니다. 프래그먼트를 액티비티 레이아웃에 추가하는 데에는 두 가지 방법이 
+있습니다.</p>
+
+<ul>
+  <li><b>프래그먼트를 액티비티의 레이아웃 파일 안에서 선언합니다.</b>
+<p>이 경우, 프래그먼트에 대한 레이아웃 속성을 마치 
+보기인 것처럼 나타낼 수 있습니다. 예를 들어 다음은 프래그먼트가 두 개 있는 
+한 액티비티에 대한 레이아웃 파일을 나타낸 것입니다.</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>{@code &lt;fragment&gt;} 안의 {@code android:name} 속성이 레이아웃 안에서 인스턴트화할 {@link
+android.app.Fragment} 클래스를 나타냅니다.</p>
+
+<p>시스템은 이 액티비티 레이아웃을 생성할 때 레이아웃에서 지정된 각 프래그먼트를 인스턴트화하며 각각에 대해 
+{@link android.app.Fragment#onCreateView onCreateView()} 메서드를 
+호출하여 각 프래그먼트의 레이아웃을 검색합니다. 시스템은 프래그먼트가 반환한 {@link android.view.View}를 
+{@code &lt;fragment&gt;} 요소 자리에 곧바로 삽입합니다.</p>
+
+<div class="note">
+  <p><strong>참고:</strong> 각 프래그먼트에는 액티비티가 재시작되는 경우 
+프래그먼트를 복구하기 위해 시스템이 사용할 수 있는 고유한 식별자가 필요합니다(그리고, 개발자는 이것을 사용하여 프래그먼트를 캡처해 
+이를 제거하는 등 여러 가지 트랜잭션을 수행할 수 있습니다). 프래그먼트에 ID를 제공하는 데에는 
+다음과 같은 세 가지 방법이 있습니다.</p>
+  <ul>
+    <li>고유한 ID와 함께 {@code android:id} 속성을 제공합니다.</li>
+    <li>고유한 문자열과 함께 {@code android:tag} 속성을 제공합니다.</li>
+    <li>위의 두 가지 중 어느 것도 제공하지 않으면, 시스템은 컨테이너 보기의 ID를 
+사용합니다.</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>또는, 프로그래밍 방식으로 프래그먼트를 기존의 {@link android.view.ViewGroup}에 추가합니다.</b>
+<p>액티비티가 실행 중인 동안에는 언제든 액티비티 레이아웃에 프래그먼트를 추가할 수 있습니다. 그저 프래그먼트를 배치할 
+{@link
+android.view.ViewGroup}를 지정하기만 하면 됩니다.</p>
+  <p>액티비티 내에서 프래그먼트 트랜잭션을 수행하려면(프래그먼트 추가, 제거 또는 
+교체 등), {@link android.app.FragmentTransaction}에서 가져온 API를 사용해야 합니다. 
+{@link android.app.FragmentTransaction}의 인스턴스를 {@link android.app.Activity}에서 가져오는 방법은 다음과 같습니다.</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>그런 다음 {@link
+android.app.FragmentTransaction#add(int,Fragment) add()} 메서드를 사용하여 프래그먼트를 추가하고, 추가할 프래그먼트와 이를 삽입할 
+보기를 지정하면 됩니다. 예:</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>{@link android.app.FragmentTransaction#add(int,Fragment) add()}에 
+전달되는 첫 인수가 {@link android.view.ViewGroup}입니다. 
+여기에 프래그먼트가 리소스 ID가 지정한 바와 같이 배치되어야 하며, 두 번째 매개변수는 추가할 프래그먼트입니다.</p>
+  <p>
+{@link android.app.FragmentTransaction}을 변경하고 나면, 반드시 
+{@link android.app.FragmentTransaction#commit}을 호출해야 변경 내용이 적용됩니다.</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">UI 없이 프래그먼트 추가</h4>
+
+<p>위의 예시에서는 UI를 제공하기 위해 프래그먼트를 액티비티에 추가하는 방법을 보여드렸습니다. 하지만 
+추가로 UI를 제시하지 않고 액티비티에 대한 배경 동작을 제공하는 데에도 프래그먼트를 사용할 수 
+있습니다.</p>
+
+<p>UI 없이 프래그먼트를 추가하려면 액티비티로부터 가져온 프래그먼트를 {@link
+android.app.FragmentTransaction#add(Fragment,String)}을 사용하여 추가합니다(이때, 프래그먼트에 대해 
+보기 ID보다는 고유한 문자열 "태그"를 제공합니다). 이렇게 하면 프래그먼트가 추가되지만, 
+이것은 액티비티 레이아웃 안에 있는 보기와 연관되어 있지 않기 때문에 {@link
+android.app.Fragment#onCreateView onCreateView()}로의 호출은 받지 않습니다. 따라서 그 메서드는 구현하지 않아도 됩니다.</p>
+
+<p>프래그먼트에 대해 문자열 태그를 제공하는 것은 엄밀히 말해 비 UI 프래그먼트에만 해당되는 것은 아닙니다. UI가 있는 
+프래그먼트에도 문자열 태그를 제공할 수 있습니다. 하지만 프래그먼트에 
+UI가 없는 경우라면 이를 식별할 방법은 문자열 태그뿐입니다. 액티비티에서 나중에 
+프래그먼트를 가져오고자 하는 경우, {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}를 사용해야 합니다.</p>
+
+<p>예를 들어 어떤 액티비티에서 UI 없이 프래그먼트를 배경 작업자로 사용한다고 가정해봅시다. 이것의 예로 {@code
+FragmentRetainInstance.java} 샘플을 들 수 있으며 
+이는 SDK 샘플에 포함되어 있고(Android SDK Manager를 통해 이용 가능), 시스템에는 
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>로 찾을 수 있습니다.</p>
+
+
+
+<h2 id="Managing">프래그먼트 관리</h2>
+
+<p>액티비티 내의 프래그먼트를 관리하려면 {@link android.app.FragmentManager}를 사용해야 합니다. 이것을 
+가져오려면 액티비티에서 {@link android.app.Activity#getFragmentManager()}를 호출하십시오.</p>
+
+<p>{@link android.app.FragmentManager}를 가지고 할 수 있는 여러 가지 일 중에 예를 들면 다음과 같습니다.</p>
+
+<ul>
+  <li>액티비티 내에 존재하는 프래그먼트를 {@link
+android.app.FragmentManager#findFragmentById findFragmentById()}로 가져오기(액티비티 레이아웃 내에서 
+UI를 제공하는 프래그먼트의 경우) 또는 {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}로 가져오기(UI를 제공하거나 하지 않는 프래그먼트의 경우).</li> 
+  <li>백 스택에서 프래그먼트를 {@link
+android.app.FragmentManager#popBackStack()}을 사용하여 튀어나오게 하기(사용자가 내린 <em>뒤로</em> 명령을 시뮬레이트함).</li>
+  <li>백 스택에 변경 내용이 있는지 알아보기 위해 {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()}로 수신기 등록하기.</li>
+</ul>
+
+<p>이와 같은 메서드와 그 외 다른 메서드에 대한 자세한 정보는 {@link
+android.app.FragmentManager} 클래스 관련 문서를 참조하십시오.</p>
+
+<p>이전 섹션에서 설명한 바와 같이 {@link android.app.FragmentManager}를 
+사용해서도 {@link android.app.FragmentTransaction}
+을 열 수 있습니다. 이렇게 하면 프래그먼트 추가 및 제거 등 트랜잭션을 수행할 수 있게 해줍니다.</p>
+
+
+<h2 id="Transactions">프래그먼트 트랜잭션 수행</h2>
+
+<p>액티비티에서 프래그먼트를 사용하는 경우 특히 유용한 점은 사용자 상호 작용에 응답하여 추가, 
+제거, 교체 및 다른 작업을 수행할 수 있다는 것입니다. 액티비티에 적용한 
+변경 내용의 집합을 하나의 트랜잭션이라 칭합니다. 이것을 수행하려면 {@link
+android.app.FragmentTransaction} 내의 API를 사용하면 됩니다. 해당 액티비티가 관리하는 백 스택에 행해진 각 트랜잭션을 
+저장할 수도 있습니다. 이렇게 하면 사용자가 프래그먼트 변경 내역을 거쳐 뒤로 탐색할 수 있습니다(액티비티를 통과해 
+뒤로 탐색하는 것과 비슷합니다).</p>
+
+<p>{@link android.app.FragmentTransaction}의 인스턴스를 {@link
+android.app.FragmentManager}로부터 가져오는 방법은 다음과 같습니다.</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>각 트랜잭션은 동시에 수행하고자 하는 여러 변경을 집합적으로 일컫는 말입니다. 주어진 
+트랜잭션에 대해 수행하고자 하는 모든 변경 사항을 설정하려면 {@link
+android.app.FragmentTransaction#add add()}, {@link android.app.FragmentTransaction#remove remove()},
+및 {@link android.app.FragmentTransaction#replace replace()}와 같은 메서드를 사용하면 됩니다. 그런 다음, 
+트랜잭션을 액티비티에 적용하려면 반드시 {@link android.app.FragmentTransaction#commit()}을 호출해야 합니다.</p>
+</dl>
+
+<p>하지만 {@link
+android.app.FragmentTransaction#commit()}을 호출하기 전에 먼저 호출해야 할 것이 있습니다. 바로 {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}입니다. 
+이렇게 해야 트랜잭션을 프래그먼트 트랜잭션의 백 스택에 추가할 수 있습니다. 이 백 스택을 액티비티가 관리하며, 
+이를 통해 사용자가 이전 프래그먼트 상태로 되돌아갈 수 있습니다. 이때 <em>뒤로</em> 버튼을 누르면 됩니다.</p>
+
+<p>예를 들어 다음은 한 프래그먼트를 다른 것으로 교체하고 이전 상태를 백 스택에 보존하는 법을 
+나타낸 것입니다.</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>이 예시에서 {@code newFragment}가 현재 레이아웃 컨테이너에 있는 
+프래그먼트(있는 경우)를 교체합니다. 이는 {@code R.id.fragment_container} ID로 식별할 수 있습니다. {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}를 호출하면 교체 트랜잭션이 
+백 스택에 저장되고, 따라서 사용자가 트랜잭션을 거꾸로 수행하여 
+이전 프래그먼트를 도로 가져올 수 있습니다. <em>뒤로</em> 버튼을 사용하면 됩니다.</p>
+
+<p>트랜잭션에 여러 개의 변경을 추가하고(예를 들어 또 다른 {@link
+android.app.FragmentTransaction#add add()} 또는 {@link android.app.FragmentTransaction#remove
+remove()}) {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}을 호출하면, {@link android.app.FragmentTransaction#commit commit()}을 호출하기 전에 적용된 모든 변경 내용이 
+백 스택에 하나의 트랜잭션으로 추가되며, <em>뒤로</em> 버튼을 누르면 
+모두 한꺼번에 역행하게 됩니다.</p>
+
+<p>{@link android.app.FragmentTransaction}에 변경 내용을 추가하는 순서는 중요하지 않습니다. 
+다만 다음과 같은 예외가 있습니다.</p>
+<ul>
+  <li>{@link android.app.FragmentTransaction#commit()}을 마지막으로 호출해야만 합니다.</li>
+  <li>같은 컨테이너에 여러 개의 프래그먼트를 추가하는 경우, 이를 추가하는 순서가 이들이 
+보기 계층에 나타나는 순서를 결정 짓습니다.</li>
+</ul>
+
+<p>프래그먼트를 제거하는 트랜잭션을 수행하면서 {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()}을 호출하지 않는 경우, 
+해당 프래그먼트는 트랜잭션이 적용되면 소멸되고 사용자가 이를 되짚어 탐색할 수 없게 됩니다. 반면에 
+프래그먼트를 제거하면서 {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}을 호출하면, 
+해당 프래그먼트는 <em>중단</em>되고 사용자가 뒤로 탐색하면 
+재개됩니다.</p>
+
+<p class="note"><strong>팁:</strong> 각 프래그먼트 트랜잭션에 대해 전환 애니메이션을 적용하려면 
+커밋하기 전에 {@link android.app.FragmentTransaction#setTransition setTransition()}을 
+호출하면 됩니다.</p>
+
+<p>{@link android.app.FragmentTransaction#commit()}을 호출해도 그 즉시 트랜잭션을 수행하지는 
+않습니다. 그보다는, 액티비티의 UI 스레드("주요" 스레드)를 스레드가 할 수 있는 한 빨리 
+이 트랜잭션을 수행하도록 일정을 예약하는 것에 가깝습니다. 하지만 필요한 경우 UI 스레드로부터 {@link
+android.app.FragmentManager#executePendingTransactions()}를 호출하면 
+{@link android.app.FragmentTransaction#commit()}이 제출한 트랜잭션을 즉시 실행할 수 있습니다. 트랜잭션이 
+다른 스레드의 작업에 대한 종속성이 아니라면 굳이 이렇게 해야만 하는 것은 아닙니다.</p>
+
+<p class="caution"><strong>주의:</strong> 트랜잭션을 적용할 때 {@link
+android.app.FragmentTransaction#commit commit()}을 사용해도 되는 것은 액티비티가 <a href="{@docRoot}guide/components/activities.html#SavingActivityState">그 상태를 
+저장</a>하기 전뿐입니다(사용자가 액티비티를 떠날 때). 그 시점 이후에 적용하려고 하면 예외가 
+발생합니다. 이것은 액티비티를 복원해야 하는 경우 적용 이후의 상태가 손실될 수 
+있기 때문입니다. 적용이 손실되어도 괜찮은 상황이라면, {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()}를 사용하십시오.</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">액티비티와 통신</h2>
+
+<p>{@link android.app.Fragment}는 
+{@link android.app.Activity}로부터 독립적인 객체로 구현되었고 여러 개의 액티비티 안에서 사용할 수 있는 것이 사실이지만, 
+프래그먼트의 주어진 인스턴스는 그것을 포함하고 있는 액티비티에 직접적으로 연결되어 있습니다.</p>
+
+<p>구체적으로 말하면, 이 프래그먼트는 {@link
+android.app.Fragment#getActivity()}를 사용하여 {@link android.app.Activity} 인스턴스에 액세스하여 
+액티비티 레이아웃에서 보기를 찾는 것과 같은 작업을 손쉽게 수행할 수 있습니다.</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>이와 마찬가지로, 액티비티도 프래그먼트 안의 메서드를 호출할 수 있습니다. 그러려면 {@link android.app.FragmentManager}로부터의 
+{@link android.app.Fragment}에 대한 참조를 가져와야 하며, 이때 {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} 또는 {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()}를 사용합니다. 예:</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">액티비티로의 이벤트 콜백 생성</h3>
+
+<p>어떤 경우에는 프래그먼트로 하여금 액티비티와 이벤트를 공유하게 해야 할 수 있습니다. 이렇게 하기 위한 
+한 가지 좋은 방법은 프래그먼트 내부의 콜백 인터페이스를 정의한 다음 해당 호스트 액티비티가 이를 구현하도록 
+하는 것입니다. 액티비티가 인터페이스를 통해 콜백을 수신하면, 필요에 따라 그 정보를 레이아웃 내의 
+다른 프래그먼트와 공유할 수 있습니다.</p>
+
+<p>예를 들어 어떤 뉴스 애플리케이션에서 액티비티 하나에 프래그먼트가 두 개 있습니다. 
+ 하나는 기사 목록을 표시(프래그먼트 A)하고 다른 하나는 기사 하나를 표시(프래그먼트 B)하는 경우 목록 항목이 선택되면 
+프래그먼트 A가 액티비티에 알려야 프래그먼트 B에 해당 기사를 표시하라고 알릴 수 있습니다. 이 경우, 
+{@code OnArticleSelectedListener} 인터페이스는 프래그먼트 A 내부에 선언됩니다.</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>그러면 프래그먼트를 호스팅하는 액티비티가 {@code OnArticleSelectedListener}
+ 인터페이스를 
+구현하고 {@code onArticleSelected()}를 재정의하여 프래그먼트 A로부터 일어난 이벤트를 
+프래그먼트 B에 알립니다. 호스트 액티비티가 이 인터페이스를 구현하도록 
+확실히 하려면 프래그먼트 A의 {@link
+android.app.Fragment#onAttach onAttach()} 콜백 메서드(프래그먼트를 액티비티에 추가할 때 시스템이 호출하는 것)가 {@code OnArticleSelectedListener}의 인스턴스를 인스턴트화해야 합니다. 이때 {@link android.app.Fragment#onAttach
+onAttach()} 안으로 전달된 {@link android.app.Activity}를 
+캐스팅하는 방법을 씁니다.</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>액티비티가 인터페이스를 구현하지 않은 경우, 프래그먼트가 
+{@link java.lang.ClassCastException}을 발생시킵니다. 
+성공 시, {@code mListener} 구성원이 액티비티의 
+{@code OnArticleSelectedListener} 구현에 대한 참조를 보유하므로, 프래그먼트 A가 액티비티와 이벤트를 공유할 수 있습니다. 
+이때 {@code OnArticleSelectedListener} 인터페이스가 정의한 메서드를 호출하는 방법을 씁니다. 예를 들어 프래그먼트 A가 
+{@link android.app.ListFragment}의 확장인 경우, 
+사용자가 목록 항목을 클릭할 때마다 시스템이 프래그먼트 안의 {@link android.app.ListFragment#onListItemClick
+onListItemClick()}을 호출하고, 그러면 이것이 {@code onArticleSelected()}를 호출하여 
+해당 이벤트를 액티비티와 공유하는 것입니다.</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>{@link
+android.app.ListFragment#onListItemClick onListItemClick()}에 전달된 {@code id} 매개변수가 클릭한 항목의 행 ID이며, 
+액티비티(또는 다른 프래그먼트)가 이것을 사용해 애플리케이션의 {@link
+android.content.ContentProvider}에서 기사를 가져옵니다.</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->콘텐츠 제공자 사용법에 대한 자세한 정보는 
+<a href="{@docRoot}guide/topics/providers/content-providers.html">콘텐츠 제공자</a> 문서에서 이용하실 수 있습니다.</p>
+
+
+
+<h3 id="ActionBar">작업 모음에 항목 추가</h3>
+
+<p>프래그먼트는 액티비티의 <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">옵션 메뉴</a>에(결과적으로 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a>에도) 메뉴 항목으로 참가할 수 있습니다. 이때 
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}를 구현하는 방법을 씁니다. 이 메서드가 
+호출을 수신하도록 하려면, {@link
+android.app.Fragment#onCreate(Bundle) onCreate()} 중에 {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()}를 호출하여 프래그먼트가 
+옵션 메뉴에 항목을 추가하고자 한다는 것을 나타내야 합니다(그렇지 않으면 해당 프래그먼트가 
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}로의 호출을 받지 못하게 됩니다).</p>
+
+<p>그런 다음 프래그먼트로부터 옵션 메뉴에 추가하는 모든 항목은 기존의 메뉴 항목에 
+추가됩니다. 해당 프래그먼트는 메뉴 항목을 선택하면 {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}로의 콜백도 
+수신하게 됩니다.</p>
+
+<p>또한 프래그먼트 레이아웃에 보기를 등록하여 컨텍스트 메뉴를 제공하도록 할 수도 있습니다. 이때 {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}를 호출하면 됩니다. 사용자가 컨텍스트 메뉴를 열면, 
+해당 프래그먼트가 {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()}로의 호출을 받습니다. 사용자가 항목을 하나 선택하면, 해당 프래그먼트는 {@link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()}로의 호출을 받습니다.</p>
+
+<p class="note"><strong>참고:</strong> 프래그먼트는 추가한 각 메뉴 항목에 대해 '항목 선택됨' 콜백을 
+하나씩 받게 되지만, 사용자가 메뉴 항목을 선택할 때 그에 상응하는 콜백을 가장 처음 받는 것은 
+액티비티입니다. 액티비티가 구현한 '항목 선택됨' 콜백이 선택된 항목을 다루지 않는 경우, 
+해당 이벤트는 프래그먼트의 콜백으로 전달됩니다. 이것은 
+옵션 메뉴와 컨텍스트 메뉴에 모두 참입니다.</p>
+
+<p>메뉴에 대한 더 자세한 정보는 <a href="{@docRoot}guide/topics/ui/menus.html">메뉴</a> 및 <a href="{@docRoot}guide/topics/ui/actionbar.html">작업 모음</a> 개발자 가이드를 참조하십시오.</p>
+
+
+
+
+<h2 id="Lifecycle">프래그먼트 수명 주기 처리</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>그림 3.</strong> 액티비티 수명 주기가 프래그먼트 수명 주기에 미치는 
+영향입니다.</p>
+</div>
+
+<p>프래그먼트의 수명 주기를 관리하는 것은 액티비티의 수명 주기를 관리하는 것과 매우 비슷합니다. 액티비티와 마찬가지로 
+프래그먼트는 세 가지 상태로 존재할 수 있습니다.</p>
+
+<dl>
+  <dt><i>재개됨</i></dt>
+    <dd>프래그먼트가 실행 중인 액티비티에 표시됩니다.</dd>
+
+  <dt><i>일시정지됨</i></dt>
+    <dd>또 다른 액티비티가 전경에 나와 있고 사용자가 이에 초점을 맞추고 있지만, 
+이 프래그먼트가 있는 액티비티도 여전히 표시되어 있습니다(전경의 액티비티가 부분적으로 투명하거나 
+전체 화면을 뒤덮지 않습니다).</dd>
+
+  <dt><i>정지됨</i></dt>
+    <dd>프래그먼트가 표시되지 않습니다. 호스트 액티비티가 정지되었거나 
+프래그먼트가 액티비티에서 제거되었지만 백 스택에 추가되었습니다. 정지된 프래그먼트도 
+여전히 표시는 됩니다(모든 상태 및 구성원 정보를 시스템이 보존합니다). 하지만, 사용자에게는 
+더 이상 표시되지 않으며 액티비티를 종료하면 이것도 종료됩니다.</dd>
+</dl>
+
+<p>이번에도 액티비티와 마찬가지로, 프래그먼트의 상태를 보존하려면 {@link
+android.os.Bundle}을 사용합니다. 이는 혹시나 액티비티의 프로세스가 종료되고 액티비티를 
+다시 만들 때 해당 프래그먼트의 상태를 복구해야 할 필요가 있을 때를 대비하는 것입니다. 상태를 저장하려면 프래그먼트의 {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} 콜백 중에 저장할 수 있고, 복구는 
+{@link android.app.Fragment#onCreate onCreate()}, {@link
+android.app.Fragment#onCreateView onCreateView()} 또는 {@link
+android.app.Fragment#onActivityCreated onActivityCreated()} 중 한 가지가 진행되는 동안 할 수 있습니다. 상태 저장에 관한 자세한 정보는 
+<a href="{@docRoot}guide/components/activities.html#SavingActivityState">액티비티</a>
+문서를 참조하십시오.</p>
+
+<p>액티비티와 프래그먼트의 수명 주기에서 가장 중대한 차이점은 
+해당되는 백 스택에 저장되는 방법입니다. 액티비티는 중단되었을 때 시스템이 관리하는 
+액티비티 백 스택 안에 배치되는 것이 기본입니다(따라서 사용자가 <em>뒤로</em> 버튼을 사용하여 다시 이 액티비티로 
+뒤로 탐색할 수 있습니다. 이 내용은 <a href="{@docRoot}guide/components/tasks-and-back-stack.html">작업 및 백 스택</a>에서 설명하였습니다). 
+하지만, 프래그먼트가 호스트 액티비티가 관리하는 백 스택 안에 배치되는 것은 해당 인스턴스를 저장하라고 명시적으로 요청하는 경우뿐입니다. 
+이때 프래그먼트를 제거하는 트랜잭션 중 {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()}을 
+호출합니다.</p>
+
+<p>이것만 제외하면, 프래그먼트 수명 주기를 관리하는 것은 액티비티의 수명 주기를 관리하는 것과 
+아주 비슷합니다. 따라서, <a href="{@docRoot}guide/components/activities.html#Lifecycle">액티비티 
+수명 주기 관리</a>에 쓰이는 실례가 프래그먼트에도 똑같이 적용되는 것입니다. 하지만 또 한 가지 이해해두어야 하는 것이 있습니다. 즉, 
+액티비티의 수명이 프래그먼트의 수명에 어떤 영향을 미치는지를 알아두어야 합니다.</p>
+
+<p class="caution"><strong>주의:</strong> {@link android.app.Fragment} 내에서 {@link android.content.Context} 
+객체가 필요한 경우, {@link android.app.Fragment#getActivity()}를 호출하면 됩니다. 
+그러나 {@link android.app.Fragment#getActivity()}를 호출하는 것은 프래그먼트가 액티비티에
+ 첨부되어 있는 경우뿐이니 유의하십시오. 프래그먼트가 아직 첨부되지 않았거나 수명 주기가 끝날 무렵 분리된 경우, 
+{@link android.app.Fragment#getActivity()}가 null을 반환합니다.</p>
+
+
+<h3 id="CoordinatingWithActivity">액티비티 수명 주기와 조화</h3>
+
+<p>프래그먼트가 있는 액티비티의 수명 주기는 해당 프래그먼트의 수명 주기에 직접적인 
+영향을 미칩니다. 따라서 액티비티에 대한 각 수명 주기 콜백이 각 프래그먼트에 대한 비슷한 콜백을 
+유발합니다. 예를 들어 액티비티가 {@link android.app.Activity#onPause}를 받으면, 
+해당 액티비티 내의 각 프래그먼트가 {@link android.app.Fragment#onPause}를 받습니다.</p>
+
+<p>하지만 프래그먼트에는 몇 가지 수명 주기 콜백이 더 있습니다. 이것은 액티비티와의 
+고유한 상호 작용을 다루어 프래그먼트의 UI를 구축하고 소멸시키는 것과 같은 
+작업을 수행합니다. 이러한 추가적인 콜백 메서드를 예로 들면 다음과 같습니다.</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>프래그먼트가 액티비티와 연관되어 있었던 경우 호출됩니다(여기에서 {@link
+android.app.Activity}가 전달됩니다).</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>프래그먼트와 연관된 보기 계층을 생성하기 위해 호출됩니다.</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>액티비티의 {@link android.app.Activity#onCreate
+onCreate()} 메서드가 반환되면 호출됩니다.</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>프래그먼트와 연관된 보기 계층이 제거되는 중일 때 호출됩니다.</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>프래그먼트가 액티비티와 연결이 끊어지는 중일 때 호출됩니다.</dd>
+</dl>
+
+<p>호스트 액티비티의 영향을 받을 프래그먼트 수명 주기의 흐름은 그림 3에서 
+확인하십시오. 이 그림을 보면 액티비티의 각 연속된 상태가 프래그먼트가 어느 
+콜백 메서드를 받게 되는지 결정 짓는다는 것을 볼 수 있습니다. 예를 들어 액티비티가 자신의 {@link
+android.app.Activity#onCreate onCreate()} 콜백을 받은 경우, 해당 액티비티 안에 있는 프래그먼트는 
+{@link android.app.Fragment#onActivityCreated onActivityCreated()} 콜백을 받을 뿐입니다.</p>
+
+<p>액티비티가 재개된 상태에 도달하면 자유자재로 프래그먼트를 액티비티에 추가하거나 액티비티에서 
+제거해도 됩니다. 따라서, 액티비티가 재개된 상태에 있는 동안에만 프래그먼트의 수명 주기를 
+독립적으로 변경할 수 있는 것입니다.</p>
+
+<p>그러나 액티비티가 재개된 상태를 떠나면 액티비티는 다시 프래그먼트를 그 수명 주기 안으로 
+밀어넣습니다.</p>
+
+
+
+
+<h2 id="Example">예</h2>
+
+<p>이 문서에서 논의한 모든 것을 한 번에 모아 보기 위해, 다음은 두 개의 프래그먼트를 사용하여 
+창이 두 개인 레이아웃을 생성하는 액티비티를 예시로 나타낸 것입니다. 아래의 액티비티에 포함된 
+한 프래그먼트는 셰익스피어 희곡 제목 목록을 표시하고, 또 다른 하나는 목록에서 선택했을 때 
+해당 희곡의 요약을 표시합니다. 또한 화면 구성을 근거로 프래그먼트를 여러 가지로 구성하여 제공하는 방법도 
+보여줍니다.</p>
+
+<p class="note"><strong>참고:</strong> 이 액티비티에 대한 완전한 소스 코드는 
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>에서 이용하실 수 있습니다.</p>
+
+<p>주요 액티비티는 {@link
+android.app.Activity#onCreate onCreate()} 중에 일반적인 방식으로 레이아웃을 적용합니다.</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>적용된 레이아웃은 {@code fragment_layout.xml}입니다.</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>시스템은 이 레이아웃을 사용하여 액티비티가 레이아웃을 로딩하자마자 {@code TitlesFragment}를 초기화합니다(이것이 희곡 제목을 
+목록으로 나열합니다). 반면 {@link android.widget.FrameLayout}
+(희곡 요약을 표시하는 프래그먼트가 배치될 곳)은 화면 오른쪽에 있는 
+공간을 차지하기는 하지만 처음에는 텅 빈 상태로 유지됩니다. 아래에서 볼 수 있듯이, 사용자가 해당 목록에서 
+항목을 하나 선택해야만 프래그먼트가 {@link android.widget.FrameLayout} 안에 배치됩니다.</p>
+
+<p>그러나 희곡 목록과 요약을 둘 다 나란히 표시할 만큼 너비가 넓지 않은 
+화면 구성도 있습니다. 따라서 위의 레이아웃은 가로 방향 화면 구성에만 사용되며, 
+이를 {@code res/layout-land/fragment_layout.xml}에 저장하여 씁니다.</p>
+
+<p>그러므로 화면이 세로 방향으로 구성된 경우, 시스템은 다음 레이아웃을 적용합니다. 이것은 
+{@code res/layout/fragment_layout.xml}에 저장되어 있습니다.</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>이 레이아웃에는 {@code TitlesFragment}만 포함되어 있습니다. 이는 다시 말해 기기가 세로 방향인 경우에는 
+희곡 제목 목록만 표시된다는 뜻입니다. 따라서 사용자가 이 구성에서 목록 항목을 하나 클릭하면, 
+애플리케이션이 두 번째 프래그먼트를 로딩하는 대신 새 액티비티를 시작하여 요약을 
+표시하게 됩니다.</p>
+
+<p>다음으로, 프래그먼트 클래스에서 이것을 달성하는 방법을 보시겠습니다. 첫 번째가 {@code
+TitlesFragment}로, 셰익스피어 희곡 제목 목록을 표시하는 것입니다. 이 프래그먼트는 {@link
+android.app.ListFragment}를 확장하며 목록 보기 작업의 대부분을 처리하기 위해 여기에 의존합니다.</p>
+
+<p>이 코드를 살펴보면서 사용자가 목록 항목을 클릭하면 일어날 수 있는 두 가지 동작이 
+있다는 점을 눈여겨 보십시오. 두 레이아웃 중 어느 것이 활성화 상태인지에 따라 
+같은 액티비티 내에서 세부 사항을 표시하기 위해 새 프래그먼트를 생성하거나 표시할 수도 있고(프래그먼트를 {@link
+android.widget.FrameLayout}에 추가함으로써), 새 액티비티를 시작할 수도 있습니다(프래그먼트를 표시할 수 있는 곳).</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>두 번째 프래그먼트인 {@code DetailsFragment}는 {@code TitlesFragment}에서 가져온 목록에서 선택한 항목에 대한 희곡 요약을 
+표시하는 것입니다.</p>
+ 
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>{@code TitlesFragment} 클래스에서 다룬 것을 되살려 보면, 사용자가 목록 항목을 클릭하고 
+현재 레이아웃이 {@code R.id.details} 보기를 포함하지 <em>않는</em> 경우(이 보기가 
+{@code DetailsFragment}가 속하는 곳임), 애플리케이션은 항목의 내용을 표시하기 위해 {@code DetailsActivity}
+ 액티비티를 시작하게 됩니다.</p>
+
+<p>다음은 화면이 세로 방향으로 구성되어 있을 때 선택한 희곡의 요약을 표시하기 위해 단순히 {@code DetailsFragment}를
+ 포함할 뿐인 {@code DetailsActivity}입니다.</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+ 
+<p>이 액티비티는 구성이 가로 방향인 경우 알아서 종료한다는 점을 눈여겨 보십시오. 따라서 
+주요 액티비티가 작업을 인계 받아 {@code DetailsFragment}를 {@code TitlesFragment}와 함께 표시할 수 있는 것입니다.
+이것은 사용자가 세로 방향 구성에서 {@code DetailsActivity}를 시작했지만 
+그런 다음 가로 방향으로 돌리는 경우(현재 액티비티를 다시 시작함) 일어날 수 있습니다.</p>
+
+
+<p>프래그먼트 사용에 대한 더 많은 샘플(및 이 예시에 대한 완전한 소스 파일)을 보시려면 
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+ApiDemos</a>에서 이용할 수 있는 API Demos 샘플 앱을 참조하십시오(<a href="{@docRoot}resources/samples/get.html">샘플 SDK 구성 요소</a>에서 다운로드할 수 있습니다).</p>
+
+

@@ -71,13 +71,13 @@ trainingnavtop=true
   block.</p>
 
 <p>This lesson requires only coarse location. Request this permission with the
-  {@code uses-permission} element in your app manifest, as shown in the
-  following example:
+  {@code uses-permission} element in your app manifest, as the following code
+  snippet shows:
 
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.gms.location.sample.basiclocationsample" &gt;
-  
+
   &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/&gt;
 &lt;/manifest&gt;
 </pre>
@@ -92,23 +92,45 @@ trainingnavtop=true
 </p>
 
 <p>In your activity's {@link android.app.Activity#onCreate onCreate()} method,
-  create an instance of Google API Client using
-  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code GoogleApiClient.Builder}</a>.
-  Use the builder to add the
-  <a href="{@docRoot}reference/com/google/android/gms/location/LocationServices.html">{@code LocationServices}</a>
-  API.</p>
-
-<p>The sample app defines a {@code buildGoogleApiClient()} method, called from
-  the activity's {@link android.app.Activity#onCreate onCreate()} method,
-  which includes the following code.</p>
+  create an instance of Google API Client, using the
+  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">{@code GoogleApiClient.Builder}</a> class to add the
+  <a href="{@docRoot}reference/com/google/android/gms/location/LocationServices.html">
+  {@code LocationServices}</a>
+  API, as the following code snippet shows.</p>
 
 <pre>
-protected synchronized void buildGoogleApiClient() {
+// Create an instance of GoogleAPIClient.
+if (mGoogleApiClient == null) {
     mGoogleApiClient = new GoogleApiClient.Builder(this)
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
         .addApi(LocationServices.API)
         .build();
+}
+</pre>
+
+<p>To connect, call
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient#connect()">
+  {@code connect()}</a>
+  from the activity's
+  <a href="{@docRoot}reference/android/app/Activity.html#onStart()">{@code onStart()}</a>
+  method. To disconnect, call
+  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient#disconnect()">
+  {@code disconnect()}</a> from the activity's
+  <a href="{@docRoot}reference/android/app/Activity.html#onStop()">
+  {@code onStop()}</a> method. The following snippet shows an example of how
+  to use both of these methods.
+  </p>
+
+<pre>
+protected void onStart() {
+    mGoogleApiClient.connect();
+    super.onStart();
+}
+
+protected void onStop() {
+    mGoogleApiClient.disconnect();
+    super.onStop();
 }
 </pre>
 
@@ -130,7 +152,7 @@ protected synchronized void buildGoogleApiClient() {
   object. Do this in the
   <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">{@code onConnected()}</a>
   callback provided by Google API Client, which is called when the client is
-  ready. The following code sample illustrates the request and a simple
+  ready. The following code snippet illustrates the request and a simple
   handling of the response:</p>
 
 <pre>
@@ -158,5 +180,6 @@ public class MainActivity extends ActionBarActivity implements
   when the location is not available.</p>
 
 <p>The next lesson,
-  <a href="receive-location-updates.html">Receiving Location Updates</a>, shows
-  you how to receive periodic location updates.</p>
+  <a href="change-location-settings.html">Changing Location Settings</a>, shows
+  you how to detect the current location settings, and prompt the user to
+  change settings as appropriate for your app's requirements.</p>

@@ -1,0 +1,77 @@
+page.title=Remember The Milk lifts installs with tablet design
+page.metaDescription=The team at Remember The Milk redesigned their app for tablets.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/remember-the-milk.jpg
+page.timestamp=1456340902
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/rememberthemilk-icon.png"
+  height="113" />
+</div>
+
+<p>
+  When the Android tablet guidelines came out, the team at Remember The Milk had
+  already been thinking about a redesign for
+  <a class="external-link"
+  href="http://play.google.com/store/apps/details?id=com.rememberthemilk.MobileRTM">
+  Remember The Milk</a> their feature-packed to-do list app; never forget the
+  milk (or anything else) again.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  “We took this as an opportunity to think about how we were going to approach
+  Android tablets differently from a user experience perspective,” says Omar
+  Kilani, Co-founder of Remember The Milk. “The guidelines were a helpful
+  resource, and with the extra screen real estate tablets afford, users have
+  the opportunity to see all of their data in context and drill down on more
+  items."
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:367px">
+  <img
+   src="{@docRoot}images/distribute/stories/rememberthemilk-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/rememberthemilk-screenshot.png 1x
+  {@docRoot}images/distribute/stories/rememberthemilk-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Tablet version of Remember The Milk
+  </p>
+</div>
+
+<p>
+  In addition to the basic changes to bring the app to tablets, the team also
+  came out with a number of other goodies — including a new set of widgets and
+  richer notifications, and more ways to provide an immersive experience for
+  their users. And importantly, following the guidelines meant they could
+  deliver a <b>single APK for phones and tablets</b>.
+</p>
+
+<p>
+  Following the
+  <a class="external-link"
+  href="http://blog.rememberthemilk.com/2013/04/the-all-new-remember-the-milk-for-android-and-tablets-too/">
+  update</a> of the Android app, in part to meet the tablet design criteria,
+  Remember The Milk saw an <b>83% increase in tablet installs</b>. They also
+  noted that Nexus 7 was theat most popular Android device for the app.
+</p>
+
+<p>
+  Omar Kilani, concludesd that “For us, designing for tablets was an investment that has really paid off.”
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about creating a tablet version of your app by reviewing the
+  <a href="http://developer.android.com/distribute/essentials/quality/tablets.html">
+  Tablet App Quality</a> guidelines and growing your user base.
+</p>

@@ -50,5 +50,7 @@ just your own.</p>
     and uses that information to communicate with the user.  The example will
     use a text-to-speech engine to speak to the user.</dd>
 
+    <dt><b><a href="testing.html">Accessibility Checklist</a></b></dt>
+    <dd>Learn how to test your app for accessibility.</dd>
 </dl>
 

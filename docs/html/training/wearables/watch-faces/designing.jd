@@ -65,7 +65,7 @@ full color and animations.</dd>
 technology, you may need to avoid large blocks of white pixels, use only black and white, and
 disable anti-aliasing.</dd>
 
-<dt><em>Accomodate system UI elements</em></dt>
+<dt><em>Accommodate system UI elements</em></dt>
 <dd>Your design should ensure that system indicators remain visible and that users can still
 read the time when notification cards appear on the screen.</dd>
 

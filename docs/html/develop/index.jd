@@ -13,6 +13,12 @@ excludeFromSuggestions=true
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <!--
+        <iframe width="448" height="252"
+            src="//www.youtube.com/embed/Z98hXV9GmzY?autohide=1&amp;showinfo=0"
+            frameborder="0" allowfullscreen=""
+            style="float: right;"></iframe>
+        -->
         <img class="dac-hero-image" src="{@docRoot}images/develop/hero_image_studio5_2x.png"
           srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x" />
       </div>
@@ -53,15 +59,15 @@ excludeFromSuggestions=true
   </a>
 </div>
 
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+<section class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
-       data-query="collection:develop/landing/latest"
-       data-sortOrder="-timestamp"
-       data-cardSizes="6x6"
-       data-maxResults="12"
-       data-initial-results="3"></div>
+    data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
@@ -74,7 +80,25 @@ excludeFromSuggestions=true
        data-cardSizes="6x6"
        data-maxResults="15"
        data-initial-results="3"
+       data-items-per-page="6"
        data-sortOrder="random"></div>
+</div></section>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Android development patterns</h1>
+  <div class="dac-section-subtitle">
+    Fundamental components and best practices that can help you build better apps.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/devpatterns"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Playlist
+    </a></li>
+  </ul>
 </div></section>
 
 <section class="dac-section dac-section-light"><div class="wrap">
@@ -97,7 +121,7 @@ excludeFromSuggestions=true
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Ubiquitous computing on Android</h1>
   <div class="dac-section-subtitle">
-    A great experience for your users across devices. 
+    A great experience for your users across devices.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/ubicomp"
@@ -128,5 +152,6 @@ excludeFromSuggestions=true
        data-sortOrder="random"
        data-cardSizes="6x6"
        data-initial-results="6"
-       data-maxResults="12"></div>
+       data-items-per-page="24"
+       data-maxResults="24"></div>
 </div></section>

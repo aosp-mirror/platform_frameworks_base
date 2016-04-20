@@ -2,7 +2,7 @@ page.title=Swipe Views
 page.tags=viewpager,navigation,tabs
 @jd:body
 
-<a class="notice-developers" href="{@docRoot}training/implementing-navigation/lateral.html">
+<a class="notice-developers right" href="{@docRoot}training/implementing-navigation/lateral.html">
   <div>
     <h3>Developer Docs</h3>
     <p>Creating Swipe Views with Tabs</p>
@@ -20,7 +20,7 @@ browsing and consuming data a more fluent experience.</p>
 related data items, such as images, chats, or emails, and then pick one of the items to see the
 detail contents in a separate screen.</p>
 
-<img src="{@docRoot}design/media/swipe_views.png">
+<img itemprop="image" src="{@docRoot}design/media/swipe_views.png">
 <div class="figure-caption">
   Master (left) and detail (right) views.
 </div>

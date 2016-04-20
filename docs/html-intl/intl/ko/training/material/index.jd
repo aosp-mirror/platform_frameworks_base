@@ -1,0 +1,61 @@
+page.title=개발자를 위한 머티리얼 디자인
+page.type=design
+page.image=images/cards/material_2x.png
+page.metaDescription=Learn how to apply material design to your apps.
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>종속 사항 및 전제조건</h2>
+  <ul>
+    <li>Android 5.0(API 레벨 21)</li>
+  </ul>
+</div>
+</div>
+
+<p>머티리얼 디자인은 플랫폼 및 기기 전반의 표현 방식, 모션 및 상호 작용 디자인에 대한 종합적인 지침입니다.
+ Android 앱에서 머티리얼 디자인을 사용하려면
+<a href="http://www.google.com/design/spec/material-design/introduction.html">머티리얼 디자인 사양</a>에 설명된 지침을 따르고 Android 5.0(API 레벨 21)에서 제공되는 새 구성 요소 및 기능들을 활용하세요.
+
+
+</p>
+
+<p>이 클래스에서는 다음 요소를 사용하여 머티리얼 디자인 앱을 만드는 방법을 보여줍니다.</p>
+
+<ul>
+<li>머티리얼 테마</li>
+<li>목록 및 카드용 위젯</li>
+<li>사용자지정 그림자 및 뷰 클리핑</li>
+<li>벡터 드로어블</li>
+<li>사용자지정 애니메이션</li>
+</ul>
+
+<p>또한 이 클래스에서는 앱에서 머티리얼 디자인 기능을 사용할 때
+Android 5.0(API 레벨 21) 이전 버전과의 호환성을 유지하는 방법도 배웁니다.</p>
+
+<h2>과정</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">시작하기</a></dt>
+  <dd>머티리얼 디자인 기능을 사용하여 앱을 업데이트하는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">머티리얼 테마 사용</a></dt>
+  <dd>앱에 머티리얼 디자인 스타일을 적용하는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">목록 및 카드 생성</a></dt>
+  <dd>시스템 위젯을 사용하여 일관된 모양과 느낌을 가진 목록과 카드를 만드는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">그림자 정의 및 뷰 클리핑</a></dt>
+  <dd>뷰에 대한 엘리베이션을 설정하여 사용자지정 그림자를 생성하는 방법과 뷰를 클리핑하는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">드로어블 사용</a></dt>
+  <dd>벡터 드로어블을 생성하는 방법과 드로어블 리소스를 채색하는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">사용자지정 애니메이션 정의</a></dt>
+  <dd>공유 요소를 사용하여 뷰 및 액티비티 전환을 위한 사용자지정 애니메이션을 생성하는 방법을 배웁니다.</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">호환성 유지</a></dt>
+  <dd>Android 5.0 이전 버전 플랫폼과의 호환성을 유지하는 방법을 배웁니다.</dd>
+</dl>
