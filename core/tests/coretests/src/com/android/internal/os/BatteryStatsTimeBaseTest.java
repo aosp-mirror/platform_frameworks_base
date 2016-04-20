@@ -18,11 +18,10 @@ package com.android.internal.os;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 import android.util.Log;
 
 import junit.framework.Assert;
