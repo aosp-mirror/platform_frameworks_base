@@ -27,7 +27,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-import com.android.internal.annotations.GuardedBy;
 
 import java.util.List;
 
@@ -46,8 +45,6 @@ public abstract class RecommendationService extends Service {
     /**
      * The {@link Intent} action that must be declared as handled by a service in its manifest for
      * the system to recognize it as a print service recommendation service.
-     *
-     * @hide
      */
     public static final String SERVICE_INTERFACE =
             "android.printservice.recommendation.RecommendationService";
