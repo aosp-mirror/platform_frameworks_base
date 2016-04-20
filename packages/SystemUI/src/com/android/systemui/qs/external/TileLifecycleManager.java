@@ -148,13 +148,20 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (DEBUG) Log.d(TAG, "onServiceConnected " + name);
         // Got a connection, set the binding count to 0.
         mBindTryCount = 0;
-        mWrapper = new QSTileServiceWrapper(Stub.asInterface(service));
+        final QSTileServiceWrapper wrapper = new QSTileServiceWrapper(Stub.asInterface(service));
         try {
             service.linkToDeath(this, 0);
         } catch (RemoteException e) {
         }
-        setQSService(mService);
-        setQSTile(mTile);
+        if (!wrapper.setQSService(mService)) {
+            handleDeath();
+            return;
+        }
+        if (!wrapper.setQSTile(mTile)) {
+            handleDeath();
+            return;
+        }
+        mWrapper = wrapper;
         handlePendingMessages();
     }
 
