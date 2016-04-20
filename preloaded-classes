@@ -1613,6 +1613,7 @@ android.os.AsyncTask$Status
 android.os.AsyncTask$WorkerRunnable
 android.os.BadParcelableException
 android.os.BaseBundle
+android.os.BaseBundle$NoImagePreloadHolder
 android.os.BatteryManager
 android.os.Binder
 android.os.BinderProxy
