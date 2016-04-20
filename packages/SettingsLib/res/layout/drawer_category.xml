@@ -28,7 +28,8 @@
     <TextView
         android:id="@android:id/title"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
         android:paddingStart="16dp"
