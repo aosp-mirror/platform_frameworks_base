@@ -161,8 +161,10 @@ public final class TvInputManagerService extends SystemService {
         PackageMonitor monitor = new PackageMonitor() {
             private void buildTvInputList(String[] packages) {
                 synchronized (mLock) {
-                    buildTvInputListLocked(getChangingUserId(), packages);
-                    buildTvContentRatingSystemListLocked(getChangingUserId());
+                    if (mCurrentUserId == getChangingUserId()) {
+                        buildTvInputListLocked(mCurrentUserId, packages);
+                        buildTvContentRatingSystemListLocked(mCurrentUserId);
+                    }
                 }
             }
 
