@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -26,12 +27,12 @@ public class InputMethodSubtypeHandle {
     private final String mInputMethodId;
     private final int mSubtypeId;
 
-    public InputMethodSubtypeHandle(InputMethodInfo info, InputMethodSubtype subtype) {
+    public InputMethodSubtypeHandle(InputMethodInfo info, @Nullable InputMethodSubtype subtype) {
         mInputMethodId = info.getId();
         if (subtype != null) {
             mSubtypeId = subtype.hashCode();
         } else {
-            mSubtypeId = 0;
+            mSubtypeId = InputMethodUtils.NOT_A_SUBTYPE_ID;
         }
     }
 
