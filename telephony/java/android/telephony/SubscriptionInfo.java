@@ -90,6 +90,14 @@ public class SubscriptionInfo implements Parcelable {
     private int mDataRoaming;
 
     /**
+     * Sim Provisioning Status:
+     * {@See SubscriptionManager#SIM_PROVISIONED}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_COLD}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_OUT_OF_CREDIT}
+     */
+    private int mSimProvisioningStatus;
+
+    /**
      * SIM Icon bitmap
      */
     private Bitmap mIconBitmap;
@@ -114,7 +122,7 @@ public class SubscriptionInfo implements Parcelable {
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
-            Bitmap icon, int mcc, int mnc, String countryIso) {
+            Bitmap icon, int mcc, int mnc, String countryIso, int simProvisioningStatus) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -128,6 +136,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mMcc = mcc;
         this.mMnc = mnc;
         this.mCountryIso = countryIso;
+        this.mSimProvisioningStatus = simProvisioningStatus;
     }
 
     /**
@@ -264,6 +273,17 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
+     * @return Sim Provisioning Status
+     * {@See SubscriptionManager#SIM_PROVISIONED}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_COLD}
+     * {@See SubscriptionManager#SIM_UNPROVISIONED_OUT_OF_CREDIT}
+     * @hide
+     */
+    public int getSimProvisioningStatus() {
+        return this.mSimProvisioningStatus;
+    }
+
+    /**
      * @return the MCC.
      */
     public int getMcc() {
@@ -299,10 +319,12 @@ public class SubscriptionInfo implements Parcelable {
             int mcc = source.readInt();
             int mnc = source.readInt();
             String countryIso = source.readString();
+            int simProvisioningStatus = source.readInt();
             Bitmap iconBitmap = Bitmap.CREATOR.createFromParcel(source);
 
             return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName,
-                    nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso);
+                    nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso,
+                    simProvisioningStatus);
         }
 
         @Override
@@ -325,6 +347,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
         dest.writeString(mCountryIso);
+        dest.writeInt(mSimProvisioningStatus);
         mIconBitmap.writeToParcel(dest, flags);
     }
 
@@ -355,6 +378,6 @@ public class SubscriptionInfo implements Parcelable {
                 + " displayName=" + mDisplayName + " carrierName=" + mCarrierName
                 + " nameSource=" + mNameSource + " iconTint=" + mIconTint
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
-                + " mnc " + mMnc + "}";
+                + " mnc " + mMnc + " SimProvisioningStatus " + mSimProvisioningStatus +"}";
     }
 }

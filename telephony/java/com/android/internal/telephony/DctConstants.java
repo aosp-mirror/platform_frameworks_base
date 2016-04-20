@@ -103,6 +103,7 @@ public class DctConstants {
     public static final int EVENT_DATA_RAT_CHANGED = BASE + 41;
     public static final int CMD_CLEAR_PROVISIONING_SPINNER = BASE + 42;
     public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 43;
+    public static final int EVENT_REDIRECTION_DETECTED = BASE + 44;
 
     /***** Constants *****/
 
