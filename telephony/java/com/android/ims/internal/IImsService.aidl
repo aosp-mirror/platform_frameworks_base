@@ -38,7 +38,18 @@ interface IImsService {
     void close(int serviceId);
     boolean isConnected(int serviceId, int serviceType, int callType);
     boolean isOpened(int serviceId);
+
+    /**
+     * Replace existing registration listener
+     *
+     */
     void setRegistrationListener(int serviceId, in IImsRegistrationListener listener);
+
+    /**
+     * Add new registration listener
+     */
+    void addRegistrationListener(int phoneId, int serviceClass,
+            in IImsRegistrationListener listener);
 
     ImsCallProfile createCallProfile(int serviceId, int serviceType, int callType);
 
