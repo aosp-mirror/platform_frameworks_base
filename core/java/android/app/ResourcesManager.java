@@ -224,7 +224,7 @@ public class ResourcesManager {
      * @return a new AssetManager.
     */
     @VisibleForTesting
-    protected AssetManager createAssetManager(@NonNull final ResourcesKey key) {
+    protected @NonNull AssetManager createAssetManager(@NonNull final ResourcesKey key) {
         AssetManager assets = new AssetManager();
 
         // resDir can be null if the 'android' package is creating a new Resources object.
@@ -232,14 +232,15 @@ public class ResourcesManager {
         // already.
         if (key.mResDir != null) {
             if (assets.addAssetPath(key.mResDir) == 0) {
-                return null;
+                throw new IllegalArgumentException("failed to add asset path " + key.mResDir);
             }
         }
 
         if (key.mSplitResDirs != null) {
             for (final String splitResDir : key.mSplitResDirs) {
                 if (assets.addAssetPath(splitResDir) == 0) {
-                    return null;
+                    throw new IllegalArgumentException(
+                            "failed to add split asset path " + splitResDir);
                 }
             }
         }
