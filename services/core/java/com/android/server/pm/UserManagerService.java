@@ -667,6 +667,8 @@ public class UserManagerService extends IUserManager.Stub {
             long identity = Binder.clearCallingIdentity();
             try {
                 if (enableQuietMode) {
+                    LocalServices.getService(ActivityManagerInternal.class)
+                            .killForegroundAppsForUser(userHandle);
                     ActivityManagerNative.getDefault().stopUser(userHandle, /* force */true, null);
                 } else {
                     ActivityManagerNative.getDefault().startUserInBackground(userHandle);
