@@ -58,8 +58,8 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
-import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -176,7 +176,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     BatteryStatsService(File systemDir, Handler handler) {
         // Our handler here will be accessing the disk, use a different thread than
         // what the ActivityManagerService gave us (no I/O on that one!).
-        mHandler = new BatteryStatsHandler(FgThread.getHandler().getLooper());
+        final ServiceThread thread = new ServiceThread("batterystats-sync",
+                Process.THREAD_PRIORITY_DEFAULT, true);
+        thread.start();
+        mHandler = new BatteryStatsHandler(thread.getLooper());
 
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
         mStats = new BatteryStatsImpl(systemDir, handler, mHandler);
@@ -209,6 +212,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.shutdownLocked();
         }
+
+        // Shutdown the thread we made.
+        mHandler.getLooper().quit();
     }
     
     public static IBatteryStats getService() {
