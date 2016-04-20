@@ -610,7 +610,7 @@ public abstract class Window {
      * Callback for clients that want frame timing information for each
      * frame rendered by the Window.
      */
-    public interface FrameMetricsListener {
+    public interface OnFrameMetricsAvailableListener {
         /**
          * Called when information is available for the previously rendered frame.
          *
@@ -629,7 +629,7 @@ public abstract class Window {
          * @param dropCountSinceLastInvocation the number of reports dropped since the last time
          * this callback was invoked.
          */
-        void onMetricsAvailable(Window window, FrameMetrics frameMetrics,
+        void onFrameMetricsAvailable(Window window, FrameMetrics frameMetrics,
                 int dropCountSinceLastInvocation);
     }
 
@@ -829,7 +829,8 @@ public abstract class Window {
      *
      * Must be in hardware rendering mode.
      */
-    public final void addFrameMetricsListener(@NonNull FrameMetricsListener listener,
+    public final void addOnFrameMetricsAvailableListener(
+            @NonNull OnFrameMetricsAvailableListener listener,
             Handler handler) {
         final View decorView = getDecorView();
         if (decorView == null) {
@@ -846,7 +847,7 @@ public abstract class Window {
     /**
      * Remove observer and stop listening to frame stats for this window.
      */
-    public final void removeFrameMetricsListener(FrameMetricsListener listener) {
+    public final void removeOnFrameMetricsAvailableListener(OnFrameMetricsAvailableListener listener) {
         final View decorView = getDecorView();
         if (decorView != null) {
             getDecorView().removeFrameMetricsListener(listener);
