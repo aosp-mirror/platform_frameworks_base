@@ -38,12 +38,10 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         XmlUtils.WriteMapCallback {
     private static final String TAG_PERSISTABLEMAP = "pbundle_as_map";
     public static final PersistableBundle EMPTY;
-    static final Parcel EMPTY_PARCEL;
 
     static {
         EMPTY = new PersistableBundle();
         EMPTY.mMap = ArrayMap.EMPTY;
-        EMPTY_PARCEL = BaseBundle.EMPTY_PARCEL;
     }
 
     /** @hide */
@@ -278,7 +276,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     @Override
     synchronized public String toString() {
         if (mParcelledData != null) {
-            if (mParcelledData == EMPTY_PARCEL) {
+            if (isEmptyParcel()) {
                 return "PersistableBundle[EMPTY_PARCEL]";
             } else {
                 return "PersistableBundle[mParcelledData.dataSize=" +
