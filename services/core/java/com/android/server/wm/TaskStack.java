@@ -126,6 +126,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private WindowState mImeWin;
     private float mMinimizeAmount;
     private float mAdjustImeAmount;
+    private float mAdjustDividerAmount;
     private final int mDockedStackMinimizeThickness;
 
     // If this is true, we are in the bounds animating mode.
@@ -853,7 +854,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (!mAdjustedForIme) {
             mAdjustedForIme = true;
             mAdjustImeAmount = 0f;
-            updateAdjustForIme(0f, true /* force */);
+            mAdjustDividerAmount = 0f;
+            updateAdjustForIme(0f, 0f, true /* force */);
         }
     }
 
@@ -873,9 +875,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
      *
      * @return true if a traversal should be performed after the adjustment.
      */
-    boolean updateAdjustForIme(float adjustAmount, boolean force) {
-        if (adjustAmount != mAdjustImeAmount || force) {
+    boolean updateAdjustForIme(float adjustAmount, float adjustDividerAmount, boolean force) {
+        if (adjustAmount != mAdjustImeAmount
+                || adjustDividerAmount != mAdjustDividerAmount || force) {
             mAdjustImeAmount = adjustAmount;
+            mAdjustDividerAmount = adjustDividerAmount;
             updateAdjustedBounds();
             return isVisibleForUserLocked();
         } else {
@@ -895,6 +899,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mAdjustedForIme = false;
             mImeGoingAway = false;
             mAdjustImeAmount = 0f;
+            mAdjustDividerAmount = 0f;
             updateAdjustedBounds();
             mService.setResizeDimLayer(false, mStackId, 1.0f);
         } else {
@@ -992,25 +997,27 @@ public class TaskStack implements DimLayer.DimLayerUser,
                     (int) (mAdjustImeAmount * bottom + (1 - mAdjustImeAmount) * mBounds.bottom);
             mFullyAdjustedImeBounds.set(mBounds);
         } else {
-            final int top;
-            final boolean isFocusedStack = mService.getFocusedStackLocked() == this;
-            if (isFocusedStack) {
-                // If this stack is docked on bottom and has focus, we shift it up so that it's not
-                // occluded by IME. We try to move it up by the height of the IME window, but only
-                // to the extent that leaves at least 30% of the top stack visible.
-                final int minTopStackBottom =
-                        getMinTopStackBottom(displayContentRect, mBounds.top - dividerWidth);
-                top = Math.max(
-                        mBounds.top - yOffset, minTopStackBottom + dividerWidthInactive);
-            } else {
-                // If this stack is docked on bottom but doesn't have focus, we don't need to adjust
-                // for IME, but still need to apply a small adjustment due to the thinner divider.
-                top = mBounds.top - dividerWidth + dividerWidthInactive;
-            }
+            // When the stack is on bottom and has no focus, it's only adjusted for divider width.
+            final int dividerWidthDelta = dividerWidthInactive - dividerWidth;
+
+            // When the stack is on bottom and has focus, it needs to be moved up so as to
+            // not occluded by IME, and at the same time adjusted for divider width.
+            // We try to move it up by the height of the IME window, but only to the extent
+            // that leaves at least 30% of the top stack visible.
+            // 'top' is where the top of bottom stack will move to in this case.
+            final int topBeforeImeAdjust = mBounds.top - dividerWidth + dividerWidthInactive;
+            final int minTopStackBottom =
+                    getMinTopStackBottom(displayContentRect, mBounds.top - dividerWidth);
+            final int top = Math.max(
+                    mBounds.top - yOffset, minTopStackBottom + dividerWidthInactive);
 
             mTmpAdjustedBounds.set(mBounds);
-            mTmpAdjustedBounds.top =
-                    (int) (mAdjustImeAmount * top + (1 - mAdjustImeAmount) * mBounds.top);
+            // Account for the adjustment for IME and divider width separately.
+            // (top - topBeforeImeAdjust) is the amount of movement due to IME only,
+            // and dividerWidthDelta is due to divider width change only.
+            mTmpAdjustedBounds.top = mBounds.top +
+                    (int) (mAdjustImeAmount * (top - topBeforeImeAdjust) +
+                            mAdjustDividerAmount * dividerWidthDelta);
             mFullyAdjustedImeBounds.set(mBounds);
             mFullyAdjustedImeBounds.top = top;
             mFullyAdjustedImeBounds.bottom = top + mBounds.height();
@@ -1082,9 +1089,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
         setAdjustedBounds(mTmpAdjustedBounds);
 
-        final boolean isFocusedStack = mService.getFocusedStackLocked() == this;
-        if (mAdjustedForIme && adjust && !isFocusedStack) {
-            final float alpha = mAdjustImeAmount * IME_ADJUST_DIM_AMOUNT;
+        final boolean isImeTarget = (mService.getImeTargetStackLocked() == this);
+        if (mAdjustedForIme && adjust && !isImeTarget) {
+            final float alpha = Math.max(mAdjustImeAmount, mAdjustDividerAmount)
+                    * IME_ADJUST_DIM_AMOUNT;
             mService.setResizeDimLayer(true, mStackId, alpha);
         }
     }
