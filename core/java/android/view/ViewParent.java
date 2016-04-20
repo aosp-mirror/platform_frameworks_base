@@ -199,9 +199,11 @@ public interface ViewParent {
      * @param originalView the source view where the context menu was first
      *                     invoked
      * @param x the X coordinate in pixels relative to the original view to
-     *          which the menu should be anchored
+     *          which the menu should be anchored, or {@link Float#NaN} to
+     *          disable anchoring
      * @param y the Y coordinate in pixels relative to the original view to
-     *          which the menu should be anchored
+     *          which the menu should be anchored, or {@link Float#NaN} to
+     *          disable anchoring
      * @return {@code true} if the context menu was shown, {@code false}
      *         otherwise
      */

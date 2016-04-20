@@ -733,16 +733,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
-        return showContextMenuForChildInternal(originalView, 0, 0, false);
+        return showContextMenuForChildInternal(originalView, Float.NaN, Float.NaN);
     }
 
     @Override
     public boolean showContextMenuForChild(View originalView, float x, float y) {
-        return showContextMenuForChildInternal(originalView, x, y, true);
+        return showContextMenuForChildInternal(originalView, x, y);
     }
 
     private boolean showContextMenuForChildInternal(View originalView,
-            float x, float y, boolean isPopup) {
+            float x, float y) {
         // Only allow one context menu at a time.
         if (mWindow.mContextMenuHelper != null) {
             mWindow.mContextMenuHelper.dismiss();
@@ -759,6 +759,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
 
         final MenuHelper helper;
+        final boolean isPopup = !Float.isNaN(x) && !Float.isNaN(y);
         if (isPopup) {
             helper = mWindow.mContextMenu.showPopup(getContext(), originalView, x, y);
         } else {
