@@ -42,6 +42,7 @@ public final class MidiDevice implements Closeable {
     private final IMidiManager mMidiManager;
     private final IBinder mClientToken;
     private final IBinder mDeviceToken;
+    private boolean mIsDeviceClosed;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -123,6 +124,9 @@ public final class MidiDevice implements Closeable {
      *         or null in case of failure.
      */
     public MidiInputPort openInputPort(int portNumber) {
+        if (mIsDeviceClosed) {
+            return null;
+        }
         try {
             IBinder token = new Binder();
             ParcelFileDescriptor pfd = mDeviceServer.openInputPort(token, portNumber);
@@ -146,6 +150,9 @@ public final class MidiDevice implements Closeable {
      *         or null in case of failure.
      */
     public MidiOutputPort openOutputPort(int portNumber) {
+        if (mIsDeviceClosed) {
+            return null;
+        }
         try {
             IBinder token = new Binder();
             ParcelFileDescriptor pfd = mDeviceServer.openOutputPort(token, portNumber);
@@ -175,12 +182,15 @@ public final class MidiDevice implements Closeable {
         if (outputPortNumber < 0 || outputPortNumber >= mDeviceInfo.getOutputPortCount()) {
             throw new IllegalArgumentException("outputPortNumber out of range");
         }
+        if (mIsDeviceClosed) {
+            return null;
+        }
 
         ParcelFileDescriptor pfd = inputPort.claimFileDescriptor();
         if (pfd == null) {
             return null;
         }
-         try {
+        try {
             IBinder token = new Binder();
             int calleePid = mDeviceServer.connectPorts(token, pfd, outputPortNumber);
             // If the service is a different Process then it will duplicate the pfd
@@ -202,11 +212,14 @@ public final class MidiDevice implements Closeable {
     @Override
     public void close() throws IOException {
         synchronized (mGuard) {
-            mGuard.close();
-            try {
-                mMidiManager.closeDevice(mClientToken, mDeviceToken);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in closeDevice");
+            if (!mIsDeviceClosed) {
+                mGuard.close();
+                mIsDeviceClosed = true;
+                try {
+                    mMidiManager.closeDevice(mClientToken, mDeviceToken);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in closeDevice");
+                }
             }
         }
     }
