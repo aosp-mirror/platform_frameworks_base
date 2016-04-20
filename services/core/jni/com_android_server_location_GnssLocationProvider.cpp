@@ -1194,7 +1194,7 @@ static jobject translate_gps_measurement(JNIEnv* env,
     JavaObject object(env, "android/location/GnssMeasurement");
     GpsMeasurementFlags flags = measurement->flags;
     SET(Svid, static_cast<int32_t>(measurement->prn));
-    if (measurement->prn >= 1 || measurement->prn <= 32) {
+    if (measurement->prn >= 1 && measurement->prn <= 32) {
         SET(ConstellationType, static_cast<int32_t>(GNSS_CONSTELLATION_GPS));
     } else {
         ALOGD("Unknown constellation type with Svid = %d.", measurement->prn);
