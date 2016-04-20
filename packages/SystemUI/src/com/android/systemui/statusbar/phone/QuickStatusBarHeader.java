@@ -106,6 +106,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
         mDateTimeGroup.setPivotX(0);
         mDateTimeGroup.setPivotY(0);
+        boolean showDate = getResources().getBoolean(R.bool.quick_settings_show_date);
+        findViewById(R.id.date).setVisibility(showDate ? View.VISIBLE : View.GONE);
 
         mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
 
