@@ -41,7 +41,7 @@ public abstract class EnumerateClient extends ClientMonitor {
         try {
             final int result = daemon.enumerate();
             if (result != 0) {
-                Slog.w(TAG, "start enumerate for user " + getCallingUserId()
+                Slog.w(TAG, "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
                 return result;
