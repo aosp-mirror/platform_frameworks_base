@@ -279,6 +279,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private void selectPosition(int position, View v) {
         // Remove the placeholder.
+        notifyItemRemoved(mEditIndex);
         mTiles.remove(mEditIndex--);
         mAccessibilityMoving = false;
         move(mAccessibilityFromIndex, position, v);
@@ -323,7 +324,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private boolean move(int from, int to, View v) {
-        if (to >= mEditIndex) {
+        if (to > mEditIndex) {
             if (from >= mEditIndex) {
                 return false;
             }
