@@ -38,8 +38,10 @@ import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
@@ -68,6 +70,7 @@ import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
+import com.android.systemui.stackdivider.DividerView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -156,7 +159,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
             showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */,
-                    false /* reloadTasks */, false /* fromHome */);
+                    false /* reloadTasks */, false /* fromHome */,
+                    DividerView.INVALID_RECENTS_GROW_TARGET);
         }
     });
 
@@ -230,7 +234,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
-            boolean animate, boolean launchedWhileDockingTask, boolean fromHome) {
+            boolean animate, boolean launchedWhileDockingTask, boolean fromHome,
+            int growTarget) {
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
         mLaunchedWhileDocking = launchedWhileDockingTask;
@@ -260,7 +265,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask == null || !ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                startRecentsActivity(topTask, isTopTaskHome.value || fromHome, animate);
+                startRecentsActivity(topTask, isTopTaskHome.value || fromHome, animate, growTarget);
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentsActivity", e);
@@ -284,7 +289,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 triggeredFromHomeKey));
     }
 
-    public void toggleRecents() {
+    public void toggleRecents(int growTarget) {
         // Skip this toggle if we are already waiting to trigger recents via alt-tab
         if (mFastAltTabTrigger.isDozing()) {
             return;
@@ -338,7 +343,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 }
 
                 // Otherwise, start the recents activity
-                startRecentsActivity(topTask, isTopTaskHome.value, true /* animate */);
+                startRecentsActivity(topTask, isTopTaskHome.value, true /* animate */, growTarget);
 
                 // Only close the other system windows if we are actually showing recents
                 ssp.sendCloseSystemWindows(BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
@@ -369,7 +374,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 // At this point, we don't know anything about the stack state.  So only calculate
                 // the dimensions of the thumbnail that we need for the transition into Recents, but
                 // do not draw it until we construct the activity options when we start Recents
-                updateHeaderBarLayout(stack);
+                updateHeaderBarLayout(stack, null /* window rect override*/);
             }
         }
     }
@@ -535,7 +540,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,
                     false /* animate */,
                     true /* launchedWhileDockingTask*/,
-                    false /* fromHome */);
+                    false /* fromHome */,
+                    DividerView.INVALID_RECENTS_GROW_TARGET);
         }
     }
 
@@ -574,12 +580,17 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * since the last call, it will attempt to re-measure and layout the header bar to the new size.
      *
      * @param stack the stack to initialize the stack layout with
+     * @param windowRectOverride the rectangle to use when calculating the stack state which can
+     *                           be different from the current window rect if recents is resizing
+     *                           while being launched
      */
-    private void updateHeaderBarLayout(TaskStack stack) {
+    private void updateHeaderBarLayout(TaskStack stack, Rect windowRectOverride) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
-        Rect windowRect = ssp.getWindowRect();
+        Rect windowRect = windowRectOverride != null
+                ? new Rect(windowRectOverride)
+                : ssp.getWindowRect();
         // When docked, the nav bar insets are consumed and the activity is measured without insets.
         // However, the window bounds include the insets, so we need to subtract them here to make
         // them identical.
@@ -682,7 +693,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Creates the activity options for an app->recents transition.
      */
     private ActivityOptions getThumbnailTransitionActivityOptions(
-            ActivityManager.RunningTaskInfo topTask, TaskStackView stackView) {
+            ActivityManager.RunningTaskInfo topTask, TaskStackView stackView,
+            Rect windowOverrideRect) {
         if (topTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             ArrayList<Task> tasks = stackView.getStack().getStackTasks();
@@ -696,7 +708,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 Task task = tasks.get(i);
                 if (task.isFreeformTask()) {
                     mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
-                                    stackScroller.getStackScroll(), mTmpTransform, null);
+                            stackScroller.getStackScroll(), mTmpTransform, null,
+                            windowOverrideRect);
                     Bitmap thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform,
                             mThumbTransitionBitmapCache);
                     Rect toTaskRect = new Rect();
@@ -711,7 +724,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         } else {
             // Update the destination rect
             Task toTask = new Task();
-            TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask);
+            TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask,
+                    windowOverrideRect);
             Bitmap thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform,
                     mThumbTransitionBitmapCache);
             if (thumbnail != null) {
@@ -729,7 +743,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Returns the transition rect for the given task id.
      */
     private TaskViewTransform getThumbnailTransitionTransform(TaskStackView stackView,
-            Task runningTaskOut) {
+            Task runningTaskOut, Rect windowOverrideRect) {
         // Find the running task in the TaskStack
         TaskStack stack = stackView.getStack();
         Task launchTask = stack.getLaunchTarget();
@@ -745,7 +759,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
-                stackView.getScroller().getStackScroll(), mTmpTransform, null);
+                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect);
         return mTmpTransform;
     }
 
@@ -788,7 +802,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Shows the recents activity
      */
     protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome, boolean animate) {
+            boolean isTopTaskHome, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
@@ -820,7 +834,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         preloadIcon(topTask);
 
         // Update the header bar if necessary
-        updateHeaderBarLayout(stack);
+        Rect windowOverrideRect = getWindowRectOverride(growTarget);
+        updateHeaderBarLayout(stack, windowOverrideRect);
 
         // Prepare the dummy stack for the transition
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
@@ -838,7 +853,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         ActivityOptions opts;
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView);
+            opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView,
+                    windowOverrideRect);
         } else {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition
@@ -848,6 +864,18 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
         startRecentsActivity(opts);
         mLastToggleTime = SystemClock.elapsedRealtime();
+    }
+
+    private Rect getWindowRectOverride(int growTarget) {
+        if (growTarget == DividerView.INVALID_RECENTS_GROW_TARGET) {
+            return null;
+        }
+        Rect result = new Rect();
+        Rect displayRect = Recents.getSystemServices().getDisplayRect();
+        DockedDividerUtils.calculateBoundsForPosition(growTarget, WindowManager.DOCKED_BOTTOM,
+                result, displayRect.width(), displayRect.height(),
+                Recents.getSystemServices().getDockedDividerSize(mContext));
+        return result;
     }
 
     /**
