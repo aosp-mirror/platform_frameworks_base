@@ -61,6 +61,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
     private Calendar mCalendar;
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
+    private SimpleDateFormat mContentDescriptionFormat;
     private Locale mLocale;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
@@ -158,6 +159,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (mDemoMode) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
         setText(getSmallTime());
+        setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
     }
 
     @Override
@@ -207,6 +209,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
                 ? is24 ? d.timeFormat_Hms : d.timeFormat_hms
                 : is24 ? d.timeFormat_Hm : d.timeFormat_hm;
         if (!format.equals(mClockFormatString)) {
+            mContentDescriptionFormat = new SimpleDateFormat(format);
             /*
              * Search for an unquoted "a" in the format string, so we can
              * add dummy characters around it to let us find it again after
@@ -295,6 +298,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
                 mCalendar.set(Calendar.MINUTE, mm);
             }
             setText(getSmallTime());
+            setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
         }
     }
 
