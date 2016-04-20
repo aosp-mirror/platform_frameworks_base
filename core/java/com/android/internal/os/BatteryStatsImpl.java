@@ -60,6 +60,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1092,7 +1093,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             if (DEBUG) Log.i(TAG, "**** WRITING TIMER #" + mType + ": mTotalTime="
                     + computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs)));
-            out.writeInt(mCount);
+            out.writeInt(computeCurrentCountLocked());
             out.writeInt(mLoadedCount);
             out.writeInt(mUnpluggedCount);
             out.writeLong(computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs)));
@@ -1109,7 +1110,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         + " old mUnpluggedCount=" + mUnpluggedCount);
             }
             mUnpluggedTime = computeRunTimeLocked(baseRealtime);
-            mUnpluggedCount = mCount;
+            mUnpluggedCount = computeCurrentCountLocked();
             if (DEBUG && mType < 0) {
                 Log.v(TAG, "unplug #" + mType
                         + ": new mUnpluggedTime=" + mUnpluggedTime
@@ -1192,7 +1193,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void writeSummaryFromParcelLocked(Parcel out, long elapsedRealtimeUs) {
             long runTime = computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs));
             out.writeLong(runTime);
-            out.writeInt(mCount);
+            out.writeInt(computeCurrentCountLocked());
         }
 
         public void readSummaryFromParcelLocked(Parcel in) {
@@ -1249,7 +1250,8 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         int mUpdateVersion;
 
-        SamplingTimer(Clocks clocks, TimeBase timeBase, Parcel in) {
+        @VisibleForTesting
+        public SamplingTimer(Clocks clocks, TimeBase timeBase, Parcel in) {
             super(clocks, 0, timeBase, in);
             mCurrentReportedCount = in.readInt();
             mUnpluggedReportedCount = in.readInt();
@@ -1259,7 +1261,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mTimeBaseRunning = timeBase.isRunning();
         }
 
-        SamplingTimer(Clocks clocks, TimeBase timeBase, boolean trackReportedValues) {
+        @VisibleForTesting
+        public SamplingTimer(Clocks clocks, TimeBase timeBase, boolean trackReportedValues) {
             super(clocks, 0, timeBase);
             mTrackingReportedValues = trackReportedValues;
             mTimeBaseRunning = timeBase.isRunning();
