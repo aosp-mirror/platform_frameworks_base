@@ -356,7 +356,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
     }
 
-    void startRemove(IBinder token, int fingerId, int callingUserId, int groupId,
+    void startRemove(IBinder token, int fingerId, int groupId, int userId,
             IFingerprintServiceReceiver receiver, boolean restricted) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon == null) {
@@ -364,7 +364,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return;
         }
         RemovalClient client = new RemovalClient(getContext(), mHalDeviceId, token,
-                receiver, callingUserId, groupId, fingerId, restricted, token.toString()) {
+                receiver, fingerId, groupId, userId, restricted, token.toString()) {
             @Override
             public void notifyUserActivity() {
                 FingerprintService.this.userActivity();
@@ -794,14 +794,13 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
         @Override // Binder call
         public void remove(final IBinder token, final int fingerId, final int groupId,
-                final IFingerprintServiceReceiver receiver) {
+                final int userId, final IFingerprintServiceReceiver receiver) {
             checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
             final boolean restricted = isRestricted();
-            final int callingUserId = UserHandle.getCallingUserId();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startRemove(token, fingerId, callingUserId, groupId, receiver, restricted);
+                    startRemove(token, fingerId, groupId, userId, receiver, restricted);
                 }
             });
 
