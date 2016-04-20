@@ -30,8 +30,6 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IActivityManager.WaitResult;
-import android.app.KeyguardManager;
-import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -40,7 +38,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -171,6 +168,7 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
+import static com.android.server.am.ActivityStack.STACK_VISIBLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -3399,6 +3397,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         info.displayId = Display.DEFAULT_DISPLAY;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
+        info.visible = stack.getStackVisibilityLocked(null) == STACK_VISIBLE;
 
         ArrayList<TaskRecord> tasks = stack.getAllTasks();
         final int numTasks = tasks.size();
@@ -3421,6 +3420,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         info.taskNames = taskNames;
         info.taskBounds = taskBounds;
         info.taskUserIds = taskUserIds;
+
+        final ActivityRecord top = stack.topRunningActivityLocked();
+        info.topActivity = top != null ? top.intent.getComponent() : null;
         return info;
     }
 

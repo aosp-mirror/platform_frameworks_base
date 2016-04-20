@@ -28,7 +28,6 @@ import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimatio
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -51,7 +50,7 @@ public class SystemBarScrimViews {
         mNavBarScrimView.forceHasOverlappingRendering(false);
         mNavBarScrimEnterDuration = activity.getResources().getInteger(
                 R.integer.recents_nav_bar_scrim_enter_duration);
-        mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavBar();
+        mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavigationBar();
         mHasDockedTasks = Recents.getSystemServices().hasDockedTask();
     }
 
@@ -145,7 +144,7 @@ public class SystemBarScrimViews {
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
         if (event.fromDeviceOrientationChange) {
-            mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavBar();
+            mHasNavBarScrim = Recents.getSystemServices().hasTransposedNavigationBar();
         }
         animateScrimToCurrentNavBarState(event.hasStackTasks);
     }

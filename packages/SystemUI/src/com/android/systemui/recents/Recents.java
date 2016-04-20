@@ -423,25 +423,26 @@ public class Recents extends SystemUI
 
         int currentUser = sSystemServicesProxy.getCurrentUser();
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
+        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
         boolean screenPinningActive = ssp.isScreenPinningActive();
-        boolean isTopTaskHome = topTask != null && SystemServicesProxy.isHomeStack(topTask.stackId);
-        if (topTask != null && !isTopTaskHome && !screenPinningActive) {
-            logDockAttempt(mContext, topTask.topActivity, topTask.resizeMode);
-            if (topTask.isDockable) {
+        boolean isRunningTaskInHomeStack = runningTask != null &&
+                SystemServicesProxy.isHomeStack(runningTask.stackId);
+        if (runningTask != null && !isRunningTaskInHomeStack && !screenPinningActive) {
+            logDockAttempt(mContext, runningTask.topActivity, runningTask.resizeMode);
+            if (runningTask.isDockable) {
                 if (metricsDockAction != -1) {
                     MetricsLogger.action(mContext, metricsDockAction,
-                            topTask.topActivity.flattenToShortString());
+                            runningTask.topActivity.flattenToShortString());
                 }
                 if (sSystemServicesProxy.isSystemUser(currentUser)) {
-                    mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
+                    mImpl.dockTopTask(runningTask.id, dragMode, stackCreateMode, initialBounds);
                 } else {
                     if (mSystemToUserCallbacks != null) {
                         IRecentsNonSystemUserCallbacks callbacks =
                                 mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                         if (callbacks != null) {
                             try {
-                                callbacks.dockTopTask(topTask.id, dragMode, stackCreateMode,
+                                callbacks.dockTopTask(runningTask.id, dragMode, stackCreateMode,
                                         initialBounds);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Callback failed", e);

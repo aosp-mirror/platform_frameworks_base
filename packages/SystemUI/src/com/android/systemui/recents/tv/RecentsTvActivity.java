@@ -217,7 +217,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
     boolean dismissRecentsToLaunchTargetTaskOrHome(boolean animate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchPreviousTask(animate)) {
               return true;
@@ -230,7 +230,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
     boolean dismissRecentsToFocusedTaskOrHome() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
             // If none of the other cases apply, then just go Home
@@ -263,7 +263,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
     boolean dismissRecentsToHomeIfVisible(boolean animated) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // Return to Home
             dismissRecentsToHome(animated);
             return true;
