@@ -16,8 +16,6 @@
 
 package com.android.internal.policy;
 
-import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
-
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -102,9 +100,6 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mOldSystemInsets.set(systemInsets);
         mOldStableInsets.set(stableInsets);
         mResizeMode = resizeMode;
-        synchronized (this) {
-            redrawLocked(initialBounds, fullscreen, mSystemInsets, mStableInsets);
-        }
 
         // Kick off our draw thread.
         start();
@@ -160,7 +155,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             mSystemInsets.set(systemInsets);
             mStableInsets.set(stableInsets);
             // Notify of a bounds change.
-            pingRenderLocked();
+            pingRenderLocked(false /* drawImmediate */);
         }
     }
 
@@ -172,7 +167,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             if (mRenderer != null) {
                 // Enforce a window redraw.
                 mOldTargetRect.set(0, 0, 0, 0);
-                pingRenderLocked();
+                pingRenderLocked(false /* drawImmediate */);
             }
         }
     }
@@ -197,7 +192,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 mRenderer = null;
 
                 // Exit the renderer loop.
-                pingRenderLocked();
+                pingRenderLocked(false /* drawImmediate */);
             }
         }
     }
@@ -208,9 +203,6 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             Looper.prepare();
             synchronized (this) {
                 mChoreographer = Choreographer.getInstance();
-
-                // Draw at least once.
-                mChoreographer.postFrameCallback(this);
             }
             Looper.loop();
         } finally {
@@ -236,18 +228,22 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 Looper.myLooper().quit();
                 return;
             }
-            mNewTargetRect.set(mTargetRect);
-            if (!mNewTargetRect.equals(mOldTargetRect)
-                    || mOldFullscreen != mFullscreen
-                    || !mStableInsets.equals(mOldStableInsets)
-                    || !mSystemInsets.equals(mOldSystemInsets)
-                    || mReportNextDraw) {
-                mOldFullscreen = mFullscreen;
-                mOldTargetRect.set(mNewTargetRect);
-                mOldSystemInsets.set(mSystemInsets);
-                mOldStableInsets.set(mStableInsets);
-                redrawLocked(mNewTargetRect, mFullscreen, mSystemInsets, mStableInsets);
-            }
+            doFrameUncheckedLocked();
+        }
+    }
+
+    private void doFrameUncheckedLocked() {
+        mNewTargetRect.set(mTargetRect);
+        if (!mNewTargetRect.equals(mOldTargetRect)
+                || mOldFullscreen != mFullscreen
+                || !mStableInsets.equals(mOldStableInsets)
+                || !mSystemInsets.equals(mOldSystemInsets)
+                || mReportNextDraw) {
+            mOldFullscreen = mFullscreen;
+            mOldTargetRect.set(mNewTargetRect);
+            mOldSystemInsets.set(mSystemInsets);
+            mOldStableInsets.set(mStableInsets);
+            redrawLocked(mNewTargetRect, mFullscreen, mSystemInsets, mStableInsets);
         }
     }
 
@@ -288,7 +284,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         synchronized (this) {
             mReportNextDraw = reportNextDraw;
             mOldTargetRect.set(0, 0, 0, 0);
-            pingRenderLocked();
+            pingRenderLocked(true /* drawImmediate */);
         }
     }
 
@@ -403,10 +399,14 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      * Sends a message to the renderer to wake up and perform the next action which can be
      * either the next rendering or the self destruction if mRenderer is null.
      * Note: This call must be synchronized.
+     *
+     * @param drawImmediate if we should draw immediately instead of scheduling a frame
      */
-    private void pingRenderLocked() {
-        if (mChoreographer != null) {
+    private void pingRenderLocked(boolean drawImmediate) {
+        if (mChoreographer != null && !drawImmediate) {
             mChoreographer.postFrameCallback(this);
+        } else {
+            doFrameUncheckedLocked();
         }
     }
 
