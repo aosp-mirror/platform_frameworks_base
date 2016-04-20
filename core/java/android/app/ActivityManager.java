@@ -696,6 +696,14 @@ public class ActivityManager {
         public static boolean activitiesCanRequestVisibleBehind(int stackId) {
             return stackId == FULLSCREEN_WORKSPACE_STACK_ID;
         }
+
+        /**
+         * Returns true if this stack may be scaled without resizing,
+         * and windows within may need to be configured as such.
+         */
+        public static boolean windowsAreScaleable(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
     }
 
     /**

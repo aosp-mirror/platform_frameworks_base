@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
@@ -1683,6 +1684,11 @@ class WindowStateAnimator {
      * @return Returns true if the surface was successfully shown.
      */
     private boolean showSurfaceRobustlyLocked() {
+        final Task task = mWin.getTask();
+        if (task != null && StackId.windowsAreScaleable(task.mStack.mStackId)) {
+            mSurfaceController.forceScaleableInTransaction(true);
+        }
+
         boolean shown = mSurfaceController.showRobustlyInTransaction();
         if (!shown)
             return false;
