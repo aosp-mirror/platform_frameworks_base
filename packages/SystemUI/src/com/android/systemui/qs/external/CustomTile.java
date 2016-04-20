@@ -36,7 +36,6 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -59,6 +58,7 @@ public class CustomTile extends QSTile<QSTile.State> {
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
     private final int mUser;
+    private final android.graphics.drawable.Icon mDefaultIcon;
 
     private boolean mListening;
     private boolean mBound;
@@ -73,15 +73,19 @@ public class CustomTile extends QSTile<QSTile.State> {
         mService = mServiceManager.getTileService();
         mTile = new Tile(mComponent);
         mUser = ActivityManager.getCurrentUser();
+        android.graphics.drawable.Icon defaultIcon;
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent,
                     PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
-            mTile.setIcon(android.graphics.drawable.Icon
-                    .createWithResource(mComponent.getPackageName(), info.icon));
+            defaultIcon = info.icon != 0 ? android.graphics.drawable.Icon
+                    .createWithResource(mComponent.getPackageName(), info.icon) : null;
+            mTile.setIcon(defaultIcon);
             mTile.setLabel(info.loadLabel(pm));
         } catch (Exception e) {
+            defaultIcon = null;
         }
+        mDefaultIcon = defaultIcon;
         try {
             mService.setQSTile(mTile);
         } catch (RemoteException e) {
@@ -91,13 +95,7 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     public boolean isAvailable() {
-        try {
-            ServiceInfo info = mContext.getPackageManager().getServiceInfo(mComponent,
-                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return mDefaultIcon != null;
     }
 
     public int getUser() {
@@ -227,10 +225,17 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        Drawable drawable = mTile.getIcon().loadDrawable(mContext);
         int tileState = mTile.getState();
         if (mServiceManager.hasPendingBind()) {
             tileState = Tile.STATE_UNAVAILABLE;
+        }
+        Drawable drawable;
+        try {
+            drawable = mTile.getIcon().loadDrawable(mContext);
+        } catch (Exception e) {
+            Log.w(TAG, "Invalid icon, forcing into unavailable state");
+            tileState = Tile.STATE_UNAVAILABLE;
+            drawable = mDefaultIcon.loadDrawable(mContext);
         }
         int color = mContext.getColor(getColor(tileState));
         drawable.setTint(color);
