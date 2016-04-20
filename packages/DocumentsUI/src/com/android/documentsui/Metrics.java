@@ -29,7 +29,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
-import android.view.KeyEvent;
 
 import com.android.documentsui.State.ActionType;
 import com.android.documentsui.model.DocumentInfo;
@@ -349,7 +348,7 @@ public final class Metrics {
     }
 
     /**
-     * Logs a root visited event. Call this when the user clicks on a root in the RootsFragment.
+     * Logs a root visited event. Call this when the user visits on a root in the RootsFragment.
      *
      * @param context
      * @param info
@@ -359,7 +358,7 @@ public final class Metrics {
     }
 
     /**
-     * Logs an app visited event. Call this when the user clicks on an app in the RootsFragment.
+     * Logs an app visited event. Call this when the user visits on an app in the RootsFragment.
      *
      * @param context
      * @param info
