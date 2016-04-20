@@ -139,4 +139,9 @@ public abstract class ActivityManagerInternal {
      * minimized state.
      */
     public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
+
+    /**
+     * Kill foreground apps from the specified user.
+     */
+    public abstract void killForegroundAppsForUser(int userHandle);
 }
