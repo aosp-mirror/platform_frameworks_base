@@ -2716,11 +2716,11 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mHardwareRenderer.setStopped(false);
                 }
 
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
-
                 if (updated) {
                     requestDrawWindow();
                 }
+
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
