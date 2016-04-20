@@ -85,8 +85,8 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
+import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
-import android.view.DropPermissions;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -6500,16 +6500,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Create {@link DropPermissions} object bound to this activity and controlling the access
-     * permissions for content URIs associated with the {@link DragEvent}.
+     * Create {@link DragAndDropPermissions} object bound to this activity and controlling the
+     * access permissions for content URIs associated with the {@link DragEvent}.
      * @param event Drag event
-     * @return The DropPermissions object used to control access to the content URIs. Null if
-     * no content URIs are associated with the event or if permissions could not be granted.
+     * @return The {@link DragAndDropPermissions} object used to control access to the content URIs.
+     * Null if no content URIs are associated with the event or if permissions could not be granted.
      */
-    public DropPermissions requestDropPermissions(DragEvent event) {
-        DropPermissions dropPermissions = DropPermissions.obtain(event);
-        if (dropPermissions != null && dropPermissions.take(getActivityToken())) {
-            return dropPermissions;
+    public DragAndDropPermissions requestDragAndDropPermissions(DragEvent event) {
+        DragAndDropPermissions dragAndDropPermissions = DragAndDropPermissions.obtain(event);
+        if (dragAndDropPermissions != null && dragAndDropPermissions.take(getActivityToken())) {
+            return dragAndDropPermissions;
         }
         return null;
     }
