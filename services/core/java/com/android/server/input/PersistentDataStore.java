@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.Nullable;
 import android.view.Surface;
 import android.hardware.input.TouchCalibration;
 import android.text.TextUtils;
@@ -342,6 +343,7 @@ final class PersistentDataStore {
                 "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
 
         private TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
+        @Nullable
         private String mCurrentKeyboardLayout;
         private List<String> mUnassociatedKeyboardLayouts = new ArrayList<>();
         private ArrayMap<InputMethodSubtypeHandle, String> mKeyboardLayouts = new ArrayMap<>();
@@ -368,6 +370,7 @@ final class PersistentDataStore {
             }
         }
 
+        @Nullable
         public String getCurrentKeyboardLayout() {
             return mCurrentKeyboardLayout;
         }
@@ -443,7 +446,7 @@ final class PersistentDataStore {
 
         public boolean switchKeyboardLayout(InputMethodSubtypeHandle imeHandle) {
             final String layout = mKeyboardLayouts.get(imeHandle);
-            if (layout != null && !TextUtils.equals(mCurrentKeyboardLayout, layout)) {
+            if (!TextUtils.equals(mCurrentKeyboardLayout, layout)) {
                 mCurrentKeyboardLayout = layout;
                 return true;
             }
