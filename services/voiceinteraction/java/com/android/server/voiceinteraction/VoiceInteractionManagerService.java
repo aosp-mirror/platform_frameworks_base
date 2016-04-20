@@ -128,6 +128,12 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
+    public void onUnlockUser(int userHandle) {
+        mServiceStub.initForUser(userHandle);
+        mServiceStub.switchImplementationIfNeeded(false);
+    }
+
+    @Override
     public void onSwitchUser(int userHandle) {
         mServiceStub.switchUser(userHandle);
     }
@@ -359,6 +365,12 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 mCurUser = userHandle;
                 switchImplementationIfNeededLocked(false);
+            }
+        }
+
+        void switchImplementationIfNeeded(boolean force) {
+            synchronized (this) {
+                switchImplementationIfNeededLocked(force);
             }
         }
 
