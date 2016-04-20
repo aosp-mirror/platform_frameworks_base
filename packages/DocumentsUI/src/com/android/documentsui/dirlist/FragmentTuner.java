@@ -70,11 +70,7 @@ public abstract class FragmentTuner {
     }
 
     public boolean isDocumentEnabled(String docMimeType, int docFlags) {
-        if (isDirectory(docMimeType)) {
-            return true;
-        }
-
-        return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
+        return true;
     }
 
     abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
