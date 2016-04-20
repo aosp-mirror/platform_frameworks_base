@@ -43,7 +43,8 @@ interface IWallpaperManager {
      * new wallpaper content is ready to display.
      */
     ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
-            in Rect cropHint, out Bundle extras, int which, IWallpaperManagerCallback completion);
+            in Rect cropHint, boolean allowBackup, out Bundle extras, int which,
+            IWallpaperManagerCallback completion);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
@@ -123,6 +124,11 @@ interface IWallpaperManager {
      * Check whether setting of wallpapers are allowed for the calling user.
      */
     boolean isWallpaperSettingAllowed(in String callingPackage);
+
+    /*
+     * Backup: is the current system wallpaper image eligible for off-device backup?
+     */
+    boolean isWallpaperBackupEligible(int userId);
 
     /*
      * Keyguard: register a callback for being notified that lock-state relevant
