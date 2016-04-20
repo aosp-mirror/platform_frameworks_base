@@ -6043,6 +6043,33 @@ public final class Settings {
         public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
 
         /**
+         * Behavior of the display while in VR mode.
+         *
+         * One of {@link #VR_DISPLAY_MODE_LOW_PERSISTENCE} or {@link #VR_DISPLAY_MODE_OFF}.
+         *
+         * @hide
+         */
+        public static final String VR_DISPLAY_MODE = "vr_display_mode";
+
+        /**
+         * Lower the display persistence while the system is in VR mode.
+         *
+         * @see PackageManager#FEATURE_VR_MODE_HIGH_PERFORMANCE
+         *
+         * @hide.
+         */
+        public static final int VR_DISPLAY_MODE_LOW_PERSISTENCE = 0;
+
+        /**
+         * Do not alter the display persistence while the system is in VR mode.
+         *
+         * @see PackageManager#FEATURE_VR_MODE_HIGH_PERFORMANCE
+         *
+         * @hide.
+         */
+        public static final int VR_DISPLAY_MODE_OFF = 1;
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
