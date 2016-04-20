@@ -1177,6 +1177,15 @@ public abstract class Window {
         return false;
     }
 
+    /* Sets the Sustained Performance requirement for the calling window.
+     * @param enable disables or enables the mode.
+     */
+    public void setSustainedPerformanceMode(boolean enable) {
+        setPrivateFlags(enable
+                ? WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE : 0,
+                WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE);
+    }
+
     private boolean isOutOfBounds(Context context, MotionEvent event) {
         final int x = (int) event.getX();
         final int y = (int) event.getY();

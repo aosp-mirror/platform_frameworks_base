@@ -1247,6 +1247,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND = 0x00020000;
 
         /**
+         * Flag to indicate that this window needs Sustained Performance Mode if
+         * the device supports it.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00020000;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */

@@ -8,6 +8,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
@@ -127,6 +128,9 @@ class WindowSurfacePlacer {
 
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;
+
+    private boolean mSustainedPerformanceModeEnabled = false;
+    private boolean mSustainedPerformanceModeCurrent = false;
 
     private static final class LayerAndToken {
         public int layer;
@@ -288,7 +292,7 @@ class WindowSurfacePlacer {
         mButtonBrightness = -1;
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
-
+        mSustainedPerformanceModeCurrent = false;
         mService.mTransactionSequence++;
 
         final DisplayContent defaultDisplay = mService.getDefaultDisplayContentLocked();
@@ -485,6 +489,13 @@ class WindowSurfacePlacer {
             }
             mService.mPowerManagerInternal.setUserActivityTimeoutOverrideFromWindowManager(
                     mUserActivityTimeout);
+        }
+
+        if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
+            mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
+            mService.mPowerManagerInternal.powerHint(
+                    mService.mPowerManagerInternal.POWER_HINT_SUSTAINED_PERFORMANCE_MODE,
+                    (mSustainedPerformanceModeEnabled ? 1 : 0));
         }
 
         if (mService.mTurnOnScreen) {
@@ -1409,6 +1420,7 @@ class WindowSurfacePlacer {
         final LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
+        final int privateflags = attrs.privateFlags;
 
         if (canBeSeen && w.isObscuringFullscreen(dispInfo)) {
             // This window completely covers everything behind it,
@@ -1468,6 +1480,9 @@ class WindowSurfacePlacer {
                 if (mPreferredModeId == 0
                         && w.mAttrs.preferredDisplayModeId != 0) {
                     mPreferredModeId = w.mAttrs.preferredDisplayModeId;
+                }
+                if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
+                    mSustainedPerformanceModeCurrent = true;
                 }
             }
         }
