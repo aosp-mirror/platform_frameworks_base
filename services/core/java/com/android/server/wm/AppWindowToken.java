@@ -204,7 +204,7 @@ class AppWindowToken extends WindowToken {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG, "Win " + win + ": isDrawn="
                         + win.isDrawnLw()
-                        + ", isAnimating=" + win.mWinAnimator.isAnimating());
+                        + ", isAnimationSet=" + win.mWinAnimator.isAnimationSet());
                 if (!win.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" +
                             win.mWinAnimator.mSurfaceController
@@ -220,11 +220,11 @@ class AppWindowToken extends WindowToken {
             numInteresting++;
             if (win.isDrawnLw()) {
                 numDrawn++;
-                if (!win.mWinAnimator.isAnimating()) {
+                if (!win.mWinAnimator.isAnimationSet()) {
                     numVisible++;
                 }
                 nowGone = false;
-            } else if (win.mWinAnimator.isAnimating()) {
+            } else if (win.mWinAnimator.isAnimationSet()) {
                 nowGone = false;
             }
         }
@@ -297,7 +297,7 @@ class AppWindowToken extends WindowToken {
             // Return true so that the alpha doesn't get cleared.
             if (!win.mAppFreezing
                     && (win.mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface
-                            || (win.mWinAnimator.isAnimating()
+                            || (win.mWinAnimator.isAnimationSet()
                                     && !service.mAppTransition.isTransitionSet()))
                     && !win.mDestroying
                     && win.isDrawnLw()) {
