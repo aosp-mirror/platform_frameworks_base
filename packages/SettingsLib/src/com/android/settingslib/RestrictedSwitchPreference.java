@@ -37,6 +37,7 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 public class RestrictedSwitchPreference extends SwitchPreference {
     RestrictedPreferenceHelper mHelper;
     boolean mUseAdditionalSummary = false;
+    String mRestrictedSwitchSummary = null;
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -45,14 +46,30 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs,
-                    R.styleable.RestrictedPreference);
-            final TypedValue useAdditionalSummary =
-                    attributes.peekValue(R.styleable.RestrictedPreference_useAdditionalSummary);
+                    R.styleable.RestrictedSwitchPreference);
+            final TypedValue useAdditionalSummary = attributes.peekValue(
+                    R.styleable.RestrictedSwitchPreference_useAdditionalSummary);
             if (useAdditionalSummary != null) {
                 mUseAdditionalSummary =
                         (useAdditionalSummary.type == TypedValue.TYPE_INT_BOOLEAN
                                 && useAdditionalSummary.data != 0);
             }
+
+            final TypedValue restrictedSwitchSummary = attributes.peekValue(
+                    R.styleable.RestrictedSwitchPreference_restrictedSwitchSummary);
+            CharSequence data = null;
+            if (restrictedSwitchSummary != null
+                    && restrictedSwitchSummary.type == TypedValue.TYPE_STRING) {
+                if (restrictedSwitchSummary.resourceId != 0) {
+                    data = context.getString(restrictedSwitchSummary.resourceId);
+                } else {
+                    data = restrictedSwitchSummary.string;
+                }
+            }
+            mRestrictedSwitchSummary = data == null ? null : data.toString();
+        }
+        if (mRestrictedSwitchSummary == null) {
+            mRestrictedSwitchSummary = context.getString(R.string.disabled_by_admin);
         }
         if (mUseAdditionalSummary) {
             setLayoutResource(R.layout.restricted_switch_preference);
@@ -91,8 +108,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                     R.id.additional_summary);
             if (additionalSummaryView != null) {
                 if (isDisabledByAdmin()) {
-                    additionalSummaryView.setText(
-                            isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+                    additionalSummaryView.setText(mRestrictedSwitchSummary);
                     additionalSummaryView.setVisibility(View.VISIBLE);
                 }
             } else {
@@ -102,8 +118,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
                 if (isDisabledByAdmin()) {
-                    summaryView.setText(
-                            isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+                    summaryView.setText(mRestrictedSwitchSummary);
                     summaryView.setVisibility(View.VISIBLE);
                 }
             }

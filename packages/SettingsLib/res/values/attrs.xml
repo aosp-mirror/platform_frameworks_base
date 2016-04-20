@@ -21,10 +21,16 @@
         <attr name="userRestriction" format="string" />
         <!-- If true then we can use enabled/disabled by admin strings for summary (android.R.id.summary). -->
         <attr name="useAdminDisabledSummary" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="RestrictedSwitchPreference">
         <!-- If true, an additional summary will be added in addition to the existing summary and
         this will be used for enabled/disabled by admin strings leaving android.R.id.summary untouched.
         As such when this is true, useAdminDisabledSummary will be overwritten to false. -->
         <attr name="useAdditionalSummary" format="boolean" />
+        <!-- This is used as summary for restricted switch preferences, default value is
+        @string/disabled_by_admin (Disabled by administrator). -->
+        <attr name="restrictedSwitchSummary" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="WifiEncryptionState">
