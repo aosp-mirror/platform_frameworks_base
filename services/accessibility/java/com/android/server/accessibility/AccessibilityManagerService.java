@@ -2296,11 +2296,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean bindLocked() {
             UserState userState = getUserStateLocked(mUserId);
             if (!mIsAutomation) {
-                if (mService == null && mContext.bindServiceAsUser(
-                        mIntent, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                        new UserHandle(mUserId))) {
-                    userState.mBindingServices.add(mComponentName);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    if (mService == null && mContext.bindServiceAsUser(
+                            mIntent, this,
+                            Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                            new UserHandle(mUserId))) {
+                        userState.mBindingServices.add(mComponentName);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
             } else {
                 userState.mBindingServices.add(mComponentName);
