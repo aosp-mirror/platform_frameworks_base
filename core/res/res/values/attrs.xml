@@ -8134,6 +8134,10 @@ i
         <attr name="spacing" />
     </declare-styleable>
 
+    <declare-styleable name="DateTimeView">
+        <attr name="showRelative" format="boolean" />
+    </declare-styleable>
+
     <declare-styleable name="ResolverDrawerLayout_LayoutParams">
         <attr name="layout_alwaysShow" format="boolean" />
         <attr name="layout_ignoreOffset" format="boolean" />
