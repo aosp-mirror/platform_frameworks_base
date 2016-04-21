@@ -92,8 +92,8 @@ public class PipControlButtonView extends LinearLayout {
         TypedArray typedArray =
             context.obtainStyledAttributes(attrs, values, defStyleAttr, defStyleRes);
 
-        mButtonImageView.setImageDrawable(typedArray.getDrawable(0));
-        mDescriptionTextView.setText(typedArray.getText(1));
+        setImageResource(typedArray.getResourceId(0, 0));
+        setText(typedArray.getResourceId(1, 0));
 
         typedArray.recycle();
     }
@@ -132,6 +132,7 @@ public class PipControlButtonView extends LinearLayout {
      * Sets the text for description the with the given resource id.
      */
     public void setText(int resId) {
+        mButtonImageView.setContentDescription(getContext().getString(resId));
         mDescriptionTextView.setText(resId);
     }
 

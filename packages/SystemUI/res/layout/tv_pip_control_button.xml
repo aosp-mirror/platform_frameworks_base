@@ -38,5 +38,6 @@
         android:alpha="0"
         android:fontFamily="sans-serif"
         android:textSize="12sp"
-        android:textColor="#EEEEEE" />
+        android:textColor="#EEEEEE"
+        android:importantForAccessibility="no" />
 </merge>
