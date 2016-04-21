@@ -17,8 +17,6 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Debug;
@@ -519,7 +517,7 @@ public class TaskPersister {
         if (DEBUG) Slog.d(TAG, "removeObsoleteFiles: persistentTaskIds=" + persistentTaskIds +
                 " files=" + files);
         if (files == null) {
-            Slog.e(TAG, "File error accessing recents directory (too many files open?).");
+            Slog.e(TAG, "File error accessing recents directory (directory doesn't exist?).");
             return;
         }
         for (int fileNdx = 0; fileNdx < files.length; ++fileNdx) {
@@ -597,15 +595,12 @@ public class TaskPersister {
     }
 
     static File getUserImagesDir(int userId) {
-        File userImagesDir = new File(Environment.getDataSystemCeDirectory(userId), IMAGES_DIRNAME);
+        return new File(Environment.getDataSystemCeDirectory(userId), IMAGES_DIRNAME);
+    }
 
-        if (!userImagesDir.exists()) {
-            if (!userImagesDir.mkdir()) {
-                Slog.e(TAG, "Failure creating images directory for user " + userId + ": "
-                        + userImagesDir);
-            }
-        }
-        return userImagesDir;
+    private static boolean createParentDirectory(String filePath) {
+        File parentDir = new File(filePath).getParentFile();
+        return parentDir.exists() || parentDir.mkdirs();
     }
 
     private class LazyTaskWriterThread extends Thread {
@@ -693,6 +688,10 @@ public class TaskPersister {
                 if (item instanceof ImageWriteQueueItem) {
                     ImageWriteQueueItem imageWriteQueueItem = (ImageWriteQueueItem) item;
                     final String filePath = imageWriteQueueItem.mFilePath;
+                    if (!createParentDirectory(filePath)) {
+                        Slog.e(TAG, "Error while creating images directory for file: " + filePath);
+                        continue;
+                    }
                     final Bitmap bitmap = imageWriteQueueItem.mImage;
                     if (DEBUG) Slog.d(TAG, "writing bitmap: filename=" + filePath);
                     FileOutputStream imageFile = null;
