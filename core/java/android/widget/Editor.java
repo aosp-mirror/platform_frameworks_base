@@ -77,8 +77,8 @@ import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
 import android.view.DisplayListCanvas;
+import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
-import android.view.DropPermissions;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -2379,9 +2379,9 @@ public class Editor {
     void onDrop(DragEvent event) {
         StringBuilder content = new StringBuilder("");
 
-        final DropPermissions dropPermissions = DropPermissions.obtain(event);
-        if (dropPermissions != null) {
-            dropPermissions.takeTransient();
+        final DragAndDropPermissions permissions = DragAndDropPermissions.obtain(event);
+        if (permissions != null) {
+            permissions.takeTransient();
         }
 
         try {
@@ -2393,8 +2393,8 @@ public class Editor {
             }
         }
         finally {
-            if (dropPermissions != null) {
-                dropPermissions.release();
+            if (permissions != null) {
+                permissions.release();
             }
         }
 
