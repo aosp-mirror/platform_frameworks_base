@@ -25,11 +25,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Wraps a notification view inflated from a template.
@@ -43,8 +42,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private TextView mTitle;
     private TextView mText;
 
-    protected NotificationTemplateViewWrapper(Context ctx, View view) {
-        super(ctx, view);
+    protected NotificationTemplateViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
+        super(ctx, view, row);
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
