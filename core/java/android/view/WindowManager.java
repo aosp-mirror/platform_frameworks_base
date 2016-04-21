@@ -1251,7 +1251,7 @@ public interface WindowManager extends ViewManager {
          * the device supports it.
          * @hide
          */
-        public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00020000;
+        public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
 
         /**
          * Control flags that are private to the platform.
