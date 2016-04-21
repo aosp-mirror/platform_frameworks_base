@@ -408,15 +408,15 @@ public abstract class PrinterDiscoverySession {
     public abstract void onStartPrinterStateTracking(@NonNull PrinterId printerId);
 
     /**
-     * Request the custom icon for a printer. Once the icon is available use
-     * {@link CustomPrinterIconCallback#onCustomPrinterIconLoaded} to send the data to the print
-     * service.
+     * Called by the system to request the custom icon for a printer. Once the icon is available the
+     * print services uses {@link CustomPrinterIconCallback#onCustomPrinterIconLoaded} to send the
+     * icon to the system.
      *
      * @param printerId The printer to icon belongs to.
-     * @param cancellationSignal Signal used to cancel the request
-     * @param callback Callback for returning the icon to the print spooler.
+     * @param cancellationSignal Signal used to cancel the request.
+     * @param callback Callback for returning the icon to the system.
      *
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon(boolean)
      */
     public void onRequestCustomPrinterIcon(@NonNull PrinterId printerId,
             @NonNull CancellationSignal cancellationSignal,
