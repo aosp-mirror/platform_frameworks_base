@@ -24,7 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Log;
-import static android.util.TimeUtils.formatForLogging;
+import static android.util.TimeUtils.formatDuration;
 
 import java.util.ArrayList;
 
@@ -760,15 +760,27 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo job = new JobInfo(this);
-            if (job.intervalMillis != job.getIntervalMillis()) {
-                Log.w(TAG, "Specified interval for " + mJobService.getPackageName() + " is "
-                        + formatForLogging(mIntervalMillis) + ". Clamped to " +
-                        formatForLogging(job.getIntervalMillis()));
-            }
-            if (job.flexMillis != job.getFlexMillis()) {
-                Log.w(TAG, "Specified interval for " + mJobService.getPackageName() + " is "
-                        + formatForLogging(mFlexMillis) + ". Clamped to " +
-                        formatForLogging(job.getFlexMillis()));
+            if (job.isPeriodic()) {
+                if (job.intervalMillis != job.getIntervalMillis()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("Specified interval for ")
+                            .append(String.valueOf(mJobId))
+                            .append(" is ");
+                    formatDuration(mIntervalMillis, builder);
+                    builder.append(". Clamped to ");
+                    formatDuration(job.getIntervalMillis(), builder);
+                    Log.w(TAG, builder.toString());
+                }
+                if (job.flexMillis != job.getFlexMillis()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("Specified flex for ")
+                            .append(String.valueOf(mJobId))
+                            .append(" is ");
+                    formatDuration(mFlexMillis, builder);
+                    builder.append(". Clamped to ");
+                    formatDuration(job.getFlexMillis(), builder);
+                    Log.w(TAG, builder.toString());
+                }
             }
             return job;
         }
