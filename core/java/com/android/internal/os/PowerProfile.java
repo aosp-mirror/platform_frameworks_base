@@ -51,7 +51,7 @@ public class PowerProfile {
      * Power consumption when CPU is awake (when a wake lock is held).  This
      * should be 0 on devices that can go into full CPU power collapse even
      * when a wake lock is held.  Otherwise, this is the power consumption in
-     * addition to POWERR_CPU_IDLE due to a wake lock being held but with no
+     * addition to POWER_CPU_IDLE due to a wake lock being held but with no
      * CPU activity.
      */
     public static final String POWER_CPU_AWAKE = "cpu.awake";
