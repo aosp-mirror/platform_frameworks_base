@@ -103,10 +103,10 @@ import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.AutoReinflateContainer;
+import com.android.systemui.AutoReinflateContainer.InflateListener;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
-import com.android.systemui.DensityContainer;
-import com.android.systemui.DensityContainer.InflateListener;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
@@ -871,8 +871,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Set up the quick settings tile panel
-        DensityContainer container = (DensityContainer) mStatusBarWindow.findViewById(
-                R.id.qs_density_container);
+        AutoReinflateContainer container = (AutoReinflateContainer) mStatusBarWindow.findViewById(
+                R.id.qs_auto_reinflate_container);
         if (container != null) {
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
