@@ -214,7 +214,7 @@ public class TrackerService extends Service {
     private long getLocationUpdateTime() {
         try {
             String timeString = getPreferences().getString(MIN_TIME_PREF, "0");
-            long secondsTime = Long.valueOf(timeString);
+            long secondsTime = Long.parseLong(timeString);
             return secondsTime * 1000;
         }
         catch (NumberFormatException e) {
