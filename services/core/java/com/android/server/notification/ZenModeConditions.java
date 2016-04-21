@@ -99,9 +99,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
-        if (isAutomaticActive(component)) {
-            mHelper.setConfigAsync(mHelper.getConfig(), "zmc.onServiceAdded");
-        }
+        mHelper.setConfigAsync(mHelper.getConfig(), "zmc.onServiceAdded");
     }
 
     @Override
