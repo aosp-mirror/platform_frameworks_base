@@ -24,9 +24,7 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
-import android.net.metrics.IpReachabilityMonitorMessageEvent;
-import android.net.metrics.IpReachabilityMonitorProbeEvent;
-import android.net.metrics.IpReachabilityMonitorLostEvent;
+import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
@@ -168,47 +166,54 @@ public class IpReachabilityMonitor {
      * Make the kernel perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
      * for the given IP address on the specified interface index.
      *
-     * @return true, if the request was successfully passed to the kernel; false otherwise.
+     * @return 0 if the request was successfully passed to the kernel; otherwise return
+     *         a non-zero error code.
      */
-    public static boolean probeNeighbor(int ifIndex, InetAddress ip) {
-        final long IO_TIMEOUT = 300L;
+    private static int probeNeighbor(int ifIndex, InetAddress ip) {
         final String msgSnippet = "probing ip=" + ip.getHostAddress() + "%" + ifIndex;
         if (DBG) { Log.d(TAG, msgSnippet); }
 
         final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
                 1, ip, StructNdMsg.NUD_PROBE, ifIndex, null);
-        boolean returnValue = false;
 
+        int errno = -OsConstants.EPROTO;
         try (NetlinkSocket nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE)) {
+            final long IO_TIMEOUT = 300L;
             nlSocket.connectToKernel();
             nlSocket.sendMessage(msg, 0, msg.length, IO_TIMEOUT);
             final ByteBuffer bytes = nlSocket.recvMessage(IO_TIMEOUT);
+            // recvMessage() guaranteed to not return null if it did not throw.
             final NetlinkMessage response = NetlinkMessage.parse(bytes);
             if (response != null && response instanceof NetlinkErrorMessage &&
-                    (((NetlinkErrorMessage) response).getNlMsgError() != null) &&
-                    (((NetlinkErrorMessage) response).getNlMsgError().error == 0)) {
-                returnValue = true;
-            } else {
-                String errmsg;
-                if (bytes == null) {
-                    errmsg = "null recvMessage";
-                } else if (response == null) {
-                    bytes.position(0);
-                    errmsg = "raw bytes: " + NetlinkConstants.hexify(bytes);
-                } else {
+                    (((NetlinkErrorMessage) response).getNlMsgError() != null)) {
+                errno = ((NetlinkErrorMessage) response).getNlMsgError().error;
+                if (errno != 0) {
                     // TODO: consider ignoring EINVAL (-22), which appears to be
                     // normal when probing a neighbor for which the kernel does
                     // not already have / no longer has a link layer address.
+                    Log.e(TAG, "Error " + msgSnippet + ", errmsg=" + response.toString());
+                }
+            } else {
+                String errmsg;
+                if (response == null) {
+                    bytes.position(0);
+                    errmsg = "raw bytes: " + NetlinkConstants.hexify(bytes);
+                } else {
                     errmsg = response.toString();
                 }
                 Log.e(TAG, "Error " + msgSnippet + ", errmsg=" + errmsg);
             }
-        } catch (ErrnoException | InterruptedIOException | SocketException e) {
-            Log.d(TAG, "Error " + msgSnippet, e);
+        } catch (ErrnoException e) {
+            Log.e(TAG, "Error " + msgSnippet, e);
+            errno = -e.errno;
+        } catch (InterruptedIOException e) {
+            Log.e(TAG, "Error " + msgSnippet, e);
+            errno = -OsConstants.ETIMEDOUT;
+        } catch (SocketException e) {
+            Log.e(TAG, "Error " + msgSnippet, e);
+            errno = -OsConstants.EIO;
         }
-        IpReachabilityMonitorProbeEvent.logEvent("ifindex-" + ifIndex, ip.getHostAddress(),
-                returnValue);
-        return returnValue;
+        return errno;
     }
 
     public IpReachabilityMonitor(Context context, String ifName, Callback callback)
@@ -354,7 +359,7 @@ public class IpReachabilityMonitor {
         }
 
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
-            IpReachabilityMonitorLostEvent.logEvent(mInterfaceName);
+            IpReachabilityEvent.logProvisioningLost(mInterfaceName);
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + msg;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
@@ -362,6 +367,8 @@ public class IpReachabilityMonitor {
                 // an InetAddress argument.
                 mCallback.notifyLost(ip, logMsg);
             }
+        } else {
+            IpReachabilityEvent.logNudFailed(mInterfaceName);
         }
     }
 
@@ -385,7 +392,8 @@ public class IpReachabilityMonitor {
             if (!stillRunning()) {
                 break;
             }
-            probeNeighbor(mInterfaceIndex, target);
+            final int returnValue = probeNeighbor(mInterfaceIndex, target);
+            IpReachabilityEvent.logProbeEvent(mInterfaceName, returnValue);
         }
     }
 
@@ -523,8 +531,6 @@ public class IpReachabilityMonitor {
 
             final short msgType = neighMsg.getHeader().nlmsg_type;
             final short nudState = ndMsg.ndm_state;
-            IpReachabilityMonitorMessageEvent.logEvent(mInterfaceName,
-                    destination.getHostAddress(), msgType, nudState);
             final String eventMsg = "NeighborEvent{"
                     + "elapsedMs=" + whenMs + ", "
                     + destination.getHostAddress() + ", "
