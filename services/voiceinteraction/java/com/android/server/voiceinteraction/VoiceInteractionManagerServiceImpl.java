@@ -183,11 +183,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startVoiceActivity does not match active session");
-                return ActivityManager.START_CANCELED;
+                return ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
             }
             if (!mActiveSession.mShown) {
                 Slog.w(TAG, "startVoiceActivity not allowed on hidden session");
-                return ActivityManager.START_CANCELED;
+                return ActivityManager.START_VOICE_HIDDEN_SESSION;
             }
             intent = new Intent(intent);
             intent.addCategory(Intent.CATEGORY_VOICE);
