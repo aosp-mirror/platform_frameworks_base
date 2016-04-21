@@ -166,7 +166,7 @@ public class MainFragment extends BrowseFragment implements
   shown in figures 1 and 2. This method replaces the title string with the
   drawable resource, if {@code setTitle()} is also called. The drawable resource should be 52dps
   tall.</li>
-  <li>{@link android.support.v17.leanback.app.BrowseFragment#setTitle(java.lang.String) setTitle()}
+  <li>{@link android.support.v17.leanback.app.BrowseFragment#setTitle(java.lang.CharSequence) setTitle()}
   sets the title string in the upper-right corner of the browse fragment, unless
   {@code setBadgeDrawable()} is called.</li>
   <li>{@link android.support.v17.leanback.app.BrowseFragment#setHeadersState(int) setHeadersState()}
