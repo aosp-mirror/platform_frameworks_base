@@ -47,6 +47,7 @@ public class TaskCardView extends LinearLayout {
 
     private static final String TAG = "TaskCardView";
     private View mThumbnailView;
+    private View mDismissIconView;
     private TextView mTitleTextView;
     private ImageView mBadgeView;
     private Task mTask;
@@ -78,6 +79,7 @@ public class TaskCardView extends LinearLayout {
         mThumbnailView = findViewById(R.id.card_view_thumbnail);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
+        mDismissIconView = findViewById(R.id.dismiss_icon);
         mDismissAnimationsHolder = new DismissAnimationsHolder(this);
         View title = findViewById(R.id.card_info_field);
         mCornerRadius = getResources().getDimensionPixelSize(
@@ -315,5 +317,9 @@ public class TaskCardView extends LinearLayout {
 
     public View getThumbnailView() {
         return mThumbnailView;
+    }
+
+    public View getDismissIconView() {
+        return mDismissIconView;
     }
 }
