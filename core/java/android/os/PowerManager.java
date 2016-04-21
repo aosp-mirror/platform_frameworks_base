@@ -1023,7 +1023,7 @@ public final class PowerManager {
     /**
      * Returns True if the device supports Sustained Performance Mode.
      * Applications Should check if the device supports this mode, before
-     * using {@link #SUSTAINED_PERFORMANCE_WAKE_LOCK}.
+     * using {@link android.view.Window#setSustainedPerformanceMode}.
      */
     public boolean isSustainedPerformanceModeSupported() {
         return mContext.getResources().getBoolean(
