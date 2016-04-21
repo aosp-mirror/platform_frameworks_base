@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.Choreographer;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -637,10 +638,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     /**
-     * Keeps state of stream of events from a keyboard device.
+     * Keeps state of streams of events from all keyboard devices.
      */
     private static class KeyboardEventStreamState extends EventStreamState {
-        private boolean mEventSequenceStarted;
+        private SparseBooleanArray mEventSequenceStartedMap = new SparseBooleanArray();
 
         public KeyboardEventStreamState() {
             reset();
@@ -649,17 +650,35 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         @Override
         final public void reset() {
             super.reset();
-            mEventSequenceStarted = false;
+            mEventSequenceStartedMap.clear();
         }
+
+        /*
+         * Key events from different devices may be interleaved. For example, the volume up and
+         * down keys can come from different device IDs.
+         */
+        @Override
+        public boolean updateDeviceId(int deviceId) {
+            return false;
+        }
+
+        // We manage all device ids simultaneously; there is no concept of validity.
+        @Override
+        public boolean deviceIdValid() {
+            return true;
+        }
+
 
         @Override
         final public boolean shouldProcessKeyEvent(KeyEvent event) {
-            // Wait for a down key event to start processing.
-            if (mEventSequenceStarted) {
+            // For each keyboard device, wait for a down event from a device to start processing
+            int deviceId = event.getDeviceId();
+            if (mEventSequenceStartedMap.get(deviceId, false)) {
                 return true;
             }
-            mEventSequenceStarted = event.getAction() == KeyEvent.ACTION_DOWN;
-            return mEventSequenceStarted;
+            boolean shouldProcess = event.getAction() == KeyEvent.ACTION_DOWN;
+            mEventSequenceStartedMap.put(deviceId, shouldProcess);
+            return shouldProcess;
         }
     }
 }
