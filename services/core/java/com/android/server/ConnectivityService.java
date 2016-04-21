@@ -71,7 +71,7 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
-import android.net.metrics.ConnectivityServiceChangeEvent;
+import android.net.metrics.DefaultNetworkEvent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -2220,7 +2220,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             rematchAllNetworksAndRequests(null, 0);
             if (wasDefault && getDefaultNetwork() == null) {
                 // Log that we lost the default network and there is no replacement.
-                logConnectivityServiceChangeEvent(null, nai);
+                logDefaultNetworkEvent(null, nai);
             }
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
@@ -4455,8 +4455,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
-
-        logConnectivityServiceChangeEvent(newNetwork, prevNetwork);
+        logDefaultNetworkEvent(newNetwork, prevNetwork);
     }
 
     // Handles a network appearing or improving its score.
@@ -5078,21 +5077,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new NetworkMonitor(context, handler, nai, defaultRequest);
     }
 
-    private static void logConnectivityServiceChangeEvent(
-            NetworkAgentInfo next, NetworkAgentInfo prev) {
-        final int newNetId = (next == null) ? NETID_UNSET : next.network.netId;
-        final int[] newTransportTypes = (next == null)
-                ? new int[0]
-                : next.networkCapabilities.getTransportTypes();
+    private static void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
+        int newNetid = NETID_UNSET;
+        int prevNetid = NETID_UNSET;
+        int[] transports = new int[0];
+        boolean hadIPv4 = false;
+        boolean hadIPv6 = false;
 
-        final int oldNetId = (prev == null) ? NETID_UNSET : prev.network.netId;
-        final boolean hadIPv4 = (prev != null) &&
-                prev.linkProperties.hasIPv4Address() &&
-                prev.linkProperties.hasIPv4DefaultRoute();
-        final boolean hadIPv6 = (prev != null) &&
-                prev.linkProperties.hasGlobalIPv6Address() &&
-                prev.linkProperties.hasIPv6DefaultRoute();
-        ConnectivityServiceChangeEvent.logEvent(newNetId, newTransportTypes,
-                oldNetId, hadIPv4, hadIPv6);
+        if (newNai != null) {
+            newNetid = newNai.network.netId;
+            transports = newNai.networkCapabilities.getTransportTypes();
+        }
+        if (prevNai != null) {
+            prevNetid = prevNai.network.netId;
+            final LinkProperties lp = prevNai.linkProperties;
+            hadIPv4 = lp.hasIPv4Address() && lp.hasIPv4DefaultRoute();
+            hadIPv6 = lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
+        }
+
+        DefaultNetworkEvent.logEvent(newNetid, transports, prevNetid, hadIPv4, hadIPv6);
     }
 }
