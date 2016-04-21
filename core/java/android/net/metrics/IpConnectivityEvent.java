@@ -50,6 +50,9 @@ public abstract class IpConnectivityEvent {
 
     public static final int IPCE_NETMON_STATE_CHANGE       = IPCE_NETMON_BASE + 0;
     public static final int IPCE_NETMON_CHECK_RESULT       = IPCE_NETMON_BASE + 1;
+    public static final int IPCE_NETMON_VALIDATED          = IPCE_NETMON_BASE + 2;
+    public static final int IPCE_NETMON_PORTAL_PROBE       = IPCE_NETMON_BASE + 3;
+    public static final int IPCE_NETMON_CAPPORT_FOUND      = IPCE_NETMON_BASE + 4;
 
     public static final int IPCE_CONSRV_DEFAULT_NET_CHANGE = IPCE_CONSRV_BASE + 0;
 
