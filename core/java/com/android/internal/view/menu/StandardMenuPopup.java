@@ -108,8 +108,6 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
 
-    private int mXOffset;
-    private int mYOffset;
     private boolean mShowTitle;
 
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
@@ -177,8 +175,6 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
         mPopup.setContentWidth(mContentWidth);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-        mPopup.setHorizontalOffset(mXOffset);
-        mPopup.setVerticalOffset(mYOffset);
         mPopup.setEpicenterBounds(getEpicenterBounds());
         mPopup.show();
 
@@ -276,7 +272,9 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
             mMenu.close(false /* closeAllMenus */);
 
             // Show the new sub-menu popup at the same location as this popup.
-            if (subPopup.tryShow(mXOffset, mYOffset)) {
+            final int horizontalOffset = mPopup.getHorizontalOffset();
+            final int verticalOffset = mPopup.getVerticalOffset();
+            if (subPopup.tryShow(horizontalOffset, verticalOffset)) {
                 if (mPresenterCallback != null) {
                     mPresenterCallback.onOpenSubMenu(subMenu);
                 }
@@ -338,12 +336,12 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
     @Override
     public void setHorizontalOffset(int x) {
-        mXOffset = x;
+        mPopup.setHorizontalOffset(x);
     }
 
     @Override
     public void setVerticalOffset(int y) {
-        mYOffset = y;
+        mPopup.setVerticalOffset(y);
     }
 
     @Override
