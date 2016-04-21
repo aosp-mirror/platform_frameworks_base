@@ -110,6 +110,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final float HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
+    public static final int SLOW_SYNC_STACK_DURATION = 250;
     private static final int DRAG_SCALE_DURATION = 175;
     static final float DRAG_SCALE_FACTOR = 1.05f;
 
@@ -1797,7 +1798,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
-        AnimationProps animation = new AnimationProps(250, Interpolators.FAST_OUT_SLOW_IN);
+        AnimationProps animation = new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN);
         boolean ignoreTaskOverrides = false;
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will

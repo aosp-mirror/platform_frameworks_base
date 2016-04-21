@@ -49,6 +49,7 @@ import android.util.SparseArray;
 import android.view.animation.Interpolator;
 
 import com.android.internal.policy.DockedDividerUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -253,7 +254,7 @@ public class TaskStack {
         private static final int HORIZONTAL = 0;
         private static final int VERTICAL = 1;
 
-        private static final int DOCK_AREA_ALPHA = 192;
+        private static final int DOCK_AREA_ALPHA = 80;
         public static final DockState NONE = new DockState(DOCKED_INVALID, -1, 80, 255, HORIZONTAL,
                 null, null, null);
         public static final DockState LEFT = new DockState(DOCKED_LEFT,
@@ -368,19 +369,28 @@ public class TaskStack {
                     mDockAreaOverlayAnimator.cancel();
                 }
 
+                ObjectAnimator anim;
                 ArrayList<Animator> animators = new ArrayList<>();
                 if (dockAreaOverlay.getAlpha() != areaAlpha) {
                     if (animateAlpha) {
-                        animators.add(ObjectAnimator.ofInt(dockAreaOverlay,
-                                Utilities.DRAWABLE_ALPHA, dockAreaOverlay.getAlpha(), areaAlpha));
+                        anim = ObjectAnimator.ofInt(dockAreaOverlay,
+                                Utilities.DRAWABLE_ALPHA, dockAreaOverlay.getAlpha(), areaAlpha);
+                        anim.setDuration(duration);
+                        anim.setInterpolator(interpolator);
+                        animators.add(anim);
                     } else {
                         dockAreaOverlay.setAlpha(areaAlpha);
                     }
                 }
                 if (mHintTextAlpha != hintAlpha) {
                     if (animateAlpha) {
-                        animators.add(ObjectAnimator.ofInt(this, HINT_ALPHA, mHintTextAlpha,
-                                hintAlpha));
+                        anim = ObjectAnimator.ofInt(this, HINT_ALPHA, mHintTextAlpha,
+                                hintAlpha);
+                        anim.setDuration(150);
+                        anim.setInterpolator(hintAlpha > mHintTextAlpha
+                                ? Interpolators.ALPHA_IN
+                                : Interpolators.ALPHA_OUT);
+                        animators.add(anim);
                     } else {
                         mHintTextAlpha = hintAlpha;
                         dockAreaOverlay.invalidateSelf();
@@ -390,8 +400,11 @@ public class TaskStack {
                     if (animateBounds) {
                         PropertyValuesHolder prop = PropertyValuesHolder.ofObject(
                                 Utilities.DRAWABLE_RECT, Utilities.RECT_EVALUATOR,
-                                dockAreaOverlay.getBounds(), bounds);
-                        animators.add(ObjectAnimator.ofPropertyValuesHolder(dockAreaOverlay, prop));
+                                new Rect(dockAreaOverlay.getBounds()), bounds);
+                        anim = ObjectAnimator.ofPropertyValuesHolder(dockAreaOverlay, prop);
+                        anim.setDuration(duration);
+                        anim.setInterpolator(interpolator);
+                        animators.add(anim);
                     } else {
                         dockAreaOverlay.setBounds(bounds);
                     }
@@ -399,8 +412,6 @@ public class TaskStack {
                 if (!animators.isEmpty()) {
                     mDockAreaOverlayAnimator = new AnimatorSet();
                     mDockAreaOverlayAnimator.playTogether(animators);
-                    mDockAreaOverlayAnimator.setDuration(duration);
-                    mDockAreaOverlayAnimator.setInterpolator(interpolator);
                     mDockAreaOverlayAnimator.start();
                 }
             }
