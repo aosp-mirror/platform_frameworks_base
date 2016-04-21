@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/qs_background_primary"
         android:clipToPadding="false"
-        android:clipChildren="false">
+        android:clipChildren="false"
+        android:elevation="4dp">
 
     <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
