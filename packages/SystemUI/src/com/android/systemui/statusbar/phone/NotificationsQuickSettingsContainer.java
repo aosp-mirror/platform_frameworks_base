@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-import com.android.systemui.DensityContainer;
+import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -33,10 +33,10 @@ import com.android.systemui.qs.customize.QSCustomizer;
  * The container with notification stack scroller and quick settings inside.
  */
 public class NotificationsQuickSettingsContainer extends FrameLayout
-        implements ViewStub.OnInflateListener, DensityContainer.InflateListener {
+        implements ViewStub.OnInflateListener, AutoReinflateContainer.InflateListener {
 
 
-    private DensityContainer mQsContainer;
+    private AutoReinflateContainer mQsContainer;
     private View mUserSwitcher;
     private View mStackScroller;
     private View mKeyguardStatusBar;
@@ -54,7 +54,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQsContainer = (DensityContainer) findViewById(R.id.qs_density_container);
+        mQsContainer = (AutoReinflateContainer) findViewById(R.id.qs_auto_reinflate_container);
         mQsContainer.addInflateListener(this);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
