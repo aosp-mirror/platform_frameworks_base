@@ -11502,6 +11502,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void startConfirmDeviceCredentialIntent(Intent intent) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startConfirmDeviceCredentialIntent");
+        synchronized (this) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mActivityStarter.startConfirmCredentialIntent(intent);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
     public void stopAppSwitches() {
         if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
                 != PackageManager.PERMISSION_GRANTED) {

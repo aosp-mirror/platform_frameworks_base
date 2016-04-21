@@ -33,6 +33,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -612,11 +613,6 @@ class ActivityStarter {
                 .getSystemService(Context.KEYGUARD_SERVICE);
         final Intent credential =
                 km.createConfirmDeviceCredentialIntent(null, null, userId);
-        credential.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
-                Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchTaskId(mSupervisor.getHomeActivity().task.taskId);
         final ActivityRecord activityRecord = targetStack.topRunningActivityLocked();
         if (activityRecord != null) {
             final IIntentSender target = mService.getIntentSenderLocked(
@@ -633,11 +629,19 @@ class ActivityStarter {
                     null);
             credential.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
             // Show confirm credentials activity.
-            mService.mContext.startActivityAsUser(credential, options.toBundle(),
-                    UserHandle.CURRENT);
+            startConfirmCredentialIntent(credential);
         }
     }
 
+    void startConfirmCredentialIntent(Intent intent) {
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK |
+                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                FLAG_ACTIVITY_TASK_ON_HOME);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchTaskId(mSupervisor.getHomeActivity().task.taskId);
+        mService.mContext.startActivityAsUser(intent, options.toBundle(),
+                UserHandle.CURRENT);
+    }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType,
