@@ -29,16 +29,12 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewDebug;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -53,41 +49,38 @@ public class TaskViewThumbnail extends View {
 
     private Task mTask;
 
+    private int mDisplayOrientation = Configuration.ORIENTATION_UNDEFINED;
     private Rect mDisplayRect = new Rect();
-    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     // Drawing
     @ViewDebug.ExportedProperty(category="recents")
-    Rect mTaskViewRect = new Rect();
+    private Rect mTaskViewRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
-    Rect mThumbnailRect = new Rect();
+    private Rect mThumbnailRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
-    float mThumbnailScale;
-    float mFullscreenThumbnailScale;
-    ActivityManager.TaskThumbnailInfo mThumbnailInfo;
+    private float mThumbnailScale;
+    private float mFullscreenThumbnailScale;
+    private ActivityManager.TaskThumbnailInfo mThumbnailInfo;
 
-    int mCornerRadius;
+    private int mCornerRadius;
     @ViewDebug.ExportedProperty(category="recents")
-    float mDimAlpha;
-    Matrix mScaleMatrix = new Matrix();
-    Paint mDrawPaint = new Paint();
-    Paint mBgFillPaint = new Paint();
-    BitmapShader mBitmapShader;
-    LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
+    private float mDimAlpha;
+    private Matrix mScaleMatrix = new Matrix();
+    private Paint mDrawPaint = new Paint();
+    private Paint mBgFillPaint = new Paint();
+    private BitmapShader mBitmapShader;
+    private LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
-    // Task bar clipping, the top of this thumbnail can be clipped against the opaque header
-    // bar that overlaps this thumbnail
-    View mTaskBar;
-    @ViewDebug.ExportedProperty(category="recents")
-    Rect mClipRect = new Rect();
+    // Clip the top of the thumbnail against the opaque header bar that overlaps this view
+    private View mTaskBar;
 
     // Visibility optimization, if the thumbnail height is less than the height of the header
     // bar for the task view, then just mark this thumbnail view as invisible
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mInvisible;
+    private boolean mInvisible;
 
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mDisabledInSafeMode;
+    private boolean mDisabledInSafeMode;
 
     public TaskViewThumbnail(Context context) {
         this(context, null);
@@ -126,15 +119,6 @@ public class TaskViewThumbnail extends View {
         mTaskViewRect.set(0, 0, width, height);
         setLeftTopRightBottom(0, 0, width, height);
         updateThumbnailScale();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        mOrientation = Utilities.getAppConfiguration(mContext).orientation;
-        mDisplayRect = ssp.getDisplayRect();
     }
 
     @Override
@@ -247,7 +231,7 @@ public class TaskViewThumbnail extends View {
                 mThumbnailScale = 0f;
             } else if (isStackTask) {
                 float invThumbnailScale = 1f / mFullscreenThumbnailScale;
-                if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
                     if (mThumbnailInfo.screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
                         // If we are in the same orientation as the screenshot, just scale it to the
                         // width of the task view
@@ -306,9 +290,11 @@ public class TaskViewThumbnail extends View {
     /**
      * Binds the thumbnail view to the task.
      */
-    void bindToTask(Task t, boolean disabledInSafeMode) {
+    void bindToTask(Task t, boolean disabledInSafeMode, int displayOrientation, Rect displayRect) {
         mTask = t;
         mDisabledInSafeMode = disabledInSafeMode;
+        mDisplayOrientation = displayOrientation;
+        mDisplayRect.set(displayRect);
         if (t.colorBackground != 0) {
             mBgFillPaint.setColor(t.colorBackground);
         }

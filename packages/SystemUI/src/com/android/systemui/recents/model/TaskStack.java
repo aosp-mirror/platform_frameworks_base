@@ -481,8 +481,9 @@ public class TaskStack {
          * Returns the task stack bounds with the given {@param width} and
          * {@param height}.
          */
-        public Rect getDockedTaskStackBounds(int width, int height, int dividerSize, Rect insets,
-                TaskStackLayoutAlgorithm layoutAlgorithm, Resources res, Rect windowRectOut) {
+        public Rect getDockedTaskStackBounds(Rect displayRect, int width, int height,
+                int dividerSize, Rect insets, TaskStackLayoutAlgorithm layoutAlgorithm,
+                Resources res, Rect windowRectOut) {
             // Calculate the inverse docked task bounds
             boolean isHorizontalDivision =
                     res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -499,7 +500,8 @@ public class TaskStack {
             int top = dockArea.bottom < 1f
                     ? 0
                     : insets.top;
-            layoutAlgorithm.getTaskStackBounds(windowRectOut, top, insets.right, taskStackBounds);
+            layoutAlgorithm.getTaskStackBounds(displayRect, windowRectOut, top, insets.right,
+                    taskStackBounds);
             return taskStackBounds;
         }
     }

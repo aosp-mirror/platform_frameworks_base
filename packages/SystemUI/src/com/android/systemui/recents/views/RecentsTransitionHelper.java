@@ -404,7 +404,7 @@ public class RecentsTransitionHelper {
         transform.rect.round(taskRect);
         if (stackView.getStack().getStackFrontMostTask(false /* includeFreeformTasks */) !=
                 taskView.getTask()) {
-            taskRect.bottom = 2 * Recents.getSystemServices().getDisplayRect().height();
+            taskRect.bottom = taskRect.top + stackView.getMeasuredHeight();
         }
         return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);
     }
