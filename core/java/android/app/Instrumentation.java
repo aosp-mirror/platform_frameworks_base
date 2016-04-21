@@ -1797,7 +1797,7 @@ public class Instrumentation {
         if (res >= ActivityManager.START_SUCCESS) {
             return;
         }
-        
+
         switch (res) {
             case ActivityManager.START_INTENT_NOT_RESOLVED:
             case ActivityManager.START_CLASS_NOT_FOUND:
@@ -1820,6 +1820,15 @@ public class Instrumentation {
             case ActivityManager.START_NOT_VOICE_COMPATIBLE:
                 throw new SecurityException(
                         "Starting under voice control not allowed for: " + intent);
+            case ActivityManager.START_VOICE_NOT_ACTIVE_SESSION:
+                throw new IllegalStateException(
+                        "Session calling startVoiceActivity does not match active session");
+            case ActivityManager.START_VOICE_HIDDEN_SESSION:
+                throw new IllegalStateException(
+                        "Cannot start voice activity on a hidden session");
+            case ActivityManager.START_CANCELED:
+                throw new AndroidRuntimeException("Activity could not be started for "
+                        + intent);
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);
