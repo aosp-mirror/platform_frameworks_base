@@ -661,6 +661,16 @@ static void GeofenceMonitorStatusCallback(
     TranslateToObject(lastLocation, locationObject);
   }
 
+  // sCallbacksObject is created when FlpHardwareProvider on Java side is
+  // initialized. Sometimes the hardware may call this function before the Java
+  // side is ready. In order to prevent the system crash, check whether
+  // sCallbacksObj has been created. If not, simply ignore this event from
+  // hardware.
+  if (sCallbacksObj == NULL) {
+    ALOGE("FlpHardwareProvider hasn't been initialized.");
+    return;
+  }
+
   sCallbackEnv->CallVoidMethod(
       sCallbacksObj,
       sOnGeofenceMonitorStatus,
