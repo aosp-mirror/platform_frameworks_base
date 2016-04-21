@@ -1,0 +1,120 @@
+page.title=Android N Developer Preview
+page.tags="preview","developer"
+meta.tags="preview", "android"
+fullpage=true
+forcelocalnav=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<script>
+  $(document).ready(function() {
+    if (useUpdatedTemplates) {
+      $("#useUpdatedTemplates").css("display","block");
+    } else {
+      $("#useOldTemplates").css("display","block");
+    }
+  })
+</script>
+
+<section class="dac-expand dac-hero dac-light" style="background-color:#B2DFDB">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+    <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+      <div class="col-7of16 col-push-9of16" style="padding-left:2em">
+        <h1 class="dac-hero-title">Android N Developer Preview</h1>
+        <p class="dac-hero-description">
+          為 Android N 做好準備！
+          在 Nexus 與其他裝置上<strong>測試您的應用程式</strong>。支援新系統行為以<strong>節省電力與記憶體</strong>。使用<strong>多視窗 UI</strong>、<strong>直接回覆通知</strong>等延伸您的應用程式。
+
+
+
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          開始使用</a>
+<!--<br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Update to Android N (final SDK)
+        </a><br>-->
+      </div>
+      <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
+        <img class="dac-hero-image" src="{@docRoot}images/home/n-preview-hero.png" srcset="{@docRoot}images/home/n-preview-hero.png 1x,
+             {@docRoot}images/home/n-preview-hero_2x.png 2x">
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:preview/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="https://developer.android.com/preview/bug">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          回報問題
+</a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}preview/support.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          查看版本資訊</a>
+
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}preview/dev-community">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          加入開發人員社群</a>
+
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end .dac-actions -->
+
+<div id="useOldTemplates" style="display:none;color:black" class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+
+    <div class="actions">
+      <div><a href="https://developer.android.com/preview/bug">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        回報問題</a>
+</div>
+      <div><a href="{@docRoot}preview/support.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        查看版本資訊</a>
+</div>
+      <div><a href="{@docRoot}preview/dev-community">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        加入開發人員社群</a>
+</div>
+    </div><!-- end .actions -->
+  </div><!-- end .wrap -->
+</div>
+
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">資源</h1>
+  <div class="dac-section-subtitle">
+    以下重要資訊可幫助您的應用程式準備好使用 Android N。
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:preview/landing/more"
+       data-cardSizes="6x6"
+       data-items-per-page="6"
+       data-maxResults="15"
+       data-initial-results="6"></div>
+
+  </div>
+</section>
+

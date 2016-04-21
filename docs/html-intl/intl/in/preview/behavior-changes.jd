@@ -1,0 +1,480 @@
+page.title=Perubahan Perilaku
+page.keywords=preview,sdk,compatibility
+meta.tags="preview", "kompatibilitas"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+
+<ol>
+  <li><a href="#perf">Peningkatan Kinerja</a>
+    <ol>
+      <li><a href="#doze">Doze</a></li>
+      <li><a href="#bg-opt">Optimisasi Latar Belakang</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">Perubahan Izin</a></li>
+  <li><a href="#accessibility">Peningkatan Aksesibilitas</a>
+    <ol>
+      <li><a href="#screen-zoom">Zoom Layar</a></li>
+      <li><a href="#vision-settings">Vision Settings di Setup Wizard</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">Menautkan Aplikasi NDK ke Pustaka Platform</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+</ol>
+
+<h2>Lihat Juga</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">
+    Ikhtisar Android N API</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  Selain fitur dan kemampuan baru, Android N
+  juga menyertakan berbagai perubahan perilaku sistem dan API. Dokumen ini
+  menyoroti beberapa perubahan utama yang harus dipahami dan diperhitungkan
+  dalam aplikasi Anda.
+</p>
+
+<p>
+  Jika Anda sebelumnya telah mempublikasikan aplikasi untuk Android, ketahuilah bahwa aplikasi Anda
+  mungkin akan terpengaruh oleh perubahan dalam platform ini.
+</p>
+
+
+<h2 id="perf">Peningkatan Kinerja</h2>
+
+<p>
+  Android N berisi perubahan perilaku sistem yang bertujuan meningkatkan daya tahan
+  baterai perangkat, penggunaan RAM, dan kinerja aplikasi. Perubahan-perubahan ini bisa memengaruhi
+  ketersediaan sumber daya sistem dan pemberitahuan sistem bagi aplikasi. Anda
+  harus meninjau perubahan ini dan mengevaluasi cara menyesuaikan aplikasi Anda terhadap perubahan
+  tersebut.
+</p>
+
+<h3 id="doze">Doze</h3>
+
+<p>
+  Diperkenalkan dalam Android 6.0 (API level 23), Doze meningkatkan daya tahan baterai dengan
+  menangguhkan aktivitas CPU dan jaringan bila pengguna mencabut steker perangkat,
+  diam, dan layar dinonaktifkan. Android N
+  menyempurnakan Doze lebih jauh dengan menerapkan subset CPU dan pembatasan jaringan
+  bila perangkat dicabut stekernya dan layar dinonaktifkan, namun tidak harus
+  diam, misalnya, bila handset dibawa bepergian di saku pengguna.
+</p>
+
+
+<img src="{@docRoot}preview/images/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>Gambar 1.</strong> Ilustrasi tentang cara Doze menerapkan pembatasan
+  aktivitas sistem tingkat pertama untuk meningkatkan daya tahan baterai.
+</p>
+
+<p>
+  Bila perangkat sedang menggunakan daya baterai, dan layar telah nonaktif selama jangka waktu
+  tertentu, perangkat akan memasuki Doze dan menerapkan pembatasan subset pertama: Perangkat
+  akan menutup akses jaringan aplikasi, serta menangguhkan pekerjaan dan sinkronisasi. Jika perangkat
+  sedang diam selama jangka waktu tertentu setelah memasuki Doze, sistem akan menerapkan pembatasan
+  Doze lainnya terhadap alarm {@link android.os.PowerManager.WakeLock},
+  {@link android.app.AlarmManager}, GPS, dan pemindaian Wi-Fi. Tidak peduli
+  apakah sebagian atau semua pembatasan Doze diterapkan, sistem akan membangunkan
+  perangkat selama jeda pemeliharaan singkat, dan selama itu aplikasi diizinkan
+  mengakses jaringan dan bisa mengeksekusi semua pekerjaan/sinkronisasi yang telah ditangguhkan.
+</p>
+
+
+<img src="{@docRoot}preview/images/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Gambar 2.</strong> Ilustrasi tentang cara Doze menerapkan pembatasan
+  aktivitas sistem tingkat kedua setelah perangkat diam selama jangka waktu tertentu.
+</p>
+
+<p>
+  Perhatikan, mengaktifkan layar atau memasang steker perangkat akan menyebabkan keluar dari Doze dan
+  menghilangkan pembatasan pemrosesan ini. Perilaku tambahan ini tidak
+  memengaruhi rekomendasi dan praktik terbaik dalam menyesuaikan aplikasi Anda dengan versi
+  Doze sebelumnya yang diperkenalkan dalam Android 6.0 (API level 23), seperti yang dibahas di
+  <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
+  Mengoptimalkan untuk Doze dan App Standby</a>. Anda tetap harus
+  mengikuti rekomendasi itu, seperti menggunakan Google Cloud Messaging (GCM) untuk
+  mengirim dan menerima pesan, dan mulai merencanakan pembaruan untuk mengakomodasi
+  perilaku Doze tambahan.
+</p>
+
+
+<h3 id="bg-opt">Project Svelte: Optimisasi Latar Belakang</h3>
+
+<p>
+  Android N menghilangkan tiga siaran implisit untuk membantu mengoptimalkan
+  penggunaan memori dan konsumsi daya. Perubahan ini penting karena siaran
+  implisit sering memulai aplikasi yang telah didaftarkan untuk mendengarkannya di
+  latar belakang. Menghilangkan siaran ini bisa sangat menguntungkan kinerja perangkat dan pengalaman
+  pengguna.
+</p>
+
+<p>
+  Perangkat seluler sering mengalami perubahan konektivitas, seperti saat berpindah
+  antara Wi-Fi dan data seluler. Saat ini, aplikasi bisa memantau perubahan dalam
+  konektivitas dengan mendaftarkan suatu penerima untuk siaran implisit {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} dalam manifes
+  mereka. Karena banyak aplikasi yang didaftarkan untuk menerima siaran ini, switch
+  jaringan tunggal bisa menyebabkan semuanya aktif dan memproses siaran tersebut
+  secara bersamaan.
+</p>
+
+<p>
+  Demikian pula, aplikasi bisa mendaftar untuk menerima siaran implisit {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} dan {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} dari aplikasi lain, seperti
+  Kamera. Bila pengguna mengambil gambar dengan aplikasi Kamera, semua aplikasi ini akan aktif
+  untuk memproses siaran.
+</p>
+
+<p>
+  Untuk meminimalkan masalah ini, Android N menerapkan optimisasi
+  berikut:
+</p>
+
+<ul>
+  <li>Aplikasi yang menargetkan Android N tidak menerima siaran {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, sekalipun
+  memiliki entri manifes untuk meminta pemberitahuan mengenai kejadian ini. Aplikasi yang berjalan
+  di latar depan tetap bisa mendengarkan {@code CONNECTIVITY_CHANGE} pada thread
+  utama jika meminta pemberitahuan dengan {@link
+  android.content.BroadcastReceiver}.
+  </li>
+
+  <li>Aplikasi tidak bisa mengirim atau menerima siaran {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} atau {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Optimisasi ini
+  memengaruhi semua aplikasi, bukan hanya yang menargetkan Android N.
+  </li>
+</ul>
+
+<p>
+  Rilis Android mendatang mungkin akan menghilangkan siaran implisit tambahan,
+  juga layanan latar belakang tak terikat. Karena itu, Anda harus menghindari atau
+  menghilangkan dependensi terhadap penerima yang dideklarasikan manifes untuk siaran implisit,
+  serta layanan latar belakang.
+</p>
+
+<p>
+  Kerangka kerja Android menyediakan beberapa solusi untuk mengurangi kebutuhan akan
+  siaran implisit atau layanan latar belakang ini. Misalnya, {@link
+  android.app.job.JobScheduler} API menyediakan mekanisme yang tangguh untuk menjadwalkan
+ operasi jaringan bila syarat yang ditetapkan terpenuhi, misalnya koneksi ke suatu
+ jaringan berbiaya tetap. Anda bahkan bisa menggunakan {@link
+  android.app.job.JobScheduler} untuk bereaksi terhadap perubahan kepada penyedia konten.
+</p>
+
+<p>
+  Untuk informasi selengkapnya tentang perubahan perilaku ini dan cara menyesuaikan aplikasi Anda,
+  lihat <a href="{@docRoot}preview/features/background-optimization.html">Optimalisasi
+  Latar Belakang</a>.
+</p>
+
+
+<h2 id="perm">Perubahan Izin</h2>
+
+<p>
+  Android N menyertakan perubahan pada izin yang bisa memengaruhi aplikasi Anda,
+  termasuk izin akun pengguna dan izin baru untuk menulis ke
+  penyimpanan eksternal. Inilah rangkuman izin-izin yang telah berubah dalam
+  preview:
+</p>
+
+<ul>
+  <li>{@code GET_ACCOUNTS} (Tidak digunakan lagi)
+    <p>
+      Izin GET_ACCOUNTS sekarang tidak digunakan lagi. Sistem mengabaikan izin ini
+ untuk aplikasi yang menargetkan Android N.
+    </p>
+  </li>
+
+</ul>
+
+
+
+<h2 id="accessibility">Peningkatan Aksesibilitas</h2>
+
+<p>
+  Android N menyertakan perubahan yang bertujuan meningkatkan kegunaan
+  platform ini untuk pengguna dengan penglihatan yang kurang atau lemah. Perubahan ini secara umum tidak
+  akan mengharuskan perubahan kode dalam aplikasi Anda, akan tetapi Anda harus meninjau
+  fitur ini dan mengujinya dengan aplikasi Anda untuk menilai dampak potensial terhadap pengalaman
+  pengguna.
+</p>
+
+
+<h3 id="screen-zoom">Zoom Layar</h3>
+
+<p>
+  Android N memungkinkan pengguna untuk mengatur <strong>Display size</strong> yang akan memperbesar
+  atau memperkecil semua elemen pada layar, sehingga meningkatkan aksesibilitas perangkat
+  bagi pengguna yang kurang melihat. Pengguna tidak bisa memperbesar layar melewati lebar layar
+  minimum <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">
+  sw320dp</a>, yang merupakan lebar Nexus 4, yakni ponsel ukuran sedang pada umumnya.
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>Gambar 3.</strong> Layar di sebelah kanan menampilkan efek
+ penambahan Display size perangkat yang menjalankan citra sistem Android N.
+</p>
+
+
+<p>
+  Bila densitas perangkat berubah, sistem akan memberi tahu aplikasi yang sedang berjalan dengan
+  cara berikut:
+</p>
+
+<ul>
+  <li>Jika aplikasi menargetkan API level 23 atau yang lebih rendah, sistem secara otomatis akan mematikan
+  semua proses latar belakang. Artinya, jika pengguna beralih dari
+ aplikasi tersebut untuk membuka layar <em>Settings</em> dan mengubah
+  pengaturan <strong>Display size</strong>, maka sistem akan mematikan aplikasi tersebut dengan cara yang
+  sama dengan saat memori tinggal sedikit. Jika aplikasi memiliki beberapa proses
+  latar depan, sistem akan memberi tahu proses tersebut mengenai perubahan konfigurasi seperti
+ dijelaskan dalam <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
+  Runtime</a>, seolah-olah orientasi perangkat telah berubah.
+  </li>
+
+  <li>Jika sebuah aplikasi menargetkan Android N, semua prosesnya
+ (latar depan dan latar belakang) akan diberi tahu mengenai perubahan konfigurasi seperti
+  dijelaskan dalam <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
+  Runtime</a>.
+  </li>
+</ul>
+
+<p>
+  Sebagian besar aplikasi tidak perlu melakukan perubahan untuk mendukung fitur ini, asalkan
+  aplikasi tersebut mengikuti praktik terbaik Android. Hal-hal tertentu yang harus diperiksa:
+</p>
+
+<ul>
+  <li>Uji aplikasi Anda pada perangkat dengan lebar layar <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+  dan pastikan aplikasinya berjalan dengan semestinya.
+  </li>
+
+  <li>Bila konfigurasi perangkat berubah, perbarui informasi cache
+  yang bergantung pada densitas, seperti bitmap di cache atau sumber daya yang dimuat dari
+  jaringan. Periksa perubahan konfigurasi bila aplikasi melanjutkan dari status dihentikan
+  sementara.
+    <p class="note">
+      <strong>Catatan:</strong> Jika Anda menyimpan sementara data yang bergantung pada konfigurasi, ada
+      baiknya untuk menyertakan metadata yang relevan seperti ukuran layar
+      atau densitas piksel yang sesuai untuk data tersebut. Menyimpan metadata ini memungkinkan Anda untuk
+      memutuskan apakah Anda perlu memperbarui data cache setelah perubahan
+      konfigurasi.
+    </p>
+  </li>
+
+  <li>Hindari menetapkan dimensi dengan satuan px, karena satuan ini tidak diskalakan dengan
+  densitas layar. Sebagai gantinya, tetapkan dimensi dengan satuan <a href="{@docRoot}guide/practices/screens_support.html">piksel yang tidak bergantung densitas
+  </a> (<code>dp</code>).
+  </li>
+</ul>
+
+<h3 id="vision-settings">Vision Settings di Setup Wizard</h3>
+
+<p>
+  Android N menyertakan Vision Settings pada layar Welcome, di mana pengguna bisa
+ menyiapkan pengaturan aksesibilitas berikut pada perangkat baru:
+  <strong>Magnification gesture</strong>, <strong>Font size</strong>,
+  <strong>Display size</strong> dan <strong>TalkBack</strong>. Perubahan ini
+  menambah visibilitas bug yang terkait dengan berbagai pengaturan layar. Untuk
+  menilai dampak dari fitur ini, Anda harus menguji aplikasi dengan mengaktifkan
+  pengaturan ini. Anda bisa menemukan pengaturan ini pada <strong>Settings &gt;
+  Accessibility</strong>.
+</p>
+
+<h2 id="ndk">Menautkan Aplikasi NDK ke Pustaka Platform</h2>
+
+<p>
+  Android N menyertakan perubahan namespace untuk mencegah pemuatan API non-publik.
+  Jika Anda menggunakan NDK, Anda hanya bisa menggunakan API publik dari platform
+  Android. Menggunakan API non-publik dalam rilis Android resmi berikutnya
+  bisa menyebabkan aplikasi mengalami crash.
+</p>
+
+<p>
+  Untuk memperingatkan Anda terhadap penggunaan API non-publik, aplikasi yang berjalan pada perangkat
+  Android N akan menghasilkan kesalahan output logcat bila sebuah aplikasi memanggil API non-publik.
+  Kesalahan ini juga ditampilkan pada layar perangkat berupa pesan untuk membantu
+  meningkatkan kesadaran akan situasi ini. Anda harus meninjau kode aplikasi untuk
+  menghilangkan penggunaan API platform non-publik dan secara saksama menguji aplikasi Anda menggunakan
+  perangkat preview atau emulator.
+</p>
+
+<p>
+  Jika aplikasi Anda bergantung pada pustaka platform, lihat dokumentasi NDK untuk
+  perbaikan tipikal guna menggantikan API privat umum dengan padanan API publik.
+  Anda mungkin juga menautkan ke pustaka platform tanpa menyadarinya,
+  terutama jika aplikasi Anda menggunakan pustaka yang merupakan bagian dari platform ini (seperti
+  <code>libpng</code>), namun bukan bagian dari NDK. Dalam hal ini, pastikan
+  APK Anda berisi semua file .so yang ingin ditautkan.
+</p>
+
+<p class="caution">
+  <strong>Peringatan:</strong> Beberapa pustaka pihak ketiga mungkin menautkan ke API
+  non-publik. Jika aplikasi Anda menggunakan pustaka ini, aplikasi Anda mungkin akan crash saat dijalankan
+  pada rilis resmi Android berikutnya.
+</p>
+
+<p>
+  Aplikasi tidak boleh bergantung pada atau menggunakan pustaka bawaan yang tidak disertakan dalam
+  NDK, karena bisa mengalami perubahan, atau dipindahkan dari satu rilis Android ke
+  rilis lainnya. Peralihan dari OpenSSL ke BoringSSL merupakan satu contoh dari perubahan semacam ini.
+  Selain itu, perbedaan perangkat juga bisa menawarkan tingkat kompatibilitas, karena
+  tidak ada persyaratan kompatibilitas bagi pustaka platform yang tidak disertakan
+  dalam NDK. Jika Anda harus mengakses pustaka non-NDK pada perangkat yang lebih lama, jadikan
+  pemuatan bergantung pada level API Android.
+</p>
+
+<p>
+  Untuk membantu Anda mendiagnosis tipe masalah ini ada beberapa contoh kesalahan Java dan NDK
+  yang mungkin Anda temui saat berusaha membangun aplikasi dengan Android N:
+</p>
+
+<p>Contoh kesalahan Java:</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>Contoh kesalahan NDK:</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  Inilah beberapa perbaikan tipikal untuk aplikasi yang mengalami tipe kesalahan ini:
+</p>
+
+<ul>
+  <li>Penggunaan getJavaVM dan getJNIEnv dari libandroid_runtime.so bisa diganti
+  dengan fungsi JNI standar:
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>Penggunaan simbol {@code property_get} dari {@code libcutils.so} bisa
+    diganti dengan {@code __system_property_get} alternatif publik.
+   Caranya, gunakan {@code __system_property_get} dengan include berikut:
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>Penggunaan simbol {@code SSL_ctrl} dari {@code libcrypto.so} harus
+  diganti dengan aplikasi versi lokal. Misalnya, Anda harus menautkan
+  {@code libcyrpto.a} secara statis dalam file {@code .so} atau menyertakan
+  {@code libcrypto.so} Anda sendiri secara dinamis dari BoringSSL atau OpenSSL dalam aplikasi Anda.
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  Android N berisi perubahan untuk aplikasi yang menargetkan Android for Work, termasuk
+  perubahan pada instalasi sertifikat, pengaturan ulang kata sandi, manajemen pengguna
+  tambahan, dan akses ke identifier perangkat. Jika Anda membangun aplikasi untuk
+  lingkungan Android for Work, Anda harus meninjau perubahan ini dan memodifikasi
+  aplikasi sebagaimana mestinya.
+</p>
+
+<ul>
+  <li>Anda harus menginstal penginstal sertifikat yang didelegasikan sebelum DPC bisa
+  mengaturnya. Untuk profil dan aplikasi pemilik perangkat yang menargetkan N SDK, Anda harus
+  menginstal penginstal sertifikat yang didelegasikan sebelum pengontrol kebijakan
+  perangkat (DPC) memanggil
+  <code>DevicePolicyManager.setCertInstallerPackage()</code>. Jika penginstal
+  belum diinstal, sistem akan melontarkan
+  <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>Pembatasan pengaturan ulang kata sandi untuk admin perangkat sekarang diterapkan kepada pemilik
+  profil. Admin perangkat tidak bisa lagi menggunakan
+  <code>DevicePolicyManager.resetPassword()</code> untuk menghapus kata sandi atau mengubah
+  kata sandi yang sudah ditetapkan. Admin perangkat tetap bisa menetapkan kata sandi, namun hanya
+  bila perangkat belum memiliki kata sandi, PIN, atau pola.
+  </li>
+
+  <li>Pemilik perangkat dan profil bisa mengelola akun meskipun pembatasan
+  ditetapkan. Pemilik perangkat dan pemilik profil bisa memanggil Account Management API
+  sekalipun pembatasan pengguna <code>DISALLOW_MODIFY_ACCOUNTS</code> diberlakukan.
+  </li>
+
+  <li>Pemilik perangkat bisa mengelola pengguna tambahan dengan lebih mudah. bila perangkat
+  dijalankan dalam mode pemilik perangkat, pembatasan <code>DISALLOW_ADD_USER</code> 
+  secara otomatis ditetapkan. Ini mencegah pengguna membuat pengguna tambahan yang
+  tidak terkelola. Selain itu, metode <code>CreateUser()</code> dan
+  <code>createAndInitial()</code> tidak digunakan lagi; metode
+  <code>DevicePolicyManager.createAndManageUser()</code> baru telah menggantikannya.
+  </li>
+
+  <li>Pemilik perangkat bisa mengakses identifier perangkat. Pemilik perangkat bisa mengakses
+  alamat MAC Wi-Fi dari sebuah perangkat, menggunakan
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code>. Jika Wi-Fi belum pernah
+  diaktifkan pada perangkat tersebut, metode ini akan mengembalikan nilai {@code null}.
+  </li>
+</ul>
+
+<p>
+  Untuk informasi selengkapnya tentang perubahan pada Android for Work di Android N, lihat
+  <a href="{@docRoot}preview/features/afw.html">Pembaruan Android for Work</a>.
+</p>
+
+<h2 id="other">Poin penting lainnya</h2>
+
+<ul>
+<li>Bila aplikasi berjalan pada Android N, namun menargetkan level API yang lebih rendah,
+dan pengguna mengubah ukuran tampilan, proses aplikasi akan dimatikan. Aplikasi
+harus dapat menangani skenario ini dengan lancar. Jika tidak, maka akan terjadi crash
+bila pengguna memulihkannya dari Recents.
+
+<p>
+Anda harus menguji aplikasi untuk memastikan
+perilaku ini tidak terjadi.
+Anda bisa melakukannya dengan menyebabkan suatu crash yang mirip
+saat mematikan aplikasi secara manual melalui DDMS.
+</p>
+
+<p>
+Aplikasi yang menargetkan N dan yang di atasnya tidak secara otomatis dimatikan saat perubahan densitas;
+akan tetapi, aplikasi tersebut mungkin tetap merespons perubahan konfigurasi dengan buruk.
+</p>
+</li>
+
+<li>
+Aplikasi pada Android N harus mampu menangani perubahan konfigurasi dengan lancar,
+dan tidak boleh mengalami crash pada start selanjutnya. Anda bisa memverifikasi perilaku aplikasi
+dengan mengubah ukuran font (<strong>Setting</strong> &gt;
+<strong>Display</strong> &gt; <strong>Font size</strong>), kemudian memulihkan
+aplikasi dari Recents.
+</li>
+</ul>
+
