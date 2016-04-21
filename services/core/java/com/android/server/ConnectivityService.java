@@ -2330,6 +2330,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (VDBG || (DBG && nri.isRequest())) log("releasing NetworkRequest " + request);
             nri.unlinkDeathRecipient();
             mNetworkRequests.remove(request);
+            synchronized (mUidToNetworkRequestCount) {
+                int requests = mUidToNetworkRequestCount.get(nri.mUid, 0);
+                if (requests < 1) {
+                    Slog.wtf(TAG, "BUG: too small request count " + requests + " for UID " +
+                            nri.mUid);
+                } else if (requests == 1) {
+                    mUidToNetworkRequestCount.removeAt(
+                            mUidToNetworkRequestCount.indexOfKey(nri.mUid));
+                } else {
+                    mUidToNetworkRequestCount.put(nri.mUid, requests - 1);
+                }
+            }
             mNetworkRequestInfoLogs.log("RELEASE " + nri);
             if (nri.isRequest()) {
                 // Find all networks that are satisfying this request and remove the request
@@ -3677,6 +3689,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final HashMap<NetworkRequest, NetworkRequestInfo> mNetworkRequests =
             new HashMap<NetworkRequest, NetworkRequestInfo>();
 
+    private static final int MAX_NETWORK_REQUESTS_PER_UID = 100;
+    // Map from UID to number of NetworkRequests that UID has filed.
+    @GuardedBy("mUidToNetworkRequestCount")
+    private final SparseIntArray mUidToNetworkRequestCount = new SparseIntArray();
+
     private static class NetworkFactoryInfo {
         public final String name;
         public final Messenger messenger;
@@ -3737,6 +3754,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mPid = getCallingPid();
             mUid = getCallingUid();
             mType = type;
+            enforceRequestCountLimit();
         }
 
         NetworkRequestInfo(Messenger m, NetworkRequest r, IBinder binder, NetworkRequestType type) {
@@ -3748,11 +3766,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mUid = getCallingUid();
             mType = type;
             mPendingIntent = null;
+            enforceRequestCountLimit();
 
             try {
                 mBinder.linkToDeath(this, 0);
             } catch (RemoteException e) {
                 binderDied();
+            }
+        }
+
+        private void enforceRequestCountLimit() {
+            synchronized (mUidToNetworkRequestCount) {
+                int networkRequests = mUidToNetworkRequestCount.get(mUid, 0) + 1;
+                if (networkRequests >= MAX_NETWORK_REQUESTS_PER_UID) {
+                    throw new IllegalArgumentException("Too many NetworkRequests filed");
+                }
+                mUidToNetworkRequestCount.put(mUid, networkRequests);
             }
         }
 
