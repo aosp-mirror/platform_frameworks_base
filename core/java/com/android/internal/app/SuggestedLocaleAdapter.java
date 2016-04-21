@@ -159,6 +159,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
                 text.setText(item.getLabel(mCountryMode));
                 text.setTextLocale(item.getLocale());
+                text.setContentDescription(item.getContentDescription(mCountryMode));
                 if (mCountryMode) {
                     int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
                     //noinspection ResourceType
