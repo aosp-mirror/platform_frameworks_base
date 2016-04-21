@@ -689,7 +689,7 @@ bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, cons
 void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
-    if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF) {
+    if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF && radius <= 25.0f) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
         if (mRs == nullptr) {
