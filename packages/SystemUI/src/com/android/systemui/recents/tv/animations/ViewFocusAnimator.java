@@ -36,6 +36,7 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
     private final float mSelectedZDelta;
     private final float mUnselectedSpacing;
     private final float mSelectedSpacingDelta;
+    private final float mDismissIconAlpha;
     private final int mAnimDuration;
     private final Interpolator mFocusInterpolator;
 
@@ -71,6 +72,8 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         mFocusAnimation.setDuration(mAnimDuration);
         mFocusAnimation.setInterpolator(mFocusInterpolator);
 
+        mDismissIconAlpha = res.getFloat(R.integer.dismiss_unselected_alpha);
+
         setFocusProgress(0.0f);
 
         mFocusAnimation.addListener(new AnimatorListenerAdapter() {
@@ -99,7 +102,7 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         mTargetView.setPadding((int) spacing, mTargetView.getPaddingTop(),
                 (int) spacing, mTargetView.getPaddingBottom());
 
-
+        mTargetView.getDismissIconView().setAlpha(mDismissIconAlpha * level);
         mTargetView.getThumbnailView().setZ(z);
     }
 
