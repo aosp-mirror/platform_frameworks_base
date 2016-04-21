@@ -10,7 +10,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
@@ -762,13 +761,15 @@ class WindowSurfacePlacer {
                             }
                         }
                     }
-                    if (!winAnimator.isAnimating()) {
+                    if (!winAnimator.isAnimationStarting()) {
                         // Updates the shown frame before we set up the surface. This is needed
                         // because the resizing could change the top-left position (in addition to
                         // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
-                        // position the surface. We only apply it to windows that aren't animating,
-                        // because we depend on the animation to calculate the correct shown frame
-                        // on the next animation step.
+                        // position the surface.
+                        //
+                        // If an animation is being started, we can't call this method because the
+                        // animation hasn't processed its initial transformation yet, but in general
+                        // we do want to update the position if the window is animating.
                         winAnimator.computeShownFrameLocked();
                     }
                     winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
@@ -792,7 +793,7 @@ class WindowSurfacePlacer {
                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                             Slog.v(TAG, "Eval win " + w + ": isDrawn="
                                     + w.isDrawnLw()
-                                    + ", isAnimating=" + winAnimator.isAnimating());
+                                    + ", isAnimationSet=" + winAnimator.isAnimationSet());
                             if (!w.isDrawnLw()) {
                                 Slog.v(TAG, "Not displayed: s="
                                         + winAnimator.mSurfaceController
@@ -943,7 +944,8 @@ class WindowSurfacePlacer {
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || ((win.isConfigChanged() || win.setInsetsChanged()) &&
+                    || ((win.isConfigChanged() || win.setInsetsChanged())
+                            && !win.isGoneForLayoutLw() &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             (win.mHasSurface && win.mAppToken != null &&
                             win.mAppToken.layoutConfigChanges)))) {

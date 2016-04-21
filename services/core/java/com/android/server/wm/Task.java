@@ -601,7 +601,7 @@ class Task implements DimLayer.DimLayerUser {
                     // Anyway we don't need to synchronize position and content updates for these
                     // windows since they aren't at the base layer and could be moved around anyway.
                     if (!win.computeDragResizing() && win.mAttrs.type == TYPE_BASE_APPLICATION &&
-                            !mStack.getBoundsAnimating()) {
+                            !mStack.getBoundsAnimating() && !win.isGoneForLayoutLw()) {
                         win.mResizedWhileNotDragResizing = true;
                     }
                 }
