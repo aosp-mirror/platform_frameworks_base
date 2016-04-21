@@ -1502,11 +1502,16 @@ public class AudioManager {
      */
     public boolean isBluetoothA2dpOn() {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP,"")
-            == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
-            return false;
-        } else {
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
+            return true;
+        } else if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,"")
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
+            return true;
+        } else if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER,"")
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
             return true;
         }
+        return false;
     }
 
     /**
