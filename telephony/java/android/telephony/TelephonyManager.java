@@ -3592,14 +3592,21 @@ public class TelephonyManager {
     }
 
     // ICC SIM Application Types
+    /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
+    /** UICC application type is USIM */
     public static final int APPTYPE_USIM = PhoneConstants.APPTYPE_USIM;
+    /** UICC application type is RUIM */
     public static final int APPTYPE_RUIM = PhoneConstants.APPTYPE_RUIM;
+    /** UICC application type is CSIM */
     public static final int APPTYPE_CSIM = PhoneConstants.APPTYPE_CSIM;
+    /** UICC application type is ISIM */
     public static final int APPTYPE_ISIM = PhoneConstants.APPTYPE_ISIM;
-    // authContext (parameter P2) when doing SIM challenge,
+    // authContext (parameter P2) when doing UICC challenge,
     // per 3GPP TS 31.102 (Section 7.1.2)
+    /** Authentication type for UICC challenge is EAP SIM. See RFC 4186 for details. */
     public static final int AUTHTYPE_EAP_SIM = PhoneConstants.AUTH_CONTEXT_EAP_SIM;
+    /** Authentication type for UICC challenge is EAP AKA. See RFC 4187 for details. */
     public static final int AUTHTYPE_EAP_AKA = PhoneConstants.AUTH_CONTEXT_EAP_AKA;
 
     /**
