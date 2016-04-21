@@ -93,6 +93,8 @@ public class BinderInternal {
      * @hide
      */
     public static final native void disableBackgroundScheduling(boolean disable);
+
+    public static final native void setMaxThreads(int numThreads);
     
     static native final void handleGc();
     
