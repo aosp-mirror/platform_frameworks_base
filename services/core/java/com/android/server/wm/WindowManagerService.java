@@ -120,7 +120,6 @@ import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
-import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
@@ -1532,7 +1531,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (highestTarget != null) {
                     if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, mAppTransition + " " + highestTarget
-                            + " animating=" + highestTarget.mWinAnimator.isAnimating()
+                            + " animating=" + highestTarget.mWinAnimator.isAnimationSet()
                             + " layer=" + highestTarget.mWinAnimator.mAnimLayer
                             + " new layer=" + w.mWinAnimator.mAnimLayer);
 
@@ -1542,7 +1541,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mInputMethodTargetWaitingAnim = true;
                         mInputMethodTarget = highestTarget;
                         return highestPos + 1;
-                    } else if (highestTarget.mWinAnimator.isAnimating() &&
+                    } else if (highestTarget.mWinAnimator.isAnimationSet() &&
                             highestTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer) {
                         // If the window we are currently targeting is involved
                         // with an animation, and it is on top of the next target
@@ -2282,7 +2281,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " mRemoveOnExit=" + win.mRemoveOnExit
                 + " mHasSurface=" + win.mHasSurface
                 + " surfaceShowing=" + win.mWinAnimator.getShown()
-                + " isAnimating=" + win.mWinAnimator.isAnimating()
+                + " isAnimationSet=" + win.mWinAnimator.isAnimationSet()
                 + " app-animation="
                 + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
                 + " mWillReplaceWindow=" + win.mWillReplaceWindow
@@ -2346,7 +2345,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             final boolean isAnimating =
-                    winAnimator.isAnimating() && !winAnimator.isDummyAnimation();
+                    winAnimator.isAnimationSet() && !winAnimator.isDummyAnimation();
             final boolean lastWindowIsStartingWindow = startingWindow && appToken != null
                     && appToken.allAppWindows.size() == 1;
             // We delay the removal of a window if it has a showing surface that can be used to run
@@ -2931,7 +2930,7 @@ public class WindowManagerService extends IWindowManager.Stub
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
-        } else if (win.mWinAnimator.isAnimating()) {
+        } else if (win.mWinAnimator.isAnimationSet()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
@@ -3288,7 +3287,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowState win = wtoken.windows.get(i);
                         displayContent = win.getDisplayContent();
 
-                        if (win.mWinAnimator.isAnimating()) {
+                        if (win.mWinAnimator.isAnimationSet()) {
                             delayed = true;
                         }
 
@@ -4304,7 +4303,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         for (int i = wtoken.allAppWindows.size() - 1; i >= 0 && !delayed; i--) {
-            if (wtoken.allAppWindows.get(i).mWinAnimator.isWindowAnimating()) {
+            if (wtoken.allAppWindows.get(i).mWinAnimator.isWindowAnimationSet()) {
                 delayed = true;
             }
         }
@@ -9111,7 +9110,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
-        if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq) {
+        if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq && !w.isGoneForLayoutLw()) {
             w.setInsetsChanged();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
