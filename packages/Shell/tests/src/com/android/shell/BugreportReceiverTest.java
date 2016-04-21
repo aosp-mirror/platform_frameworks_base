@@ -241,14 +241,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testProgress_takeExtraScreenshot() throws Exception {
-        takeExtraScreenshotTest(false);
-    }
-
-    public void testProgress_takeExtraScreenshotServiceDiesAfterScreenshotTaken() throws Exception {
-        takeExtraScreenshotTest(true);
-    }
-
-    private void takeExtraScreenshotTest(boolean serviceDies) throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
 
@@ -259,11 +251,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         sendBugreportFinished(ID, mPlainTextPath, mScreenshotPath);
 
-        if (serviceDies) {
-            waitShareNotification(ID);
-            killService();
-        }
-
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
@@ -272,14 +259,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testScreenshotFinishesAfterBugreport() throws Exception {
-        screenshotFinishesAfterBugreportTest(false);
-    }
-
-    public void testScreenshotFinishesAfterBugreportAndServiceDiesBeforeSharing() throws Exception {
-        screenshotFinishesAfterBugreportTest(true);
-    }
-
-    private void screenshotFinishesAfterBugreportTest(boolean serviceDies) throws Exception {
         resetProperties();
 
         sendBugreportStarted(1000);
@@ -290,10 +269,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
         Thread.sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
-
-        if (serviceDies) {
-            killService();
-        }
 
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID, PID, ZIP_FILE,
@@ -562,7 +537,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     public void testShareBugreportAfterServiceDies() throws Exception {
         sendBugreportFinished(NO_ID, mPlainTextPath, NO_SCREENSHOT);
-        killService();
+        waitForService(false);
         Bundle extras = acceptBugreportAndGetSharedIntent(NO_ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
@@ -841,15 +816,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
     }
 
-    private void killService() {
-        waitForService(true);
-        Log.v(TAG, "Stopping service");
-        boolean stopped = mContext.stopService(new Intent(mContext, BugreportProgressService.class));
-        Log.d(TAG, "stopService returned " + stopped);
-        waitForService(false);
-        assertServiceNotRunning();  // Sanity check.
-    }
-
     private boolean isServiceRunning(String name) {
         ActivityManager manager = (ActivityManager) mContext
                 .getSystemService(Context.ACTIVITY_SERVICE);
@@ -877,12 +843,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
                 Log.w(TAG, "thread interrupted");
                 Thread.currentThread().interrupt();
             }
-        }
-        if (!expectRunning) {
-            // Typically happens when service is waiting for a screenshot to finish.
-            Log.w(TAG, "Service didn't stop; try to kill it again");
-            killService();
-            return;
         }
 
         fail("Service status didn't change to " + expectRunning);
