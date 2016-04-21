@@ -21,6 +21,7 @@ import android.graphics.PixelFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager;
 
@@ -141,6 +142,7 @@ public class PipRecentsOverlayManager {
 
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
         mPipControlsView.requestFocus();
+        mPipControlsView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         mPipControlsView.startFocusGainAnimation();
     }
 
