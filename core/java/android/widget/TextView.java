@@ -1591,7 +1591,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    @RemotableViewMethod
+    @android.view.RemotableViewMethod
     @Override
     public void setEnabled(boolean enabled) {
         if (enabled == isEnabled()) {
