@@ -1117,12 +1117,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                 f.mState = Fragment.INITIALIZING;
                             }
 
-                            f.mCalled = false;
-                            f.onDetach();
-                            if (!f.mCalled) {
-                                throw new SuperNotCalledException("Fragment " + f
-                                        + " did not call through to super.onDetach()");
-                            }
+                            f.performDetach();
                             if (!keepActive) {
                                 if (!f.mRetaining) {
                                     makeInactive(f);
