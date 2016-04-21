@@ -54,7 +54,7 @@ public class TileQueryHelper {
         // TODO: Live?
     }
 
-    private void addSystemTiles(QSTileHost host) {
+    private void addSystemTiles(final QSTileHost host) {
         String possible = mContext.getString(R.string.quick_settings_tiles_default)
                 + ",hotspot,inversion,saver,work,cast,night";
         String[] possibleTiles = possible.split(",");
@@ -93,7 +93,7 @@ public class TileQueryHelper {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        new QueryTilesTask().execute();
+                        new QueryTilesTask().execute(host.getTiles());
                     }
                 });
             }
@@ -133,9 +133,10 @@ public class TileQueryHelper {
         public boolean isSystem;
     }
 
-    private class QueryTilesTask extends AsyncTask<Void, Void, Collection<TileInfo>> {
+    private class QueryTilesTask extends
+            AsyncTask<Collection<QSTile<?>>, Void, Collection<TileInfo>> {
         @Override
-        protected Collection<TileInfo> doInBackground(Void... params) {
+        protected Collection<TileInfo> doInBackground(Collection<QSTile<?>>... params) {
             List<TileInfo> tiles = new ArrayList<>();
             PackageManager pm = mContext.getPackageManager();
             List<ResolveInfo> services = pm.queryIntentServicesAsUser(
@@ -143,7 +144,13 @@ public class TileQueryHelper {
             for (ResolveInfo info : services) {
                 String packageName = info.serviceInfo.packageName;
                 ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
+                final CharSequence appLabel = info.serviceInfo.applicationInfo.loadLabel(pm);
                 String spec = CustomTile.toSpec(componentName);
+                State state = getState(params[0], spec);
+                if (state != null) {
+                    addTile(spec, appLabel, state, false);
+                    continue;
+                }
                 if (info.serviceInfo.icon == 0) {
                     continue;
                 }
@@ -157,10 +164,20 @@ public class TileQueryHelper {
                 icon.mutate();
                 icon.setTint(mContext.getColor(android.R.color.white));
                 CharSequence label = info.serviceInfo.loadLabel(pm);
-                final CharSequence appLabel = info.serviceInfo.applicationInfo.loadLabel(pm);
                 addTile(spec, icon, label != null ? label.toString() : "null", appLabel, mContext);
             }
             return tiles;
+        }
+
+        private State getState(Collection<QSTile<?>> tiles, String spec) {
+            for (QSTile<?> tile : tiles) {
+                if (spec.equals(tile.getTileSpec())) {
+                    final QSTile.State state = tile.newTileState();
+                    tile.getState().copyTo(state);
+                    return state;
+                }
+            }
+            return null;
         }
 
         @Override
