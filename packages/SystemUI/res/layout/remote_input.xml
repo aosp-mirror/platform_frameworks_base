@@ -22,8 +22,7 @@
         android:theme="@style/systemui_theme_remote_input"
         android:id="@+id/remote_input"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:paddingEnd="12dp">
+        android:layout_width="match_parent">
 
     <view class="com.android.systemui.statusbar.policy.RemoteInputView$RemoteEditText"
             android:id="@+id/remote_input_text"
@@ -48,19 +47,17 @@
 
     <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingTop="2dp"
-            android:paddingBottom="4dp">
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical">
 
         <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
                 android:id="@+id/remote_input_send"
                 android:src="@drawable/ic_send"
                 android:contentDescription="@*android:string/ime_action_send"
@@ -72,6 +69,7 @@
                 android:id="@+id/remote_input_progress"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:layout_marginEnd="6dp"
                 android:layout_gravity="center"
                 android:visibility="invisible"
                 android:indeterminate="true"
