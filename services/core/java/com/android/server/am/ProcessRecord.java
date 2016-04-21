@@ -37,9 +37,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -550,6 +552,29 @@ final class ProcessRecord {
             }
         }
         return adj;
+    }
+
+    void scheduleCrash(String message) {
+        // Checking killedbyAm should keep it from showing the crash dialog if the process
+        // was already dead for a good / normal reason.
+        if (!killedByAm) {
+            if (thread != null) {
+                if (pid == Process.myPid()) {
+                    Slog.w(TAG, "scheduleCrash: trying to crash system process!");
+                    return;
+                }
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    thread.scheduleCrash(message);
+                } catch (RemoteException e) {
+                    // If it's already dead our work is done. If it's wedged just kill it.
+                    // We won't get the crash dialog or the error reporting.
+                    kill("scheduleCrash for '" + message + "' failed", true);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        }
     }
 
     void kill(String reason, boolean noisy) {

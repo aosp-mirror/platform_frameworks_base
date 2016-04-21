@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -446,7 +447,7 @@ public final class BroadcastQueue {
         }
     }
 
-    private static void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
+    private void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
@@ -454,8 +455,23 @@ public final class BroadcastQueue {
             if (app.thread != null) {
                 // If we have an app thread, do the call through that so it is
                 // correctly ordered with other one-way calls.
-                app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
-                        data, extras, ordered, sticky, sendingUser, app.repProcState);
+                try {
+                    app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
+                            data, extras, ordered, sticky, sendingUser, app.repProcState);
+                // TODO: Uncomment this when (b/28322359) is fixed and we aren't getting
+                // DeadObjectException when the process isn't actually dead.
+                //} catch (DeadObjectException ex) {
+                // Failed to call into the process.  It's dying so just let it die and move on.
+                //    throw ex;
+                } catch (RemoteException ex) {
+                    // Failed to call into the process. It's either dying or wedged. Kill it gently.
+                    synchronized (mService) {
+                        Slog.w(TAG, "Can't deliver broadcast to " + app.processName
+                                + " (pid " + app.pid + "). Crashing it.");
+                        app.scheduleCrash("can't deliver broadcast");
+                    }
+                    throw ex;
+                }
             } else {
                 // Application has died. Receiver doesn't exist.
                 throw new RemoteException("app.thread must not be null");
@@ -853,6 +869,7 @@ public final class BroadcastQueue {
                             Slog.w(TAG, "Failure ["
                                     + mQueueName + "] sending broadcast result of "
                                     + r.intent, e);
+
                         }
                     }
 
