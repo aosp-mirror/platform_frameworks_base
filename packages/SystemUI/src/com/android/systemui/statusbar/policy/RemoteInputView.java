@@ -105,7 +105,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 return false;
             }
         });
-        mEditText.setOnClickListener(this);
         mEditText.addTextChangedListener(this);
         mEditText.setInnerFocusable(false);
         mEditText.mRemoteInputView = this;
@@ -148,13 +147,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
-        if (v == mEditText) {
-            if (!mEditText.isFocusable()) {
-                focus();
-            }
-        } else if (v == mSendButton) {
+        if (v == mSendButton) {
             sendRemoteInput();
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+
+        // We never want for a touch to escape to an outer view or one we covered.
+        return true;
     }
 
     public void onDefocus() {
