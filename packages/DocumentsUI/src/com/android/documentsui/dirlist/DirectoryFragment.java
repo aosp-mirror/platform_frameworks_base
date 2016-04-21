@@ -48,6 +48,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
@@ -82,6 +83,7 @@ import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.DocumentClipper;
+import com.android.documentsui.DocumentClipper.ClipDetails;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
@@ -1000,19 +1002,24 @@ public class DirectoryFragment extends Fragment
         return commonType[0] + "/" + commonType[1];
     }
 
-    private void copyFromClipboard() {
-        new AsyncTask<Void, Void, List<DocumentInfo>>() {
+    private void copyFromClipboard(final DocumentInfo destination) {
+        new AsyncTask<Void, Void, ClipDetails>() {
 
             @Override
-            protected List<DocumentInfo> doInBackground(Void... params) {
-                return mClipper.getClippedDocuments();
+            protected ClipDetails doInBackground(Void... params) {
+                return mClipper.getClipDetails();
             }
 
             @Override
-            protected void onPostExecute(List<DocumentInfo> docs) {
-                DocumentInfo destination =
-                        ((BaseActivity) getActivity()).getCurrentDirectory();
-                copyDocuments(docs, destination);
+            protected void onPostExecute(ClipDetails clipDetails) {
+                if (clipDetails == null) {
+                    Log.w(TAG, "Received null clipDetails from primary clipboard. Ignoring.");
+                    return;
+                }
+                List<DocumentInfo> docs = clipDetails.docs;
+                @OpType int type = clipDetails.opType;
+                DocumentInfo srcParent = clipDetails.parent;
+                moveDocuments(docs, destination, type, srcParent);
             }
         }.execute();
     }
@@ -1020,21 +1027,35 @@ public class DirectoryFragment extends Fragment
     private void copyFromClipData(final ClipData clipData, final DocumentInfo destination) {
         assert(clipData != null);
 
-        new AsyncTask<Void, Void, List<DocumentInfo>>() {
+        new AsyncTask<Void, Void, ClipDetails>() {
 
             @Override
-            protected List<DocumentInfo> doInBackground(Void... params) {
-                return mClipper.getDocumentsFromClipData(clipData);
+            protected ClipDetails doInBackground(Void... params) {
+                return mClipper.getClipDetails(clipData);
             }
 
             @Override
-            protected void onPostExecute(List<DocumentInfo> docs) {
-                copyDocuments(docs, destination);
+            protected void onPostExecute(ClipDetails clipDetails) {
+                if (clipDetails == null) {
+                    Log.w(TAG,  "Received null clipDetails. Ignoring.");
+                    return;
+                }
+
+                List<DocumentInfo> docs = clipDetails.docs;
+                @OpType int type = clipDetails.opType;
+                DocumentInfo srcParent = clipDetails.parent;
+                moveDocuments(docs, destination, type, srcParent);
             }
         }.execute();
     }
 
-    private void copyDocuments(final List<DocumentInfo> docs, final DocumentInfo destination) {
+    /**
+     * Moves {@code docs} from {@code srcParent} to {@code destination}.
+     * operationType can be copy or cut
+     * srcParent Must be non-null for move operations.
+     */
+    private void moveDocuments(final List<DocumentInfo> docs, final DocumentInfo destination,
+            final @OpType int operationType, final DocumentInfo srcParent) {
         BaseActivity activity = (BaseActivity) getActivity();
         if (!canCopy(docs, activity.getCurrentRoot(), destination)) {
             Snackbars.makeSnackbar(
@@ -1050,33 +1071,37 @@ public class DirectoryFragment extends Fragment
         }
 
         final DocumentStack curStack = getDisplayState().stack;
-        DocumentStack tmpStack = new DocumentStack();
+        DocumentStack dstStack = new DocumentStack();
         if (destination != null) {
-            tmpStack.push(destination);
-            tmpStack.addAll(curStack);
+            dstStack.push(destination);
+            dstStack.addAll(curStack);
         } else {
-            tmpStack = curStack;
+            dstStack = curStack;
         }
-
-        FileOperations.copy(getActivity(), docs, tmpStack);
+        switch (operationType) {
+            case FileOperationService.OPERATION_MOVE:
+                FileOperations.move(getActivity(), docs, srcParent, dstStack);
+                break;
+            case FileOperationService.OPERATION_COPY:
+                FileOperations.copy(getActivity(), docs, dstStack);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported operation: " + operationType);
+        }
     }
 
     public void copySelectedToClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_COPY_CLIPBOARD);
 
         Selection selection = mSelectionManager.getSelection(new Selection());
-        if (!selection.isEmpty()) {
-            copySelectionToClipboard(selection);
-            mSelectionManager.clearSelection();
+        if (selection.isEmpty()) {
+            return;
         }
-    }
 
-    void copySelectionToClipboard(Selection selection) {
-        assert(!selection.isEmpty());
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
-                mClipper.clipDocuments(docs);
+                mClipper.clipDocumentsForCopy(docs);
                 Activity activity = getActivity();
                 Snackbars.makeSnackbar(activity,
                         activity.getResources().getQuantityString(
@@ -1084,12 +1109,37 @@ public class DirectoryFragment extends Fragment
                         Snackbar.LENGTH_SHORT).show();
             }
         }.execute(selection);
+        mSelectionManager.clearSelection();
+    }
+
+    public void cutSelectedToClipboard() {
+        Metrics.logUserAction(getContext(), Metrics.USER_ACTION_CUT_CLIPBOARD);
+        Selection selection = mSelectionManager.getSelection(new Selection());
+        if (selection.isEmpty()) {
+            return;
+        }
+
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                // We need the srcParent for move operations because we do a copy / delete
+                DocumentInfo currentDoc = getDisplayState().stack.peek();
+                mClipper.clipDocumentsForCut(docs, currentDoc);
+                Activity activity = getActivity();
+                Snackbars.makeSnackbar(activity,
+                        activity.getResources().getQuantityString(
+                                R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
+                        Snackbar.LENGTH_SHORT).show();
+            }
+        }.execute(selection);
+        mSelectionManager.clearSelection();
     }
 
     public void pasteFromClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_PASTE_CLIPBOARD);
 
-        copyFromClipboard();
+        DocumentInfo destination = ((BaseActivity) getActivity()).getCurrentDirectory();
+        copyFromClipboard(destination);
         getActivity().invalidateOptionsMenu();
     }
 
@@ -1198,6 +1248,8 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case DragEvent.ACTION_DRAG_ENDED:
+                    // After a drop event, always stop highlighting the target.
+                    setDropTargetHighlight(v, false);
                     if (event.getResult()) {
                         // Exit selection mode if the drop was handled.
                         mSelectionManager.clearSelection();
@@ -1205,38 +1257,43 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case DragEvent.ACTION_DROP:
-                    // After a drop event, always stop highlighting the target.
-                    setDropTargetHighlight(v, false);
-
-                    ClipData clipData = event.getClipData();
-                    if (clipData == null) {
-                        Log.w(TAG, "Received invalid drop event with null clipdata. Ignoring.");
-                        return false;
-                    }
-
-                    // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
-                    // multi-window drag, because localState isn't carried over from one process to
-                    // another.
-                    Object src = event.getLocalState();
-                    DocumentInfo dst = getDestination(v);
-                    if (Objects.equals(src, dst)) {
-                        if (DEBUG) Log.d(TAG, "Drop target same as source. Ignoring.");
-                        return false;
-                    }
-
-                    // Recognize multi-window drag and drop based on the fact that localState is not
-                    // carried between processes. It will stop working when the localsState behavior
-                    // is changed. The info about window should be passed in the localState then.
-                    // The localState could also be null for copying from Recents in single window
-                    // mode, but Recents doesn't offer this functionality (no directories).
-                    Metrics.logUserAction(getContext(),
-                            src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
-                                    : Metrics.USER_ACTION_DRAG_N_DROP);
-
-                    copyFromClipData(clipData, dst);
-                    return true;
+                return handleDropEvent(v, event);
             }
             return false;
+        }
+
+        private boolean handleDropEvent(View v, DragEvent event) {
+
+            ClipData clipData = event.getClipData();
+            if (clipData == null) {
+                Log.w(TAG, "Received invalid drop event with null clipdata. Ignoring.");
+                return false;
+            }
+
+            ClipDetails clipDetails = mClipper.getClipDetails(clipData);
+            assert(clipDetails.opType == FileOperationService.OPERATION_COPY);
+
+            // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
+            // multi-window drag, because localState isn't carried over from one process to
+            // another.
+            Object src = event.getLocalState();
+            DocumentInfo dst = getDestination(v);
+            if (Objects.equals(src, dst)) {
+                if (DEBUG) Log.d(TAG, "Drop target same as source. Ignoring.");
+                return false;
+            }
+
+            // Recognize multi-window drag and drop based on the fact that localState is not
+            // carried between processes. It will stop working when the localsState behavior
+            // is changed. The info about window should be passed in the localState then.
+            // The localState could also be null for copying from Recents in single window
+            // mode, but Recents doesn't offer this functionality (no directories).
+            Metrics.logUserAction(getContext(),
+                    src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
+                            : Metrics.USER_ACTION_DRAG_N_DROP);
+
+            copyFromClipData(clipData, dst);
+            return true;
         }
 
         private DocumentInfo getDestination(View v) {
@@ -1552,7 +1609,8 @@ public class DirectoryFragment extends Fragment
                     return false;
                 }
                 v.startDragAndDrop(
-                        mClipper.getClipDataForDocuments(docs),
+                        mClipper.getClipDataForDocuments(docs,
+                                FileOperationService.OPERATION_COPY),
                         new DragShadowBuilder(getActivity(), mIconHelper, docs),
                         getDisplayState().stack.peek(),
                         View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
