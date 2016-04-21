@@ -353,7 +353,7 @@ public class DockedStackDividerController implements DimLayerUser {
             stack.getDimBounds(mTmpRect);
             if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
                 mDimLayer.setBounds(mTmpRect);
-                mDimLayer.show(mDisplayContent.mService.mLayersController.getResizeDimLayer(),
+                mDimLayer.show(mService.mLayersController.getResizeDimLayer(),
                         alpha, 0 /* duration */);
             } else {
                 visibleAndValid = false;
@@ -543,6 +543,9 @@ public class DockedStackDividerController implements DimLayerUser {
         } else if (mAnimatingForIme) {
             return animateForIme(now);
         } else {
+            if (mDimLayer != null) {
+                mDimLayer.setLayer(mService.mLayersController.getResizeDimLayer());
+            }
             return false;
         }
     }
