@@ -19,51 +19,52 @@ package android.view;
 import android.app.ActivityManagerNative;
 import android.os.IBinder;
 import android.os.RemoteException;
-import com.android.internal.view.IDropPermissions;
+import com.android.internal.view.IDragAndDropPermissions;
 import dalvik.system.CloseGuard;
 
 
 /**
- * {@link DropPermissions} controls the access permissions for the content URIs associated with a
- * {@link DragEvent}.
+ * {@link DragAndDropPermissions} controls the access permissions for the content URIs associated
+ * with a {@link DragEvent}.
  * <p>
  * Permission are granted when this object is created by {@link
- * android.app.Activity#requestDropPermissions(DragEvent) Activity.requestDropPermissions}.
+ * android.app.Activity#requestDragAndDropPermissions(DragEvent)
+ * Activity.requestDragAndDropPermissions}.
  * Which permissions are granted is defined by the set of flags passed to {@link
  * View#startDragAndDrop(android.content.ClipData, View.DragShadowBuilder, Object, int)
  * View.startDragAndDrop} by the app that started the drag operation.
  * <p>
  * The life cycle of the permissions is bound to the activity used to call {@link
- * android.app.Activity#requestDropPermissions(DragEvent) requestDropPermissions}. The
+ * android.app.Activity#requestDragAndDropPermissions(DragEvent) requestDragAndDropPermissions}. The
  * permissions are revoked when this activity is destroyed, or when {@link #release()} is called,
  * whichever occurs first.
  */
-public final class DropPermissions {
+public final class DragAndDropPermissions {
 
-    private final IDropPermissions mDropPermissions;
+    private final IDragAndDropPermissions mDragAndDropPermissions;
 
     private IBinder mPermissionOwnerToken;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /**
-     * Create a new {@link DropPermissions} object to control the access permissions for content
-     * URIs associated with {@link DragEvent}.
+     * Create a new {@link DragAndDropPermissions} object to control the access permissions for
+     * content URIs associated with {@link DragEvent}.
      * @param dragEvent Drag event
-     * @return {@link DropPermissions} object or null if there are no content URIs associated with
-     * the {@link DragEvent}.
+     * @return {@link DragAndDropPermissions} object or null if there are no content URIs associated
+     * with the {@link DragEvent}.
      * @hide
      */
-    public static DropPermissions obtain(DragEvent dragEvent) {
-        if (dragEvent.getDropPermissions() == null) {
+    public static DragAndDropPermissions obtain(DragEvent dragEvent) {
+        if (dragEvent.getDragAndDropPermissions() == null) {
             return null;
         }
-        return new DropPermissions(dragEvent.getDropPermissions());
+        return new DragAndDropPermissions(dragEvent.getDragAndDropPermissions());
     }
 
     /** @hide */
-    private DropPermissions(IDropPermissions dropPermissions) {
-        mDropPermissions = dropPermissions;
+    private DragAndDropPermissions(IDragAndDropPermissions dragAndDropPermissions) {
+        mDragAndDropPermissions = dragAndDropPermissions;
     }
 
     /**
@@ -74,7 +75,7 @@ public final class DropPermissions {
      */
     public boolean take(IBinder activityToken) {
         try {
-            mDropPermissions.take(activityToken);
+            mDragAndDropPermissions.take(activityToken);
         } catch (RemoteException e) {
             return false;
         }
@@ -91,7 +92,7 @@ public final class DropPermissions {
         try {
             mPermissionOwnerToken = ActivityManagerNative.getDefault().
                     newUriPermissionOwner("drop");
-            mDropPermissions.takeTransient(mPermissionOwnerToken);
+            mDragAndDropPermissions.takeTransient(mPermissionOwnerToken);
         } catch (RemoteException e) {
             return false;
         }
@@ -104,7 +105,7 @@ public final class DropPermissions {
      */
     public void release() {
         try {
-            mDropPermissions.release();
+            mDragAndDropPermissions.release();
             mPermissionOwnerToken = null;
         } catch (RemoteException e) {
         }
