@@ -39,9 +39,10 @@ public abstract class IpConnectivityEvent {
     public static final int IPCE_IPMGR_BASE                = 4 * 1024;
     public static final int IPCE_DNS_BASE                  = 5 * 1024;
 
-    public static final int IPCE_IPRM_PROBE_RESULT         = IPCE_IPRM_BASE + 0;
-    public static final int IPCE_IPRM_MESSAGE_RECEIVED     = IPCE_IPRM_BASE + 1;
-    public static final int IPCE_IPRM_REACHABILITY_LOST    = IPCE_IPRM_BASE + 2;
+    public static final int IPCE_IPRM_PROBE_STARTED        = IPCE_IPRM_BASE + 0;
+    public static final int IPCE_IPRM_PROBE_FAILURE        = IPCE_IPRM_BASE + 1;
+    public static final int IPCE_IPRM_NUD_FAILED           = IPCE_IPRM_BASE + 2;
+    public static final int IPCE_IPRM_PROVISIONING_LOST    = IPCE_IPRM_BASE + 3;
 
     public static final int IPCE_DHCP_RECV_ERROR           = IPCE_DHCP_BASE + 0;
     public static final int IPCE_DHCP_PARSE_ERROR          = IPCE_DHCP_BASE + 1;
