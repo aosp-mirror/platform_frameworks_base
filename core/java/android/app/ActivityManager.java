@@ -126,6 +126,19 @@ public class ActivityManager {
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 
     /**
+     * Result for IActivityManager.startVoiceActivity: active session is currently hidden.
+     * @hide
+     */
+    public static final int START_VOICE_HIDDEN_SESSION = -10;
+
+    /**
+     * Result for IActivityManager.startVoiceActivity: active session does not match
+     * the requesting token.
+     * @hide
+     */
+    public static final int START_VOICE_NOT_ACTIVE_SESSION = -9;
+
+    /**
      * Result for IActivityManager.startActivity: trying to start a background user
      * activity that shouldn't be displayed for all users.
      * @hide
