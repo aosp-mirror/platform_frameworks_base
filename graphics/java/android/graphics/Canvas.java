@@ -1266,7 +1266,7 @@ public class Canvas {
     /**
      * @hide
      */
-    protected static void throwIfCannotDraw(Bitmap bitmap) {
+    protected void throwIfCannotDraw(Bitmap bitmap) {
         if (bitmap.isRecycled()) {
             throw new RuntimeException("Canvas: trying to use a recycled bitmap " + bitmap);
         }
