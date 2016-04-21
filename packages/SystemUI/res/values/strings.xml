@@ -1089,6 +1089,9 @@
     <string name="volume_stream_content_description_vibrate">%1$s. Tap to set to vibrate. Accessibility services may be muted.</string>
     <string name="volume_stream_content_description_mute">%1$s. Tap to mute. Accessibility services may be muted.</string>
 
+    <string name="volume_dialog_accessibility_shown_message">%s volume controls shown. Swipe up to dismiss.</string>
+    <string name="volume_dialog_accessibility_dismissed_message">Volume controls hidden</string>
+
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
 
