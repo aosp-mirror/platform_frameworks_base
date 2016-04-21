@@ -1,0 +1,541 @@
+page.title=Kiểm thử trên Thiết bị
+meta.tags="preview", "nexus","system image"
+page.tags="preview", "androidn"
+page.image=images/cards/card-n-downloads_2x.png
+
+@jd:body
+
+<div style="position:relative; min-height:600px">
+
+  <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+
+    <p class="sdk-terms-intro">Trước khi tải xuống và cài đặt các thành phần của
+      Android Preview SDK, bạn phải đồng ý với các điều khoản và
+      điều kiện sau.</p>
+
+    <h2 class="norule">Điều khoản và Điều kiện</h2>
+
+    <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
+Đây là Thỏa thuận Cấp phép Android SDK Preview (gọi là “Thỏa thuận Cấp phép”).
+
+1. Giới thiệu
+
+1.1 Android SDK Preview (trong Thỏa thuận Cấp phép này gọi là “Preview” và cụ thể bao gồm các tệp hệ thống Android, các API dạng gói, và các tệp thư viện Preview, nếu và khi nào chúng được cung cấp) được cấp phép cho bạn theo các điều khoản của Thỏa thuận Cấp phép này. Thỏa thuận Cấp phép này hợp thành một hợp đồng ràng buộc pháp lý giữa bạn và Google liên quan đến việc bạn sử dụng Preview.
+
+1.2 "Android" có nghĩa là chồng phần mềm Android cho thiết bị, được cung cấp theo Dự án Nguồn mở Android, nằm ở địa chỉ URL sau: http://source.android.com/, được cập nhật trong từng thời kỳ.
+
+1.3 “Tương thích Android” nghĩa là bất cứ triển khai Android nào (i) tuân thủ theo tài liệu Định nghĩa Tính tương thích Android, có thể được tìm thấy tại trang web về tính tương thích Android (http://source.android.com/compatibility) và có thể được cập nhật theo thời gian; và (ii) vượt qua thành công Gói Kiểm tra Tính tương thích Android (CTS).
+
+1.4 "Google" có nghĩa là Google Inc., một công ty ở Delaware với trụ sở kinh doanh chính tại 1600 Amphitheatre Parkway, Mountain View, CA 94043, Hoa Kỳ.
+
+2. Chấp thuận Thỏa thuận Cấp phép
+
+2.1 Để sử dụng Preview, trước tiên bạn phải đồng ý với Thỏa thuận Cấp phép. Bạn không được sử dụng Preview nếu không chấp nhận Thỏa thuận Cấp phép này.
+
+2.2 Bằng việc nhấp vào chấp nhận và/hoặc sử dụng Preview, theo đây bạn đồng ý với các điều khoản của Thỏa thuận Cấp phép này.
+
+2.3 Bạn không được sử dụng Preview và không được chấp nhận Thỏa thuận Cấp phép nếu bạn là người bị cấm nhận Preview theo pháp luật của Hoa Kỳ hoặc các quốc gia khác bao gồm quốc gia nơi bạn cư trú hoặc nơi mà bạn sử dụng Preview từ đó.
+
+2.4 Nếu bạn sẽ sử dụng Preview trong nội bộ công ty hoặc tổ chức của bạn thì bạn đồng ý chịu ràng buộc bởi Thỏa thuận Cấp phép này đại diện cho bên tuyển dụng của mình hoặc đơn vị khác, và bạn tuyên bố và bảo đảm rằng bạn có đầy đủ thẩm quyền pháp lý để ràng buộc bên tuyển dụng của mình hoặc đơn vị đó với Thỏa thuận Cấp phép này. Nếu bạn không có thẩm quyền cần thiết, bạn không được chấp nhận Thỏa thuận Cấp phép này hoặc sử dụng Preview đại diện cho bên tuyển dụng của mình hoặc đơn vị khác.
+
+3. Giấy phép Preview từ Google
+
+3.1 Tùy thuộc vào các điều khoản của Thỏa thuận Cấp phép này, Google cấp cho bạn một giấy phép giới hạn, toàn cầu, miễn phí sử dụng, không thể chuyển nhượng, không độc quyền và không thể cấp phép lại để sử dụng Preview cho mục đích duy nhất là phát triển các ứng dụng cho các triển khai Android tương thích.
+
+3.2 Bạn không được sử dụng Preview này để phát triển các ứng dụng cho các nền tảng khác (bao gồm các triển khai Android không tương thích) hoặc để phát triển một bộ SDK khác. Bạn dĩ nhiên được phát triển các ứng dụng cho các nền tảng khác, bao gồm các triển khai Android không tương thích, miễn là Preview này không được sử dụng cho mục đích đó.
+
+3.3 Bạn đồng ý rằng Google hoặc các bên thứ ba sở hữu tất cả quyền, quyền sở hữu hoặc lợi ích hợp pháp trong và đối với Preview, bao gồm bất kỳ Quyền Sở hữu Trí tuệ nào nằm trong Preview. "Quyền Sở hữu Trí tuệ" có nghĩa là bất kỳ và tất cả các quyền theo luật về bằng sáng chế, luật về bản quyền, luật về bí mật thương mại, luật về nhãn hiệu thương mại và bất kỳ và tất cả các quyền sở hữu khác. Google bảo lưu tất cả các quyền không được cấp phép rõ ràng cho bạn.
+
+3.4 Bạn không được sử dụng Preview cho bất kỳ mục đích nào không được cho phép rõ ràng bởi Thỏa thuận Cấp phép này. Trừ trường hợp được yêu cầu bởi giấy phép của bên thứ ba có liên quan, bạn không được: (a) sao chép (trừ trường hợp sao lưu), sửa đổi, điều chỉnh cho phù hợp, phân phối lại, biên dịch ngược, kỹ thuật đảo ngược, phân rã, hoặc tạo sản phẩm phái sinh từ Preview hay bất kỳ phần nào của Preview; hoặc (b) tải bất kỳ phần nào của Preview lên một thiết bị cầm tay di động hoặc bất kỳ thiết bị phần cứng nào khác ngoại trừ máy tính cá nhân, kết hợp bất kỳ phần nào của Preview với phần mềm khác, hay phân phối bất kỳ phần mềm hay thiết bị nào tích hợp một phần của Preview.
+
+3.5 Việc sử dụng, tái tạo lại và phân phối các thành phần của Preview được cấp phép theo một giấy phép phần mềm nguồn mở được chi phối chủ yếu bởi các điều khoản của giấy phép phần mềm nguồn mở đó chứ không phải Thỏa thuận Cấp phép này. Bạn đồng ý duy trì một giấy phép có uy tín liên quan đến các giấy phép phần mềm mã nguồn mở theo tất cả các quyền được cấp và phải tránh bất kỳ hành động nào có thể chấm dứt, đình chỉ hoặc vi phạm các quyền đó.
+
+3.6 Bạn đồng ý rằng hình thức và tính chất của Preview mà Google cung cấp có thể thay đổi mà không có thông báo trước cho bạn và rằng các phiên bản sau này của Preview có thể không tương thích với các ứng dụng được phát triển trên những phiên bản trước của Preview. Bạn đồng ý rằng Google có thể ngừng (vĩnh viễn hoặc tạm thời) việc cung cấp Preview (hoặc bất kỳ tính năng nào trong Preview) cho bạn hoặc cho người dùng nói chung toàn quyền theo quyết định của Google, mà không cần thông báo trước cho bạn.
+
+3.7 Không có bất cứ nội dung nào trong Thỏa thuận Cấp phép này trao cho bạn quyền sử dụng bất kỳ tên thương mại, thương hiệu, dấu hiệu dịch vụ, logo, tên miền, hoặc các tính năng nhãn hiệu đặc biệt nào khác.
+
+3.8 Bạn đồng ý rằng bạn sẽ không gỡ bỏ, che đậy, hoặc sửa đổi bất kỳ thông báo quyền sở hữu nào (bao gồm các thông báo về bản quyền và thương hiệu) mà có thể gắn với hoặc có trong Preview.
+
+4. Việc Bạn sử dụng Preview
+
+4.1 Google đồng ý rằng không có bất cứ nội dung nào trong Thỏa thuận Cấp phép này cấp cho Google bất cứ quyền, quyền sở hữu hay lợi ích nào từ bạn (hay bên cấp phép của bạn) theo Thỏa thuận Cấp phép này trong hoặc đối với bất kỳ ứng dụng phần mềm nào mà bạn phát triển bằng cách sử dụng Preview, bao gồm bất kỳ quyền sở hữu trí tuệ nào nằm trong những ứng dụng đó.
+
+4.2 Bạn đồng ý sử dụng Preview và viết ứng dụng chỉ cho các mục đích được cho phép bởi (a) Thỏa thuận Cấp phép này và (b) bất kỳ luật, quy định hoặc thực hành áp dụng nào hoặc hướng dẫn được chấp nhận chung ở các vùng tài phán liên quan (bao gồm bất kỳ luật nào về việc xuất dữ liệu hoặc phần mềm đến và từ Hoa Kỳ hoặc các quốc gia có liên quan khác).
+
+4.3 Bạn đồng ý rằng nếu bạn sử dụng Preview để phát triển ứng dụng, bạn sẽ bảo vệ quyền riêng tư và các quyền hợp pháp của người dùng. Nếu người dùng cung cấp cho bạn tên người dùng, mật khẩu hoặc thông tin đăng nhập hay thông tin cá nhân khác, bạn phải thông báo cho người dùng rằng thông tin sẽ có sẵn cho ứng dụng của bạn, và bạn phải cung cấp thông báo về quyền riêng tư và sự bảo vệ thỏa đáng về mặt pháp lý cho những người dùng đó. Nếu ứng dụng của bạn lưu trữ thông tin cá nhân hoặc nhạy cảm được cung cấp bởi người dùng, ứng dụng phải làm vậy một cách bảo mật. Nếu người dùng cung cấp cho bạn thông tin về Tài khoản Google, ứng dụng của bạn chỉ được sử dụng thông tin đó để truy cập Tài khoản Google của người dùng khi, và chỉ cho các mục đích giới hạn mà mỗi người dùng đã cấp phép cho bạn để thực hiện.
+
+4.4 Bạn đồng ý rằng bạn sẽ không tham gia vào bất kỳ hoạt động nào với Preview, bao gồm việc phát triển hoặc phân phối một ứng dụng, mà can thiệp vào, làm gián đoạn, gây thiệt hại, hoặc truy cập một cách trái phép vào máy chủ, mạng hoặc tài sản hay dịch vụ khác của Google hoặc bất kỳ bên thứ ba nào.
+
+4.5 Bạn đồng ý rằng bạn hoàn toàn chịu trách nhiệm về (và rằng Google không có trách nhiệm đối với bạn hay bất kỳ bên thứ ba nào về) bất kỳ dữ liệu, nội dung hay tài nguyên nào mà bạn tạo lập, truyền hoặc hiển thị thông qua Android và/hoặc các ứng dụng cho Android, và về hậu quả của những hành động của bạn (bao gồm bất kỳ tổn thất hay thiệt hại nào mà Google có thể phải gánh chịu) bởi việc làm như vậy.
+
+4.6 Bạn đồng ý rằng bạn hoàn toàn chịu trách nhiệm về (và rằng Google không có trách nhiệm đối với bạn hay bất kỳ bên thứ ba nào về) bất kỳ sự vi phạm nào đối với các nghĩa vụ của bạn theo Thỏa thuận Cấp phép này, bất kỳ hợp đồng với bên thứ ba áp dụng nào hoặc các Điều khoản Dịch vụ, hoặc bất kỳ luật hay quy định áp dụng nào, và về hậu quả của những hành động của bạn (bao gồm bất kỳ tổn thất hay thiệt hại nào mà Google hoặc bất kỳ bên thứ ba nào có thể phải gánh chịu) do bất kỳ sự vi phạm nào như vậy.
+
+4.7 Preview đang được phát triển, và việc kiểm thử và phản hồi của bạn là một phần quan trọng trong quá trình phát triển này. Bằng việc sử dụng Preview, bạn thừa nhận rằng việc triển khai một số tính năng vẫn còn đang được phát triển và rằng bạn không nên dựa vào Preview có đầy đủ chức năng của một phiên bản ổn định. Bạn đồng ý không công khai phân phối hoặc gửi bất kỳ ứng dụng nào bằng Preview này bởi Preview này sẽ không còn được hỗ trợ sau khi Android SDK bản chính thức được phát hành.
+
+5. Thông tin Xác thực Nhà phát triển của bạn
+
+5.1 Bạn đồng ý rằng bạn chịu trách nhiệm duy trì tính bảo mật của bất kỳ thông tin xác thực nhà phát triển nào mà có thể được phát hành cho bạn bởi Google hoặc bạn có thể tự chọn và rằng bạn sẽ hoàn toàn chịu trách nhiệm về tất cả ứng dụng được phát triển theo thông tin xác thực nhà phát triển của bạn.
+
+6. Quyền riêng tư và Thông tin
+
+6.1 Để tiếp tục đổi mới và cải thiện Preview, Google có thể thu thập một số thống kê về sử dụng từ phần mềm bao gồm nhưng không giới hạn mã định danh duy nhất, địa chỉ IP liên kết, số phiên bản của phần mềm, và thông tin về những công cụ và/hoặc dịch vụ trong Preview đang được sử dụng và chúng đang được sử dụng như thế nào. Trước khi bất kỳ thông tin nào được thu thập, Preview sẽ thông báo cho bạn và xin phép sự đồng ý của bạn. Nếu bạn từ chối cho phép, thông tin sẽ không được thu thập.
+
+6.2 Dữ liệu thu thập được kiểm tra chung để cải thiện Preview và được duy trì theo Chính sách Quyền riêng tư của Google tại http://www.google.com/policies/privacy/.
+
+7. Ứng dụng của Bên thứ ba
+
+7.1 Nếu bạn sử dụng Preview để chạy các ứng dụng được phát triển bởi một bên thứ ba hoặc truy cập dữ liệu, nội dung hoặc tài nguyên được cung cấp bởi một bên thứ ba, bạn đồng ý rằng Google không chịu trách nhiệm về những ứng dụng, dữ liệu, nội dung hoặc tài nguyên đó. Bạn hiểu rằng tất cả dữ liệu, nội dung hoặc tài nguyên mà bạn có thể truy cập thông qua các ứng dụng của bên thứ ba như vậy hoàn toàn thuộc trách nhiệm của người cung cấp chúng và rằng Google không chịu trách nhiệm về bất kỳ tổn thất hay thiệt hại nào mà bạn có thể gặp phải do kết quả từ việc sử dụng hay truy cập bất kỳ ứng dụng của bên thứ ba, dữ liệu, nội dung hay tài nguyên nào như vậy.
+
+7.2 Bạn cần ý thức được rằng dữ liệu, nội dung và tài nguyên được trình chiếu cho bạn thông qua một ứng dụng của bên thứ ba như vậy có thể được bảo vệ bởi các quyền sở hữu trí tuệ thuộc sở hữu của các nhà cung cấp (hoặc bởi cá nhân hoặc công ty khác đại diện cho họ). Bạn không được sửa đổi, thuê, cho thuê, cho vay, bán, phân phối hoặc tạo sản phẩm phái sinh dựa trên những dữ liệu, nội dung hoặc tài nguyên này (hoặc toàn bộ hoặc một phần) trừ khi bạn đã được cấp phép cụ thể để làm vậy bởi chủ sở hữu có liên quan.
+
+7.3 Bạn hiểu rằng việc bạn sử dụng các ứng dụng, dữ liệu, nội dung hoặc tài nguyên của bên thứ ba như vậy có thể phải tuân thủ các điều khoản riêng giữa bạn và bên thứ ba có liên quan.
+
+8. Sử dụng các API Google
+
+8.1 Các API Google
+
+8.1.1 Nếu bạn sử dụng bất kỳ API nào để truy xuất dữ liệu từ Google, bạn hiểu rằng dữ liệu có thể được bảo vệ bởi quyền sở hữu trí tuệ thuộc sở hữu của Google hoặc những bên cung cấp dữ liệu (hoặc bởi cá nhân hoặc công ty khác đại diện cho họ). Việc bạn sử dụng bất kỳ API nào như vậy có thể phải tuân theo các Điều khoản Dịch vụ bổ sung. Bạn không được sửa đổi, thuê, cho thuê, cho vay, bán, phân phối hoặc tạo sản phẩm phái sinh dựa trên dữ liệu này (hoặc toàn bộ hoặc một phần) trừ khi được cho phép bởi các Điều khoản Dịch vụ có liên quan.
+
+8.1.2 Nếu bạn sử dụng bất kỳ API nào để truy xuất dữ liệu của một người dùng từ Google, bạn hiểu và đồng ý rằng bạn sẽ chỉ truy xuất dữ liệu với sự cho phép rõ ràng của người dùng và chỉ khi, và cho các mục đích giới hạn mà người dùng đã được cấp quyền để thực hiện.
+
+9. Chấm dứt Thỏa thuận Cấp phép
+
+9.1 Thỏa thuận Cấp phép sẽ tiếp tục áp dụng cho đến khi được chấm dứt hoặc bởi bạn hoặc Google như quy định dưới đây.
+
+9.2 Nếu bạn muốn chấm dứt Thỏa thuận Cấp phép, bạn có thể làm như vậy bằng cách ngừng sử dụng Preview và bất kỳ thông tin nhà phát triển nào có liên quan.
+
+9.3 Bất cứ lúc nào, Google đều có thể chấm dứt Thỏa thuận Cấp phép này, có hoặc không có nguyên nhân, sau khi thông báo cho bạn.
+
+9.4 Thỏa thuận Cấp phép sẽ tự động chấm dứt mà không cần có thông báo hay hành động khác tùy theo sự việc nào sớm hơn:
+(A) khi Google ngừng cung cấp Preview hoặc một số thành phần nhất định của Preview cho người dùng ở quốc gia mà bạn đang cư trú hoặc nơi bạn đang sử dụng dịch vụ; và
+(B) Google phát hành một phiên bản phát hành cuối cùng của Android SDK.
+
+9.5 Khi Thỏa thuận Cấp phép bị chấm dứt, giấy phép đã cấp cho bạn trong Thỏa thuận Cấp phép sẽ chấm dứt, ngay lập tức bạn sẽ ngừng tất cả việc sử dụng Preview này, và các quy định tại khoản 10, 11, 12 và 14 sẽ vẫn còn hiệu lực mãi mãi.
+
+10. ĐIỀU KHOẢN MIỄN TRỪ
+
+10.1 BẠN HIỂU VÀ ĐỒNG Ý RÕ RÀNG RẰNG VIỆC BẠN SỬ DỤNG PREVIEW HOÀN TOÀN LÀ RỦI RO CỦA BẠN VÀ RẰNG PREVIEW ĐƯỢC CUNG CẤP TRÊN CƠ SỞ “NGUYÊN TRẠNG” VÀ “CÓ SẴN” MÀ KHÔNG CÓ BẤT KỲ SỰ BẢO ĐẢM NÀO TỪ GOOGLE.
+
+10.2 VIỆC BẠN SỬ DỤNG PREVIEW VÀ BẤT KỲ TÀI NGUYÊN NÀO ĐƯỢC TẢI XUỐNG HOẶC CÓ ĐƯỢC BẰNG CÁCH KHÁC THÔNG QUA VIỆC SỬ DỤNG PREVIEW LÀ QUYẾT ĐỊNH VÀ RỦI RO CỦA CHÍNH BẠN VÀ BẠN HOÀN TOÀN CHỊU TRÁCH NHIỆM VỀ BẤT KỲ THIỆT HẠI NÀO ĐỐI VỚI HỆ THỐNG MÁY TÍNH HOẶC THIẾT BỊ KHÁC HOẶC VIỆC MẤT DỮ LIỆU LÀ KẾT QUẢ TỪ VIỆC SỬ DỤNG ĐÓ. KHÔNG GIỚI HẠN TRONG NỘI DUNG TRÊN, BẠN HIỂU RẰNG PREVIEW KHÔNG PHẢI LÀ BẢN PHÁT HÀNH ỔN ĐỊNH VÀ CÓ THỂ CHỨA LỖI, KHIẾM KHUYẾT VÀ CÁC LỖ HỔNG BẢO MẬT CÓ THỂ DẪN ĐẾN THIỆT HẠI ĐÁNG KỂ, BAO GỒM MẤT KHẢ NĂNG SỬ DỤNG HOÀN TOÀN, KHÔNG THỂ PHỤC HỒI ĐƯỢC CỦA HỆ THỐNG MÁY TÍNH HAY THIẾT BỊ KHÁC CỦA BẠN.
+
+10.3 GOOGLE CÔNG KHAI TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM ĐỐI VỚI TẤT CẢ BẢO ĐẢM VÀ ĐIỀU KIỆN CÁC LOẠI, DÙ RÕ RÀNG HAY NGỤ Ý, BAO GỒM, NHƯNG KHÔNG GIỚI HẠN NHỮNG BẢO ĐẢM VÀ ĐIỀU KIỆN NGỤ Ý VỀ KHẢ NĂNG MUA BÁN ĐƯỢC, SỰ PHÙ HỢP CHO MỘT MỤC ĐÍCH CỤ THỂ VÀ KHÔNG XÂM PHẠM.
+
+11. GIỚI HẠN TRÁCH NHIỆM
+
+11.1 BẠN HIỂU VÀ ĐỒNG Ý RÕ RÀNG RẰNG GOOGLE, CÁC CÔNG TY CON VÀ CÔNG TY LIÊN KẾT CỦA GOOGLE, VÀ CÁC BÊN CẤP PHÉP CỦA GOOGLE SẼ KHÔNG CHỊU TRÁCH NHIỆM ĐỐI VỚI BẠN THEO BẤT KỲ LÝ THUYẾT TRÁCH NHIỆM NÀO VỀ BẤT KỲ THIỆT HẠI MANG TÍNH TRỰC TIẾP, GIÁN TIẾP, NGẪU NHIÊN, ĐẶC BIỆT, HẬU QUẢ HOẶC BẤT THƯỜNG NÀO MÀ BẠN CÓ THỂ PHẢI CHỊU, BAO GỒM BẤT KỲ TRƯỜNG HỢP MẤT DỮ LIỆU NÀO, DÙ GOOGLE HAY ĐẠI DIỆN CỦA GOOGLE CÓ BIẾT VỀ KHẢ NĂNG PHÁT SINH MẤT MÁT NHƯ VẬY HAY KHÔNG.
+
+12. Bồi thường
+
+12.1 Trong giới hạn tối đa mà pháp luật cho phép, bạn đồng ý bảo vệ, bồi thường và đảm bảo Google, các công ty liên kết của họ và các giám đốc, cán bộ, nhân viên và đại lý tương ứng của họ không bị thiệt hại trước và đối với bất kỳ và tất cả khiếu nại, hành động, kiện tụng hoặc thủ tục cũng như bất kỳ và tất cả tổn thất, trách nhiệm, thiệt hại, chi phí và phí tổn nào (bao gồm phí luật sư hợp lý) phát sinh từ hoặc phải trả từ (a) việc bạn sử dụng Preview, (b) bất kỳ ứng dụng nào do bạn phát triển trên Preview mà xâm phạm bất kỳ Quyền Sở hữu Trí tuệ của bất kỳ người nào hay bôi nhọ bất kỳ người nào hoặc vi phạm các quyền công khai hoặc riêng tư của họ, và (c) bất kỳ sự không tuân thủ nào của bạn đối với Thỏa thuận Cấp phép này.
+
+13. Thay đổi Thỏa thuận Cấp phép
+
+13.1 Google có thể thực hiện các thay đổi về Thỏa thuận Cấp phép khi họ phân phối các phiên bản mới của Preview. Khi những thay đổi này được thực hiện, Google sẽ lập một phiên bản Thỏa thuận Cấp phép mới có sẵn trên trang web nơi Preview được cung cấp.
+
+14. Các Điều khoản Pháp lý Chung
+
+14.1 Thỏa thuận Cấp phép này cấu thành toàn bộ thỏa thuận pháp lý giữa bạn và Google và chi phối việc bạn sử dụng Preview (không bao gồm bất kỳ dịch vụ nào mà Google có thể cung cấp cho bạn theo một thỏa thuận riêng bằng văn bản), và hoàn toàn thay thế bất kỳ thỏa thuận nào trước đây giữa bạn và Google liên quan tới Preview.
+
+14.2 Bạn đồng ý rằng nếu Google không thực hiện hay thi hành bất kỳ quyền hay chế tài hợp pháp nào có trong Thỏa thuận Cấp phép này (hoặc Google được hưởng lợi theo bất kỳ luật áp dụng nào), điều này sẽ không được coi như sự khước từ hình thức đối với các quyền của Google và rằng các quyền hoặc chế tài đó sẽ vẫn dành cho Google.
+
+14.3 Nếu bất kỳ tòa án pháp luật nào, có thẩm quyền tài phán đối với vấn đề này, phán rằng bất kỳ quy định nào của Thỏa thuận Cấp phép này không có hiệu lực, quy định đó sẽ bị xóa bỏ khỏi Thỏa thuận Cấp phép này mà không ảnh hưởng tới phần còn lại của Thỏa thuận Cấp phép này. Các quy định còn lại của Thỏa thuận Cấp phép này sẽ tiếp tục có giá trị và thi hành được.
+
+14.4 Bạn hiểu và đồng ý rằng mỗi thành viên trong nhóm các công ty mà trong đó Google là công ty mẹ sẽ là bên thụ hưởng thứ ba của Thỏa thuận Cấp phép và rằng những công ty khác đó sẽ có quyền trực tiếp thi hành, và dựa vào, bất kỳ quy định nào của Thỏa thuận Cấp phép này mà trao lợi ích cho họ (hoặc trao quyền có lợi cho họ). Ngoài điều này ra, không người hay công ty nào khác sẽ là bên thụ hưởng thứ ba của Thỏa thuận Cấp phép này.
+
+14.5 HẠN CHẾ VỀ XUẤT KHẨU. PREVIEW PHẢI TUÂN THEO PHÁP LUẬT VÀ QUY ĐỊNH VỀ XUẤT KHẨU CỦA HOA KỲ. BẠN PHẢI TUÂN THỦ TẤT CẢ PHÁP LUẬT VÀ QUY ĐỊNH VỀ XUẤT KHẨU TRONG NƯỚC VÀ QUỐC TẾ ÁP DỤNG CHO PREVIEW. NHỮNG LUẬT NÀY BAO GỒM CÁC HẠN CHẾ VỀ ĐIỂM ĐẾN, NGƯỜI DÙNG CUỐI VÀ MỤC ĐÍCH SỬ DỤNG CUỐI.
+
+14.6 Bạn không được phép chỉ định hoặc chuyển nhượng Thỏa thuận Cấp phép mà không có sự chấp thuận trước bằng văn bản của Google, và mọi nỗ lực chuyển nhượng mà không có chấp thuận như vậy sẽ vô hiệu lực. Bạn sẽ không được giao phó các trách nhiệm hoặc nghĩa vụ của mình theo Thỏa thuận Cấp phép này khi chưa có sự phê duyệt trước bằng văn bản của Google.
+
+14.7 Thỏa thuận Cấp phép này và mối quan hệ giữa bạn với Google theo Thỏa thuận Cấp phép sẽ được điều chỉnh bởi pháp luật của Tiểu bang California, không xét tới các quy định về xung đột pháp luật của họ. Bạn và Google đồng ý trình lên theo thẩm quyền tài phán duy nhất của các tòa án bên trong quận Santa Clara, California để giải quyết bất kỳ vấn đề pháp lý nào phát sinh từ Thỏa thuận Cấp phép này. Không kể điều này, bạn đồng ý rằng Google sẽ vẫn được phép xin các lệnh chế tài của tòa (hoặc một hình thức chế tài pháp lý khẩn cấp tương đương) ở bất kỳ vùng tài phán nào.
+  </div><!-- sdk terms -->
+
+
+
+    <div id="sdk-terms-form">
+      <p>
+        <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+        <label id="agreeLabel" for="agree">Tôi đã đọc và đồng ý với các điều khoản và điều kiện trên</label>
+      </p>
+      <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+    </div>
+
+
+  </div><!-- end TOS -->
+
+
+  <div id="landing">
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Trong tài liệu này</h2>
+      <ol>
+        <li><a href="#device-preview">Thiết lập thiết bị phần cứng</a>
+          <ol>
+            <li><a href="#ota">Nhận cập nhật qua sóng vô tuyến</a></li>
+            <li><a href="#flash">Flash thủ công thiết bị</a></li>
+            <li><a href="#revertDevice">Gỡ cài đặt</a></li>
+          </ol>
+        </li>
+        <li><a href="#setupAVD">Thiết lập bộ giả lập</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Để chạy và kiểm thử ứng dụng của bạn trên nền tảng mới, bạn cần phải thiết lập môi trường thời gian chạy Android N
+. Bạn có thể thực hiện điều đó bằng một trong các cách sau:
+</p>
+
+<ul>
+  <li>Cài đặt Android N trên một thiết bị phần cứng được hỗ trợ, hoặc</li>
+  <li>Thiết lập một bộ giả lập Android chạy Android N</li>
+</ul>
+
+<p>
+  Nếu bạn muốn có một môi trường để kiểm thử khả năng tương thích cơ bản của ứng dụng của bạn trên
+  nền tảng mới này, tất cả những gì bạn cần là APK hiện tại của bạn và một thiết bị phần cứng hoặc
+  bộ giả lập. Bạn không nhất thiết phải cập nhật môi trường phát triển đầy đủ
+  để thực hiện kiểm thử cơ bản.
+</p>
+
+<p>
+  Nếu bạn muốn sửa đổi ứng dụng của mình để nhắm mục tiêu đến Android N hoặc sử dụng các API Android N mới,
+  bạn cần thiết lập một môi trường phát triển được cập nhật để hỗ trợ
+  Android N. <a href="{@docRoot}preview/setup-sdk.html">Thiết lập để Phát triển dành cho
+  Android N</a> có các chi tiết.
+</p>
+
+
+<h2 id="device-preview">Thiết lập thiết bị phần cứng</h2>
+
+<p>
+  Bản N Developer Preview cung cấp các cập nhật hệ thống cho một loạt các thiết bị phần cứng 
+  mà bạn có thể sử dụng để kiểm thử ứng dụng của bạn, từ điện thoại tới máy tính bảng và TV.
+</p>
+
+<p>
+  Nếu bạn có quyền truy cập vào một thiết bị được hỗ trợ, bạn có thể cập nhật nó thành bản dựng theo mốc của Preview dành cho
+  Nhà phát triển bằng một trong những cách sau:
+</p>
+
+<ul>
+  <li><strong>Đăng ký cập nhật hệ thống tự động qua vô tuyến cho thiết bị</strong> thông qua
+  <a href="https://g.co/androidbeta">Chương trình Android Beta</a>. Sau khi đăng ký, thiết bị của bạn sẽ nhận được 
+  qua sóng vô tuyến các cập nhật định kỳ về tất cả bản dựng theo mốc trong bản N Developer Preview. Cách tiếp cận này 
+  được khuyến khích bởi nó cho phép bạn chuyển tiếp liền mạch từ môi trường hiện tại của bạn
+ qua nhiều bản phát hành khác nhau của N Developer Preview.</li>
+  <li><strong>Tải xuống ảnh hệ thống của Developer Preview và flash thiết bị</strong>.
+  Các cập nhật qua vô tuyến không được cung cấp tự động cho các thiết bị mà bạn flash thủ công, nhưng
+  bạn có thể đăng ký Chương trình Android Beta cho các thiết bị đó để nhận cập nhật qua vô tuyến. </li>
+</ul>
+
+<h3 id="ota">Đăng ký cập nhật tự động qua vô tuyến cho thiết bị</h3>
+
+<p>
+  Nếu bạn có quyền truy cập vào một thiết bị được hỗ trợ (xem danh sách trong bảng
+  Tải xuống), bạn có thể nhận được cập nhật qua sóng vô tuyến để xem trước các phiên bản của Android
+ bằng cách đăng ký <a href="https://g.co/androidbeta">Chương trình Android Beta</a> cho thiết bị. Các cập nhật này được
+  tự động tải xuống và sẽ cập nhật thiết bị của bạn giống như các bản cập nhật
+  hệ thống chính thức.
+</p>
+
+<p>
+  Bạn có thể hủy đăng ký thiết bị bất cứ lúc nào. Thiết bị sẽ nhận được bản cập nhật qua vô tuyến
+ của phiên bản Android sản xuất mới nhất khả dụng cho thiết bị đó
+  (ví dụ, Android 6.0 Marshmallow). Việc cập nhật yêu cầu phải thiết lập lại thiết bị
+  hoàn toàn, vì vậy dữ liệu người dùng trên thiết bị sẽ được gỡ bỏ. Hãy đảm bảo <strong>sao lưu
+  dữ liệu quan trọng</strong> trước khi hủy đăng ký thiết bị.
+</p>
+
+<p>
+  Để biết thêm thông tin và đăng ký thiết bị của bạn, xem
+  trang web <a href="https://g.co/androidbeta">Chương trình Android Beta</a>.
+</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+  Việc hủy đăng ký yêu cầu phải cài đặt lại toàn bộ thiết bị. Trước hết hãy sao lưu
+  các dữ liệu quan trọng.
+</p>
+
+<h3 id="flash">Flash thiết bị thủ công</h3>
+
+<p>
+  Bất cứ lúc nào bạn cũng có thể tải xuống ảnh hệ thống mới nhất của Developer Preview và
+  flash thủ công nó vào thiết bị của bạn. Xem bảng dưới đây để tải xuống ảnh hệ thống
+  cho thiết bị kiểm thử của bạn. Việc flash thủ công thiết bị sẽ hữu ích nếu bạn cần
+  kiểm soát chính xác môi trường kiểm thử hoặc cần phải cài đặt lại thường xuyên,
+  chẳng hạn như cho kiểm thử tự động. 
+</p>
+
+<!-- You can flash by ota or system image --><p>
+  Việc cài đặt ảnh hệ thống trên thiết bị <strong>sẽ gỡ bỏ tất cả dữ liệu khỏi
+  thiết bị</strong>, vì vậy trước hết bạn nên sao lưu dữ liệu của mình.
+</p>
+
+<p>
+  Sau khi sao lưu dữ liệu thiết bị và tải xuống ảnh hệ thống bên dưới
+  khớp với thiết bị của bạn, hãy làm theo hướng dẫn tại <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+ để flash ảnh này vào thiết bị của bạn.
+</p>
+
+<p>
+  Các ảnh hệ thống được flash thủ công <strong>không
+  tự động nhận cập nhật qua vô tuyến</strong> cho các bản dựng theo mốc sau này của
+  Developer Preview. Hãy đảm bảo giữ cho môi trường của bạn được cập nhật và flash một
+  ảnh hệ thống mới tại mỗi mốc của Developer Preview.
+</p>
+
+<p>
+  Nếu bạn quyết định muốn nhận cập nhật qua vô tuyến sau khi đã flash thủ công thiết bị, 
+  tất cả những gì bạn cần làm là đăng ký <a href="https://g.co/androidbeta">Chương trình Android
+  Beta</a> cho thiết bị. Bạn có thể đăng ký thiết bị bất cứ lúc nào để nhận được
+  bản cập nhật qua vô tuyến tiếp theo của Preview. 
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Thiết bị</th>
+    <th scope="col">Tải xuống / Tổng kiểm</th>
+  </tr>
+
+  <tr id="bullhead">
+    <td>Nexus 5X <br>"bullhead"</td>
+    <td><a href="#top" onclick="onDownload(this)">bullhead-npc56p-preview-6c877a3d.tgz</a><br>
+      MD5: b5cf874021023b398f5b983b24913f5d<br>
+      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+    </td>
+  </tr>
+
+  <tr id="shamu">
+    <td>Nexus 6 <br>"shamu"</td>
+    <td><a href="#top" onclick="onDownload(this)">shamu-npc56p-preview-54b13c67.tgz</a><br>
+      MD5: af183638cf34e0eb944a1957d7696f60<br>
+      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
+    </td>
+  </tr>
+
+  <tr id="angler">
+    <td>Nexus 6P <br>"angler"</td>
+    <td><a href="#top" onclick="onDownload(this)">angler-npc56p-preview-85ffc1b1.tgz</a><br>
+      MD5: bc4934ea7bd325753eee1606d3725a24<br>
+      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+    </td>
+  </tr>
+
+  <tr id="volantis">
+    <td>Nexus 9 <br>"volantis"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
+      MD5: c901334c6158351e945f188167ae56f4<br>
+      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>"volantisg"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
+      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
+      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+    </td>
+  </tr>
+
+  <tr id="fugu">
+    <td>Nexus Player <br>"fugu"</td>
+    <td><a href="#top" onclick="onDownload(this)">fugu-npc56r-preview-7027d5b6.tgz</a><br>
+      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
+      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    </td>
+  </tr>
+
+  <tr id="ryu">
+    <td>Pixel C <br>"ryu"</td>
+    <td><a href="#top" onclick="onDownload(this)">ryu-npc56p-preview-335a86a4.tgz</a><br>
+      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
+      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    </td>
+  </tr>
+  <tr id="seed">
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
+      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
+      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    </td>
+  </tr>
+
+</table>
+
+<h3 id="revertDevice">Gỡ cài đặt Preview khỏi thiết bị</h3>
+
+<p>
+  Nếu bạn muốn gỡ cài đặt preview khỏi thiết bị, bạn có thể thực hiện điều đó bằng một trong
+  những cách sau: </p>
+  <ul>
+    <li><strong>Lấy thông số kỹ thuật của ảnh hệ thống nguyên gốc</strong> và sau đó flash thủ công
+    nó cho thiết bị.
+      <ul>
+          <li>Đối với <strong>các thiết bị Nexus và Pixel C</strong>, xem
+        trang <a href="http://developers.google.com/android/nexus/images">Ảnh Cài đặt Gốc
+        cho Thiết bị Nexus</a> để tìm bản tải xuống. </li>
+        <li>Đối với <strong>các thiết bị khác</strong>, vui lòng liên hệ trực tiếp với nhà sản xuất
+thiết bị. Hoặc, nếu thiết bị được hỗ trợ
+        trong Chương trình Android Beta, bạn có thể đăng ký
+        chương trình cho thiết bị và sau đó hủy đăng ký thiết bị (xem bên dưới).</li>
+      </ul>
+    </li>
+    <li><strong>Hủy đăng ký thiết bị khỏi Chương trình Android Beta</strong>. Nếu
+    thiết bị được đăng ký <a href="https://g.co/androidbeta">Chương trình Android Beta
+    </a>, không quan trọng là thiết bị nào, bạn có thể dễ dàng hủy đăng ký thiết bị khỏi chương trình này.
+  <p>
+    Thiết bị sẽ nhận được bản cập nhật qua vô tuyến của phiên bản Android sản xuất
+    mới nhất có sẵn cho thiết bị đó (ví dụ, Android 6.0 Marshmallow).
+    Bản cập nhật yêu cầu thiết lập lại toàn bộ thiết bị, vì vậy dữ liệu người dùng trên thiết bị sẽ được
+    gỡ bỏ. Hãy đảm bảo rằng bạn đã  <strong>sao lưu dữ liệu quan trọng</strong> trước khi
+    hủy đăng ký thiết bị.
+  </p>
+  </li>
+</ul>
+
+<p class="note"><strong>Lưu ý:</strong>
+  Việc gỡ cài đặt ảnh hệ thống của Developer Preview trước khi
+  kết thúc chương trình yêu cầu phải thiết lập lại toàn bộ thiết bị và gỡ bỏ tất cả dữ liệu người dùng
+  trên thiết bị.
+</p>
+
+
+<h2 id="setupAVD">Thiết lập bộ giả lập</h2>
+
+<p>Để sử dụng Bộ Giả Lập Android chạy Android N Preview, bạn cần
+tải xuống Android N Preview SDK và tạo một thiết bị ảo cho
+bộ giả lập.</p>
+
+<p>Đầu tiên, tải xuống Android N Preview SDK như sau (nếu bạn
+đã có nó trong khi <a href="{@docRoot}preview/setup-sdk.html">thiết lập
+để phát triển dành cho Android N</a>, bạn có thể bỏ qua phần này):
+
+<ol>
+  <li>Trong Android Studio, Mở hộp thoại Settings
+    (<strong>File &gt; Settings</strong> trên Windows/Linux, hoặc
+    <strong>Android Studio &gt; Preferences</strong> trên Mac). Trong bảng điều khiển
+    bên trái, chọn <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Nhấp vào tab <strong>SDK Platforms</strong>, rồi chọn hộp kiểm
+  <strong>Android N Preview</strong>.</li>
+
+  <li>Nhấp vào tab <strong>SDK Tools</strong>, rồi chọn
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong>, và các hộp kiểm <strong>Android SDK Tools</strong> 
+.
+  </li>
+
+  <li>Nhấp vào <strong>OK</strong> và chấp nhận thỏa thuận
+    giấy phép cho bất kỳ gói nào sẽ được cài đặt.
+  </li>
+</ol>
+
+<p>Giờ đây bạn sẽ có <strong>Android SDK Built-Tools 24.0 0 rc1</strong>,
+<strong>Platform-Tools 24.0.0 rc1</strong>, và <strong>SDK Tools
+25.0.9</strong>. Nếu bạn không cập nhật Các Công cụ SDK lên 25.0.9, bạn sẽ không
+thể chạy ảnh hệ thống x86_64 cho Android N.</p>
+
+
+<p>Bây giờ, hãy tạo một thiết bị ảo với ảnh hệ thống Android N:</p>
+
+<ol>
+  <li>Mở Trình quản lý AVD bằng cách chọn <strong>Tools &gt; Android &gt;
+    AVD Manager</strong>.</li>
+  <li>Nhấp vào <strong>Create Virtual Device</strong>.</li>
+  <li>Chọn một thiết bị chẳng hạn như Nexus 5X, Nexus 6P, Nexus 9, hoặc Android TV,
+    rồi nhấp vào <strong>Next</strong>.</li>
+  <li>Chọn ảnh hệ thống <strong>N</strong> (với
+    <strong>x86</strong> ABI), rồi nhấp vào <strong>Next</strong>.
+    (Hiện chỉ có ảnh hệ thống x86 được hỗ trợ với Bộ giả lập Android
+dành cho Preview Android N.)
+  <li>Hoàn thành các bước cấu hình AVD còn lại và nhấp vào
+    <strong>Finish</strong>.</li>
+</ol>
+
+<p>Giờ đây bạn có thể khởi chạy Bộ giả lập Android với AVD Preview Android N.</p>
+
+<p>
+Để có trải nghiệm tốt nhất trong Bộ giả lập Android, hãy cài đặt
+Android Studio 2.1 Preview, có hỗ trợ <a href="http://tools.android.com/tech-docs/emulator">Bộ giả lập Android 2.0 Beta</a>
+với hiệu suất nhanh hơn nhiều so với Bộ giả lập trong
+Android Studio 1.5.</p>
+
+<p class="note"><strong>Lưu ý:</strong>
+  Nếu bạn hiện đang sử dụng Android Studio 2.0 Beta, một vấn đề đã được biết đến
+ sẽ ngăn cản bạn tạo AVD bằng ảnh hệ thống của N Preview, vì vậy 
+  hiện bạn cần sử dụng preview của Android Studio 2.1 để tạo các AVD.
+</p>
+
+<p>Để biết thêm thông tin về tạo thiết bị ảo, hãy xem <a href="{@docRoot}tools/devices/index.html">Quản lý Thiết bị ảo</a>.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div><!-- landing -->
+
+</div><!-- relative wrapper -->
+
+
+
+<script>
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/preview/";
+  function onDownload(link) {
+
+    $("#downloadForRealz").html("Download " + $(link).text());
+    $("#downloadForRealz").attr('href', urlRoot + $(link).text());
+
+    $("#tos").fadeIn('fast');
+    $("#landing").fadeOut('fast');
+
+    return true;
+  }
+
+
+  function onAgreeChecked() {
+    /* verify that the TOS is agreed */
+    if ($("input#agree").is(":checked")) {
+      /* reveal the download button */
+      $("a#downloadForRealz").removeClass('disabled');
+    } else {
+      $("a#downloadForRealz").addClass('disabled');
+    }
+  }
+
+  function onDownloadForRealz(link) {
+    if ($("input#agree").is(':checked')) {
+    /*
+      $("#tos").fadeOut('fast');
+      $("#landing").fadeIn('fast');
+    */
+
+      ga('send', 'event', 'M Preview', 'System Image', $("#downloadForRealz").html());
+
+    /*
+      location.hash = "";
+    */
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  $(window).hashchange( function(){
+    if (location.hash == "") {
+      location.reload();
+    }
+  });
+
+</script>
