@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.UserInfo;
+import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -64,15 +65,14 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         Context realTestContext = getContext();
         Context mockContext = new MyMockContext(realTestContext);
         setContext(mockContext);
-        mAms = new MyAccountManagerService(getContext(),
-                new MyMockPackageManager(), new MockAccountAuthenticatorCache(), realTestContext);
+        mAms = createAccountManagerService(mockContext, realTestContext);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        new File(mAms.getCeDatabaseName(UserHandle.USER_SYSTEM)).delete();
-        new File(mAms.getDeDatabaseName(UserHandle.USER_SYSTEM)).delete();
-        new File(mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM)).delete();
+        SQLiteDatabase.deleteDatabase(new File(mAms.getCeDatabaseName(UserHandle.USER_SYSTEM)));
+        SQLiteDatabase.deleteDatabase(new File(mAms.getDeDatabaseName(UserHandle.USER_SYSTEM)));
+        SQLiteDatabase.deleteDatabase(new File(mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM)));
         super.tearDown();
     }
 
@@ -88,7 +88,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testCheckAddAccount() throws Exception {
-        unlockUser(UserHandle.USER_SYSTEM);
+        unlockSystemUser();
         Account a11 = new Account("account1", "type1");
         Account a21 = new Account("account2", "type1");
         Account a31 = new Account("account3", "type1");
@@ -129,7 +129,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testPasswords() throws Exception {
-        unlockUser(UserHandle.USER_SYSTEM);
+        unlockSystemUser();
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
         mAms.addAccountExplicitly(a11, "p11", null);
@@ -145,7 +145,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testUserdata() throws Exception {
-        unlockUser(UserHandle.USER_SYSTEM);
+        unlockSystemUser();
         Account a11 = new Account("account1", "type1");
         Bundle u11 = new Bundle();
         u11.putString("a", "a_a11");
@@ -178,7 +178,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     public void testAuthtokens() throws Exception {
-        unlockUser(UserHandle.USER_SYSTEM);
+        unlockSystemUser();
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
         mAms.addAccountExplicitly(a11, "p11", null);
@@ -211,10 +211,89 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertNull(mAms.peekAuthToken(a12, "att2"));
     }
 
-    private void unlockUser(int userId) {
+    public void testRemovedAccountSync() throws Exception {
+        unlockSystemUser();
+        Account a1 = new Account("account1", "type1");
+        Account a2 = new Account("account2", "type2");
+        mAms.addAccountExplicitly(a1, "p1", null);
+        mAms.addAccountExplicitly(a2, "p2", null);
+
+        Context originalContext = ((MyMockContext)getContext()).mTestContext;
+        // create a separate instance of AMS. It initially assumes that user0 is locked
+        AccountManagerService ams2 = createAccountManagerService(getContext(), originalContext);
+
+        // Verify that account can be removed when user is locked
+        ams2.removeAccountInternal(a1);
+        Account[] accounts = ams2.getAccounts(UserHandle.USER_SYSTEM, mContext.getOpPackageName());
+        assertEquals(1, accounts.length);
+        assertEquals("Only a2 should be returned", a2, accounts[0]);
+
+        // Verify that CE db file is unchanged and still has 2 accounts
+        String ceDatabaseName = mAms.getCeDatabaseName(UserHandle.USER_SYSTEM);
+        int accountsNumber = readNumberOfAccountsFromDbFile(originalContext, ceDatabaseName);
+        assertEquals("CE database should still have 2 accounts", 2, accountsNumber);
+
+        // Unlock the user and verify that db has been updated
+        ams2.onUserUnlocked(newIntentForUser(UserHandle.USER_SYSTEM));
+        accountsNumber = readNumberOfAccountsFromDbFile(originalContext, ceDatabaseName);
+        assertEquals("CE database should now have 1 account", 2, accountsNumber);
+        accounts = ams2.getAccounts(UserHandle.USER_SYSTEM, mContext.getOpPackageName());
+        assertEquals(1, accounts.length);
+        assertEquals("Only a2 should be returned", a2, accounts[0]);
+    }
+
+    public void testPreNDatabaseMigration() throws Exception {
+        String preNDatabaseName = mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM);
+        Context originalContext = ((MyMockContext) getContext()).mTestContext;
+        PreNTestDatabaseHelper.createV4Database(originalContext, preNDatabaseName);
+        // Assert that database was created with 1 account
+        int n = readNumberOfAccountsFromDbFile(originalContext, preNDatabaseName);
+        assertEquals("pre-N database should have 1 account", 1, n);
+
+        // Start testing
+        unlockSystemUser();
+        Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
+        assertEquals("1 account should be migrated", 1, accounts.length);
+        assertEquals(PreNTestDatabaseHelper.ACCOUNT_NAME, accounts[0].name);
+        assertEquals(PreNTestDatabaseHelper.ACCOUNT_PASSWORD, mAms.getPassword(accounts[0]));
+        assertEquals("Authtoken should be migrated",
+                PreNTestDatabaseHelper.TOKEN_STRING,
+                mAms.peekAuthToken(accounts[0], PreNTestDatabaseHelper.TOKEN_TYPE));
+
+        assertFalse("pre-N database file should be removed but was found at " + preNDatabaseName,
+                new File(preNDatabaseName).exists());
+
+        // Verify that ce/de files are present
+        String deDatabaseName = mAms.getDeDatabaseName(UserHandle.USER_SYSTEM);
+        String ceDatabaseName = mAms.getCeDatabaseName(UserHandle.USER_SYSTEM);
+        assertTrue("DE database file should be created at " + deDatabaseName,
+                new File(deDatabaseName).exists());
+        assertTrue("CE database file should be created at " + ceDatabaseName,
+                new File(ceDatabaseName).exists());
+    }
+
+    private int readNumberOfAccountsFromDbFile(Context context, String dbName) {
+        SQLiteDatabase ceDb = context.openOrCreateDatabase(dbName, 0, null);
+        try (Cursor cursor = ceDb.rawQuery("SELECT count(*) FROM accounts", null)) {
+            assertTrue(cursor.moveToNext());
+            return cursor.getInt(0);
+        }
+    }
+
+    private AccountManagerService createAccountManagerService(Context mockContext,
+            Context realContext) {
+        return new MyAccountManagerService(mockContext,
+                new MyMockPackageManager(), new MockAccountAuthenticatorCache(), realContext);
+    }
+
+    private void unlockSystemUser() {
+        mAms.onUserUnlocked(newIntentForUser(UserHandle.USER_SYSTEM));
+    }
+
+    private static Intent newIntentForUser(int userId) {
         Intent intent = new Intent();
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        mAms.onUserUnlocked(intent);
+        return intent;
     }
 
     static public class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
@@ -264,11 +343,13 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         private Context mTestContext;
         private AppOpsManager mAppOpsManager;
         private UserManager mUserManager;
+        private PackageManager mPackageManager;
 
         public MyMockContext(Context testContext) {
             this.mTestContext = testContext;
             this.mAppOpsManager = mock(AppOpsManager.class);
             this.mUserManager = mock(UserManager.class);
+            this.mPackageManager = mock(PackageManager.class);
             final UserInfo ui = new UserInfo(UserHandle.USER_SYSTEM, "user0", 0);
             when(mUserManager.getUserInfo(eq(ui.id))).thenReturn(ui);
         }
@@ -276,6 +357,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public int checkCallingOrSelfPermission(final String permission) {
             return PackageManager.PERMISSION_GRANTED;
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mPackageManager;
         }
 
         @Override
