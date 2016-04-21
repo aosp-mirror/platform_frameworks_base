@@ -276,9 +276,6 @@ public class PipManager {
     void movePipToFullscreen() {
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onMoveToFullscreen();
-        }
         resizePinnedStack(mState);
     }
 
@@ -638,6 +635,11 @@ public class PipManager {
         public void onPinnedStackAnimationEnded() {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
             switch (mState) {
+                case STATE_NO_PIP:
+                    for (int i = mListeners.size() - 1; i >= 0; --i) {
+                        mListeners.get(i).onMoveToFullscreen();
+                    }
+                    break;
                 case STATE_PIP_OVERLAY:
                     if (!mPipRecentsOverlayManager.isRecentsShown()) {
                         showPipOverlay();
