@@ -1507,6 +1507,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+
+        // Ensure that before we return from this command, any asynchronous
+        // notifications generated before the command completed have been
+        // processed by all NetworkManagementEventObservers.
+        mConnector.waitForCallbacks();
     }
 
     @Override
