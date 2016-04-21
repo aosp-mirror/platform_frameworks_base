@@ -433,7 +433,7 @@ public class AppWindowAnimator {
             WindowStateAnimator winAnimator = mAllAppWinAnimators.get(i);
             if (DEBUG_VISIBILITY) Slog.v(TAG, "performing show on: " + winAnimator);
             winAnimator.performShowLocked();
-            isAnimating |= winAnimator.isAnimating();
+            isAnimating |= winAnimator.isAnimationSet();
         }
         return isAnimating;
     }
