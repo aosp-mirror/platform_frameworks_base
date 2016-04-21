@@ -22,7 +22,7 @@ import android.os.IBinder;
  * Interface to allow a drop receiver to request permissions for URIs passed along with ClipData
  * contained in DragEvent.
  */
-interface IDropPermissions {
+interface IDragAndDropPermissions {
     void take(IBinder activityToken);
     void takeTransient(IBinder permissionOwnerToken);
     void release();

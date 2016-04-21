@@ -59,7 +59,7 @@ import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
 import com.android.server.wm.WindowManagerService.H;
 
-import com.android.internal.view.IDropPermissions;
+import com.android.internal.view.IDragAndDropPermissions;
 
 import java.util.ArrayList;
 
@@ -484,10 +484,10 @@ class DragState {
 
         final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
 
-        DropPermissionsHandler dropPermissions = null;
+        DragAndDropPermissionsHandler dragAndDropPermissions = null;
         if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
                 (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
-            dropPermissions = new DropPermissionsHandler(
+            dragAndDropPermissions = new DragAndDropPermissionsHandler(
                     mData,
                     mUid,
                     touchedWin.getOwningPackage(),
@@ -501,7 +501,7 @@ class DragState {
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
         DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
-                null, null, mData, dropPermissions, false);
+                null, null, mData, dragAndDropPermissions, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
 
@@ -524,12 +524,12 @@ class DragState {
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
             ClipDescription description, ClipData data,
-            IDropPermissions dropPermissions,
+            IDragAndDropPermissions dragAndDropPermissions,
             boolean result) {
         final float winX = win.translateToWindowX(x);
         final float winY = win.translateToWindowY(y);
         return DragEvent.obtain(action, winX, winY, localState, description, data,
-                dropPermissions, result);
+                dragAndDropPermissions, result);
     }
 
     boolean stepAnimationLocked(long currentTimeMs) {
