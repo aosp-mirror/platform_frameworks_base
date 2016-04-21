@@ -527,8 +527,13 @@ class ActivityStarter {
 
         doPendingActivityLaunchesLocked(false);
 
-        err = startActivityUnchecked(
-                r, sourceRecord, voiceSession, voiceInteractor, startFlags, true, options, inTask);
+        try {
+            mService.mWindowManager.deferSurfaceLayout();
+            err = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                    true, options, inTask);
+        } finally {
+            mService.mWindowManager.continueSurfaceLayout();
+        }
         postStartActivityUncheckedProcessing(r, err, stack.mStackId);
         return err;
     }
@@ -1853,6 +1858,12 @@ class ActivityStarter {
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
             ActivityOptions aOptions) {
+
+        // We are reusing a task, keep the stack!
+        if (mReuseTask != null) {
+            return mReuseTask.stack;
+        }
+
         final int launchStackId =
                 (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
 

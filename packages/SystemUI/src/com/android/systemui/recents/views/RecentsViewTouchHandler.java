@@ -202,8 +202,8 @@ public class RecentsViewTouchHandler {
      * Handles dragging touch events
      */
     private void handleTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
+        int action = ev.getActionMasked();
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownPos.set((int) ev.getX(), (int) ev.getY());
                 break;
@@ -258,7 +258,7 @@ public class RecentsViewTouchHandler {
             case MotionEvent.ACTION_CANCEL: {
                 if (mDragRequested) {
                     EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView,
-                            mLastDropTarget));
+                            action == MotionEvent.ACTION_UP ? mLastDropTarget : null));
                     break;
                 }
             }

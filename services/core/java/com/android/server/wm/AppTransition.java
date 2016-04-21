@@ -1914,6 +1914,14 @@ public class AppTransition implements Dump {
                 setAppTransition(transit);
             }
         }
+        if (transit != TRANSIT_DOCK_TASK_FROM_RECENTS
+                && mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+
+            // Somebody is trying to start another transition while we are waiting for the docking
+            // window to be drawn. Because TRANSIT_DOCK_TASK_FROM_RECENTS starts prolonged
+            // animations, we need to override it or our prolonged animations will never be ended.
+            setAppTransition(transit);
+        }
         boolean prepared = prepare();
         if (isTransitionSet()) {
             mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
