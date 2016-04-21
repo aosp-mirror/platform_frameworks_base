@@ -497,14 +497,14 @@
     <string name="bugreport_option_interactive_title">Interactive report</string>
     <!-- Summary in the bugreport dialog for the interactive workflow. [CHAR LIMIT=NONE] -->
     <string name="bugreport_option_interactive_summary">Use this under most circumstances.
-        It allows you to track progress of the report and enter more details about the problem.
+        It allows you to track progress of the report, enter more details about the problem, and take screenshots.
         It might omit some less-used sections that take a long time to report.</string>
     <!-- Title in the bugreport dialog for the full workflow. Should fit in one line. [CHAR LIMIT=30] -->
     <string name="bugreport_option_full_title">Full report</string>
     <!-- Summary in the bugreport dialog for the full workflow. [CHAR LIMIT=NONE] -->
     <string name="bugreport_option_full_summary">Use this option for minimal system interference when
         your device is unresponsive or too slow, or when you need all report sections.
-        Does not take a screenshot or allow you to enter more details.</string>
+        Does not allow you to enter more details or take additional screenshots.</string>
     <!--  Toast message informing user in how many seconds a bugreport screenshot will be taken -->
     <plurals name="bugreport_countdown">
         <item quantity="one">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> second.</item>
