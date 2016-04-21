@@ -1213,44 +1213,55 @@ public class ApplicationsState {
         }
     }
 
+    /**
+     * Compare by label, then package name, then uid.
+     */
     public static final Comparator<AppEntry> ALPHA_COMPARATOR = new Comparator<AppEntry>() {
         private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
-            return sCollator.compare(object1.label, object2.label);
+            int compareResult = sCollator.compare(object1.label, object2.label);
+            if (compareResult != 0) {
+                return compareResult;
+            }
+            if (object1.info != null && object2.info != null) {
+                compareResult =
+                    sCollator.compare(object1.info.packageName, object2.info.packageName);
+                if (compareResult != 0) {
+                    return compareResult;
+                }
+            }
+            return object1.info.uid - object2.info.uid;
         }
     };
 
     public static final Comparator<AppEntry> SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.size < object2.size) return 1;
             if (object1.size > object2.size) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
     public static final Comparator<AppEntry> INTERNAL_SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.internalSize < object2.internalSize) return 1;
             if (object1.internalSize > object2.internalSize) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
     public static final Comparator<AppEntry> EXTERNAL_SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.externalSize < object2.externalSize) return 1;
             if (object1.externalSize > object2.externalSize) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
@@ -1272,20 +1283,17 @@ public class ApplicationsState {
         }
     };
 
-    public static final AppFilter FILTER_PERSONAL_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
-        private int mCurrentUser;
-
+    public static final AppFilter FILTER_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
         public void init() {
-            mCurrentUser = ActivityManager.getCurrentUser();
+            // do nothings
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) == mCurrentUser &&
-                    entry.info.enabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
+            return entry.info.enabledSetting
+                    != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
         }
     };
-
 
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
