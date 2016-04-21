@@ -151,12 +151,24 @@ public class ModemActivityInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        int totalTxTimeMs = 0;
-        int txTime [] = getTxTimeMillis();
-        for (int i = 0; i < TX_POWER_LEVELS; i++) {
-            totalTxTimeMs += txTime[i];
+        for (int txVal : getTxTimeMillis()) {
+            if(txVal < 0) {
+                return false;
+            }
         }
-        return ((getIdleTimeMillis() >= 0) && (totalTxTimeMs >= 0)
-                && (getSleepTimeMillis() >= 0) && (getIdleTimeMillis() >= 0));
+
+        return ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0)
+                && (getRxTimeMillis() >= 0) && (getEnergyUsed() >= 0) && !isEmpty());
+    }
+
+    private boolean isEmpty() {
+        for (int txVal : getTxTimeMillis()) {
+            if(txVal != 0) {
+                return false;
+            }
+        }
+
+        return ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0)
+                && (getRxTimeMillis() == 0) && (getEnergyUsed() == 0));
     }
 }
