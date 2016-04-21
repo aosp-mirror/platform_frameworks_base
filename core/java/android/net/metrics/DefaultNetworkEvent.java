@@ -24,8 +24,7 @@ import android.os.Parcelable;
  * {@hide}
  */
 @SystemApi
-public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
-        implements Parcelable {
+public final class DefaultNetworkEvent extends IpConnectivityEvent implements Parcelable {
     // The ID of the network that has become the new default or NETID_UNSET if none.
     public final int netId;
     // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
@@ -37,7 +36,7 @@ public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
     public final boolean prevIPv4;
     public final boolean prevIPv6;
 
-    private ConnectivityServiceChangeEvent(int netId, int[] transportTypes,
+    private DefaultNetworkEvent(int netId, int[] transportTypes,
                 int prevNetId, boolean prevIPv4, boolean prevIPv6) {
         this.netId = netId;
         this.transportTypes = transportTypes;
@@ -46,7 +45,7 @@ public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
         this.prevIPv6 = prevIPv6;
     }
 
-    private ConnectivityServiceChangeEvent(Parcel in) {
+    private DefaultNetworkEvent(Parcel in) {
         this.netId = in.readInt();
         this.transportTypes = in.createIntArray();
         this.prevNetId = in.readInt();
@@ -66,21 +65,21 @@ public final class ConnectivityServiceChangeEvent extends IpConnectivityEvent
         return 0;
     }
 
-    public static final Parcelable.Creator<ConnectivityServiceChangeEvent> CREATOR
-        = new Parcelable.Creator<ConnectivityServiceChangeEvent>() {
-        public ConnectivityServiceChangeEvent createFromParcel(Parcel in) {
-            return new ConnectivityServiceChangeEvent(in);
+    public static final Parcelable.Creator<DefaultNetworkEvent> CREATOR
+        = new Parcelable.Creator<DefaultNetworkEvent>() {
+        public DefaultNetworkEvent createFromParcel(Parcel in) {
+            return new DefaultNetworkEvent(in);
         }
 
-        public ConnectivityServiceChangeEvent[] newArray(int size) {
-            return new ConnectivityServiceChangeEvent[size];
+        public DefaultNetworkEvent[] newArray(int size) {
+            return new DefaultNetworkEvent[size];
         }
     };
 
-    public static void logEvent(int netId, int[] transportTypes,
-            int prevNetId, boolean prevIPv4, boolean prevIPv6) {
-        logEvent(IPCE_CONSRV_DEFAULT_NET_CHANGE,
-                new ConnectivityServiceChangeEvent(
-                        netId, transportTypes, prevNetId, prevIPv4, prevIPv6));
+    public static void logEvent(
+            int netId, int[] transports, int prevNetId, boolean hadIPv4, boolean hadIPv6) {
+        final DefaultNetworkEvent ev =
+                new DefaultNetworkEvent(netId, transports, prevNetId, hadIPv4, hadIPv6);
+        logEvent(IPCE_CONSRV_DEFAULT_NET_CHANGE, ev);
     }
 };
