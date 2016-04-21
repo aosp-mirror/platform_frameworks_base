@@ -116,6 +116,7 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
@@ -5025,10 +5026,20 @@ final class ActivityStack {
     }
 
     void positionTask(final TaskRecord task, int position) {
+        final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
+        final boolean wasResumed = topRunningActivity == task.stack.mResumedActivity;
         final ActivityStack prevStack = preAddTask(task, "positionTask");
         task.stack = this;
         insertTaskAtPosition(task, position);
         postAddTask(task, prevStack);
+        if (wasResumed) {
+            if (mResumedActivity != null) {
+                Log.wtf(TAG, "mResumedActivity was already set when moving mResumedActivity from"
+                        + " other stack to this stack mResumedActivity=" + mResumedActivity
+                        + " other mResumedActivity=" + topRunningActivity);
+            }
+            mResumedActivity = topRunningActivity;
+        }
     }
 
     private ActivityStack preAddTask(TaskRecord task, String reason) {
