@@ -1210,6 +1210,16 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * A counter meant to accept monotonically increasing values to its {@link #update(long, int)}
+     * method. The state of the timer according to its {@link TimeBase} will determine how much
+     * of the value is recorded.
+     *
+     * If the value being recorded resets, {@link #endSample()} can be called in order to
+     * account for the change. If the value passed in to {@link #update(long, int)} decreased
+     * between calls, the {@link #endSample()} is automatically called and the new value is
+     * expected to increase monotonically from that point on.
+     */
     public static class SamplingTimer extends Timer {
 
         /**
@@ -1262,16 +1272,21 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @VisibleForTesting
-        public SamplingTimer(Clocks clocks, TimeBase timeBase, boolean trackReportedValues) {
+        public SamplingTimer(Clocks clocks, TimeBase timeBase) {
             super(clocks, 0, timeBase);
-            mTrackingReportedValues = trackReportedValues;
+            mTrackingReportedValues = false;
             mTimeBaseRunning = timeBase.isRunning();
         }
 
-        public void setStale() {
-            mTrackingReportedValues = false;
-            mUnpluggedReportedTotalTime = 0;
-            mUnpluggedReportedCount = 0;
+        /**
+         * Ends the current sample, allowing subsequent values to {@link #update(long, int)} to
+         * be less than the values used for a previous invocation.
+         */
+        public void endSample() {
+            mTotalTime = computeRunTimeLocked(0 /* unused by us */);
+            mCount = computeCurrentCountLocked();
+            mUnpluggedReportedTotalTime = mCurrentReportedTotalTime = 0;
+            mUnpluggedReportedCount = mCurrentReportedCount = 0;
         }
 
         public void setUpdateVersion(int version) {
@@ -1282,34 +1297,46 @@ public class BatteryStatsImpl extends BatteryStats {
             return mUpdateVersion;
         }
 
-        public void updateCurrentReportedCount(int count) {
-            if (mTimeBaseRunning && mUnpluggedReportedCount == 0) {
+        /**
+         * Updates the current recorded values. These are meant to be monotonically increasing
+         * and cumulative. If you are dealing with deltas, use {@link #add(long, int)}.
+         *
+         * If the values being recorded have been reset, the monotonically increasing requirement
+         * will be broken. In this case, {@link #endSample()} is automatically called and
+         * the total value of totalTime and count are recorded, starting a new monotonically
+         * increasing sample.
+         *
+         * @param totalTime total time of sample in microseconds.
+         * @param count total number of times the event being sampled occurred.
+         */
+        public void update(long totalTime, int count) {
+            if (mTimeBaseRunning && !mTrackingReportedValues) {
                 // Updating the reported value for the first time.
+                mUnpluggedReportedTotalTime = totalTime;
                 mUnpluggedReportedCount = count;
-                // If we are receiving an update update mTrackingReportedValues;
-                mTrackingReportedValues = true;
             }
+
+            mTrackingReportedValues = true;
+
+            if (totalTime < mCurrentReportedTotalTime || count < mCurrentReportedCount) {
+                endSample();
+            }
+
+            mCurrentReportedTotalTime = totalTime;
             mCurrentReportedCount = count;
         }
 
-        public void addCurrentReportedCount(int delta) {
-            updateCurrentReportedCount(mCurrentReportedCount + delta);
+        /**
+         * Adds deltaTime and deltaCount to the current sample.
+         *
+         * @param deltaTime additional time recorded since the last sampled event, in microseconds.
+         * @param deltaCount additional number of times the event being sampled occurred.
+         */
+        public void add(long deltaTime, int deltaCount) {
+            update(mCurrentReportedTotalTime + deltaTime, mCurrentReportedCount + deltaCount);
         }
 
-        public void updateCurrentReportedTotalTime(long totalTime) {
-            if (mTimeBaseRunning && mUnpluggedReportedTotalTime == 0) {
-                // Updating the reported value for the first time.
-                mUnpluggedReportedTotalTime = totalTime;
-                // If we are receiving an update update mTrackingReportedValues;
-                mTrackingReportedValues = true;
-            }
-            mCurrentReportedTotalTime = totalTime;
-        }
-
-        public void addCurrentReportedTotalTime(long delta) {
-            updateCurrentReportedTotalTime(mCurrentReportedTotalTime + delta);
-        }
-
+        @Override
         public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             super.onTimeStarted(elapsedRealtime, baseUptime, baseRealtime);
             if (mTrackingReportedValues) {
@@ -1319,11 +1346,13 @@ public class BatteryStatsImpl extends BatteryStats {
             mTimeBaseRunning = true;
         }
 
+        @Override
         public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             super.onTimeStopped(elapsedRealtime, baseUptime, baseRealtime);
             mTimeBaseRunning = false;
         }
 
+        @Override
         public void logState(Printer pw, String prefix) {
             super.logState(pw, prefix);
             pw.println(prefix + "mCurrentReportedCount=" + mCurrentReportedCount
@@ -1332,16 +1361,19 @@ public class BatteryStatsImpl extends BatteryStats {
                     + " mUnpluggedReportedTotalTime=" + mUnpluggedReportedTotalTime);
         }
 
+        @Override
         protected long computeRunTimeLocked(long curBatteryRealtime) {
             return mTotalTime + (mTimeBaseRunning && mTrackingReportedValues
                     ? mCurrentReportedTotalTime - mUnpluggedReportedTotalTime : 0);
         }
 
+        @Override
         protected int computeCurrentCountLocked() {
             return mCount + (mTimeBaseRunning && mTrackingReportedValues
                     ? mCurrentReportedCount - mUnpluggedReportedCount : 0);
         }
 
+        @Override
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             super.writeToParcel(out, elapsedRealtimeUs);
             out.writeInt(mCurrentReportedCount);
@@ -1351,12 +1383,16 @@ public class BatteryStatsImpl extends BatteryStats {
             out.writeInt(mTrackingReportedValues ? 1 : 0);
         }
 
+        @Override
         public boolean reset(boolean detachIfReset) {
             super.reset(detachIfReset);
-            setStale();
+            mTrackingReportedValues = false;
+            mUnpluggedReportedTotalTime = 0;
+            mUnpluggedReportedCount = 0;
             return true;
         }
 
+        @Override
         public void writeSummaryFromParcelLocked(Parcel out, long batteryRealtime) {
             super.writeSummaryFromParcelLocked(out, batteryRealtime);
             out.writeLong(mCurrentReportedTotalTime);
@@ -1364,6 +1400,7 @@ public class BatteryStatsImpl extends BatteryStats {
             out.writeInt(mTrackingReportedValues ? 1 : 0);
         }
 
+        @Override
         public void readSummaryFromParcelLocked(Parcel in) {
             super.readSummaryFromParcelLocked(in);
             mUnpluggedReportedTotalTime = mCurrentReportedTotalTime = in.readLong();
@@ -2002,7 +2039,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public SamplingTimer getWakeupReasonTimerLocked(String name) {
         SamplingTimer timer = mWakeupReasonStats.get(name);
         if (timer == null) {
-            timer = new SamplingTimer(mClocks, mOnBatteryTimeBase, true);
+            timer = new SamplingTimer(mClocks, mOnBatteryTimeBase);
             mWakeupReasonStats.put(name, timer);
         }
         return timer;
@@ -2015,8 +2052,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public SamplingTimer getKernelWakelockTimerLocked(String name) {
         SamplingTimer kwlt = mKernelWakelockStats.get(name);
         if (kwlt == null) {
-            kwlt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase,
-                    true /* track reported values */);
+            kwlt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase);
             mKernelWakelockStats.put(name, kwlt);
         }
         return kwlt;
@@ -3125,8 +3161,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mLastWakeupReason != null) {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
-            timer.addCurrentReportedCount(1);
-            timer.addCurrentReportedTotalTime(deltaUptime * 1000); // time is in microseconds
+            timer.add(deltaUptime * 1000, 1); // time in in microseconds
             mLastWakeupReason = null;
         }
     }
@@ -8727,16 +8762,15 @@ public class BatteryStatsImpl extends BatteryStats {
 
             SamplingTimer kwlt = mKernelWakelockStats.get(name);
             if (kwlt == null) {
-                kwlt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase,
-                        true /* track reported val */);
+                kwlt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase);
                 mKernelWakelockStats.put(name, kwlt);
             }
-            kwlt.updateCurrentReportedCount(kws.mCount);
-            kwlt.updateCurrentReportedTotalTime(kws.mTotalTime);
+            kwlt.update(kws.mTotalTime, kws.mCount);
             kwlt.setUpdateVersion(kws.mVersion);
 
-            if (kws.mVersion != wakelockStats.kernelWakelockVersion)
-            seenNonZeroTime |= kws.mTotalTime > 0;
+            if (kws.mVersion != wakelockStats.kernelWakelockVersion) {
+                seenNonZeroTime |= kws.mTotalTime > 0;
+            }
         }
 
         int numWakelocksSetStale = 0;
@@ -8745,7 +8779,7 @@ public class BatteryStatsImpl extends BatteryStats {
             for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
                 SamplingTimer st = ent.getValue();
                 if (st.getUpdateVersion() != wakelockStats.kernelWakelockVersion) {
-                    st.setStale();
+                    st.endSample();
                     numWakelocksSetStale++;
                 }
             }
