@@ -181,8 +181,10 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private View mAnchorView;
     private View mShownAnchorView;
     private int mLastPosition;
-    private int mInitXOffset;
-    private int mInitYOffset;
+    private boolean mHasXOffset;
+    private boolean mHasYOffset;
+    private int mXOffset;
+    private int mYOffset;
     private boolean mForceShowIcon;
     private boolean mShowTitle;
     private Callback mPresenterCallback;
@@ -379,9 +381,6 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             parentView = null;
         }
 
-        final int x;
-        final int y;
-        final Rect epicenterBounds;
         if (parentView != null) {
             // This menu is a cascading submenu anchored to a parent view.
             popupWindow.setTouchModal(false);
@@ -401,6 +400,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
             // By now, mDropDownGravity is the resolved absolute gravity, so
             // this should work in both LTR and RTL.
+            final int x;
             if ((mDropDownGravity & Gravity.RIGHT) == Gravity.RIGHT) {
                 if (showOnRight) {
                     x = parentOffsetLeft + menuWidth;
@@ -415,17 +415,21 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                 }
             }
 
-            y = parentOffsetTop;
-            epicenterBounds = null;
+            popupWindow.setHorizontalOffset(x);
+
+            final int y = parentOffsetTop;
+            popupWindow.setVerticalOffset(y);
         } else {
-            x = mInitXOffset;
-            y = mInitYOffset;
-            epicenterBounds = getEpicenterBounds();
+            if (mHasXOffset) {
+                popupWindow.setHorizontalOffset(mXOffset);
+            }
+            if (mHasYOffset) {
+                popupWindow.setVerticalOffset(mYOffset);
+            }
+            final Rect epicenterBounds = getEpicenterBounds();
+            popupWindow.setEpicenterBounds(epicenterBounds);
         }
 
-        popupWindow.setHorizontalOffset(x);
-        popupWindow.setVerticalOffset(y);
-        popupWindow.setEpicenterBounds(epicenterBounds);
 
         final CascadingMenuInfo menuInfo = new CascadingMenuInfo(popupWindow, menu, mLastPosition);
         mShowingMenus.add(menuInfo);
@@ -712,12 +716,14 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public void setHorizontalOffset(int x) {
-        mInitXOffset = x;
+        mHasXOffset = true;
+        mXOffset = x;
     }
 
     @Override
     public void setVerticalOffset(int y) {
-        mInitYOffset = y;
+        mHasYOffset = true;
+        mYOffset = y;
     }
 
     @Override
