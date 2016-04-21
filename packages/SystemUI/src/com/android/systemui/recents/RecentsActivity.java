@@ -223,13 +223,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 new DismissRecentsToHomeAnimationStarted(animateTaskViews);
         dismissEvent.addPostAnimationCallback(new LaunchHomeRunnable(mHomeIntent,
                 overrideAnimation));
-        dismissEvent.addPostAnimationCallback(new Runnable() {
-            @Override
-            public void run() {
-                Recents.getSystemServices().sendCloseSystemWindows(
-                        BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
-            }
-        });
+        Recents.getSystemServices().sendCloseSystemWindows(
+                BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
         EventBus.getDefault().send(dismissEvent);
     }
 
