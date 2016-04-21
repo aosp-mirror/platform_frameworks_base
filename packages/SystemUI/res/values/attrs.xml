@@ -98,7 +98,7 @@
         <attr name="metricsAction" format="integer" />
     </declare-styleable>
 
-    <declare-styleable name="DensityContainer">
+    <declare-styleable name="AutoReinflateContainer">
         <attr name="android:layout" />
     </declare-styleable>
 
