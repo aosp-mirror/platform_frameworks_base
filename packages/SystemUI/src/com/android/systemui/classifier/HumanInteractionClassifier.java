@@ -67,7 +67,7 @@ public class HumanInteractionClassifier extends Classifier {
         // If the phone is rotated to landscape, the calculations would be wrong if xdpi and ydpi
         // were to be used separately. Due negligible differences in xdpi and ydpi we can just
         // take the average.
-        // TODO: make this respect DPI changes.
+        // Note that xdpi and ydpi are the physical pixels per inch and are not affected by scaling.
         mDpi = (displayMetrics.xdpi + displayMetrics.ydpi) / 2.0f;
         mClassifierData = new ClassifierData(mDpi);
         mHistoryEvaluator = new HistoryEvaluator();
