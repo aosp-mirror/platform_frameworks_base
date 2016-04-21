@@ -82,6 +82,11 @@ public abstract class FragmentTuner {
     abstract boolean enableManagedMode();
 
     /**
+     * Whether drag n' drop is allowed in this context
+     */
+    abstract boolean allowDragNDrop();
+
+    /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
     private static final class DocumentsTuner extends FragmentTuner {
@@ -191,6 +196,11 @@ public abstract class FragmentTuner {
         public boolean enableManagedMode() {
             return false;
         }
+
+        @Override
+        public boolean allowDragNDrop() {
+            return false;
+        }
     }
 
     /**
@@ -254,6 +264,11 @@ public abstract class FragmentTuner {
             return mState.stack.root != null
                     && mState.stack.root.isDownloads()
                     && mState.stack.size() == 1;
+        }
+
+        @Override
+        public boolean allowDragNDrop() {
+            return true;
         }
     }
 
