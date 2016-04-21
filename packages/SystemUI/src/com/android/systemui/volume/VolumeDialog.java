@@ -20,6 +20,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.KeyguardManager;
@@ -109,6 +110,7 @@ public class VolumeDialog implements TunerService.Tunable {
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
     private final AudioManager mAudioManager;
+    private final AccessibilityManager mAccessibilityMgr;
     private int mExpandButtonAnimationDuration;
     private ZenFooter mZenFooter;
     private final LayoutTransition mLayoutTransition;
@@ -150,6 +152,7 @@ public class VolumeDialog implements TunerService.Tunable {
         mSpTexts = new SpTexts(mContext);
         mKeyguard = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAccessibilityMgr = (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mActiveSliderTint = loadColorStateList(R.color.system_accent_color);
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
         mLayoutTransition = new LayoutTransition();
@@ -507,6 +510,15 @@ public class VolumeDialog implements TunerService.Tunable {
                 setExpandedH(false);
             }
         });
+        if (mAccessibilityMgr.isEnabled()) {
+            AccessibilityEvent event =
+                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            event.setPackageName(mContext.getPackageName());
+            event.setClassName(CustomDialog.class.getSuperclass().getName());
+            event.getText().add(mContext.getString(
+                    R.string.volume_dialog_accessibility_dismissed_message));
+            mAccessibilityMgr.sendAccessibilityEvent(event);
+        }
         Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
@@ -1082,6 +1094,27 @@ public class VolumeDialog implements TunerService.Tunable {
             }
             return false;
         }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(@NonNull AccessibilityEvent event) {
+            event.setClassName(getClass().getSuperclass().getName());
+            event.setPackageName(mContext.getPackageName());
+
+            ViewGroup.LayoutParams params = getWindow().getAttributes();
+            boolean isFullScreen = (params.width == ViewGroup.LayoutParams.MATCH_PARENT) &&
+                    (params.height == ViewGroup.LayoutParams.MATCH_PARENT);
+            event.setFullScreen(isFullScreen);
+
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                if (mShowing) {
+                    event.getText().add(mContext.getString(
+                            R.string.volume_dialog_accessibility_shown_message,
+                            getActiveRow().ss.name));
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private final class VolumeSeekBarChangeListener implements OnSeekBarChangeListener {
@@ -1138,16 +1171,13 @@ public class VolumeDialog implements TunerService.Tunable {
     }
 
     private final class Accessibility extends AccessibilityDelegate {
-        private AccessibilityManager mMgr;
         private boolean mFeedbackEnabled;
 
         public void init() {
-            mMgr = (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
             mDialogView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     if (D.BUG) Log.d(TAG, "onViewDetachedFromWindow");
-                    // noop
                 }
 
                 @Override
@@ -1157,12 +1187,13 @@ public class VolumeDialog implements TunerService.Tunable {
                 }
             });
             mDialogView.setAccessibilityDelegate(this);
-            mMgr.addAccessibilityStateChangeListener(new AccessibilityStateChangeListener() {
-                @Override
-                public void onAccessibilityStateChanged(boolean enabled) {
-                    updateFeedbackEnabled();
-                }
-            });
+            mAccessibilityMgr.addAccessibilityStateChangeListener(
+                    new AccessibilityStateChangeListener() {
+                        @Override
+                        public void onAccessibilityStateChanged(boolean enabled) {
+                            updateFeedbackEnabled();
+                        }
+                    });
             updateFeedbackEnabled();
         }
 
@@ -1180,7 +1211,7 @@ public class VolumeDialog implements TunerService.Tunable {
         private boolean computeFeedbackEnabled() {
             // are there any enabled non-generic a11y services?
             final List<AccessibilityServiceInfo> services =
-                    mMgr.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+                    mAccessibilityMgr.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
             for (AccessibilityServiceInfo asi : services) {
                 if (asi.feedbackType != 0 && asi.feedbackType != FEEDBACK_GENERIC) {
                     return true;
