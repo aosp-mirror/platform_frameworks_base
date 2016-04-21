@@ -174,6 +174,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -7473,6 +7474,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw();
         final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
         final TaskStack imeTargetStack = getImeTargetStackLocked();
+        final int imeDockSide = (dockVisible && imeTargetStack != null) ?
+                imeTargetStack.getDockSide() : DOCKED_INVALID;
+        final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
+        final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
 
         // The divider could be adjusted for IME position, or be thinner than usual,
         // or both. There are three possible cases:
@@ -7480,20 +7485,19 @@ public class WindowManagerService extends IWindowManager.Stub
         // - If IME is visible, and focus is on bottom, divider is moved for IME and thinner.
         // - If IME is not visible, divider is not moved and is normal width.
 
-        if (imeVisible && dockVisible && imeTargetStack != null) {
-            final boolean isFocusOnBottom = imeTargetStack.getDockSide() == DOCKED_BOTTOM;
+        if (imeVisible && dockVisible && (imeOnTop || imeOnBottom)) {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
-                if (stack.isVisibleLocked() && (isFocusOnBottom || isDockedOnBottom)) {
+                if (stack.isVisibleLocked() && (imeOnBottom || isDockedOnBottom)) {
                     stack.setAdjustedForIme(imeWin);
                 } else {
                     stack.resetAdjustedForIme(false);
                 }
             }
             displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    isFocusOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin);
+                    imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin);
         } else {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
