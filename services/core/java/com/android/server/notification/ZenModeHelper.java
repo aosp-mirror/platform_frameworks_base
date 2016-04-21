@@ -643,16 +643,20 @@ public class ZenModeHelper {
                 dispatchOnPolicyChanged();
             }
             mConfig = config;
-            final String val = Integer.toString(config.hashCode());
-            Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-            if (!evaluateZenMode(reason, setRingerMode)) {
-                applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
-            }
-            mConditions.evaluateConfig(config, true /*processSubscriptions*/);
+            mHandler.postApplyConfig(config, reason, setRingerMode);
             return true;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void applyConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
+        final String val = Integer.toString(config.hashCode());
+        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
+        if (!evaluateZenMode(reason, setRingerMode)) {
+            applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
+        }
+        mConditions.evaluateConfig(config, true /*processSubscriptions*/);
     }
 
     private int getZenModeSetting() {
@@ -1071,14 +1075,23 @@ public class ZenModeHelper {
         private static final int MSG_DISPATCH = 1;
         private static final int MSG_METRICS = 2;
         private static final int MSG_SET_CONFIG = 3;
+        private static final int MSG_APPLY_CONFIG = 4;
 
         private final class ConfigMessageData {
             public final ZenModeConfig config;
             public final String reason;
+            public final boolean setRingerMode;
 
             ConfigMessageData(ZenModeConfig config, String reason) {
                 this.config = config;
                 this.reason = reason;
+                this.setRingerMode = false;
+            }
+
+            ConfigMessageData(ZenModeConfig config, String reason, boolean setRingerMode) {
+                this.config = config;
+                this.reason = reason;
+                this.setRingerMode = setRingerMode;
             }
         }
 
@@ -1102,6 +1115,11 @@ public class ZenModeHelper {
             sendMessage(obtainMessage(MSG_SET_CONFIG, new ConfigMessageData(config, reason)));
         }
 
+        private void postApplyConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
+            sendMessage(obtainMessage(MSG_APPLY_CONFIG,
+                    new ConfigMessageData(config, reason, setRingerMode)));
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -1112,11 +1130,15 @@ public class ZenModeHelper {
                     mMetrics.emit();
                     break;
                 case MSG_SET_CONFIG:
-                    ConfigMessageData configData = (ConfigMessageData)msg.obj;
+                    ConfigMessageData configData = (ConfigMessageData) msg.obj;
                     synchronized (mConfig) {
                         setConfigLocked(configData.config, configData.reason);
                     }
                     break;
+                case MSG_APPLY_CONFIG:
+                    ConfigMessageData applyConfigData = (ConfigMessageData) msg.obj;
+                    applyConfig(applyConfigData.config, applyConfigData.reason,
+                            applyConfigData.setRingerMode);
             }
         }
     }
