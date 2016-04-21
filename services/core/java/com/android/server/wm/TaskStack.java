@@ -119,7 +119,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     // Whether the stack and all its tasks is currently being drag-resized
     private boolean mDragResizing;
 
-    private final Rect mLastContentBounds = new Rect();
     private final Rect mTmpAdjustedBounds = new Rect();
     private boolean mAdjustedForIme;
     private boolean mImeGoingAway;
@@ -975,7 +974,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
             contentBounds.bottom = imeTop;
         }
 
-        mLastContentBounds.set(contentBounds);
         final int yOffset = displayContentRect.bottom - contentBounds.bottom;
 
         final int dividerWidth =
@@ -1085,7 +1083,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
         if (!adjust) {
             mTmpAdjustedBounds.setEmpty();
-            mLastContentBounds.setEmpty();
         }
         setAdjustedBounds(mTmpAdjustedBounds);
 
