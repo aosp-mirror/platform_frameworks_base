@@ -12805,8 +12805,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
-            // Enable home activity for system user, so that the system can always boot
-            if (UserManager.isSplitSystemUser()) {
+            // Enable home activity for system user, so that the system can always boot. We don't
+            // do this when the system user is not setup since the setup wizard should be the one
+            // to handle home activity in this case.
+            if (UserManager.isSplitSystemUser() &&
+                    Settings.Secure.getInt(mContext.getContentResolver(),
+                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0) {
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
