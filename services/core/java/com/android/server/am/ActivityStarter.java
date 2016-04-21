@@ -1853,6 +1853,12 @@ class ActivityStarter {
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
             ActivityOptions aOptions) {
+
+        // We are reusing a task, keep the stack!
+        if (mReuseTask != null) {
+            return mReuseTask.stack;
+        }
+
         final int launchStackId =
                 (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
 
