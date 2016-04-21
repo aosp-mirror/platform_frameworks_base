@@ -41,7 +41,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.animation.PathInterpolator;
 import android.view.SurfaceControl;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
@@ -502,7 +501,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
-                    if (winAnimator.isAnimating() || winAnimator.mWin.mAnimatingExit) {
+                    if (winAnimator.isAnimationSet() || winAnimator.mWin.mAnimatingExit) {
                         return true;
                     }
                 }

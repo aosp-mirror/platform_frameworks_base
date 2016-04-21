@@ -291,11 +291,21 @@ class WindowStateAnimator {
         }
     }
 
-    /** Is the window or its container currently animating? */
-    boolean isAnimating() {
+    /**
+     * Is the window or its container currently set to animate or currently animating?
+     */
+    boolean isAnimationSet() {
         return mAnimation != null
                 || (mAttachedWinAnimator != null && mAttachedWinAnimator.mAnimation != null)
                 || (mAppAnimator != null && mAppAnimator.isAnimating());
+    }
+
+    /**
+     * @return whether an animation is about to start, i.e. the animation is set already but we
+     *         haven't processed the first frame yet.
+     */
+    boolean isAnimationStarting() {
+        return isAnimationSet() && !mAnimating;
     }
 
     /** Is the window animating the DummyAnimation? */
@@ -304,8 +314,10 @@ class WindowStateAnimator {
                 && mAppAnimator.animation == sDummyAnimation;
     }
 
-    /** Is this window currently set to animate or currently animating? */
-    boolean isWindowAnimating() {
+    /**
+     * Is this window currently set to animate or currently animating?
+     */
+    boolean isWindowAnimationSet() {
         return mAnimation != null;
     }
 
@@ -340,7 +352,7 @@ class WindowStateAnimator {
     // there is more animation to run.
     boolean stepAnimationLocked(long currentTime) {
         // Save the animation state as it was before this step so WindowManagerService can tell if
-        // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
+        // we just started or just stopped animating by comparing mWasAnimating with isAnimationSet().
         mWasAnimating = mAnimating;
         final DisplayContent displayContent = mWin.getDisplayContent();
         if (displayContent != null && mService.okToDisplay()) {
@@ -402,7 +414,7 @@ class WindowStateAnimator {
                 // Little trick to get through the path below to act like
                 // we have finished an animation.
                 mAnimating = true;
-            } else if (isAnimating()) {
+            } else if (isAnimationSet()) {
                 mAnimating = true;
             }
         } else if (mAnimation != null) {
@@ -476,7 +488,7 @@ class WindowStateAnimator {
                 TAG, "finishExit in " + this
                 + ": exiting=" + mWin.mAnimatingExit
                 + " remove=" + mWin.mRemoveOnExit
-                + " windowAnimating=" + isWindowAnimating());
+                + " windowAnimating=" + isWindowAnimationSet());
 
         if (!mWin.mChildWindows.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
@@ -499,7 +511,7 @@ class WindowStateAnimator {
             }
         }
 
-        if (!isWindowAnimating()) {
+        if (!isWindowAnimationSet()) {
             //TODO (multidisplay): Accessibility is supported only for the default display.
             if (mService.mAccessibilityController != null
                     && mWin.getDisplayId() == DEFAULT_DISPLAY) {
@@ -511,7 +523,7 @@ class WindowStateAnimator {
             return;
         }
 
-        if (isWindowAnimating()) {
+        if (isWindowAnimationSet()) {
             return;
         }
 
@@ -1310,7 +1322,7 @@ class WindowStateAnimator {
         final int stackClip = resolveStackClip();
 
         // It's animating and we don't want to clip it to stack bounds during animation - abort.
-        if (isAnimating() && stackClip == STACK_CLIP_NONE) {
+        if (isAnimationSet() && stackClip == STACK_CLIP_NONE) {
             return;
         }
 
@@ -1332,7 +1344,7 @@ class WindowStateAnimator {
 
         // If we are animating, we either apply the clip before applying all the animation
         // transformation or after all the transformation.
-        final boolean useFinalClipRect = isAnimating() && stackClip == STACK_CLIP_AFTER_ANIM;
+        final boolean useFinalClipRect = isAnimationSet() && stackClip == STACK_CLIP_AFTER_ANIM;
 
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
@@ -1507,7 +1519,7 @@ class WindowStateAnimator {
                 w.mToken.hasVisible = true;
             }
         } else {
-            if (DEBUG_ANIM && isAnimating()) {
+            if (DEBUG_ANIM && isAnimationSet()) {
                 Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
             displayed = true;
