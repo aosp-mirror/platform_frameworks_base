@@ -1897,7 +1897,7 @@ public final class TvInputManagerService extends SystemService {
                 pw.increaseIndent();
                 for (int i = 0; i < mUserStates.size(); i++) {
                     int userId = mUserStates.keyAt(i);
-                    pw.println(Integer.valueOf(userId));
+                    pw.println(userId);
                 }
                 pw.decreaseIndent();
 
