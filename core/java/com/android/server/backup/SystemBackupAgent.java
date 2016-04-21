@@ -183,6 +183,9 @@ public class SystemBackupAgent extends BackupAgentHelper {
 
     @Override
     public void onRestoreFinished() {
-        mWallpaperHelper.onRestoreFinished();
+        // helper will be null following 'adb restore' or other full-data operation
+        if (mWallpaperHelper != null) {
+            mWallpaperHelper.onRestoreFinished();
+        }
     }
 }
