@@ -2959,6 +2959,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case START_CONFIRM_DEVICE_CREDENTIAL_INTENT: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final Intent intent = Intent.CREATOR.createFromParcel(data);
+            startConfirmDeviceCredentialIntent(intent);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6926,6 +6933,17 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userId);
         mRemote.transact(NOTIFY_LOCKED_PROFILE, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void startConfirmDeviceCredentialIntent(Intent intent) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        intent.writeToParcel(data, 0);
+        mRemote.transact(START_CONFIRM_DEVICE_CREDENTIAL_INTENT, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
