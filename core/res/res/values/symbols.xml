@@ -2546,6 +2546,9 @@
 
   <java-symbol type="dimen" name="notification_messaging_spacing" />
 
+  <java-symbol type="dimen" name="notification_text_margin_top" />
+  <java-symbol type="dimen" name="notification_inbox_item_top_padding" />
+
   <!-- WallpaperManager config -->
   <java-symbol type="string" name="config_wallpaperCropperPackage" />
 
