@@ -917,6 +917,12 @@ static void android_os_BinderInternal_disableBackgroundScheduling(JNIEnv* env,
     IPCThreadState::disableBackgroundScheduling(disable ? true : false);
 }
 
+static void android_os_BinderInternal_setMaxThreads(JNIEnv* env,
+        jobject clazz, jint maxThreads)
+{
+    ProcessState::self()->setThreadPoolMaxThreadCount(maxThreads);
+}
+
 static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
 {
     ALOGV("Gc has executed, clearing binder ops");
@@ -930,6 +936,7 @@ static const JNINativeMethod gBinderInternalMethods[] = {
     { "getContextObject", "()Landroid/os/IBinder;", (void*)android_os_BinderInternal_getContextObject },
     { "joinThreadPool", "()V", (void*)android_os_BinderInternal_joinThreadPool },
     { "disableBackgroundScheduling", "(Z)V", (void*)android_os_BinderInternal_disableBackgroundScheduling },
+    { "setMaxThreads", "(I)V", (void*)android_os_BinderInternal_setMaxThreads },
     { "handleGc", "()V", (void*)android_os_BinderInternal_handleGc }
 };
 
