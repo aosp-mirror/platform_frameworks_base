@@ -537,8 +537,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     );
                 }
             } else if (WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION.equals(action)) {
-                final IntentSender intentSender = (IntentSender) intent
-                        .getParcelableExtra(Intent.EXTRA_INTENT);
+                final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
                 final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
                 try {
                     mContext.startIntentSender(intentSender, null, 0, 0, 0);
@@ -1928,11 +1927,23 @@ public abstract class BaseStatusBar extends SystemUI implements
             callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
             callBackIntent.setPackage(mContext.getPackageName());
 
-            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            newIntent.putExtra(Intent.EXTRA_INTENT, PendingIntent
-                    .getBroadcast(mContext, 0, callBackIntent, 0).getIntentSender());
-            mContext.startActivity(newIntent);
+            PendingIntent callBackPendingIntent = PendingIntent.getBroadcast(
+                    mContext,
+                    0,
+                    callBackIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT |
+                            PendingIntent.FLAG_ONE_SHOT |
+                            PendingIntent.FLAG_IMMUTABLE
+            );
+            newIntent.putExtra(
+                    Intent.EXTRA_INTENT,
+                    callBackPendingIntent.getIntentSender()
+            );
+            try {
+                ActivityManagerNative.getDefault().startConfirmDeviceCredentialIntent(newIntent);
+            } catch (RemoteException ex) {
+                // ignore
+            }
             return true;
         }
 
