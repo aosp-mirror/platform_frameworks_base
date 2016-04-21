@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -1505,6 +1506,22 @@ public class NumberPicker extends LinearLayout {
         updateInputTextView();
         initializeSelectorWheelIndices();
         tryComputeMaxWidth();
+    }
+
+    /**
+     * Retrieves the displayed value for the current selection in this picker.
+     *
+     * @hide
+     */
+    @TestApi
+    public CharSequence getDisplayedValueForCurrentSelection() {
+        // The cache field itself is initialized at declaration time, and since it's final, it
+        // can't be null here. The cache is updated in ensureCachedScrollSelectorValue which is
+        // called, directly or indirectly, on every call to setDisplayedValues, setFormatter,
+        // setMinValue, setMaxValue and setValue, as well as user-driven interaction with the
+        // picker. As such, the contents of the cache are always synced to the latest state of
+        // the widget.
+        return mSelectorIndexToStringCache.get(getValue());
     }
 
     @Override
