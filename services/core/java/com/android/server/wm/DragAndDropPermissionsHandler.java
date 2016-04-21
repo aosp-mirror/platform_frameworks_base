@@ -23,11 +23,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.internal.view.IDropPermissions;
+import com.android.internal.view.IDragAndDropPermissions;
 
 import java.util.ArrayList;
 
-class DropPermissionsHandler extends IDropPermissions.Stub implements IBinder.DeathRecipient {
+class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
+        implements IBinder.DeathRecipient {
 
     private final int mSourceUid;
     private final String mTargetPackage;
@@ -40,8 +41,8 @@ class DropPermissionsHandler extends IDropPermissions.Stub implements IBinder.De
     private IBinder mActivityToken = null;
     private IBinder mPermissionOwnerToken = null;
 
-    DropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
-            int sourceUserId, int targetUserId) {
+    DragAndDropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
+                                  int sourceUserId, int targetUserId) {
         mSourceUid = sourceUid;
         mTargetPackage = targetPackage;
         mMode = mode;
