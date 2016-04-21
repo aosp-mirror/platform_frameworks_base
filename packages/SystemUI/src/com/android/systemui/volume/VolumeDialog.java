@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -59,6 +60,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -92,6 +94,7 @@ public class VolumeDialog implements TunerService.Tunable {
     public static final String SHOW_FULL_ZEN = "sysui_show_full_zen";
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
+    private static final int UPDATE_ANIMATION_DURATION = 80;
 
     private final Context mContext;
     private final H mHandler = new H();
@@ -367,6 +370,14 @@ public class VolumeDialog implements TunerService.Tunable {
         writer.print("  mCollapseTime: "); writer.println(mCollapseTime);
         writer.print("  mAccessibility.mFeedbackEnabled: ");
         writer.println(mAccessibility.mFeedbackEnabled);
+    }
+
+    private static int getImpliedLevel(SeekBar seekBar, int progress) {
+        final int m = seekBar.getMax();
+        final int n = m / 100 - 1;
+        final int level = progress == 0 ? 0
+                : progress == m ? (m / 100) : (1 + (int)((progress / (float) m) * n));
+        return level;
     }
 
     @SuppressLint("InflateParams")
@@ -707,7 +718,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 : false;
 
         // update slider max
-        final int max = ss.levelMax;
+        final int max = ss.levelMax * 100;
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
         }
@@ -824,7 +835,8 @@ public class VolumeDialog implements TunerService.Tunable {
         if (row.tracking) {
             return;  // don't update if user is sliding
         }
-        final int level = row.slider.getProgress();
+        final int progress = row.slider.getProgress();
+        final int level = getImpliedLevel(row.slider, progress);
         final boolean rowVisible = row.view.getVisibility() == View.VISIBLE;
         final boolean inGracePeriod = (SystemClock.uptimeMillis() - row.userAttempt)
                 < USER_ATTEMPT_GRACE_PERIOD;
@@ -840,7 +852,33 @@ public class VolumeDialog implements TunerService.Tunable {
                 return;  // don't clamp if visible
             }
         }
-        row.slider.setProgress(vlevel, true);
+        final int newProgress = vlevel * 100;
+        if (progress != newProgress) {
+            if (mShowing && rowVisible) {
+                // animate!
+                if (row.anim != null && row.anim.isRunning()
+                        && row.animTargetProgress == newProgress) {
+                    return;  // already animating to the target progress
+                }
+                // start/update animation
+                if (row.anim == null) {
+                    row.anim = ObjectAnimator.ofInt(row.slider, "progress", progress, newProgress);
+                    row.anim.setInterpolator(new DecelerateInterpolator());
+                } else {
+                    row.anim.cancel();
+                    row.anim.setIntValues(progress, newProgress);
+                }
+                row.animTargetProgress = newProgress;
+                row.anim.setDuration(UPDATE_ANIMATION_DURATION);
+                row.anim.start();
+            } else {
+                // update slider directly to clamped value
+                if (row.anim != null) {
+                    row.anim.cancel();
+                }
+                row.slider.setProgress(newProgress);
+            }
+        }
     }
 
     private void recheckH(VolumeRow row) {
@@ -1060,19 +1098,20 @@ public class VolumeDialog implements TunerService.Tunable {
                     + " onProgressChanged " + progress + " fromUser=" + fromUser);
             if (!fromUser) return;
             if (mRow.ss.levelMin > 0) {
-                final int minProgress = mRow.ss.levelMin;
+                final int minProgress = mRow.ss.levelMin * 100;
                 if (progress < minProgress) {
                     seekBar.setProgress(minProgress);
                     progress = minProgress;
                 }
             }
-            if (mRow.ss.level != progress || mRow.ss.muted && progress > 0) {
+            final int userLevel = getImpliedLevel(seekBar, progress);
+            if (mRow.ss.level != userLevel || mRow.ss.muted && userLevel > 0) {
                 mRow.userAttempt = SystemClock.uptimeMillis();
-                if (mRow.requestedLevel != progress) {
-                    mController.setStreamVolume(mRow.stream, progress);
-                    mRow.requestedLevel = progress;
+                if (mRow.requestedLevel != userLevel) {
+                    mController.setStreamVolume(mRow.stream, userLevel);
+                    mRow.requestedLevel = userLevel;
                     Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_CHANGED, mRow.stream,
-                            progress);
+                            userLevel);
                 }
             }
         }
@@ -1089,7 +1128,7 @@ public class VolumeDialog implements TunerService.Tunable {
             if (D.BUG) Log.d(TAG, "onStopTrackingTouch"+ " " + mRow.stream);
             mRow.tracking = false;
             mRow.userAttempt = SystemClock.uptimeMillis();
-            final int userLevel = seekBar.getProgress();
+            final int userLevel = getImpliedLevel(seekBar, seekBar.getProgress());
             Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_DONE, mRow.stream, userLevel);
             if (mRow.ss.level != userLevel) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.RECHECK, mRow),
@@ -1169,6 +1208,8 @@ public class VolumeDialog implements TunerService.Tunable {
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
         private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+        private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
+        private int animTargetProgress;
         private int lastAudibleLevel = 1;
     }
 
