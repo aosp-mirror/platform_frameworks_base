@@ -69,15 +69,17 @@
         android:text="@string/notification_header_divider_symbol"
         android:singleLine="true"
         android:visibility="gone"/>
-    <ViewStub
+    <DateTimeView
         android:id="@+id/time"
+        android:textAppearance="@style/TextAppearance.Material.Notification.Time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
-        android:layout="@layout/notification_template_part_time"
-        android:visibility="gone"
-        />
+        android:showRelative="true"
+        android:singleLine="true"
+        android:visibility="gone" />
     <ViewStub
         android:id="@+id/chronometer"
         android:layout_width="wrap_content"
