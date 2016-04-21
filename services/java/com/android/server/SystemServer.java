@@ -165,6 +165,10 @@ public final class SystemServer {
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
     private static final String BLOCK_MAP_FILE = "/cache/recovery/block.map";
 
+    // maximum number of binder threads used for system_server
+    // will be higher than the system default
+    private static final int sMaxBinderThreads = 31;
+
     /**
      * Default theme used by the system context. This is used to style
      * system-provided dialogs, such as the Power Off dialog, and other
@@ -284,6 +288,9 @@ public final class SystemServer {
 
             // Ensure binder calls into the system always run at foreground priority.
             BinderInternal.disableBackgroundScheduling(true);
+
+            // Increase the number of binder threads in system_server
+            BinderInternal.setMaxThreads(sMaxBinderThreads);
 
             // Prepare the main looper thread (this thread).
             android.os.Process.setThreadPriority(
