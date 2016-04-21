@@ -1811,6 +1811,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
+    private static boolean excludeWindowTypeFromTapOutTask(int windowType) {
+        switch (windowType) {
+            case TYPE_STATUS_BAR:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_INPUT_METHOD_DIALOG:
+                return true;
+        }
+        return false;
+    }
+
     public int addWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
@@ -2009,7 +2019,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             res = WindowManagerGlobal.ADD_OKAY;
 
-            if (type == TYPE_STATUS_BAR || type == TYPE_NAVIGATION_BAR) {
+            if (excludeWindowTypeFromTapOutTask(type)) {
                 displayContent.mTapExcludedWindows.add(win);
             }
 
@@ -2401,7 +2411,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final int type = win.mAttrs.type;
-        if (type == TYPE_STATUS_BAR || type == TYPE_NAVIGATION_BAR) {
+        if (excludeWindowTypeFromTapOutTask(type)) {
             final DisplayContent displaycontent = win.getDisplayContent();
             displaycontent.mTapExcludedWindows.remove(win);
         }
