@@ -4696,26 +4696,20 @@ public class AccountManagerService
             ceHelper.getWritableDatabase();
             ceHelper.close();
             if (removeOldDb) {
-                // TODO STOPSHIP - backup file during testing. Remove file before the release
-                Log.i(TAG, "Migration complete - creating backup of old db " + preNDatabaseFile);
-                renameToBakFile(preNDatabaseFile);
+                Slog.i(TAG, "Migration complete - removing pre-N db " + preNDatabaseFile);
+                if (!SQLiteDatabase.deleteDatabase(preNDatabaseFile)) {
+                    Slog.e(TAG, "Cannot remove pre-N db " + preNDatabaseFile);
+                }
             }
             return ceHelper;
         }
 
-        private static void renameToBakFile(File file) {
-            File bakFile = new File(file.getPath() + ".bak");
-            if (!file.renameTo(bakFile)) {
-                Log.e(TAG, "Cannot move file to " + bakFile);
-            }
-        }
-
         private static boolean migratePreNDbToCe(File oldDbFile, File ceDbFile) {
-            Log.i(TAG, "Moving pre-N DB " + oldDbFile + " to CE " + ceDbFile);
+            Slog.i(TAG, "Moving pre-N DB " + oldDbFile + " to CE " + ceDbFile);
             try {
                 FileUtils.copyFileOrThrow(oldDbFile, ceDbFile);
             } catch (IOException e) {
-                Log.e(TAG, "Cannot copy file to " + ceDbFile + " from " + oldDbFile, e);
+                Slog.e(TAG, "Cannot copy file to " + ceDbFile + " from " + oldDbFile, e);
                 // Try to remove potentially damaged file if I/O error occurred
                 deleteDbFileWarnIfFailed(ceDbFile);
                 return false;
