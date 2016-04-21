@@ -1397,6 +1397,10 @@ public class ProgressBar extends View {
     /**
      * Sets the current progress to the specified value. Does not do anything
      * if the progress bar is in indeterminate mode.
+     * <p>
+     * This method will immediately update the visual position of the progress
+     * indicator. To animate the visual position to the target value, use
+     * {@link #setProgress(int, boolean)}}.
      *
      * @param progress the new progress, between 0 and {@link #getMax()}
      *
@@ -1412,7 +1416,7 @@ public class ProgressBar extends View {
 
     /**
      * Sets the current progress to the specified value, optionally animating
-     * between the current and target values.
+     * the visual position between the current and target values.
      * <p>
      * Animation does not affect the result of {@link #getProgress()}, which
      * will return the target value immediately after this method is called.
