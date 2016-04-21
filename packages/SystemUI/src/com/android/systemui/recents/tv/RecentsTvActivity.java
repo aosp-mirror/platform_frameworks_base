@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.android.systemui.R;
@@ -131,6 +132,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
                 @Override
                 public void onRecentsFocused() {
                     mRecentsView.requestFocus();
+                    mRecentsView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
                 }
             };
     private final View.OnFocusChangeListener mPipViewFocusChangeListener =
