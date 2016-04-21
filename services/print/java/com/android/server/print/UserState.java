@@ -593,7 +593,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                     new ListenerRecord<IPrintServicesChangeListener>(listener) {
                         @Override
                         public void onBinderDied() {
-                            mPrintServicesChangeListenerRecords.remove(this);
+                            synchronized (mLock) {
+                                if (mPrintServicesChangeListenerRecords != null) {
+                                    mPrintServicesChangeListenerRecords.remove(this);
+                                }
+                            }
                         }
                     });
         }
