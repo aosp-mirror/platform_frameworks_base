@@ -3431,8 +3431,10 @@ final class ActivityStack {
                 mWindowManager.prepareAppTransition(transit, false);
                 mWindowManager.setAppVisibility(r.appToken, false);
                 mWindowManager.executeAppTransition();
+                mStackSupervisor.mWaitingVisibleActivities.add(r);
             }
-            return finishCurrentActivityLocked(r, FINISH_AFTER_PAUSE, oomAdj) == null;
+            return finishCurrentActivityLocked(r,
+                    r.visible ? FINISH_AFTER_VISIBLE : FINISH_AFTER_PAUSE, oomAdj) == null;
         } else {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + r);
         }

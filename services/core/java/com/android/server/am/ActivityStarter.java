@@ -527,8 +527,13 @@ class ActivityStarter {
 
         doPendingActivityLaunchesLocked(false);
 
-        err = startActivityUnchecked(
-                r, sourceRecord, voiceSession, voiceInteractor, startFlags, true, options, inTask);
+        try {
+            mService.mWindowManager.deferSurfaceLayout();
+            err = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                    true, options, inTask);
+        } finally {
+            mService.mWindowManager.continueSurfaceLayout();
+        }
         postStartActivityUncheckedProcessing(r, err, stack.mStackId);
         return err;
     }
