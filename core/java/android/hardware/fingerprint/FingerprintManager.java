@@ -590,7 +590,7 @@ public class FingerprintManager {
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            mService.remove(mToken, fp.getFingerId(), userId, mServiceReceiver);
+            mService.remove(mToken, fp.getFingerId(), fp.getGroupId(), userId, mServiceReceiver);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
@@ -810,11 +810,13 @@ public class FingerprintManager {
             if (mRemovalCallback != null) {
                 int reqFingerId = mRemovalFingerprint.getFingerId();
                 int reqGroupId = mRemovalFingerprint.getGroupId();
-                if (reqFingerId != 0  &&  fingerId != reqFingerId) {
+                if (reqFingerId != 0 && fingerId != 0  &&  fingerId != reqFingerId) {
                     Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
+                    return;
                 }
                 if (groupId != reqGroupId) {
                     Log.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
+                    return;
                 }
                 mRemovalCallback.onRemovalSucceeded(new Fingerprint(null, groupId, fingerId,
                         deviceId));
