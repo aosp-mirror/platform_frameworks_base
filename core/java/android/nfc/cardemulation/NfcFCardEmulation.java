@@ -453,7 +453,7 @@ public final class NfcFCardEmulation {
             return false;
         }
         try {
-            Long.valueOf(nfcid2, 16);
+            Long.parseLong(nfcid2, 16);
         } catch (NumberFormatException e) {
             Log.e(TAG, "NFCID2 " + nfcid2 + " is not a valid NFCID2.");
             return false;
