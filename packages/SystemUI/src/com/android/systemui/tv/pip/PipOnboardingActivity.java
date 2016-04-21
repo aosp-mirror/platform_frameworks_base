@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
@@ -33,6 +34,7 @@ import com.android.systemui.R;
  */
 public class PipOnboardingActivity extends Activity implements PipManager.Listener {
     private final PipManager mPipManager = PipManager.getInstance();
+    private AnimatorSet mEnterAnimator;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -51,28 +53,47 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
     @Override
     public void onResume() {
         super.onResume();
-        AnimatorSet enterAnimator = new AnimatorSet();
-        enterAnimator.playTogether(
+        mEnterAnimator = new AnimatorSet();
+        mEnterAnimator.playTogether(
+                loadAnimator(R.id.background, R.anim.tv_pip_onboarding_background_enter_animation),
                 loadAnimator(R.id.remote, R.anim.tv_pip_onboarding_image_enter_animation),
                 loadAnimator(R.id.remote_button, R.anim.tv_pip_onboarding_image_enter_animation),
                 loadAnimator(R.id.title, R.anim.tv_pip_onboarding_title_enter_animation),
                 loadAnimator(R.id.description,
                         R.anim.tv_pip_onboarding_description_enter_animation),
                 loadAnimator(R.id.button, R.anim.tv_pip_onboarding_button_enter_animation));
-        enterAnimator.addListener(new AnimatorListenerAdapter() {
+        mEnterAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 ImageView button = (ImageView) findViewById(R.id.remote_button);
                 ((AnimationDrawable) button.getDrawable()).start();
             }
         });
-        enterAnimator.start();
+        int delay = getResources().getInteger(R.integer.tv_pip_onboarding_anim_start_delay);
+        mEnterAnimator.setStartDelay(delay);
+        mEnterAnimator.start();
     }
 
     private Animator loadAnimator(int viewResId, int animResId) {
         Animator animator = AnimatorInflater.loadAnimator(this, animResId);
         animator.setTarget(findViewById(viewResId));
         return animator;
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mEnterAnimator.isStarted()) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mEnterAnimator.isStarted()) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
