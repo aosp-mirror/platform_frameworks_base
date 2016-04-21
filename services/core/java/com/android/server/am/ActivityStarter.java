@@ -582,7 +582,7 @@ class ActivityStarter {
                 null /*voiceInteractor*/, null /*resultTo*/, null /*resultWho*/,
                 0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/, null /*callingPackage*/,
                 0 /*realCallingPid*/, 0 /*realCallingUid*/, 0 /*startFlags*/, null /*options*/,
-                false /*ignoreTargetSecurity*/, false /*componentSpecified*/,  null /*outActivity*/,
+                false /*ignoreTargetSecurity*/, false /*componentSpecified*/, null /*outActivity*/,
                 null /*container*/, null /*inTask*/);
         if (mSupervisor.inResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
@@ -1432,7 +1432,7 @@ class ActivityStarter {
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
                 if (!willClearTask) {
                     final ActivityStack launchStack = getLaunchStack(
-                            mStartActivity, mLaunchFlags, mStartActivity.task, mOptions, true);
+                            mStartActivity, mLaunchFlags, mStartActivity.task, mOptions);
                     if (launchStack == null || launchStack == mTargetStack) {
                         // We only want to move to the front, if we aren't going to launch on a
                         // different stack. If we launch on a different stack, we will put the
@@ -1606,8 +1606,11 @@ class ActivityStarter {
         // We only want to allow changing stack if the target task is not the top one,
         // otherwise we would move the launching task to the other side, rather than show
         // two side by side.
-        final boolean launchToSideAllowed = sourceTask.stack.topTask() != sourceTask;
-        mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task, mOptions, launchToSideAllowed);
+        final boolean moveStackAllowed = sourceTask.stack.topTask() != sourceTask;
+        if (moveStackAllowed) {
+            mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task,
+                    mOptions);
+        }
 
         if (mTargetStack == null) {
             mTargetStack = sourceTask.stack;
@@ -1780,7 +1783,7 @@ class ActivityStarter {
             return mSupervisor.mHomeStack;
         }
 
-        ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions, true);
+        ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions);
         if (stack != null) {
             return stack;
         }
@@ -1845,7 +1848,7 @@ class ActivityStarter {
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
-            ActivityOptions aOptions, boolean launchToSideAllowed) {
+            ActivityOptions aOptions) {
         final int launchStackId =
                 (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
 
@@ -1857,7 +1860,7 @@ class ActivityStarter {
             return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
 
-        if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
+        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
             return null;
         }
         // Otherwise handle adjacent launch.
