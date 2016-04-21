@@ -778,6 +778,12 @@ public final class PrintManager {
 
         public PrintDocumentAdapterDelegate(Activity activity,
                 PrintDocumentAdapter documentAdapter) {
+            if (activity.isFinishing()) {
+                // The activity is already dead hence the onActivityDestroyed callback won't be
+                // triggered. Hence it is not save to print in this situation.
+                throw new IllegalStateException("Cannot start printing for finishing activity");
+            }
+
             mActivity = activity;
             mDocumentAdapter = documentAdapter;
             mHandler = new MyHandler(mActivity.getMainLooper());
