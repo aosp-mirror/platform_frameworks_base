@@ -32,7 +32,6 @@ import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.MutableInt;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
@@ -105,6 +104,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
     private static final PathInterpolator DIM_INTERPOLATOR =
             new PathInterpolator(.23f, .87f, .52f, -0.11f);
+    private static final Interpolator IME_ADJUST_INTERPOLATOR =
+            new PathInterpolator(0.2f, 0f, 0.1f, 1f);
 
     private DividerHandleView mHandle;
     private View mBackground;
@@ -701,7 +702,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             resetBackground();
         } else if (mDockSide == WindowManager.DOCKED_TOP) {
             mBackground.setPivotY(0);
-            mBackground.setScaleY(MINIMIZE_DOCK_SCALE);
+            mBackground.setScaleY(ADJUSTED_FOR_IME_SCALE);
         }
         mAdjustedForIme = adjustedForIme;
     }
@@ -709,20 +710,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
         updateDockSide();
         mHandle.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setInterpolator(IME_ADJUST_INTERPOLATOR)
                 .setDuration(animDuration)
                 .alpha(adjustedForIme ? 0f : 1f)
                 .start();
         if (mDockSide == WindowManager.DOCKED_TOP) {
             mBackground.setPivotY(0);
             mBackground.animate()
-                    .scaleY(adjustedForIme ? MINIMIZE_DOCK_SCALE : 1f);
+                    .scaleY(adjustedForIme ? ADJUSTED_FOR_IME_SCALE : 1f);
         }
         if (!adjustedForIme) {
             mBackground.animate().withEndAction(mResetBackgroundRunnable);
         }
         mBackground.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setInterpolator(IME_ADJUST_INTERPOLATOR)
                 .setDuration(animDuration)
                 .start();
         mAdjustedForIme = adjustedForIme;
