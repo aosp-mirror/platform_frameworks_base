@@ -36,8 +36,10 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.metrics.CaptivePortalCheckResultEvent;
 import android.net.metrics.CaptivePortalStateChangeEvent;
+import android.net.metrics.NetworkMonitorEvent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.util.Stopwatch;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
@@ -79,7 +81,7 @@ import java.util.Random;
  */
 public class NetworkMonitor extends StateMachine {
     private static final boolean DBG = false;
-    private static final String TAG = "NetworkMonitor";
+    private static final String TAG = NetworkMonitor.class.getSimpleName();
     private static final String DEFAULT_SERVER = "connectivitycheck.gstatic.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
     public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
@@ -221,6 +223,7 @@ public class NetworkMonitor extends StateMachine {
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
     private final NetworkAgentInfo mNetworkAgentInfo;
+    private final int mNetId;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final AlarmManager mAlarmManager;
@@ -246,6 +249,8 @@ public class NetworkMonitor extends StateMachine {
 
     private final LocalLog validationLogs = new LocalLog(20); // 20 lines
 
+    private final Stopwatch mEvaluationTimer = new Stopwatch();
+
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
         // Add suffix indicating which NetworkMonitor we're talking about.
@@ -254,6 +259,7 @@ public class NetworkMonitor extends StateMachine {
         mContext = context;
         mConnectivityServiceHandler = handler;
         mNetworkAgentInfo = networkAgentInfo;
+        mNetId = mNetworkAgentInfo.network.netId;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -300,12 +306,12 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mLingeringState);
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
-                    CaptivePortalStateChangeEvent.logEvent(
+                    CaptivePortalStateChangeEvent.logEvent(mNetId,
                             CaptivePortalStateChangeEvent.NETWORK_MONITOR_CONNECTED);
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
-                    CaptivePortalStateChangeEvent.logEvent(
+                    CaptivePortalStateChangeEvent.logEvent(mNetId,
                             CaptivePortalStateChangeEvent.NETWORK_MONITOR_DISCONNECTED);
                     if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
                         mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
@@ -336,7 +342,7 @@ public class NetworkMonitor extends StateMachine {
                             mUserDoesNotWant = true;
                             mConnectivityServiceHandler.sendMessage(obtainMessage(
                                     EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID,
-                                    mNetworkAgentInfo.network.netId, null));
+                                    mNetId, null));
                             // TODO: Should teardown network.
                             mUidResponsibleForReeval = 0;
                             transitionTo(mEvaluatingState);
@@ -356,7 +362,11 @@ public class NetworkMonitor extends StateMachine {
     private class ValidatedState extends State {
         @Override
         public void enter() {
-            CaptivePortalStateChangeEvent.logEvent(
+            if (mEvaluationTimer.isRunning()) {
+                NetworkMonitorEvent.logValidated(mNetId, mEvaluationTimer.stop());
+                mEvaluationTimer.reset();
+            }
+            CaptivePortalStateChangeEvent.logEvent(mNetId,
                    CaptivePortalStateChangeEvent.NETWORK_MONITOR_VALIDATED);
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, mNetworkAgentInfo.network.netId, null));
@@ -436,6 +446,12 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
+            // If we have already started to track time spent in EvaluatingState
+            // don't reset the timer due simply to, say, commands or events that
+            // cause us to exit and re-enter EvaluatingState.
+            if (!mEvaluationTimer.isStarted()) {
+                mEvaluationTimer.start();
+            }
             sendMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
             if (mUidResponsibleForReeval != INVALID_UID) {
                 TrafficStats.setThreadStatsUid(mUidResponsibleForReeval);
@@ -481,22 +497,20 @@ public class NetworkMonitor extends StateMachine {
                     // will be unresponsive. isCaptivePortal() could be executed on another Thread
                     // if this is found to cause problems.
                     CaptivePortalProbeResult probeResult = isCaptivePortal();
-                    CaptivePortalCheckResultEvent.logEvent(mNetworkAgentInfo.network.netId,
-                            probeResult.mHttpResponseCode);
+                    CaptivePortalCheckResultEvent.logEvent(mNetId, probeResult.mHttpResponseCode);
                     if (probeResult.mHttpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (probeResult.mHttpResponseCode >= 200 &&
                             probeResult.mHttpResponseCode <= 399) {
                         mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                                NETWORK_TEST_RESULT_INVALID, mNetworkAgentInfo.network.netId,
-                                probeResult.mRedirectUrl));
+                                NETWORK_TEST_RESULT_INVALID, mNetId, probeResult.mRedirectUrl));
                         transitionTo(mCaptivePortalState);
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
                         mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID,
-                                mNetworkAgentInfo.network.netId, probeResult.mRedirectUrl));
+                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId,
+                                probeResult.mRedirectUrl));
                         if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
                             // Don't continue to blame UID forever.
                             TrafficStats.clearThreadStatsUid();
@@ -511,7 +525,7 @@ public class NetworkMonitor extends StateMachine {
                     // Before IGNORE_REEVALUATE_ATTEMPTS attempts are made,
                     // ignore any re-evaluation requests. After, restart the
                     // evaluation process via EvaluatingState#enter.
-                    return mAttempts < IGNORE_REEVALUATE_ATTEMPTS ? HANDLED : NOT_HANDLED;
+                    return (mAttempts < IGNORE_REEVALUATE_ATTEMPTS) ? HANDLED : NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -553,6 +567,10 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
+            if (mEvaluationTimer.isRunning()) {
+                NetworkMonitorEvent.logCaptivePortalFound(mNetId, mEvaluationTimer.stop());
+                mEvaluationTimer.reset();
+            }
             // Don't annoy user with sign-in notifications.
             if (mDontDisplaySigninNotification) return;
             // Create a CustomIntentReceiver that sends us a
@@ -593,7 +611,8 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
-            final String cmdName = ACTION_LINGER_EXPIRED + "." + mNetworkAgentInfo.network.netId;
+            mEvaluationTimer.reset();
+            final String cmdName = ACTION_LINGER_EXPIRED + "." + mNetId;
             mWakeupMessage = makeWakeupMessage(mContext, getHandler(), cmdName, CMD_LINGER_EXPIRED);
             long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
             mWakeupMessage.schedule(wakeupTime);
@@ -663,6 +682,7 @@ public class NetworkMonitor extends StateMachine {
         HttpURLConnection urlConnection = null;
         int httpResponseCode = 599;
         String redirectUrl = null;
+        final Stopwatch probeTimer = new Stopwatch().start();
         try {
             URL url = new URL(getCaptivePortalServerUrl(mContext));
             // On networks with a PAC instead of fetching a URL that should result in a 204
@@ -759,6 +779,7 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.disconnect();
             }
         }
+        NetworkMonitorEvent.logPortalProbeEvent(mNetId, probeTimer.stop(), httpResponseCode);
         return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
     }
 

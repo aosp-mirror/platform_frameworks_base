@@ -29,17 +29,21 @@ public final class CaptivePortalStateChangeEvent extends IpConnectivityEvent imp
     public static final int NETWORK_MONITOR_DISCONNECTED = 1;
     public static final int NETWORK_MONITOR_VALIDATED    = 2;
 
+    public final int netId;
     public final int state;
 
-    public CaptivePortalStateChangeEvent(int state) {
+    public CaptivePortalStateChangeEvent(int netId, int state) {
+        this.netId = netId;
         this.state = state;
     }
 
     public CaptivePortalStateChangeEvent(Parcel in) {
+        netId = in.readInt();
         state = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(netId);
         out.writeInt(state);
     }
 
@@ -58,7 +62,7 @@ public final class CaptivePortalStateChangeEvent extends IpConnectivityEvent imp
         }
     };
 
-    public static void logEvent(int state) {
-        logEvent(IPCE_NETMON_STATE_CHANGE, new CaptivePortalStateChangeEvent(state));
+    public static void logEvent(int netId, int state) {
+        logEvent(IPCE_NETMON_STATE_CHANGE, new CaptivePortalStateChangeEvent(netId, state));
     }
 };
