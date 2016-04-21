@@ -135,7 +135,7 @@ public class VpnProfile implements Cloneable, Parcelable {
             profile.dnsServers = values[5];
             profile.searchDomains = values[6];
             profile.routes = values[7];
-            profile.mppe = Boolean.valueOf(values[8]);
+            profile.mppe = Boolean.parseBoolean(values[8]);
             profile.l2tpSecret = values[9];
             profile.ipsecIdentifier = values[10];
             profile.ipsecSecret = values[11];

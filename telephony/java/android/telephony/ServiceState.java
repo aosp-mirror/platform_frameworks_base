@@ -986,7 +986,7 @@ public class ServiceState implements Parcelable {
         m.putString("data-operator-alpha-long", mDataOperatorAlphaLong);
         m.putString("data-operator-alpha-short", mDataOperatorAlphaShort);
         m.putString("data-operator-numeric", mDataOperatorNumeric);
-        m.putBoolean("manual", Boolean.valueOf(mIsManualNetworkSelection));
+        m.putBoolean("manual", mIsManualNetworkSelection);
         m.putInt("radioTechnology", mRilVoiceRadioTechnology);
         m.putInt("dataRadioTechnology", mRilDataRadioTechnology);
         m.putBoolean("cssIndicator", mCssIndicator);
@@ -994,8 +994,8 @@ public class ServiceState implements Parcelable {
         m.putInt("systemId", mSystemId);
         m.putInt("cdmaRoamingIndicator", mCdmaRoamingIndicator);
         m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
-        m.putBoolean("emergencyOnly", Boolean.valueOf(mIsEmergencyOnly));
-        m.putBoolean("isDataRoamingFromRegistration", Boolean.valueOf(mIsDataRoamingFromRegistration));
+        m.putBoolean("emergencyOnly", mIsEmergencyOnly);
+        m.putBoolean("isDataRoamingFromRegistration", mIsDataRoamingFromRegistration);
     }
 
     /** @hide */
