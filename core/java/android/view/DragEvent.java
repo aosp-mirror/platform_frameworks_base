@@ -21,7 +21,7 @@ import android.content.ClipDescription;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.view.IDropPermissions;
+import com.android.internal.view.IDragAndDropPermissions;
 
 //TODO: Improve Javadoc
 /**
@@ -130,7 +130,7 @@ public class DragEvent implements Parcelable {
     float mX, mY;
     ClipDescription mClipDescription;
     ClipData mClipData;
-    IDropPermissions mDropPermissions;
+    IDragAndDropPermissions mDragAndDropPermissions;
 
     Object mLocalState;
     boolean mDragResult;
@@ -257,13 +257,13 @@ public class DragEvent implements Parcelable {
     }
 
     private void init(int action, float x, float y, ClipDescription description, ClipData data,
-            IDropPermissions dropPermissions, Object localState, boolean result) {
+            IDragAndDropPermissions dragAndDropPermissions, Object localState, boolean result) {
         mAction = action;
         mX = x;
         mY = y;
         mClipDescription = description;
         mClipData = data;
-        mDropPermissions = dropPermissions;
+        this.mDragAndDropPermissions = dragAndDropPermissions;
         mLocalState = localState;
         mDragResult = result;
     }
@@ -274,13 +274,14 @@ public class DragEvent implements Parcelable {
 
     /** @hide */
     public static DragEvent obtain(int action, float x, float y, Object localState,
-            ClipDescription description, ClipData data, IDropPermissions dropPermissions,
-            boolean result) {
+            ClipDescription description, ClipData data,
+            IDragAndDropPermissions dragAndDropPermissions, boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data, dropPermissions, localState, result);
+                ev.init(action, x, y, description, data, dragAndDropPermissions, localState,
+                        result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -291,7 +292,7 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data, dropPermissions, localState, result);
+        ev.init(action, x, y, description, data, dragAndDropPermissions, localState, result);
 
         return ev;
     }
@@ -299,7 +300,7 @@ public class DragEvent implements Parcelable {
     /** @hide */
     public static DragEvent obtain(DragEvent source) {
         return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
-                source.mClipDescription, source.mClipData, source.mDropPermissions,
+                source.mClipDescription, source.mClipData, source.mDragAndDropPermissions,
                 source.mDragResult);
     }
 
@@ -365,8 +366,8 @@ public class DragEvent implements Parcelable {
     }
 
     /** @hide */
-    public IDropPermissions getDropPermissions() {
-        return mDropPermissions;
+    public IDragAndDropPermissions getDragAndDropPermissions() {
+        return mDragAndDropPermissions;
     }
 
     /**
@@ -489,11 +490,11 @@ public class DragEvent implements Parcelable {
             dest.writeInt(1);
             mClipDescription.writeToParcel(dest, flags);
         }
-        if (mDropPermissions == null) {
+        if (mDragAndDropPermissions == null) {
             dest.writeInt(0);
         } else {
             dest.writeInt(1);
-            dest.writeStrongBinder(mDropPermissions.asBinder());
+            dest.writeStrongBinder(mDragAndDropPermissions.asBinder());
         }
     }
 
@@ -515,7 +516,8 @@ public class DragEvent implements Parcelable {
                 event.mClipDescription = ClipDescription.CREATOR.createFromParcel(in);
             }
             if (in.readInt() != 0) {
-                event.mDropPermissions = IDropPermissions.Stub.asInterface(in.readStrongBinder());;
+                event.mDragAndDropPermissions =
+                        IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());;
             }
             return event;
         }
