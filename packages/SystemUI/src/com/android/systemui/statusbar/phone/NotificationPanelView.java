@@ -41,9 +41,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.AutoReinflateContainer;
+import com.android.systemui.AutoReinflateContainer.InflateListener;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.DensityContainer;
-import com.android.systemui.DensityContainer.InflateListener;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
@@ -92,7 +92,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
     protected QSContainer mQsContainer;
-    private DensityContainer mQsDensityContainer;
+    private AutoReinflateContainer mQsAutoReinflateContainer;
     private KeyguardStatusView mKeyguardStatusView;
     private TextView mClockView;
     private View mReserveNotificationSpace;
@@ -219,8 +219,9 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        mQsDensityContainer = (DensityContainer) findViewById(R.id.qs_density_container);
-        mQsDensityContainer.addInflateListener(new InflateListener() {
+        mQsAutoReinflateContainer =
+                (AutoReinflateContainer) findViewById(R.id.qs_auto_reinflate_container);
+        mQsAutoReinflateContainer.addInflateListener(new InflateListener() {
             @Override
             public void onInflated(View v) {
                 mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
@@ -280,11 +281,11 @@ public class NotificationPanelView extends PanelView implements
         int panelWidth = getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
         int panelGravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
         FrameLayout.LayoutParams lp =
-                (FrameLayout.LayoutParams) mQsDensityContainer.getLayoutParams();
+                (FrameLayout.LayoutParams) mQsAutoReinflateContainer.getLayoutParams();
         if (lp.width != panelWidth) {
             lp.width = panelWidth;
             lp.gravity = panelGravity;
-            mQsDensityContainer.setLayoutParams(lp);
+            mQsAutoReinflateContainer.setLayoutParams(lp);
             mQsContainer.post(mUpdateHeader);
         }
 
@@ -790,8 +791,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isInQsArea(float x, float y) {
-        return (x >= mQsDensityContainer.getX()
-                && x <= mQsDensityContainer.getX() + mQsDensityContainer.getWidth())
+        return (x >= mQsAutoReinflateContainer.getX()
+                && x <= mQsAutoReinflateContainer.getX() + mQsAutoReinflateContainer.getWidth())
                 && (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
                 || y <= mQsContainer.getY() + mQsContainer.getHeight());
     }
@@ -1339,8 +1340,8 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         View header = mKeyguardShowing ? mKeyguardStatusBar : mQsContainer.getHeader();
-        boolean onHeader = x >= mQsDensityContainer.getX()
-                && x <= mQsDensityContainer.getX() + mQsDensityContainer.getWidth()
+        boolean onHeader = x >= mQsAutoReinflateContainer.getX()
+                && x <= mQsAutoReinflateContainer.getX() + mQsAutoReinflateContainer.getWidth()
                 && y >= header.getTop() && y <= header.getBottom();
         if (mQsExpanded) {
             return onHeader || (yDiff < 0 && isInQsArea(x, y));
@@ -2227,7 +2228,7 @@ public class NotificationPanelView extends PanelView implements
 
     protected void setVerticalPanelTranslation(float translation) {
         mNotificationStackScroller.setTranslationX(translation);
-        mQsDensityContainer.setTranslationX(translation);
+        mQsAutoReinflateContainer.setTranslationX(translation);
     }
 
     protected void updateStackHeight(float stackHeight) {
