@@ -100,6 +100,8 @@ class WindowSurfaceController {
     void hideInTransaction(String reason) {
         if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
         mHiddenForOtherReasons = true;
+
+        mAnimator.destroyPreservedSurfaceLocked();
         updateVisibility();
     }
 
@@ -180,6 +182,7 @@ class WindowSurfaceController {
                 updateVisibility();
             } else {
                 mHiddenForCrop = true;
+                mAnimator.destroyPreservedSurfaceLocked();
                 updateVisibility();
             }
         } catch (RuntimeException e) {
