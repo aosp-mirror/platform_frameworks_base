@@ -7750,7 +7750,7 @@ public final class Settings {
          * Device Idle (Doze) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
-         * "inactive_timeout=60000,sensing_timeout=400000"
+         * "inactive_to=60000,sensing_to=400000"
          *
          * The following keys are supported:
          *
