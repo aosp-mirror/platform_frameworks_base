@@ -341,6 +341,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
@@ -9613,8 +9614,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                             null /* initialBounds */);
                 }
-                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS,
-                        "moveTaskToStack", ANIMATE);
+                boolean result = mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop,
+                        !FORCE_FOCUS, "moveTaskToStack", ANIMATE);
+                if (result && stackId == DOCKED_STACK_ID) {
+                    // If task moved to docked stack - show recents if needed.
+                    mStackSupervisor.moveHomeStackTaskToTop(RECENTS_ACTIVITY_TYPE,
+                            "moveTaskToDockedStack");
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
