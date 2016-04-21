@@ -1280,7 +1280,7 @@ public class XmlUtils {
             if (eventType == parser.START_TAG) {
                 if (parser.getName().equals("item")) {
                     try {
-                        array[i] = Boolean.valueOf(parser.getAttributeValue(null, "value"));
+                        array[i] = Boolean.parseBoolean(parser.getAttributeValue(null, "value"));
                     } catch (NullPointerException e) {
                         throw new XmlPullParserException("Need value attribute in item");
                     } catch (NumberFormatException e) {
