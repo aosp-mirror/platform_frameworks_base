@@ -274,7 +274,7 @@ public class ListFragment extends Fragment {
     }
 
     /**
-     * Get the activity's list view widget.
+     * Get the fragment's list view widget.
      */
     public ListView getListView() {
         ensureList();
@@ -346,9 +346,9 @@ public class ListFragment extends Fragment {
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getContext(), android.R.anim.fade_out));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getContext(), android.R.anim.fade_in));
             } else {
                 mProgressContainer.clearAnimation();
                 mListContainer.clearAnimation();
@@ -358,9 +358,9 @@ public class ListFragment extends Fragment {
         } else {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                        getContext(), android.R.anim.fade_in));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
+                        getContext(), android.R.anim.fade_out));
             } else {
                 mProgressContainer.clearAnimation();
                 mListContainer.clearAnimation();
@@ -371,7 +371,7 @@ public class ListFragment extends Fragment {
     }
     
     /**
-     * Get the ListAdapter associated with this activity's ListView.
+     * Get the ListAdapter associated with this fragment's ListView.
      */
     public ListAdapter getListAdapter() {
         return mAdapter;
