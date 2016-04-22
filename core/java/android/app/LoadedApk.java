@@ -432,7 +432,8 @@ public final class LoadedApk {
         if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
             VMRuntime.getRuntime().vmInstructionSet();
             try {
-                ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
+                ActivityThread.getPackageManager().notifyPackageUse(mPackageName,
+                        PackageManager.NOTIFY_PACKAGE_USE_CROSS_PACKAGE);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
