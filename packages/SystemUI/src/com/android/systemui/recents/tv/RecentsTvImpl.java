@@ -48,8 +48,8 @@ public class RecentsTvImpl extends RecentsImpl{
     }
 
     @Override
-    protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome, boolean animate, int growTarget) {
+    protected void startRecentsActivity(ActivityManager.RunningTaskInfo runningTask,
+            boolean isHomeStackVisible, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
@@ -60,25 +60,25 @@ public class RecentsTvImpl extends RecentsImpl{
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         if (!animate) {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext, -1, -1);
-            startRecentsActivity(topTask, opts, false /* fromHome */, false /* fromThumbnail*/);
+            startRecentsActivity(runningTask, opts, false /* fromHome */, false /* fromThumbnail*/);
             return;
         }
 
         boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
+        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible && hasRecentTasks;
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptionsForTV(topTask,
+            ActivityOptions opts = getThumbnailTransitionActivityOptionsForTV(runningTask,
                     stack.getTaskCount());
             if (opts != null) {
-                startRecentsActivity(topTask, opts, false /* fromHome */, true /* fromThumbnail */);
+                startRecentsActivity(runningTask, opts, false /* fromHome */, true /* fromThumbnail */);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -86,19 +86,19 @@ public class RecentsTvImpl extends RecentsImpl{
         }
 
         if (!useThumbnailTransition) {
-            startRecentsActivity(topTask, null, true /* fromHome */, false /* fromThumbnail */);
+            startRecentsActivity(runningTask, null, true /* fromHome */, false /* fromThumbnail */);
         }
         mLastToggleTime = SystemClock.elapsedRealtime();
     }
 
-    protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
+    protected void startRecentsActivity(ActivityManager.RunningTaskInfo runningTask,
             ActivityOptions opts, boolean fromHome, boolean fromThumbnail) {
         // Update the configuration based on the launch options
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.launchedFromHome = fromHome;
         launchState.launchedFromApp = fromThumbnail;
-        launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
+        launchState.launchedToTaskId = (runningTask != null) ? runningTask.id : -1;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
 
         Intent intent = new Intent();
@@ -119,10 +119,10 @@ public class RecentsTvImpl extends RecentsImpl{
      * Creates the activity options for an app->recents transition on TV.
      */
     private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
-            ActivityManager.RunningTaskInfo topTask, int numTasks) {
+            ActivityManager.RunningTaskInfo runningTask, int numTasks) {
         Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext, numTasks);
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ThumbnailData thumbnailData = ssp.getTaskThumbnail(topTask.id);
+        ThumbnailData thumbnailData = ssp.getTaskThumbnail(runningTask.id);
         if (thumbnailData.thumbnail != null) {
             Bitmap thumbnail = Bitmap.createScaledBitmap(thumbnailData.thumbnail, rect.width(),
                     rect.height(), false);

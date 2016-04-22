@@ -20,6 +20,9 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.SparseArray;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
 /**
  * A mapping of {@link Task.TaskKey} to value, with additional LRU functionality where the least
  * recently referenced key/values will be evicted as more values than the given cache size are
@@ -111,5 +114,17 @@ public class TaskKeyLruCache<V> {
     /** Trims the cache to a specific size */
     final void trimToSize(int cacheSize) {
         mCache.trimToSize(cacheSize);
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" numEntries="); writer.print(mKeys.size());
+        writer.println();
+        int keyCount = mKeys.size();
+        for (int i = 0; i < keyCount; i++) {
+            writer.print(innerPrefix); writer.println(mKeys.get(mKeys.keyAt(i)));
+        }
     }
 }

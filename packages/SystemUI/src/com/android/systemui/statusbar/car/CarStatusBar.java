@@ -210,7 +210,7 @@ public class CarStatusBar extends PhoneStatusBar implements
         @Override
         public void onTaskStackChanged() {
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getTopMostTask();
+            ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
             if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
                 mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
             }
