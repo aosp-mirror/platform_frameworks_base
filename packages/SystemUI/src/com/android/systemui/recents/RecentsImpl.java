@@ -108,11 +108,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 SystemServicesProxy ssp = Recents.getSystemServices();
-                ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getTopMostTask();
+                ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
 
                 // Load the next task only if we aren't svelte
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
+                loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
                 // This callback is made when a new activity is launched and the old one is paused
                 // so ignore the current activity and try and preload the thumbnail for the
@@ -189,7 +189,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
@@ -262,10 +262,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         try {
             // Check if the top task is in the home stack, and start the recents activity
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-            MutableBoolean isTopTaskHome = new MutableBoolean(true);
-            if (topTask == null || !ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                startRecentsActivity(topTask, isTopTaskHome.value || fromHome, animate, growTarget);
+            MutableBoolean isHomeStackVisible = new MutableBoolean(false);
+            if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                startRecentsActivity(runningTask, isHomeStackVisible.value || fromHome, animate,
+                        growTarget);
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentsActivity", e);
@@ -301,11 +302,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         try {
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-            MutableBoolean isTopTaskHome = new MutableBoolean(true);
+            MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
 
-            if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
+            if (ssp.isRecentsActivityVisible(isHomeStackVisible)) {
                 RecentsDebugFlags debugFlags = Recents.getDebugFlags();
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
@@ -343,7 +343,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 }
 
                 // Otherwise, start the recents activity
-                startRecentsActivity(topTask, isTopTaskHome.value, true /* animate */, growTarget);
+                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                startRecentsActivity(runningTask, isHomeStackVisible.value, true /* animate */,
+                        growTarget);
 
                 // Only close the other system windows if we are actually showing recents
                 ssp.sendCloseSystemWindows(BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
@@ -358,18 +360,18 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity) only if there is a task to animate to.
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-        MutableBoolean topTaskHome = new MutableBoolean(true);
-        if (topTask != null && !ssp.isRecentsTopMost(topTask, topTaskHome)) {
+        MutableBoolean isHomeStackVisible = new MutableBoolean(true);
+        if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+            ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
             RecentsTaskLoader loader = Recents.getTaskLoader();
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
-            sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
-            loader.preloadTasks(sInstanceLoadPlan, topTask.id, topTaskHome.value);
+            sInstanceLoadPlan.preloadRawTasks(isHomeStackVisible.value);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
             if (stack.getTaskCount() > 0) {
                 // Only preload the icon (but not the thumbnail since it may not have been taken for
                 // the pausing activity)
-                preloadIcon(topTask);
+                preloadIcon(runningTask);
 
                 // At this point, we don't know anything about the stack state.  So only calculate
                 // the dimensions of the thumbnail that we need for the transition into Recents, but
@@ -398,25 +400,25 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
-        ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task
+        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
         if (runningTask == null) return;
 
         // Find the task in the recents list
-        boolean isTopTaskHome = SystemServicesProxy.isHomeStack(runningTask.stackId);
+        boolean isRunningTaskInHomeStack = SystemServicesProxy.isHomeStack(runningTask.stackId);
         ArrayList<Task> tasks = focusedStack.getStackTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 1; i--) {
             Task task = tasks.get(i);
-            if (isTopTaskHome) {
+            if (isRunningTaskInHomeStack) {
                 toTask = tasks.get(i - 1);
                 launchOpts = ActivityOptions.makeCustomAnimation(mContext,
                         R.anim.recents_launch_next_affiliated_task_target,
@@ -450,14 +452,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
         if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
-        ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
+        ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
         if (runningTask == null) return;
         // Return early if the running task is in the home stack (optimization)
         if (SystemServicesProxy.isHomeStack(runningTask.stackId)) return;
@@ -693,9 +695,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Creates the activity options for an app->recents transition.
      */
     private ActivityOptions getThumbnailTransitionActivityOptions(
-            ActivityManager.RunningTaskInfo topTask, TaskStackView stackView,
-            Rect windowOverrideRect) {
-        if (topTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
+            ActivityManager.RunningTaskInfo runningTask, TaskStackView stackView,
+                    Rect windowOverrideRect) {
+        if (runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             ArrayList<Task> tasks = stackView.getStack().getStackTasks();
             TaskStackLayoutAlgorithm stackLayout = stackView.getStackAlgorithm();
@@ -801,8 +803,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Shows the recents activity
      */
-    protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome, boolean animate, int growTarget) {
+    protected void startRecentsActivity(ActivityManager.RunningTaskInfo runningTask,
+            boolean isHomeStackVisible, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
@@ -814,24 +816,24 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible);
         }
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
+        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible && hasRecentTasks;
 
         // Update the launch state that we need in updateHeaderBarLayout()
         launchState.launchedFromHome = !useThumbnailTransition;
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;
-        launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
+        launchState.launchedToTaskId = (runningTask != null) ? runningTask.id : -1;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
 
         // Preload the icon (this will be a null-op if we have preloaded the icon already in
         // preloadRecents())
-        preloadIcon(topTask);
+        preloadIcon(runningTask);
 
         // Update the header bar if necessary
         Rect windowOverrideRect = getWindowRectOverride(growTarget);
@@ -853,7 +855,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         ActivityOptions opts;
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView,
+            opts = getThumbnailTransitionActivityOptions(runningTask, mDummyStackView,
                     windowOverrideRect);
         } else {
             // If there is no thumbnail transition, but is launching from home into recents, then

@@ -38,7 +38,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -251,9 +250,14 @@ public class SystemServicesProxy {
         return sSystemServicesProxy;
     }
 
-    /** Returns a list of the recents tasks */
+    /**
+     * Returns a list of the recents tasks.
+     *
+     * @param isHomeStackVisible whether or not the home stack is currently visible.  If it is
+     *                           visible, then we ignore all excluded tasks (even the first one).
+     */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean isTopTaskHome, ArraySet<Integer> quietProfileIds) {
+            boolean isHomeStackVisible, ArraySet<Integer> quietProfileIds) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
@@ -320,7 +324,7 @@ public class SystemServicesProxy {
             boolean isBlackListed = sRecentsBlacklist.contains(t.realActivity.getClassName());
             // Filter out recent tasks from managed profiles which are in quiet mode.
             isExcluded |= quietProfileIds.contains(t.userId);
-            if (isBlackListed || (isExcluded && (isTopTaskHome || !isFirstValidTask))) {
+            if (isBlackListed || (isExcluded && (isHomeStackVisible || !isFirstValidTask))) {
                 iter.remove();
                 continue;
             }
@@ -330,19 +334,48 @@ public class SystemServicesProxy {
         return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));
     }
 
-    /** Returns a list of the running tasks */
-    private List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
-        if (mAm == null) return null;
-        return mAm.getRunningTasks(numTasks);
-    }
-
-    /** Returns the top task. */
-    public ActivityManager.RunningTaskInfo getTopMostTask() {
-        List<ActivityManager.RunningTaskInfo> tasks = getRunningTasks(1);
+    /**
+     * Returns the top running task.
+     */
+    public ActivityManager.RunningTaskInfo getRunningTask() {
+        List<ActivityManager.RunningTaskInfo> tasks = mAm.getRunningTasks(1);
         if (tasks != null && !tasks.isEmpty()) {
             return tasks.get(0);
         }
         return null;
+    }
+
+    /**
+     * Returns whether the recents activity is currently visible.
+     */
+    public boolean isRecentsActivityVisible() {
+        return isRecentsActivityVisible(null);
+    }
+
+    /**
+     * Returns whether the recents activity is currently visible.
+     *
+     * @param isHomeStackVisible if provided, will return whether the home stack is visible
+     *                           regardless of the recents visibility
+     */
+    public boolean isRecentsActivityVisible(MutableBoolean isHomeStackVisible) {
+        if (mIam == null) return false;
+
+        try {
+            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(
+                    ActivityManager.StackId.HOME_STACK_ID);
+            ComponentName topActivity = stackInfo.topActivity;
+            if (isHomeStackVisible != null) {
+                isHomeStackVisible.value = stackInfo.visible;
+            }
+            return (stackInfo.visible && topActivity != null
+                    && topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE)
+                    && (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY)
+                        || topActivity.getClassName().equals(RecentsTvImpl.RECENTS_TV_ACTIVITY)));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -357,56 +390,6 @@ public class SystemServicesProxy {
      */
     public boolean isInSafeMode() {
         return mIsSafeMode;
-    }
-
-    /** Returns whether the recents is currently running */
-    public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
-            MutableBoolean isHomeTopMost) {
-        if (topTask != null) {
-            ComponentName topActivity = topTask.topActivity;
-
-            // Check if the front most activity is recents
-            if ((topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE) &&
-                    (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY) ||
-                    topActivity.getClassName().equals(RecentsTvImpl.RECENTS_TV_ACTIVITY)))) {
-                if (isHomeTopMost != null) {
-                    isHomeTopMost.value = false;
-                }
-                return true;
-            }
-
-            // Note, this is only valid because we currently only allow the recents and home
-            // activities in the home stack
-            if (isHomeTopMost != null) {
-                isHomeTopMost.value = SystemServicesProxy.isHomeStack(topTask.stackId);
-            }
-        }
-        return false;
-    }
-
-    /** Get the bounds of a task. */
-    public Rect getTaskBounds(int taskId) {
-        if (mIam == null) return null;
-
-        try {
-            return mIam.getTaskBounds(taskId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Resizes the given task to the new bounds.
-     */
-    public void resizeTask(int taskId, Rect bounds) {
-        if (mIam == null) return;
-
-        try {
-            mIam.resizeTask(taskId, bounds, ActivityManager.RESIZE_MODE_FORCED);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
     }
 
     /** Docks a task to the side of the screen and starts it. */
@@ -437,18 +420,6 @@ public class SystemServicesProxy {
             e.printStackTrace();
         }
         return false;
-    }
-
-    /** Returns the focused stack id. */
-    public int getFocusedStack() {
-        if (mIam == null) return -1;
-
-        try {
-            return mIam.getFocusedStackId();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return -1;
-        }
     }
 
     /**
@@ -513,6 +484,16 @@ public class SystemServicesProxy {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * Returns whether the device has a transposed nav bar (on the right of the screen) in the
+     * current display orientation.
+     */
+    public boolean hasTransposedNavigationBar() {
+        Rect insets = new Rect();
+        getStableInsets(insets);
+        return insets.right > 0;
     }
 
     /**
@@ -610,19 +591,6 @@ public class SystemServicesProxy {
             mIam.positionTaskInStack(taskId, stackId, 0);
         } catch (RemoteException | IllegalArgumentException e) {
             e.printStackTrace();
-        }
-    }
-
-    /** Moves a task to the front with the specified activity options. */
-    public void moveTaskToFront(int taskId, ActivityOptions opts) {
-        if (mAm == null) return;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return;
-
-        if (opts != null) {
-            mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME,
-                    opts.toBundle());
-        } else {
-            mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME);
         }
     }
 
@@ -1080,16 +1048,6 @@ public class SystemServicesProxy {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
-    }
-
-    /**
-     * Returns whether the device has a transposed nav bar (on the right of the screen) in the
-     * current display orientation.
-     */
-    public boolean hasTransposedNavBar() {
-        Rect insets = new Rect();
-        getStableInsets(insets);
-        return insets.right > 0;
     }
 
     private final class H extends Handler {

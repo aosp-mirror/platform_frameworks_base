@@ -338,8 +338,17 @@ public class Task {
 
     public void dump(String prefix, PrintWriter writer) {
         writer.print(prefix); writer.print(key);
-        if (affiliationTaskId != key.id) {
+        if (isAffiliatedTask()) {
             writer.print(" "); writer.print("affTaskId=" + affiliationTaskId);
+        }
+        if (!isDockable) {
+            writer.print(" dockable=N");
+        }
+        if (isLaunchTarget) {
+            writer.print(" launchTarget=Y");
+        }
+        if (isFreeformTask()) {
+            writer.print(" freeform=Y");
         }
         writer.print(" "); writer.print(title);
         writer.println();
