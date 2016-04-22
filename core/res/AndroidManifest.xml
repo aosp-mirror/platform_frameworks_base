@@ -2039,10 +2039,10 @@
     <permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows but does not guarantee access to user passwords at the conclusion of add
-         account -->
-    <permission android:name="android.permission.GET_PASSWORD_PRIVILEGED"
-        android:protectionLevel="signature|privileged" />
+    <!-- Allows but does not guarantee access to user passwords at the conclusion of add account
+    @hide -->
+    <permission android:name="android.permission.GET_PASSWORD"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows applications to RW to diagnostic resources.
     <p>Not for use by third-party applications. -->

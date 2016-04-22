@@ -2589,7 +2589,7 @@ public class AccountManagerService
         // Check to see if the Password should be included to the caller.
         String callerPkg = optionsIn.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
         boolean isPasswordForwardingAllowed = isPermitted(
-                callerPkg, uid, Manifest.permission.GET_PASSWORD_PRIVILEGED);
+                callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         int usrId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
@@ -3008,7 +3008,7 @@ public class AccountManagerService
         // Check to see if the Password should be included to the caller.
         String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
         boolean isPasswordForwardingAllowed = isPermitted(
-                callerPkg, uid, Manifest.permission.GET_PASSWORD_PRIVILEGED);
+                callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         long identityToken = clearCallingIdentity();
         try {
