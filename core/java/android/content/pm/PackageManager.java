@@ -2367,6 +2367,7 @@ public abstract class PackageManager {
     *
     * @hide
     */
+    @SystemApi
     public static final int FLAG_PERMISSION_USER_SET = 1 << 0;
 
     /**
@@ -2376,6 +2377,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_USER_FIXED =  1 << 1;
 
     /**
@@ -2385,6 +2387,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_POLICY_FIXED =  1 << 2;
 
     /**
@@ -2397,6 +2400,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
 
     /**
@@ -2405,6 +2409,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
 
     /**
@@ -2415,6 +2420,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**
@@ -2423,6 +2429,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
@@ -3124,6 +3131,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
             @UserIdInt int userId);
 

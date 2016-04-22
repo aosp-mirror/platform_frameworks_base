@@ -1561,6 +1561,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link} #ACTION_VIEW} to indicate the uid of the package that initiated the install
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_ORIGINATING_UID
             = "android.intent.extra.ORIGINATING_UID";
 
@@ -1634,6 +1635,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_PERMISSIONS =
             "android.intent.action.MANAGE_APP_PERMISSIONS";
@@ -1649,6 +1651,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_PERMISSIONS =
             "android.intent.action.MANAGE_PERMISSIONS";
@@ -1686,6 +1689,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REVIEW_PERMISSIONS =
             "android.intent.action.REVIEW_PERMISSIONS";
@@ -1698,6 +1702,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
 
     /**
@@ -1717,100 +1722,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
-
-    /**
-     * Broadcast action that requests current permission granted information.  It will respond
-     * to the request by sending a broadcast with action defined by
-     * {@link #EXTRA_GET_PERMISSIONS_RESPONSE_INTENT}. The response will contain
-     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}, as well as
-     * {@link #EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT}, with contents described below or
-     * a null upon failure.
-     *
-     * <p>If {@link #EXTRA_PACKAGE_NAME} is included then the number of permissions granted, the
-     * number of permissions requested and the number of granted additional permissions
-     * by that package will be calculated and included as the first
-     * and second elements respectively of an int[] in the response as
-     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.  The response will also deliver the list
-     * of localized permission group names that are granted in
-     * {@link #EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT}.
-     *
-     * <p>If {@link #EXTRA_PACKAGE_NAME} is not included then the number of apps granted any runtime
-     * permissions and the total number of apps requesting runtime permissions will be the first
-     * and second elements respectively of an int[] in the response as
-     * {@link #EXTRA_GET_PERMISSIONS_COUNT_RESULT}.
-     *
-     * @hide
-     */
-    public static final String ACTION_GET_PERMISSIONS_COUNT
-            = "android.intent.action.GET_PERMISSIONS_COUNT";
-
-    /**
-     * Broadcast action that requests list of all apps that have runtime permissions.  It will
-     * respond to the request by sending a broadcast with action defined by
-     * {@link #EXTRA_GET_PERMISSIONS_PACKAGES_RESPONSE_INTENT}. The response will contain
-     * {@link #EXTRA_GET_PERMISSIONS_APP_LIST_RESULT}, as well as
-     * {@link #EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT}, with contents described below or
-     * a null upon failure.
-     *
-     * <p>{@link #EXTRA_GET_PERMISSIONS_APP_LIST_RESULT} will contain a list of package names of
-     * apps that have runtime permissions. {@link #EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT}
-     * will contain the list of app labels corresponding ot the apps in the first list.
-     *
-     * @hide
-     */
-    public static final String ACTION_GET_PERMISSIONS_PACKAGES
-            = "android.intent.action.GET_PERMISSIONS_PACKAGES";
-
-    /**
-     * Extra included in response to {@link #ACTION_GET_PERMISSIONS_COUNT}.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_COUNT_RESULT
-            = "android.intent.extra.GET_PERMISSIONS_COUNT_RESULT";
-
-    /**
-     * List of CharSequence of localized permission group labels.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_GROUP_LIST_RESULT
-            = "android.intent.extra.GET_PERMISSIONS_GROUP_LIST_RESULT";
-
-    /**
-     * String list of apps that have one or more runtime permissions.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_APP_LIST_RESULT
-            = "android.intent.extra.GET_PERMISSIONS_APP_LIST_RESULT";
-
-    /**
-     * String list of app labels for apps that have one or more runtime permissions.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_APP_LABEL_LIST_RESULT
-            = "android.intent.extra.GET_PERMISSIONS_APP_LABEL_LIST_RESULT";
-
-    /**
-     * Boolean list describing if the app is a system app for apps that have one or more runtime
-     * permissions.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_IS_SYSTEM_APP_LIST_RESULT
-            = "android.intent.extra.GET_PERMISSIONS_IS_SYSTEM_APP_LIST_RESULT";
-
-    /**
-     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_COUNT} broadcasts.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_RESPONSE_INTENT
-            = "android.intent.extra.GET_PERMISSIONS_RESONSE_INTENT";
-
-    /**
-     * Required extra to be sent with {@link #ACTION_GET_PERMISSIONS_PACKAGES} broadcasts.
-     * @hide
-     */
-    public static final String EXTRA_GET_PERMISSIONS_PACKAGES_RESPONSE_INTENT
-            = "android.intent.extra.GET_PERMISSIONS_PACKAGES_RESONSE_INTENT";
 
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
@@ -1826,6 +1739,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_PERMISSION_APPS =
             "android.intent.action.MANAGE_PERMISSION_APPS";

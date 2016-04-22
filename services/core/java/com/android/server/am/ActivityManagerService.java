@@ -17179,8 +17179,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(action)
                     || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
-                    || Intent.ACTION_GET_PERMISSIONS_COUNT.equals(action)
-                    || Intent.ACTION_GET_PERMISSIONS_PACKAGES.equals(action)
                     || Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
