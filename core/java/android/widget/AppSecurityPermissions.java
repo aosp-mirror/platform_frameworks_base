@@ -16,6 +16,7 @@
 */
 package android.widget;
 
+import android.annotation.SystemApi;
 import android.os.UserHandle;
 import com.android.internal.R;
 
@@ -80,6 +81,7 @@ public class AppSecurityPermissions {
     private final CharSequence mNewPermPrefix;
     private String mPackageName;
 
+    /** @hide */
     static class MyPermissionGroupInfo extends PermissionGroupInfo {
         CharSequence mLabel;
 
@@ -104,6 +106,7 @@ public class AppSecurityPermissions {
         }
     }
 
+    /** @hide */
     private static class MyPermissionInfo extends PermissionInfo {
         CharSequence mLabel;
 
@@ -128,6 +131,7 @@ public class AppSecurityPermissions {
         }
     }
 
+    /** @hide */
     public static class PermissionItemView extends LinearLayout implements View.OnClickListener {
         MyPermissionGroupInfo mGroup;
         MyPermissionInfo mPerm;
