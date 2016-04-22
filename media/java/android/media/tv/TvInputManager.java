@@ -191,7 +191,9 @@ public final class TvInputManager {
     /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
      * {@link TvRecordingClient.RecordingCallback#onError(int)}: The requested operation cannot be
-     * completed due to a problem that does not fit under any other error codes.
+     * completed due to a problem that does not fit under any other error codes, or the error code
+     * for the problem is defined on the higher version than application's
+     * <code>android:targetSdkVersion</code>.
      */
     public static final int RECORDING_ERROR_UNKNOWN = 0;
 
@@ -1181,14 +1183,23 @@ public final class TvInputManager {
     }
 
     /**
-     * Updates information about an existing TV input.
+     * Updates the <code>TvInputInfo</code> for an existing TV input. A TV input service
+     * implementation may call this method to pass the application and system an up-to-date
+     * <code>TvInputInfo</code> object that describes itself.
      *
-     * <p>This is called internally only by {@link TvInputService}.
+     * <p>The system automatically creates a <code>TvInputInfo</code> object for each TV input,
+     * based on the information collected from the <code>AndroidManifest.xml</code>, thus it is not
+     * necessary to call this method unless such information has changed dynamically.
+     * Use {@link TvInputInfo.Builder} to build a new <code>TvInputInfo</code> object.
+     *
+     * <p>Attempting to change information about a TV input that the calling package does not own
+     * does nothing.
      *
      * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
      * @throws IllegalArgumentException if the argument is {@code null}.
+     * @see TvInputCallback#onTvInputInfoUpdated(TvInputInfo)
      */
-    void updateTvInputInfo(@NonNull TvInputInfo inputInfo) {
+    public void updateTvInputInfo(@NonNull TvInputInfo inputInfo) {
         Preconditions.checkNotNull(inputInfo);
         try {
             mService.updateTvInputInfo(inputInfo, mUserId);

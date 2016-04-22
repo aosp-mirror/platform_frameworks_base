@@ -8083,11 +8083,11 @@ i
         <attr name="settingsActivity" />
         <!-- Attribute whether the TV input service can record programs. This value can be changed
              at runtime by calling
-             {@link android.media.tv.TvInputService#updateTvInputInfo(android.content.Context, android.media.tv.TvInputInfo)}. -->
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
         <attr name="canRecord" format="boolean" />
         <!-- The number of tuners that the TV input service is associated with. This value can be
              changed at runtime by calling
-             {@link android.media.tv.TvInputService#updateTvInputInfo(android.content.Context, android.media.tv.TvInputInfo)}. -->
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
         <attr name="tunerCount" format="integer" />
     </declare-styleable>
 
