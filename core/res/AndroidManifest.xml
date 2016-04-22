@@ -1587,9 +1587,10 @@
     <permission android:name="android.permission.INTERACT_ACROSS_USERS"
         android:protectionLevel="signature|privileged|development" />
 
-    <!-- @hide Fuller form of {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+    <!-- @SystemApi Fuller form of {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
          that removes restrictions on where broadcasts can be sent and allows other
-         types of interactions. -->
+         types of interactions
+         @hide -->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:protectionLevel="signature|installer" />
 
@@ -2082,11 +2083,12 @@
         android:protectionLevel="signature|privileged|development" />
 
     <!-- @SystemApi Allows an application to update application operation statistics. Not for
-         use by third party apps. @hide -->
+         use by third party apps.
+         @hide -->
     <permission android:name="android.permission.UPDATE_APP_OPS_STATS"
         android:protectionLevel="signature|privileged|installer" />
 
-    <!-- Allows an application to update the user app op restrictions.
+    <!-- @SystemApi Allows an application to update the user app op restrictions.
          Not for use by third party apps.
          @hide -->
     <permission android:name="android.permission.MANAGE_APP_OPS_RESTRICTIONS"
@@ -2232,7 +2234,13 @@
     <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by a TextService (eg SpellCheckerService)
+    <!-- @SystemApi Must be required by the RuntimePermissionPresenterService to ensure
+         that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE"
+        android:protectionLevel="signature" />
+
+    <!-- Must be required by a TextService (e.g. SpellCheckerService)
          to ensure that only the system can bind to it.
          <p>Protection level: signature
     -->
@@ -2413,21 +2421,19 @@
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to grant specific permissions.
+    <!-- @SystemApi Allows an application to grant specific permissions.
          @hide -->
     <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature|installer|verifier" />
 
-    <!-- Allows an app that has this permission and the permissions to install packages
+    <!-- @SystemApi Allows an app that has this permission and the permissions to install packages
          to request certain runtime permissions to be granted at installation.
-         @hide
-         @SystemApi -->
+         @hide -->
     <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature|installer|verifier" />
 
-    <!-- Allows an application to revoke specific permissions.
-        @hide
-        @SystemApi -->
+    <!-- @SystemApi Allows an application to revoke specific permissions.
+        @hide -->
     <permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS"
          android:protectionLevel="signature|installer|verifier" />
 
@@ -2963,7 +2969,7 @@
     <permission android:name="android.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT"
                 android:protectionLevel="signature" />
 
-    <!-- Allows applications to kill UIDs.
+    <!-- @SystemApi Allows applications to kill UIDs.
         <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.KILL_UID"
