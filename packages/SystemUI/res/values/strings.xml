@@ -286,6 +286,9 @@
     <!-- Content description of the bluetooth label showing what we are connected to. [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_name">Connected to <xliff:g id="bluetooth" example="Car Audio">%s</xliff:g>.</string>
 
+    <!-- Content description of the cast label showing what we are connected to. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_cast_name">Connected to <xliff:g id="cast" example="TV">%s</xliff:g>.</string>
+
 
     <!-- Content description of the WiMAX signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_wimax">No WiMAX.</string>
@@ -363,6 +366,12 @@
     <!-- Content description of the data connection with no SIM for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_sim">No SIM.</string>
 
+    <!-- Content description of the cell data. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_cell_data">Cellular Data</string>
+
+    <!-- Content description of the cell data being enabled. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_cell_data_on">Cellular Data On</string>
+
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
     <string name="accessibility_cell_data_off">Cellular Data Off</string>
 
@@ -377,6 +386,9 @@
 
     <!-- Content description of the carrier network changing icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_carrier_network_change_mode">Carrier network changing.</string>
+
+    <!-- Content description of button to open battery details icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_battery_details">Open battery details</string>
 
     <!-- Content description of the battery level icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_level">Battery <xliff:g id="number">%d</xliff:g> percent.</string>
@@ -468,12 +480,16 @@
     <string name="accessibility_quick_settings_dnd_none_on">Do not disturb on, total silence.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_alarms_on">Do not disturb on, alarms only.</string>
+     <!-- Content description of the do not disturb tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_dnd">Do not disturb.</string>
      <!-- Content description of the do not disturb tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_off">Do not disturb off.</string>
     <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_changed_off">Do not disturb turned off.</string>
     <!-- Announcement made when do not disturb changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_changed_on">Do not disturb turned on.</string>
+    <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_bluetooth">Bluetooth.</string>
     <!-- Content description of the bluetooth tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_off">Bluetooth off.</string>
     <!-- Content description of the bluetooth tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -633,6 +649,10 @@
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
     <string name="quick_settings_rotation_unlocked_label">Auto-rotate</string>
+    <!-- Accessibility label for Auto-ratate QuickSettings tile [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_rotation">Auto-rotate screen</string>
+    <!-- Accessibility label for value of Auto-ratate QuickSettings tile [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_rotation_value">Set to <xliff:g name="rotation" example="Portrait">%s</xliff:g></string>
     <!-- QuickSettings: Rotation Locked [CHAR LIMIT=NONE] -->
     <string name="quick_settings_rotation_locked_label">Rotation locked</string>
     <!-- QuickSettings: Locked to Portrait [CHAR LIMIT=NONE] -->
@@ -669,6 +689,8 @@
     <string name="quick_settings_wifi_no_network">No Network</string>
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
+    <!-- QuickSettings: Wifi (On) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_on_label">Wi-Fi On</string>
     <!-- QuickSettings: Wifi detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_detail_empty_text">No Wi-Fi networks available</string>
     <!-- QuickSettings: Cast title [CHAR LIMIT=NONE] -->
@@ -1641,8 +1663,32 @@
     <!-- Warning message when we try to dock a non-resizeble tasks and launch it in fullscreen instead. -->
     <string name="dock_non_resizeble_failed_to_dock_text">App does not support split-screen.</string>
 
+    <!-- accessibility label for button to open settings [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_settings">Open settings.</string>
+
     <!-- accessibility label for button to expand quick settings [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_expand">Expand quick settings.</string>
+    <string name="accessibility_quick_settings_expand">Open quick settings.</string>
+
+    <!-- accessibility label for button to collapse quick settings [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_collapse">Close quick settings.</string>
+
+    <!-- accessibility label for alarm icon [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_alarm_set">Alarm set.</string>
+
+    <!-- accessibility label for button to select user [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_user">Signed in as <xliff:g name="user" example="John">%s</xliff:g></string>
+
+    <!-- accessibility label for no internet [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_no_internet">No internet.</string>
+
+    <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_open_details">Open details.</string>
+
+    <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
+
+    <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_edit">Edit order of settings.</string>
 
     <!-- accessibility label for paging indicator in quick settings [CHAR LIMITi=NONE] -->
     <string name="accessibility_quick_settings_page">Page <xliff:g name="current_page" example="1">%1$d</xliff:g> of <xliff:g name="num_pages" example="2">%2$d</xliff:g></string>
