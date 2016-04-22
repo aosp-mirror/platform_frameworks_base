@@ -227,10 +227,11 @@ public class RootsFragment extends Fragment {
         }
 
         public View getView(View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
+            // Disable recycling views because 1) it's very unlikely a view can be recycled here;
+            // 2) there is no easy way for us to know with which layout id the convertView was
+            // inflated; and 3) simplicity is much appreciated at this time.
+            convertView = LayoutInflater.from(parent.getContext())
                         .inflate(mLayoutId, parent, false);
-            }
             bindView(convertView);
             return convertView;
         }
