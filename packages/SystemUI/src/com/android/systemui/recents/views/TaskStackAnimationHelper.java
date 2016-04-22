@@ -18,6 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -32,7 +33,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -74,32 +74,35 @@ public class TaskStackAnimationHelper {
         void onStartFrontTaskEnterAnimation(boolean screenPinningEnabled);
     }
 
+    private static final int DOUBLE_FRAME_OFFSET_MS = 33;
     private static final int FRAME_OFFSET_MS = 16;
 
-    public static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
-    public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 333;
+    private static final int ENTER_EXIT_NUM_ANIMATING_TASKS = 5;
 
-    private static final PathInterpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
-            new PathInterpolator(0, 0, 0, 1f);
-    private static final PathInterpolator ENTER_FROM_HOME_ALPHA_INTERPOLATOR =
-            new PathInterpolator(0, 0, 0.2f, 1f);
+    private static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
+    public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 300;
+    private static final Interpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
+            Interpolators.LINEAR_OUT_SLOW_IN;
+    private static final Interpolator ENTER_FROM_HOME_ALPHA_INTERPOLATOR = Interpolators.LINEAR;
 
-    public static final int EXIT_TO_HOME_ALPHA_DURATION = 100;
-    public static final int EXIT_TO_HOME_TRANSLATION_DURATION = 150;
-    private static final PathInterpolator EXIT_TO_HOME_TRANSLATION_INTERPOLATOR =
-            new PathInterpolator(0.8f, 0, 0.6f, 1f);
-    private static final PathInterpolator EXIT_TO_HOME_ALPHA_INTERPOLATOR =
+    public static final int EXIT_TO_HOME_TRANSLATION_DURATION = 200;
+    private static final Interpolator EXIT_TO_HOME_TRANSLATION_INTERPOLATOR =
+            new PathInterpolator(0.4f, 0, 0.6f, 1f);
+
+    private static final int DISMISS_TASK_DURATION = 175;
+    private static final int DISMISS_ALL_TASKS_DURATION = 200;
+    private static final Interpolator DISMISS_ALL_TRANSLATION_INTERPOLATOR =
             new PathInterpolator(0.4f, 0, 1f, 1f);
 
-    private static final PathInterpolator FOCUS_NEXT_TASK_INTERPOLATOR =
+    private static final Interpolator FOCUS_NEXT_TASK_INTERPOLATOR =
             new PathInterpolator(0.4f, 0, 0, 1f);
-    private static final PathInterpolator FOCUS_IN_FRONT_NEXT_TASK_INTERPOLATOR =
+    private static final Interpolator FOCUS_IN_FRONT_NEXT_TASK_INTERPOLATOR =
             new PathInterpolator(0, 0, 0, 1f);
-    private static final PathInterpolator FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR =
-            new PathInterpolator(0.4f, 0, 0.2f, 1f);
+    private static final Interpolator FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR =
+            Interpolators.LINEAR_OUT_SLOW_IN;
 
-    private static final PathInterpolator ENTER_WHILE_DOCKING_INTERPOLATOR =
-            new PathInterpolator(0, 0, 0.2f, 1f);
+    private static final Interpolator ENTER_WHILE_DOCKING_INTERPOLATOR =
+            Interpolators.LINEAR_OUT_SLOW_IN;
 
     private TaskStackView mStackView;
 
@@ -251,16 +254,20 @@ public class TaskStackAnimationHelper {
                 }
 
             } else if (launchState.launchedFromHome) {
-                // Animate the tasks up
+                // Animate the tasks up, but offset the animations to be relative to the front-most
+                // task animation
                 AnimationProps taskAnimation = new AnimationProps()
-                        .setStartDelay(AnimationProps.ALPHA, taskIndexFromFront * FRAME_OFFSET_MS)
+                        .setInitialPlayTime(AnimationProps.BOUNDS,
+                                Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
+                                        DOUBLE_FRAME_OFFSET_MS)
+                        .setStartDelay(AnimationProps.ALPHA,
+                                Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
+                                        FRAME_OFFSET_MS)
+                        .setDuration(AnimationProps.BOUNDS, ENTER_FROM_HOME_TRANSLATION_DURATION)
                         .setDuration(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_DURATION)
-                        .setDuration(AnimationProps.BOUNDS, ENTER_FROM_HOME_TRANSLATION_DURATION -
-                                (taskIndexFromFront * FRAME_OFFSET_MS))
                         .setInterpolator(AnimationProps.BOUNDS,
                                 ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR)
-                        .setInterpolator(AnimationProps.ALPHA,
-                                ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
+                        .setInterpolator(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
@@ -270,8 +277,8 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedViaDockGesture) {
                 // Animate the tasks up
                 AnimationProps taskAnimation = new AnimationProps()
-                        .setDuration(AnimationProps.BOUNDS, (int) (dockGestureAnimDuration +
-                                                        (taskIndexFromBack * 2f * FRAME_OFFSET_MS)))
+                        .setDuration(AnimationProps.BOUNDS, dockGestureAnimDuration +
+                                (taskIndexFromBack * DOUBLE_FRAME_OFFSET_MS))
                         .setInterpolator(AnimationProps.BOUNDS,
                                 ENTER_WHILE_DOCKING_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
@@ -302,20 +309,17 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             int taskIndexFromFront = taskViewCount - i - 1;
             TaskView tv = taskViews.get(i);
-            Task task = tv.getTask();
 
             // Animate the tasks down
             AnimationProps taskAnimation;
             if (animated) {
+                int delay = Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS , taskIndexFromFront) *
+                        DOUBLE_FRAME_OFFSET_MS;
                 taskAnimation = new AnimationProps()
-                        .setStartDelay(AnimationProps.ALPHA, i * FRAME_OFFSET_MS)
-                        .setDuration(AnimationProps.ALPHA, EXIT_TO_HOME_ALPHA_DURATION)
-                        .setDuration(AnimationProps.BOUNDS, EXIT_TO_HOME_TRANSLATION_DURATION +
-                                (taskIndexFromFront * FRAME_OFFSET_MS))
+                        .setStartDelay(AnimationProps.BOUNDS, delay)
+                        .setDuration(AnimationProps.BOUNDS, EXIT_TO_HOME_TRANSLATION_DURATION)
                         .setInterpolator(AnimationProps.BOUNDS,
                                 EXIT_TO_HOME_TRANSLATION_INTERPOLATOR)
-                        .setInterpolator(AnimationProps.ALPHA,
-                                EXIT_TO_HOME_ALPHA_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
             } else {
@@ -323,7 +327,6 @@ public class TaskStackAnimationHelper {
             }
 
             mTmpTransform.fillIn(tv);
-            mTmpTransform.alpha = 0f;
             mTmpTransform.rect.offset(0, offscreenYOffset);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
@@ -384,8 +387,6 @@ public class TaskStackAnimationHelper {
         Resources res = mStackView.getResources();
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
 
-        int taskViewRemoveAnimDuration = res.getInteger(
-                R.integer.recents_animate_task_view_remove_duration);
         int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
 
         // Disabling clipping with the stack while the view is animating away, this will get
@@ -393,7 +394,7 @@ public class TaskStackAnimationHelper {
         deleteTaskView.setClipViewInStack(false);
 
         // Compose the new animation and transform and star the animation
-        AnimationProps taskAnimation = new AnimationProps(taskViewRemoveAnimDuration,
+        AnimationProps taskAnimation = new AnimationProps(DISMISS_TASK_DURATION,
                 Interpolators.ALPHA_OUT, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -413,29 +414,23 @@ public class TaskStackAnimationHelper {
      */
     public void startDeleteAllTasksAnimation(final List<TaskView> taskViews,
                                              final ReferenceCountedTrigger postAnimationTrigger) {
-        Resources res = mStackView.getResources();
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
 
-        int taskViewRemoveAnimDuration = res.getInteger(
-                R.integer.recents_animate_task_views_remove_all_duration);
         int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
 
         int taskViewCount = taskViews.size();
-        int startDelayMax = 125;
 
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
-            int indexFromFront = taskViewCount - i - 1;
-            float x = Interpolators.ACCELERATE.getInterpolation((float) indexFromFront /
-                    taskViewCount);
-            int startDelay = (int) Utilities.mapRange(x, 0, startDelayMax);
+            int taskIndexFromFront = taskViewCount - i - 1;
+            int startDelay = taskIndexFromFront * DOUBLE_FRAME_OFFSET_MS;
 
             // Disabling clipping with the stack while the view is animating away
             tv.setClipViewInStack(false);
 
             // Compose the new animation and transform and star the animation
             AnimationProps taskAnimation = new AnimationProps(startDelay,
-                    taskViewRemoveAnimDuration, Interpolators.FAST_OUT_LINEAR_IN,
+                    DISMISS_ALL_TASKS_DURATION, DISMISS_ALL_TRANSLATION_INTERPOLATOR,
                     new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -605,7 +600,7 @@ public class TaskStackAnimationHelper {
                 // Now, animate in the front-most task
                 if (frontMostTaskView != null) {
                     mStackView.updateTaskViewToTransform(frontMostTaskView, frontMostTransform,
-                            new AnimationProps(75, 200, FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR));
+                            new AnimationProps(75, 250, FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR));
                 }
             }
         });

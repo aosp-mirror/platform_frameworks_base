@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -97,6 +98,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final static int INCOMPATIBLE_APP_ALPHA_DURATION = 150;
 
     private RecentsPackageMonitor mPackageMonitor;
+    private Handler mHandler = new Handler();
     private long mLastTabKeyEventTime;
     private int mLastDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
     private int mLastDisplayDensity;
@@ -138,12 +140,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         @Override
         public void run() {
             try {
-                ActivityOptions opts = mOpts;
-                if (opts == null) {
-                    opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
-                            R.anim.recents_to_launcher_enter, R.anim.recents_to_launcher_exit);
-                }
-                startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
+                mHandler.post(() -> {
+                    ActivityOptions opts = mOpts;
+                    if (opts == null) {
+                        opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
+                                R.anim.recents_to_launcher_enter, R.anim.recents_to_launcher_exit);
+                    }
+                    startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
+                });
             } catch (Exception e) {
                 Log.e(TAG, getString(R.string.recents_launch_error_message, "Home"), e);
             }
@@ -223,13 +227,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 new DismissRecentsToHomeAnimationStarted(animateTaskViews);
         dismissEvent.addPostAnimationCallback(new LaunchHomeRunnable(mHomeIntent,
                 overrideAnimation));
-        dismissEvent.addPostAnimationCallback(new Runnable() {
-            @Override
-            public void run() {
-                Recents.getSystemServices().sendCloseSystemWindows(
-                        BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
-            }
-        });
+        Recents.getSystemServices().sendCloseSystemWindows(
+                BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
         EventBus.getDefault().send(dismissEvent);
     }
 

@@ -144,12 +144,6 @@
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
 
-    <!-- The animation duration for animating the removal of a task view. -->
-    <integer name="recents_animate_task_view_remove_duration">175</integer>
-
-    <!-- The base animation duration for animating the removal of all task views. -->
-    <integer name="recents_animate_task_views_remove_all_duration">300</integer>
-
     <!-- The animation duration for scrolling the stack to a particular item. -->
     <integer name="recents_animate_task_stack_scroll_duration">200</integer>
 
