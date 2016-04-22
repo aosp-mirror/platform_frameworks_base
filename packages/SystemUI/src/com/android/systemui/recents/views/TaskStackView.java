@@ -25,6 +25,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -109,6 +110,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final float HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
+    public static final int SLOW_SYNC_STACK_DURATION = 250;
     private static final int DRAG_SCALE_DURATION = 175;
     static final float DRAG_SCALE_FACTOR = 1.05f;
 
@@ -126,48 +128,48 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Update only the layout to the initial state. */
     private static final int INITIAL_STATE_UPDATE_LAYOUT_ONLY = 2;
 
-    LayoutInflater mInflater;
-    TaskStack mStack = new TaskStack();
+    private LayoutInflater mInflater;
+    private TaskStack mStack = new TaskStack();
     @ViewDebug.ExportedProperty(deepExport=true, prefix="layout_")
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
     // The stable layout algorithm is only used to calculate the task rect with the stable bounds
-    TaskStackLayoutAlgorithm mStableLayoutAlgorithm;
+    private TaskStackLayoutAlgorithm mStableLayoutAlgorithm;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="scroller_")
-    TaskStackViewScroller mStackScroller;
+    private TaskStackViewScroller mStackScroller;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
-    TaskStackViewTouchHandler mTouchHandler;
-    TaskStackAnimationHelper mAnimationHelper;
-    GradientDrawable mFreeformWorkspaceBackground;
-    ObjectAnimator mFreeformWorkspaceBackgroundAnimator;
-    ViewPool<TaskView, Task> mViewPool;
+    private TaskStackViewTouchHandler mTouchHandler;
+    private TaskStackAnimationHelper mAnimationHelper;
+    private GradientDrawable mFreeformWorkspaceBackground;
+    private ObjectAnimator mFreeformWorkspaceBackgroundAnimator;
+    private ViewPool<TaskView, Task> mViewPool;
 
-    ArrayList<TaskView> mTaskViews = new ArrayList<>();
-    ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
-    ArraySet<Task.TaskKey> mIgnoreTasks = new ArraySet<>();
-    AnimationProps mDeferredTaskViewLayoutAnimation = null;
+    private ArrayList<TaskView> mTaskViews = new ArrayList<>();
+    private ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
+    private ArraySet<Task.TaskKey> mIgnoreTasks = new ArraySet<>();
+    private AnimationProps mDeferredTaskViewLayoutAnimation = null;
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="doze_")
-    DozeTrigger mUIDozeTrigger;
+    private DozeTrigger mUIDozeTrigger;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="focused_task_")
-    Task mFocusedTask;
+    private Task mFocusedTask;
 
-    int mTaskCornerRadiusPx;
+    private int mTaskCornerRadiusPx;
     private int mDividerSize;
     private int mStartTimerIndicatorDuration;
 
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mTaskViewsClipDirty = true;
+    private boolean mTaskViewsClipDirty = true;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mAwaitingFirstLayout = true;
+    private boolean mAwaitingFirstLayout = true;
     @ViewDebug.ExportedProperty(category="recents")
     @InitialStateAction
-    int mInitialState = INITIAL_STATE_UPDATE_ALL;
+    private int mInitialState = INITIAL_STATE_UPDATE_ALL;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mInMeasureLayout = false;
+    private boolean mInMeasureLayout = false;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mEnterAnimationComplete = false;
+    private boolean mEnterAnimationComplete = false;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mTouchExplorationEnabled;
+    private boolean mTouchExplorationEnabled;
     @ViewDebug.ExportedProperty(category="recents")
     boolean mScreenPinningEnabled;
 
@@ -183,12 +185,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The current window bounds are dynamic and may change as the user drags and drops
     @ViewDebug.ExportedProperty(category="recents")
     private Rect mWindowRect = new Rect();
+    // The current display bounds
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mDisplayRect = new Rect();
+    // The current display orientation
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mDisplayOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private Rect mTmpRect = new Rect();
     private ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();
     private List<TaskView> mTmpTaskViews = new ArrayList<>();
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
-    private ArrayList<TaskViewTransform> mTmpTaskTransforms = new ArrayList<>();
     private int[] mTmpIntPair = new int[2];
     private boolean mResetToInitialStateWhenResized;
     private int mLastWidth;
@@ -248,6 +255,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTaskCornerRadiusPx = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         mDividerSize = ssp.getDockedDividerSize(context);
+        mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
+        mDisplayRect = ssp.getDisplayRect();
 
         int taskBarDismissDozeDelaySeconds = getResources().getInteger(
                 R.integer.recents_task_bar_dismiss_delay_seconds);
@@ -1150,7 +1159,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the stable stack bounds, but only update the current stack bounds if the stable
         // bounds have changed.  This is because we may get spurious measures while dragging where
         // our current stack bounds reflect the target drop region.
-        mLayoutAlgorithm.getTaskStackBounds(new Rect(0, 0, width, height),
+        mLayoutAlgorithm.getTaskStackBounds(mDisplayRect, new Rect(0, 0, width, height),
                 mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
         if (!mTmpRect.equals(mStableStackBounds)) {
             mStableStackBounds.set(mTmpRect);
@@ -1160,9 +1169,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Compute the rects in the stack algorithm
-        mStableLayoutAlgorithm.initialize(mStableWindowRect, mStableStackBounds,
+        mStableLayoutAlgorithm.initialize(mDisplayRect, mStableWindowRect, mStableStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
-        mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
+        mLayoutAlgorithm.initialize(mDisplayRect, mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         updateLayoutAlgorithm(false /* boundScroll */);
 
@@ -1538,7 +1547,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private void bindTaskView(TaskView tv, Task task) {
         // Rebind the task and request that this task's data be filled into the TaskView
-        tv.onTaskBound(task);
+        tv.onTaskBound(task, mTouchExplorationEnabled, mDisplayOrientation, mDisplayRect);
 
         // Load the task data
         Recents.getTaskLoader().loadTaskData(task);
@@ -1789,7 +1798,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
-        AnimationProps animation = new AnimationProps(250, Interpolators.FAST_OUT_SLOW_IN);
+        AnimationProps animation = new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN);
         boolean ignoreTaskOverrides = false;
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
@@ -1802,11 +1812,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             int height = getMeasuredHeight();
             height -= systemInsets.bottom;
             systemInsets.bottom = 0;
-            mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
+            mStackBounds.set(dockState.getDockedTaskStackBounds(mDisplayRect, getMeasuredWidth(),
                     height, mDividerSize, systemInsets,
                     mLayoutAlgorithm, getResources(), mWindowRect));
             mLayoutAlgorithm.setSystemInsets(systemInsets);
-            mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
+            mLayoutAlgorithm.initialize(mDisplayRect, mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
             ignoreTaskOverrides = true;
@@ -1817,7 +1827,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStackBounds.set(mStableStackBounds);
             removeIgnoreTask(event.task);
             mLayoutAlgorithm.setSystemInsets(mStableLayoutAlgorithm.mSystemInsets);
-            mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
+            mLayoutAlgorithm.initialize(mDisplayRect, mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
             addIgnoreTask(event.task);
@@ -1960,6 +1970,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
+        if (event.fromDeviceOrientationChange) {
+            mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
+            mDisplayRect = Recents.getSystemServices().getDisplayRect();
+        }
         reloadOnConfigurationChange();
 
         // Notify the task views of the configuration change so they can reload their resources
@@ -2072,6 +2086,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         writer.print(" stackBounds="); writer.print(Utilities.dumpRect(mStackBounds));
         writer.print(" stableWindow="); writer.print(Utilities.dumpRect(mStableWindowRect));
         writer.print(" window="); writer.print(Utilities.dumpRect(mWindowRect));
+        writer.print(" display="); writer.print(Utilities.dumpRect(mDisplayRect));
+        writer.print(" orientation="); writer.print(mDisplayOrientation);
         writer.print(" [0x"); writer.print(id); writer.print("]");
         writer.println();
 

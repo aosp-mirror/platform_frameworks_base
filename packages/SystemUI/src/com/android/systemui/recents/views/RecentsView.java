@@ -88,7 +88,6 @@ public class RecentsView extends FrameLayout {
 
     private static final String TAG = "RecentsView";
 
-    private static final int DOCK_AREA_OVERLAY_TRANSITION_DURATION = 135;
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
     private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
 
@@ -733,8 +732,8 @@ public class RecentsView extends FrameLayout {
             TaskStack.DockState.ViewState viewState = dockState.viewState;
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it
-                viewState.startAnimation(null, 0, 0, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
-                        Interpolators.ALPHA_OUT, animateAlpha, animateBounds);
+                viewState.startAnimation(null, 0, 0, TaskStackView.SLOW_SYNC_STACK_DURATION,
+                        Interpolators.FAST_OUT_SLOW_IN, animateAlpha, animateBounds);
             } else {
                 // This state is now visible, update the bounds and show it
                 int areaAlpha = overrideAreaAlpha != -1
@@ -752,7 +751,7 @@ public class RecentsView extends FrameLayout {
                     viewState.dockAreaOverlay.setBounds(bounds);
                 }
                 viewState.startAnimation(bounds, areaAlpha, hintAlpha,
-                        DOCK_AREA_OVERLAY_TRANSITION_DURATION, Interpolators.ALPHA_IN,
+                        TaskStackView.SLOW_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN,
                         animateAlpha, animateBounds);
             }
         }
