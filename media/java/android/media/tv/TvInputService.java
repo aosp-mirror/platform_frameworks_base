@@ -256,31 +256,6 @@ public abstract class TvInputService extends Service {
         return null;
     }
 
-    /**
-     * Updates the <code>TvInputInfo</code> for an existing TV input. A TV input service
-     * implementation may call this method to pass the application and system an up-to-date
-     * <code>TvInputInfo</code> object that describes itself.
-     *
-     * <p>The system automatically creates a <code>TvInputInfo</code> object for each TV input,
-     * based on the information collected from the <code>AndroidManifest.xml</code>, thus it is not
-     * necessary to call this method unless such information has changed dynamically.
-     * Use {@link TvInputInfo.Builder} to build a new <code>TvInputInfo</code> object.
-     *
-     * <p>Attempting to change information about a TV input that the calling package does not own
-     * does nothing.
-     *
-     * @param context The application context.
-     * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
-     * @see TvInputManager.TvInputCallback#onTvInputInfoUpdated(TvInputInfo)
-     */
-    public static final void updateTvInputInfo(Context context, TvInputInfo inputInfo) {
-        TvInputManager manager = (TvInputManager) context.getSystemService(
-                Context.TV_INPUT_SERVICE);
-        if (manager != null) {
-            manager.updateTvInputInfo(inputInfo);
-        }
-    }
-
     private boolean isPassthroughInput(String inputId) {
         if (mTvInputManager == null) {
             mTvInputManager = (TvInputManager) getSystemService(Context.TV_INPUT_SERVICE);
