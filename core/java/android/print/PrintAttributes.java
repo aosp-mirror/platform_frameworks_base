@@ -805,8 +805,8 @@ public final class PrintAttributes implements Parcelable {
          * @param id The unique media size id.
          * @param packageName The name of the creating package.
          * @param labelResId The resource if of a human readable label.
-         * @param widthMils The width in mils (thousands of an inch).
-         * @param heightMils The height in mils (thousands of an inch).
+         * @param widthMils The width in mils (thousandths of an inch).
+         * @param heightMils The height in mils (thousandths of an inch).
          *
          * @throws IllegalArgumentException If the id is empty or the label
          * is empty or the widthMils is less than or equal to zero or the
@@ -828,8 +828,8 @@ public final class PrintAttributes implements Parcelable {
          * @param id The unique media size id. It is unique amongst other media sizes
          *        supported by the printer.
          * @param label The <strong>localized</strong> human readable label.
-         * @param widthMils The width in mils (thousands of an inch).
-         * @param heightMils The height in mils (thousands of an inch).
+         * @param widthMils The width in mils (thousandths of an inch).
+         * @param heightMils The height in mils (thousandths of an inch).
          *
          * @throws IllegalArgumentException If the id is empty or the label is empty
          * or the widthMils is less than or equal to zero or the heightMils is less
@@ -864,8 +864,8 @@ public final class PrintAttributes implements Parcelable {
          *        supported by the printer.
          * @param label The <strong>localized</strong> human readable label.
          * @param packageName The name of the creating package.
-         * @param widthMils The width in mils (thousands of an inch).
-         * @param heightMils The height in mils (thousands of an inch).
+         * @param widthMils The width in mils (thousandths of an inch).
+         * @param heightMils The height in mils (thousandths of an inch).
          * @param labelResId The resource if of a human readable label.
          *
          * @throws IllegalArgumentException If the id is empty or the label is unset
@@ -924,7 +924,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the media width in mils (thousands of an inch).
+         * Gets the media width in mils (thousandths of an inch).
          *
          * @return The media width.
          */
@@ -933,7 +933,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the media height in mils (thousands of an inch).
+         * Gets the media height in mils (thousandths of an inch).
          *
          * @return The media height.
          */
@@ -1225,10 +1225,10 @@ public final class PrintAttributes implements Parcelable {
         /**
          * Creates a new instance.
          *
-         * @param leftMils The left margin in mils (thousands of an inch).
-         * @param topMils The top margin in mils (thousands of an inch).
-         * @param rightMils The right margin in mils (thousands of an inch).
-         * @param bottomMils The bottom margin in mils (thousands of an inch).
+         * @param leftMils The left margin in mils (thousandths of an inch).
+         * @param topMils The top margin in mils (thousandths of an inch).
+         * @param rightMils The right margin in mils (thousandths of an inch).
+         * @param bottomMils The bottom margin in mils (thousandths of an inch).
          */
         public Margins(int leftMils, int topMils, int rightMils, int bottomMils) {
             mTopMils = topMils;
@@ -1238,7 +1238,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the left margin in mils (thousands of an inch).
+         * Gets the left margin in mils (thousandths of an inch).
          *
          * @return The left margin.
          */
@@ -1247,7 +1247,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the top margin in mils (thousands of an inch).
+         * Gets the top margin in mils (thousandths of an inch).
          *
          * @return The top margin.
          */
@@ -1256,7 +1256,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the right margin in mils (thousands of an inch).
+         * Gets the right margin in mils (thousandths of an inch).
          *
          * @return The right margin.
          */
@@ -1265,7 +1265,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Gets the bottom margin in mils (thousands of an inch).
+         * Gets the bottom margin in mils (thousandths of an inch).
          *
          * @return The bottom margin.
          */
