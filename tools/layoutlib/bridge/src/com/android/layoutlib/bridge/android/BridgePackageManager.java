@@ -49,6 +49,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 import java.util.List;
@@ -307,6 +308,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public String getServicesSystemSharedLibraryPackageName() {
+        return null;
+    }
+
+    @Override
+    public @NonNull String getSharedSystemSharedLibraryPackageName() {
         return null;
     }
 
