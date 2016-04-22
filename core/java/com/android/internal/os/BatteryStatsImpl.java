@@ -3400,7 +3400,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
                             || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
             if (active) {
-                mMobileRadioActiveStartTime = realElapsedRealtimeMs = elapsedRealtime;
+                mMobileRadioActiveStartTime = realElapsedRealtimeMs = timestampNs / (1000 * 1000);
                 mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
             } else {
                 realElapsedRealtimeMs = timestampNs / (1000*1000);
