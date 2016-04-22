@@ -401,6 +401,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputServiceCallback.aidl \
 	media/java/android/media/tv/ITvInputSession.aidl \
 	media/java/android/media/tv/ITvInputSessionCallback.aidl \
+	media/java/android/media/tv/ITvRemoteProvider.aidl \
+	media/java/android/media/tv/ITvRemoteServiceInput.aidl \
 	media/java/android/service/media/IMediaBrowserService.aidl \
 	media/java/android/service/media/IMediaBrowserServiceCallbacks.aidl \
 	telecomm/java/com/android/internal/telecom/ICallScreeningAdapter.aidl \
