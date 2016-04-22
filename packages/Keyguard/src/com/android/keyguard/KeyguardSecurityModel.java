@@ -54,7 +54,7 @@ public class KeyguardSecurityModel {
         mLockPatternUtils = utils;
     }
 
-    SecurityMode getSecurityMode() {
+    SecurityMode getSecurityMode(int userId) {
         KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
 
         if (SubscriptionManager.isValidSubscriptionId(
@@ -67,8 +67,7 @@ public class KeyguardSecurityModel {
             return SecurityMode.SimPuk;
         }
 
-        final int security = mLockPatternUtils.getActivePasswordQuality(
-                KeyguardUpdateMonitor.getCurrentUser());
+        final int security = mLockPatternUtils.getActivePasswordQuality(userId);
         switch (security) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

@@ -510,7 +510,11 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void keyguardDone(boolean strongAuth) {
+        public void keyguardDone(boolean strongAuth, int targetUserId) {
+            if (targetUserId != ActivityManager.getCurrentUser()) {
+                return;
+            }
+
             if (!mKeyguardDonePending) {
                 KeyguardViewMediator.this.keyguardDone(true /* authenticated */);
             }
@@ -530,7 +534,11 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void keyguardDonePending(boolean strongAuth) {
+        public void keyguardDonePending(boolean strongAuth, int targetUserId) {
+            if (targetUserId != ActivityManager.getCurrentUser()) {
+                return;
+            }
+
             mKeyguardDonePending = true;
             mHideAnimationRun = true;
             mStatusBarKeyguardViewManager.startPreHideAnimation(null /* finishRunnable */);

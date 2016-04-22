@@ -258,7 +258,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mCallback.reportUnlockAttempt(userId, true, 0);
                 if (dismissKeyguard) {
                     mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
-                    mCallback.dismiss(true);
+                    mCallback.dismiss(true, userId);
                 }
             } else {
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);

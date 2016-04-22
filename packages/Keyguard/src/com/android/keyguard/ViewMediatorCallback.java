@@ -31,8 +31,9 @@ public interface ViewMediatorCallback {
      *
      * @param strongAuth whether the user has authenticated with strong authentication like
      *                   pattern, password or PIN but not by trust agents or fingerprint
+     * @param targetUserId a user that needs to be the foreground user at the completion.
      */
-    void keyguardDone(boolean strongAuth);
+    void keyguardDone(boolean strongAuth, int targetUserId);
 
     /**
      * Report that the keyguard is done drawing.
@@ -50,8 +51,9 @@ public interface ViewMediatorCallback {
      *
      * @param strongAuth whether the user has authenticated with strong authentication like
      *                   pattern, password or PIN but not by trust agents or fingerprint
+     * @param targetUserId a user that needs to be the foreground user at the completion.
      */
-    void keyguardDonePending(boolean strongAuth);
+    void keyguardDonePending(boolean strongAuth, int targetUserId);
 
     /**
      * Report when keyguard is actually gone

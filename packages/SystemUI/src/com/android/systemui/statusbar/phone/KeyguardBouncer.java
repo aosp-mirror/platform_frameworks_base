@@ -101,7 +101,7 @@ public class KeyguardBouncer {
                 && activeUserId == keyguardUserId;
         // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
         // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
-        if (allowDismissKeyguard && mKeyguardView.dismiss()) {
+        if (allowDismissKeyguard && mKeyguardView.dismiss(activeUserId)) {
             return;
         }
 
@@ -291,6 +291,6 @@ public class KeyguardBouncer {
 
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
         ensureView();
-        mKeyguardView.finish(strongAuth);
+        mKeyguardView.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
     }
 }
