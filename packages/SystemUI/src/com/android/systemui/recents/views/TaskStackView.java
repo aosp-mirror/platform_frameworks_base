@@ -647,7 +647,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private void relayoutTaskViews(AnimationProps animation, boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
-        mDeferredTaskViewLayoutAnimation = null;
+        cancelDeferredTaskViewLayoutAnimation();
 
         // Synchronize the current set of TaskViews
         bindVisibleTaskViews(mStackScroller.getStackScroll(),
@@ -739,23 +739,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /**
      * Cancels all {@link TaskView} animations.
-     *
-     * @see #cancelAllTaskViewAnimations(ArraySet<Task.TaskKey>)
      */
     void cancelAllTaskViewAnimations() {
-        cancelAllTaskViewAnimations(mIgnoreTasks);
-    }
-
-    /**
-     * Cancels all {@link TaskView} animations.
-     *
-     * @param ignoreTasksSet The set of tasks to continue running their animations.
-     */
-    void cancelAllTaskViewAnimations(ArraySet<Task.TaskKey> ignoreTasksSet) {
         List<TaskView> taskViews = getTaskViews();
         for (int i = taskViews.size() - 1; i >= 0; i--) {
             final TaskView tv = taskViews.get(i);
-            if (!ignoreTasksSet.contains(tv.getTask().key)) {
+            if (!mIgnoreTasks.contains(tv.getTask().key)) {
                 tv.cancelTransformAnimation();
             }
         }
@@ -1675,8 +1664,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // Stop any scrolling
+        cancelDeferredTaskViewLayoutAnimation();
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
+        mTouchHandler.finishAnimations();
 
         // Start the task animations
         mAnimationHelper.startExitToHomeAnimation(event.animated, event.getAnimationTrigger());

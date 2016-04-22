@@ -188,6 +188,18 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         return true;
     }
 
+    /**
+     * Finishes all scroll-fling and swipe animations currently running.
+     */
+    public void finishAnimations() {
+        Utilities.cancelAnimationWithoutCallbacks(mScrollFlingAnimator);
+        ArrayMap<View, Animator> existingAnimators = new ArrayMap<>(mSwipeHelperAnimations);
+        for (int i = 0; i < existingAnimators.size(); i++) {
+            existingAnimators.get(existingAnimators.keyAt(i)).end();
+        }
+        mSwipeHelperAnimations.clear();
+    }
+
     private boolean handleTouchEvent(MotionEvent ev) {
         // Short circuit if we have no children
         if (mSv.getTaskViews().size() == 0) {
@@ -207,19 +219,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mActiveTaskView = findViewAtPoint(mDownX, mDownY);
 
                 // Stop the current scroll if it is still flinging
+                mSv.cancelDeferredTaskViewLayoutAnimation();
                 mScroller.stopScroller();
                 mScroller.stopBoundScrollAnimation();
                 mScroller.resetDeltaScroll();
-                Utilities.cancelAnimationWithoutCallbacks(mScrollFlingAnimator);
-
-                // Finish any existing task animations from the delete
-                mSv.cancelAllTaskViewAnimations();
-                // Finish any of the swipe helper animations
-                ArrayMap<View, Animator> existingAnimators = new ArrayMap<>(mSwipeHelperAnimations);
-                for (int i = 0; i < existingAnimators.size(); i++) {
-                    existingAnimators.get(existingAnimators.keyAt(i)).end();
-                }
-                mSwipeHelperAnimations.clear();
+                finishAnimations();
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
