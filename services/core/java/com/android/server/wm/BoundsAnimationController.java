@@ -149,15 +149,11 @@ public class BoundsAnimationController {
         public void onAnimationEnd(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
                     + " mMoveToFullScreen=" + mMoveToFullScreen + " mWillReplace=" + mWillReplace);
+
+            finishAnimation();
             if (mMoveToFullScreen && !mWillReplace) {
                 mTarget.moveToFullscreen();
             }
-
-            // If we finish the animation before we move the target to fullscreen,
-            // recents may close itself and we may try and resume the previous
-            // fullscreen app leading to churn and flicker after we then move
-            // our target to fullscreen.
-            finishAnimation();
         }
 
         @Override
