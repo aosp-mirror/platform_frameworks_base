@@ -947,10 +947,10 @@ public class Notification implements Parcelable
     public static final String EXTRA_ALLOW_GENERATED_REPLIES = "android.allowGeneratedReplies";
 
     /**
-     * {@link #extras} key: a {@link String} to be displayed as the title to a thread represented by
-     * a {@link android.app.Notification.MessagingStyle}
+     * {@link #extras} key: a {@link String} to be displayed as the title to a conversation
+     * represented by a {@link android.app.Notification.MessagingStyle}
      */
-    public static final String EXTRA_THREAD_TITLE = "android.threadTitle";
+    public static final String EXTRA_CONVERSATION_TITLE = "android.conversationTitle";
 
     /**
      * {@link #extras} key: an array of {@link android.app.Notification.MessagingStyle.Message}
@@ -4326,7 +4326,7 @@ public class Notification implements Parcelable
         CharSequence mUserDisplayName;
         CharSequence mConversationTitle;
         boolean mAllowGeneratedReplies = true;
-        ArrayList<Message> mMessages = new ArrayList<>();
+        List<Message> mMessages = new ArrayList<>();
 
         MessagingStyle() {
         }
@@ -4439,11 +4439,11 @@ public class Notification implements Parcelable
                 extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUserDisplayName);
             }
             if (mConversationTitle != null) {
-                extras.putCharSequence(EXTRA_THREAD_TITLE, mConversationTitle);
+                extras.putCharSequence(EXTRA_CONVERSATION_TITLE, mConversationTitle);
             }
             extras.putBoolean(EXTRA_ALLOW_GENERATED_REPLIES, mAllowGeneratedReplies);
-            if (!mMessages.isEmpty()) {
-                extras.putParcelableArrayList(EXTRA_MESSAGES, mMessages);
+            if (!mMessages.isEmpty()) { extras.putParcelableArray(EXTRA_MESSAGES,
+                    Message.getBundleArrayForMessages(mMessages));
             }
         }
 
@@ -4456,12 +4456,12 @@ public class Notification implements Parcelable
 
             mMessages.clear();
             mUserDisplayName = extras.getString(EXTRA_SELF_DISPLAY_NAME);
-            mConversationTitle = extras.getString(EXTRA_THREAD_TITLE);
+            mConversationTitle = extras.getString(EXTRA_CONVERSATION_TITLE);
             mAllowGeneratedReplies = extras.getBoolean(EXTRA_ALLOW_GENERATED_REPLIES,
                     mAllowGeneratedReplies);
-            List<Message> messages = extras.getParcelableArrayList(EXTRA_MESSAGES);
-            if (messages != null) {
-                mMessages.addAll(messages);
+            Parcelable[] parcelables = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (parcelables != null && parcelables instanceof Bundle[]) {
+                mMessages = Message.getMessagesFromBundleArray((Bundle[]) parcelables);
             }
         }
 
@@ -4562,7 +4562,13 @@ public class Notification implements Parcelable
                     ColorStateList.valueOf(color), null);
         }
 
-        public static final class Message implements Parcelable {
+        public static final class Message {
+
+            static final String KEY_TEXT = "text";
+            static final String KEY_TIMESTAMP = "time";
+            static final String KEY_SENDER = "sender";
+            static final String KEY_DATA_MIME_TYPE = "type";
+            static final String KEY_DATA_URI= "uri";
 
             private final CharSequence mText;
             private final long mTimestamp;
@@ -4620,26 +4626,6 @@ public class Notification implements Parcelable
                 return this;
             }
 
-            private Message(Parcel in) {
-                if (in.readInt() != 0) {
-                    mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-                } else {
-                    mText = null;
-                }
-                mTimestamp = in.readLong();
-                if (in.readInt() != 0) {
-                    mSender = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-                } else {
-                    mSender = null;
-                }
-                if (in.readInt() != 0) {
-                    mDataMimeType = in.readString();
-                }
-                if (in.readInt() != 0) {
-                    mDataUri = in.readParcelable(Uri.class.getClassLoader());
-                }
-            }
-
             /**
              * Get the text to be used for this message, or the fallback text if a type and content
              * Uri have been set
@@ -4677,49 +4663,64 @@ public class Notification implements Parcelable
                 return mDataUri;
             }
 
-            @Override
-            public int describeContents() {
-                return 0;
-            }
-
-            @Override
-            public void writeToParcel(Parcel out, int flags) {
+            private Bundle toBundle() {
+                Bundle bundle = new Bundle();
                 if (mText != null) {
-                    out.writeInt(1);
-                    TextUtils.writeToParcel(mText, out, flags);
-                } else {
-                    out.writeInt(0);
+                    bundle.putCharSequence(KEY_TEXT, mText);
                 }
-                out.writeLong(mTimestamp);
+                bundle.putLong(KEY_TIMESTAMP, mTimestamp);
                 if (mSender != null) {
-                    out.writeInt(1);
-                    TextUtils.writeToParcel(mSender, out, flags);
-                } else {
-                    out.writeInt(0);
+                    bundle.putCharSequence(KEY_SENDER, mSender);
                 }
                 if (mDataMimeType != null) {
-                    out.writeInt(1);
-                    out.writeString(mDataMimeType);
-                } else {
-                    out.writeInt(0);
+                    bundle.putString(KEY_DATA_MIME_TYPE, mDataMimeType);
                 }
                 if (mDataUri != null) {
-                    out.writeInt(1);
-                    out.writeParcelable(mDataUri, flags);
-                } else {
-                    out.writeInt(0);
+                    bundle.putParcelable(KEY_DATA_URI, mDataUri);
                 }
+                return bundle;
             }
 
-            public static final Parcelable.Creator<Message> CREATOR =
-                    new Parcelable.Creator<Message>() {
-                        public Message createFromParcel(Parcel in) {
-                            return new Message(in);
+            static Bundle[] getBundleArrayForMessages(List<Message> messages) {
+                Bundle[] bundles = new Bundle[messages.size()];
+                final int N = messages.size();
+                for (int i = 0; i < N; i++) {
+                    bundles[i] = messages.get(i).toBundle();
+                }
+                return bundles;
+            }
+
+            static List<Message> getMessagesFromBundleArray(Bundle[] bundles) {
+                List<Message> messages = new ArrayList<>(bundles.length);
+                for (int i = 0; i < bundles.length; i++) {
+                    Message message = getMessageFromBundle(bundles[i]);
+                    if (message != null) {
+                        messages.add(message);
+                    }
+                }
+                return messages;
+            }
+
+            static Message getMessageFromBundle(Bundle bundle) {
+                try {
+                    if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP) ||
+                            !bundle.containsKey(KEY_SENDER)) {
+                        return null;
+                    } else {
+                        Message message = new Message(bundle.getCharSequence(KEY_TEXT),
+                                bundle.getLong(KEY_TIMESTAMP), bundle.getCharSequence(KEY_SENDER));
+                        if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
+                                bundle.containsKey(KEY_DATA_URI)) {
+
+                            message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
+                                    (Uri) bundle.getParcelable(KEY_DATA_URI));
                         }
-                        public Message[] newArray(int size) {
-                            return new Message[size];
-                        }
-                    };
+                        return message;
+                    }
+                } catch (ClassCastException e) {
+                    return null;
+                }
+            }
         }
     }
 
