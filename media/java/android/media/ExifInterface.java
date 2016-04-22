@@ -1748,7 +1748,7 @@ public class ExifInterface {
             String subSecs = getAttribute(TAG_SUBSEC_TIME);
             if (subSecs != null) {
                 try {
-                    long sub = Long.valueOf(subSecs);
+                    long sub = Long.parseLong(subSecs);
                     while (sub > 1000) {
                         sub /= 10;
                     }

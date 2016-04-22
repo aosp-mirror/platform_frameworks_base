@@ -560,7 +560,7 @@ final class SettingsState {
         }
 
         public Setting(String name, String value, String packageName, String id) {
-            mNextId = Math.max(mNextId, Long.valueOf(id) + 1);
+            mNextId = Math.max(mNextId, Long.parseLong(id) + 1);
             init(name, value, packageName, id);
         }
 

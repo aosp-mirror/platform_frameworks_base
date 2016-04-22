@@ -607,7 +607,7 @@ public final class DropBoxManagerService extends SystemService {
             this.flags = flags;
 
             long millis;
-            try { millis = Long.valueOf(name); } catch (NumberFormatException e) { millis = 0; }
+            try { millis = Long.parseLong(name); } catch (NumberFormatException e) { millis = 0; }
             this.timestampMillis = millis;
         }
 
