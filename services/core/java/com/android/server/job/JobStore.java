@@ -365,11 +365,14 @@ public class JobStore {
          */
         private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
+            if (jobStatus.hasConnectivityConstraint()) {
+                out.attribute(null, "connectivity", Boolean.toString(true));
+            }
             if (jobStatus.hasUnmeteredConstraint()) {
                 out.attribute(null, "unmetered", Boolean.toString(true));
             }
-            if (jobStatus.hasConnectivityConstraint()) {
-                out.attribute(null, "connectivity", Boolean.toString(true));
+            if (jobStatus.hasNotRoamingConstraint()) {
+                out.attribute(null, "not-roaming", Boolean.toString(true));
             }
             if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
@@ -693,13 +696,17 @@ public class JobStore {
         }
 
         private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
-            String val = parser.getAttributeValue(null, "unmetered");
+            String val = parser.getAttributeValue(null, "connectivity");
+            if (val != null) {
+                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+            }
+            val = parser.getAttributeValue(null, "unmetered");
             if (val != null) {
                 jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
             }
-            val = parser.getAttributeValue(null, "connectivity");
+            val = parser.getAttributeValue(null, "not-roaming");
             if (val != null) {
-                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NOT_ROAMING);
             }
             val = parser.getAttributeValue(null, "idle");
             if (val != null) {

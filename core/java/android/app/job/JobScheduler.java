@@ -16,6 +16,9 @@
 
 package android.app.job;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.List;
 
 /**
@@ -78,7 +81,6 @@ public abstract class JobScheduler {
      * Cancel a job that is pending in the JobScheduler.
      * @param jobId unique identifier for this job. Obtain this value from the jobs returned by
      * {@link #getAllPendingJobs()}.
-     * @return
      */
     public abstract void cancel(int jobId);
 
@@ -88,8 +90,18 @@ public abstract class JobScheduler {
     public abstract void cancelAll();
 
     /**
-     * @return a list of all the jobs registered by this package that have not yet been executed.
+     * Retrieve all jobs for this package that are pending in the JobScheduler.
+     *
+     * @return a list of all the jobs registered by this package that have not
+     *         yet been executed.
      */
-    public abstract List<JobInfo> getAllPendingJobs();
+    public abstract @NonNull List<JobInfo> getAllPendingJobs();
 
+    /**
+     * Retrieve a specific job for this package that is pending in the
+     * JobScheduler.
+     *
+     * @return job registered by this package that has not yet been executed.
+     */
+    public abstract @Nullable JobInfo getPendingJob(int jobId);
 }
