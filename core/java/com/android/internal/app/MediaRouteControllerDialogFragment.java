@@ -55,6 +55,6 @@ public class MediaRouteControllerDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return onCreateControllerDialog(getActivity(), savedInstanceState);
+        return onCreateControllerDialog(getContext(), savedInstanceState);
     }
 }
