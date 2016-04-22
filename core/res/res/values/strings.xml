@@ -2687,6 +2687,11 @@
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
     <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
+    <!-- [CHAR LIMIT=40] Title of notification that is shown when performing a system upgrade. -->
+    <string name="android_upgrading_notification_title">Android is upgrading</string>
+    <!-- [CHAR LIMIT=200] Body of notification that is shown when performing a system upgrade. -->
+    <string name="android_upgrading_notification_body">Some apps may not work properly until the upgrade finishes</string>
+
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
     <string name="android_upgrading_apk">Optimizing app
         <xliff:g id="number" example="123">%1$d</xliff:g> of
