@@ -295,6 +295,14 @@ public class SignalClusterView
             return;
         }
         // Clear out all old subIds.
+        for (PhoneState state : mPhoneStates) {
+            if (state.mMobile != null) {
+                state.maybeStopAnimatableDrawable(state.mMobile);
+            }
+            if (state.mMobileDark != null) {
+                state.maybeStopAnimatableDrawable(state.mMobileDark);
+            }
+        }
         mPhoneStates.clear();
         if (mMobileSignalGroup != null) {
             mMobileSignalGroup.removeAllViews();
@@ -389,6 +397,11 @@ public class SignalClusterView
             if (state.mMobile != null) {
                 state.maybeStopAnimatableDrawable(state.mMobile);
                 state.mMobile.setImageDrawable(null);
+                state.mLastMobileStrengthId = -1;
+            }
+            if (state.mMobileDark != null) {
+                state.maybeStopAnimatableDrawable(state.mMobileDark);
+                state.mMobileDark.setImageDrawable(null);
                 state.mLastMobileStrengthId = -1;
             }
             if (state.mMobileType != null) {
