@@ -16,8 +16,6 @@
 
 package android.mtp;
 
-import android.annotation.Nullable;
-
 /**
  * This class encapsulates information about an MTP device.
  * This corresponds to the DeviceInfo Dataset described in
@@ -112,7 +110,7 @@ public class MtpDeviceInfo {
      * @see MtpConstants#OPERATION_SET_OBJECT_REFERENCES
      * @see MtpConstants#OPERATION_SKIP
      */
-    public final @Nullable int[] getOperationsSupported() {
+    public final int[] getOperationsSupported() {
         return mOperationsSupported;
     }
 
@@ -120,26 +118,57 @@ public class MtpDeviceInfo {
      * Returns event code supported by the device.
      *
      * @return supported event code. Can be null if device does not provide the property.
-     * @see MtpConstants#EVENT_UNDEFINED
-     * @see MtpConstants#EVENT_CANCEL_TRANSACTION
-     * @see MtpConstants#EVENT_OBJECT_ADDED
-     * @see MtpConstants#EVENT_OBJECT_REMOVED
-     * @see MtpConstants#EVENT_STORE_ADDED
-     * @see MtpConstants#EVENT_STORE_REMOVED
-     * @see MtpConstants#EVENT_DEVICE_PROP_CHANGED
-     * @see MtpConstants#EVENT_OBJECT_INFO_CHANGED
-     * @see MtpConstants#EVENT_DEVICE_INFO_CHANGED
-     * @see MtpConstants#EVENT_REQUEST_OBJECT_TRANSFER
-     * @see MtpConstants#EVENT_STORE_FULL
-     * @see MtpConstants#EVENT_DEVICE_RESET
-     * @see MtpConstants#EVENT_STORAGE_INFO_CHANGED
-     * @see MtpConstants#EVENT_CAPTURE_COMPLETE
-     * @see MtpConstants#EVENT_UNREPORTED_STATUS
-     * @see MtpConstants#EVENT_OBJECT_PROP_CHANGED
-     * @see MtpConstants#EVENT_OBJECT_PROP_DESC_CHANGED
-     * @see MtpConstants#EVENT_OBJECT_REFERENCES_CHANGED
+     * @see MtpEvent#EVENT_UNDEFINED
+     * @see MtpEvent#EVENT_CANCEL_TRANSACTION
+     * @see MtpEvent#EVENT_OBJECT_ADDED
+     * @see MtpEvent#EVENT_OBJECT_REMOVED
+     * @see MtpEvent#EVENT_STORE_ADDED
+     * @see MtpEvent#EVENT_STORE_REMOVED
+     * @see MtpEvent#EVENT_DEVICE_PROP_CHANGED
+     * @see MtpEvent#EVENT_OBJECT_INFO_CHANGED
+     * @see MtpEvent#EVENT_DEVICE_INFO_CHANGED
+     * @see MtpEvent#EVENT_REQUEST_OBJECT_TRANSFER
+     * @see MtpEvent#EVENT_STORE_FULL
+     * @see MtpEvent#EVENT_DEVICE_RESET
+     * @see MtpEvent#EVENT_STORAGE_INFO_CHANGED
+     * @see MtpEvent#EVENT_CAPTURE_COMPLETE
+     * @see MtpEvent#EVENT_UNREPORTED_STATUS
+     * @see MtpEvent#EVENT_OBJECT_PROP_CHANGED
+     * @see MtpEvent#EVENT_OBJECT_PROP_DESC_CHANGED
+     * @see MtpEvent#EVENT_OBJECT_REFERENCES_CHANGED
      */
-    public final @Nullable int[] getEventsSupported() {
+    public final int[] getEventsSupported() {
         return mEventsSupported;
+    }
+
+    /**
+     * Returns if the given operation is supported by the device or not.
+     * @param code Operation code.
+     * @return If the given operation is supported by the device or not.
+     */
+    public boolean isOperationSupported(int code) {
+        return isSupported(mOperationsSupported, code);
+    }
+
+    /**
+     * Returns if the given event is supported by the device or not.
+     * @param code Event code.
+     * @return If the given event is supported by the device or not.
+     */
+    public boolean isEventSupported(int code) {
+        return isSupported(mEventsSupported, code);
+    }
+
+    /**
+     * Returns if the code set contains code.
+     * @hide
+     */
+    private static boolean isSupported(int[] set, int code) {
+        for (final int element : set) {
+            if (element == code) {
+                return true;
+            }
+        }
+        return false;
     }
 }
