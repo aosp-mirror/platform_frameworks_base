@@ -72,6 +72,7 @@ import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
 import android.net.metrics.DefaultNetworkEvent;
+import android.net.metrics.NetworkEvent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -2112,6 +2113,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void linger(NetworkAgentInfo nai) {
         nai.lingering = true;
+        NetworkEvent.logEvent(nai.network.netId, NetworkEvent.NETWORK_LINGER);
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_LINGER);
         notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING);
     }
@@ -2125,6 +2127,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkLingered.clear();
         if (!nai.lingering) return;
         nai.lingering = false;
+        NetworkEvent.logEvent(nai.network.netId, NetworkEvent.NETWORK_UNLINGER);
         if (VDBG) log("Canceling linger of " + nai.name());
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
     }
