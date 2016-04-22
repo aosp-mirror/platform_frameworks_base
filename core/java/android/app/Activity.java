@@ -721,6 +721,10 @@ public class Activity extends ContextThemeWrapper
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
 
+    private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
+    private static final String KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME =
+            "com.android.systemui.statusbar.KeyboardShortcutsReceiver";
+
     private static class ManagedDialog {
         Dialog mDialog;
         Bundle mArgs;
@@ -1682,8 +1686,18 @@ public class Activity extends ContextThemeWrapper
      */
     public final void requestKeyboardShortcutsHelper() {
         Intent intent = new Intent(Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS);
-        intent.setComponent(new ComponentName("com.android.systemui",
-                "com.android.systemui.statusbar.KeyboardShortcutsReceiver"));
+        intent.setComponent(new ComponentName(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME,
+                KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME));
+        sendBroadcast(intent);
+    }
+
+    /**
+     * Dismiss the Keyboard Shortcuts screen.
+     */
+    public final void dismissKeyboardShortcutsHelper() {
+        Intent intent = new Intent(Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS);
+        intent.setComponent(new ComponentName(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME,
+                KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME));
         sendBroadcast(intent);
     }
 
@@ -1693,11 +1707,6 @@ public class Activity extends ContextThemeWrapper
         if (menu == null) {
           return;
         }
-        final InputDevice inputDevice = InputManager.getInstance().getInputDevice(deviceId);
-        if (inputDevice == null) {
-            return;
-        }
-        final KeyCharacterMap keyCharacterMap = inputDevice.getKeyCharacterMap();
         KeyboardShortcutGroup group = null;
         int menuSize = menu.size();
         for (int i = 0; i < menuSize; ++i) {
