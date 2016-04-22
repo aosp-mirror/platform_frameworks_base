@@ -273,9 +273,6 @@ public class Tethering extends BaseNetworkObserver {
                     // ignore usb0 down after enabling RNDIS
                     // we will handle disconnect in interfaceRemoved instead
                     if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
-                } else if (isWifi(iface)) {
-                    // handle disconnect in interfaceRemoved
-                    if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
                 } else if (sm != null) {
                     sm.sendMessage(TetherInterfaceSM.CMD_INTERFACE_DOWN);
                     mIfaces.remove(iface);
