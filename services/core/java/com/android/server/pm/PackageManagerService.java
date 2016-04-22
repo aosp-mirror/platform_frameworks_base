@@ -1104,6 +1104,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final @NonNull String mRequiredInstallerPackage;
     final @Nullable String mSetupWizardPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
+    final @NonNull String mSharedSystemSharedLibraryPackageName;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
 
@@ -2718,7 +2719,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mIntentFilterVerifierComponent);
                 mServicesSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES);
-                getRequiredSharedLibraryLPr(
+                mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED);
             } else {
                 mRequiredVerifierPackage = null;
@@ -2726,6 +2727,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mIntentFilterVerifierComponent = null;
                 mIntentFilterVerifier = null;
                 mServicesSystemSharedLibraryPackageName = null;
+                mSharedSystemSharedLibraryPackageName = null;
             }
 
             mInstallerService = new PackageInstallerService(context, this);
@@ -3697,6 +3699,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     public @NonNull String getServicesSystemSharedLibraryPackageName() {
         synchronized (mPackages) {
             return mServicesSystemSharedLibraryPackageName;
+        }
+    }
+
+    @Override
+    public @NonNull String getSharedSystemSharedLibraryPackageName() {
+        synchronized (mPackages) {
+            return mSharedSystemSharedLibraryPackageName;
         }
     }
 

@@ -822,7 +822,13 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public @Nullable String getServicesSystemSharedLibraryPackageName() {
+    public @NonNull String getServicesSystemSharedLibraryPackageName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public @NonNull String getSharedSystemSharedLibraryPackageName() {
         throw new UnsupportedOperationException();
     }
 
