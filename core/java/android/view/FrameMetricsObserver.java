@@ -40,7 +40,7 @@ public class FrameMetricsObserver {
 
     private FrameMetrics mFrameMetrics;
 
-    /* package */ Window.FrameMetricsListener mListener;
+    /* package */ Window.OnFrameMetricsAvailableListener mListener;
     /* package */ VirtualRefBasePtr mNative;
 
     /**
@@ -49,7 +49,7 @@ public class FrameMetricsObserver {
      * @param looper the looper to use when invoking callbacks
      */
     FrameMetricsObserver(@NonNull Window window, @NonNull Looper looper,
-            @NonNull Window.FrameMetricsListener listener) {
+            @NonNull Window.OnFrameMetricsAvailableListener listener) {
         if (looper == null) {
             throw new NullPointerException("looper cannot be null");
         }
@@ -69,7 +69,7 @@ public class FrameMetricsObserver {
     private void notifyDataAvailable(int dropCount) {
         final Window window = mWindow.get();
         if (window != null) {
-            mListener.onMetricsAvailable(window, mFrameMetrics, dropCount);
+            mListener.onFrameMetricsAvailable(window, mFrameMetrics, dropCount);
         }
     }
 }
