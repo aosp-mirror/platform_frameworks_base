@@ -2600,7 +2600,7 @@ public class RemoteViews implements Parcelable, Filter {
      *               simply display the timer value.
      * @param started True if you want the clock to be started, false if not.
      *
-     * @see #setChronometerCountsDown(int, boolean)
+     * @see #setChronometerCountDown(int, boolean)
      */
     public void setChronometer(int viewId, long base, String format, boolean started) {
         setLong(viewId, "setBase", base);
@@ -2616,7 +2616,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param isCountDown True if you want the chronometer to count down to base instead of
      *                    counting up.
      */
-    public void setChronometerCountsDown(int viewId, boolean isCountDown) {
+    public void setChronometerCountDown(int viewId, boolean isCountDown) {
         setBoolean(viewId, "setCountDown", isCountDown);
     }
 
