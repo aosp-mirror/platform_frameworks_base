@@ -109,9 +109,36 @@ $ git checkout android_layers
 </li>
 
 <li>
-Prepare to build by following the preparation instructions for your platform. These instructions
-are in the {@code BUILD.md} file contained in the local instance of the repository you cloned.
+Begin preparation for building by entering the following commands on the command line:
+<ul>
+   <li>For Linux or OS X:
+   <ul>
+      <li>
+      <pre class="no-pretty-print">
+$ cd build-android
+$ ./android-generate</pre>
+      </li>
+   </ul>
+   </li>
+
+   <li>For Windows:
+   <ul>
+      <li>
+<pre class="no-pretty-print">
+&gt; cd build-android
+&gt; android-generate.bat</pre>
+      </li>
+   </ul>
+   </li>
+</ul>
 </li>
+
+<li>
+Continue by following the build instructions for your platform.
+These instructions are in the {@code BUILD.md} file contained in the local instance of the
+repository you cloned.
+</li>
+</ul>
 
 </ol>
 
@@ -205,12 +232,10 @@ Android Studio.
 <p>
 To build validation layers on Linux or OS X, enter these commands on the command line:
 </p>
-<ol>
+<ul>
 <li>
 Using Gradle:
 <pre class="no-pretty-print">
-$ cd build-android
-$ ./android-generate
 $ cd generated/gradle-build
 $ # configure SDK and NDK path in local.properties
 $ gradlew assembleAllDebug
@@ -219,22 +244,17 @@ $ gradlew assembleAllDebug
 <li>
 Using Android makefiles:
 <pre class="no-pretty-print">
-$ cd build-android
-$ ./android-generate
-$ ndk-build
-</pre>
+$ ndk-build</pre>
 </li>
-</ol>
+</ul>
 
 <p>
 To build validation layers on Windows, enter these commands on the command line:
 </p>
-<ol>
+<ul>
 <li>
 Using Gradle:
 <pre class="no-pretty-print">
-&gt; cd build-android
-&gt; android-generate.bat
 &gt; cd generated\gradle-build
 &gt; REM configure SDK and NDK path in local.properties
 &gt; gradlew.bat assembleAllDebug
@@ -243,12 +263,10 @@ Using Gradle:
 <li>
 Using Android makefiles:
 <pre class="no-pretty-print">
-&gt; cd build-android
-&gt; android-generate.bat
 &gt; ndk-build.cmd
 </pre>
 </li>
-</ol>
+</ul>
 
 
 
