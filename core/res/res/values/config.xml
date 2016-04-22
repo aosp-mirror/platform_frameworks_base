@@ -2477,4 +2477,8 @@
     -->
     <integer name="config_externalHardKeyboardBehavior">0</integer>
 
+    <!-- Package of the unbundled tv remote service which can connect to tv
+         remote provider -->
+    <string name="config_tvRemoteServicePackage" translatable="false"></string>
+
 </resources>

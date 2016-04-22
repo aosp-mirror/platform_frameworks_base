@@ -2574,4 +2574,7 @@
 
   <java-symbol type="dimen" name="input_extract_action_button_width" />
   <java-symbol type="dimen" name="input_extract_action_button_height" />
+
+  <!-- TV Remote Service package -->
+  <java-symbol type="string" name="config_tvRemoteServicePackage" />
 </resources>
