@@ -3350,10 +3350,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return proc;
     }
 
-    void notifyPackageUse(String packageName) {
+    void notifyPackageUse(String packageName, int reason) {
         IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            pm.notifyPackageUse(packageName);
+            pm.notifyPackageUse(packageName, reason);
         } catch (RemoteException e) {
         }
     }
@@ -6363,11 +6363,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
-            notifyPackageUse(app.instrumentationInfo != null
-                    ? app.instrumentationInfo.packageName
-                    : app.info.packageName);
             if (app.instrumentationClass != null) {
-                notifyPackageUse(app.instrumentationClass.getPackageName());
+                notifyPackageUse(app.instrumentationClass.getPackageName(),
+                                 PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
                     + processName + " with config " + mConfiguration);
@@ -6447,7 +6445,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.uid) {
             if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
                     "New app is backup target, launching agent for " + app);
-            notifyPackageUse(mBackupTarget.appInfo.packageName);
+            notifyPackageUse(mBackupTarget.appInfo.packageName,
+                             PackageManager.NOTIFY_PACKAGE_USE_BACKUP);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
                         compatibilityInfoForPackageLocked(mBackupTarget.appInfo),
@@ -10094,7 +10093,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.addPackage(cpi.applicationInfo.packageName, cpi.applicationInfo.versionCode,
                             mProcessStats);
                 }
-                notifyPackageUse(cpi.applicationInfo.packageName);
+                notifyPackageUse(cpi.applicationInfo.packageName,
+                                 PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER);
             }
         }
         return providers;
