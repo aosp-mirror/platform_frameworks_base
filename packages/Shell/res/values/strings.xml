@@ -44,6 +44,8 @@
 
     <!-- Toast message sent when the bugreport file could be read. -->
     <string name="bugreport_unreadable_text">Bug report file could not be read</string>
+    <!-- Toast message sent when the bugreport details could not be added to the zip file. -->
+    <string name="bugreport_add_details_to_zip_failed">Couldn\'t add bug report details to zip file</string>
 
     <!-- Title for bug reports received from dumpstate without a name. [CHAR LIMIT=30]-->
     <string name="bugreport_unnamed">unnamed</string>
