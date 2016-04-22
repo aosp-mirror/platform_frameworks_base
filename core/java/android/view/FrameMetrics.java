@@ -234,7 +234,8 @@ public final class FrameMetrics {
      * Constructs a FrameMetrics object as a copy.
      * <p>
      * Use this method to copy out metrics reported by
-     * {@link Window.FrameMetricsListener#onMetricsAvailable(Window, FrameMetrics, int)}
+     * {@link Window.OnFrameMetricsAvailableListener#onFrameMetricsAvailable(
+     * Window, FrameMetrics, int)}
      * </p>
      * @param other the FrameMetrics object to copy.
      */
