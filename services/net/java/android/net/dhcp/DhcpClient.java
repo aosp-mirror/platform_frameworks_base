@@ -264,8 +264,8 @@ public class DhcpClient extends StateMachine {
             mInterfaceBroadcastAddr = new PacketSocketAddress(mIface.getIndex(),
                     DhcpPacket.ETHER_BROADCAST);
             return true;
-        } catch(SocketException e) {
-            Log.wtf(TAG, "Can't determine ifindex or MAC address for " + mIfaceName);
+        } catch(SocketException | NullPointerException e) {
+            Log.e(TAG, "Can't determine ifindex or MAC address for " + mIfaceName, e);
             return false;
         }
     }
