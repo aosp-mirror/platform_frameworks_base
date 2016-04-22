@@ -65,12 +65,7 @@ public class NotificationHeaderUtil {
             ImageView expand = (ImageView) view.findViewById(
                     com.android.internal.R.id.expand_button);
             applyToChild(icon, apply, header.getOriginalIconColor());
-            int color = header.getOriginalNotificationColor();
-            if (color == Notification.COLOR_DEFAULT) {
-                color = view.getContext().getColor(
-                        com.android.internal.R.color.notification_icon_default_color);
-            }
-            applyToChild(expand, apply, color);
+            applyToChild(expand, apply, header.getOriginalNotificationColor());
         }
 
         private void applyToChild(View view, boolean shouldApply, int originalColor) {
@@ -116,7 +111,7 @@ public class NotificationHeaderUtil {
                     @Override
                     public boolean compare(View parent, View child, Object parentData,
                             Object childData) {
-                        return parent.getVisibility() == View.VISIBLE;
+                        return parent.getVisibility() != View.GONE;
                     }
 
                     @Override
@@ -161,11 +156,11 @@ public class NotificationHeaderUtil {
                 mComparators.get(compI).apply(row);
             }
             // We need to sanitize the dividers since they might be off-balance now
-            sanitizeDividers(row);
+            sanitizeHeaderViews(row);
         }
     }
 
-    private void sanitizeDividers(ExpandableNotificationRow row) {
+    private void sanitizeHeaderViews(ExpandableNotificationRow row) {
         if (row.isSummaryWithChildren()) {
             sanitizeHeader(row.getNotificationHeader());
             return;
@@ -188,9 +183,26 @@ public class NotificationHeaderUtil {
         if (rowHeader == null) {
             return;
         }
+        final int childCount = rowHeader.getChildCount();
+        View time = rowHeader.findViewById(com.android.internal.R.id.time);
+        boolean hasVisibleText = false;
+        for (int i = 1; i < childCount - 1 ; i++) {
+            View child = rowHeader.getChildAt(i);
+            if (child instanceof TextView
+                    && child.getVisibility() != View.GONE
+                    && !mDividers.contains(Integer.valueOf(child.getId()))
+                    && child != time) {
+                hasVisibleText = true;
+                break;
+            }
+        }
+        // in case no view is visible we make sure the time is visible
+        int timeVisibility = !hasVisibleText
+                || mRow.getStatusBarNotification().getNotification().showsTimeOrChronometer()
+                ? View.VISIBLE : View.GONE;
+        time.setVisibility(timeVisibility);
         View left = null;
         View right;
-        final int childCount = rowHeader.getChildCount();
         for (int i = 1; i < childCount - 1 ; i++) {
             View child = rowHeader.getChildAt(i);
             if (mDividers.contains(Integer.valueOf(child.getId()))) {
@@ -202,14 +214,14 @@ public class NotificationHeaderUtil {
                         // A divider was found, this needs to be hidden
                         i--;
                         break;
-                    } else if (right.getVisibility() == View.VISIBLE) {
+                    } else if (right.getVisibility() != View.GONE && right instanceof TextView) {
                         visible = left != null;
                         left = right;
                         break;
                     }
                 }
                 child.setVisibility(visible ? View.VISIBLE : View.GONE);
-            } else if (child.getVisibility() == View.VISIBLE) {
+            } else if (child.getVisibility() != View.GONE && child instanceof TextView) {
                 left = child;
             }
         }
@@ -219,7 +231,7 @@ public class NotificationHeaderUtil {
         for (int compI = 0; compI < mComparators.size(); compI++) {
             mComparators.get(compI).apply(row, true /* reset */);
         }
-        sanitizeDividers(row);
+        sanitizeHeaderViews(row);
     }
 
     private static class HeaderProcessor {
