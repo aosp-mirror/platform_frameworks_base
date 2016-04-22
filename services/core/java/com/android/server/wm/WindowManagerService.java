@@ -9161,7 +9161,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " " + w.mOutsets.toShortString()
                             + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged
-                            + " dragResizingChanged=" + dragResizingChanged);
+                            + " dragResizingChanged=" + dragResizingChanged
+                            + " resizedWhileNotDragResizing=" + w.mResizedWhileNotDragResizing);
                 }
 
                 // If it's a dead window left on screen, and the configuration changed,
