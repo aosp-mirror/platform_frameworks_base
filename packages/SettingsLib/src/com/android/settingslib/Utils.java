@@ -20,6 +20,10 @@ import com.android.settingslib.drawable.UserIconDrawable;
 import java.text.NumberFormat;
 
 public class Utils {
+    private static Signature[] sSystemSignature;
+    private static String sPermissionControllerPackageName;
+    private static String sServicesSystemSharedLibPackageName;
+    private static String sSharedSystemSharedLibPackageName;
 
     /**
      * Return string resource that best describes combination of tethering
@@ -161,14 +165,18 @@ public class Utils {
         if (sPermissionControllerPackageName == null) {
             sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
         }
+        if (sServicesSystemSharedLibPackageName == null) {
+            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
+        }
+        if (sSharedSystemSharedLibPackageName == null) {
+            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
+        }
         return (sSystemSignature[0] != null
                         && sSystemSignature[0].equals(getFirstSignature(pkg)))
-                || (sPermissionControllerPackageName != null
-                        && sPermissionControllerPackageName.equals(pkg.packageName));
+                || pkg.packageName.equals(sPermissionControllerPackageName)
+                || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
+                || pkg.packageName.equals(sSharedSystemSharedLibPackageName);
     }
-
-    private static Signature[] sSystemSignature;
-    private static String sPermissionControllerPackageName;
 
     private static Signature getFirstSignature(PackageInfo pkg) {
         if (pkg != null && pkg.signatures != null && pkg.signatures.length > 0) {
