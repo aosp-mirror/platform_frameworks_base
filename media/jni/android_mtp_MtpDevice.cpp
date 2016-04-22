@@ -244,7 +244,8 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
     if (deviceInfo->mSerial)
         env->SetObjectField(info, field_deviceInfo_serialNumber,
             env->NewStringUTF(deviceInfo->mSerial));
-    if (deviceInfo->mOperations) {
+    assert(deviceInfo->mOperations);
+    {
         const size_t size = deviceInfo->mOperations->size();
         ScopedLocalRef<jintArray> operations(env, static_cast<jintArray>(env->NewIntArray(size)));
         {
@@ -259,7 +260,8 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
             env->SetObjectField(info, field_deviceInfo_operationsSupported, operations.get());
         }
     }
-    if (deviceInfo->mEvents) {
+    assert(deviceInfo->mEvents);
+    {
         const size_t size = deviceInfo->mEvents->size();
         ScopedLocalRef<jintArray> events(env, static_cast<jintArray>(env->NewIntArray(size)));
         {
