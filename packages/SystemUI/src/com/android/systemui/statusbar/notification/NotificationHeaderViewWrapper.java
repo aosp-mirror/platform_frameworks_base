@@ -36,6 +36,7 @@ import android.widget.ImageView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
@@ -61,8 +62,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private ImageView mExpandButton;
     private NotificationHeaderView mNotificationHeader;
 
-    protected NotificationHeaderViewWrapper(Context ctx, View view) {
-        super(view);
+    protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
+        super(view, row);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
         mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
@@ -156,7 +157,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         } else {
             mInvertHelper.update(dark);
         }
-        if (mIcon != null) {
+        if (mIcon != null && !mRow.isChildInGroup()) {
+            // We don't update the color for children views / their icon is invisible anyway.
+            // It also may lead to bugs where the icon isn't correctly greyed out.
             boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
                     != NotificationHeaderView.NO_COLOR;
             if (fade) {

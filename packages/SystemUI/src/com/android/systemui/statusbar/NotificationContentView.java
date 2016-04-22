@@ -307,7 +307,8 @@ public class NotificationContentView extends FrameLayout {
         addView(child);
         mContractedChild = child;
         mContractedChild.addOnLayoutChangeListener(mLayoutUpdater);
-        mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
+        mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
+                mContainingNotification);
         selectLayout(false /* animate */, true /* force */);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
@@ -321,7 +322,8 @@ public class NotificationContentView extends FrameLayout {
         addView(child);
         mExpandedChild = child;
         mExpandedChild.addOnLayoutChangeListener(mLayoutUpdater);
-        mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child);
+        mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
+                mContainingNotification);
         selectLayout(false /* animate */, true /* force */);
     }
 
@@ -334,7 +336,8 @@ public class NotificationContentView extends FrameLayout {
         addView(child);
         mHeadsUpChild = child;
         mHeadsUpChild.addOnLayoutChangeListener(mLayoutUpdater);
-        mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child);
+        mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
+                mContainingNotification);
         selectLayout(false /* animate */, true /* force */);
     }
 

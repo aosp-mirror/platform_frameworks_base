@@ -30,6 +30,7 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
@@ -44,8 +45,8 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     private boolean mShouldInvertDark;
     private boolean mShowingLegacyBackground;
 
-    protected NotificationCustomViewWrapper(View view) {
-        super(view);
+    protected NotificationCustomViewWrapper(View view, ExpandableNotificationRow row) {
+        super(view, row);
         mInvertHelper = new ViewInvertHelper(view, NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
