@@ -4218,6 +4218,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void removeCaApprovalsIfNeeded(int userId) {
+        for (UserInfo userInfo : mUserManager.getProfiles(userId)) {
+            boolean isSecure = mLockPatternUtils.isSecure(userInfo.id);
+            if (userInfo.isManagedProfile()){
+                isSecure |= mLockPatternUtils.isSecure(getProfileParentId(userInfo.id));
+            }
+            if (!isSecure) {
+                synchronized (this) {
+                    getUserData(userInfo.id).mAcceptedCaCertificates.clear();
+                    saveSettingsLocked(userInfo.id);
+                }
+
+                new MonitoringCertNotificationTask().execute(userInfo.id);
+            }
+        }
+    }
+
     @Override
     public boolean installCaCert(ComponentName admin, byte[] certBuffer) throws RemoteException {
         enforceCanManageCaCerts(admin);
@@ -4644,6 +4661,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                         DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
             }
+            removeCaApprovalsIfNeeded(userHandle);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
