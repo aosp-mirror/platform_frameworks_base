@@ -554,6 +554,15 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (toTop) {
             mDisplayContent.moveStack(this, true);
         }
+
+        if (StackId.windowsAreScaleable(mStackId)) {
+            // We force windows out of SCALING_MODE_FREEZE
+            // so that we can continue to animate them
+            // while a resize is pending.
+            forceWindowsScaleable(task, true);
+        } else {
+            forceWindowsScaleable(task, false);
+        }
         EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.mTaskId, toTop ? 1 : 0, position);
     }
 
@@ -1279,20 +1288,18 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return true;
     }
 
-    void forceWindowsScaleable(boolean force) {
+    void forceWindowsScaleable(Task task, boolean force) {
         SurfaceControl.openTransaction();
         try {
-            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
-                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
-                    for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                        final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
-                        if (winAnimator == null || !winAnimator.hasSurface()) {
-                            continue;
-                        }
-                        winAnimator.mSurfaceController.forceScaleableInTransaction(force);
+            final ArrayList<AppWindowToken> activities = task.mAppTokens;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
+                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                    final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
+                    if (winAnimator == null || !winAnimator.hasSurface()) {
+                        continue;
                     }
+                    winAnimator.mSurfaceController.forceScaleableInTransaction(force);
                 }
             }
         } finally {
@@ -1303,10 +1310,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override  // AnimatesBounds
     public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
-            // We force windows out of SCALING_MODE_FREEZE
-            // so that we can continue to animate them
-            // while a resize is pending.
-            forceWindowsScaleable(true);
             mFreezeMovementAnimations = true;
             mBoundsAnimating = true;
         }
@@ -1317,7 +1320,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         synchronized (mService.mWindowMap) {
             mFreezeMovementAnimations = false;
             mBoundsAnimating = false;
-            forceWindowsScaleable(false);
             mService.requestTraversal();
         }
         if (mStackId == PINNED_STACK_ID) {
