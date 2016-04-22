@@ -169,7 +169,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     boolean dismissRecentsToFocusedTask(int logCategory) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask(logCategory)) return true;
         }
@@ -181,7 +181,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     boolean dismissRecentsToLaunchTargetTaskOrHome() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchPreviousTask()) return true;
             // If none of the other cases apply, then just go Home
@@ -195,7 +195,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     boolean dismissRecentsToFocusedTaskOrHome() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask(0 /* logCategory */)) return true;
             // If none of the other cases apply, then just go Home
@@ -236,7 +236,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
     boolean dismissRecentsToHomeIfVisible(boolean animated) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+        if (ssp.isRecentsActivityVisible()) {
             // Return to Home
             dismissRecentsToHome(animated);
             return true;
@@ -448,7 +448,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsActivityLaunchState launchState = config.getLaunchState();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-        loader.preloadTasks(loadPlan, -1 /* topTaskId */, false /* isTopTaskHome */);
+        loader.preloadTasks(loadPlan, -1 /* runningTaskId */, false /* isHomeStackVisible */);
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
@@ -777,6 +777,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         super.dump(prefix, fd, writer, args);
         EventBus.getDefault().dump(prefix, writer);
+        Recents.getTaskLoader().dump(prefix, writer);
 
         String id = Integer.toHexString(System.identityHashCode(this));
 
