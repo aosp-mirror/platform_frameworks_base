@@ -133,19 +133,20 @@ public final class Installer extends SystemService {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags, String compilerFilter, String volumeUuid) throws InstallerException {
+            int dexFlags, String compilerFilter, String volumeUuid, String sharedLibraries)
+            throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags,
-                compilerFilter, volumeUuid);
+                compilerFilter, volumeUuid, sharedLibraries);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, String volumeUuid)
-                    throws InstallerException {
+            String compilerFilter, String volumeUuid, String sharedLibraries)
+            throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
-                outputPath, dexFlags, compilerFilter, volumeUuid);
+                outputPath, dexFlags, compilerFilter, volumeUuid, sharedLibraries);
     }
 
     public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
