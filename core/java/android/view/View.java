@@ -3899,7 +3899,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * cleanup.
      */
     final RenderNode mRenderNode;
-    private Runnable mRenderNodeDetachedCallback;
 
     /**
      * Set to true when the view is sending hover accessibility events because it
@@ -16058,20 +16057,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onRenderNodeDetached(RenderNode renderNode) {
-        if (renderNode == mRenderNode && mRenderNodeDetachedCallback != null) {
-            mRenderNodeDetachedCallback.run();
-        }
-    }
-
-    /**
-     * Set callback for functor detach. Exposed to WebView through WebViewDelegate.
-     * Should not be used otherwise.
-     * @hide
-     */
-    public final Runnable setRenderNodeDetachedCallback(@Nullable Runnable callback) {
-        Runnable oldCallback = mRenderNodeDetachedCallback;
-        mRenderNodeDetachedCallback = callback;
-        return oldCallback;
     }
 
     /**
