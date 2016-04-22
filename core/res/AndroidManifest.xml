@@ -2280,6 +2280,23 @@
     <permission android:name="android.permission.BIND_TV_INPUT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi
+         Must be required by a {@link com.android.media.tv.remoteprovider.TvRemoteProvider}
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature|privileged
+         <p>Not for use by third-party applications. </p>
+         @hide  -->
+    <permission android:name="android.permission.BIND_TV_REMOTE_SERVICE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi
+         Must be required for a virtual remote controller for TV.
+         <p>Protection level: signature|privileged
+         <p>Not for use by third-party applications. </p>
+         @hide  -->
+    <permission android:name="android.permission.TV_VIRTUAL_REMOTE_CONTROLLER"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to modify parental controls
          <p>Not for use by third-party applications.
          @hide -->
