@@ -21,6 +21,7 @@ import android.service.notification.StatusBarNotification;
 import android.view.View;
 
 import com.android.internal.widget.ImageFloatingTextView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 
 /**
@@ -30,8 +31,9 @@ public class NotificationBigTextTemplateViewWrapper extends NotificationTemplate
 
     private ImageFloatingTextView mBigtext;
 
-    protected NotificationBigTextTemplateViewWrapper(Context ctx, View view) {
-        super(ctx, view);
+    protected NotificationBigTextTemplateViewWrapper(Context ctx, View view,
+            ExpandableNotificationRow row) {
+        super(ctx, view, row);
     }
 
     private void resolveViews(StatusBarNotification notification) {
