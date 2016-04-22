@@ -208,7 +208,11 @@ public class WindowLayersController {
 
         if (mDockDivider != null && mDockDivider.isVisibleLw()) {
             while (!mInputMethodWindows.isEmpty()) {
-                layer = assignAndIncreaseLayerIfNeeded(mInputMethodWindows.remove(), layer);
+                final WindowState w = mInputMethodWindows.remove();
+                // Only ever move IME windows up, else we brake IME for windows above the divider.
+                if (layer > w.mLayer) {
+                    layer = assignAndIncreaseLayerIfNeeded(w, layer);
+                }
             }
         }
 
