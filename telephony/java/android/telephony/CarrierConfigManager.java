@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.internal.telephony.ICarrierConfigLoader;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -25,6 +23,8 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+
+import com.android.internal.telephony.ICarrierConfigLoader;
 
 /**
  * Provides access to telephony configuration values that are carrier-specific.
@@ -454,12 +454,12 @@ public class CarrierConfigManager {
     /**
      * Whether cellular data is required to access visual voicemail.
      */
-    public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN = "vvm_cellular_data_required";
+    public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOL = "vvm_cellular_data_required";
 
     /**
      * Whether to prefetch audio data on new voicemail arrival, defaulted to true.
      */
-    public static final String KEY_VVM_PREFETCH_BOOLEAN = "vvm_prefetch";
+    public static final String KEY_VVM_PREFETCH_BOOL = "vvm_prefetch";
 
     /**
      * The package name of the carrier's visual voicemail app to ensure that dialer visual voicemail
@@ -735,8 +735,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
         sDefaults.putInt(KEY_VVM_PORT_NUMBER_INT, 0);
         sDefaults.putString(KEY_VVM_TYPE_STRING, "");
-        sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN, false);
-        sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOLEAN, true);
+        sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOL, false);
+        sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOL, true);
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
