@@ -4096,6 +4096,10 @@
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
+    <!-- [CHAR_LIMIT=30] Data saver: Title on first-time dialogFeature description -->
+    <string name="data_saver_enable_title">Turn on Data Saver?</string>
+    <!-- [CHAR_LIMIT=16] Data saver: Button to turn it on on first-time dialog -->
+    <string name="data_saver_enable_button">Turn on</string>
 
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes_summary">
