@@ -64,6 +64,11 @@ public final class NetworkStats implements AutoCloseable {
     private int mUidOrUidIndex;
 
     /**
+     * Tag id in case if was specified in the query.
+     */
+    private int mTag = android.net.NetworkStats.TAG_NONE;
+
+    /**
      * The session while the query requires it, null if all the stats have been collected or close()
      * has been called.
      */
@@ -434,7 +439,7 @@ public final class NetworkStats implements AutoCloseable {
             mHistory = mSession.getHistoryIntervalForUid(mTemplate, uid,
                     android.net.NetworkStats.SET_ALL, tag,
                     NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
-            setSingleUid(uid);
+            setSingleUidTag(uid, tag);
         } catch (RemoteException e) {
             Log.w(TAG, e);
             // Leaving mHistory null
@@ -538,6 +543,7 @@ public final class NetworkStats implements AutoCloseable {
                 mRecycledHistoryEntry = mHistory.getValues(mEnumerationIndex++,
                         mRecycledHistoryEntry);
                 bucketOut.mUid = Bucket.convertUid(getUid());
+                bucketOut.mTag = Bucket.convertTag(mTag);
                 bucketOut.mState = Bucket.STATE_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;
@@ -579,8 +585,9 @@ public final class NetworkStats implements AutoCloseable {
         return mUidOrUidIndex;
     }
 
-    private void setSingleUid(int uid) {
+    private void setSingleUidTag(int uid, int tag) {
         mUidOrUidIndex = uid;
+        mTag = tag;
     }
 
     private void stepUid() {
