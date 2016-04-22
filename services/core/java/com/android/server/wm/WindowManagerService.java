@@ -1580,11 +1580,13 @@ public class WindowManagerService extends IWindowManager.Stub
             // If the docked divider is visible, we still need to go through this whole
             // excercise to find the appropriate input method target (used for animations
             // and dialog adjustments), but for purposes of Z ordering we simply wish to
-            // place it above the docked divider.
+            // place it above the docked divider. Unless it is already above the divider.
             WindowState dockedDivider = w.mDisplayContent.mDividerControllerLocked.getWindow();
             if (dockedDivider != null && dockedDivider.isVisibleLw()) {
                 int dividerIndex = windows.indexOf(dockedDivider);
-                return dividerIndex > 0 ? dividerIndex + 1 : i + 1;
+                if (dividerIndex > 0 && dividerIndex > i) {
+                    return dividerIndex + 1;
+                }
             }
             return i+1;
         }
