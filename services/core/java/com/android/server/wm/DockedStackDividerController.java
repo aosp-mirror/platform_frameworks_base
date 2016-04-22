@@ -538,12 +538,15 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     public boolean animate(long now) {
+        if (mWindow == null) {
+            return false;
+        }
         if (mAnimatingForMinimizedDockedStack) {
             return animateForMinimizedDockedStack(now);
         } else if (mAnimatingForIme) {
             return animateForIme(now);
         } else {
-            if (mDimLayer != null) {
+            if (mDimLayer != null && mDimLayer.isDimming()) {
                 mDimLayer.setLayer(mService.mLayersController.getResizeDimLayer());
             }
             return false;
