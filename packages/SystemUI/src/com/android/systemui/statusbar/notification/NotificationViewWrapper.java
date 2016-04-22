@@ -26,7 +26,7 @@ import android.view.View;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.NotificationContentView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
@@ -38,28 +38,30 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
     protected final View mView;
+    protected final ExpandableNotificationRow mRow;
     protected boolean mDark;
     protected boolean mDarkInitialized = false;
 
-    public static NotificationViewWrapper wrap(Context ctx, View v) {
+    public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
             if ("bigPicture".equals(v.getTag())) {
-                return new NotificationBigPictureTemplateViewWrapper(ctx, v);
+                return new NotificationBigPictureTemplateViewWrapper(ctx, v, row);
             } else if ("bigText".equals(v.getTag())) {
-                return new NotificationBigTextTemplateViewWrapper(ctx, v);
+                return new NotificationBigTextTemplateViewWrapper(ctx, v, row);
             } else if ("media".equals(v.getTag()) || "bigMediaNarrow".equals(v.getTag())) {
-                return new NotificationMediaTemplateViewWrapper(ctx, v);
+                return new NotificationMediaTemplateViewWrapper(ctx, v, row);
             }
-            return new NotificationTemplateViewWrapper(ctx, v);
+            return new NotificationTemplateViewWrapper(ctx, v, row);
         } else if (v instanceof NotificationHeaderView) {
-            return new NotificationHeaderViewWrapper(ctx, v);
+            return new NotificationHeaderViewWrapper(ctx, v, row);
         } else {
-            return new NotificationCustomViewWrapper(v);
+            return new NotificationCustomViewWrapper(v, row);
         }
     }
 
-    protected NotificationViewWrapper(View view) {
+    protected NotificationViewWrapper(View view, ExpandableNotificationRow row) {
         mView = view;
+        mRow = row;
     }
 
     /**
