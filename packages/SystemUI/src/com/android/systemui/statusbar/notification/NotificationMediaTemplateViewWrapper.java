@@ -20,6 +20,7 @@ import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 
 /**
@@ -27,8 +28,9 @@ import com.android.systemui.statusbar.TransformableView;
  */
 public class NotificationMediaTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
-    protected NotificationMediaTemplateViewWrapper(Context ctx, View view) {
-        super(ctx, view);
+    protected NotificationMediaTemplateViewWrapper(Context ctx, View view,
+            ExpandableNotificationRow row) {
+        super(ctx, view, row);
     }
 
     View mActions;

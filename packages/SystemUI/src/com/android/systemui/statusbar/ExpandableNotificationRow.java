@@ -1346,7 +1346,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             expandButton.setVisibility(VISIBLE);
             mNotificationHeader.setOnClickListener(mExpandClickListener);
             mNotificationHeaderWrapper = NotificationViewWrapper.wrap(getContext(),
-                    mNotificationHeader);
+                    mNotificationHeader, this);
             addView(mNotificationHeader, indexOfChild(mChildrenContainer) + 1);
             mTranslateableViews.add(mNotificationHeader);
         } else {
