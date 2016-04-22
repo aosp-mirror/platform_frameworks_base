@@ -1134,6 +1134,8 @@ public class BugreportProgressService extends Service {
             addEntry(zos, "description.txt", info.description);
         } catch (IOException e) {
             Log.e(TAG, "exception zipping file " + tmpZip, e);
+            Toast.makeText(mContext, R.string.bugreport_add_details_to_zip_failed,
+                    Toast.LENGTH_LONG).show();
             return;
         } finally {
             // Make sure it only tries to add details once, even it fails the first time.
