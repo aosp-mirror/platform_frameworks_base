@@ -2423,6 +2423,49 @@
         <item quantity="other"><xliff:g id="count">%d</xliff:g> hours</item>
     </plurals>
 
+    <!-- A string denoting the current point in time that should be as short as possible. Abbreviations are preferred to full strings as this might be shown repetitively. It is used in the header of notifications. [CHAR LIMIT=8]-->
+    <string name="now_string_shortest">now</string>
+
+    <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
+    <plurals name="duration_minutes_shortest">
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>m</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
+    <plurals name="duration_hours_shortest">
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>h</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
+    <plurals name="duration_days_shortest">
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>d</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
+    <plurals name="duration_years_shortest">
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>y</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <plurals name="duration_minutes_shortest_future">
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>m</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <plurals name="duration_hours_shortest_future">
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>h</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <plurals name="duration_days_shortest_future">
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>d</item>
+    </plurals>
+
+    <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <plurals name="duration_years_shortest_future">
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>y</item>
+    </plurals>
+
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Video problem</string>
     <!-- Text for error alert when a video container is not valid for progressive download/playback. -->
