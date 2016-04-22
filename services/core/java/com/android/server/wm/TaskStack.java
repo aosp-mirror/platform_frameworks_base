@@ -645,9 +645,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
         Rect bounds = null;
         final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         if (mStackId == DOCKED_STACK_ID
-                || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId))) {
+                || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId)
+                        && !dockedStack.isFullscreen())) {
             // The existence of a docked stack affects the size of other static stack created since
-            // the docked stack occupies a dedicated region on screen.
+            // the docked stack occupies a dedicated region on screen, but only if the dock stack is
+            // not fullscreen. If it's fullscreen, it means that we are in the transition of
+            // dismissing it, so we must not resize this stack.
             bounds = new Rect();
             displayContent.getLogicalDisplayRect(mTmpRect);
             mTmpRect2.setEmpty();
