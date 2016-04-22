@@ -34,9 +34,8 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.metrics.CaptivePortalCheckResultEvent;
-import android.net.metrics.CaptivePortalStateChangeEvent;
-import android.net.metrics.NetworkMonitorEvent;
+import android.net.metrics.ValidationProbeEvent;
+import android.net.metrics.NetworkEvent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.util.Stopwatch;
@@ -306,13 +305,11 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mLingeringState);
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
-                    CaptivePortalStateChangeEvent.logEvent(mNetId,
-                            CaptivePortalStateChangeEvent.NETWORK_MONITOR_CONNECTED);
+                    NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_CONNECTED);
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
-                    CaptivePortalStateChangeEvent.logEvent(mNetId,
-                            CaptivePortalStateChangeEvent.NETWORK_MONITOR_DISCONNECTED);
+                    NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_DISCONNECTED);
                     if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
                         mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
                         mLaunchCaptivePortalAppBroadcastReceiver = null;
@@ -363,11 +360,9 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public void enter() {
             if (mEvaluationTimer.isRunning()) {
-                NetworkMonitorEvent.logValidated(mNetId, mEvaluationTimer.stop());
+                NetworkEvent.logValidated(mNetId, mEvaluationTimer.stop());
                 mEvaluationTimer.reset();
             }
-            CaptivePortalStateChangeEvent.logEvent(mNetId,
-                   CaptivePortalStateChangeEvent.NETWORK_MONITOR_VALIDATED);
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, mNetworkAgentInfo.network.netId, null));
         }
@@ -497,7 +492,6 @@ public class NetworkMonitor extends StateMachine {
                     // will be unresponsive. isCaptivePortal() could be executed on another Thread
                     // if this is found to cause problems.
                     CaptivePortalProbeResult probeResult = isCaptivePortal();
-                    CaptivePortalCheckResultEvent.logEvent(mNetId, probeResult.mHttpResponseCode);
                     if (probeResult.mHttpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (probeResult.mHttpResponseCode >= 200 &&
@@ -508,6 +502,7 @@ public class NetworkMonitor extends StateMachine {
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
+                        NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_VALIDATION_FAILED);
                         mConnectivityServiceHandler.sendMessage(obtainMessage(
                                 EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId,
                                 probeResult.mRedirectUrl));
@@ -568,7 +563,7 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public void enter() {
             if (mEvaluationTimer.isRunning()) {
-                NetworkMonitorEvent.logCaptivePortalFound(mNetId, mEvaluationTimer.stop());
+                NetworkEvent.logCaptivePortalFound(mNetId, mEvaluationTimer.stop());
                 mEvaluationTimer.reset();
             }
             // Don't annoy user with sign-in notifications.
@@ -779,7 +774,8 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.disconnect();
             }
         }
-        NetworkMonitorEvent.logPortalProbeEvent(mNetId, probeTimer.stop(), httpResponseCode);
+        final int probeType = ValidationProbeEvent.PROBE_HTTP;
+        ValidationProbeEvent.logEvent(mNetId, probeTimer.stop(), probeType, httpResponseCode);
         return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
     }
 
