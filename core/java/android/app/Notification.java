@@ -185,6 +185,11 @@ public class Notification implements Parcelable
     public long when;
 
     /**
+     * The creation time of the notification
+     */
+    private long creationTime;
+
+    /**
      * The resource id of a drawable to use as the icon in the status bar.
      *
      * @deprecated Use {@link Builder#setSmallIcon(Icon)} instead.
@@ -1479,6 +1484,7 @@ public class Notification implements Parcelable
     public Notification()
     {
         this.when = System.currentTimeMillis();
+        this.creationTime = System.currentTimeMillis();
         this.priority = PRIORITY_DEFAULT;
     }
 
@@ -1516,6 +1522,7 @@ public class Notification implements Parcelable
         this.icon = icon;
         this.tickerText = tickerText;
         this.when = when;
+        this.creationTime = System.currentTimeMillis();
     }
 
     /**
@@ -1526,6 +1533,7 @@ public class Notification implements Parcelable
         int version = parcel.readInt();
 
         when = parcel.readLong();
+        creationTime = parcel.readLong();
         if (parcel.readInt() != 0) {
             mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
             if (mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
@@ -1614,6 +1622,7 @@ public class Notification implements Parcelable
      */
     public void cloneInto(Notification that, boolean heavy) {
         that.when = this.when;
+        that.creationTime = this.creationTime;
         that.mSmallIcon = this.mSmallIcon;
         that.number = this.number;
 
@@ -1794,6 +1803,7 @@ public class Notification implements Parcelable
         parcel.writeInt(1);
 
         parcel.writeLong(when);
+        parcel.writeLong(creationTime);
         if (mSmallIcon == null && icon != 0) {
             // you snuck an icon in here without using the builder; let's try to keep it
             mSmallIcon = Icon.createWithResource("", icon);
@@ -3129,6 +3139,7 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.header_text, View.GONE);
             contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
+            contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
             contentView.setViewVisibility(R.id.profile_badge, View.GONE);
         }
@@ -3264,6 +3275,10 @@ public class Notification implements Parcelable
                     contentView.setViewVisibility(R.id.time, View.VISIBLE);
                     contentView.setLong(R.id.time, "setTime", mN.when);
                 }
+            } else {
+                // We still want a time to be set but gone, such that we can show and hide it
+                // on demand in case it's a child notification without anything in the header
+                contentView.setLong(R.id.time, "setTime", mN.when != 0 ? mN.when : mN.creationTime);
             }
         }
 
@@ -3331,7 +3346,7 @@ public class Notification implements Parcelable
          *         otherwise
          */
         private boolean showsTimeOrChronometer() {
-            return mN.when != 0 && mN.extras.getBoolean(EXTRA_SHOW_WHEN);
+            return mN.showsTimeOrChronometer();
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
@@ -3693,6 +3708,8 @@ public class Notification implements Parcelable
                 mN.extras = getAllExtras();
             }
 
+            mN.creationTime = System.currentTimeMillis();
+
             // lazy stuff from mContext; see comment in Builder(Context, Notification)
             Notification.addFieldsFromContext(mContext, mN);
 
@@ -3823,6 +3840,15 @@ public class Notification implements Parcelable
         private int getActionTombstoneLayoutResource() {
             return R.layout.notification_material_action_tombstone;
         }
+    }
+
+    /**
+     * @return true if the notification will show the time or the chronometer; false
+     *         otherwise
+     * @hide
+     */
+    public boolean showsTimeOrChronometer() {
+        return when != 0 && extras.getBoolean(EXTRA_SHOW_WHEN);
     }
 
     /**

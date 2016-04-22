@@ -131,8 +131,18 @@ public class DateTimeView extends TextView {
         update();
     }
 
+    @Override
+    @android.view.RemotableViewMethod
+    public void setVisibility(@Visibility int visibility) {
+        boolean gotVisible = visibility != GONE && getVisibility() == GONE;
+        super.setVisibility(visibility);
+        if (gotVisible) {
+            update();
+        }
+    }
+
     void update() {
-        if (mTime == null) {
+        if (mTime == null || getVisibility() == GONE) {
             return;
         }
         if (mShowRelativeTime) {
