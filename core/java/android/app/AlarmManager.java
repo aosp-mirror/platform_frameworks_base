@@ -33,7 +33,6 @@ import android.util.Log;
 import libcore.util.ZoneInfoDB;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
 /**
@@ -245,12 +244,7 @@ public class AlarmManager {
 
     // Tracking of the OnAlarmListener -> wrapper mapping, for cancel() support.
     // Access is synchronized on the AlarmManager class object.
-    //
-    // These are weak references so that we don't leak listener references if, for
-    // example, the pending-alarm messages are posted to a HandlerThread that is
-    // disposed of prior to alarm delivery.  The underlying messages will be GC'd
-    // but this static reference would still persist, orphaned, never deallocated.
-    private static WeakHashMap<OnAlarmListener, WeakReference<ListenerWrapper>> sWrappers;
+    private static WeakHashMap<OnAlarmListener, ListenerWrapper> sWrappers;
 
     /**
      * package private on purpose
@@ -637,16 +631,14 @@ public class AlarmManager {
         if (listener != null) {
             synchronized (AlarmManager.class) {
                 if (sWrappers == null) {
-                    sWrappers = new WeakHashMap<OnAlarmListener, WeakReference<ListenerWrapper>>();
+                    sWrappers = new WeakHashMap<OnAlarmListener, ListenerWrapper>();
                 }
 
-                WeakReference<ListenerWrapper> wrapperRef = sWrappers.get(listener);
-                // no existing wrapper *or* we've lost our weak ref to it => build a new one
-                if (wrapperRef == null ||
-                        (recipientWrapper = wrapperRef.get()) == null) {
+                recipientWrapper = sWrappers.get(listener);
+                // no existing wrapper => build a new one
+                if (recipientWrapper == null) {
                     recipientWrapper = new ListenerWrapper(listener);
-                    wrapperRef = new WeakReference<ListenerWrapper>(recipientWrapper);
-                    sWrappers.put(listener, wrapperRef);
+                    sWrappers.put(listener, recipientWrapper);
                 }
             }
 
@@ -906,11 +898,7 @@ public class AlarmManager {
         ListenerWrapper wrapper = null;
         synchronized (AlarmManager.class) {
             if (sWrappers != null) {
-                final WeakReference<ListenerWrapper> wrapperRef;
-                wrapperRef = sWrappers.get(listener);
-                if (wrapperRef != null) {
-                    wrapper = wrapperRef.get();
-                }
+                wrapper = sWrappers.get(listener);
             }
         }
 
