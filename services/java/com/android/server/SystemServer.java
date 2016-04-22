@@ -90,6 +90,7 @@ import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.trust.TrustManagerService;
+import com.android.server.tv.TvRemoteService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usage.UsageStatsService;
@@ -1109,6 +1110,10 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 mSystemServiceManager.startService(MediaResourceMonitorService.class);
+            }
+
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                mSystemServiceManager.startService(TvRemoteService.class);
             }
 
             if (!disableNonCoreServices) {
