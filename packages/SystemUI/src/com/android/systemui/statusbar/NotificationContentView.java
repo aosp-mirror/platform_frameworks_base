@@ -834,10 +834,14 @@ public class NotificationContentView extends FrameLayout {
     public void updateExpandButtons(boolean expandable) {
         mExpandable = expandable;
         // if the expanded child has the same height as the collapsed one we hide it.
-        if (mExpandedChild != null && mExpandedChild.getHeight() != 0 &&
-                ((mIsHeadsUp && mExpandedChild.getHeight() == mHeadsUpChild.getHeight()) ||
-                (!mIsHeadsUp && mExpandedChild.getHeight() == mContractedChild.getHeight()))) {
-            expandable = false;
+        if (mExpandedChild != null && mExpandedChild.getHeight() != 0) {
+            if ((!mIsHeadsUp || mHeadsUpChild == null)) {
+                if (mExpandedChild.getHeight() == mContractedChild.getHeight()) {
+                    expandable = false;
+                }
+            } else if (mExpandedChild.getHeight() == mHeadsUpChild.getHeight()) {
+                expandable = false;
+            }
         }
         if (mExpandedChild != null) {
             mExpandedWrapper.updateExpandability(expandable, mExpandClickListener);
