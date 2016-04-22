@@ -497,6 +497,20 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
+    /**
+     * Notify all interested parties that a print job has been updated.
+     *
+     * @param printJob The updated print job.
+     */
+    private void notifyPrintJobUpdated(PrintJobInfo printJob) {
+        Message message = mHandlerCaller.obtainMessageO(
+                HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                printJob);
+        mHandlerCaller.executeOrSendMessage(message);
+
+        mNotificationController.onUpdateNotifications(mPrintJobs);
+    }
+
     public boolean setPrintJobState(PrintJobId printJobId, int state, String error) {
         boolean success = false;
 
@@ -549,12 +563,7 @@ public final class PrintSpoolerService extends Service {
                     notifyOnAllPrintJobsHandled();
                 }
 
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
-                        printJob);
-                mHandlerCaller.executeOrSendMessage(message);
-
-                mNotificationController.onUpdateNotifications(mPrintJobs);
+                notifyPrintJobUpdated(printJob);
             }
         }
 
@@ -584,9 +593,12 @@ public final class PrintSpoolerService extends Service {
      */
     public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
         synchronized (mLock) {
-            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
 
-            mNotificationController.onUpdateNotifications(mPrintJobs);
+            if (printJob != null) {
+                printJob.setStatus(status);
+                notifyPrintJobUpdated(printJob);
+            }
         }
     }
 
@@ -600,9 +612,12 @@ public final class PrintSpoolerService extends Service {
     public void setStatus(@NonNull PrintJobId printJobId, @StringRes int status,
             @Nullable CharSequence appPackageName) {
         synchronized (mLock) {
-            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status, appPackageName);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
 
-            mNotificationController.onUpdateNotifications(mPrintJobs);
+            if (printJob != null) {
+                printJob.setStatus(status, appPackageName);
+                notifyPrintJobUpdated(printJob);
+            }
         }
     }
 
