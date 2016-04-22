@@ -74,6 +74,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
     private static final int MSG_TOGGLE_APP_SPLIT_SCREEN       = 30 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_FINISHED       = 31 << MSG_SHIFT;
+    private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -108,6 +109,7 @@ public class CommandQueue extends IStatusBar.Stub {
         void toggleRecentApps();
         void toggleSplitScreen();
         void preloadRecentApps();
+        void dismissKeyboardShortcutsMenu();
         void toggleKeyboardShortcutsMenu(int deviceId);
         void cancelPreloadRecentApps();
         void setWindowState(int window, int state);
@@ -252,6 +254,14 @@ public class CommandQueue extends IStatusBar.Stub {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_CANCEL_PRELOAD_RECENT_APPS);
             mHandler.obtainMessage(MSG_CANCEL_PRELOAD_RECENT_APPS, 0, 0, null).sendToTarget();
+        }
+    }
+
+    @Override
+    public void dismissKeyboardShortcutsMenu() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_DISMISS_KEYBOARD_SHORTCUTS);
+            mHandler.obtainMessage(MSG_DISMISS_KEYBOARD_SHORTCUTS).sendToTarget();
         }
     }
 
@@ -434,6 +444,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_CANCEL_PRELOAD_RECENT_APPS:
                     mCallbacks.cancelPreloadRecentApps();
+                    break;
+                case MSG_DISMISS_KEYBOARD_SHORTCUTS:
+                    mCallbacks.dismissKeyboardShortcutsMenu();
                     break;
                 case MSG_TOGGLE_KEYBOARD_SHORTCUTS:
                     mCallbacks.toggleKeyboardShortcutsMenu(msg.arg1);
