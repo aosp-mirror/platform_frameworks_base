@@ -361,8 +361,8 @@ public class DialogFragment extends Fragment
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         if (!mShownByMe) {
             // If not explicitly shown through our API, take this as an
             // indication that the dialog is no longer dismissed.
@@ -394,7 +394,6 @@ public class DialogFragment extends Fragment
             mShowsDialog = savedInstanceState.getBoolean(SAVED_SHOWS_DIALOG, mShowsDialog);
             mBackStackId = savedInstanceState.getInt(SAVED_BACK_STACK_ID, -1);
         }
-        
     }
 
     /** @hide */
@@ -473,11 +472,15 @@ public class DialogFragment extends Fragment
         View view = getView();
         if (view != null) {
             if (view.getParent() != null) {
-                throw new IllegalStateException("DialogFragment can not be attached to a container view");
+                throw new IllegalStateException(
+                        "DialogFragment can not be attached to a container view");
             }
             mDialog.setContentView(view);
         }
-        mDialog.setOwnerActivity(getActivity());
+        final Activity activity = getActivity();
+        if (activity != null) {
+            mDialog.setOwnerActivity(activity);
+        }
         mDialog.setCancelable(mCancelable);
         if (!mDialog.takeCancelAndDismissListeners("DialogFragment", this, this)) {
             throw new IllegalStateException(
