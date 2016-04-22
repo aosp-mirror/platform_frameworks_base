@@ -2816,15 +2816,36 @@ class MountService extends IMountService.Stub
         }
     }
 
+    /*
+     * Add this token/secret pair to the set of ways we can recover a disk encryption key.
+     * Changing the token/secret for a disk encryption key is done in two phases: first, adding
+     * a new token/secret pair with this call, then delting all other pairs with
+     * fixateNewestUserKeyAuth. This allows other places where a credential is used, such as
+     * Gatekeeper, to be updated between the two calls.
+     */
     @Override
-    public void changeUserKey(int userId, int serialNumber,
-            byte[] token, byte[] oldSecret, byte[] newSecret) {
+    public void addUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "change_user_key", userId, serialNumber,
-                encodeBytes(token), encodeBytes(oldSecret), encodeBytes(newSecret));
+            mCryptConnector.execute("cryptfs", "add_user_key_auth", userId, serialNumber,
+                encodeBytes(token), encodeBytes(secret));
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    /*
+     * Delete all disk encryption token/secret pairs except the most recently added one
+     */
+    @Override
+    public void fixateNewestUserKeyAuth(int userId) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        try {
+            mCryptConnector.execute("cryptfs", "fixate_newest_user_key_auth", userId);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
