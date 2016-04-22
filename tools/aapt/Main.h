@@ -54,6 +54,7 @@ extern android::status_t writeResourceSymbols(Bundle* bundle,
         bool includePrivate, bool emitCallback);
 
 extern android::status_t writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets);
+extern android::status_t writeMainDexProguardFile(Bundle* bundle, const sp<AaptAssets>& assets);
 
 extern bool isValidResourceType(const String8& type);
 
