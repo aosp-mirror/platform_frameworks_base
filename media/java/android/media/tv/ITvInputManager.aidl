@@ -87,7 +87,7 @@ interface ITvInputManager {
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     // For the recording session
-    void startRecording(in IBinder sessionToken, in Uri programHint, int userId);
+    void startRecording(in IBinder sessionToken, in Uri programUri, int userId);
     void stopRecording(in IBinder sessionToken, int userId);
 
     // For TV input hardware binding

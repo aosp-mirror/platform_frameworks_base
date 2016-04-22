@@ -1555,7 +1555,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void startRecording(IBinder sessionToken, @Nullable Uri programHint, int userId) {
+        public void startRecording(IBinder sessionToken, @Nullable Uri programUri, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "startRecording");
@@ -1564,7 +1564,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).startRecording(
-                                programHint);
+                                programUri);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in startRecording", e);
                     }
