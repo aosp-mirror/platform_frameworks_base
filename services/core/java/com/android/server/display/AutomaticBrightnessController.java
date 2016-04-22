@@ -147,6 +147,9 @@ class AutomaticBrightnessController {
     // A ring buffer containing all of the recent ambient light sensor readings.
     private AmbientLightRingBuffer mAmbientLightRingBuffer;
 
+    // A ring buffer containing the light sensor readings for the initial horizon period.
+    private AmbientLightRingBuffer mInitialHorizonAmbientLightRingBuffer;
+
     // The handler
     private AutomaticBrightnessHandler mHandler;
 
@@ -204,7 +207,10 @@ class AutomaticBrightnessController {
         mScreenAutoBrightnessAdjustmentMaxGamma = autoBrightnessAdjustmentMaxGamma;
 
         mHandler = new AutomaticBrightnessHandler(looper);
-        mAmbientLightRingBuffer = new AmbientLightRingBuffer(mLightSensorRate, mAmbientLightHorizon);
+        mAmbientLightRingBuffer =
+            new AmbientLightRingBuffer(mLightSensorRate, mAmbientLightHorizon);
+        mInitialHorizonAmbientLightRingBuffer =
+            new AmbientLightRingBuffer(mLightSensorRate, mAmbientLightHorizon);
 
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -273,6 +279,8 @@ class AutomaticBrightnessController {
         pw.println("  mLastObservedLuxTime=" + TimeUtils.formatUptime(mLastObservedLuxTime));
         pw.println("  mRecentLightSamples=" + mRecentLightSamples);
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
+        pw.println("  mInitialHorizonAmbientLightRingBuffer=" +
+                mInitialHorizonAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mScreenAutoBrightnessAdjustment=" + mScreenAutoBrightnessAdjustment);
         pw.println("  mScreenAutoBrightnessAdjustmentMaxGamma=" + mScreenAutoBrightnessAdjustmentMaxGamma);
@@ -295,6 +303,7 @@ class AutomaticBrightnessController {
                 mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
                 mRecentLightSamples = 0;
                 mAmbientLightRingBuffer.clear();
+                mInitialHorizonAmbientLightRingBuffer.clear();
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
@@ -311,6 +320,11 @@ class AutomaticBrightnessController {
 
     private void applyLightSensorMeasurement(long time, float lux) {
         mRecentLightSamples++;
+        // Store all of the light measurements for the intial horizon period. This is to help
+        // diagnose dim wake ups and slow responses in b/27951906.
+        if (time <= mLightSensorEnableTime + mAmbientLightHorizon) {
+            mInitialHorizonAmbientLightRingBuffer.push(time, lux);
+        }
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
         mAmbientLightRingBuffer.push(time, lux);
 
@@ -617,7 +631,7 @@ class AutomaticBrightnessController {
         void updateBrightness();
     }
 
-    private static final class AmbientLightRingBuffer{
+    private static final class AmbientLightRingBuffer {
         // Proportional extra capacity of the buffer beyond the expected number of light samples
         // in the horizon
         private static final float BUFFER_SLACK = 1.5f;
