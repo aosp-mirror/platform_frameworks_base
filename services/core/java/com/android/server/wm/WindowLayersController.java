@@ -27,6 +27,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
 
 /**
@@ -150,7 +151,7 @@ public class WindowLayersController {
      *         above all application surfaces.
      */
     int getResizeDimLayer() {
-        return mDockDivider.mLayer - 1;
+        return (mDockDivider != null) ? mDockDivider.mLayer - 1 : LAYER_OFFSET_DIM;
     }
 
     private void logDebugLayers(WindowList windows) {
