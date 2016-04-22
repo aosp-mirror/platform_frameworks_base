@@ -711,6 +711,8 @@ public final class ActiveServices {
                         updateServiceForegroundLocked(r.app, true);
                     }
                     getServiceMap(r.userId).ensureNotStartingBackground(r);
+                    mAm.notifyPackageUse(r.serviceInfo.packageName,
+                                         PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
                 } else {
                     if (r.isForeground) {
                         r.isForeground = false;
@@ -1756,7 +1758,8 @@ public final class ActiveServices {
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
-            mAm.notifyPackageUse(r.serviceInfo.packageName);
+            mAm.notifyPackageUse(r.serviceInfo.packageName,
+                                 PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             app.thread.scheduleCreateService(r, r.serviceInfo,
                     mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),

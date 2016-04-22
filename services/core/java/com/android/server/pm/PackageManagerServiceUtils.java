@@ -69,7 +69,7 @@ public class PackageManagerServiceUtils {
         long now = System.currentTimeMillis();
         for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
             PackageParser.Package pkg = i.next();
-            long then = pkg.mLastPackageUsageTimeInMills;
+            long then = pkg.getLatestPackageUseTimeInMills();
             if (then + dexOptLRUThresholdInMills < now) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
