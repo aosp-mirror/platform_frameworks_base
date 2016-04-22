@@ -177,6 +177,13 @@ public class NotificationContentView extends FrameLayout {
             if (updateContractedHeaderWidth()) {
                 mContractedChild.measure(widthMeasureSpec, heightSpec);
             }
+            if (mExpandedChild != null
+                    && mContractedChild.getMeasuredHeight() > mExpandedChild.getMeasuredHeight()) {
+                // the Expanded child is smaller then the collapsed. Let's remeasure it.
+                heightSpec = MeasureSpec.makeMeasureSpec(mContractedChild.getMeasuredHeight(),
+                        MeasureSpec.EXACTLY);
+                mExpandedChild.measure(widthMeasureSpec, heightSpec);
+            }
         }
         if (mHeadsUpChild != null) {
             int size = Math.min(maxSize, mHeadsUpHeight);
