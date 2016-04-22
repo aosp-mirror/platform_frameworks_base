@@ -451,9 +451,11 @@ interface IPackageManager {
     void updatePackagesIfNeeded();
 
     /**
-     * Notify the package manager that a package is going to be used.
+     * Notify the package manager that a package is going to be used and why.
+     *
+     * See PackageManager.NOTIFY_PACKAGE_USE_* for reasons.
      */
-    void notifyPackageUse(String packageName);
+    void notifyPackageUse(String packageName, int reason);
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given

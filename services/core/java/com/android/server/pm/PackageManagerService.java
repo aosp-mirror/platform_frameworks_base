@@ -1152,16 +1152,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                     try {
                         f = file.startWrite();
                         BufferedOutputStream out = new BufferedOutputStream(f);
-                        FileUtils.setPermissions(file.getBaseFile().getPath(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
+                        FileUtils.setPermissions(file.getBaseFile().getPath(),
+                                0640, SYSTEM_UID, PACKAGE_INFO_GID);
                         StringBuilder sb = new StringBuilder();
+
+                        sb.append(USAGE_FILE_MAGIC_VERSION_1);
+                        sb.append('\n');
+                        out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
+
                         for (PackageParser.Package pkg : mPackages.values()) {
-                            if (pkg.mLastPackageUsageTimeInMills == 0) {
+                            if (pkg.getLatestPackageUseTimeInMills() == 0L) {
                                 continue;
                             }
                             sb.setLength(0);
                             sb.append(pkg.packageName);
-                            sb.append(' ');
-                            sb.append((long)pkg.mLastPackageUsageTimeInMills);
+                            for (long usageTimeInMillis : pkg.mLastPackageUsageTimeInMills) {
+                                sb.append(' ');
+                                sb.append(usageTimeInMillis);
+                            }
                             sb.append('\n');
                             out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
                         }
@@ -1185,28 +1193,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 try {
                     in = new BufferedInputStream(file.openRead());
                     StringBuffer sb = new StringBuffer();
-                    while (true) {
-                        String packageName = readToken(in, sb, ' ');
-                        if (packageName == null) {
-                            break;
-                        }
-                        String timeInMillisString = readToken(in, sb, '\n');
-                        if (timeInMillisString == null) {
-                            throw new IOException("Failed to find last usage time for package "
-                                                  + packageName);
-                        }
-                        PackageParser.Package pkg = mPackages.get(packageName);
-                        if (pkg == null) {
-                            continue;
-                        }
-                        long timeInMillis;
-                        try {
-                            timeInMillis = Long.parseLong(timeInMillisString);
-                        } catch (NumberFormatException e) {
-                            throw new IOException("Failed to parse " + timeInMillisString
-                                                  + " as a long.", e);
-                        }
-                        pkg.mLastPackageUsageTimeInMills = timeInMillis;
+
+                    String firstLine = readLine(in, sb);
+                    if (firstLine.equals(USAGE_FILE_MAGIC_VERSION_1)) {
+                        readVersion1LP(in, sb);
+                    } else {
+                        readVersion0LP(in, sb, firstLine);
                     }
                 } catch (FileNotFoundException expected) {
                     mIsHistoricalPackageUsageAvailable = false;
@@ -1217,6 +1209,76 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mLastWritten.set(SystemClock.elapsedRealtime());
+        }
+
+        private void readVersion0LP(InputStream in, StringBuffer sb, String firstLine)
+                throws IOException {
+            // Initial version of the file had no version number and stored one
+            // package-timestamp pair per line.
+            // Note that the first line has already been read from the InputStream.
+            String line = firstLine;
+            while (true) {
+                if (line == null) {
+                    break;
+                }
+
+                String[] tokens = line.split(" ");
+                if (tokens.length != 2) {
+                    throw new IOException("Failed to parse " + line +
+                            " as package-timestamp pair.");
+                }
+
+                String packageName = tokens[0];
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    continue;
+                }
+
+                long timestamp = parseAsLong(tokens[1]);
+                for (int reason = 0;
+                        reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
+                        reason++) {
+                    pkg.mLastPackageUsageTimeInMills[reason] = timestamp;
+                }
+
+                line = readLine(in, sb);
+            }
+        }
+
+        private void readVersion1LP(InputStream in, StringBuffer sb) throws IOException {
+            // Version 1 of the file started with the corresponding version
+            // number and then stored a package name and eight timestamps per line.
+            String line;
+            while ((line = readLine(in, sb)) != null) {
+                String[] tokens = line.split(" ");
+                if (tokens.length != PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT + 1) {
+                    throw new IOException("Failed to parse " + line + " as a timestamp array.");
+                }
+
+                String packageName = tokens[0];
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    continue;
+                }
+
+                for (int reason = 0;
+                        reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
+                        reason++) {
+                    pkg.mLastPackageUsageTimeInMills[reason] = parseAsLong(tokens[reason + 1]);
+                }
+            }
+        }
+
+        private long parseAsLong(String token) throws IOException {
+            try {
+                return Long.parseLong(token);
+            } catch (NumberFormatException e) {
+                throw new IOException("Failed to parse " + token + " as a long.", e);
+            }
+        }
+
+        private String readLine(InputStream in, StringBuffer sb) throws IOException {
+            return readToken(in, sb, '\n');
         }
 
         private String readToken(InputStream in, StringBuffer sb, char endOfToken)
@@ -1243,6 +1305,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             File fname = new File(systemDir, "package-usage.list");
             return new AtomicFile(fname);
         }
+
+        private static final String USAGE_FILE_MAGIC = "PACKAGE_USAGE__VERSION_";
+        private static final String USAGE_FILE_MAGIC_VERSION_1 = USAGE_FILE_MAGIC + "1";
     }
 
     class PackageHandler extends Handler {
@@ -7136,13 +7201,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void notifyPackageUse(String packageName) {
+    public void notifyPackageUse(String packageName, int reason) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (p == null) {
                 return;
             }
-            p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
+            p.mLastPackageUsageTimeInMills[reason] = System.currentTimeMillis();
         }
     }
 
