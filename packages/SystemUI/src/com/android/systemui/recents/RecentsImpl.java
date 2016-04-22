@@ -588,6 +588,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      */
     private void updateHeaderBarLayout(TaskStack stack, Rect windowRectOverride) {
         SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect displayRect = ssp.getDisplayRect();
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
         Rect windowRect = windowRectOverride != null
@@ -608,10 +609,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Rebind the header bar and draw it for the transition
         stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
-            stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
-                    mTaskStackBounds);
+            stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
+                    systemInsets.right, mTaskStackBounds);
             stackLayout.reset();
-            stackLayout.initialize(windowRect, mTaskStackBounds,
+            stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
             mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
 

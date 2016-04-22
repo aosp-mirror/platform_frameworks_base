@@ -126,21 +126,21 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             };
 
     @ViewDebug.ExportedProperty(category="recents")
-    float mDimAlpha;
-    float mActionButtonTranslationZ;
+    private float mDimAlpha;
+    private float mActionButtonTranslationZ;
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
-    Task mTask;
+    private Task mTask;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mTaskDataLoaded;
+    private boolean mTaskDataLoaded;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mClipViewInStack = true;
+    private boolean mClipViewInStack = true;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mTouchExplorationEnabled;
+    private boolean mTouchExplorationEnabled;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mIsDisabledInSafeMode;
+    private boolean mIsDisabledInSafeMode;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="view_bounds_")
-    AnimateableViewBounds mViewBounds;
+    private AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
     private ObjectAnimator mDimAnimator;
@@ -152,12 +152,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     TaskViewThumbnail mThumbnailView;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
     TaskViewHeader mHeaderView;
-    View mActionButtonView;
-    View mIncompatibleAppToastView;
-    TaskViewCallbacks mCb;
+    private View mActionButtonView;
+    private View mIncompatibleAppToastView;
+    private TaskViewCallbacks mCb;
 
     @ViewDebug.ExportedProperty(category="recents")
-    Point mDownTouchPos = new Point();
+    private Point mDownTouchPos = new Point();
 
     private Toast mDisabledAppToast;
 
@@ -196,7 +196,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      */
     void onReload(boolean isResumingFromVisible) {
         resetNoUserInteractionState();
-        readSystemFlags();
         if (!isResumingFromVisible) {
             resetViewProperties();
         }
@@ -210,12 +209,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /** Returns the view bounds. */
     AnimateableViewBounds getViewBounds() {
         return mViewBounds;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        readSystemFlags();
     }
 
     @Override
@@ -598,12 +591,14 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     /**** TaskCallbacks Implementation ****/
 
-    public void onTaskBound(Task t) {
+    public void onTaskBound(Task t, boolean touchExplorationEnabled, int displayOrientation,
+            Rect displayRect) {
         SystemServicesProxy ssp = Recents.getSystemServices();
+        mTouchExplorationEnabled = touchExplorationEnabled;
         mTask = t;
         mTask.addCallback(this);
         mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
-        mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode);
+        mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode, displayOrientation, displayRect);
         mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
 
         if (!t.isDockable && ssp.hasDockedTask()) {
@@ -708,13 +703,5 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             });
         }
         EventBus.getDefault().unregister(this);
-    }
-
-    /**
-     * Reads current system flags related to accessibility and screen pinning.
-     */
-    private void readSystemFlags() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
     }
 }
