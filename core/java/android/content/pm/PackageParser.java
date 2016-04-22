@@ -4756,7 +4756,8 @@ public class PackageParser {
         public int mPreferredOrder = 0;
 
         // For use by package manager to keep track of when a package was last used.
-        public long mLastPackageUsageTimeInMills;
+        public long[] mLastPackageUsageTimeInMills =
+                new long[PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT];
 
         // // User set enabled state.
         // public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -5084,6 +5085,14 @@ public class PackageParser {
                 return isSystemApp();
             }
             return true;
+        }
+
+        public long getLatestPackageUseTimeInMills() {
+            long latestUse = 0L;
+            for (long use : mLastPackageUsageTimeInMills) {
+                latestUse = Math.max(latestUse, use);
+            }
+            return latestUse;
         }
 
         public String toString() {

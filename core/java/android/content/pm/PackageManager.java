@@ -2456,6 +2456,69 @@ public abstract class PackageManager {
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
 
     /**
+     * Used when starting a process for an Activity.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_ACTIVITY = 0;
+
+    /**
+     * Used when starting a process for a Service.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_SERVICE = 1;
+
+    /**
+     * Used when moving a Service to the foreground.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE = 2;
+
+    /**
+     * Used when starting a process for a BroadcastReceiver.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER = 3;
+
+    /**
+     * Used when starting a process for a ContentProvider.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_CONTENT_PROVIDER = 4;
+
+    /**
+     * Used when starting a process for a BroadcastReceiver.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_BACKUP = 5;
+
+    /**
+     * Used with Context.getClassLoader() across Android packages.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_CROSS_PACKAGE = 6;
+
+    /**
+     * Used when starting a package within a process for Instrumentation.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_INSTRUMENTATION = 7;
+
+    /**
+     * Total number of usage reasons.
+     *
+     * @hide
+     */
+    public static final int NOTIFY_PACKAGE_USE_REASONS_COUNT = 8;
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
