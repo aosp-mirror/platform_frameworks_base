@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
 
@@ -341,6 +342,30 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         }
 
         rawBuilder.append('\0');
+    }
+
+    /**
+     * Method that waits until all asychronous notifications sent by the native daemon have
+     * been processed. This method must not be called on the notification thread or an
+     * exception will be thrown.
+     */
+    public void waitForCallbacks() {
+        if (Thread.currentThread() == mLooper.getThread()) {
+            throw new IllegalStateException("Must not call this method on callback thread");
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mCallbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Slog.wtf(TAG, "Interrupted while waiting for unsolicited response handling", e);
+        }
     }
 
     /**
