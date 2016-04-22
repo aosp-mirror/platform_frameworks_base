@@ -46,7 +46,8 @@ private:
     std::map<std::u16string, std::set<Source>> mKeepMethodSet;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
+bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet,
+                                     bool mainDexOnly = false);
 bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
