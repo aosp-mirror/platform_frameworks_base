@@ -1427,6 +1427,16 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.SHOW_KEYBOARD_SHORTCUTS";
 
     /**
+     * Activity Action: Dismiss the Keyboard Shortcuts Helper screen.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISMISS_KEYBOARD_SHORTCUTS =
+            "android.intent.action.DISMISS_KEYBOARD_SHORTCUTS";
+
+    /**
      * Activity Action: Show settings for managing network data usage of a
      * specific application. Applications should define an activity that offers
      * options to control data usage.
