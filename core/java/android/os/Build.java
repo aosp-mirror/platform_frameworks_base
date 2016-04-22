@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -802,6 +803,7 @@ public class Build {
      *
      * @hide
      */
+    @SystemApi
     public static final boolean PERMISSIONS_REVIEW_REQUIRED =
             SystemProperties.getInt("ro.permission_review_required", 0) == 1;
 
