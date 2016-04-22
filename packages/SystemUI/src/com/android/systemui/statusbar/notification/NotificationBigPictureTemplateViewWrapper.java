@@ -23,13 +23,16 @@ import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+
 /**
  * Wraps a notification containing a big picture template
  */
 public class NotificationBigPictureTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
-    protected NotificationBigPictureTemplateViewWrapper(Context ctx, View view) {
-        super(ctx, view);
+    protected NotificationBigPictureTemplateViewWrapper(Context ctx, View view,
+            ExpandableNotificationRow row) {
+        super(ctx, view, row);
     }
 
     @Override
