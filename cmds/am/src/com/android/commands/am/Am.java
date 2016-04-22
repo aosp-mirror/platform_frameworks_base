@@ -526,7 +526,7 @@ public class Am extends BaseCommand {
                 String[] strings = value.split(",");
                 long[] list = new long[strings.length];
                 for (int i = 0; i < strings.length; i++) {
-                    list[i] = Long.valueOf(strings[i]);
+                    list[i] = Long.parseLong(strings[i]);
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;

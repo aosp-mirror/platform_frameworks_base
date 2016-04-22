@@ -364,7 +364,7 @@ public class ZenModeConfig implements Parcelable {
     private static long tryParseLong(String value, long defValue) {
         if (TextUtils.isEmpty(value)) return defValue;
         try {
-            return Long.valueOf(value);
+            return Long.parseLong(value);
         } catch (NumberFormatException e) {
             return defValue;
         }
