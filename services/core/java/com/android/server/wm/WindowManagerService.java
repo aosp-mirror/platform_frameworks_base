@@ -7525,7 +7525,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 stack.resetAdjustedForIme(!dockVisible);
             }
             displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, null);
+                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin);
         }
     }
 
