@@ -100,12 +100,12 @@ public class RecentsTaskLoadPlan {
      * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
      * to most-recent order.
      */
-    public synchronized void preloadRawTasks(boolean isTopTaskHome) {
+    public synchronized void preloadRawTasks(boolean isHomeStackVisible) {
         int currentUserId = UserHandle.USER_CURRENT;
         updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
         mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                currentUserId, isTopTaskHome, mCurrentQuietProfiles);
+                currentUserId, isHomeStackVisible, mCurrentQuietProfiles);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -120,12 +120,12 @@ public class RecentsTaskLoadPlan {
      * - least-recent to most-recent stack tasks
      * - least-recent to most-recent freeform tasks
      */
-    public synchronized void preloadPlan(RecentsTaskLoader loader, int topTaskId,
-            boolean isTopTaskHome) {
+    public synchronized void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
+            boolean isHomeStackVisible) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks(isTopTaskHome);
+            preloadRawTasks(isHomeStackVisible);
         }
 
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
@@ -182,7 +182,7 @@ public class RecentsTaskLoadPlan {
             boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
             boolean isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
                     (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS)));
-            boolean isLaunchTarget = taskKey.id == topTaskId;
+            boolean isLaunchTarget = taskKey.id == runningTaskId;
             if (isStackTask && newLastStackActiveTime < 0) {
                 newLastStackActiveTime = t.lastActiveTime;
             }
@@ -196,7 +196,7 @@ public class RecentsTaskLoadPlan {
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
-            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false);
+            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false /* loadIfNotCached */);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&
@@ -256,7 +256,8 @@ public class RecentsTaskLoadPlan {
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null || isRunningTask) {
                     if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, true);
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
+                                true /* loadIfNotCached */);
                     } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
                         loadQueue.addTask(task);
                     }

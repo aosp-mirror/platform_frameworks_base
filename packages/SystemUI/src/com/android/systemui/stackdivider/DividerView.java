@@ -277,7 +277,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     updateDockSide();
                     SystemServicesProxy ssp = Recents.getSystemServices();
                     if (mDockSide != WindowManager.DOCKED_INVALID
-                            && !ssp.isRecentsTopMost(ssp.getTopMostTask(), null /* isTopHome */)) {
+                            && !ssp.isRecentsActivityVisible()) {
                         mWindowManagerProxy.swapTasks();
                         return true;
                     }
