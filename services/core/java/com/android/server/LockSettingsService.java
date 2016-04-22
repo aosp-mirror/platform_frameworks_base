@@ -1048,7 +1048,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void changeUserKey(int userId, byte[] token, byte[] secret)
             throws RemoteException {
         final UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
-        getMountService().changeUserKey(userId, userInfo.serialNumber, token, null, secret);
+        final IMountService mountService = getMountService();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            mountService.changeUserKey(userId, userInfo.serialNumber, token, null, secret);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     @Override
