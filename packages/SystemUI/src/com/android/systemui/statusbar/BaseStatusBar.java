@@ -143,6 +143,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
     protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
     protected static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU = 1026;
+    protected static final int MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU = 1027;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
@@ -1251,6 +1252,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void dismissKeyboardShortcutsMenu() {
+        int msg = MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
         int msg = MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU;
         mHandler.removeMessages(msg);
@@ -1345,6 +1353,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void toggleKeyboardShortcuts(int deviceId) {
         KeyboardShortcuts.toggle(mContext, deviceId);
+    }
+
+    protected void dismissKeyboardShortcuts() {
+        KeyboardShortcuts.dismiss();
     }
 
     protected void cancelPreloadingRecents() {
@@ -1520,6 +1532,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                   break;
              case MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU:
                   toggleKeyboardShortcuts(m.arg1);
+                  break;
+             case MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU:
+                  dismissKeyboardShortcuts();
                   break;
             }
         }

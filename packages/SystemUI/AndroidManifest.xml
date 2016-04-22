@@ -508,6 +508,7 @@
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver">
             <intent-filter>
+                <action android:name="android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
                 <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
             </intent-filter>
         </receiver>

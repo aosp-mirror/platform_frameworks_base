@@ -3301,6 +3301,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         try {
                             startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                            dismissKeyboardShortcutsMenu();
                         } catch (ActivityNotFoundException ex) {
                             Slog.w(TAG, "Dropping shortcut key combination because "
                                     + "the activity to which it is registered was not found: "
@@ -3327,6 +3328,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     try {
                         startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                        dismissKeyboardShortcutsMenu();
                     } catch (ActivityNotFoundException ex) {
                         Slog.w(TAG, "Dropping shortcut key combination because "
                                 + "the activity to which it is registered was not found: "
@@ -3345,6 +3347,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
                     startActivityAsUser(intent, UserHandle.CURRENT);
+                    dismissKeyboardShortcutsMenu();
                 } catch (ActivityNotFoundException ex) {
                     Slog.w(TAG, "Dropping application launch key because "
                             + "the activity to which it is registered was not found: "
@@ -3632,6 +3635,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
             statusbar.toggleKeyboardShortcutsMenu(deviceId);
+        }
+    }
+
+    private void dismissKeyboardShortcutsMenu() {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.dismissKeyboardShortcutsMenu();
         }
     }
 
