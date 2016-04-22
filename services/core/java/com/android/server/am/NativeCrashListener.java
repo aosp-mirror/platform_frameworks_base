@@ -49,8 +49,8 @@ final class NativeCrashListener extends Thread {
     static final String DEBUGGERD_SOCKET_PATH = "/data/system/ndebugsocket";
 
     // Use a short timeout on socket operations and abandon the connection
-    // on hard errors
-    static final long SOCKET_TIMEOUT_MILLIS = 2000;  // 2 seconds
+    // on hard errors, just in case debuggerd goes out to lunch.
+    static final long SOCKET_TIMEOUT_MILLIS = 10000;  // 10 seconds
 
     final ActivityManagerService mAm;
 
