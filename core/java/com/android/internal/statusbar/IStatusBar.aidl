@@ -65,6 +65,7 @@ oneway interface IStatusBar
     void cancelPreloadRecentApps();
     void showScreenPinningRequest(int taskId);
 
+    void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**

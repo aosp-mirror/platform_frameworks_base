@@ -277,6 +277,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
+        public void dismissKeyboardShortcutsMenu() {
+            if (mBar != null) {
+                try {
+                    mBar.dismissKeyboardShortcutsMenu();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public void toggleKeyboardShortcutsMenu(int deviceId) {
             if (mBar != null) {
                 try {
