@@ -2508,6 +2508,17 @@
 
   <java-symbol type="id" name="notification_content_container" />
 
+  <java-symbol type="plurals" name="duration_minutes_shortest" />
+  <java-symbol type="plurals" name="duration_hours_shortest" />
+  <java-symbol type="plurals" name="duration_days_shortest" />
+  <java-symbol type="plurals" name="duration_years_shortest" />
+  <java-symbol type="plurals" name="duration_minutes_shortest_future" />
+  <java-symbol type="plurals" name="duration_hours_shortest_future" />
+  <java-symbol type="plurals" name="duration_days_shortest_future" />
+  <java-symbol type="plurals" name="duration_years_shortest_future" />
+
+  <java-symbol type="string" name="now_string_shortest" />
+
   <!-- Encryption notification while accounts are locked by credential encryption -->
   <java-symbol type="string" name="user_encrypted_title" />
   <java-symbol type="string" name="user_encrypted_message" />
