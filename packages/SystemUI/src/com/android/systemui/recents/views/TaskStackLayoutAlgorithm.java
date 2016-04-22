@@ -432,10 +432,9 @@ public class TaskStackLayoutAlgorithm {
      * Computes the stack and task rects.  The given task stack bounds already has the top/right
      * insets and left/right padding already applied.
      */
-    public void initialize(Rect windowRect, Rect taskStackBounds, StackState state) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
+    public void initialize(Rect displayRect, Rect windowRect, Rect taskStackBounds,
+            StackState state) {
         Rect lastStackRect = new Rect(mStackRect);
-        Rect displayRect = ssp.getDisplayRect();
 
         int topMargin = getScaleForExtent(windowRect, displayRect, mBaseTopMargin, mMinMargin, HEIGHT);
         int bottomMargin = getScaleForExtent(windowRect, displayRect, mBaseBottomMargin, mMinMargin,
@@ -999,14 +998,12 @@ public class TaskStackLayoutAlgorithm {
      * top and right system insets (but not the bottom inset) and left/right paddings, but _not_
      * the top/bottom padding or insets.
      */
-    public void getTaskStackBounds(Rect windowRect, int topInset, int rightInset,
+    public void getTaskStackBounds(Rect displayRect, Rect windowRect, int topInset, int rightInset,
             Rect taskStackBounds) {
         taskStackBounds.set(windowRect.left, windowRect.top + topInset,
                 windowRect.right - rightInset, windowRect.bottom);
 
         // Ensure that the new width is at most the smaller display edge size
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        Rect displayRect = ssp.getDisplayRect();
         int sideMargin = getScaleForExtent(windowRect, displayRect, mBaseSideMargin, mMinMargin,
                 WIDTH);
         int targetStackWidth = taskStackBounds.width() - 2 * sideMargin;

@@ -18,6 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
@@ -53,6 +54,7 @@ public class AnimationProps {
     public static final int FOCUS_STATE = 8;
 
     private SparseLongArray mPropStartDelay;
+    private SparseLongArray mPropInitialPlayTime;
     private SparseLongArray mPropDuration;
     private SparseArray<Interpolator> mPropInterpolators;
     private Animator.AnimatorListener mListener;
@@ -116,10 +118,14 @@ public class AnimationProps {
      * Applies the specific start delay, duration and interpolator to the given {@param animator}
      * for the specified {@param propertyType}.
      */
-    public <T extends Animator> T apply(@PropType int propertyType, T animator) {
+    public <T extends ValueAnimator> T apply(@PropType int propertyType, T animator) {
         animator.setStartDelay(getStartDelay(propertyType));
         animator.setDuration(getDuration(propertyType));
         animator.setInterpolator(getInterpolator(propertyType));
+        long initialPlayTime = getInitialPlayTime(propertyType);
+        if (initialPlayTime != 0) {
+            animator.setCurrentPlayTime(initialPlayTime);
+        }
         return animator;
     }
 
@@ -131,6 +137,17 @@ public class AnimationProps {
             mPropStartDelay = new SparseLongArray();
         }
         mPropStartDelay.append(propertyType, startDelay);
+        return this;
+    }
+
+    /**
+     * Sets a initial play time for a specific property.
+     */
+    public AnimationProps setInitialPlayTime(@PropType int propertyType, int initialPlayTime) {
+        if (mPropInitialPlayTime == null) {
+            mPropInitialPlayTime = new SparseLongArray();
+        }
+        mPropInitialPlayTime.append(propertyType, initialPlayTime);
         return this;
     }
 
@@ -197,6 +214,20 @@ public class AnimationProps {
             return mPropInterpolators.get(ALL, Interpolators.LINEAR);
         }
         return Interpolators.LINEAR;
+    }
+
+    /**
+     * Returns the initial play time for a specific property, falling back to the general initial
+     * play time if there is no specific property interpolator.
+     */
+    public long getInitialPlayTime(@PropType int propertyType) {
+        if (mPropInitialPlayTime != null) {
+            if (mPropInitialPlayTime.indexOfKey(propertyType) != -1) {
+                return mPropInitialPlayTime.get(propertyType);
+            }
+            return mPropInitialPlayTime.get(ALL, 0);
+        }
+        return 0;
     }
 
     /**
