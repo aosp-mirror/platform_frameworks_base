@@ -690,7 +690,7 @@ public class IpManager extends StateMachine {
             final InterfaceConfiguration ifcg = new InterfaceConfiguration();
             ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
             mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-        } catch (RemoteException e) {
+        } catch (IllegalStateException | RemoteException e) {
             Log.e(mTag, "ALERT: Failed to clear IPv4 address on interface " + mInterfaceName, e);
         }
     }
