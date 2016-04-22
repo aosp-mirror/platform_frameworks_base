@@ -5513,7 +5513,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void addFrameMetricsListener(Window window, Window.FrameMetricsListener listener,
+    public void addFrameMetricsListener(Window window,
+            Window.OnFrameMetricsAvailableListener listener,
             Handler handler) {
         if (mAttachInfo != null) {
             if (mAttachInfo.mHardwareRenderer != null) {
@@ -5544,11 +5545,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void removeFrameMetricsListener(Window.FrameMetricsListener listener) {
+    public void removeFrameMetricsListener(
+            Window.OnFrameMetricsAvailableListener listener) {
         ThreadedRenderer renderer = getHardwareRenderer();
         FrameMetricsObserver fmo = findFrameMetricsObserver(listener);
         if (fmo == null) {
-            throw new IllegalArgumentException("attempt to remove FrameMetricsListener that was never added");
+            throw new IllegalArgumentException(
+                    "attempt to remove OnFrameMetricsAvailableListener that was never added");
         }
 
         if (mFrameMetricsObservers != null) {
@@ -5572,7 +5575,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private FrameMetricsObserver findFrameMetricsObserver(Window.FrameMetricsListener listener) {
+    private FrameMetricsObserver findFrameMetricsObserver(
+            Window.OnFrameMetricsAvailableListener listener) {
         for (int i = 0; i < mFrameMetricsObservers.size(); i++) {
             FrameMetricsObserver observer = mFrameMetricsObservers.get(i);
             if (observer.mListener == listener) {
