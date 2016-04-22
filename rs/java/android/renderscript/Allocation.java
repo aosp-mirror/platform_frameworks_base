@@ -392,8 +392,6 @@ public class Allocation extends BaseObj {
 
     protected void finalize() throws Throwable {
         RenderScript.registerNativeFree.invoke(RenderScript.sRuntime, mSize);
-        // Set mType null to avoid double-destroying it in case its finalizer races ahead
-        mType = null;
         super.finalize();
     }
 
@@ -2615,7 +2613,6 @@ public class Allocation extends BaseObj {
 
         if (mType != null && mOwningType) {
             mType.destroy();
-            mType = null;
         }
 
         super.destroy();
