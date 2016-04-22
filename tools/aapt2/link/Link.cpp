@@ -61,6 +61,7 @@ struct LinkOptions {
     Maybe<std::u16string> customJavaPackage;
     std::set<std::u16string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
+    Maybe<std::string> generateMainDexProguardRulesPath;
     bool noAutoVersion = false;
     bool noVersionVectors = false;
     bool staticLib = false;
@@ -282,6 +283,7 @@ struct ResourceFileFlattenerOptions {
     bool noVersionVectors = false;
     bool keepRawValues = false;
     bool doNotCompressAnything = false;
+    bool updateProguardSpec = false;
     std::vector<std::string> extensionsToNotCompress;
 };
 
@@ -363,8 +365,8 @@ bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
         return false;
     }
 
-    if (!proguard::collectProguardRules(outFileOp->xmlToFlatten->file.source,
-                                        outFileOp->xmlToFlatten.get(), mKeepSet)) {
+    if (mOptions.updateProguardSpec && !proguard::collectProguardRules(
+            outFileOp->xmlToFlatten->file.source, outFileOp->xmlToFlatten.get(), mKeepSet)) {
         return false;
     }
 
@@ -811,12 +813,12 @@ public:
         return true;
     }
 
-    bool writeProguardFile(const proguard::KeepSet& keepSet) {
-        if (!mOptions.generateProguardRulesPath) {
+    bool writeProguardFile(const Maybe<std::string>& out, const proguard::KeepSet& keepSet) {
+        if (!out) {
             return true;
         }
 
-        const std::string& outPath = mOptions.generateProguardRulesPath.value();
+        const std::string& outPath = out.value();
         std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
             mContext->getDiagnostics()->error(
@@ -1213,6 +1215,7 @@ public:
         }
 
         proguard::KeepSet proguardKeepSet;
+        proguard::KeepSet proguardMainDexKeepSet;
 
         std::unique_ptr<IArchiveWriter> archiveWriter = makeArchiveWriter();
         if (!archiveWriter) {
@@ -1234,9 +1237,18 @@ public:
 
             XmlReferenceLinker manifestLinker;
             if (manifestLinker.consume(mContext, manifestXml.get())) {
-                if (!proguard::collectProguardRulesForManifest(Source(mOptions.manifestPath),
-                                                               manifestXml.get(),
-                                                               &proguardKeepSet)) {
+                if (mOptions.generateProguardRulesPath &&
+                        !proguard::collectProguardRulesForManifest(Source(mOptions.manifestPath),
+                                                                   manifestXml.get(),
+                                                                   &proguardKeepSet)) {
+                    error = true;
+                }
+
+                if (mOptions.generateMainDexProguardRulesPath &&
+                        !proguard::collectProguardRulesForManifest(Source(mOptions.manifestPath),
+                                                                   manifestXml.get(),
+                                                                   &proguardMainDexKeepSet,
+                                                                   true)) {
                     error = true;
                 }
 
@@ -1268,6 +1280,8 @@ public:
         fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
         fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
         fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
+        fileFlattenerOptions.updateProguardSpec =
+                static_cast<bool>(mOptions.generateProguardRulesPath);
         ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
 
         if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
@@ -1338,10 +1352,12 @@ public:
             }
         }
 
-        if (mOptions.generateProguardRulesPath) {
-            if (!writeProguardFile(proguardKeepSet)) {
-                return 1;
-            }
+        if (!writeProguardFile(mOptions.generateProguardRulesPath, proguardKeepSet)) {
+            return 1;
+        }
+
+        if (!writeProguardFile(mOptions.generateMainDexProguardRulesPath, proguardMainDexKeepSet)) {
+            return 1;
         }
 
         if (mContext->verbose()) {
@@ -1397,6 +1413,9 @@ int link(const std::vector<StringPiece>& args) {
                           &options.generateJavaClassPath)
             .optionalFlag("--proguard", "Output file for generated Proguard rules",
                           &options.generateProguardRulesPath)
+            .optionalFlag("--proguard-main-dex",
+                          "Output file for generated Proguard rules for the main dex",
+                          &options.generateMainDexProguardRulesPath)
             .optionalSwitch("--no-auto-version",
                             "Disables automatic style and layout SDK versioning",
                             &options.noAutoVersion)

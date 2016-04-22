@@ -140,7 +140,8 @@ struct TransitionVisitor : public BaseVisitor {
 };
 
 struct ManifestVisitor : public BaseVisitor {
-    ManifestVisitor(const Source& source, KeepSet* keepSet) : BaseVisitor(source, keepSet) {
+    ManifestVisitor(const Source& source, KeepSet* keepSet, bool mainDexOnly)
+            : BaseVisitor(source, keepSet), mMainDexOnly(mainDexOnly) {
     }
 
     virtual void visit(xml::Element* node) override {
@@ -161,6 +162,13 @@ struct ManifestVisitor : public BaseVisitor {
                         addClass(node->lineNumber, result.value());
                     }
                 }
+                if (mMainDexOnly) {
+                    xml::Attribute* defaultProcess = node->findAttribute(xml::kSchemaAndroid,
+                                                                         u"process");
+                    if (defaultProcess) {
+                        mDefaultProcess = defaultProcess->value;
+                    }
+                }
             } else if (node->name == u"activity" || node->name == u"service" ||
                     node->name == u"receiver" || node->name == u"provider" ||
                     node->name == u"instrumentation") {
@@ -169,7 +177,18 @@ struct ManifestVisitor : public BaseVisitor {
 
             if (getName) {
                 xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"name");
-                if (attr) {
+                getName = attr != nullptr;
+
+                if (getName && mMainDexOnly) {
+                    xml::Attribute* componentProcess = node->findAttribute(xml::kSchemaAndroid,
+                                                                           u"process");
+
+                    const std::u16string& process = componentProcess ? componentProcess->value
+                                                                     : mDefaultProcess;
+                    getName = !process.empty() && process[0] != u':';
+                }
+
+                if (getName) {
                     Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
                                                                                     attr->value);
                     if (result) {
@@ -181,12 +200,15 @@ struct ManifestVisitor : public BaseVisitor {
         BaseVisitor::visit(node);
     }
 
+private:
     std::u16string mPackage;
+    const bool mMainDexOnly;
+    std::u16string mDefaultProcess;
 };
 
 bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res,
-                                     KeepSet* keepSet) {
-    ManifestVisitor visitor(source, keepSet);
+                                     KeepSet* keepSet, bool mainDexOnly) {
+    ManifestVisitor visitor(source, keepSet, mainDexOnly);
     if (res->root) {
         res->root->accept(&visitor);
         return true;
