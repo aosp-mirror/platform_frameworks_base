@@ -388,6 +388,11 @@ public class PropertyValuesHolder implements Cloneable {
      * set of Object values. This variant also takes a TypeEvaluator because the system
      * cannot automatically interpolate between objects of unknown type.
      *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the PropertyValuesHolder. If the objects will be mutated externally
+     * after this method is called, callers should pass a copy of those objects instead.
+     *
      * @param propertyName The name of the property being animated.
      * @param evaluator A TypeEvaluator that will be called on each animation frame to
      * provide the necessary interpolation between the Object values to derive the animated
@@ -433,6 +438,11 @@ public class PropertyValuesHolder implements Cloneable {
      * set of Object values. This variant also takes a TypeEvaluator because the system
      * cannot automatically interpolate between objects of unknown type.
      *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the PropertyValuesHolder. If the objects will be mutated externally
+     * after this method is called, callers should pass a copy of those objects instead.
+     *
      * @param property The property being animated. Should not be null.
      * @param evaluator A TypeEvaluator that will be called on each animation frame to
      * provide the necessary interpolation between the Object values to derive the animated
@@ -457,6 +467,11 @@ public class PropertyValuesHolder implements Cloneable {
      * of the property. If only one value is supplied, the <code>TypeConverter</code>
      * must be a {@link android.animation.BidirectionalTypeConverter} to retrieve the current
      * value.
+     *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the PropertyValuesHolder. If the objects will be mutated externally
+     * after this method is called, callers should pass a copy of those objects instead.
      *
      * @param property The property being animated. Should not be null.
      * @param converter Converts the animated object to the Property type.
@@ -636,7 +651,12 @@ public class PropertyValuesHolder implements Cloneable {
      * {@link ObjectAnimator}, and with a getter function
      * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
      * no way of determining what the value should be.
-     * 
+     *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the PropertyValuesHolder. If the objects will be mutated externally
+     * after this method is called, callers should pass a copy of those objects instead.
+     *
      * @param values One or more values that the animation will animate between.
      */
     public void setObjectValues(Object... values) {

@@ -585,6 +585,11 @@ public final class ObjectAnimator extends ValueAnimator {
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
      *
+     * <p><strong>Note:</strong> The values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
+     *
      * @param target The object whose property is to be animated. This object should
      * have a public method on it called <code>setName()</code>, where <code>name</code> is
      * the value of the <code>propertyName</code> parameter.
@@ -635,6 +640,11 @@ public final class ObjectAnimator extends ValueAnimator {
      * along the way, and an ending value (these values will be distributed evenly across
      * the duration of the animation).
      *
+     * <p><strong>Note:</strong> The values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
+     *
      * @param target The object whose property is to be animated.
      * @param property The property being animated.
      * @param evaluator A TypeEvaluator that will be called on each animation frame to
@@ -662,6 +672,11 @@ public final class ObjectAnimator extends ValueAnimator {
      * convert from the animated values to the type of the property. If only one value is
      * supplied, the <code>TypeConverter</code> must be a
      * {@link android.animation.BidirectionalTypeConverter} to retrieve the current value.
+     *
+     * <p><strong>Note:</strong> The values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
      *
      * @param target The object whose property is to be animated.
      * @param property The property being animated.
