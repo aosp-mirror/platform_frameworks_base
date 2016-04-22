@@ -31,7 +31,6 @@ import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
-import android.util.Log;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -63,7 +62,6 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Size;
-import android.util.Slog;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -2360,8 +2358,10 @@ public class ActivityManager {
         public String[] taskNames;
         public Rect[] taskBounds;
         public int[] taskUserIds;
+        public ComponentName topActivity;
         public int displayId;
         public int userId;
+        public boolean visible;
 
         @Override
         public int describeContents() {
@@ -2388,6 +2388,13 @@ public class ActivityManager {
             dest.writeIntArray(taskUserIds);
             dest.writeInt(displayId);
             dest.writeInt(userId);
+            dest.writeInt(visible ? 1 : 0);
+            if (topActivity != null) {
+                dest.writeInt(1);
+                topActivity.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -2410,6 +2417,10 @@ public class ActivityManager {
             taskUserIds = source.createIntArray();
             displayId = source.readInt();
             userId = source.readInt();
+            visible = source.readInt() > 0;
+            if (source.readInt() > 0) {
+                topActivity = ComponentName.readFromParcel(source);
+            }
         }
 
         public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
@@ -2445,6 +2456,10 @@ public class ActivityManager {
                             sb.append(" bounds="); sb.append(taskBounds[i].toShortString());
                         }
                         sb.append(" userId=").append(taskUserIds[i]);
+                        sb.append(" visible=").append(visible);
+                        if (topActivity != null) {
+                            sb.append(" topActivity=").append(topActivity);
+                        }
                         sb.append("\n");
             }
             return sb.toString();
