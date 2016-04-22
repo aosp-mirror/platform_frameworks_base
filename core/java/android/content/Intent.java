@@ -3078,10 +3078,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MANAGED_PROFILE_UNLOCKED =
             "android.intent.action.MANAGED_PROFILE_UNLOCKED";
 
-    /** @hide */
-    public static final String ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED =
-            "android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED";
-
     /**
      * Broadcast sent to the primary user when an associated managed profile has become available.
      * Currently this includes when the user disables quiet mode for the profile. Carries an extra
