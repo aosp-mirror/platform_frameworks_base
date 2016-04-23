@@ -552,6 +552,15 @@
          should not be interrupted with other activities or notifications. -->
     <attr name="immersive" format="boolean" />
 
+    <!-- Flag declaring that this activity will be run in VR mode, and specifying
+         the component of the VrListenerService that should be bound while this
+         Activity is visible if installed and enabled on this device. This is
+         equivalent to calling {@link android.app.Activity#setVrModeEnabled} with the
+         the given component name within this Activity. Declaring this will prevent
+         the system from leaving VR mode during an Activity transtion one VR activity
+         to another. -->
+    <attr name="enableVrMode" format="string" />
+
     <!-- Specify the order in which content providers hosted by a process
          are instantiated when that process is created.  Not needed unless
          you have providers with dependencies between each other, to make
@@ -1884,6 +1893,7 @@
              For example, {@link android.R.attr#supportsPictureInPicture} activities are placed
              in a task/stack that isn't focusable. This flag allows them to be focusable.-->
         <attr name="alwaysFocusable" format="boolean" />
+        <attr name="enableVrMode" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
