@@ -3301,7 +3301,10 @@ public class Notification implements Parcelable
             }
         }
 
-        private String loadHeaderAppName() {
+        /**
+         * @hide
+         */
+        public String loadHeaderAppName() {
             CharSequence name = null;
             final PackageManager pm = mContext.getPackageManager();
             if (mN.extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
