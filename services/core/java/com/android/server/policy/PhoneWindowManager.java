@@ -6643,6 +6643,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardDelegate.onBootCompleted();
         }
         mSystemGestures.systemReady();
+        mImmersiveModeConfirmation.systemReady();
     }
 
     /** {@inheritDoc} */
@@ -7347,7 +7348,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean newImmersiveMode = isImmersiveMode(vis);
         if (win != null && oldImmersiveMode != newImmersiveMode) {
             final String pkg = win.getOwningPackage();
-            mImmersiveModeConfirmation.immersiveModeChanged(pkg, newImmersiveMode,
+            mImmersiveModeConfirmation.immersiveModeChangedLw(pkg, newImmersiveMode,
                     isUserSetupComplete());
         }
 
