@@ -37,7 +37,7 @@ public abstract class AbsSavedState implements Parcelable {
 
     /**
      * Constructor called by derived classes when creating their SavedState objects
-     * 
+     *
      * @param superState The state of the superclass of this view
      */
     protected AbsSavedState(Parcelable superState) {
@@ -49,13 +49,22 @@ public abstract class AbsSavedState implements Parcelable {
 
     /**
      * Constructor used when reading from a parcel. Reads the state of the superclass.
-     * 
-     * @param source
+     *
+     * @param source parcel to read from
      */
     protected AbsSavedState(Parcel source) {
-        // FIXME need class loader
-        Parcelable superState = source.readParcelable(null);
-         
+        this(source, null);
+    }
+
+    /**
+     * Constructor used when reading from a parcel using a given class loader.
+     * Reads the state of the superclass.
+     *
+     * @param source parcel to read from
+     * @param loader ClassLoader to use for reading
+     */
+    protected AbsSavedState(Parcel source, ClassLoader loader) {
+        Parcelable superState = source.readParcelable(loader);
         mSuperState = superState != null ? superState : EMPTY_STATE;
     }
 
@@ -68,20 +77,27 @@ public abstract class AbsSavedState implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-         dest.writeParcelable(mSuperState, flags);
+        dest.writeParcelable(mSuperState, flags);
     }
 
-    public static final Parcelable.Creator<AbsSavedState> CREATOR 
-        = new Parcelable.Creator<AbsSavedState>() {
-        
+    public static final Parcelable.Creator<AbsSavedState> CREATOR
+            = new Parcelable.ClassLoaderCreator<AbsSavedState>() {
+
+        @Override
         public AbsSavedState createFromParcel(Parcel in) {
-            Parcelable superState = in.readParcelable(null);
+            return createFromParcel(in, null);
+        }
+
+        @Override
+        public AbsSavedState createFromParcel(Parcel in, ClassLoader loader) {
+            Parcelable superState = in.readParcelable(loader);
             if (superState != null) {
                 throw new IllegalStateException("superState must be null");
             }
             return EMPTY_STATE;
         }
 
+        @Override
         public AbsSavedState[] newArray(int size) {
             return new AbsSavedState[size];
         }
