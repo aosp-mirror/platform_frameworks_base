@@ -370,20 +370,28 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         }
         if (mHaveAssistData) {
             AssistDataForActivity assistData;
-            while (!mAssistData.isEmpty()) {
-                if (mPendingAssistDataCount <= 0) {
-                    Slog.e(TAG, "mPendingAssistDataCount is " + mPendingAssistDataCount);
+            if (mAssistData.isEmpty()) {
+                // We're not actually going to get any data, deliver some nothing
+                try {
+                    mSession.handleAssist(null, null, null, 0, 0);
+                } catch (RemoteException e) {
                 }
-                mPendingAssistDataCount--;
-                assistData = mAssistData.remove(0);
-                if (assistData.data == null) {
-                    try {
-                        mSession.handleAssist(null, null, null, assistData.activityIndex,
-                                assistData.activityCount);
-                    } catch (RemoteException e) {
+            } else {
+                while (!mAssistData.isEmpty()) {
+                    if (mPendingAssistDataCount <= 0) {
+                        Slog.e(TAG, "mPendingAssistDataCount is " + mPendingAssistDataCount);
                     }
-                } else {
-                    deliverSessionDataLocked(assistData);
+                    mPendingAssistDataCount--;
+                    assistData = mAssistData.remove(0);
+                    if (assistData.data == null) {
+                        try {
+                            mSession.handleAssist(null, null, null, assistData.activityIndex,
+                                    assistData.activityCount);
+                        } catch (RemoteException e) {
+                        }
+                    } else {
+                        deliverSessionDataLocked(assistData);
+                    }
                 }
             }
             if (mPendingAssistDataCount <= 0) {
