@@ -20,6 +20,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="#00000000"
     android:tag="media"
     >
     <include layout="@layout/notification_template_header"
@@ -29,7 +30,6 @@
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#00000000"
         android:orientation="horizontal"
         android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginTop="@dimen/notification_content_margin_top"
