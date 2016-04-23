@@ -307,9 +307,9 @@ public class StatusBarIconView extends AnimatedImageView {
 
     private void setContentDescription(Notification notification) {
         if (notification != null) {
-            CharSequence tickerText = notification.tickerText;
-            if (!TextUtils.isEmpty(tickerText)) {
-                setContentDescription(tickerText);
+            String d = contentDescForNotification(mContext, notification);
+            if (!TextUtils.isEmpty(d)) {
+                setContentDescription(d);
             }
         }
     }
@@ -321,5 +321,13 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public String getSlot() {
         return mSlot;
+    }
+
+
+    public static String contentDescForNotification(Context c, Notification n) {
+        Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
+        String appName = builder.loadHeaderAppName();
+        CharSequence ticker = n.tickerText;
+        return c.getString(R.string.accessibility_desc_notification_icon, appName, ticker);
     }
 }
