@@ -2114,7 +2114,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 smallIcon,
                 n.iconLevel,
                 n.number,
-                n.tickerText);
+                StatusBarIconView.contentDescForNotification(mContext, n));
         if (!iconView.set(ic)) {
             handleNotificationError(sbn, "Couldn't create icon: " + ic);
             return null;
@@ -2283,7 +2283,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             n.getSmallIcon(),
                             n.iconLevel,
                             n.number,
-                            n.tickerText);
+                            StatusBarIconView.contentDescForNotification(mContext, n));
                     entry.icon.setNotification(n);
                     if (!entry.icon.set(ic)) {
                         handleNotificationError(notification, "Couldn't update icon: " + ic);
@@ -2307,7 +2307,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     n.getSmallIcon(),
                     n.iconLevel,
                     n.number,
-                    n.tickerText);
+                    StatusBarIconView.contentDescForNotification(mContext, n));
             entry.icon.setNotification(n);
             entry.icon.set(ic);
             inflateViews(entry, mStackScroller);
