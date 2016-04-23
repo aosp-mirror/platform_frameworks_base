@@ -25,6 +25,8 @@
     <!-- Delay between the start of slide in animation for each card. -->
     <integer name="recents_home_delay">40</integer>
 
+    <!-- Delay of the onboarding animation start after it launches -->
+    <integer name="tv_pip_onboarding_anim_start_delay">1000</integer>
     <!-- Duration of the onboarding animation duration -->
     <integer name="tv_pip_onboarding_anim_duration">1000</integer>
 </resources>

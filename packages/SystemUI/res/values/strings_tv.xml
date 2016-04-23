@@ -32,9 +32,9 @@
     <!-- Picture-in-Picture (PIP) onboarding screen -->
     <eat-comment />
     <!-- Title for picture-in-picture (PIP) onboarding screen to indicate that an user is in PIP mode. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_title">PIP mode</string>
+    <string name="pip_onboarding_title">Picture-in-picture</string>
     <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_description">To control PIP press and hold the <b>HOME</b> button on the remote</string>
+    <string name="pip_onboarding_description">This keeps your video in view until you play another one. Press and hold <b>HOME</b> to control it.</string>
     <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
     <string name="pip_onboarding_button">Got it</string>
     <!-- Dismiss icon description -->
