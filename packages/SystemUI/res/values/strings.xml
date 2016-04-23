@@ -182,7 +182,7 @@
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saved_title">Screenshot captured.</string>
     <!-- Notification text displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=100] -->
-    <string name="screenshot_saved_text">Touch to view your screenshot.</string>
+    <string name="screenshot_saved_text">Tap to view your screenshot.</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t capture screenshot.</string>
     <!-- Notification text displayed when we fail to save a screenshot for unknown reasons. [CHAR LIMIT=100] -->
@@ -792,7 +792,7 @@
     <string name="speed_bump_explanation">Less urgent notifications below</string>
 
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
-    <string name="notification_tap_again">Touch again to open</string>
+    <string name="notification_tap_again">Tap again to open</string>
 
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
@@ -1027,7 +1027,7 @@
     <!-- Screen pinning dialog title. -->
     <string name="screen_pinning_title">Screen is pinned</string>
     <!-- Screen pinning dialog description. -->
-    <string name="screen_pinning_description">This keeps it in view until you unpin. Touch and hold Back to unpin.</string>
+    <string name="screen_pinning_description">This keeps it in view until you unpin. Touch &amp; hold Back to unpin.</string>
     <!-- Screen pinning positive response. -->
     <string name="screen_pinning_positive">Got it</string>
     <!-- Screen pinning negative response. -->
@@ -1055,7 +1055,7 @@
     <string name="volumeui_notification_title"><xliff:g id="app_name" example="Volume Prototype 1">%1$s</xliff:g> is the volume dialog</string>
 
     <!-- VolumeUI restoration notification: text -->
-    <string name="volumeui_notification_text">Touch to restore the original.</string>
+    <string name="volumeui_notification_text">Tap to restore the original.</string>
 
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You\'re using your work profile</string>
