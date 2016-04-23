@@ -1657,6 +1657,9 @@
     <!-- Accessibility label for window when QS editing is happening [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings_edit">Quick settings editor.</string>
 
+    <!-- Accessibility label for the notification icons in the collapsed status bar. Not shown on screen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_notification_icon"><xliff:g name="app_name" example="Gmail">%1$s</xliff:g> notification: <xliff:g name="notification_text" example="5 new messages">%2$s</xliff:g></string>
+
     <!-- Multi-Window strings -->
     <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity and that things might crash/not work properly [CHAR LIMIT=NONE] -->
     <string name="dock_forced_resizable">App may not work with split-screen.</string>
