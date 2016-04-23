@@ -21,8 +21,13 @@
     android:id="@+id/pip_onboarding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B3000000"
     android:orientation="vertical">
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0" />
 
     <ImageView
         android:id="@+id/remote"
