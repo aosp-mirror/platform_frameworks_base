@@ -21,7 +21,118 @@ import android.support.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
+import org.mockito.Mockito;
+
 public class BatteryStatsSamplingTimerTest extends TestCase {
+
+    @SmallTest
+    public void testSettingStalePreservesData() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        final BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks,
+                Mockito.mock(BatteryStatsImpl.TimeBase.class));
+
+        timer.onTimeStarted(100, 100, 100);
+
+        // First update is absorbed.
+        timer.update(10, 1);
+
+        timer.update(20, 2);
+
+        assertEquals(1, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(10, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+
+        timer.endSample();
+
+        assertEquals(1, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(10, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+
+        timer.onTimeStopped(200, 200, 200);
+
+        assertEquals(1, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(10, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+    }
+
+    @SmallTest
+    public void testEndSampleAndContinueWhenTimeOrCountDecreases() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
+        final BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks,
+                timeBase);
+
+        // First once is absorbed.
+        timer.update(10, 1);
+
+        timer.add(10, 1);
+
+        assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(0, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+
+        // This is less than we currently have, so we will end the sample. Time isn't running, so
+        // nothing should happen.
+        timer.update(0, 0);
+
+        assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(0, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+
+        timer.onTimeStarted(100, 100, 100);
+
+        // This should add.
+        timer.add(100, 10);
+
+        assertEquals(100, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(10, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        // This is less than we currently have, so we should end our sample and continue with the
+        // entire amount updated here.
+        timer.update(50, 5);
+
+        assertEquals(150, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(15, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        timer.onTimeStopped(200, 200, 200);
+
+        assertEquals(150, timer.getTotalTimeLocked(200, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(15, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+    }
+
+    @SmallTest
+    public void testFirstUpdateIsAbsorbed() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);
+
+        BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
+
+        // This should be absorbed because it is our first update and we don't know what
+        // was being counted before.
+        timer.update(10, 1);
+
+        assertEquals(0, timer.getTotalTimeLocked(10, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        timer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
+        timer.onTimeStarted(100, 100, 100);
+
+        // This should be absorbed.
+        timer.update(10, 1);
+
+        assertEquals(0, timer.getTotalTimeLocked(100, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(0, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        // This should NOT be aborbed, since we've already done that.
+        timer.add(10, 1);
+
+        assertEquals(10, timer.getTotalTimeLocked(100, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(1, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        timer.onTimeStopped(200, 200, 200);
+        timer.onTimeStarted(300, 300, 300);
+
+        // This should NOT be absorbed.
+        timer.add(10, 1);
+
+        assertEquals(20, timer.getTotalTimeLocked(300, BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(2, timer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+    }
 
     @SmallTest
     public void testSampleTimerSummaryParceling() throws Exception {
@@ -32,18 +143,15 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
 
-        BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase,
-                true);
+        BatteryStatsImpl.SamplingTimer timer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
 
         // Start running on battery.
         timeBase.setRunning(true, clocks.uptimeMillis(), clocks.elapsedRealtime());
 
         // The first update on battery consumes the values as a way of starting cleanly.
-        timer.addCurrentReportedTotalTime(10);
-        timer.addCurrentReportedCount(1);
+        timer.add(10, 1);
 
-        timer.addCurrentReportedTotalTime(10);
-        timer.addCurrentReportedCount(1);
+        timer.add(10, 1);
 
         clocks.realtime = 20;
         clocks.uptime = 20;
@@ -72,14 +180,14 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
 
         // Read the on battery summary from the parcel.
         BatteryStatsImpl.SamplingTimer unparceledTimer = new BatteryStatsImpl.SamplingTimer(
-                clocks, timeBase, true);
+                clocks, timeBase);
         unparceledTimer.readSummaryFromParcelLocked(onBatterySummaryParcel);
 
         assertEquals(10, unparceledTimer.getTotalTimeLocked(0, BatteryStats.STATS_SINCE_CHARGED));
         assertEquals(1, unparceledTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Read the off battery summary from the parcel.
-        unparceledTimer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase, true);
+        unparceledTimer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
         unparceledTimer.readSummaryFromParcelLocked(offBatterySummaryParcel);
 
         assertEquals(10, unparceledTimer.getTotalTimeLocked(0, BatteryStats.STATS_SINCE_CHARGED));
