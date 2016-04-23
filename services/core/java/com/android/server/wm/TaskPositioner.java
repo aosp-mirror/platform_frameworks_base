@@ -189,9 +189,10 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                     final boolean wasResizing = mResizing;
                     synchronized (mService.mWindowMap) {
                         endDragLocked();
+                        mTask.getDimBounds(mTmpRect);
                     }
                     try {
-                        if (wasResizing) {
+                        if (wasResizing && !mTmpRect.equals(mWindowDragBounds)) {
                             // We were using fullscreen surface during resizing. Request
                             // resizeTask() one last time to restore surface to window size.
                             mService.mActivityManager.resizeTask(
@@ -376,6 +377,10 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
 
         mWindowOriginalBounds.set(mTmpRect);
+
+        // Make sure we always have valid drag bounds even if the drag ends before any move events
+        // have been handled.
+        mWindowDragBounds.set(mTmpRect);
     }
 
     private void endDragLocked() {
