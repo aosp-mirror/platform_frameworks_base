@@ -22575,10 +22575,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Constructor used when reading from a parcel. Reads the state of the superclass.
          *
-         * @param source
+         * @param source parcel to read from
          */
         public BaseSavedState(Parcel source) {
-            super(source);
+            this(source, null);
+        }
+
+        /**
+         * Constructor used when reading from a parcel using a given class loader.
+         * Reads the state of the superclass.
+         *
+         * @param source parcel to read from
+         * @param loader ClassLoader to use for reading
+         */
+        public BaseSavedState(Parcel source, ClassLoader loader) {
+            super(source, loader);
             mStartActivityRequestWhoSaved = source.readString();
         }
 
@@ -22597,12 +22608,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             out.writeString(mStartActivityRequestWhoSaved);
         }
 
-        public static final Parcelable.Creator<BaseSavedState> CREATOR =
-                new Parcelable.Creator<BaseSavedState>() {
+        public static final Parcelable.Creator<BaseSavedState> CREATOR
+                = new Parcelable.ClassLoaderCreator<BaseSavedState>() {
+            @Override
             public BaseSavedState createFromParcel(Parcel in) {
                 return new BaseSavedState(in);
             }
 
+            @Override
+            public BaseSavedState createFromParcel(Parcel in, ClassLoader loader) {
+                return new BaseSavedState(in, loader);
+            }
+
+            @Override
             public BaseSavedState[] newArray(int size) {
                 return new BaseSavedState[size];
             }
