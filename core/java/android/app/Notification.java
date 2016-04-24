@@ -4826,33 +4826,37 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(rowId, View.GONE);
             }
 
-            final boolean largeText =
-                    mBuilder.mContext.getResources().getConfiguration().fontScale > 1f;
-            final float subTextSize = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_subtext_size);
             int i=0;
-            final float density = mBuilder.mContext.getResources().getDisplayMetrics().density;
-            int topPadding = (int) (5 * density);
-            int bottomPadding = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_content_margin_bottom);
+            int topPadding = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_inbox_item_top_padding);
             boolean first = true;
-            while (i < mTexts.size() && i < rowIds.length) {
+            int onlyViewId = 0;
+            int maxRows = rowIds.length;
+            if (mBuilder.mActions.size() > 0) {
+                maxRows--;
+            }
+            while (i < mTexts.size() && i < maxRows) {
                 CharSequence str = mTexts.get(i);
-                if (str != null && !str.equals("")) {
+                if (!TextUtils.isEmpty(str)) {
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
                     contentView.setTextViewText(rowIds[i], mBuilder.processLegacyText(str));
-                    if (largeText) {
-                        contentView.setTextViewTextSize(rowIds[i], TypedValue.COMPLEX_UNIT_PX,
-                                subTextSize);
-                    }
-                    contentView.setViewPadding(rowIds[i], 0, topPadding, 0,
-                            i == rowIds.length - 1 || i == mTexts.size() - 1 ? bottomPadding : 0);
+                    contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
                     handleInboxImageMargin(contentView, rowIds[i], first);
+                    if (first) {
+                        onlyViewId = rowIds[i];
+                    } else {
+                        onlyViewId = 0;
+                    }
                     first = false;
                 }
                 i++;
             }
-
+            if (onlyViewId != 0) {
+                // We only have 1 entry, lets make it look like the normal Text of a Bigtext
+                topPadding = mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_text_margin_top);
+                contentView.setViewPadding(onlyViewId, 0, topPadding, 0, 0);
+            }
 
             return contentView;
         }
