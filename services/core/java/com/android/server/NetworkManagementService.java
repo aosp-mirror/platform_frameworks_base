@@ -72,6 +72,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -2047,6 +2048,65 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    private void closeSocketsForFirewallChain(int chain, String chainName) {
+        // UID ranges to close sockets on.
+        UidRange[] ranges;
+        // UID ranges whose sockets we won't touch.
+        int[] exemptUids;
+
+        SparseIntArray rules = getUidFirewallRules(chain);
+        int numUids = 0;
+
+        if (getFirewallType(chain) == FIREWALL_TYPE_WHITELIST) {
+            // Close all sockets on all non-system UIDs...
+            ranges = new UidRange[] {
+                // TODO: is there a better way of finding all existing users? If so, we could
+                // specify their ranges here.
+                new UidRange(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
+            };
+            // ... except for the UIDs that have allow rules.
+            exemptUids = new int[rules.size()];
+            for (int i = 0; i < exemptUids.length; i++) {
+                if (rules.valueAt(i) == NetworkPolicyManager.FIREWALL_RULE_ALLOW) {
+                    exemptUids[numUids] = rules.keyAt(i);
+                    numUids++;
+                }
+            }
+            // Normally, whitelist chains only contain deny rules, so numUids == exemptUids.length.
+            // But the code does not guarantee this in any way, and at least in one case - if we add
+            // a UID rule to the firewall, and then disable the firewall - the chains can contain
+            // the wrong type of rule. In this case, don't close connections that we shouldn't.
+            //
+            // TODO: tighten up this code by ensuring we never set the wrong type of rule, and
+            // fix setFirewallEnabled to grab mQuotaLock and clear rules.
+            if (numUids != exemptUids.length) {
+                exemptUids = Arrays.copyOf(exemptUids, numUids);
+            }
+        } else {
+            // Close sockets for every UID that has a deny rule...
+            ranges = new UidRange[rules.size()];
+            for (int i = 0; i < ranges.length; i++) {
+                if (rules.valueAt(i) == NetworkPolicyManager.FIREWALL_RULE_DENY) {
+                    int uid = rules.keyAt(i);
+                    ranges[numUids] = new UidRange(uid, uid);
+                    numUids++;
+                }
+            }
+            // As above; usually numUids == ranges.length, but not always.
+            if (numUids != ranges.length) {
+                ranges = Arrays.copyOf(ranges, numUids);
+            }
+            // ... with no exceptions.
+            exemptUids = new int[0];
+        }
+
+        try {
+            mNetdService.socketDestroy(ranges, exemptUids);
+        } catch(RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error closing sockets after enabling chain " + chainName + ": " + e);
+        }
+    }
+
     @Override
     public void setFirewallChainEnabled(int chain, boolean enable) {
         enforceSystemUid();
@@ -2059,24 +2119,34 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mFirewallChainStates.put(chain, enable);
 
             final String operation = enable ? "enable_chain" : "disable_chain";
+            String chainName;
+            switch(chain) {
+                case FIREWALL_CHAIN_STANDBY:
+                    chainName = FIREWALL_CHAIN_NAME_STANDBY;
+                    break;
+                case FIREWALL_CHAIN_DOZABLE:
+                    chainName = FIREWALL_CHAIN_NAME_DOZABLE;
+                    break;
+                case FIREWALL_CHAIN_POWERSAVE:
+                    chainName = FIREWALL_CHAIN_NAME_POWERSAVE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Bad child chain: " + chain);
+            }
+
             try {
-                String chainName;
-                switch(chain) {
-                    case FIREWALL_CHAIN_STANDBY:
-                        chainName = FIREWALL_CHAIN_NAME_STANDBY;
-                        break;
-                    case FIREWALL_CHAIN_DOZABLE:
-                        chainName = FIREWALL_CHAIN_NAME_DOZABLE;
-                        break;
-                    case FIREWALL_CHAIN_POWERSAVE:
-                        chainName = FIREWALL_CHAIN_NAME_POWERSAVE;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Bad child chain: " + chain);
-                }
                 mConnector.execute("firewall", operation, chainName);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
+            }
+
+            // Close any sockets that were opened by the affected UIDs. This has to be done after
+            // disabling network connectivity, in case they react to the socket close by reopening
+            // the connection and race with the iptables commands that enable the firewall. All
+            // whitelist and blacklist chains allow RSTs through.
+            if (enable) {
+                if (DBG) Slog.d(TAG, "Closing sockets after enabling chain " + chainName);
+                closeSocketsForFirewallChain(chain, chainName);
             }
         }
     }
@@ -2376,7 +2446,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private void dumpUidFirewallRule(PrintWriter pw, String name, SparseIntArray rules) {
-        pw.print("UID firewall");
+        pw.print("UID firewall ");
         pw.print(name);
         pw.print(" rule: [");
         final int size = rules.size();
