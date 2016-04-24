@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="top"
-    android:layout_marginTop="0.5dp"
+    android:layout_marginTop="@dimen/notification_text_margin_top"
     android:ellipsize="marquee"
     android:fadingEdge="horizontal"
     android:gravity="top"
