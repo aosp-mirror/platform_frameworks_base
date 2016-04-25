@@ -2148,6 +2148,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public boolean isNetworkMetered(NetworkState state) {
+        if (state.networkInfo == null) {
+            return false;
+        }
+
         final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
 
         // roaming networks are always considered metered
@@ -2163,10 +2167,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (policy != null) {
             return policy.metered;
         } else {
-            if (state.networkInfo == null) {
-                return false;
-            }
-
             final int type = state.networkInfo.getType();
             if (isNetworkTypeMobile(type) || type == TYPE_WIMAX) {
                 return true;

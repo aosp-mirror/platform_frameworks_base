@@ -16,45 +16,45 @@
 
 package com.android.server.job.controllers;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.INetworkPolicyListener;
 import android.net.NetworkInfo;
-import android.os.ServiceManager;
+import android.net.NetworkPolicyManager;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
-import com.android.server.ConnectivityService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Handles changes in connectivity.
- * We are only interested in metered vs. unmetered networks, and we're interested in them on a
- * per-user basis.
+ * <p>
+ * Each app can have a different default networks or different connectivity
+ * status due to user-requested network policies, so we need to check
+ * constraints on a per-UID basis.
  */
 public class ConnectivityController extends StateController implements
         ConnectivityManager.OnNetworkActiveListener {
     private static final String TAG = "JobScheduler.Conn";
 
-    private final List<JobStatus> mTrackedJobs = new LinkedList<JobStatus>();
-    private final BroadcastReceiver mConnectivityChangedReceiver =
-            new ConnectivityChangedReceiver();
+    private final ConnectivityManager mConnManager;
+    private final NetworkPolicyManager mNetPolicyManager;
+
+    @GuardedBy("mLock")
+    private final ArrayList<JobStatus> mTrackedJobs = new ArrayList<JobStatus>();
+
     /** Singleton. */
     private static ConnectivityController mSingleton;
     private static Object sCreationLock = new Object();
-    /** Track whether the latest active network is metered. */
-    private boolean mNetworkUnmetered;
-    /** Track whether the latest active network is connected. */
-    private boolean mNetworkConnected;
 
     public static ConnectivityController get(JobSchedulerService jms) {
         synchronized (sCreationLock) {
@@ -68,52 +68,62 @@ public class ConnectivityController extends StateController implements
     private ConnectivityController(StateChangedListener stateChangedListener, Context context,
             Object lock) {
         super(stateChangedListener, context, lock);
-        // Register connectivity changed BR.
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        mConnManager = mContext.getSystemService(ConnectivityManager.class);
+        mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
+
+        final IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiverAsUser(
-                mConnectivityChangedReceiver, UserHandle.ALL, intentFilter, null,
-                BackgroundThread.getHandler());
-        ConnectivityService cs =
-                (ConnectivityService)ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        if (cs != null) {
-            if (cs.getActiveNetworkInfo() != null) {
-                mNetworkConnected = cs.getActiveNetworkInfo().isConnected();
-                mNetworkUnmetered = mNetworkConnected && !cs.isActiveNetworkMetered();
-            } else {
-                mNetworkConnected = mNetworkUnmetered = false;
-            }
-        }
+                mConnectivityReceiver, UserHandle.SYSTEM, intentFilter, null, null);
+
+        mNetPolicyManager.registerListener(mNetPolicyListener);
     }
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
-            jobStatus.setConnectivityConstraintSatisfied(mNetworkConnected);
-            jobStatus.setUnmeteredConstraintSatisfied(mNetworkUnmetered);
+        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()
+                || jobStatus.hasNotRoamingConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
             mTrackedJobs.add(jobStatus);
         }
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
-        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()
+                || jobStatus.hasNotRoamingConstraint()) {
             mTrackedJobs.remove(jobStatus);
         }
     }
 
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
+        final NetworkInfo info = mConnManager.getActiveNetworkInfoForUid(jobStatus.getSourceUid());
+        final boolean connected = (info != null) && info.isConnected();
+        final boolean unmetered = connected && !info.isMetered();
+        final boolean notRoaming = connected && !info.isRoaming();
+
+        boolean changed = false;
+        changed |= jobStatus.setConnectivityConstraintSatisfied(connected);
+        changed |= jobStatus.setUnmeteredConstraintSatisfied(unmetered);
+        changed |= jobStatus.setNotRoamingConstraintSatisfied(notRoaming);
+        return changed;
+    }
+
     /**
-     * @param userId Id of the user for whom we are updating the connectivity state.
+     * Update all jobs tracked by this controller.
+     *
+     * @param uid only update jobs belonging to this UID, or {@code -1} to
+     *            update all tracked jobs.
      */
-    private void updateTrackedJobs(int userId) {
+    private void updateTrackedJobs(int uid) {
         synchronized (mLock) {
             boolean changed = false;
-            for (JobStatus js : mTrackedJobs) {
-                if (js.getUserId() != userId) {
-                    continue;
+            for (int i = 0; i < mTrackedJobs.size(); i++) {
+                final JobStatus js = mTrackedJobs.get(i);
+                if (uid == -1 || uid == js.getSourceUid()) {
+                    changed |= updateConstraintsSatisfied(js);
                 }
-                changed |= js.setConnectivityConstraintSatisfied(mNetworkConnected);
-                changed |= js.setUnmeteredConstraintSatisfied(mNetworkUnmetered);
             }
             if (changed) {
                 mStateChangedListener.onControllerStateChanged();
@@ -124,9 +134,11 @@ public class ConnectivityController extends StateController implements
     /**
      * We know the network has just come up. We want to run any jobs that are ready.
      */
+    @Override
     public synchronized void onNetworkActive() {
         synchronized (mLock) {
-            for (JobStatus js : mTrackedJobs) {
+            for (int i = 0; i < mTrackedJobs.size(); i++) {
+                final JobStatus js = mTrackedJobs.get(i);
                 if (js.isReady()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Running " + js + " due to network activity.");
@@ -137,61 +149,44 @@ public class ConnectivityController extends StateController implements
         }
     }
 
-    class ConnectivityChangedReceiver extends BroadcastReceiver {
-        /**
-         * We'll receive connectivity changes for each user here, which we process independently.
-         * We are only interested in the active network here. We're only interested in the active
-         * network, b/c the end result of this will be for apps to try to hit the network.
-         * @param context The Context in which the receiver is running.
-         * @param intent The Intent being received.
-         */
-        // TODO: Test whether this will be called twice for each user.
+    private BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) {
-                Slog.d(TAG, "Received connectivity event: " + intent.getAction() + " u"
-                        + context.getUserId());
-            }
-            final String action = intent.getAction();
-            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                final int networkType =
-                        intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE,
-                                ConnectivityManager.TYPE_NONE);
-                // Connectivity manager for THIS context - important!
-                final ConnectivityManager connManager = (ConnectivityManager)
-                        context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                final NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
-                final int userid = context.getUserId();
-                // This broadcast gets sent a lot, only update if the active network has changed.
-                if (activeNetwork == null) {
-                    mNetworkUnmetered = false;
-                    mNetworkConnected = false;
-                    updateTrackedJobs(userid);
-                } else if (activeNetwork.getType() == networkType) {
-                    mNetworkUnmetered = false;
-                    mNetworkConnected = !intent.getBooleanExtra(
-                            ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-                    if (mNetworkConnected) {  // No point making the call if we know there's no conn.
-                        mNetworkUnmetered = !connManager.isActiveNetworkMetered();
-                    }
-                    updateTrackedJobs(userid);
-                }
-            } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "Unrecognised action in intent: " + action);
-                }
-            }
+            updateTrackedJobs(-1);
+        }
+    };
+
+    private INetworkPolicyListener mNetPolicyListener = new INetworkPolicyListener.Stub() {
+        @Override
+        public void onUidRulesChanged(int uid, int uidRules) {
+            updateTrackedJobs(uid);
+        }
+
+        @Override
+        public void onMeteredIfacesChanged(String[] meteredIfaces) {
+            updateTrackedJobs(-1);
+        }
+
+        @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            updateTrackedJobs(-1);
+        }
+
+        @Override
+        public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
+            updateTrackedJobs(uid);
         }
     };
 
     @Override
     public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("Conn.");
-        pw.println("connected: " + mNetworkConnected + " unmetered: " + mNetworkUnmetered);
-        for (JobStatus js: mTrackedJobs) {
+        for (int i = 0; i < mTrackedJobs.size(); i++) {
+            final JobStatus js = mTrackedJobs.get(i);
             pw.println(String.valueOf(js.getJobId() + "," + js.getUid())
                     + ": C=" + js.hasConnectivityConstraint()
-                    + ", UM=" + js.hasUnmeteredConstraint());
+                    + ", UM=" + js.hasUnmeteredConstraint()
+                    + ", NR=" + js.hasNotRoamingConstraint());
         }
     }
 }
