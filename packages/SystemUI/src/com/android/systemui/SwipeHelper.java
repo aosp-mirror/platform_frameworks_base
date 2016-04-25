@@ -493,7 +493,15 @@ public class SwipeHelper implements Gefingerpoken {
         updateSwipeProgressFromOffset(view, canAnimViewBeDismissed);
     }
 
-    public void snapChildIfNeeded(final View view, boolean animate) {
+    /**
+     * Called when a view is updated to be non-dismissable, if the view was being dismissed before
+     * the update this will handle snapping it back into place.
+     *
+     * @param view the view to snap if necessary.
+     * @param animate whether to animate the snap or not.
+     * @param targetLeft the target to snap to.
+     */
+    public void snapChildIfNeeded(final View view, boolean animate, float targetLeft) {
         if ((mDragging && mCurrView == view) || mSnappingChild) {
             return;
         }
@@ -507,7 +515,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
         if (needToSnap) {
             if (animate) {
-                snapChild(view, 0 /* targetLeft */, 0.0f /* velocity */);
+                snapChild(view, targetLeft, 0.0f /* velocity */);
             } else {
                 snapChildInstantly(view);
             }
