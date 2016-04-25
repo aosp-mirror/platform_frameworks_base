@@ -55749,6 +55749,7 @@ package java.util {
     method public java.lang.Object clone();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
   }
 
   public class IllegalFormatCodePointException extends java.util.IllegalFormatException {
@@ -56731,6 +56732,8 @@ package java.util {
     method public java.util.NavigableSet<K> navigableKeySet();
     method public java.util.Map.Entry<K, V> pollFirstEntry();
     method public java.util.Map.Entry<K, V> pollLastEntry();
+    method public boolean replace(K, V, V);
+    method public V replace(K, V);
     method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public java.util.NavigableMap<K, V> subMap(K, boolean, K, boolean);
     method public java.util.SortedMap<K, V> subMap(K, K);
