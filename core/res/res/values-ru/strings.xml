@@ -170,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Память устройства заполнена. Удалите файлы, чтобы освободить место."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Нет места в памяти телевизора. Удалите ненужные файлы."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Память телефона заполнена. Удалите какие-нибудь файлы, чтобы освободить место."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">Сертификаты ЦС установлены</item>
+      <item quantity="few">Сертификаты ЦС установлены</item>
+      <item quantity="many">Сертификаты ЦС установлены</item>
+      <item quantity="other">Сертификаты ЦС установлены</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"администратором"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Администратор рабочего профиля может отслеживать сеть"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"администратором домена <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -217,9 +222,11 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивный отчет"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Рекомендуем пользоваться этой функцией, чтобы отслеживать статус отчета и указывать дополнительные данные о проблеме. Некоторые разделы могут быть исключены, чтобы сократить время подготовки отчета."</string>
+    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
+    <skip />
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Подробный отчет"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Выберите этот вариант, если устройство не реагирует на ваши действия или работает слишком медленно, а также если вы хотите включить все разделы. Вы не сможете сделать скриншот или указать дополнительные сведения."</string>
+    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
+    <skip />
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунду</item>
       <item quantity="few">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунды</item>
@@ -867,6 +874,16 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> часов</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часов</item>
     </plurals>
+    <!-- no translation found for now_string_shortest (8912796667087856402) -->
+    <skip />
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Ошибка"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Это видео не предназначено для потокового воспроизведения на данном устройстве."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Не удалось воспроизвести видео."</string>
@@ -1493,8 +1510,7 @@
     <string name="select_year" msgid="7952052866994196170">"Выберите год"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Цифра <xliff:g id="KEY">%1$s</xliff:g> удалена"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (4921623036476880316) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Назад\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Обзор\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Включена блокировка в приложении. Ее отключение запрещено правилами организации."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>
@@ -1506,7 +1522,10 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Удалено администратором"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <string name="data_saver_description" msgid="6015391409098303235">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
+    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
+    <skip />
+    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
     <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
