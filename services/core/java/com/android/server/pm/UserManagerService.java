@@ -691,9 +691,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean trySetQuietModeDisabled(int userHandle, IntentSender target) {
+        final int credentialOwnerUserId = getCredentialOwnerProfile(userHandle);
         if (mContext.getSystemService(StorageManager.class).isUserKeyUnlocked(userHandle)
-                || !mLockPatternUtils.isSecure(userHandle)
-                || !mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
+                || !mLockPatternUtils.isSecure(credentialOwnerUserId)) {
             // if the user is already unlocked, no need to show a profile challenge
             setQuietModeEnabled(userHandle, false);
             return true;
@@ -704,6 +704,9 @@ public class UserManagerService extends IUserManager.Stub {
             // otherwise, we show a profile challenge to trigger decryption of the user
             final KeyguardManager km = (KeyguardManager) mContext.getSystemService(
                     Context.KEYGUARD_SERVICE);
+            // We should use userHandle not credentialOwnerUserId here, as even if it is unified
+            // lock, confirm screenlock page will know and show personal challenge, and unlock
+            // work profile when personal challenge is correct
             final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null,
                     userHandle);
             if (unlockIntent == null) {
