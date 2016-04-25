@@ -490,7 +490,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             AsyncTask.execute(runnable);
         } else {
             mPhoneStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
-                    false /* dismissShade */, false /* afterKeyguardGone */);
+                    false /* dismissShade */, false /* afterKeyguardGone */, true /* deferred */);
         }
     }
 

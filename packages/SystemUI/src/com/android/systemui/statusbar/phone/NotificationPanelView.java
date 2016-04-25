@@ -1199,7 +1199,7 @@ public class NotificationPanelView extends PanelView implements
         }
         if (mQsFullyExpanded && mFalsingManager.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
-                    false /* dismissShade */, true /* afterKeyguardGone */);
+                    false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
         if (DEBUG) {
             invalidate();
@@ -1794,7 +1794,8 @@ public class NotificationPanelView extends PanelView implements
                     public void run() {
                         mKeyguardBottomArea.launchLeftAffordance();
                     }
-                }, null, true /* dismissShade */, false /* afterKeyguardGone */);
+                }, null, true /* dismissShade */, false /* afterKeyguardGone */,
+                        true /* deferred */);
             }
             else {
                 mKeyguardBottomArea.launchLeftAffordance();
@@ -1813,7 +1814,8 @@ public class NotificationPanelView extends PanelView implements
                     public void run() {
                         mKeyguardBottomArea.launchCamera(mLastCameraLaunchSource);
                     }
-                }, null, true /* dismissShade */, false /* afterKeyguardGone */);
+                }, null, true /* dismissShade */, false /* afterKeyguardGone */,
+                    true /* deferred */);
             }
             else {
                 mKeyguardBottomArea.launchCamera(mLastCameraLaunchSource);
