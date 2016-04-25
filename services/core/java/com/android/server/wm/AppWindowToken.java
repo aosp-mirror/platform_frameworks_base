@@ -515,6 +515,13 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void requestUpdateWallpaperIfNeeded() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            w.requestUpdateWallpaperIfNeeded();
+        }
+    }
+
     boolean isRelaunching() {
         return mPendingRelaunchCount > 0;
     }

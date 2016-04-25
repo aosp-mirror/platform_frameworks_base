@@ -4422,6 +4422,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         wtoken.sendAppVisibilityToClients();
                     }
                 }
+                wtoken.requestUpdateWallpaperIfNeeded();
+
                 if (DEBUG_ADD_REMOVE) Slog.v(
                         TAG_WM, "No longer Stopped: " + wtoken);
                 wtoken.mAppStopped = false;
