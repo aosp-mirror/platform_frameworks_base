@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
@@ -624,10 +627,16 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 final Intent trIntent = tr.intent;
                 final boolean sameAffinity =
                         task.affinity != null && task.affinity.equals(tr.affinity);
-                final boolean sameIntent = (intent != null && intent.filterEquals(trIntent));
+                final boolean sameIntentFilter = intent != null && intent.filterEquals(trIntent);
+                boolean multiTasksAllowed = false;
+                final int flags = intent.getFlags();
+                if ((flags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NEW_DOCUMENT)) != 0
+                        && (flags & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
+                    multiTasksAllowed = true;
+                }
                 final boolean trIsDocument = trIntent != null && trIntent.isDocument();
                 final boolean bothDocuments = document && trIsDocument;
-                if (!sameAffinity && !sameIntent && !bothDocuments) {
+                if (!sameAffinity && !sameIntentFilter && !bothDocuments) {
                     continue;
                 }
 
@@ -638,7 +647,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                             && task.realActivity.equals(tr.realActivity);
                     // If the document is open in another app or is not the same
                     // document, we don't need to trim it.
-                    if (!sameActivity || !sameIntent) {
+                    if (!sameActivity || !sameIntentFilter || multiTasksAllowed) {
                         continue;
                     // Otherwise only trim if we are over our max recents for this task
                     } else if (maxRecents > 0 && !doTrim) {
