@@ -11979,8 +11979,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (receiver != null) {
             // Caller wants result sent back to them.
+            Bundle sendBundle = new Bundle();
+            // At least return the receiver extras
+            sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
+                    pae.receiverExtras);
             try {
-                pae.receiver.send(0, null);
+                pae.receiver.send(0, sendBundle);
             } catch (RemoteException e) {
             }
         }
