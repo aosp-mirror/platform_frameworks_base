@@ -47,6 +47,11 @@ public final class DhcpClientEvent extends IpConnectivityEvent implements Parcel
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return String.format("DhcpClientEvent(%s, %s)", ifName, msg);
+    }
+
     public static final Parcelable.Creator<DhcpClientEvent> CREATOR
         = new Parcelable.Creator<DhcpClientEvent>() {
         public DhcpClientEvent createFromParcel(Parcel in) {

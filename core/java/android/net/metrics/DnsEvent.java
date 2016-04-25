@@ -63,6 +63,11 @@ final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return String.format("DnsEvent(%d, %d events)", netId, eventTypes.length);
+    }
+
     public static final Parcelable.Creator<DnsEvent> CREATOR = new Parcelable.Creator<DnsEvent>() {
         @Override
         public DnsEvent createFromParcel(Parcel in) {

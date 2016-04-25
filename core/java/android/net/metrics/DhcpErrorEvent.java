@@ -19,6 +19,9 @@ package android.net.metrics;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
+
+import com.android.internal.util.MessageUtils;
 
 /**
  * {@hide} Event class used to record error events when parsing DHCP response packets.
@@ -102,5 +105,16 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
 
     private static int makeErrorCode(int type, int subtype) {
         return (type << 24) | ((0xFF & subtype) << 16);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("DhcpErrorEvent(%s, %s)", ifName, Decoder.constants.get(errorCode));
+    }
+
+    final static class Decoder {
+        static final SparseArray<String> constants =
+                MessageUtils.findMessageNames(new Class[]{DhcpErrorEvent.class},
+                new String[]{"L2_", "L3_", "L4_", "BOOTP_", "DHCP_", "BUFFER_", "RECEIVE_"});
     }
 }

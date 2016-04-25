@@ -17,6 +17,7 @@
 package android.net.metrics;
 
 import android.annotation.SystemApi;
+import android.net.NetworkCapabilities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -63,6 +64,12 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
 
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("DefaultNetworkEvent(%d -> %d, %s, IPv4: %b, IPv6: %b)", prevNetId,
+              netId, NetworkCapabilities.transportNamesOf(transportTypes), prevIPv4, prevIPv6);
     }
 
     public static final Parcelable.Creator<DefaultNetworkEvent> CREATOR

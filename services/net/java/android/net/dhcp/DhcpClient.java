@@ -357,8 +357,8 @@ public class DhcpClient extends StateMachine {
                 } catch (IOException|ErrnoException e) {
                     if (!mStopped) {
                         Log.e(TAG, "Read error", e);
+                        DhcpErrorEvent.logReceiveError(mIfaceName);
                     }
-                    DhcpErrorEvent.logReceiveError(mIfaceName);
                 } catch (DhcpPacket.ParseException e) {
                     Log.e(TAG, "Can't parse packet: " + e.getMessage());
                     if (PACKET_DBG) {

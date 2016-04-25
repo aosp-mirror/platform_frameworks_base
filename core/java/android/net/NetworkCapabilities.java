@@ -809,17 +809,7 @@ public final class NetworkCapabilities implements Parcelable {
     @Override
     public String toString() {
         int[] types = getTransportTypes();
-        String transports = (types.length > 0 ? " Transports: " : "");
-        for (int i = 0; i < types.length;) {
-            switch (types[i]) {
-                case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
-                case TRANSPORT_WIFI:        transports += "WIFI"; break;
-                case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
-                case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
-                case TRANSPORT_VPN:         transports += "VPN"; break;
-            }
-            if (++i < types.length) transports += "|";
-        }
+        String transports = (types.length > 0) ? " Transports: " + transportNamesOf(types) : "";
 
         types = getCapabilities();
         String capabilities = (types.length > 0 ? " Capabilities: " : "");
@@ -858,5 +848,23 @@ public final class NetworkCapabilities implements Parcelable {
         String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
 
         return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength + "]";
+    }
+
+    /**
+     * @hide
+     */
+    public static String transportNamesOf(int[] types) {
+        String transports = "";
+        for (int i = 0; i < types.length;) {
+            switch (types[i]) {
+                case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
+                case TRANSPORT_WIFI:        transports += "WIFI"; break;
+                case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
+                case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
+                case TRANSPORT_VPN:         transports += "VPN"; break;
+            }
+            if (++i < types.length) transports += "|";
+        }
+        return transports;
     }
 }
