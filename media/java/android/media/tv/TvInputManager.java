@@ -188,12 +188,15 @@ public final class TvInputManager {
             RECORDING_ERROR_RESOURCE_BUSY})
     public @interface RecordingError {}
 
+    static final int RECORDING_ERROR_START = 0;
+    static final int RECORDING_ERROR_END = 2;
+
     /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
      * {@link TvRecordingClient.RecordingCallback#onError(int)}: The requested operation cannot be
      * completed due to a problem that does not fit under any other error codes.
      */
-    public static final int RECORDING_ERROR_UNKNOWN = 0;
+    public static final int RECORDING_ERROR_UNKNOWN = RECORDING_ERROR_START;
 
     /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
@@ -207,7 +210,7 @@ public final class TvInputManager {
      * {@link TvRecordingClient.RecordingCallback#onError(int)}: Recording cannot proceed because
      * a required recording resource was not able to be allocated.
      */
-    public static final int RECORDING_ERROR_RESOURCE_BUSY = 2;
+    public static final int RECORDING_ERROR_RESOURCE_BUSY = RECORDING_ERROR_END;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
