@@ -2501,13 +2501,13 @@ public class SyncStorageEngine extends Handler {
                                 Log.w(TAG, "Unknown pending operation version " + versionString);
                                 throw new java.io.IOException("Unknown version.");
                             }
-                            int authorityId = Integer.valueOf(parser.getAttributeValue(
+                            int authorityId = Integer.parseInt(parser.getAttributeValue(
                                     null, XML_ATTR_AUTHORITYID));
-                            boolean expedited = Boolean.valueOf(parser.getAttributeValue(
+                            boolean expedited = Boolean.parseBoolean(parser.getAttributeValue(
                                     null, XML_ATTR_EXPEDITED));
-                            int syncSource = Integer.valueOf(parser.getAttributeValue(
+                            int syncSource = Integer.parseInt(parser.getAttributeValue(
                                     null, XML_ATTR_SOURCE));
-                            int reason = Integer.valueOf(parser.getAttributeValue(
+                            int reason = Integer.parseInt(parser.getAttributeValue(
                                     null, XML_ATTR_REASON));
                             AuthorityInfo authority = mAuthorities.get(authorityId);
                             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
