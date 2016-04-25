@@ -27,8 +27,8 @@ import android.net.NetworkPolicyManager;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
