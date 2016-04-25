@@ -3177,13 +3177,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         };
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShade,
-                afterKeyguardGone);
+                afterKeyguardGone, true /* deferred */);
     }
 
     public void executeRunnableDismissingKeyguard(final Runnable runnable,
             final Runnable cancelAction,
             final boolean dismissShade,
-            final boolean afterKeyguardGone) {
+            final boolean afterKeyguardGone,
+            final boolean deferred) {
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
@@ -3206,7 +3207,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
                             true /* delayed*/);
                 }
-                return true;
+                return deferred;
             }
         }, cancelAction, afterKeyguardGone);
     }
@@ -3529,7 +3530,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             @Override
             public void run() {
                 mLeaveOpenOnKeyguardHide = true;
-                executeRunnableDismissingKeyguard(runnable, null, false, false);
+                executeRunnableDismissingKeyguard(runnable, null, false, false, false);
             }
         });
     }
