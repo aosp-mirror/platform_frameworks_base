@@ -890,6 +890,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Loads the given URL with the specified additional HTTP headers.
+     * <p>
+     * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
      * @param additionalHttpHeaders the additional headers to be used in the
@@ -906,6 +908,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Loads the given URL.
+     * <p>
+     * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
      */
@@ -1006,6 +1010,12 @@ public class WebView extends AbsoluteLayout
      * If non-null, |resultCallback| will be invoked with any result returned from that
      * execution. This method must be called on the UI thread and the callback will
      * be made on the UI thread.
+     * <p>
+     * Compatibility note. Applications targeting {@link android.os.Build.VERSION_CODES#N} or
+     * later, JavaScript state from an empty WebView is no longer persisted across navigations like
+     * {@link #loadUrl(String)}. For example, global variables and functions defined before calling
+     * {@link #loadUrl(String)} will not exist in the loaded page. Applications should use
+     * {@link #addJavascriptInterface} instead to persist JavaScript objects across navigations.
      *
      * @param script the JavaScript to execute.
      * @param resultCallback A callback to be invoked when the script execution
