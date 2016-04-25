@@ -247,8 +247,8 @@ public class AssistManager {
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Failed to swap drawable; "
-                        + component.flattenToShortString() + " not found", e);
+                Log.v(TAG, "Assistant component "
+                        + component.flattenToShortString() + " not found");
             } catch (Resources.NotFoundException nfe) {
                 Log.w(TAG, "Failed to swap drawable from "
                         + component.flattenToShortString(), nfe);
