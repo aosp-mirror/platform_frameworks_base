@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -157,6 +158,92 @@ public class IpManager extends StateMachine {
         }
     }
 
+    // Use a wrapper class to log in order to ensure complete and detailed
+    // logging. This method is lighter weight than annotations/reflection
+    // and has the following benefits:
+    //
+    //     - No invoked method can be forgotten.
+    //       Any new method added to IpManager.Callback must be overridden
+    //       here or it will never be called.
+    //
+    //     - No invoking call site can be forgotten.
+    //       Centralized logging in this way means call sites don't need to
+    //       remember to log, and therefore no call site can be forgotten.
+    //
+    //     - No variation in log format among call sites.
+    //       Encourages logging of any available arguments, and all call sites
+    //       are necessarily logged identically.
+    //
+    // TODO: Find an lighter weight approach.
+    private class LoggingCallbackWrapper extends Callback {
+        private static final String PREFIX = "INVOKE ";
+        private Callback mCallback;
+
+        public LoggingCallbackWrapper(Callback callback) {
+            mCallback = callback;
+        }
+
+        private void log(String msg) {
+            mLocalLog.log(PREFIX + msg);
+        }
+
+        @Override
+        public void onPreDhcpAction() {
+            mCallback.onPreDhcpAction();
+            log("onPreDhcpAction()");
+        }
+        @Override
+        public void onPostDhcpAction() {
+            mCallback.onPostDhcpAction();
+            log("onPostDhcpAction()");
+        }
+        @Override
+        public void onNewDhcpResults(DhcpResults dhcpResults) {
+            mCallback.onNewDhcpResults(dhcpResults);
+            log("onNewDhcpResults({" + dhcpResults + "})");
+        }
+        @Override
+        public void onProvisioningSuccess(LinkProperties newLp) {
+            mCallback.onProvisioningSuccess(newLp);
+            log("onProvisioningSuccess({" + newLp + "})");
+        }
+        @Override
+        public void onProvisioningFailure(LinkProperties newLp) {
+            mCallback.onProvisioningFailure(newLp);
+            log("onProvisioningFailure({" + newLp + "})");
+        }
+        @Override
+        public void onLinkPropertiesChange(LinkProperties newLp) {
+            mCallback.onLinkPropertiesChange(newLp);
+            log("onLinkPropertiesChange({" + newLp + "})");
+        }
+        @Override
+        public void onReachabilityLost(String logMsg) {
+            mCallback.onReachabilityLost(logMsg);
+            log("onReachabilityLost(" + logMsg + ")");
+        }
+        @Override
+        public void onQuit() {
+            mCallback.onQuit();
+            log("onQuit()");
+        }
+        @Override
+        public void installPacketFilter(byte[] filter) {
+            mCallback.installPacketFilter(filter);
+            log("installPacketFilter(byte[" + filter.length + "])");
+        }
+        @Override
+        public void setFallbackMulticastFilter(boolean enabled) {
+            mCallback.setFallbackMulticastFilter(enabled);
+            log("setFallbackMulticastFilter(" + enabled + ")");
+        }
+        @Override
+        public void setNeighborDiscoveryOffload(boolean enable) {
+            mCallback.setNeighborDiscoveryOffload(enable);
+            log("setNeighborDiscoveryOffload(" + enable + ")");
+        }
+    }
+
     /**
      * This class encapsulates parameters to be passed to
      * IpManager#startProvisioning(). A defensive copy is made by IpManager
@@ -234,7 +321,7 @@ public class IpManager extends StateMachine {
     private static final int CMD_UPDATE_HTTP_PROXY = 7;
     private static final int CMD_SET_MULTICAST_FILTER = 8;
 
-    private static final int MAX_LOG_RECORDS = 1000;
+    private static final int MAX_LOG_RECORDS = 500;
 
     private static final boolean NO_CALLBACKS = false;
     private static final boolean SEND_CALLBACKS = true;
@@ -256,6 +343,7 @@ public class IpManager extends StateMachine {
     protected final Callback mCallback;
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
+    private final LocalLog mLocalLog;
 
     private NetworkInterface mNetworkInterface;
 
@@ -296,7 +384,7 @@ public class IpManager extends StateMachine {
         mContext = context;
         mInterfaceName = ifName;
         mClatInterfaceName = CLAT_PREFIX + ifName;
-        mCallback = callback;
+        mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
 
         mNetlinkTracker = new NetlinkTracker(
@@ -341,7 +429,7 @@ public class IpManager extends StateMachine {
         addState(mStoppingState);
 
         setInitialState(mStoppedState);
-        setLogRecSize(MAX_LOG_RECORDS);
+        mLocalLog = new LocalLog(MAX_LOG_RECORDS);
         super.start();
     }
 
@@ -436,6 +524,12 @@ public class IpManager extends StateMachine {
             pw.println("No apf support");
         }
         pw.decreaseIndent();
+
+        pw.println();
+        pw.println("StateMachine dump:");
+        pw.increaseIndent();
+        mLocalLog.readOnlyLocalLog().dump(fd, pw, args);
+        pw.decreaseIndent();
     }
 
 
@@ -451,13 +545,25 @@ public class IpManager extends StateMachine {
     @Override
     protected String getLogRecString(Message msg) {
         final String logLine = String.format(
-                "iface{%s/%d} arg1{%d} arg2{%d} obj{%s}",
+                "%s/%d %d %d %s",
                 mInterfaceName, mNetworkInterface == null ? -1 : mNetworkInterface.getIndex(),
                 msg.arg1, msg.arg2, Objects.toString(msg.obj));
+
+        final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
+        mLocalLog.log(richerLogLine);
         if (VDBG) {
-            Log.d(mTag, getWhatToString(msg.what) + " " + logLine);
+            Log.d(mTag, richerLogLine);
         }
+
         return logLine;
+    }
+
+    @Override
+    protected boolean recordLogRec(Message msg) {
+        // Don't log EVENT_NETLINK_LINKPROPERTIES_CHANGED. They can be noisy,
+        // and we already log any LinkProperties change that results in an
+        // invocation of IpManager.Callback#onLinkPropertiesChange().
+        return (msg.what != EVENT_NETLINK_LINKPROPERTIES_CHANGED);
     }
 
     private void getNetworkInterface() {
