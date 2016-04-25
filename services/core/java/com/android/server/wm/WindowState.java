@@ -68,6 +68,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
@@ -2613,7 +2614,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = containingFrame.height();
         final Task task = getTask();
         final boolean nonFullscreenTask = isInMultiWindowMode();
-        final boolean fitToDisplay = (task == null || !nonFullscreenTask) && !layoutInParentFrame();
+        final boolean noLimits = (mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
+
+        // We need to fit it to the display if either
+        // a) The task is fullscreen, or we don't have a task (we assume fullscreen for the taskless
+        // windows)
+        // b) If it's a child window, we also need to fit it to the display unless
+        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popup and similar windows on screen,
+        // but SurfaceViews want to be always at a specific location so we don't fit it to the
+        // display.
+        final boolean fitToDisplay = (task == null || !nonFullscreenTask)
+                || (isChildWindow() && !noLimits);
         float x, y;
         int w,h;
 
