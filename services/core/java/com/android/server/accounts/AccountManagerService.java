@@ -828,6 +828,10 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
+        if (!isUserUnlocked(userId)) {
+            Log.w(TAG, "User " + userId + " data is locked. callingUid " + callingUid);
+            return null;
+        }
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
@@ -1787,6 +1791,11 @@ public class AccountManagerService
                     callingUid,
                     account.type);
             throw new SecurityException(msg);
+        }
+        if (!isUserUnlocked(userId)) {
+            Log.w(TAG, "Authtoken not available - user " + userId + " data is locked. callingUid "
+                    + callingUid);
+            return null;
         }
         long identityToken = clearCallingIdentity();
         try {
