@@ -28,4 +28,5 @@ interface IJobScheduler {
     void cancel(int jobId);
     void cancelAll();
     List<JobInfo> getAllPendingJobs();
+    JobInfo getPendingJob(int jobId);
 }
