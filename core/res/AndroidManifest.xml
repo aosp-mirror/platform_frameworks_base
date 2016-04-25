@@ -468,6 +468,9 @@
     <protected-broadcast android:name="com.android.internal.location.ALARM_TIMEOUT" />
     <protected-broadcast android:name="android.intent.action.GLOBAL_BUTTON" />
 
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_AVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
