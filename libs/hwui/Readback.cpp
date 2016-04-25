@@ -101,24 +101,51 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
     sp<Fence> sourceFence;
-    // FIXME: Waiting on an API from libgui for this
-    // surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence);
+    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence);
+    if (err != NO_ERROR) {
+        ALOGW("Failed to get last queued buffer, error = %d", err);
+        return false;
+    }
     if (!sourceBuffer.get()) {
         ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
         return false;
     }
-    int err = sourceFence->wait(500 /* ms */);
+    err = sourceFence->wait(500 /* ms */);
     if (err != NO_ERROR) {
         ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
         return false;
     }
-    Image sourceImage(sourceBuffer);
-    if (!sourceImage.getTexture()) {
-        ALOGW("Failed to make an EGLImage from the GraphicBuffer");
+
+    // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
+    // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
+    // to be able to properly sample from the buffer.
+
+    // Create the EGLImage object that maps the GraphicBuffer
+    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLClientBuffer clientBuffer = (EGLClientBuffer) sourceBuffer->getNativeBuffer();
+    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+
+    EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
+            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
+
+    if (sourceImage == EGL_NO_IMAGE_KHR) {
+        ALOGW("Error creating image (%#x)", eglGetError());
         return false;
     }
+    GLuint sourceTexId;
+    // Create a 2D texture to sample from the EGLImage
+    glGenTextures(1, &sourceTexId);
+    Caches::getInstance().textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, sourceImage);
+
+    GLenum status = GL_NO_ERROR;
+    while ((status = glGetError()) != GL_NO_ERROR) {
+        ALOGW("Error creating image (%#x)", status);
+        return false;
+    }
+
     Texture sourceTexture(caches);
-    sourceTexture.wrap(sourceImage.getTexture(),
+    sourceTexture.wrap(sourceTexId,
             sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0 /* total lie */);
 
     {
@@ -133,8 +160,7 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
         GlopBuilder(renderState, caches, &glop)
                 .setRoundRectClipState(nullptr)
                 .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
-                .setFillLayer(sourceTexture, nullptr, 1.0f, SkXfermode::kSrc_Mode,
-                        Blend::ModeOrderSwap::NoSwap)
+                .setFillExternalTexture(sourceTexture)
                 .setTransform(Matrix4::identity(), TransformFlags::None)
                 .setModelViewMapUnitToRect(destRect)
                 .build();
