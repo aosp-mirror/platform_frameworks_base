@@ -2067,16 +2067,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 && win.mAppToken != null && win.mAppToken.showForAllUsers) {
-            // Save some cycles by not calling getDisplayInfo unless it is an application
-            // window intended for all users.
-            final DisplayContent displayContent = win.getDisplayContent();
-            if (displayContent == null) {
-                return true;
-            }
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            if (win.mFrame.left <= 0 && win.mFrame.top <= 0
-                    && win.mFrame.right >= displayInfo.appWidth
-                    && win.mFrame.bottom >= displayInfo.appHeight) {
+
+            // All window frames that are fullscreen extend above status bar, but some don't extend
+            // below navigation bar. Thus, check for display frame for top/left and stable frame for
+            // bottom right.
+            if (win.mFrame.left <= win.mDisplayFrame.left
+                    && win.mFrame.top <= win.mDisplayFrame.top
+                    && win.mFrame.right >= win.mStableFrame.right
+                    && win.mFrame.bottom >= win.mStableFrame.bottom) {
                 // Is a fullscreen window, like the clock alarm. Show to everyone.
                 return false;
             }
