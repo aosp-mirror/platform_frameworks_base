@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Yêu cầu hình mở khóa khi bạn chuyển đổi hồ sơ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Yêu cầu mã PIN khi bạn chuyển đổi hồ sơ"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Yêu cầu mật khẩu khi bạn chuyển đổi hồ sơ"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Quản trị viên thiết bị đã khóa thiết bị"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Thiết bị đã bị khóa theo cách thủ công"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận hình.</item>
       <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận hình.</item>

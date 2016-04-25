@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್‌ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"ಸಾಧನ ನಿರ್ವಾಹಕರು ಸಾಧನವನ್ನು ಲಾಕ್‌ ಮಾಡಿದ್ದಾರೆ"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"ಸಾಧನವನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಲಾಕ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ನಮೂನೆಯನ್ನು ಖಚಿತಪಡಿಸಿ.</item>
       <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳ ಕಾಲ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗಿಲ್ಲ. ನಮೂನೆಯನ್ನು ಖಚಿತಪಡಿಸಿ.</item>

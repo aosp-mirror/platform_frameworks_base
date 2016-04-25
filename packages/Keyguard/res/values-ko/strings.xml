@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"프로필을 전환하려면 패턴이 필요합니다."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"프로필을 전환하려면 PIN이 필요합니다."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"기기 관리자가 기기를 잠금 설정함"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"기기가 수동으로 잠금 설정됨"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>
