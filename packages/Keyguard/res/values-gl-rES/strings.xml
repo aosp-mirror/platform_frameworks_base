@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"É necesario o padrón para cambiar os perfís"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"É necesario o PIN para cambiar os perfís"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"É necesario o contrasinal para cambiar os perfís"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"O administrador do dispositivo bloqueouno"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"O dispositivo bloqueouse manualmente"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma o padrón.</item>
       <item quantity="one">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma o padrón.</item>

@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ PIN ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਡੀਵਾਈਸ ਨੂੰ ਲੌਕ ਕੀਤਾ"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"ਡੀਵਾਈਸ ਨੂੰ ਹੱਥੀਂ ਲੌਕ ਕੀਤਾ ਗਿਆ ਸੀ"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
       <item quantity="other">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
