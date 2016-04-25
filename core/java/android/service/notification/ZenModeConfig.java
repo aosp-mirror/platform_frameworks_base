@@ -570,7 +570,7 @@ public class ZenModeConfig implements Parcelable {
 
     private static boolean safeBoolean(String val, boolean defValue) {
         if (TextUtils.isEmpty(val)) return defValue;
-        return Boolean.valueOf(val);
+        return Boolean.parseBoolean(val);
     }
 
     private static int safeInt(XmlPullParser parser, String att, int defValue) {

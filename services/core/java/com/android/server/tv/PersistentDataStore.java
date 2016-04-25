@@ -251,7 +251,7 @@ final class PersistentDataStore {
                     throw new XmlPullParserException(
                             "Missing " + ATTR_ENABLED + " attribute on " + TAG_PARENTAL_CONTROLS);
                 }
-                mParentalControlsEnabled = Boolean.valueOf(enabled);
+                mParentalControlsEnabled = Boolean.parseBoolean(enabled);
             }
         }
     }
