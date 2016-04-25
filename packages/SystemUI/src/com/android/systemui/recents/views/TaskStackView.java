@@ -1664,10 +1664,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // Stop any scrolling
-        cancelDeferredTaskViewLayoutAnimation();
+        mTouchHandler.finishAnimations();
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
-        mTouchHandler.finishAnimations();
+        cancelDeferredTaskViewLayoutAnimation();
 
         // Start the task animations
         mAnimationHelper.startExitToHomeAnimation(event.animated, event.getAnimationTrigger());
