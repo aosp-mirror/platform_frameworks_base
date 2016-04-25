@@ -120,6 +120,8 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Поўны сігнал перадачы дадзеных."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Падключаны да <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Падлучаны да <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
+    <skip />
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Няма сiгналу WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Адзiн слупок сiгналу WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Два слупкi сiгналу WiMAX."</string>
@@ -150,14 +152,21 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM-карты."</string>
+    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
+    <skip />
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мабільная перадача даных адключана"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Рэжым палёту."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Няма SIM-карты."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Змяненне аператара сеткі."</string>
+    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Зарадка акумулятара, працэнтаў: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Сістэмныя налады."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Апавяшчэнні."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Выдаліць апавяшчэнне."</string>
@@ -195,9 +204,13 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Рэжым «Не турбаваць» укл., толькі прыярытэтныя."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Рэжым «Не турбаваць» укл., поўная цішыня."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Рэжым «Не турбаваць» укл., толькі будзільнікі."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Рэжым «Не турбаваць» выкл."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Рэжым «Не турбаваць» выкл."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Рэжым «Не турбаваць» укл."</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
+    <skip />
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth выключаны."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth уключаны."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth падлучаецца."</string>
@@ -251,7 +264,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Цяпер экран заблакіраваны ў альбомнай арыентацыі."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Цяпер экран заблакiраваны ў кніжнай арыентацыі."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Вітрына з дэсертамі"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Мроi"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Экранная застаўка"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не турбаваць"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Толькі прыярытэтныя"</string>
@@ -263,6 +276,10 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Няма даступных спалучаных прылад"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркасць"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Аўтапаварот"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Паварот заблакіраваны"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Кніжная арыентацыя"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Альбомная арыентацыя"</string>
@@ -281,6 +298,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Няма падключэння"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма сеткi"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi адключаны"</string>
+    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
+    <skip />
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Няма даступнай сеткі Wi-Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Трансляцыя"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Ідзе перадача"</string>
@@ -316,6 +335,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> адключана ў бяспечным рэжыме."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ачысціць усё"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Праграма не падтрымлівае функцыю дзялення экрана"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Перацягніце сюды, каб перайсці ў рэжым падзеленага экрана"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Падзяліць гарызантальна"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Падзяліць вертыкальна"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Падзяліць іншым чынам"</string>
@@ -426,6 +446,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дакраніцеся, каб уключыць гук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Дакраніцеся, каб уключыць вібрацыю. Можа быць адключаны гук службаў спецыяльных магчымасцей."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дакраніцеся, каб адключыць гук. Можа быць адключаны гук службаў спецыяльных магчымасцей."</string>
+    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
+    <skip />
+    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
+    <skip />
     <string name="system_ui_tuner" msgid="708224127392452018">"Наладка сістэмнага інтэрфейсу карыстальніка"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Паказваць працэнт зараду акумулятара"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Паказваць працэнт узроўню акумулятара ўнутры значка панэлі стану, калі ён не зараджаецца"</string>
@@ -470,42 +494,24 @@
     <string name="block" msgid="2734508760962682611">"Блакіраваць усе апавяшчэнні"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Не адключаць гук"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Не адключаць гук і не блакіраваць"</string>
-    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
-    <skip />
-    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
-    <skip />
-    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
-    <skip />
-    <!-- no translation found for blocked_importance (5035073235408414397) -->
-    <skip />
-    <!-- no translation found for min_importance (560779348928574878) -->
-    <skip />
-    <!-- no translation found for low_importance (7571498511534140) -->
-    <skip />
-    <!-- no translation found for default_importance (7609889614553354702) -->
-    <skip />
-    <!-- no translation found for high_importance (3441537905162782568) -->
-    <skip />
-    <!-- no translation found for max_importance (4880179829869865275) -->
-    <skip />
-    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
-    <skip />
-    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (7844224511187027155) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (7950291702044409847) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (5924405820269074915) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (1729480727023990427) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (2508384624461849111) -->
-    <skip />
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Пашыранае кіраванне апавяшчэннямі"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Уключана"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Адключана"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"З дапамогай пашыранага кіравання апавяшчэннямі вы можаце задаваць узровень важнасці апавяшчэнняў праграмы ад 0 да 5. \n\n"<b>"Узровень 5"</b>" \n- Паказваць уверсе спіса апавяшчэнняў \n- Дазваляць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 4"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 3"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n\n"<b>"Узровень 2"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n\n"<b>"Узровень 1"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n- Хаваць з экрана блакіроўкі і панэлі стану \n- Паказваць унізе спіса апавяшчэнняў \n\n"<b>"Узровень 0"</b>" \n- Блакіраваць усе апавяшчэнні ад праграмы"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Важнасць: аўтаматычна"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Важнасць: узровень 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Важнасць: узровень 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Важнасць: узровень 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Важнасць: узровень 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Важнасць: узровень 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Важнасць: узровень 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Праграма вызначае важнасць кожнага апавяшчэння."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Ніколі не паказваць апавяшчэнні ад гэтай праграмы."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Не перап. рэжым поўн. экр., не дазв. карот. паказ, гук або вібр. Хаваць з экр. блак. і панэлі стану."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Не перапыняць рэжым поўнага экрана, не дазваляць кароткі паказ, прайгранне гуку або вібрацыю."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Не перапыняць рэжым поўнага экрана і не дазваляць кароткі паказ."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Заўсёды дазваляць кароткі паказ. Не перапыняць рэжым поўнага экрана."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Заўсёды дазваляць кароткі паказ, дазваляць перапыняць рэжым поўнага экрана."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дадатковыя налады"</string>
     <string name="notification_done" msgid="5279426047273930175">"Гатова"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Элементы кантролю апавяшчэнняў <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -620,10 +626,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Іншае"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Раздзяляльнік падзеленага экрана"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Перамясціць уніз"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Перамясціць уверх"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Перамясціць улева"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Перамясціць управа"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Левы экран – на ўвесь экран"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Левы экран – 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Левы экран – 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"Левы экран – 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Правы экран – на ўвесь экран"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Верхні экран – на ўвесь экран"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Верхні экран – 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Верхні экран – 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Верхні экран – 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Ніжні экран – на ўвесь экран"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Месца: <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Краніце двойчы, каб рэдагаваць."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Краніце двойчы, каб дадаць."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Месца: <xliff:g id="POSITION">%1$d</xliff:g>. Краніце двойчы, каб выбраць."</string>
@@ -633,9 +645,27 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Плітка <xliff:g id="TILE_NAME">%1$s</xliff:g> выдалена"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> перамешчана ў наступнае месца: <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Рэдактар хуткіх налад."</string>
+    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Праграма можа не працаваць у рэжыме дзялення экрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Праграма не падтрымлівае функцыю дзялення экрана."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Разгарнуць хуткія налады."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
     <skip />
+    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
+    <skip />
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Старонка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

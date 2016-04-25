@@ -118,6 +118,8 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Data siqnalı tamdır."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
+    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
+    <skip />
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX yoxdur."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX bir xətt."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX iki xətdir."</string>
@@ -148,12 +150,19 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM yoxdur"</string>
+    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
+    <skip />
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobil Data Deaktivdir"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tezering."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçuş rejimi"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM kart yoxdur."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Carrier şəbəkə dəyişir."</string>
+    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> faizdir."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> faiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem parametrləri"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirişlər."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Bildirişi təmizlə."</string>
@@ -191,9 +200,13 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Narahat etməyin\" aktivdir, yalnız prioritet."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Tak sakitlik vaxtı narahat etməyin."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Narahat etməmək rejimi aktivdir, yalnız alarmlara icazə var."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Narahat etməyin\" qeyri-aktivdir."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Narahat etməyin\" qeyri-aktivdir."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Narahat etməyin\" aktivdir."</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
+    <skip />
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth deaktiv."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth aktiv."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth qoşulur."</string>
@@ -247,7 +260,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Hazırda ekran landşaft orientasiyasında kilidlənib."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Hazırda ekran portret orientasiyasında kilidlənib."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Desert Qabı"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Xəyal"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Ekran qoruyucu"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Narahat etməyin"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Yalnız prioritet"</string>
@@ -259,6 +272,10 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Heç bir cütlənmiş cihaz əlçatan deyil"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Parlaqlıq"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avto-fırlanma"</string>
+    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
+    <skip />
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Fırlanma kilidlidir"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portret"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Peyzaj"</string>
@@ -277,6 +294,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Bağlantı yoxdur"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Şəbəkə yoxdur"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi sönülüdür"</string>
+    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
+    <skip />
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Heç bir Wi-Fi şəbəkəsi əlçatan deyil"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Yayım"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Yayım"</string>
@@ -312,6 +331,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> güvənli rejimdə deaktiv edildi."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hamısını silin"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Tətbiq ekran bölünməsini dəstəkləmir"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranı bölmək üçün bura sürüşdürün"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Üfüqi Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Şaquli Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Fərdi Böl"</string>
@@ -422,6 +442,10 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Səsli etmək üçün tıklayın."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Vibrasiyanı ayarlamaq üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Səssiz etmək üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
+    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
+    <skip />
+    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
+    <skip />
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Daxil batareya faizini göstərin"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Elektrik şəbəsinə qoşulu olmayan zaman batareya səviyyəsini status paneli ikonası daxilində göstərin"</string>
@@ -466,42 +490,24 @@
     <string name="block" msgid="2734508760962682611">"Bütün bildirişləri blok edin"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Səssiz etməyin"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Səssiz və ya blok etməyin"</string>
-    <!-- no translation found for tuner_full_importance_settings (3207312268609236827) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings_on (7545060756610299966) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings_off (8208165412614935229) -->
-    <skip />
-    <!-- no translation found for power_notification_controls_description (4372459941671353358) -->
-    <skip />
-    <!-- no translation found for user_unspecified_importance (361613856933432117) -->
-    <skip />
-    <!-- no translation found for blocked_importance (5035073235408414397) -->
-    <skip />
-    <!-- no translation found for min_importance (560779348928574878) -->
-    <skip />
-    <!-- no translation found for low_importance (7571498511534140) -->
-    <skip />
-    <!-- no translation found for default_importance (7609889614553354702) -->
-    <skip />
-    <!-- no translation found for high_importance (3441537905162782568) -->
-    <skip />
-    <!-- no translation found for max_importance (4880179829869865275) -->
-    <skip />
-    <!-- no translation found for notification_importance_user_unspecified (2868359605125272874) -->
-    <skip />
-    <!-- no translation found for notification_importance_blocked (4237497046867398057) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (7844224511187027155) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (7950291702044409847) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (5924405820269074915) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (1729480727023990427) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (2508384624461849111) -->
-    <skip />
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Enerji bildiriş nəzarəti"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Aktiv"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Deaktiv"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"Enerji bildiriş nəzarəti ilə, tətbiq bildirişləri üçün əhəmiyyət səviyyəsini 0-dan 5-ə kimi ayarlaya bilərsiniz. \n\n"<b>"Səviyyə 5"</b>" \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n- Tam ekran kəsintisinə icazə verin \n- Hər zaman izləyin \n\n"<b>"Səviyyə 4"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Hər zaman izləyin \n\n"<b>"Level 3"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n\n"<b>"Level 2"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n\n"<b>"Səviyyə 1"</b>" \n- Prevent full screen interruption \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n- Ekran kilidi və ya status panelindən gizlədin \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n\n"<b>"Səviyyə 0"</b>" \n- Bütün bildirişləri tətbiqdən blok edin"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Əhəmiyyət: Avtomatik"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Əhəmiyyət: Səviyyə 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Əhəmiyyət: Səviyyə 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Əhəmiyyət: Səviyyə 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Əhəmiyyət: Səviyyə 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Əhəmiyyət: Səviyyə 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Əhəmiyyət: Səviyyə 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Hər bir bildirişin əhəmiyyətinə tətbiq özü qərar verir."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Bu tətbiqdən olan bildirişləri heç vaxt göstərməyin."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Tam ekran kəsintisi, baxışı, səsi və ya vibrasiyası yoxdur. Ekran kilidi və status panelindən gizlədin."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Tam ekran kəsintisi, baxışı, səsi və ya vibrasiyası yoxdur."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Tam ekran kəsintisi və ya baxışı yoxdur."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Hər zaman baxın. Tam ekran kəsintisi yoxdur."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Hər zaman baxın və tam ekran kəsintisinə icazə verin."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Daha çox ayar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hazırdır"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> bildiriş nəzarəti"</string>
@@ -616,10 +622,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Digər"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Bölünmüş ekran ayırıcısı"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Aşağıya keçin"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Yuxarıya keçin"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Sola köçürün"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Sağa köçürün"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Sol tam ekran"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Sol 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Sol 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"Sol 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Sağ tam ekran"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Yuxarı tam ekran"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Yuxarı 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Yuxarı 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Yuxarı 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Aşağı tam ekran"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Redaktə etmək üçün iki dəfə tıklayın."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Əlavə etmək üçün iki dəfə tıklayın."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi. Seçmək üçün iki dəfə tıklayın."</string>
@@ -629,9 +641,27 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> silindi"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> mövqeyinə köçürüldü"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Sürətli ayarlar redaktoru."</string>
+    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
+    <skip />
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Tətbiq bölünmüş ekran ilə işləməyə bilər."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Tətbiq ekran bölünməsini dəstəkləmir."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Cəld ayarları genişləndirin."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
+    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
     <skip />
+    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
+    <skip />
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> səhifədən <xliff:g id="ID_1">%1$d</xliff:g> səhifə"</string>
 </resources>
