@@ -234,6 +234,8 @@ private:
                 const pb::Attribute& pbAttr = pbCompoundValue.attr();
                 std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(isWeak);
                 attr->typeMask = pbAttr.format_flags();
+                attr->minInt = pbAttr.min_int();
+                attr->maxInt = pbAttr.max_int();
                 for (const pb::Attribute_Symbol& pbSymbol : pbAttr.symbols()) {
                     Attribute::Symbol symbol;
                     deserializeItemCommon(pbSymbol, &symbol.symbol);

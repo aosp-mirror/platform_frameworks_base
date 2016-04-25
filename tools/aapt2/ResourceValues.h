@@ -54,6 +54,18 @@ struct Value {
         mWeak = val;
     }
 
+    // Whether the value is marked as translateable.
+    // This does not persist when flattened.
+    // It is only used during compilation phase.
+    void setTranslateable(bool val) {
+        mTranslateable = val;
+    }
+
+    // Default true.
+    bool isTranslateable() const {
+        return mTranslateable;
+    }
+
     /**
      * Returns the source where this value was defined.
      */
@@ -84,6 +96,8 @@ struct Value {
         mComment = std::move(str);
     }
 
+    virtual bool equals(const Value* value) const = 0;
+
     /**
      * Calls the appropriate overload of ValueVisitor.
      */
@@ -103,6 +117,7 @@ protected:
     Source mSource;
     std::u16string mComment;
     bool mWeak = false;
+    bool mTranslateable = true;
 };
 
 /**
@@ -158,6 +173,7 @@ struct Reference : public BaseItem<Reference> {
     explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
     explicit Reference(const ResourceId& i, Type type = Type::kResource);
 
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     Reference* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -168,6 +184,7 @@ struct Reference : public BaseItem<Reference> {
  */
 struct Id : public BaseItem<Id> {
     Id() { mWeak = true; }
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* out) const override;
     Id* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -183,6 +200,7 @@ struct RawString : public BaseItem<RawString> {
 
     RawString(const StringPool::Ref& ref);
 
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     RawString* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -193,17 +211,10 @@ struct String : public BaseItem<String> {
 
     String(const StringPool::Ref& ref);
 
-    // Whether the string is marked as translateable. This does not persist when flattened.
-    // It is only used during compilation phase.
-    void setTranslateable(bool val);
-    bool isTranslateable() const;
-
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     String* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
-
-private:
-    bool mTranslateable;
 };
 
 struct StyledString : public BaseItem<StyledString> {
@@ -211,17 +222,10 @@ struct StyledString : public BaseItem<StyledString> {
 
     StyledString(const StringPool::StyleRef& ref);
 
-    // Whether the string is marked as translateable. This does not persist when flattened.
-    // It is only used during compilation phase.
-    void setTranslateable(bool val);
-    bool isTranslateable() const;
-
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     StyledString* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
-
-private:
-    bool mTranslateable;
 };
 
 struct FileReference : public BaseItem<FileReference> {
@@ -235,6 +239,7 @@ struct FileReference : public BaseItem<FileReference> {
     FileReference() = default;
     FileReference(const StringPool::Ref& path);
 
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     FileReference* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -250,6 +255,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     BinaryPrimitive(const android::Res_value& val);
     BinaryPrimitive(uint8_t dataType, uint32_t data);
 
+    bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
     BinaryPrimitive* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -268,6 +274,7 @@ struct Attribute : public BaseValue<Attribute> {
 
     Attribute(bool w, uint32_t t = 0u);
 
+    bool equals(const Value* value) const override;
     Attribute* clone(StringPool* newPool) const override;
     void printMask(std::ostream* out) const;
     void print(std::ostream* out) const override;
@@ -290,6 +297,7 @@ struct Style : public BaseValue<Style> {
 
     std::vector<Entry> entries;
 
+    bool equals(const Value* value) const override;
     Style* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
 };
@@ -297,6 +305,7 @@ struct Style : public BaseValue<Style> {
 struct Array : public BaseValue<Array> {
     std::vector<std::unique_ptr<Item>> items;
 
+    bool equals(const Value* value) const override;
     Array* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
 };
@@ -314,6 +323,7 @@ struct Plural : public BaseValue<Plural> {
 
     std::array<std::unique_ptr<Item>, Count> values;
 
+    bool equals(const Value* value) const override;
     Plural* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
 };
@@ -321,6 +331,7 @@ struct Plural : public BaseValue<Plural> {
 struct Styleable : public BaseValue<Styleable> {
     std::vector<Reference> entries;
 
+    bool equals(const Value* value) const override;
     Styleable* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
 };
