@@ -55,8 +55,11 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     private boolean mOnLeft = true;
     private boolean mDismissing = false;
     private boolean mSnapping = false;
+    private boolean mIconPlaced = false;
+
     private int[] mGearLocation = new int[2];
     private int[] mParentLocation = new int[2];
+    private int mVertSpaceForGear;
 
     public NotificationSettingsIconRow(Context context) {
         this(context, null);
@@ -83,16 +86,18 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         setOnClickListener(this);
         mHorizSpaceForGear =
                 getResources().getDimensionPixelOffset(R.dimen.notification_gear_width);
+        mVertSpaceForGear = getResources().getDimensionPixelOffset(R.dimen.notification_min_height);
         resetState();
     }
 
     public void resetState() {
         setGearAlpha(0f);
+        mIconPlaced = false;
         mSettingsFadedIn = false;
         mAnimating = false;
         mSnapping = false;
         mDismissing = false;
-        setIconLocation(true /* on left */, true /* force */);
+        setIconLocation(true /* on left */);
         if (mListener != null) {
             mListener.onSettingsIconRowReset(mParent);
         }
@@ -104,7 +109,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public void setNotificationRowParent(ExpandableNotificationRow parent) {
         mParent = parent;
-        setIconLocation(mOnLeft, true /* force */);
+        setIconLocation(mOnLeft);
     }
 
     public void setAppName(String appName) {
@@ -184,7 +189,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         if (isIconLocationChange(transX)) {
             setGearAlpha(0f);
         }
-        setIconLocation(transX > 0 /* fromLeft */, false /* force */);
+        setIconLocation(transX > 0 /* fromLeft */);
         mFadeAnimator = ValueAnimator.ofFloat(mGearIcon.getAlpha(), 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -221,22 +226,39 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         mFadeAnimator.start();
     }
 
-    @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        setIconLocation(mOnLeft, true /* force */);
+    public void updateVerticalLocation() {
+        if (mParent == null) {
+            return;
+        }
+        int parentHeight = mParent.getCollapsedHeight();
+        if (parentHeight < mVertSpaceForGear) {
+            mGearIcon.setTranslationY((parentHeight / 2) - (mGearIcon.getHeight() / 2));
+        } else {
+            mGearIcon.setTranslationY((mVertSpaceForGear - mGearIcon.getHeight()) / 2);
+        }
     }
 
-    public void setIconLocation(boolean onLeft, boolean force) {
-        if ((!force && onLeft == mOnLeft) || mSnapping || mParent == null) {
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        setIconLocation(mOnLeft);
+    }
+
+    public void setIconLocation(boolean onLeft) {
+        updateVerticalLocation();
+        if ((mIconPlaced && onLeft == mOnLeft) || mSnapping || mParent == null
+                || mGearIcon.getWidth() == 0) {
             // Do nothing
             return;
         }
         final boolean isRtl = mParent.isLayoutRtl();
+
         // TODO No need to cast to float here once b/28050538 is fixed.
         final float left = (float) (isRtl ? -(mParent.getWidth() - mHorizSpaceForGear) : 0);
         final float right = (float) (isRtl ? 0 : (mParent.getWidth() - mHorizSpaceForGear));
-        setTranslationX(onLeft ? left : right);
+        final float centerX = ((mHorizSpaceForGear - mGearIcon.getWidth()) / 2);
+        setTranslationX(onLeft ? left + centerX : right + centerX);
         mOnLeft = onLeft;
+        mIconPlaced = true;
     }
 
     public boolean isIconLocationChange(float translation) {
@@ -264,9 +286,8 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
                 mParent.getLocationOnScreen(mParentLocation);
 
                 final int centerX = (int) (mHorizSpaceForGear / 2);
-                // Top / bottom padding are not equal, need to subtract them to get center of gear.
-                final int centerY = (int) (mGearIcon.getHeight() - mGearIcon.getPaddingTop()
-                        - mGearIcon.getPaddingBottom()) / 2 + mGearIcon.getPaddingTop();
+                final int centerY =
+                        (int) (mGearIcon.getTranslationY() * 2 + mGearIcon.getHeight())/ 2;
                 final int x = mGearLocation[0] - mParentLocation[0] + centerX;
                 final int y = mGearLocation[1] - mParentLocation[1] + centerY;
                 mListener.onGearTouched(mParent, x, y);
