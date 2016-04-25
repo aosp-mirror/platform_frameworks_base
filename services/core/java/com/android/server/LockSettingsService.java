@@ -705,9 +705,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         };
 
-        // Check if the user is currently in quiet mode and start it otherwise
-        if (mUserManager.isQuietModeEnabled(new UserHandle(userId))
-                && mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+        // Turn off quite mode if it's enabled, only managed profile can return true for now, it
+        // will return false if it is not a managed profile.
+        if (mUserManager.isQuietModeEnabled(new UserHandle(userId))) {
             mUserManager.setQuietModeEnabled(userId, false);
         }
 
@@ -729,6 +729,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     // Unlock managed profile with unified lock
                     if (pi.isManagedProfile()
                             && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
+                            && !pi.isQuietModeEnabled()
                             && mStorage.hasChildProfileLock(pi.id)) {
                         unlockChildProfile(pi.id);
                     }
