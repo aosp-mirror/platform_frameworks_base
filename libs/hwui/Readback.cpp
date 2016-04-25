@@ -30,7 +30,7 @@
 namespace android {
 namespace uirenderer {
 
-bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
+CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
         Surface& surface, SkBitmap* bitmap) {
     // TODO: Clean this up and unify it with LayerRenderer::copyLayer,
     // of which most of this is copied from.
@@ -44,12 +44,12 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
                 || destHeight > caches.maxTextureSize) {
         ALOGW("Can't copy surface into bitmap, %dx%d exceeds max texture size %d",
                 destWidth, destHeight, caches.maxTextureSize);
-        return false;
+        return CopyResult::DestinationInvalid;
     }
     GLuint fbo = renderState.createFramebuffer();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");
-        return false;
+        return CopyResult::UnknownError;
     }
 
     SkAutoLockPixels alp(*bitmap);
@@ -104,16 +104,20 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence);
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
-        return false;
+        return CopyResult::UnknownError;
     }
     if (!sourceBuffer.get()) {
         ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return false;
+        return CopyResult::SourceEmpty;
+    }
+    if (sourceBuffer->getUsage() & GRALLOC_USAGE_PROTECTED) {
+        ALOGW("Surface is protected, unable to copy from it");
+        return CopyResult::SourceInvalid;
     }
     err = sourceFence->wait(500 /* ms */);
     if (err != NO_ERROR) {
         ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return false;
+        return CopyResult::Timeout;
     }
 
     // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
@@ -130,7 +134,7 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
 
     if (sourceImage == EGL_NO_IMAGE_KHR) {
         ALOGW("Error creating image (%#x)", eglGetError());
-        return false;
+        return CopyResult::UnknownError;
     }
     GLuint sourceTexId;
     // Create a 2D texture to sample from the EGLImage
@@ -141,7 +145,7 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
         ALOGW("Error creating image (%#x)", status);
-        return false;
+        return CopyResult::UnknownError;
     }
 
     Texture sourceTexture(caches);
@@ -178,7 +182,7 @@ bool Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
 
     GL_CHECKPOINT(MODERATE);
 
-    return true;
+    return CopyResult::Success;
 }
 
 } // namespace uirenderer
