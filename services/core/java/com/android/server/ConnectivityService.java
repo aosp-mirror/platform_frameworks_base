@@ -31,7 +31,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
-
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
 import android.app.Notification;
@@ -1382,6 +1381,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (LOGD_RULES) {
                 log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
             }
+            if (restrictBackground) {
+                log("onRestrictBackgroundChanged(true): disabling tethering");
+                mTethering.untetherAll();
+            }
         }
 
         @Override
@@ -1809,6 +1812,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (NetworkRequest nr : nai.networkLingered) pw.println(nr.toString());
             pw.decreaseIndent();
             pw.decreaseIndent();
+        }
+        pw.decreaseIndent();
+        pw.println();
+
+        pw.println("Metered Interfaces:");
+        pw.increaseIndent();
+        for (String value : mMeteredIfaces) {
+            pw.println(value);
         }
         pw.decreaseIndent();
         pw.println();
@@ -2568,7 +2579,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public int tether(String iface) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
-            return mTethering.tether(iface);
+            final int status = mTethering.tether(iface);
+            if (status == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                try {
+                    mPolicyManager.onTetheringChanged(iface, true);
+                } catch (RemoteException e) {
+                }
+            }
+            return status;
         } else {
             return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
         }
@@ -2579,7 +2597,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ConnectivityManager.enforceTetherChangePermission(mContext);
 
         if (isTetheringSupported()) {
-            return mTethering.untether(iface);
+            final int status = mTethering.untether(iface);
+            if (status == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                try {
+                    mPolicyManager.onTetheringChanged(iface, false);
+                } catch (RemoteException e) {
+                }
+            }
+            return status;
         } else {
             return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
         }
