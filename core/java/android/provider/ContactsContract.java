@@ -607,11 +607,21 @@ public final class ContactsContract {
         /**
          * Return TRUE if it is a remote stored directory.
          */
-        public static boolean isRemoteDirectory(long directoryId) {
+        public static boolean isRemoteDirectoryId(long directoryId) {
             return directoryId != Directory.DEFAULT
                     && directoryId != Directory.LOCAL_INVISIBLE
                     && directoryId != Directory.ENTERPRISE_DEFAULT
                     && directoryId != Directory.ENTERPRISE_LOCAL_INVISIBLE;
+        }
+
+        /**
+         * Return TRUE if it is a remote stored directory. TODO: Remove this method once all
+         * internal apps are not using this API.
+         *
+         * @hide
+         */
+        public static boolean isRemoteDirectory(long directoryId) {
+            return isRemoteDirectoryId(directoryId);
         }
 
         /**
@@ -1659,7 +1669,7 @@ public final class ContactsContract {
         /**
          * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
          * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in parameters,
-         * otherwise it will throw UnsupportedOperationException.
+         * otherwise it will throw IllegalArgumentException.
          */
         public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_URI, "filter_enterprise");
@@ -5962,7 +5972,7 @@ public final class ContactsContract {
             /**
              * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
              * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
-             * parameters, otherwise it will throw UnsupportedOperationException.
+             * parameters, otherwise it will throw IllegalArgumentException.
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
@@ -6242,7 +6252,7 @@ public final class ContactsContract {
             /**
              * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
              * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
-             * parameters, otherwise it will throw UnsupportedOperationException.
+             * parameters, otherwise it will throw IllegalArgumentException.
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
@@ -7464,7 +7474,7 @@ public final class ContactsContract {
             /**
              * Similar to {@link Phone#ENTERPRISE_CONTENT_FILTER_URI}, but allows users to filter
              * callable data. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
-             * parameters, otherwise it will throw UnsupportedOperationException.
+             * parameters, otherwise it will throw IllegalArgumentException.
              */
             public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
                     CONTENT_URI, "filter_enterprise");
