@@ -416,6 +416,8 @@ public final class LoadedApk {
 
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
         if (mPackageName.equals("android")) {
+            // Note: This branch is taken for system server and we don't need to setup
+            // jit profiling support.
             if (mClassLoader != null) {
                 // nothing to update
                 return;
@@ -484,6 +486,7 @@ public final class LoadedApk {
             Slog.v(ActivityThread.TAG, "Class path: " + zip +
                     ", JNI path: " + librarySearchPath);
 
+        boolean needToSetupJitProfiles = false;
         if (mClassLoader == null) {
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
@@ -494,11 +497,15 @@ public final class LoadedApk {
                     libraryPermittedPath, mBaseClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
+            // Setup the class loader paths for profiling.
+            needToSetupJitProfiles = true;
         }
 
         if (addedPaths != null && addedPaths.size() > 0) {
             final String add = TextUtils.join(File.pathSeparator, addedPaths);
             ApplicationLoaders.getDefault().addPath(mClassLoader, add);
+            // Setup the new code paths for profiling.
+            needToSetupJitProfiles = true;
         }
 
         // Setup jit profile support.
@@ -506,7 +513,14 @@ public final class LoadedApk {
         // The runtime only keeps track of unique code paths and can handle re-registration of
         // the same code path. There's no need to pass `addedPaths` since any new code paths
         // are already in `mApplicationInfo`.
-        setupJitProfileSupport();
+        if (needToSetupJitProfiles) {
+            // Temporarily disable logging of disk reads/writes on the Looper thread
+            // as this is early and necessary. Write is only needed to create the
+            // profile file if it's not already there.
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+            setupJitProfileSupport();
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
     }
 
     public ClassLoader getClassLoader() {
