@@ -24,12 +24,9 @@
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/gear_icon"
-        android:layout_width="@dimen/notification_gear_width"
-        android:layout_height="@dimen/notification_gear_height"
-        android:paddingTop="@dimen/notification_gear_top_padding"
-        android:paddingStart="@dimen/notification_gear_padding"
-        android:paddingEnd="@dimen/notification_gear_padding"
-        android:paddingBottom="@dimen/notification_gear_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/notification_gear_padding"
         android:src="@drawable/ic_settings"
         android:tint="@color/notification_gear_color"
         android:alpha="0"
