@@ -352,8 +352,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void startRecording(@Nullable Uri programHint) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_RECORDING, programHint));
+    public void startRecording(@Nullable Uri programUri) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_RECORDING, programUri));
     }
 
     @Override
