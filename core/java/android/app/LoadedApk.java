@@ -510,11 +510,15 @@ public final class LoadedApk {
         }
 
         // Setup jit profile support.
+        //
         // It is ok to call this multiple times if the application gets updated with new splits.
         // The runtime only keeps track of unique code paths and can handle re-registration of
         // the same code path. There's no need to pass `addedPaths` since any new code paths
         // are already in `mApplicationInfo`.
-        if (needToSetupJitProfiles) {
+        //
+        // It is NOT ok to call this function from the system_server (for any of the packages it
+        // loads code from) so we explicitly disallow it there.
+        if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
             // Temporarily disable logging of disk reads/writes on the Looper thread
             // as this is early and necessary. Write is only needed to create the
             // profile file if it's not already there.
