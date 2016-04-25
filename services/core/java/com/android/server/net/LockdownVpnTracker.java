@@ -209,7 +209,9 @@ public class LockdownVpnTracker {
                 throw new RuntimeException("Problem setting firewall rules", e);
             }
 
-            mConnService.sendConnectedBroadcast(augmentNetworkInfo(egressInfo));
+            final NetworkInfo clone = new NetworkInfo(egressInfo);
+            augmentNetworkInfo(clone);
+            mConnService.sendConnectedBroadcast(clone);
         }
     }
 
@@ -320,13 +322,11 @@ public class LockdownVpnTracker {
         }
     }
 
-    public NetworkInfo augmentNetworkInfo(NetworkInfo info) {
+    public void augmentNetworkInfo(NetworkInfo info) {
         if (info.isConnected()) {
             final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
-            info = new NetworkInfo(info);
             info.setDetailedState(vpnInfo.getDetailedState(), vpnInfo.getReason(), null);
         }
-        return info;
     }
 
     private void showNotification(int titleRes, int iconRes) {
