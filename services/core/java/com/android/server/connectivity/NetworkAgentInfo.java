@@ -25,6 +25,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
 import android.net.NetworkRequest;
+import android.net.NetworkState;
 import android.os.Handler;
 import android.os.Messenger;
 import android.util.SparseArray;
@@ -245,6 +246,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     public void setCurrentScore(int newScore) {
         currentScore = newScore;
+    }
+
+    public NetworkState getNetworkState() {
+        synchronized (this) {
+            // Network objects are outwardly immutable so there is no point to duplicating.
+            // Duplicating also precludes sharing socket factories and connection pools.
+            final String subscriberId = (networkMisc != null) ? networkMisc.subscriberId : null;
+            return new NetworkState(new NetworkInfo(networkInfo),
+                    new LinkProperties(linkProperties),
+                    new NetworkCapabilities(networkCapabilities), network, subscriberId, null);
+        }
     }
 
     public String toString() {

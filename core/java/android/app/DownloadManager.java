@@ -370,6 +370,7 @@ public class DownloadManager {
          * {@link ConnectivityManager#TYPE_BLUETOOTH}.
          * @hide
          */
+        @Deprecated
         public static final int NETWORK_BLUETOOTH = 1 << 2;
 
         private Uri mUri;
@@ -381,6 +382,7 @@ public class DownloadManager {
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mRoamingAllowed = true;
         private boolean mMeteredAllowed = true;
+        private int mFlags = 0;
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
         private boolean mUseSystemCache = false;
@@ -669,6 +671,10 @@ public class DownloadManager {
          * By default, all network types are allowed. Consider using
          * {@link #setAllowedOverMetered(boolean)} instead, since it's more
          * flexible.
+         * <p>
+         * As of {@link android.os.Build.VERSION_CODES#N}, setting only the
+         * {@link #NETWORK_WIFI} flag here is equivalent to calling
+         * {@link #setAllowedOverMetered(boolean)} with {@code false}.
          *
          * @param flags any combination of the NETWORK_* bit flags.
          * @return this object
@@ -697,6 +703,42 @@ public class DownloadManager {
          */
         public Request setAllowedOverMetered(boolean allow) {
             mMeteredAllowed = allow;
+            return this;
+        }
+
+        /**
+         * Specify that to run this download, the device needs to be plugged in.
+         * This defaults to false.
+         *
+         * @param requiresCharging Whether or not the device is plugged in.
+         * @see android.app.job.JobInfo.Builder#setRequiresCharging(boolean)
+         */
+        public Request setRequiresCharging(boolean requiresCharging) {
+            if (requiresCharging) {
+                mFlags |= Downloads.Impl.FLAG_REQUIRES_CHARGING;
+            } else {
+                mFlags &= ~Downloads.Impl.FLAG_REQUIRES_CHARGING;
+            }
+            return this;
+        }
+
+        /**
+         * Specify that to run, the download needs the device to be in idle
+         * mode. This defaults to false.
+         * <p>
+         * Idle mode is a loose definition provided by the system, which means
+         * that the device is not in use, and has not been in use for some time.
+         *
+         * @param requiresDeviceIdle Whether or not the device need be within an
+         *            idle maintenance window.
+         * @see android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)
+         */
+        public Request setRequiresDeviceIdle(boolean requiresDeviceIdle) {
+            if (requiresDeviceIdle) {
+                mFlags |= Downloads.Impl.FLAG_REQUIRES_DEVICE_IDLE;
+            } else {
+                mFlags &= ~Downloads.Impl.FLAG_REQUIRES_DEVICE_IDLE;
+            }
             return this;
         }
 
@@ -746,6 +788,7 @@ public class DownloadManager {
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
             values.put(Downloads.Impl.COLUMN_ALLOW_METERED, mMeteredAllowed);
+            values.put(Downloads.Impl.COLUMN_FLAGS, mFlags);
             values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
 
             return values;
@@ -983,16 +1026,7 @@ public class DownloadManager {
             // called with nothing to remove!
             throw new IllegalArgumentException("input param 'ids' can't be null");
         }
-        ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_DELETED, 1);
-        // if only one id is passed in, then include it in the uri itself.
-        // this will eliminate a full database scan in the download service.
-        if (ids.length == 1) {
-            return mResolver.update(ContentUris.withAppendedId(mBaseUri, ids[0]), values,
-                    null, null);
-        } 
-        return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
-                getWhereArgsForIds(ids));
+        return mResolver.delete(mBaseUri, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
     }
 
     /**
@@ -1117,6 +1151,20 @@ public class DownloadManager {
         values.putNull(Downloads.Impl._DATA);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         values.put(Downloads.Impl.COLUMN_FAILED_CONNECTIONS, 0);
+        mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
+    }
+
+    /**
+     * Force the given downloads to proceed even if their size is larger than
+     * {@link #getMaxBytesOverMobile(Context)}.
+     *
+     * @hide
+     */
+    public void forceDownload(long... ids) {
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
+        values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
+        values.put(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, 1);
         mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
     }
 

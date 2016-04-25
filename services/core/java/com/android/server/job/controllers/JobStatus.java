@@ -29,7 +29,6 @@ import android.util.ArraySet;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Uniquely identifies a job internally.
@@ -55,6 +54,7 @@ public final class JobStatus {
     static final int CONSTRAINT_APP_NOT_IDLE = 1<<6;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<7;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<8;
+    static final int CONSTRAINT_NOT_ROAMING = 1<<9;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -175,6 +175,9 @@ public final class JobStatus {
         }
         if (job.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED) {
             requiredConstraints |= CONSTRAINT_UNMETERED;
+        }
+        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_NOT_ROAMING) {
+            requiredConstraints |= CONSTRAINT_NOT_ROAMING;
         }
         if (job.isRequireCharging()) {
             requiredConstraints |= CONSTRAINT_CHARGING;
@@ -312,6 +315,10 @@ public final class JobStatus {
         return (requiredConstraints&CONSTRAINT_UNMETERED) != 0;
     }
 
+    public boolean hasNotRoamingConstraint() {
+        return (requiredConstraints&CONSTRAINT_NOT_ROAMING) != 0;
+    }
+
     public boolean hasChargingConstraint() {
         return (requiredConstraints&CONSTRAINT_CHARGING) != 0;
     }
@@ -376,12 +383,16 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_IDLE, state);
     }
 
+    boolean setConnectivityConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
+    }
+
     boolean setUnmeteredConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_UNMETERED, state);
     }
 
-    boolean setConnectivityConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
+    boolean setNotRoamingConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_NOT_ROAMING, state);
     }
 
     boolean setAppNotIdleConstraintSatisfied(boolean state) {
@@ -425,7 +436,7 @@ public final class JobStatus {
 
     static final int CONSTRAINTS_OF_INTEREST =
             CONSTRAINT_CHARGING | CONSTRAINT_TIMING_DELAY |
-            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
+            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED | CONSTRAINT_NOT_ROAMING |
             CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
@@ -517,11 +528,14 @@ public final class JobStatus {
         if ((constraints&CONSTRAINT_IDLE) != 0) {
             pw.print(" IDLE");
         }
+        if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
+            pw.print(" CONNECTIVITY");
+        }
         if ((constraints&CONSTRAINT_UNMETERED) != 0) {
             pw.print(" UNMETERED");
         }
-        if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
-            pw.print(" CONNECTIVITY");
+        if ((constraints&CONSTRAINT_NOT_ROAMING) != 0) {
+            pw.print(" NOT_ROAMING");
         }
         if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
             pw.print(" APP_NOT_IDLE");
