@@ -138,4 +138,6 @@
       <item quantity="other">Искате ли да изтриете <xliff:g id="COUNT_1">%1$d</xliff:g> елемента?</item>
       <item quantity="one">Искате ли да изтриете <xliff:g id="COUNT_0">%1$d</xliff:g> елемент?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"За съжаление, можете да изберете до 1000 елемента наведнъж"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Бяха избрани само 1000 елемента"</string>
 </resources>

@@ -100,8 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Затвори"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Датотекиве не се преместени: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for delete_failure_alert_content (892393767207938353) -->
-    <skip />
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Датотекиве не се избришани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Овие датотеки беа конвертирани во друг формат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Копирана е <xliff:g id="COUNT_1">%1$d</xliff:g> датотека на таблата со исечоци.</item>
@@ -139,4 +138,6 @@
       <item quantity="one">Да се избрише <xliff:g id="COUNT_1">%1$d</xliff:g> ставка?</item>
       <item quantity="other">Да се избришат <xliff:g id="COUNT_1">%1$d</xliff:g> ставки?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"За жал, може да изберете само 1.000 ставки истовремено"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Може да се изберат само 1.000 ставки"</string>
 </resources>

@@ -138,4 +138,6 @@
       <item quantity="other">Padamkan <xliff:g id="COUNT_1">%1$d</xliff:g> item?</item>
       <item quantity="one">Padamkan <xliff:g id="COUNT_0">%1$d</xliff:g> item?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Maaf, anda hanya boleh memilih hingga 1000 item serentak"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Hanya boleh memilih 1000 item"</string>
 </resources>

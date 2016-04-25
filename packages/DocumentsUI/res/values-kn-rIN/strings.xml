@@ -138,4 +138,6 @@
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> ಐಟಂಗಳನ್ನು ಅಳಿಸುವುದೇ?</item>
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> ಐಟಂಗಳನ್ನು ಅಳಿಸುವುದೇ?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ಕ್ಷಮಿಸಿ, ನೀವು ಒಂದೇ ಬಾರಿಗೆ 1000 ಐಟಂಗಳನ್ನು ಮಾತ್ರ ಆಯ್ಕೆ ಮಾಡಬಹುದು"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"1000 ಐಟಂಗಳನ್ನು ಮಾತ್ರ ಆಯ್ಕೆ ಮಾಡಬಹುದು"</string>
 </resources>

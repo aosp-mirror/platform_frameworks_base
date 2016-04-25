@@ -138,4 +138,6 @@
       <item quantity="other">အကြောင်းအရာ <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
       <item quantity="one">အကြောင်းအရာ <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ဝမ်းနည်းပါသည်။ တစ်ကြိမ်လျှင် အခု ၁၀၀၀ အထိသာ ရွေးချယ်နိုင်ပါသည်"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"အခု ၁၀၀၀ သာ ရွေးချယ်နိုင်သည်"</string>
 </resources>

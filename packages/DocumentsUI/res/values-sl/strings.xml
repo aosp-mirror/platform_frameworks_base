@@ -162,4 +162,6 @@
       <item quantity="few">Ali želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> elemente?</item>
       <item quantity="other">Ali želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> elementov?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Hkrati lahko izberete samo do 1000 elementov"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Izbrati je mogoče samo 1000 elementov"</string>
 </resources>

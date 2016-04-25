@@ -138,4 +138,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> مورد حذف شود؟</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> مورد حذف شود؟</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"متأسفیم، هر بار حداکثر می‌توانید ۱۰۰۰ مورد انتخاب کنید."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"فقط می‌توان ۱۰۰۰ مورد انتخاب کرد"</string>
 </resources>

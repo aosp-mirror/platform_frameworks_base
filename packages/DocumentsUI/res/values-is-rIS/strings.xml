@@ -138,4 +138,6 @@
       <item quantity="one">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> atriði?</item>
       <item quantity="other">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> atriðum?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Aðeins er hægt að velja að hámarki 1000 atriði í einu"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Aðeins var hægt að velja 1000 atriði"</string>
 </resources>

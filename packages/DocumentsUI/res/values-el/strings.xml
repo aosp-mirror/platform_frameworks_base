@@ -138,4 +138,6 @@
       <item quantity="other">Να διαγραφούν <xliff:g id="COUNT_1">%1$d</xliff:g> στοιχεία;</item>
       <item quantity="one">Να διαγραφεί <xliff:g id="COUNT_0">%1$d</xliff:g> στοιχείο;</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Μπορείτε να επιλέξετε μέχρι 1000 στοιχεία κάθε φορά"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Δεν είναι δυνατή η επιλογή περισσότερων από 1000 στοιχείων"</string>
 </resources>
