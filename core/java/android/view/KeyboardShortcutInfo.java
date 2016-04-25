@@ -62,8 +62,9 @@ public final class KeyboardShortcutInfo implements Parcelable {
      *     defined in {@link KeyEvent}.
      * @param modifiers The set of modifiers that, combined with the key, trigger the shortcut.
      *     These should be a combination of {@link KeyEvent#META_CTRL_ON},
-     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON} and
-     *     {@link KeyEvent#META_ALT_ON}.
+     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON},
+     *     {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_FUNCTION_ON} and
+     *     {@link KeyEvent#META_SYM_ON}.
      */
     public KeyboardShortcutInfo(CharSequence label, int keycode, int modifiers) {
         this(label, null, keycode, modifiers);
@@ -74,8 +75,9 @@ public final class KeyboardShortcutInfo implements Parcelable {
      * @param baseCharacter The character that triggers the shortcut.
      * @param modifiers The set of modifiers that, combined with the key, trigger the shortcut.
      *     These should be a combination of {@link KeyEvent#META_CTRL_ON},
-     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON} and
-     *     {@link KeyEvent#META_ALT_ON}.
+     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON},
+     *     {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_FUNCTION_ON} and
+     *     {@link KeyEvent#META_SYM_ON}.
      */
     public KeyboardShortcutInfo(CharSequence label, char baseCharacter, int modifiers) {
         mLabel = label;
@@ -114,7 +116,8 @@ public final class KeyboardShortcutInfo implements Parcelable {
 
     /**
      * Returns the base keycode that, combined with the modifiers, triggers this shortcut. If the
-     * base character was set instead, returns {@link KeyEvent#KEYCODE_UNKNOWN}.
+     * base character was set instead, returns {@link KeyEvent#KEYCODE_UNKNOWN}. Valid keycodes are
+     * defined as constants in {@link KeyEvent}.
      */
     public int getKeycode() {
         return mKeycode;
@@ -129,7 +132,10 @@ public final class KeyboardShortcutInfo implements Parcelable {
     }
 
     /**
-     * Returns the set of modifiers that, combined with the key, trigger this shortcut.
+     * Returns the set of modifiers that, combined with the key, trigger this shortcut. These can
+     * be a combination of {@link KeyEvent#META_CTRL_ON}, {@link KeyEvent#META_SHIFT_ON},
+     * {@link KeyEvent#META_META_ON}, {@link KeyEvent#META_ALT_ON},
+     * {@link KeyEvent#META_FUNCTION_ON} and {@link KeyEvent#META_SYM_ON}.
      */
     public int getModifiers() {
         return mModifiers;
