@@ -162,6 +162,9 @@
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
 
+    <!-- the ability to rename notifications posted by other apps -->
+    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
