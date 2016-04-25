@@ -1123,6 +1123,13 @@ final class ActivityRecord {
 
     public void reportFullyDrawnLocked() {
         final long curTime = SystemClock.uptimeMillis();
+        // Normally launch time counts from the point when the activity is resumed, to when the
+        // first window is drawn. However the activity could become visible before it is resumed,
+        // due to some other activity in the same task being launched. In this case we still need
+        // to report launch time to unblock ActivityStarter.startActivityMayWait().
+        if (displayStartTime == 0 && task != null && task.isLaunching) {
+            displayStartTime = curTime;
+        }
         if (displayStartTime != 0) {
             reportLaunchTimeLocked(curTime);
         }
@@ -1188,13 +1195,22 @@ final class ActivityRecord {
             //service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
         }
         displayStartTime = 0;
+        task.isLaunching = false;
         stack.mLaunchStartTime = 0;
     }
 
     void windowsDrawnLocked() {
         mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn();
+        final long curTime = SystemClock.uptimeMillis();
+        // Normally launch time counts from the point when the activity is resumed, to when the
+        // first window is drawn. However the activity could become visible before it is resumed,
+        // due to some other activity in the same task being launched. In this case we still need
+        // to report launch time to unblock ActivityStarter.startActivityMayWait().
+        if (displayStartTime == 0 && task != null && task.isLaunching) {
+            displayStartTime = curTime;
+        }
         if (displayStartTime != 0) {
-            reportLaunchTimeLocked(SystemClock.uptimeMillis());
+            reportLaunchTimeLocked(curTime);
         }
         mStackSupervisor.sendWaitingVisibleReportLocked(this);
         startTime = 0;
