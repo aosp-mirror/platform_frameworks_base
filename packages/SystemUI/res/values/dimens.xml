@@ -87,13 +87,7 @@
     <!-- Width of the space containing the gear icon behind a notification -->
     <dimen name="notification_gear_width">64dp</dimen>
 
-    <!-- Height of the space containing the gear icon behind a notification -->
-    <dimen name="notification_gear_height">74dp</dimen>
-
-    <!-- The space above the gear icon displayed behind a notification -->
-    <dimen name="notification_gear_top_padding">30dp</dimen>
-
-    <!-- The space on either side and below the gear icon displayed behind a notification  -->
+    <!-- The space around the gear icon displayed behind a notification  -->
     <dimen name="notification_gear_padding">20dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->

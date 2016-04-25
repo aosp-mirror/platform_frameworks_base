@@ -3525,8 +3525,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     } else {
                         // Check scheduled, reset alpha and update location; check will fade it in
                         mCurrIconRow.setGearAlpha(0f);
-                        mCurrIconRow.setIconLocation(translation > 0 /* onLeft */,
-                                false /* force */);
+                        mCurrIconRow.setIconLocation(translation > 0 /* onLeft */);
                     }
                 }
             }
