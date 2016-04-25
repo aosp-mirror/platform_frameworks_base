@@ -1685,6 +1685,7 @@ public class UserManager {
 
     /**
      * Returns whether the given profile is in quiet mode or not.
+     * Notes: Quiet mode is only supported for managed profiles.
      *
      * @param userHandle The user handle of the profile to be queried.
      * @return true if the profile is in quiet mode, false otherwise.
