@@ -257,8 +257,12 @@ public class RecentsViewTouchHandler {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
                 if (mDragRequested) {
+                    boolean cancelled = action == MotionEvent.ACTION_CANCEL;
+                    if (cancelled) {
+                        EventBus.getDefault().send(new DragDropTargetChangedEvent(mDragTask, null));
+                    }
                     EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView,
-                            action == MotionEvent.ACTION_UP ? mLastDropTarget : null));
+                            !cancelled ? mLastDropTarget : null));
                     break;
                 }
             }
