@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -70,7 +71,9 @@ public class ImmersiveModeConfirmation {
     private long mPanicTime;
     private WindowManager mWindowManager;
     private int mCurrentUserId;
-    private IVrManager mVrManager;
+    // Local copy of vr mode enabled state, to avoid calling into VrManager with
+    // the lock held.
+    boolean mVrModeEnabled = false;
 
     public ImmersiveModeConfirmation(Context context) {
         mContext = context;
@@ -117,22 +120,19 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    private boolean getVrMode() {
-        boolean vrMode = false;
-        if (mVrManager == null) {
-            // lazily grab this service since it may not be available at construction time
-            mVrManager = (IVrManager) IVrManager.Stub.asInterface(
+    void systemReady() {
+        IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
-        }
-        if (mVrManager != null) {
+        if (vrManager != null) {
             try {
-                vrMode = mVrManager.getVrModeState();
-            } catch (RemoteException ex) { }
+                vrManager.registerListener(mVrStateCallbacks);
+                mVrModeEnabled = vrManager.getVrModeState();
+            } catch (RemoteException re) {
+            }
         }
-        return vrMode;
     }
 
-    public void immersiveModeChanged(String pkg, boolean isImmersiveMode,
+    public void immersiveModeChangedLw(String pkg, boolean isImmersiveMode,
             boolean userSetupComplete) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
@@ -142,7 +142,7 @@ public class ImmersiveModeConfirmation {
             if (!disabled
                     && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
                     && userSetupComplete
-                    && !getVrMode()) {
+                    && !mVrModeEnabled) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
@@ -375,4 +375,11 @@ public class ImmersiveModeConfirmation {
             }
         }
     }
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) throws RemoteException {
+            mVrModeEnabled = enabled;
+        }
+    };
 }
