@@ -403,7 +403,38 @@ public final class TvInputManagerService extends SystemService {
             if (mCurrentUserId == userId) {
                 return;
             }
-            clearSessionAndServiceStatesLocked(mUserStates.get(mCurrentUserId));
+            UserState userState = mUserStates.get(mCurrentUserId);
+            List<SessionState> sessionStatesToRelease = new ArrayList<>();
+            for (SessionState sessionState : userState.sessionStateMap.values()) {
+                if (sessionState.session != null && !sessionState.isRecordingSession) {
+                    sessionStatesToRelease.add(sessionState);
+                }
+            }
+            for (SessionState sessionState : sessionStatesToRelease) {
+                try {
+                    sessionState.session.release();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in release", e);
+                }
+                clearSessionAndNotifyClientLocked(sessionState);
+            }
+
+            for (Iterator<ComponentName> it = userState.serviceStateMap.keySet().iterator();
+                 it.hasNext(); ) {
+                ComponentName component = it.next();
+                ServiceState serviceState = userState.serviceStateMap.get(component);
+                if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
+                    if (serviceState.callback != null) {
+                        try {
+                            serviceState.service.unregisterCallback(serviceState.callback);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in unregisterCallback", e);
+                        }
+                    }
+                    mContext.unbindService(serviceState.connection);
+                    it.remove();
+                }
+            }
 
             mCurrentUserId = userId;
             getOrCreateUserStateLocked(userId);
@@ -414,13 +445,61 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    private void clearSessionAndNotifyClientLocked(SessionState state) {
+        if (state.client != null) {
+            try {
+                state.client.onSessionReleased(state.seq);
+            } catch(RemoteException e) {
+                Slog.e(TAG, "error in onSessionReleased", e);
+            }
+        }
+        // If there are any other sessions based on this session, they should be released.
+        UserState userState = getOrCreateUserStateLocked(state.userId);
+        for (SessionState sessionState : userState.sessionStateMap.values()) {
+            if (state.sessionToken == sessionState.hardwareSessionToken) {
+                releaseSessionLocked(sessionState.sessionToken, Process.SYSTEM_UID, state.userId);
+                try {
+                    sessionState.client.onSessionReleased(sessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onSessionReleased", e);
+                }
+            }
+        }
+        removeSessionStateLocked(state.sessionToken, state.userId);
+    }
+
     private void removeUser(int userId) {
         synchronized (mLock) {
             UserState userState = mUserStates.get(userId);
             if (userState == null) {
                 return;
             }
-            clearSessionAndServiceStatesLocked(userState);
+            // Release all created sessions.
+            for (SessionState state : userState.sessionStateMap.values()) {
+                if (state.session != null) {
+                    try {
+                        state.session.release();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in release", e);
+                    }
+                }
+            }
+            userState.sessionStateMap.clear();
+
+            // Unregister all callbacks and unbind all services.
+            for (ServiceState serviceState : userState.serviceStateMap.values()) {
+                if (serviceState.service != null) {
+                    if (serviceState.callback != null) {
+                        try {
+                            serviceState.service.unregisterCallback(serviceState.callback);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in unregisterCallback", e);
+                        }
+                    }
+                    mContext.unbindService(serviceState.connection);
+                }
+            }
+            userState.serviceStateMap.clear();
 
             // Clear everything else.
             userState.inputMap.clear();
@@ -432,35 +511,6 @@ public final class TvInputManagerService extends SystemService {
 
             mUserStates.remove(userId);
         }
-    }
-
-    private void clearSessionAndServiceStatesLocked(UserState userState) {
-        // Release created sessions.
-        for (SessionState state : userState.sessionStateMap.values()) {
-            if (state.session != null) {
-                try {
-                    state.session.release();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "error in release", e);
-                }
-            }
-        }
-        userState.sessionStateMap.clear();
-
-        // Unregister all callbacks and unbind all services.
-        for (ServiceState serviceState : userState.serviceStateMap.values()) {
-            if (serviceState.service != null) {
-                if (serviceState.callback != null) {
-                    try {
-                        serviceState.service.unregisterCallback(serviceState.callback);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unregisterCallback", e);
-                    }
-                }
-                mContext.unbindService(serviceState.connection);
-            }
-        }
-        userState.serviceStateMap.clear();
     }
 
     private ContentResolver getContentResolverForUser(int userId) {
@@ -527,11 +577,6 @@ public final class TvInputManagerService extends SystemService {
                 false, methodName, null);
     }
 
-    private static boolean shouldMaintainConnection(ServiceState serviceState) {
-        return !serviceState.sessionTokens.isEmpty() || serviceState.isHardware;
-        // TODO: Find a way to maintain connection to hardware TV input service only when necessary.
-    }
-
     private void updateServiceConnectionLocked(ComponentName component, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
@@ -545,8 +590,19 @@ public final class TvInputManagerService extends SystemService {
             }
             serviceState.reconnecting = false;
         }
-        boolean maintainConnection = shouldMaintainConnection(serviceState);
-        if (serviceState.service == null && maintainConnection && userId == mCurrentUserId) {
+
+        boolean shouldBind;
+        if (userId == mCurrentUserId) {
+            shouldBind = !serviceState.sessionTokens.isEmpty() || serviceState.isHardware;
+        } else {
+            // For a non-current user,
+            // if sessionTokens is not empty, it contains recording sessions only
+            // because other sessions must have been removed while switching user
+            // and non-recording sessions are not created by createSession().
+            shouldBind = !serviceState.sessionTokens.isEmpty();
+        }
+
+        if (serviceState.service == null && shouldBind) {
             // This means that the service is not yet connected but its state indicates that we
             // have pending requests. Then, connect the service.
             if (serviceState.bound) {
@@ -563,7 +619,7 @@ public final class TvInputManagerService extends SystemService {
                     i, serviceState.connection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     new UserHandle(userId));
-        } else if (serviceState.service != null && !maintainConnection) {
+        } else if (serviceState.service != null && !shouldBind) {
             // This means that the service is already connected but its state indicates that we have
             // nothing to do with it. Then, disconnect the service.
             if (DEBUG) {
@@ -799,7 +855,7 @@ public final class TvInputManagerService extends SystemService {
         int oldState = inputState.state;
         inputState.state = state;
         if (serviceState != null && serviceState.service == null
-                && shouldMaintainConnection(serviceState)) {
+                && (!serviceState.sessionTokens.isEmpty() || serviceState.isHardware)) {
             // We don't notify state change while reconnecting. It should remain disconnected.
             return;
         }
@@ -1068,6 +1124,13 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    if (userId != mCurrentUserId && !isRecordingSession) {
+                        // A non-recording session of a backgroud (non-current) user
+                        // should not be created.
+                        // Let the client get onConnectionFailed callback for this case.
+                        sendSessionTokenToClientLocked(client, inputId, null, null, seq);
+                        return;
+                    }
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     TvInputState inputState = userState.inputMap.get(inputId);
                     if (inputState == null) {
@@ -2061,27 +2124,7 @@ public final class TvInputManagerService extends SystemService {
         public void binderDied() {
             synchronized (mLock) {
                 session = null;
-                if (client != null) {
-                    try {
-                        client.onSessionReleased(seq);
-                    } catch(RemoteException e) {
-                        Slog.e(TAG, "error in onSessionReleased", e);
-                    }
-                }
-                // If there are any other sessions based on this session, they should be released.
-                UserState userState = getOrCreateUserStateLocked(userId);
-                for (SessionState sessionState : userState.sessionStateMap.values()) {
-                    if (sessionToken == sessionState.hardwareSessionToken) {
-                        releaseSessionLocked(sessionState.sessionToken, Process.SYSTEM_UID,
-                                userId);
-                        try {
-                            sessionState.client.onSessionReleased(sessionState.seq);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in onSessionReleased", e);
-                        }
-                    }
-                }
-                removeSessionStateLocked(sessionToken, userId);
+                clearSessionAndNotifyClientLocked(this);
             }
         }
     }
