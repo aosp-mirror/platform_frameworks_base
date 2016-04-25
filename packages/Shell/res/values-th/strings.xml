@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"รายงานข้อบกพร่องมีข้อมูลจากไฟล์บันทึกต่างๆ ของระบบ ซึ่งอาจรวมถึงข้อมูลที่คุณพิจารณาว่าละเอียดอ่อน (เช่น การใช้งานแอปและข้อมูลตำแหน่ง) โปรดแชร์รายงานข้อบกพร่องกับแอปและบุคคลที่คุณเชื่อถือเท่านั้น"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ไม่ต้องแสดงอีก"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"รายงานข้อบกพร่อง"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ไม่สามารถอ่านไฟล์รายงานข้อบกพร่อง"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ไม่สามารถเพิ่มรายละเอียดรายงานข้อบกพร่องลงในไฟล์ ZIP"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ไม่มีชื่อ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"รายละเอียด"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ภาพหน้าจอ"</string>

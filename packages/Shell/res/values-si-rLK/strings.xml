@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"තිර රුවක් රහිතව ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න නැතහොත් තිර රුව ගැනීම අවසන් වන තෙක් රැඳෙන්න"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"තිර රුවක් රහිතව ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න නැතහොත් තිර රුව ගැනීම අවසන් වන තෙක් රැඳෙන්න"</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"දෝෂ වාර්තාවල පද්ධතියේ විවිධ ලොග ගොනු වෙතින් වන දත්ත අඩංගු අතර, ඒවායෙහි ඔබ සංවේදී ලෙස සලකන දත්ත (යෙදුම් භාවිතය සහ ස්ථාන දත්ත වැනි) අඩංගු විය හැකිය. ඔබ විශ්වාස කරන පුද්ගලයන් සහ යෙදුම් සමග පමණක් දෝෂ වාර්තා බෙදා ගන්න."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"නැවත නොපෙන්වන්න"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"දෝෂ වාර්තා"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"දෝෂ වාර්තා ගොනුව කියවීමට නොහැකි විය"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"zip ගොනුව වෙත දෝෂ වාර්තා විස්තර එක් කිරීමට නොහැකි විය"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"නම් නොකළ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"විස්තර"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"තිර රුව"</string>
