@@ -40,6 +40,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -333,6 +334,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 outList.add(job.getJob());
             }
             return outList;
+        }
+    }
+
+    public JobInfo getPendingJob(int uid, int jobId) {
+        synchronized (mLock) {
+            List<JobStatus> jobs = mJobs.getJobsByUid(uid);
+            for (int i = jobs.size() - 1; i >= 0; i--) {
+                JobStatus job = jobs.get(i);
+                if (job.getJobId() == jobId) {
+                    return job.getJob();
+                }
+            }
+            return null;
         }
     }
 
@@ -912,7 +926,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasIdleConstraint()) {
                         idleCount++;
                     }
-                    if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()) {
+                    if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()
+                            || job.hasNotRoamingConstraint()) {
                         connectivityCount++;
                     }
                     if (job.hasChargingConstraint()) {
@@ -1346,6 +1361,18 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public JobInfo getPendingJob(int jobId) throws RemoteException {
+            final int uid = Binder.getCallingUid();
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return JobSchedulerService.this.getPendingJob(uid, jobId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public void cancelAll() throws RemoteException {
             final int uid = Binder.getCallingUid();
 
@@ -1378,7 +1405,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             long identityToken = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.dumpInternal(pw);
+                JobSchedulerService.this.dumpInternal(pw, args);
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
@@ -1450,7 +1477,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
         return s.toString();
     }
 
-    void dumpInternal(final PrintWriter pw) {
+    void dumpInternal(final PrintWriter pw, String[] args) {
+        int filterUid = -1;
+        if (!ArrayUtils.isEmpty(args)) {
+            try {
+                filterUid = getContext().getPackageManager().getPackageUid(args[0],
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            } catch (NameNotFoundException ignored) {
+            }
+        }
+
+        final int filterUidFinal = filterUid;
         final long now = SystemClock.elapsedRealtime();
         synchronized (mLock) {
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
@@ -1463,6 +1500,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     public void process(JobStatus job) {
                         pw.print("  Job #"); pw.print(index++); pw.print(": ");
                         pw.println(job.toShortString());
+
+                        // Skip printing details if the caller requested a filter
+                        if (filterUidFinal != -1 && job.getUid() != filterUidFinal
+                                && job.getSourceUid() != filterUidFinal) {
+                            return;
+                        }
+
                         job.dump(pw, "    ", true);
                         pw.print("    Ready: ");
                         pw.print(mHandler.isReadyToBeExecutedLocked(job));
