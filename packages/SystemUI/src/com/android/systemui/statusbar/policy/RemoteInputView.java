@@ -44,6 +44,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -127,10 +129,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.mShowImeOnInputConnection = false;
         mController.remoteInputSent(mEntry);
 
+        MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_SEND,
+                mEntry.notification.getPackageName());
         try {
             mPendingIntent.send(mContext, 0, fillInIntent);
         } catch (PendingIntent.CanceledException e) {
             Log.i(TAG, "Unable to send remote input result", e);
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_FAIL,
+                    mEntry.notification.getPackageName());
         }
     }
 
@@ -165,6 +171,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeRemoteInput(mEntry);
         mEntry.remoteInputText = mEditText.getText();
         setVisibility(INVISIBLE);
+        MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_CLOSE,
+                mEntry.notification.getPackageName());
     }
 
     @Override
@@ -198,6 +206,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public void focus() {
+        MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_OPEN,
+                mEntry.notification.getPackageName());
+
         setVisibility(VISIBLE);
         mController.addRemoteInput(mEntry);
         mEditText.setInnerFocusable(true);
