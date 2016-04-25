@@ -151,6 +151,7 @@ final class TaskRecord {
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean inRecents;      // Actually in the recents list?
     boolean isAvailable;    // Is the activity available to be launched?
+    boolean isLaunching;    // Is an activity in this task launching?
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
     boolean autoRemoveRecents;  // If true, we should automatically remove the task from
