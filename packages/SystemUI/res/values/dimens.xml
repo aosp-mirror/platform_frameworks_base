@@ -34,16 +34,16 @@
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">14.5dp</dimen>
+    <dimen name="status_bar_battery_icon_height">18dp</dimen>
 
     <!-- Width of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_width">9.5dp</dimen>
+    <dimen name="status_bar_battery_icon_width">18dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
 
     <!-- The starting padding for the clock in the status bar. -->
-    <dimen name="status_bar_clock_starting_padding">7dp</dimen>
+    <dimen name="status_bar_clock_starting_padding">3dp</dimen>
 
     <!-- The end padding for the clock in the status bar. -->
     <dimen name="status_bar_clock_end_padding">0dp</dimen>
@@ -501,7 +501,7 @@
     <dimen name="signal_cluster_margin_start">2.5dp</dimen>
 
     <!-- Padding between signal cluster and battery icon -->
-    <dimen name="signal_cluster_battery_padding">7dp</dimen>
+    <dimen name="signal_cluster_battery_padding">3dp</dimen>
 
     <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
     <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
@@ -582,8 +582,8 @@
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
 
-    <dimen name="battery_height">14.5dp</dimen>
-    <dimen name="battery_width">9.5dp</dimen>
+    <dimen name="battery_height">18dp</dimen>
+    <dimen name="battery_width">18dp</dimen>
 
     <dimen name="battery_detail_graph_space_top">27dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">27dp</dimen>

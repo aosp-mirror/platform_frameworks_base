@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2015-2016 The CyanogenMod Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <declare-styleable name="BatteryMeterViewDrawable">
+        <attr name="android:gravity"/>
+        <!-- Blending mode used for drawing charging bolt and percentage text -->
+        <attr name="blendMode">
+            <!-- [0, 0] -->
+            <enum name="clear" value="0" />
+            <!-- [Sa, Sc] -->
+            <enum name="src" value="1" />
+            <!-- [Da, Dc] -->
+            <enum name="dst" value="2" />
+            <!-- [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- [Sa + (1 - Sa)*Da, Rc = Dc + (1 - Da)*Sc] -->
+            <enum name="dst_over" value="4" />
+            <!-- [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- [Sa * Da, Sa * Dc] -->
+            <enum name="dst_in" value="6" />
+            <!-- [Sa * (1 - Da), Sc * (1 - Da)] -->
+            <enum name="src_out" value="7" />
+            <!-- [Da * (1 - Sa), Dc * (1 - Sa)] -->
+            <enum name="dst_out" value="8" />
+            <!-- [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- [Sa, Sa * Dc + Sc * (1 - Da)] -->
+            <enum name="dst_atop" value="10" />
+            <!-- [Sa + Da - 2 * Sa * Da, Sc * (1 - Da) + (1 - Sa) * Dc] -->
+            <enum name="xor" value="11" />
+            <!-- Saturate(S + D) -->
+            <enum name="add" value="12" />
+            <!-- [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="13" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="14" />
+            <!-- Draw on top without any blending operations performed -->
+            <enum name="overlay" value="15" />
+            <!-- [Sa + Da - Sa*Da, Sc*(1 - Da) + Dc*(1 - Sa) + min(Sc, Dc)] -->
+            <enum name="darken" value="16" />
+        </attr>
+    </declare-styleable>
+</resources>
