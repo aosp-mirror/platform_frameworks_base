@@ -169,7 +169,11 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Memorija sata je puna. Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Memorijski prostor na TV-u je popunjen. Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Skladište telefona je puno! Izbrišite neke datoteke kako biste oslobodili prostor."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">Instalirani su autoriteti za izdavanje sertifikata</item>
+      <item quantity="few">Instalirani su autoriteti za izdavanje sertifikata</item>
+      <item quantity="other">Instalirani su autoriteti za izdavanje sertifikata</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Od strane nepoznate treće strane"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Od strane administratora profila za posao"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Od strane <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -216,9 +220,11 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Napravi izveštaj o grešci"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupiti informacije o trenutnom stanju uređaja kako bi bile poslate u poruci e-pošte. Od započinjanja izveštaja o grešci do trenutka za njegovo slanje proći će neko vreme; budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv. izveštaj"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Koristite ovo u većini slučajeva. To vam omogućava da pratite napredak izveštaja i da unosite dodatne detalje o problemu. Verovatno će izostaviti neke manje korišćene odeljke za koje pravljenje izveštaja dugo traje."</string>
+    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
+    <skip />
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Kompletan izveštaj"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Koristite ovu opciju radi minimalnih sistemskih smetnji kada uređaj ne reaguje, prespor je ili su vam potrebni svi odeljci izveštaja. Ne pravi snimak ekrana niti vam dozvoljava unos dodatnih detalja."</string>
+    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
+    <skip />
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekundu.</item>
       <item quantity="few">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekunde.</item>
@@ -861,6 +867,16 @@
       <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sata</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sati</item>
     </plurals>
+    <!-- no translation found for now_string_shortest (8912796667087856402) -->
+    <skip />
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem sa video snimkom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ovaj video ne može da se strimuje na ovom uređaju."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ne možete da pustite ovaj video."</string>
@@ -1495,7 +1511,10 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao je vaš admiistrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi produžila vreme trajanja baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju možda neće da se ažuriraju ako ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
+    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
+    <skip />
+    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
     <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
