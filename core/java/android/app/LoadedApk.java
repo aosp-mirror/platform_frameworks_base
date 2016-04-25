@@ -383,6 +383,11 @@ public final class LoadedApk {
             // Add path to libraries in apk for current abi. Do this now because more entries
             // will be added to zipPaths that shouldn't be part of the library path.
             if (aInfo.primaryCpuAbi != null) {
+                // Add fake libs into the library search path if we target prior to N.
+                if (aInfo.targetSdkVersion <= 23) {
+                    outLibPaths.add("/system/fake-libs" +
+                        (VMRuntime.is64BitAbi(aInfo.primaryCpuAbi) ? "64" : ""));
+                }
                 for (String apk : outZipPaths) {
                     outLibPaths.add(apk + "!/lib/" + aInfo.primaryCpuAbi);
                 }
