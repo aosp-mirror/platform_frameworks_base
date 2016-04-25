@@ -172,7 +172,14 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"سعة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
+      <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
+      <item quantity="few">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="many">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="other">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="one">تم تثبيت شهادة المرجع المصدق</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"بواسطة جهة خارجية غير معلومة"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"بواسطة مشرف الملف الشخصي للعمل"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"بواسطة <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -219,9 +226,11 @@
     <string name="bugreport_title" msgid="2667494803742548533">"إعداد تقرير بالأخطاء"</string>
     <string name="bugreport_message" msgid="398447048750350456">"سيجمع هذا معلومات حول حالة جهازك الحالي لإرسالها كرسالة إلكترونية، ولكنه سيستغرق وقتًا قليلاً من بدء عرض تقرير بالأخطاء. وحتى يكون جاهزًا للإرسال، الرجاء الانتظار."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"تقرير تفاعلي"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"يمكنك استخدام هذا الخيار في معظم الأحيان، حيث يتيح لك إمكانية تتبع مستوى تقدم التقرير والحصول على مزيد من المعلومات حول المشكلة. وقد يتم إسقاط بعض الأقسام الأقل استخدامًا والتي تستغرق وقتًا طويلاً أثناء إعداد التقرير."</string>
+    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
+    <skip />
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"تقرير كامل"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"يمكنك استخدام هذا الخيار للحصول على حد أدنى من تدخل النظام عند توقف استجابة الجهاز أو حدوث بطئ شديد أو عند الحاجة إلى جميع أقسام التقرير. لا يؤدي ذلك إلى التقاط لقطة شاشة أو السماح لك بالحصول على مزيد من التفاصيل."</string>
+    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
+    <skip />
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="zero">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
       <item quantity="two">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانيتين (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
@@ -879,6 +888,16 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الساعات</item>
       <item quantity="one">ساعة واحدة</item>
     </plurals>
+    <!-- no translation found for now_string_shortest (8912796667087856402) -->
+    <skip />
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -1513,7 +1532,7 @@
     <string name="select_year" msgid="7952052866994196170">"تحديد العام"</string>
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
-    <string name="lock_to_app_toast" msgid="4921623036476880316">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زر الرجوع مع الاستمرار."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"لإزالة تثبيت علامة التبويب على هذه الشاشة، يمكنك لمس زر الرجوع مع الاستمرار."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"نظرة عامة\" مع الاستمرار."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"التطبيق مقيد: ولا يسمح بإلغاء التقييد على هذا الجهاز."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
@@ -1525,7 +1544,10 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
+    <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
+    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
+    <skip />
+    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
     <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
