@@ -138,4 +138,6 @@
       <item quantity="other">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> elementer?</item>
       <item quantity="one">Vil du slette <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Beklager, du kan bare velge opptil 1000 elementer samtidig"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Du kan bare velge 1000 elementer"</string>
 </resources>

@@ -162,4 +162,6 @@
       <item quantity="many">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элементаў?</item>
       <item quantity="other">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элемента?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"На жаль, вы можаце выбраць не больш за 1000 элементаў адначасова"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Атрымалася выбраць толькі 1000 элементаў"</string>
 </resources>

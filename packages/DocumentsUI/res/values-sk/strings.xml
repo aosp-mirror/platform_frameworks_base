@@ -162,4 +162,6 @@
       <item quantity="other">Odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> položiek?</item>
       <item quantity="one">Odstrániť <xliff:g id="COUNT_0">%1$d</xliff:g> položku?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Ľutujeme, ale naraz môžete vybrať maximálne 1 000 položiek"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Podarilo sa vybrať iba 1 000 položiek"</string>
 </resources>

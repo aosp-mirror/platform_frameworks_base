@@ -138,4 +138,6 @@
       <item quantity="other">Vee <xliff:g id="COUNT_1">%1$d</xliff:g> items uit?</item>
       <item quantity="one">Vee <xliff:g id="COUNT_0">%1$d</xliff:g> item uit?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Jammer, jy kan net tot en met 1 000 items op \'n slag kies"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Kon net 1 000 items kies"</string>
 </resources>

@@ -150,4 +150,6 @@
       <item quantity="one">Vai izdzēst <xliff:g id="COUNT_1">%1$d</xliff:g> vienumu?</item>
       <item quantity="other">Vai izdzēst <xliff:g id="COUNT_1">%1$d</xliff:g> vienumus?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Vienlaikus var atlasīt ne vairāk kā 1000 vienumu"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Varēja atlasīt tikai 1000 vienumu"</string>
 </resources>

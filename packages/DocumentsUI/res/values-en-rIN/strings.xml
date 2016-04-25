@@ -138,4 +138,6 @@
       <item quantity="other">Delete <xliff:g id="COUNT_1">%1$d</xliff:g> items?</item>
       <item quantity="one">Delete <xliff:g id="COUNT_0">%1$d</xliff:g> item?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Sorry, you can only select up to 1000 items at a time"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Could only select 1000 items"</string>
 </resources>

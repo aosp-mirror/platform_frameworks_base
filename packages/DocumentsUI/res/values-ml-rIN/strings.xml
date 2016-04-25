@@ -138,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഇനങ്ങൾ ഇല്ലാതാക്കണോ?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഇനം ഇല്ലാതാക്കണോ?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ക്ഷമിക്കണം, നിങ്ങൾക്ക് 1000 ഇനങ്ങൾ മാത്രമാണ് ഒരുസമയം തിരഞ്ഞെടുക്കാൻ കഴിയുക."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"1000 ഇനങ്ങൾ മാത്രമാണ് തിരഞ്ഞെടുക്കാൻ കഴിഞ്ഞത്"</string>
 </resources>

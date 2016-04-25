@@ -138,4 +138,6 @@
       <item quantity="other">Möchtest du <xliff:g id="COUNT_1">%1$d</xliff:g> Elemente löschen?</item>
       <item quantity="one">Möchtest du <xliff:g id="COUNT_0">%1$d</xliff:g> Element löschen?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Du kannst nur maximal 1000 Elemente gleichzeitig auswählen"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Du kannst nur 1000 Elemente auswählen"</string>
 </resources>

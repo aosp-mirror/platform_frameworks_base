@@ -100,8 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Fechar"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Estes arquivos não foram copiados: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Estes arquivos não foram movidos: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for delete_failure_alert_content (892393767207938353) -->
-    <skip />
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Estes arquivos não foram excluídos: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Esses arquivos foram convertidos em outro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> arquivos copiados para a área de transferência.</item>
@@ -139,4 +138,6 @@
       <item quantity="one">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> itens?</item>
       <item quantity="other">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> itens?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Só é possível selecionar até 1.000 itens por vez"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Só foi possível selecionar 1.000 itens"</string>
 </resources>
