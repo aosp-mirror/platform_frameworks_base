@@ -100,8 +100,7 @@
     <string name="close" msgid="3043722427445528732">"閉じる"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"次のファイルをコピーできませんでした: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"次のファイルを移動できませんでした: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for delete_failure_alert_content (892393767207938353) -->
-    <skip />
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"次のファイルを削除できませんでした: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"次のファイルが別の形式に変換されました: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件のファイルをクリップボードにコピーしました。</item>
@@ -139,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 個の項目を削除しますか？</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 個の項目を削除しますか？</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"一度に選択できるのは最大で 1,000 件までです"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"選択できるのは 1,000 件のみです"</string>
 </resources>

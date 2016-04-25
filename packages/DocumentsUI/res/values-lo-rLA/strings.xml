@@ -138,4 +138,6 @@
       <item quantity="other">ລຶບ <xliff:g id="COUNT_1">%1$d</xliff:g> ລາຍການອອກບໍ?</item>
       <item quantity="one">ລຶບ <xliff:g id="COUNT_0">%1$d</xliff:g> ລາຍການອອກບໍ?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ຂໍອະໄພ, ທ່ານສາມາດເລືອກໄດ້ສູງສຸດ 1000 ລາຍການຕໍ່ເທື່ອເທົ່ານັ້ນ"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"ສາມາດເລືອກໄດ້ 1000 ລາຍການເທົ່ານັ້ນ"</string>
 </resources>

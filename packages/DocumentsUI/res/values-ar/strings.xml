@@ -186,4 +186,6 @@
       <item quantity="other">هل تريد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر؟</item>
       <item quantity="one">هل تريد حذف <xliff:g id="COUNT_0">%1$d</xliff:g> عنصر؟</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"عذرًا، لا يمكنك تحديد سوى ١٠٠٠ عنصر في المرة الواحدة"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"يمكن تحديد ١٠٠٠ عنصر فقط"</string>
 </resources>

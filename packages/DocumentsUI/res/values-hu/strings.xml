@@ -138,4 +138,6 @@
       <item quantity="other">Töröl <xliff:g id="COUNT_1">%1$d</xliff:g> elemet?</item>
       <item quantity="one">Töröl <xliff:g id="COUNT_0">%1$d</xliff:g> elemet?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Sajnáljuk, de egyszerre csak 1000 elem választható ki"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Csak 1000 elemet lehetett kiválasztani"</string>
 </resources>

@@ -138,4 +138,6 @@
       <item quantity="other">Ungependa kufuta vipengee <xliff:g id="COUNT_1">%1$d</xliff:g>?</item>
       <item quantity="one">Ungependa kufuta kipengee <xliff:g id="COUNT_0">%1$d</xliff:g>?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Samahani, unaweza kuchagua hadi vipengee 1000 pekee kwa wakati mmoja"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Imechagua hadi vipengee 1000 pekee."</string>
 </resources>

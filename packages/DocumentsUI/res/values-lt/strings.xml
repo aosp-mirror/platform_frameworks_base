@@ -162,4 +162,6 @@
       <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elemento?</item>
       <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elementų?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Deja, vienu metu galite pasirinkti daugiausia 1 000 elementų"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Galima pasirinkti tik 1 000 elementų"</string>
 </resources>

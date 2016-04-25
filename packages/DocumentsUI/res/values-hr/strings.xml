@@ -150,4 +150,6 @@
       <item quantity="few">Želite li izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> stavke?</item>
       <item quantity="other">Želite li izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> stavki?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Možete odabrati samo 1000 stavki odjednom"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Može se odabrati samo 1000 stavki"</string>
 </resources>

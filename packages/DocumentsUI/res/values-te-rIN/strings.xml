@@ -138,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> అంశాలను తొలగించాలా?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> అంశాన్ని తొలగించాలా?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"క్షమించండి, మీరు ఒకేసారి గరిష్టంగా 1000 అంశాలను మాత్రమే ఎంచుకోగలరు"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"కేవలం 1000 అంశాలను మాత్రమే ఎంచుకోగలరు"</string>
 </resources>
