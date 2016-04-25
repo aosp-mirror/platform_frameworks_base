@@ -1958,6 +1958,10 @@ class ContextImpl extends Context {
             }
 
             if (res != null) {
+                if (!res.exists()) {
+                    Log.wtf(TAG, "Data directory doesn't exist for package " + getPackageName(),
+                            new Throwable());
+                }
                 return res;
             } else {
                 throw new RuntimeException(
