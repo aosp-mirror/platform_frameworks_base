@@ -416,7 +416,7 @@ public class TaskStackLayoutAlgorithm {
         int prevFocusState = mFocusState;
         mFocusState = focusState;
         updateFrontBackTransforms();
-        if (mCb != null && (prevFocusState != focusState)) {
+        if (mCb != null) {
             mCb.onFocusStateChanged(prevFocusState, focusState);
         }
     }
