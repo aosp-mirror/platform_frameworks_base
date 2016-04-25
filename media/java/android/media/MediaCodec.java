@@ -1290,10 +1290,10 @@ import java.util.Map;
    </tr>
    <tr>
     <td>-</td>
+    <td>(16+)</td>
+    <td>(16+)</td>
     <td>16+</td>
-    <td>16+</td>
-    <td>16+</td>
-    <td>16+</td>
+    <td>(16+)</td>
     <td>(16+)</td>
     <td>-</td>
     <td class=fn>{@link #setVideoScalingMode setVideoScalingMode}</td>
@@ -2429,6 +2429,9 @@ final public class MediaCodec {
      * set of output buffers returned by {@link #getOutputBuffers} from
      * this point on.
      *
+     * <p>Additionally, this event signals that the video scaling mode
+     * may have been reset to the default.</p>
+     *
      * @deprecated This return value can be ignored as {@link
      * #getOutputBuffers} has been deprecated.  Client should
      * request a current buffer using on of the get-buffer or
@@ -2996,6 +2999,10 @@ final public class MediaCodec {
     /**
      * If a surface has been specified in a previous call to {@link #configure}
      * specifies the scaling mode to use. The default is "scale to fit".
+     * <p class=note>The scaling mode may be reset to the <strong>default</strong> each time an
+     * {@link #INFO_OUTPUT_BUFFERS_CHANGED} event is received from the codec; therefore, the client
+     * must call this method after every buffer change event (and before the first output buffer is
+     * released for rendering) to ensure consistent scaling mode.</p>
      * @throws IllegalArgumentException if mode is not recognized.
      * @throws IllegalStateException if in the Released state.
      */
