@@ -109,7 +109,7 @@ public class UserGridView extends GridView {
 
     private void showOfflineAuthUi() {
         // TODO: Show keyguard UI in-place.
-        mStatusBar.executeRunnableDismissingKeyguard(null, null, true, true);
+        mStatusBar.executeRunnableDismissingKeyguard(null, null, true, true, true);
     }
 
     @Override
