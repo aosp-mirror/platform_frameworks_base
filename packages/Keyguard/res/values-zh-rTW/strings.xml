@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切換設定檔時需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"切換設定檔時需要輸入 PIN 碼"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"切換設定檔時需要輸入密碼"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"裝置管理員已鎖定裝置"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"裝置已手動鎖定"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認圖案。</item>
       <item quantity="one">裝置已有 <xliff:g id="NUMBER_0">%d</xliff:g> 小時未解鎖。請確認圖案。</item>
