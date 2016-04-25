@@ -990,9 +990,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 true /* isDismissAll */);
     }
 
-    public void snapViewIfNeeded(View child) {
+    public void snapViewIfNeeded(ExpandableNotificationRow child) {
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
-        mSwipeHelper.snapChildIfNeeded(child, animate);
+        // If the child is showing the gear to go to settings, snap to that
+        float targetLeft = child.getSettingsRow().isVisible() ? child.getTranslation() : 0;
+        mSwipeHelper.snapChildIfNeeded(child, animate, targetLeft);
     }
 
     @Override
