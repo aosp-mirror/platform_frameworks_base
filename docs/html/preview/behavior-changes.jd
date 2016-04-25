@@ -215,11 +215,17 @@ page.image=images/cards/card-n-changes_2x.png
 
 <ul>
   <li>
-    Private files’ file permissions can no longer be relaxed by the owner, and
-    an attempt to do so using
+    Private files’ file permissions should no longer be relaxed by the owner,
+    and an attempt to do so using
     {@link android.content.Context#MODE_WORLD_READABLE} and/or
     {@link android.content.Context#MODE_WORLD_WRITEABLE}, will trigger a
     {@link java.lang.SecurityException}.
+    <p class="note">
+      <strong>Note:</strong> As of yet, this restriction is not fully enforced.
+      Apps may still modify permissions to their private directory using
+      native APIs or the {@link java.io.File File} API. However, we strongly
+      discourage relaxing the permissions to the private directory.
+    </p>
   </li>
   <li>
     Passing <code>file://</code> URIs outside the package domain may leave the
