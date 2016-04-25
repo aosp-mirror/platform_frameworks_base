@@ -3474,6 +3474,12 @@ public final class ActivityThread {
                 if (r.mPreserveWindow) {
                     a.mWindowAdded = true;
                     r.mPreserveWindow = false;
+                    // Normally the ViewRoot sets up callbacks with the Activity
+                    // in addView->ViewRootImpl#setView. If we are instead reusing
+                    // the decor view we have to notify the view root that the
+                    // callbacks may have changed.
+                    ViewRootImpl impl = decor.getViewRootImpl();
+                    impl.notifyChildRebuilt();
                 }
                 if (a.mVisibleFromClient && !a.mWindowAdded) {
                     a.mWindowAdded = true;

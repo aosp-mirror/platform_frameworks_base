@@ -514,6 +514,34 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Notifies us that our child has been rebuilt, following
+     * a window preservation operation. In these cases we
+     * keep the same DecorView, but the activity controlling it
+     * is a different instance, and we need to update our
+     * callbacks.
+     *
+     * @hide
+     */
+    public void notifyChildRebuilt() {
+        if (mView instanceof RootViewSurfaceTaker) {
+            mSurfaceHolderCallback =
+                ((RootViewSurfaceTaker)mView).willYouTakeTheSurface();
+            if (mSurfaceHolderCallback != null) {
+                mSurfaceHolder = new TakenSurfaceHolder();
+                mSurfaceHolder.setFormat(PixelFormat.UNKNOWN);
+            } else {
+                mSurfaceHolder = null;
+            }
+
+            mInputQueueCallback =
+                ((RootViewSurfaceTaker)mView).willYouTakeTheInputQueue();
+            if (mInputQueueCallback != null) {
+                mInputQueueCallback.onInputQueueCreated(mInputQueue);
+            }
+        }
+    }
+
+    /**
      * We have one child
      */
     public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
@@ -1645,6 +1673,8 @@ public final class ViewRootImpl implements ViewParent,
         boolean insetsPending = false;
         int relayoutResult = 0;
 
+        final int surfaceGenerationId = mSurface.getGenerationId();
+
         final boolean isViewVisible = viewVisibility == View.VISIBLE;
         if (mFirst || windowShouldResize || insetsChanged ||
                 viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
@@ -1689,7 +1719,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mChoreographer.mFrameInfo.addFlags(FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED);
                 }
-                final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -1883,7 +1912,7 @@ public final class ViewRootImpl implements ViewParent,
                 mSurfaceHolder.setSurfaceFrameSize(mWidth, mHeight);
                 mSurfaceHolder.mSurfaceLock.unlock();
                 if (mSurface.isValid()) {
-                    if (!hadSurface) {
+                    if (!hadSurface || surfaceGenerationId != mSurface.getGenerationId()) {
                         mSurfaceHolder.ungetCallbacks();
 
                         mIsCreating = true;
