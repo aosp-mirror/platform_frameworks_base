@@ -78,4 +78,13 @@ public class JobSchedulerImpl extends JobScheduler {
             return null;
         }
     }
+
+    @Override
+    public JobInfo getPendingJob(int jobId) {
+        try {
+            return mBinder.getPendingJob(jobId);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }

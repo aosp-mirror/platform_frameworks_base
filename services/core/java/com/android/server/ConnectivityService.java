@@ -821,37 +821,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private NetworkState getFilteredNetworkState(int networkType, int uid) {
-        NetworkInfo info = null;
-        LinkProperties lp = null;
-        NetworkCapabilities nc = null;
-        Network network = null;
-        String subscriberId = null;
-
         if (mLegacyTypeTracker.isTypeSupported(networkType)) {
-            NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+            final NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+            final NetworkState state;
             if (nai != null) {
-                synchronized (nai) {
-                    info = new NetworkInfo(nai.networkInfo);
-                    lp = new LinkProperties(nai.linkProperties);
-                    nc = new NetworkCapabilities(nai.networkCapabilities);
-                    // Network objects are outwardly immutable so there is no point to duplicating.
-                    // Duplicating also precludes sharing socket factories and connection pools.
-                    network = nai.network;
-                    subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
-                }
-                info.setType(networkType);
+                state = nai.getNetworkState();
+                state.networkInfo.setType(networkType);
             } else {
-                info = new NetworkInfo(networkType, 0, getNetworkTypeName(networkType), "");
+                final NetworkInfo info = new NetworkInfo(networkType, 0,
+                        getNetworkTypeName(networkType), "");
                 info.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
                 info.setIsAvailable(true);
-                lp = new LinkProperties();
-                nc = new NetworkCapabilities();
-                network = null;
+                state = new NetworkState(info, new LinkProperties(), new NetworkCapabilities(),
+                        null, null, null);
             }
-            info = getFilteredNetworkInfo(info, lp, uid);
+            filterNetworkStateForUid(state, uid);
+            return state;
+        } else {
+            return NetworkState.EMPTY;
         }
-
-        return new NetworkState(info, lp, nc, network, subscriberId, null);
     }
 
     private NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
@@ -861,7 +849,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mNetworkForNetId) {
             return mNetworkForNetId.get(network.netId);
         }
-    };
+    }
 
     private Network[] getVpnUnderlyingNetworks(int uid) {
         if (!mLockdownEnabled) {
@@ -877,12 +865,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private NetworkState getUnfilteredActiveNetworkState(int uid) {
-        NetworkInfo info = null;
-        LinkProperties lp = null;
-        NetworkCapabilities nc = null;
-        Network network = null;
-        String subscriberId = null;
-
         NetworkAgentInfo nai = getDefaultNetwork();
 
         final Network[] networks = getVpnUnderlyingNetworks(uid);
@@ -900,18 +882,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (nai != null) {
-            synchronized (nai) {
-                info = new NetworkInfo(nai.networkInfo);
-                lp = new LinkProperties(nai.linkProperties);
-                nc = new NetworkCapabilities(nai.networkCapabilities);
-                // Network objects are outwardly immutable so there is no point to duplicating.
-                // Duplicating also precludes sharing socket factories and connection pools.
-                network = nai.network;
-                subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
-            }
+            return nai.getNetworkState();
+        } else {
+            return NetworkState.EMPTY;
         }
-
-        return new NetworkState(info, lp, nc, network, subscriberId, null);
     }
 
     /**
@@ -952,21 +926,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Return a filtered {@link NetworkInfo}, potentially marked
-     * {@link DetailedState#BLOCKED} based on
-     * {@link #isNetworkWithLinkPropertiesBlocked}.
+     * Apply any relevant filters to {@link NetworkState} for the given UID. For
+     * example, this may mark the network as {@link DetailedState#BLOCKED} based
+     * on {@link #isNetworkWithLinkPropertiesBlocked}, or
+     * {@link NetworkInfo#isMetered()} based on network policies.
      */
-    private NetworkInfo getFilteredNetworkInfo(NetworkInfo info, LinkProperties lp, int uid) {
-        if (info != null && isNetworkWithLinkPropertiesBlocked(lp, uid)) {
-            // network is blocked; clone and override state
-            info = new NetworkInfo(info);
-            info.setDetailedState(DetailedState.BLOCKED, null, null);
+    private void filterNetworkStateForUid(NetworkState state, int uid) {
+        if (state == null || state.networkInfo == null || state.linkProperties == null) return;
+
+        if (isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid)) {
+            state.networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
         }
-        if (info != null && mLockdownTracker != null) {
-            info = mLockdownTracker.augmentNetworkInfo(info);
-            if (VDBG) log("returning Locked NetworkInfo");
+        if (mLockdownTracker != null) {
+            mLockdownTracker.augmentNetworkInfo(state.networkInfo);
         }
-        return info;
+
+        // TODO: apply metered state closer to NetworkAgentInfo
+        final long token = Binder.clearCallingIdentity();
+        try {
+            state.networkInfo.setMetered(mPolicyManager.isNetworkMetered(state));
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -980,10 +962,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
-        NetworkState state = getUnfilteredActiveNetworkState(uid);
-        NetworkInfo ni = getFilteredNetworkInfo(state.networkInfo, state.linkProperties, uid);
-        maybeLogBlockedNetworkInfo(ni, uid);
-        return ni;
+        final NetworkState state = getUnfilteredActiveNetworkState(uid);
+        filterNetworkStateForUid(state, uid);
+        maybeLogBlockedNetworkInfo(state.networkInfo, uid);
+        return state.networkInfo;
     }
 
     @Override
@@ -1027,8 +1009,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         enforceConnectivityInternalPermission();
-        NetworkState state = getUnfilteredActiveNetworkState(uid);
-        return getFilteredNetworkInfo(state.networkInfo, state.linkProperties, uid);
+        final NetworkState state = getUnfilteredActiveNetworkState(uid);
+        filterNetworkStateForUid(state, uid);
+        return state.networkInfo;
     }
 
     @Override
@@ -1039,12 +1022,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // A VPN is active, so we may need to return one of its underlying networks. This
             // information is not available in LegacyTypeTracker, so we have to get it from
             // getUnfilteredActiveNetworkState.
-            NetworkState state = getUnfilteredActiveNetworkState(uid);
+            final NetworkState state = getUnfilteredActiveNetworkState(uid);
             if (state.networkInfo != null && state.networkInfo.getType() == networkType) {
-                return getFilteredNetworkInfo(state.networkInfo, state.linkProperties, uid);
+                filterNetworkStateForUid(state, uid);
+                return state.networkInfo;
             }
         }
-        NetworkState state = getFilteredNetworkState(networkType, uid);
+        final NetworkState state = getFilteredNetworkState(networkType, uid);
         return state.networkInfo;
     }
 
@@ -1052,15 +1036,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkInfo getNetworkInfoForNetwork(Network network) {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
-        NetworkInfo info = null;
-        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
         if (nai != null) {
-            synchronized (nai) {
-                info = new NetworkInfo(nai.networkInfo);
-                info = getFilteredNetworkInfo(info, nai.linkProperties, uid);
-            }
+            final NetworkState state = nai.getNetworkState();
+            filterNetworkStateForUid(state, uid);
+            return state.networkInfo;
+        } else {
+            return null;
         }
-        return info;
     }
 
     @Override
@@ -1222,12 +1205,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (Network network : getAllNetworks()) {
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
             if (nai != null) {
-                synchronized (nai) {
-                    final String subscriberId = (nai.networkMisc != null)
-                            ? nai.networkMisc.subscriberId : null;
-                    result.add(new NetworkState(nai.networkInfo, nai.linkProperties,
-                            nai.networkCapabilities, network, subscriberId, null));
-                }
+                result.add(nai.getNetworkState());
             }
         }
         return result.toArray(new NetworkState[result.size()]);
@@ -1255,24 +1233,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public boolean isActiveNetworkMetered() {
         enforceAccessPermission();
-        final int uid = Binder.getCallingUid();
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return isActiveNetworkMeteredUnchecked(uid);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
 
-    private boolean isActiveNetworkMeteredUnchecked(int uid) {
-        final NetworkState state = getUnfilteredActiveNetworkState(uid);
-        if (state.networkInfo != null) {
-            try {
-                return mPolicyManager.isNetworkMetered(state);
-            } catch (RemoteException e) {
-            }
-        }
-        return false;
+        final NetworkInfo info = getActiveNetworkInfo();
+        return (info != null) ? info.isMetered() : false;
     }
 
     private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
@@ -1490,7 +1453,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Intent makeGeneralIntent(NetworkInfo info, String bcastType) {
         if (mLockdownTracker != null) {
-            info = mLockdownTracker.augmentNetworkInfo(info);
+            info = new NetworkInfo(info);
+            mLockdownTracker.augmentNetworkInfo(info);
         }
 
         Intent intent = new Intent(bcastType);

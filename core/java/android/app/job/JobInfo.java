@@ -45,6 +45,8 @@ public class JobInfo implements Parcelable {
     public static final int NETWORK_TYPE_ANY = 1;
     /** This job requires network connectivity that is unmetered. */
     public static final int NETWORK_TYPE_UNMETERED = 2;
+    /** This job requires network connectivity that is not roaming. */
+    public static final int NETWORK_TYPE_NOT_ROAMING = 3;
 
     /**
      * Amount of backoff a job has initially by default, in milliseconds.
@@ -250,8 +252,9 @@ public class JobInfo implements Parcelable {
 
     /**
      * One of {@link android.app.job.JobInfo#NETWORK_TYPE_ANY},
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_NONE}, or
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_UNMETERED}.
+     * {@link android.app.job.JobInfo#NETWORK_TYPE_NONE},
+     * {@link android.app.job.JobInfo#NETWORK_TYPE_UNMETERED}, or
+     * {@link android.app.job.JobInfo#NETWORK_TYPE_NOT_ROAMING}.
      */
     public int getNetworkType() {
         return networkType;
