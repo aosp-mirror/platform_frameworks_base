@@ -25,6 +25,7 @@ import android.os.Parcelable;
  * @hide
  */
 public class NetworkState implements Parcelable {
+    public static final NetworkState EMPTY = new NetworkState(null, null, null, null, null, null);
 
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
