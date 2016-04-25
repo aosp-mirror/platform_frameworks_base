@@ -2093,16 +2093,16 @@ public final class TvInputManager {
         /**
          * Starts TV program recording in the current recording session.
          *
-         * @param programHint The URI for the TV program to record as a hint, built by
+         * @param programUri The URI for the TV program to record as a hint, built by
          *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
          */
-        void startRecording(@Nullable Uri programHint) {
+        void startRecording(@Nullable Uri programUri) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.startRecording(mToken, programHint, mUserId);
+                mService.startRecording(mToken, programUri, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
