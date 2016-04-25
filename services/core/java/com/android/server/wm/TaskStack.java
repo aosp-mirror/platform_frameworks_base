@@ -383,6 +383,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     boolean updateBoundsAfterConfigChange(boolean scheduleResize) {
+        if (mFullscreen) {
+            // Bounds will already be set correctly when display info is updated in the case of
+            // fullscreen.
+            return false;
+        }
+
         if (mLastConfigChangedRotation != mLastUpdateDisplayInfoRotation) {
             // We wait for the rotation values after configuration change and display info. update
             // to be equal before updating the bounds due to rotation change otherwise things might
@@ -399,6 +405,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         final int oldDockSide = mStackId == DOCKED_STACK_ID ? getDockSide() : DOCKED_INVALID;
+        mTmpRect2.set(mBounds);
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
             repositionDockedStackAfterRotation(mTmpRect2);
