@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Patroon is vereist wanneer je schakelt tussen profielen"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Pincode is vereist wanneer je schakelt tussen profielen"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Wachtwoord is vereist wanneer je schakelt tussen profielen"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Apparaatbeheerder heeft apparaat vergrendeld"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Apparaat is handmatig vergrendeld"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Apparaat is al <xliff:g id="NUMBER_1">%d</xliff:g> uur niet ontgrendeld. Bevestig het patroon.</item>
       <item quantity="one">Apparaat is al <xliff:g id="NUMBER_0">%d</xliff:g> uur niet ontgrendeld. Bevestig het patroon.</item>

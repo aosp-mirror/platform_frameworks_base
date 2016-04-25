@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ඔබ පැතිකඩවල් මාරු කරන විට රටාව අවශ්‍යයි"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ඔබ පැතිකඩවල් මාරු කරන විට PIN අංකය අවශ්‍යයි"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ඔබ පැතිකඩවල් මාරු කරන විට මුරපදය අවශ්‍යයි"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"උපාංග පරිපාලක උපාංගය අගුලු දමන ලදී"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"උපාංගය හස්තීයව අගුලු දමන ලදී"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
       <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>කට අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
