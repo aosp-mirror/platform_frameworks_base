@@ -5867,7 +5867,10 @@ public final class Settings {
         /**
          * Names of the packages that the current user has explicitly allowed to
          * manage notification policy configuration, separated by ':'.
+         *
+         * @hide
          */
+        @TestApi
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
 
