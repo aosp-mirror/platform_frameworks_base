@@ -3090,7 +3090,7 @@ public abstract class BatteryStats implements Parcelable {
                     || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_DATA, fullWifiLockOnTime, wifiScanTime,
                         uidWifiRunningTime, wifiScanCount,
-                        /* legacy fields follow, keep at 0 */ 0, 0, 0, 0);
+                        /* legacy fields follow, keep at 0 */ 0, 0, 0);
             }
 
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
