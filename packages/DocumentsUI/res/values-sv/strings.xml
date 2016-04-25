@@ -138,4 +138,6 @@
       <item quantity="other">Vill du radera <xliff:g id="COUNT_1">%1$d</xliff:g> objekt?</item>
       <item quantity="one">Vill du radera <xliff:g id="COUNT_0">%1$d</xliff:g> objekt?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Du kan endast välja upp till 1 000 objekt i taget"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Det gick bara att välja 1 000 objekt"</string>
 </resources>

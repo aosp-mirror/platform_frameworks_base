@@ -138,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 個の項目を削除しますか？</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 個の項目を削除しますか？</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"一度に選択できるのは最大で 1,000 件までです"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"選択できるのは 1,000 件のみです"</string>
 </resources>

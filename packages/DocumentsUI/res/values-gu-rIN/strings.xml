@@ -138,4 +138,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> આઇટમ કાઢી નાખીએ?</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> આઇટમ કાઢી નાખીએ?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"માફ કરશો, તમે એકવારમાં માત્ર 1000 જેટલી આઇટમ પસંદ કરી શકો છો"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"માત્ર 1000 આઇટમ પસંદ કરી શક્યાં"</string>
 </resources>

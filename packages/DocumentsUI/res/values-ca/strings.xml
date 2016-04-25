@@ -138,4 +138,6 @@
       <item quantity="other">Vols suprimir <xliff:g id="COUNT_1">%1$d</xliff:g> elements?</item>
       <item quantity="one">Vols suprimir <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Només pots seleccionar un màxim de 1.000 elements a la vegada."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Només s\'han pogut seleccionar 1.000 elements"</string>
 </resources>

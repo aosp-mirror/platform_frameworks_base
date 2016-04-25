@@ -138,4 +138,6 @@
       <item quantity="other">항목 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
       <item quantity="one">항목 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"한 번에 최대 1,000개의 항목까지 선택할 수 있습니다."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"1,000개의 항목까지만 선택할 수 있습니다."</string>
 </resources>

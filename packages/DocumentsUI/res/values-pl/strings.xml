@@ -162,4 +162,6 @@
       <item quantity="other">Usunąć <xliff:g id="COUNT_1">%1$d</xliff:g> elementu?</item>
       <item quantity="one">Usunąć <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Możesz zaznaczyć maksymalnie 1000 elementów naraz"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Udało się zaznaczyć jedynie 1000 elementów"</string>
 </resources>

@@ -150,4 +150,6 @@
       <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de elemente?</item>
       <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Ne pare rău, puteți selecta cel mult 1000 de elemente odată"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"S-au putut selecta numai 1000 de elemente"</string>
 </resources>

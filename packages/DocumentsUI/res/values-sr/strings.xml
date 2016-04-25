@@ -150,4 +150,6 @@
       <item quantity="few">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> ставке?</item>
       <item quantity="other">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> ставки?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Жао нам је, истовремено можете да изаберете највише 1000 ставки"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Можете да изаберете највише 1000 ставки"</string>
 </resources>

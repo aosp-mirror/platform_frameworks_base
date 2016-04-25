@@ -138,4 +138,6 @@
       <item quantity="one">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> itens?</item>
       <item quantity="other">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> itens?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Só é possível selecionar até 1.000 itens por vez"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Só foi possível selecionar 1.000 itens"</string>
 </resources>

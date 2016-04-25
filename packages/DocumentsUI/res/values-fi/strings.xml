@@ -138,4 +138,6 @@
       <item quantity="other">Poistetaanko <xliff:g id="COUNT_1">%1$d</xliff:g> kohdetta?</item>
       <item quantity="one">Poistetaanko <xliff:g id="COUNT_0">%1$d</xliff:g> kohde?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Voit valita vain 1 000 kohdetta kerrallaan."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Vain 1 000 kohdetta valittiin"</string>
 </resources>
