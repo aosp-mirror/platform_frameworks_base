@@ -78,7 +78,7 @@ action. This class's constructor accepts a string that the system uses as the ke
   of the input.
 
 <pre>
-// Key for the string that's delivered in the action's intent
+// Key for the string that's delivered in the action's intent.
 private static final String KEY_TEXT_REPLY = "key_text_reply";
 String replyLabel = getResources().getString(R.string.reply_label);
 RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
@@ -90,7 +90,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
  object to an action using <code>addRemoteInput()</code>.
 
 <pre>
-// Create the reply action and add the remote input
+// Create the reply action and add the remote input.
 Notification.Action action =
         new Notification.Action.Builder(R.drawable.ic_reply_icon,
                 getString(R.string.label), replyPendingIntent)
@@ -102,8 +102,8 @@ Notification.Action action =
 <li>Apply the action to a notification and issue the notification.
 
 <pre>
-// Build the notification and add the action
-Notification notification =
+// Build the notification and add the action.
+Notification newMessageNotification =
         new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_message)
                 .setContentTitle(getString(R.string.title))
@@ -111,10 +111,10 @@ Notification notification =
                 .addAction(action))
                 .build();
 
-// Issue the notification
+// Issue the notification.
 NotificationManager notificationManager =
         NotificationManager.from(mContext);
-notificationManager.notify(notificationId, notification);
+notificationManager.notify(notificationId, newMessageNotification);
 
 </pre>
 </li>
@@ -133,30 +133,32 @@ notification action. </p>
   <strong>Figure 2.</strong> The user inputs text from the notification shade.
 </p>
 
-<h3>Retrieving user input from the inline reply</h3>
+<h3>
+  Retrieving user input from the inline reply
+</h3>
 
-<p>To receive user input from the notification interface to the activity you
-declared in the reply action's intent:</p>
+<p>
+  To receive user input from the notification interface to the activity you
+  declared in the reply action's intent:
+</p>
+
 <ol>
-<li> Call {@link android.support.v4.app.RemoteInput#getResultsFromIntent
-  getResultsFromIntent()} by passing the notification action’s intent as
- the input parameter. This method returns a {@link android.os.Bundle} that
- contains the text response.
-</li>
+  <li>Call {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()} by passing the notification action’s intent as the
+  input parameter. This method returns a {@link android.os.Bundle} that
+  contains the text response.
 
-<pre>
+    <pre>
 Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 </pre>
+  </li>
 
-<li>Query the bundle using the result key (provided to the {@link
-  android.support.v4.app.RemoteInput.Builder} constructor).
-</li>
-</ol>
+  <li>Query the bundle using the result key (provided to the {@link
+  android.support.v4.app.RemoteInput.Builder} constructor). You can complete
+  this process and retrieve the input text by creating a method, as in the
+  following code snippet:
 
-<p>The following code snippet illustrates how a method retrieves the input text
-from a bundle:</p>
-
-<pre>
+    <pre>
 // Obtain the intent that started this activity by calling
 // Activity.getIntent() and pass it into this method to
 // get the associated string.
@@ -164,21 +166,43 @@ from a bundle:</p>
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
     if (remoteInput != null) {
-            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
-            }
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
     return null;
  }
 </pre>
+  </li>
 
-<p>Apps can apply logic to decide what actions to take on the retrieved
-text.
-For interactive apps (like chats), provide more context in the notification itself
- (for example, multiple lines of chat history, including the user’s own messages)
-  so that the user can respond appropriately.
-When the user responds via {@link android.support.v4.app.RemoteInput},
- include the text in the reply history with the {@code setRemoteInputHistory()}
- method.</p>
+  <li>Build and issue another notification, using the same notification ID that
+    you provided for the previous notification. The progress indicator
+    disappears from the notification interface to inform users of a successful
+    reply. When working with this new notification, use the context that gets
+    passed to the receiver's {@code onReceive()} method.
 
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  For interactive apps, such as chats, it could be useful to include additional
+  context when handling retrieved text. For example, these apps could show
+  multiple lines of chat history. When the user responds via {@link
+  android.support.v4.app.RemoteInput}, you can update the reply history
+  using the {@code setRemoteInputHistory()} method.
+</p>
 <h2 id="bundle">Bundled Notifications</h2>
 
 <p>Android N provides developers with a new way to represent
