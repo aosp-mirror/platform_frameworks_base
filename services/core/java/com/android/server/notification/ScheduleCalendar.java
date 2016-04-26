@@ -31,7 +31,7 @@ public class ScheduleCalendar {
 
     @Override
     public String toString() {
-        return "ScheduleCalendar[mDays=" + mDays + "]";
+        return "ScheduleCalendar[mDays=" + mDays + ", mSchedule=" + mSchedule + "]";
     }
 
     public void setSchedule(ScheduleInfo schedule) {
