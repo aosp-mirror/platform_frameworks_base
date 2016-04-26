@@ -344,7 +344,8 @@ static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& st
         const SkPaint& paint, int vertexBufferRenderFlags) {
     if (CC_LIKELY(vertexBuffer.getVertexCount())) {
         bool shadowInterp = vertexBufferRenderFlags & VertexBufferRenderFlags::ShadowInterp;
-        const int transformFlags = TransformFlags::OffsetByFudgeFactor;
+        const int transformFlags = vertexBufferRenderFlags & VertexBufferRenderFlags::Offset
+                ? TransformFlags::OffsetByFudgeFactor : 0;
         Glop glop;
         GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
                 .setRoundRectClipState(state.roundRectClipState)
