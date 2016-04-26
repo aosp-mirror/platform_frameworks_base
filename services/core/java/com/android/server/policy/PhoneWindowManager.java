@@ -4912,7 +4912,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
 
-                if (mWinShowWhenLocked != null &&
+                if (!mKeyguardHidden && mWinShowWhenLocked != null &&
                         mWinShowWhenLocked.getAppToken() != win.getAppToken() &&
                         (attrs.flags & FLAG_SHOW_WHEN_LOCKED) == 0) {
                     win.hideLw(false);
