@@ -90,7 +90,6 @@ public class StackStateAnimator {
     private int mCurrentLastNotAddedIndex;
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
-    private ExpandableNotificationRow mChildExpandingView;
     private int mHeadsUpAppearHeightBottom;
     private boolean mShadeExpanded;
     private ArrayList<View> mChildrenToClearFromOverlay = new ArrayList<>();
@@ -127,7 +126,6 @@ public class StackStateAnimator {
                 continue;
             }
 
-            child.setClipTopOptimization(0);
             startStackAnimations(child, viewState, finalState, i, -1 /* fixedDelay */);
         }
         if (!isRunning()) {
@@ -138,7 +136,6 @@ public class StackStateAnimator {
         mHeadsUpDisappearChildren.clear();
         mNewEvents.clear();
         mNewAddChildren.clear();
-        mChildExpandingView = null;
     }
 
     /**
@@ -870,7 +867,6 @@ public class StackStateAnimator {
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
                 row.prepareExpansionChanged(finalState);
-                mChildExpandingView = row;
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.
