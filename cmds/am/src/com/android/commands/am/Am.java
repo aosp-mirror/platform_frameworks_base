@@ -18,10 +18,10 @@
 
 package com.android.commands.am;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
@@ -484,7 +484,7 @@ public class Am extends BaseCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mUserId = defUser;
-        mStackId = FULLSCREEN_WORKSPACE_STACK_ID;
+        mStackId = INVALID_STACK_ID;
 
         return Intent.parseCommandArgs(mArgs, new Intent.CommandOptionHandler() {
             @Override
@@ -622,7 +622,7 @@ public class Am extends BaseCommand {
             int res;
             final long startTime = SystemClock.uptimeMillis();
             ActivityOptions options = null;
-            if (mStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+            if (mStackId != INVALID_STACK_ID) {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchStackId(mStackId);
             }
