@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -109,6 +110,14 @@ final class SettingsState {
     @GuardedBy("mLock")
     private final File mStatePersistFile;
 
+    private final Setting mNullSetting = new Setting(null, null, null) {
+        @Override
+        public boolean isNull() {
+            return true;
+        }
+    };
+
+    @GuardedBy("mLock")
     public final int mKey;
 
     @GuardedBy("mLock")
@@ -198,9 +207,13 @@ final class SettingsState {
     // The settings provider must hold its lock when calling here.
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {
-            return null;
+            return mNullSetting;
         }
-        return mSettings.get(name);
+        Setting setting = mSettings.get(name);
+        if (setting != null) {
+            return new Setting(setting);
+        }
+        return mNullSetting;
     }
 
     // The settings provider must hold its lock when calling here.
@@ -549,11 +562,18 @@ final class SettingsState {
         }
     }
 
-    public final class Setting {
+    class Setting {
         private String name;
         private String value;
         private String packageName;
         private String id;
+
+        public Setting(Setting other) {
+            name = other.name;
+            value = other.value;
+            packageName = other.packageName;
+            id = other.id;
+        }
 
         public Setting(String name, String value, String packageName) {
             init(name, value, packageName, String.valueOf(mNextId++));
@@ -575,6 +595,10 @@ final class SettingsState {
             return name;
         }
 
+        public int getkey() {
+            return mKey;
+        }
+
         public String getValue() {
             return value;
         }
@@ -585,6 +609,10 @@ final class SettingsState {
 
         public String getId() {
             return id;
+        }
+
+        public boolean isNull() {
+            return false;
         }
 
         public boolean update(String value, String packageName) {
