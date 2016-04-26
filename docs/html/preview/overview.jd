@@ -362,7 +362,7 @@ Android N</a> has
   <li> <a href="https://code.google.com/p/android-developer-preview/">N Developer Preview Issue
     Tracker</a> is your <strong>primary feedback channel.</strong> You can report bugs, performance
     issues, and general feedback through the issue tracker. You can also check for
-<a href="{@docRoot}preview/bug">known issues</a> and
+<a href="{@docRoot}preview/bugs">known issues</a> and
     find workaround steps. We’ll keep you updated on your issue as it’s triaged and sent to
     the Android engineering team for review. </li>
   <li> The <a href="{@docRoot}preview/dev-community">Android N Developer Community</a> is
