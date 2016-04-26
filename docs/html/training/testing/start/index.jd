@@ -479,38 +479,40 @@ Configure a test matrix and run a test
   </li>
 </ol>
 
+<img src="{@docRoot}images/training/ctl-config.png" alt="">
+<p class="img-caption">
+  <strong>Figure 1.</strong> Creating a test configuration for Cloud Test
+  Lab.
+</p>
+
 <h4 id="ctl-results">
   Analyzing test results
 </h4>
 
 <p>
   When Cloud Test Lab completes running your tests, the <em>Run</em> window will
-  open to show the results, as shown in figure 1. You may need to click
+  open to show the results, as shown in figure 2. You may need to click
   <strong>Show Passed</strong> <img src="{@docRoot}images/tools/as-ok.png" alt=
   "" style="vertical-align:bottom;margin:0;"> to see all your executed tests.
 </p>
 
-<p>
-  <img src="{@docRoot}images/training/ctl-test-results.png" alt="">
-</p>
+<img src="{@docRoot}images/training/ctl-test-results.png" alt="">
 
 <p class="img-caption">
-  <strong>Figure 1.</strong> Viewing the results of instrumented tests using
+  <strong>Figure 2.</strong> Viewing the results of instrumented tests using
   Cloud Test Lab.
 </p>
 
 <p>
   You can also analyze your tests on the web by following the link displayed at
   the beginning of the test execution log in the <em>Run</em> window, as shown
-  in figure 2.
+  in figure 3.
 </p>
 
-<p>
-  <img src="{@docRoot}images/training/ctl-exec-log.png" alt="">
-</p>
+<img src="{@docRoot}images/training/ctl-exec-log.png" alt="">
 
 <p class="img-caption">
-  <strong>Figure 2.</strong> Click the link to view detailed test results on
+  <strong>Figure 3.</strong> Click the link to view detailed test results on
   the web.
 </p>
 
