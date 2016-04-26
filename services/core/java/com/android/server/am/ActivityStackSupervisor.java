@@ -1097,7 +1097,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Don't debug things in the system process
             if (!aInfo.processName.equals("system")) {
                 if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    mService.setDebugApp(aInfo.processName, true, false);
+                    final ProcessRecord app = mService.getProcessRecordLocked(
+                            aInfo.processName, aInfo.applicationInfo.uid, true);
+                    // If the process already started, we can't wait for debugger and shouldn't
+                    // modify the debug settings.
+                    // For non-persistent debug, normally we set the debug app here, and restores
+                    // to the original at attachApplication time. However, if the app process
+                    // already exists, we won't get another attachApplication, and the debug setting
+                    // never gets restored. Furthermore, if we get two such calls back-to-back,
+                    // both mOrigDebugApp and mDebugApp will become the same app, and it won't be
+                    // cleared even if we get attachApplication after the app process is killed.
+                    if (app == null || app.thread == null) {
+                        mService.setDebugApp(aInfo.processName, true, false);
+                    } else {
+                        Slog.w(TAG, "Ignoring waitForDebugger because process already exists");
+                    }
                 }
 
                 if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
