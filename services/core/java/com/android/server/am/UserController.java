@@ -483,6 +483,8 @@ final class UserController {
                         });
                     }
                 };
+                // Clear broadcast queue for the user to avoid delivering stale broadcasts
+                mService.clearBroadcastQueueForUserLocked(userId);
                 // Kick things off.
                 mService.broadcastIntentLocked(null, null, stoppingIntent,
                         null, stoppingReceiver, 0, null, null,

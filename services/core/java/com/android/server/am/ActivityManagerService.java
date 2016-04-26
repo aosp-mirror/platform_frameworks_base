@@ -5949,6 +5949,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     }
 
+    final boolean clearBroadcastQueueForUserLocked(int userId) {
+        boolean didSomething = false;
+        for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
+            didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
+                    null, null, userId, true);
+        }
+        return didSomething;
+    }
+
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, int userId, String reason) {
