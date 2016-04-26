@@ -72,17 +72,15 @@ public final class IpReachabilityEvent extends IpConnectivityEvent implements Pa
     };
 
     public static void logProbeEvent(String ifName, int nlErrorCode) {
-        final int tag = (nlErrorCode == 0) ? IPCE_IPRM_PROBE_STARTED : IPCE_IPRM_PROBE_FAILURE;
-        final int eventType = PROBE | (nlErrorCode & 0xFF);
-        logEvent(tag, new IpReachabilityEvent(ifName, eventType));
+        logEvent(new IpReachabilityEvent(ifName, PROBE | (nlErrorCode & 0xFF)));
     }
 
     public static void logNudFailed(String ifName) {
-        logEvent(IPCE_IPRM_NUD_FAILED, new IpReachabilityEvent(ifName, NUD_FAILED));
+        logEvent(new IpReachabilityEvent(ifName, NUD_FAILED));
     }
 
     public static void logProvisioningLost(String ifName) {
-        logEvent(IPCE_IPRM_PROVISIONING_LOST, new IpReachabilityEvent(ifName, PROVISIONING_LOST));
+        logEvent(new IpReachabilityEvent(ifName, PROVISIONING_LOST));
     }
 
     @Override

@@ -71,7 +71,7 @@ public final class IpManagerEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logEvent(int eventType, String ifName, long durationMs) {
-        logEvent(IPCE_IPMGR_BASE, new IpManagerEvent(ifName, eventType, durationMs));
+        logEvent(new IpManagerEvent(ifName, eventType, durationMs));
     }
 
     @Override

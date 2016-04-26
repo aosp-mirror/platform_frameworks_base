@@ -74,8 +74,7 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
     };
 
     public static void logEvent(int netId, long durationMs, int probeType, int returnCode) {
-        logEvent(IPCE_NETMON_PORTAL_PROBE,
-                new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
+        logEvent(new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
     }
 
     @Override

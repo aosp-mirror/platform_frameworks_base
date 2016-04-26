@@ -64,6 +64,6 @@ public final class DhcpClientEvent extends IpConnectivityEvent implements Parcel
     };
 
     public static void logStateEvent(String ifName, String state) {
-        logEvent(IPCE_DHCP_STATE_CHANGE, new DhcpClientEvent(ifName, state));
+        logEvent(new DhcpClientEvent(ifName, state));
     }
 };

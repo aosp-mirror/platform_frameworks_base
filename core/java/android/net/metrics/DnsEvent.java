@@ -82,6 +82,6 @@ final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
 
     public static void logEvent(
             int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
-        logEvent(IPCE_DNS_LOOKUPS, new DnsEvent(netId, eventTypes, returnCodes, latenciesMs));
+        logEvent(new DnsEvent(netId, eventTypes, returnCodes, latenciesMs));
     }
 }

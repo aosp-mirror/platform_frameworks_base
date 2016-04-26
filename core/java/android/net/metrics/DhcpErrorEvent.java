@@ -92,11 +92,11 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logParseError(String ifName, int errorCode) {
-        logEvent(IPCE_DHCP_PARSE_ERROR, new DhcpErrorEvent(ifName, errorCode));
+        logEvent(new DhcpErrorEvent(ifName, errorCode));
     }
 
     public static void logReceiveError(String ifName) {
-        logEvent(IPCE_DHCP_RECV_ERROR, new DhcpErrorEvent(ifName, RECEIVE_ERROR));
+        logEvent(new DhcpErrorEvent(ifName, RECEIVE_ERROR));
     }
 
     public static int errorCodeWithOption(int errorCode, int option) {
