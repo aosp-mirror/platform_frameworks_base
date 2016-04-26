@@ -189,8 +189,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void requestTvPictureInPicture() {
-        PipManager.getInstance().requestTvPictureInPicture();
+    public void showTvPictureInPictureMenu() {
+        PipManager.getInstance().showTvPictureInPictureMenu();
     }
 
     @Override
@@ -224,8 +224,22 @@ public class TvStatusBar extends BaseStatusBar {
         putComponent(TvStatusBar.class, this);
     }
 
+    /**
+     * Updates the visibility of the picture-in-picture.
+     */
+    public void updatePipVisibility(boolean visible) {
+        if (visible) {
+            mSystemUiVisibility |= View.TV_PICTURE_IN_PICTURE_VISIBLE;
+        } else {
+            mSystemUiVisibility &= ~View.TV_PICTURE_IN_PICTURE_VISIBLE;
+        }
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    /**
+     * Updates the visibility of the Recents
+     */
     public void updateRecentsVisibility(boolean visible) {
-        // Update the recents visibility flag
         if (visible) {
             mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
         } else {
