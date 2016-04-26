@@ -405,6 +405,7 @@ public class SyncManager {
     private final SyncHandler mSyncHandler;
 
     private volatile boolean mBootCompleted = false;
+    private volatile boolean mJobServiceReady = false;
 
     private ConnectivityManager getConnectivityManager() {
         synchronized (this) {
@@ -2177,11 +2178,7 @@ public class SyncManager {
         static final int MESSAGE_SCHEDULE_SYNC = 12;
         static final int MESSAGE_UPDATE_PERIODIC_SYNC = 13;
         static final int MESSAGE_REMOVE_PERIODIC_SYNC = 14;
-        /**
-         * Posted delayed in order to expire syncs that are long-running.
-         * obj: {@link com.android.server.content.SyncManager.ActiveSyncContext}
-         */
-        private static final int MESSAGE_SYNC_EXPIRED = 7;
+
         /**
          * Posted periodically to monitor network process for long-running syncs.
          * obj: {@link com.android.server.content.SyncManager.ActiveSyncContext}
@@ -2209,7 +2206,7 @@ public class SyncManager {
         }
 
         void checkIfDeviceReady() {
-            if (mProvisioned && mBootCompleted) {
+            if (mProvisioned && mBootCompleted && mJobServiceReady) {
                 synchronized(this) {
                     mSyncStorageEngine.restoreAllPeriodicSyncs();
                     // Dispatch any stashed messages.
@@ -2229,7 +2226,7 @@ public class SyncManager {
          */
         private boolean tryEnqueueMessageUntilReadyToRun(Message msg) {
             synchronized (this) {
-                if (!mBootCompleted || !mProvisioned) {
+                if (!mBootCompleted || !mProvisioned || !mJobServiceReady) {
                     // Need to copy the message bc looper will recycle it.
                     Message m = Message.obtain(msg);
                     mUnreadyQueue.add(m);
@@ -2252,6 +2249,8 @@ public class SyncManager {
                 if (msg.what == MESSAGE_JOBSERVICE_OBJECT) {
                     Slog.i(TAG, "Got SyncJobService instance.");
                     mSyncJobService = (SyncJobService) msg.obj;
+                    mJobServiceReady = true;
+                    checkIfDeviceReady();
                 } else if (msg.what == SyncHandler.MESSAGE_ACCOUNTS_UPDATED) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Slog.v(TAG, "handleSyncHandlerMessage: MESSAGE_ACCOUNTS_UPDATED");
@@ -2972,7 +2971,6 @@ public class SyncManager {
                 Slog.v(TAG, "removing all MESSAGE_MONITOR_SYNC & MESSAGE_SYNC_EXPIRED for "
                         + activeSyncContext.toString());
             }
-            mSyncHandler.removeMessages(SyncHandler.MESSAGE_SYNC_EXPIRED, activeSyncContext);
             mSyncHandler.removeMessages(SyncHandler.MESSAGE_MONITOR_SYNC, activeSyncContext);
         }
 
