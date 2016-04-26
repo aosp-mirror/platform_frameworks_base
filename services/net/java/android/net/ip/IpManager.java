@@ -17,6 +17,7 @@
 package android.net.ip;
 
 import com.android.internal.util.MessageUtils;
+import com.android.internal.util.WakeupMessage;
 
 import android.content.Context;
 import android.net.apf.ApfCapabilities;
@@ -53,6 +54,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_OK;
 import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_FAIL;
@@ -254,6 +256,7 @@ public class IpManager extends StateMachine {
      *     final ProvisioningConfiguration config =
      *             mIpManager.buildProvisioningConfiguration()
      *                     .withPreDhcpAction()
+     *                     .withProvisioningTimeoutMs(36 * 1000)
      *                     .build();
      *     mIpManager.startProvisioning(config);
      *     ...
@@ -264,6 +267,15 @@ public class IpManager extends StateMachine {
      * must specify the configuration again.
      */
     public static class ProvisioningConfiguration {
+        // TODO: Delete this default timeout once those callers that care are
+        // fixed to pass in their preferred timeout.
+        //
+        // We pick 36 seconds so we can send DHCP requests at
+        //
+        //     t=0, t=2, t=6, t=14, t=30
+        //
+        // allowing for 10% jitter.
+        private static final int DEFAULT_TIMEOUT_MS = 36 * 1000;
 
         public static class Builder {
             private ProvisioningConfiguration mConfig = new ProvisioningConfiguration();
@@ -288,6 +300,11 @@ public class IpManager extends StateMachine {
                 return this;
             }
 
+            public Builder withProvisioningTimeoutMs(int timeoutMs) {
+                mConfig.mProvisioningTimeoutMs = timeoutMs;
+                return this;
+            }
+
             public ProvisioningConfiguration build() {
                 return new ProvisioningConfiguration(mConfig);
             }
@@ -297,6 +314,7 @@ public class IpManager extends StateMachine {
         /* package */ boolean mRequestedPreDhcpAction;
         /* package */ StaticIpConfiguration mStaticIpConfig;
         /* package */ ApfCapabilities mApfCapabilities;
+        /* package */ int mProvisioningTimeoutMs = DEFAULT_TIMEOUT_MS;
 
         public ProvisioningConfiguration() {}
 
@@ -305,6 +323,18 @@ public class IpManager extends StateMachine {
             mRequestedPreDhcpAction = other.mRequestedPreDhcpAction;
             mStaticIpConfig = other.mStaticIpConfig;
             mApfCapabilities = other.mApfCapabilities;
+            mProvisioningTimeoutMs = other.mProvisioningTimeoutMs;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", getClass().getSimpleName() + "{", "}")
+                    .add("mUsingIpReachabilityMonitor: " + mUsingIpReachabilityMonitor)
+                    .add("mRequestedPreDhcpAction: " + mRequestedPreDhcpAction)
+                    .add("mStaticIpConfig: " + mStaticIpConfig)
+                    .add("mApfCapabilities: " + mApfCapabilities)
+                    .add("mProvisioningTimeoutMs: " + mProvisioningTimeoutMs)
+                    .toString();
         }
     }
 
@@ -319,6 +349,7 @@ public class IpManager extends StateMachine {
     private static final int CMD_UPDATE_TCP_BUFFER_SIZES = 6;
     private static final int CMD_UPDATE_HTTP_PROXY = 7;
     private static final int CMD_SET_MULTICAST_FILTER = 8;
+    private static final int EVENT_PROVISIONING_TIMEOUT = 9;
 
     private static final int MAX_LOG_RECORDS = 500;
 
@@ -341,6 +372,7 @@ public class IpManager extends StateMachine {
     protected final Callback mCallback;
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
+    private final WakeupMessage mProvisioningTimeoutAlarm;
     private final LocalLog mLocalLog;
 
     private NetworkInterface mNetworkInterface;
@@ -414,6 +446,9 @@ public class IpManager extends StateMachine {
         }
 
         resetLinkProperties();
+
+        mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
+                mTag + ".EVENT_PROVISIONING_TIMEOUT", EVENT_PROVISIONING_TIMEOUT);
 
         // Super simple StateMachine.
         addState(mStoppedState);
@@ -653,7 +688,6 @@ public class IpManager extends StateMachine {
     }
 
     private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
-        if (mApfFilter != null) mApfFilter.setLinkProperties(newLp);
         switch (delta) {
             case GAINED_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
@@ -674,7 +708,13 @@ public class IpManager extends StateMachine {
         }
     }
 
+    // Updates all IpManager-related state concerned with LinkProperties.
+    // Returns a ProvisioningChange for possibly notifying other interested
+    // parties that are not fronted by IpManager.
     private ProvisioningChange setLinkProperties(LinkProperties newLp) {
+        if (mApfFilter != null) {
+            mApfFilter.setLinkProperties(newLp);
+        }
         if (mIpReachabilityMonitor != null) {
             mIpReachabilityMonitor.updateLinkProperties(newLp);
         }
@@ -682,13 +722,10 @@ public class IpManager extends StateMachine {
         ProvisioningChange delta = compareProvisioning(mLinkProperties, newLp);
         mLinkProperties = new LinkProperties(newLp);
 
-        if (DBG) {
-            switch (delta) {
-                case GAINED_PROVISIONING:
-                case LOST_PROVISIONING:
-                    Log.d(mTag, "provisioning: " + delta);
-                    break;
-            }
+        if (delta == ProvisioningChange.GAINED_PROVISIONING) {
+            // TODO: Add a proper ProvisionedState and cancel the alarm in
+            // its enter() method.
+            mProvisioningTimeoutAlarm.cancel();
         }
 
         return delta;
@@ -802,32 +839,38 @@ public class IpManager extends StateMachine {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
-
         dispatchCallback(delta, newLp);
     }
 
     private void handleIPv4Failure() {
+        // TODO: Investigate deleting this clearIPv4Address() call.
+        //
+        // DhcpClient will send us CMD_CLEAR_LINKADDRESS in all circumstances
+        // that could trigger a call to this function. If we missed handling
+        // that message in StartedState for some reason we would still clear
+        // any addresses upon entry to StoppedState.
         clearIPv4Address();
         mDhcpResults = null;
+        if (VDBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
+        mCallback.onNewDhcpResults(null);
+
+        handleProvisioningFailure();
+    }
+
+    private void handleProvisioningFailure() {
         final LinkProperties newLp = assembleLinkProperties();
         ProvisioningChange delta = setLinkProperties(newLp);
         // If we've gotten here and we're still not provisioned treat that as
         // a total loss of provisioning.
         //
         // Either (a) static IP configuration failed or (b) DHCPv4 failed AND
-        // there was no usable IPv6 obtained before the DHCPv4 timeout.
+        // there was no usable IPv6 obtained before a non-zero provisioning
+        // timeout expired.
         //
         // Regardless: GAME OVER.
-        //
-        // TODO: Make the DHCP client not time out and just continue in
-        // exponential backoff. Callers such as Wi-Fi which need a timeout
-        // should implement it themselves.
         if (delta == ProvisioningChange.STILL_NOT_PROVISIONED) {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
-
-        if (VDBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
-        mCallback.onNewDhcpResults(null);
 
         dispatchCallback(delta, newLp);
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
@@ -972,11 +1015,19 @@ public class IpManager extends StateMachine {
                         mInterfaceName);
                 mDhcpClient.registerForPreDhcpNotification();
                 mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
+
+                if (mConfiguration.mProvisioningTimeoutMs > 0) {
+                    final long alarmTime = SystemClock.elapsedRealtime() +
+                            mConfiguration.mProvisioningTimeoutMs;
+                    mProvisioningTimeoutAlarm.schedule(alarmTime);
+                }
             }
         }
 
         @Override
         public void exit() {
+            mProvisioningTimeoutAlarm.cancel();
+
             if (mIpReachabilityMonitor != null) {
                 mIpReachabilityMonitor.stop();
                 mIpReachabilityMonitor = null;
@@ -999,7 +1050,7 @@ public class IpManager extends StateMachine {
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case CMD_STOP:
-                    transitionTo(mStoppedState);
+                    transitionTo(mStoppingState);
                     break;
 
                 case CMD_START:
@@ -1027,7 +1078,7 @@ public class IpManager extends StateMachine {
 
                 case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
                     if (!handleLinkPropertiesUpdate(SEND_CALLBACKS)) {
-                        transitionTo(mStoppedState);
+                        transitionTo(mStoppingState);
                     }
                     break;
 
@@ -1052,6 +1103,10 @@ public class IpManager extends StateMachine {
                     }
                     break;
                 }
+
+                case EVENT_PROVISIONING_TIMEOUT:
+                    handleProvisioningFailure();
+                    break;
 
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
