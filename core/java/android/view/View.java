@@ -5750,9 +5750,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view-relative coordinate.
      *
      * @param x the X coordinate in pixels relative to the view to which the
-     *          menu should be anchored
+     *          menu should be anchored, or {@link Float#NaN} to disable anchoring
      * @param y the Y coordinate in pixels relative to the view to which the
-     *          menu should be anchored
+     *          menu should be anchored, or {@link Float#NaN} to disable anchoring
      * @return {@code true} if the context menu was shown, {@code false}
      *         otherwise
      */
