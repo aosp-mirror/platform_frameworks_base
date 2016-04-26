@@ -721,6 +721,9 @@ final class ActivityRecord {
             }
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
+
+            requestedVrComponent = (aInfo.requestedVrComponent == null) ?
+                    null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
         } else {
             realActivity = null;
             taskAffinity = null;
@@ -732,6 +735,7 @@ final class ActivityRecord {
             noDisplay = false;
             mActivityType = APPLICATION_ACTIVITY_TYPE;
             immersive = false;
+            requestedVrComponent  = null;
         }
     }
 

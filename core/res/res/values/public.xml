@@ -2714,6 +2714,7 @@
     <public type="attr" name="contentInsetStartWithNavigation" />
     <public type="attr" name="contentInsetEndWithActions" />
     <public type="attr" name="numberPickerStyle" />
+    <public type="attr" name="enableVrMode" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
