@@ -124,7 +124,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Тандалган жарак"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Жалпы"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Сүйлөө тонун баштапкы абалга келтирүү"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Текст айтылчу тонду демейки тоного коюңуз."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Текст айтылчу тонду демейки тонго коюңуз."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Өтө жай"</item>
     <item msgid="4795095314303559268">"Жай"</item>
