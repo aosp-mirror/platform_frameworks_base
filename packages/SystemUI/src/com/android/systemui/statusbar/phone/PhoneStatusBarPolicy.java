@@ -46,6 +46,8 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
@@ -74,6 +76,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
+    private final NextAlarmController mNextAlarm;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
     private final UserManager mUserManager;
@@ -101,13 +104,14 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
             CastController cast, HotspotController hotspot, UserInfoController userInfoController,
             BluetoothController bluetooth, RotationLockController rotationLockController,
-            DataSaverController dataSaver) {
+            DataSaverController dataSaver, NextAlarmController nextAlarm) {
         mContext = context;
         mIconController = iconController;
         mCast = cast;
         mHotspot = hotspot;
         mBluetooth = bluetooth;
         mBluetooth.addStateChangedCallback(this);
+        mNextAlarm = nextAlarm;
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -131,7 +135,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.ACTION_HEADSET_PLUG);
@@ -159,6 +162,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         // Alarm clock
         mIconController.setIcon(mSlotAlarmClock, R.drawable.stat_sys_alarm, null);
         mIconController.setIconVisibility(mSlotAlarmClock, false);
+        mNextAlarm.addStateChangedCallback(mNextAlarmCallback);
 
         // zen
         mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
@@ -416,7 +420,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
                 @Override
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                    updateAlarm();
                     profileChanged(newUserId);
                     updateQuietState();
                     updateManagedProfile();
@@ -439,6 +442,14 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         @Override
         public void onCastDevicesChanged() {
             updateCast();
+        }
+    };
+
+    private final NextAlarmController.NextAlarmChangeCallback mNextAlarmCallback =
+            new NextAlarmController.NextAlarmChangeCallback() {
+        @Override
+        public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
+            updateAlarm();
         }
     };
 
@@ -500,9 +511,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
-                updateAlarm();
-            } else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
+            if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
                     action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
                 updateVolumeZen();
             } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
