@@ -137,21 +137,14 @@ class PackageDexOptimizer {
         boolean isProfileGuidedFilter = DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter);
         // If any part of the app is used by other apps, we cannot use profile-guided
         // compilation.
-        // Skip the check for forward locked packages since they don't share their code.
-        if (isProfileGuidedFilter && !pkg.isForwardLocked()) {
-            for (String path : paths) {
-                if (isUsedByOtherApps(path)) {
-                    checkProfiles = false;
+        if (isProfileGuidedFilter && isUsedByOtherApps(pkg)) {
+            checkProfiles = false;
 
-                    targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
-                    if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
-                        throw new IllegalStateException(targetCompilerFilter);
-                    }
-                    isProfileGuidedFilter = false;
-
-                    break;
-                }
+            targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+                throw new IllegalStateException(targetCompilerFilter);
             }
+            isProfileGuidedFilter = false;
         }
 
         // If we're asked to take profile updates into account, check now.
@@ -281,20 +274,34 @@ class PackageDexOptimizer {
         mSystemReady = true;
     }
 
-    private boolean isUsedByOtherApps(String apkPath) {
-        try {
-            apkPath = new File(apkPath).getCanonicalPath();
-        } catch (IOException e) {
-            // Log an error but continue without it.
-            Slog.w(TAG, "Failed to get canonical path", e);
+    /**
+     * Returns true if the profiling data collected for the given app indicate
+     * that the apps's APK has been loaded by another app.
+     * Note that this returns false for all forward-locked apps and apps without
+     * any collected profiling data.
+     */
+    public static boolean isUsedByOtherApps(PackageParser.Package pkg) {
+        if (pkg.isForwardLocked()) {
+            // Skip the check for forward locked packages since they don't share their code.
+            return false;
         }
-        String useMarker = apkPath.replace('/', '@');
-        final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-        for (int i = 0; i < currentUserIds.length; i++) {
-            File profileDir = Environment.getDataProfilesDeForeignDexDirectory(currentUserIds[i]);
-            File foreignUseMark = new File(profileDir, useMarker);
-            if (foreignUseMark.exists()) {
-                return true;
+
+        for (String apkPath : pkg.getAllCodePathsExcludingResourceOnly()) {
+            try {
+                apkPath = new File(apkPath).getCanonicalPath();
+            } catch (IOException e) {
+                // Log an error but continue without it.
+                Slog.w(TAG, "Failed to get canonical path", e);
+            }
+            String useMarker = apkPath.replace('/', '@');
+            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
+            for (int i = 0; i < currentUserIds.length; i++) {
+                File profileDir =
+                        Environment.getDataProfilesDeForeignDexDirectory(currentUserIds[i]);
+                File foreignUseMark = new File(profileDir, useMarker);
+                if (foreignUseMark.exists()) {
+                    return true;
+                }
             }
         }
         return false;
