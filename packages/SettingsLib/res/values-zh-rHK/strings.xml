@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"藍牙網絡共享"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"網絡共享"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"網絡共享和可攜式熱點"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"公司檔案"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"所有工作應用程式"</string>
     <string name="user_guest" msgid="8475274842845401871">"訪客"</string>
     <string name="unknown" msgid="1592123443519355854">"未知"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"使用者：<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"啟動引擎設定"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"首選引擎"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"一般設定"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"重設語音音調"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"將文字轉語音的音調重設為預設。"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"非常慢"</item>
     <item msgid="4795095314303559268">"慢"</item>

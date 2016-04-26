@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ปล่อยสัญญาณบลูทูธ"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"การปล่อยสัญญาณ"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"การปล่อยสัญญาณและฮอตสปอต"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"โปรไฟล์งาน"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"แอปการทำงานทั้งหมด"</string>
     <string name="user_guest" msgid="8475274842845401871">"ผู้เข้าร่วม"</string>
     <string name="unknown" msgid="1592123443519355854">"ไม่ทราบ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ผู้ใช้: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"เปิดการตั้งค่าเครื่องมือ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"เครื่องมือที่ต้องการ"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ทั่วไป"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"รีเซ็ตความสูง-ต่ำของเสียงพูด"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"รีเซ็ตความสูง-ต่ำของเสียงในการพูดข้อความเป็นค่าเริ่มต้น"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"ช้ามาก"</item>
     <item msgid="4795095314303559268">"ช้า"</item>

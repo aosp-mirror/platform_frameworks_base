@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Тетъринг през Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Тетъринг"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Тетъринг и пренос. точка за достъп"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Служебен потр. профил"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Вс. служебни приложения"</string>
     <string name="user_guest" msgid="8475274842845401871">"Гост"</string>
     <string name="unknown" msgid="1592123443519355854">"Неизвестно"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Потребител: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Стартиране на настройките на машината"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Предпочитана машина"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Общи"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Нулиране на височината на говора"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Възстановяване на стандартната височина, с която се изговаря текстът."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Много бавна"</item>
     <item msgid="4795095314303559268">"Бавна"</item>

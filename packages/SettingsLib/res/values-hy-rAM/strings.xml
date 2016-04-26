@@ -91,14 +91,14 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-ը կապվում է"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Միացում"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Միացում և շարժական թեժ կետ"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Աշխատանքային պրոֆիլ"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Բոլոր աշխատանքային հավելվածները"</string>
     <string name="user_guest" msgid="8475274842845401871">"Հյուր"</string>
     <string name="unknown" msgid="1592123443519355854">"Անհայտ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Օգտվող՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Կանխադրված կարգավորումներ չկան"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Տեքստից-խոսք կարգավորումներ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Գրվածքից խոսք ելք"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Տեքստի հնչեցում"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Խոսքի գնահատական"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Տեքստի արտասանման արագությունը"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Բարձրություն"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Գործարկման շարժիչի կարգավորումներ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Նախընտրած շարժիչը"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Ընդհանուր"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Վերակայել արտասանման ձայնի բարձրությունը"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Տեքստի արտասանման ձայնի բարձրությունը վերադարձնել կանխադրված արժեքի:"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Շատ դանդաղ"</item>
     <item msgid="4795095314303559268">"Դանդաղ"</item>
