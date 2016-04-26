@@ -19,10 +19,14 @@ excludeFromSuggestions=true
             frameborder="0" allowfullscreen=""
             style="float: right;"></iframe>
         -->
+        <a href="{@docRoot}sdk/index.html">
         <img class="dac-hero-image" src="{@docRoot}images/tools/studio/studio-feature-instant-run_2x.png" />
+        </a>
       </div>
       <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">Android Studio 2.0,<br>now available!</h1>
+        <h1 class="dac-hero-title">
+            <a style="color:inherit" href="{@docRoot}sdk/index.html">
+            Android Studio 2.0,<br>now available!</a></h1>
         <p class="dac-hero-description">
         The latest version of Android Studio is the biggest update yet.
         It includes new features like <strong>Instant Run</strong>, which
