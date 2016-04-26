@@ -156,7 +156,8 @@ public final class Shared {
 
     /**
      * Compare two strings against each other using system default collator in a
-     * case-insensitive mode.
+     * case-insensitive mode. Clusters strings prefixed with {@link DIR_PREFIX}
+     * before other items.
      */
     public static int compareToIgnoreCaseNullable(String lhs, String rhs) {
         final boolean leftEmpty = TextUtils.isEmpty(lhs);
@@ -166,14 +167,6 @@ public final class Shared {
         if (leftEmpty) return -1;
         if (rightEmpty) return 1;
 
-        return sCollator.compare(lhs, rhs);
-    }
-
-    /**
-     * Compare two strings against each other using system default collator in a
-     * case-insensitive mode.
-     */
-    public static int compareToIgnoreCase(String lhs, String rhs) {
         return sCollator.compare(lhs, rhs);
     }
 
