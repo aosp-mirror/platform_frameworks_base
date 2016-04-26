@@ -216,7 +216,7 @@ public final class WebViewFactory {
         }
         if (chosen.versionCode > toUse.versionCode) {
             throw new MissingWebViewPackageException("Failed to verify WebView provider, "
-                    + "version code mismatch, expected: " + chosen.versionCode
+                    + "version code is lower than expected: " + chosen.versionCode
                     + " actual: " + toUse.versionCode);
         }
         if (getWebViewLibrary(toUse.applicationInfo) == null) {
