@@ -883,6 +883,10 @@ public abstract class PanelView extends FrameLayout {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
+                        if (!mInstantExpanding) {
+                            getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            return;
+                        }
                         if (mStatusBar.getStatusBarWindow().getHeight()
                                 != mStatusBar.getStatusBarHeight()) {
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -906,6 +910,10 @@ public abstract class PanelView extends FrameLayout {
         setExpandedFraction(0f);
         if (mExpanding) {
             notifyExpandingFinished();
+        }
+        if (mInstantExpanding) {
+            mInstantExpanding = false;
+            notifyBarPanelExpansionChanged();
         }
     }
 
