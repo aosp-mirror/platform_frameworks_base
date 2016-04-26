@@ -3071,6 +3071,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      *
+     * Whether the TV's picture-in-picture is visible or not.
+     */
+    public static final int TV_PICTURE_IN_PICTURE_VISIBLE = 0x00010000;
+
+    /**
+     * @hide
+     *
      * Makes navigation bar transparent (but not the status bar).
      */
     public static final int NAVIGATION_BAR_TRANSPARENT = 0x00008000;

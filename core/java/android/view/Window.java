@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -1253,6 +1254,18 @@ public abstract class Window {
     @Nullable
     public View findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
+    }
+
+    /**
+     * Puts the activity in picture-in-picture mode.
+     * @see android.R.attr#supportsPictureInPicture
+     * @hide
+     */
+    protected void enterPictureInPictureMode() {
+        try {
+            ActivityManagerNative.getDefault().enterPictureInPictureMode(mAppToken);
+        } catch (IllegalArgumentException|RemoteException e) {
+        }
     }
 
     /**

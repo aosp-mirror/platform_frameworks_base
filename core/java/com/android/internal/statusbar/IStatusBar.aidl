@@ -105,14 +105,9 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
-     * Request picture-in-picture.
-     *
-     * <p>
-     * This is called when an user presses picture-in-picture key or equivalent.
-     * TV device may start picture-in-picture from foreground activity if there's none.
-     * Picture-in-picture overlay menu will be shown instead otherwise.
+     * Shows the TV's picture-in-picture menu if an activity is in picture-in-picture mode.
      */
-    void requestTvPictureInPicture();
+    void showTvPictureInPictureMenu();
 
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
