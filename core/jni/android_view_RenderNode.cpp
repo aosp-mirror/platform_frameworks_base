@@ -562,6 +562,16 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             bounds.top -= info.windowInsetTop;
             bounds.bottom -= info.windowInsetTop;
 
+            if (CC_LIKELY(transform.isPureTranslate())) {
+                // snap/round the computed bounds, so they match the rounding behavior
+                // of the clear done in SurfaceView#draw().
+                bounds.snapToPixelBoundaries();
+            } else {
+                // Conservatively round out so the punched hole (in the ZOrderOnTop = true case)
+                // doesn't extend beyond the other window
+                bounds.roundOut();
+            }
+
             auto functor = std::bind(
                 std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePosition), this,
                 (jlong) info.canvasContext.getFrameNumber(),
