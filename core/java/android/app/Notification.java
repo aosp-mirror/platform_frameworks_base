@@ -4461,8 +4461,8 @@ public class Notification implements Parcelable
             mAllowGeneratedReplies = extras.getBoolean(EXTRA_ALLOW_GENERATED_REPLIES,
                     mAllowGeneratedReplies);
             Parcelable[] parcelables = extras.getParcelableArray(EXTRA_MESSAGES);
-            if (parcelables != null && parcelables instanceof Bundle[]) {
-                mMessages = Message.getMessagesFromBundleArray((Bundle[]) parcelables);
+            if (parcelables != null && parcelables instanceof Parcelable[]) {
+                mMessages = Message.getMessagesFromBundleArray(parcelables);
             }
         }
 
@@ -4556,6 +4556,25 @@ public class Notification implements Parcelable
             CharSequence text = m.mText == null ? "" : m.mText;
             sb.append("  ").append(bidi.unicodeWrap(text));
             return sb;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView() {
+            Message m = findLatestIncomingMessage();
+            CharSequence title = mConversationTitle != null
+                    ? mConversationTitle
+                    : (m == null) ? null : m.mSender;
+            CharSequence text = (m == null)
+                    ? null
+                    : mConversationTitle != null ? makeMessageLine(m) : m.mText;
+
+            return mBuilder.applyStandardTemplateWithActions(mBuilder.getBigBaseLayoutResource(),
+                    false /* hasProgress */,
+                    title,
+                    text);
         }
 
         private static TextAppearanceSpan makeFontColorSpan(int color) {
@@ -4691,12 +4710,14 @@ public class Notification implements Parcelable
                 return bundles;
             }
 
-            static List<Message> getMessagesFromBundleArray(Bundle[] bundles) {
+            static List<Message> getMessagesFromBundleArray(Parcelable[] bundles) {
                 List<Message> messages = new ArrayList<>(bundles.length);
                 for (int i = 0; i < bundles.length; i++) {
-                    Message message = getMessageFromBundle(bundles[i]);
-                    if (message != null) {
-                        messages.add(message);
+                    if (bundles[i] instanceof Bundle) {
+                        Message message = getMessageFromBundle((Bundle)bundles[i]);
+                        if (message != null) {
+                            messages.add(message);
+                        }
                     }
                 }
                 return messages;
