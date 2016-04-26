@@ -4511,7 +4511,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void requestTvPictureInPicture() {
+    public void showTvPictureInPictureMenu() {
         // no-op.
     }
 
