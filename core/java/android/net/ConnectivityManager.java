@@ -81,13 +81,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ConnectivityManager {
     private static final String TAG = "ConnectivityManager";
 
-    private static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
-            new Class[]{ConnectivityManager.class}, new String[]{"CALLBACK_"});
-
-    private static final String whatToString(int what) {
-        return sMagicDecoderRing.get(what, Integer.toString(what));
-    }
-
     /**
      * A change in network connectivity has occurred. A default connection has either
      * been established or lost. The NetworkInfo for the affected network is
@@ -3359,5 +3352,33 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * A holder class for debug info (mapping CALLBACK values to field names). This is stored
+     * in a holder for two reasons:
+     * 1) The reflection necessary to establish the map can't be run at compile-time. Thus, this
+     *    code will make the enclosing class not compile-time initializeable, deferring its
+     *    initialization to zygote startup. This leads to dirty (but shared) memory.
+     *    As this is debug info, use a holder that isn't initialized by default. This way the map
+     *    will be created on demand, while ConnectivityManager can be compile-time initialized.
+     * 2) Static initialization is still preferred for its strong thread safety guarantees without
+     *    requiring a lock.
+     */
+    private static class NoPreloadHolder {
+        public static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
+                new Class[]{ConnectivityManager.class}, new String[]{"CALLBACK_"});
+    }
+
+    static {
+        // When debug is enabled, aggressively initialize the holder by touching the field (which
+        // will guarantee static initialization).
+        if (CallbackHandler.DBG) {
+            Object dummy = NoPreloadHolder.sMagicDecoderRing;
+        }
+    }
+
+    private static final String whatToString(int what) {
+        return NoPreloadHolder.sMagicDecoderRing.get(what, Integer.toString(what));
     }
 }
