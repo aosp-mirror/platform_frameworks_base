@@ -1123,6 +1123,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateMaxHeights();
+        if (mSettingsIconRow != null) {
+            mSettingsIconRow.updateVerticalLocation();
+        }
     }
 
     private void updateMaxHeights() {
