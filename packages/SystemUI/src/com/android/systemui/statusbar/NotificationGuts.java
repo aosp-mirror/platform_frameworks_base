@@ -299,12 +299,13 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private void applyAuto() {
         mSeekBar.setEnabled(!mAuto);
 
-        final ColorStateList tint = mAuto ? mInactiveSliderTint : mActiveSliderTint;
+        final ColorStateList sliderTint = mAuto ? mInactiveSliderTint : mActiveSliderTint;
+        final ColorStateList starTint = mAuto ?  mActiveSliderTint : mInactiveSliderTint;
         Drawable icon = mAutoButton.getDrawable().mutate();
-        icon.setTintList(tint);
+        icon.setTintList(starTint);
         mAutoButton.setImageDrawable(icon);
-        mSeekBar.setProgressTintList(tint);
-        mSeekBar.setThumbTintList(tint);
+        mSeekBar.setProgressTintList(sliderTint);
+        mSeekBar.setThumbTintList(sliderTint);
 
         if (mAuto) {
             mSeekBar.setProgress(mNotificationImportance);
