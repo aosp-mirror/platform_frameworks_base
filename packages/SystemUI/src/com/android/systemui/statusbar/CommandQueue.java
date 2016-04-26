@@ -68,7 +68,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_START_ASSIST                  = 23 << MSG_SHIFT;
     private static final int MSG_CAMERA_LAUNCH_GESTURE         = 24 << MSG_SHIFT;
     private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS     = 25 << MSG_SHIFT;
-    private static final int MSG_REQUEST_TV_PICTURE_IN_PICTURE = 26 << MSG_SHIFT;
+    private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 26 << MSG_SHIFT;
     private static final int MSG_ADD_QS_TILE                   = 27 << MSG_SHIFT;
     private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
     private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
@@ -124,7 +124,7 @@ public class CommandQueue extends IStatusBar.Stub {
         void showAssistDisclosure();
         void startAssist(Bundle args);
         void onCameraLaunchGestureDetected(int source);
-        void requestTvPictureInPicture();
+        void showTvPictureInPictureMenu();
 
         void addQsTile(ComponentName tile);
         void remQsTile(ComponentName tile);
@@ -274,10 +274,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void requestTvPictureInPicture() {
+    public void showTvPictureInPictureMenu() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_REQUEST_TV_PICTURE_IN_PICTURE);
-            mHandler.obtainMessage(MSG_REQUEST_TV_PICTURE_IN_PICTURE).sendToTarget();
+            mHandler.removeMessages(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU);
+            mHandler.obtainMessage(MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU).sendToTarget();
         }
     }
 
@@ -488,8 +488,8 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_CAMERA_LAUNCH_GESTURE:
                     mCallbacks.onCameraLaunchGestureDetected(msg.arg1);
                     break;
-                case MSG_REQUEST_TV_PICTURE_IN_PICTURE:
-                    mCallbacks.requestTvPictureInPicture();
+                case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
+                    mCallbacks.showTvPictureInPictureMenu();
                     break;
                 case MSG_ADD_QS_TILE:
                     mCallbacks.addQsTile((ComponentName) msg.obj);
