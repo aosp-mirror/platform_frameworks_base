@@ -77,8 +77,8 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     }
 
     public String toString() {
-        return String.format("ConnectivityMetricsEvent(%d, %d, %d)", timestamp,
-                componentTag, eventTag);
+        return String.format("ConnectivityMetricsEvent(%d, %d, %d): %s", timestamp,
+                componentTag, eventTag, data);
     }
 
     /** {@hide} */
