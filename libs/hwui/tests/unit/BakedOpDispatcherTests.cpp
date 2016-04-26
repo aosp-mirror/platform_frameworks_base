@@ -109,3 +109,37 @@ RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
         EXPECT_FLOAT_EQ(128 / 255.0f, glop.fill.color.a) << "Rect quad should use op alpha";
     });
 }
+
+static int getGlopTransformFlags(renderthread::RenderThread& renderThread, RecordedOp* op) {
+    int result = 0;
+    testUnmergedGlopDispatch(renderThread, op, [&result] (const Glop& glop) {
+        result = glop.transform.transformFlags;
+    });
+    return result;
+}
+
+RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
+    Rect bounds(10, 15, 20, 25);
+    SkPaint paint;
+    SkPaint aaPaint;
+    aaPaint.setAntiAlias(true);
+
+    RoundRectOp roundRectOp(bounds, Matrix4::identity(), nullptr, &paint, 0, 270);
+    EXPECT_EQ(TransformFlags::None, getGlopTransformFlags(renderThread, &roundRectOp))
+            << "Expect no offset for round rect op.";
+
+    const float points[4] = {0.5, 0.5, 1.0, 1.0};
+    PointsOp antiAliasedPointsOp(bounds, Matrix4::identity(), nullptr, &aaPaint, points, 4);
+    EXPECT_EQ(TransformFlags::None, getGlopTransformFlags(renderThread, &antiAliasedPointsOp))
+                << "Expect no offset for AA points.";
+    PointsOp pointsOp(bounds, Matrix4::identity(), nullptr, &paint, points, 4);
+    EXPECT_EQ(TransformFlags::OffsetByFudgeFactor, getGlopTransformFlags(renderThread, &pointsOp))
+            << "Expect an offset for non-AA points.";
+
+    LinesOp antiAliasedLinesOp(bounds, Matrix4::identity(), nullptr, &aaPaint, points, 4);
+    EXPECT_EQ(TransformFlags::None, getGlopTransformFlags(renderThread, &antiAliasedLinesOp))
+            << "Expect no offset for AA lines.";
+    LinesOp linesOp(bounds, Matrix4::identity(), nullptr, &paint, points, 4);
+    EXPECT_EQ(TransformFlags::OffsetByFudgeFactor, getGlopTransformFlags(renderThread, &linesOp))
+            << "Expect an offset for non-AA lines.";
+}
