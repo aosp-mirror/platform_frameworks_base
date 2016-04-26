@@ -246,17 +246,28 @@ public class LinearLayout extends ViewGroup {
     }
 
     /**
+     * Returns <code>true</code> if this layout is currently configured to show at least one
+     * divider.
+     */
+    private boolean isShowingDividers() {
+        return (mShowDividers != SHOW_DIVIDER_NONE) && (mDivider != null);
+    }
+
+    /**
      * Set how dividers should be shown between items in this layout
      *
      * @param showDividers One or more of {@link #SHOW_DIVIDER_BEGINNING},
-     *                     {@link #SHOW_DIVIDER_MIDDLE}, or {@link #SHOW_DIVIDER_END},
-     *                     or {@link #SHOW_DIVIDER_NONE} to show no dividers.
+     *                     {@link #SHOW_DIVIDER_MIDDLE}, or {@link #SHOW_DIVIDER_END}
+     *                     to show dividers, or {@link #SHOW_DIVIDER_NONE} to show no dividers.
      */
     public void setShowDividers(@DividerMode int showDividers) {
-        if (showDividers != mShowDividers) {
-            requestLayout();
+        if (showDividers == mShowDividers) {
+            return;
         }
         mShowDividers = showDividers;
+
+        setWillNotDraw(!isShowingDividers());
+        requestLayout();
     }
 
     @Override
@@ -305,12 +316,15 @@ public class LinearLayout extends ViewGroup {
             mDividerWidth = 0;
             mDividerHeight = 0;
         }
-        setWillNotDraw(divider == null);
+
+        setWillNotDraw(!isShowingDividers());
         requestLayout();
     }
 
     /**
-     * Set padding displayed on both ends of dividers.
+     * Set padding displayed on both ends of dividers. For a vertical layout, the padding is applied
+     * to left and right end of dividers. For a horizontal layout, the padding is applied to top and
+     * bottom end of dividers.
      *
      * @param padding Padding value in pixels that will be applied to each end
      *
@@ -319,7 +333,15 @@ public class LinearLayout extends ViewGroup {
      * @see #getDividerPadding()
      */
     public void setDividerPadding(int padding) {
+        if (padding == mDividerPadding) {
+            return;
+        }
         mDividerPadding = padding;
+
+        if (isShowingDividers()) {
+            requestLayout();
+            invalidate();
+        }
     }
 
     /**
@@ -711,6 +733,8 @@ public class LinearLayout extends ViewGroup {
         int largestChildHeight = Integer.MIN_VALUE;
         int consumedExcessSpace = 0;
 
+        int nonSkippedChildCount = 0;
+
         // See how tall everyone is. Also remember max width.
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
@@ -724,6 +748,7 @@ public class LinearLayout extends ViewGroup {
                continue;
             }
 
+            nonSkippedChildCount++;
             if (hasDividerBeforeChildAt(i)) {
                 mTotalLength += mDividerHeight;
             }
@@ -825,7 +850,7 @@ public class LinearLayout extends ViewGroup {
             i += getChildrenSkipCount(child, i);
         }
 
-        if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
+        if (nonSkippedChildCount > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerHeight;
         }
 
@@ -865,7 +890,6 @@ public class LinearLayout extends ViewGroup {
         // Reconcile our calculated size with the heightMeasureSpec
         int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
         heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
-        
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
@@ -1049,6 +1073,8 @@ public class LinearLayout extends ViewGroup {
         int largestChildWidth = Integer.MIN_VALUE;
         int usedExcessSpace = 0;
 
+        int nonSkippedChildCount = 0;
+
         // See how wide everyone is. Also remember max height.
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
@@ -1062,6 +1088,7 @@ public class LinearLayout extends ViewGroup {
                 continue;
             }
 
+            nonSkippedChildCount++;
             if (hasDividerBeforeChildAt(i)) {
                 mTotalLength += mDividerWidth;
             }
@@ -1184,7 +1211,7 @@ public class LinearLayout extends ViewGroup {
             i += getChildrenSkipCount(child, i);
         }
 
-        if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
+        if (nonSkippedChildCount > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerWidth;
         }
 
