@@ -20,33 +20,36 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 public class MovingSurfaceViewActivity extends Activity implements Callback {
-    static final String TAG = "MovingSurfaceView";
     SurfaceView mSurfaceView;
     ObjectAnimator mAnimator;
 
     class MySurfaceView extends SurfaceView {
-        boolean mSlowToggled;
+        boolean mSlow;
+        boolean mScaled;
+        int mToggle = 0;
 
         public MySurfaceView(Context context) {
             super(context);
-            setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mSlowToggled = !mSlowToggled;
-                    Log.d(TAG, "SLOW MODE: " + mSlowToggled);
-                    invalidate();
-                }
+            setOnClickListener(v -> {
+                mToggle = (mToggle + 1) % 4;
+                mSlow = (mToggle & 0x2) != 0;
+                mScaled = (mToggle & 0x1) != 0;
+
+                mSurfaceView.setScaleX(mScaled ? 1.6f : 1f);
+                mSurfaceView.setScaleY(mScaled ? 0.8f : 1f);
+
+                setTitle("Slow=" + mSlow + ", scaled=" + mScaled);
+                invalidate();
             });
             setWillNotDraw(false);
         }
@@ -54,7 +57,7 @@ public class MovingSurfaceViewActivity extends Activity implements Callback {
         @Override
         public void draw(Canvas canvas) {
             super.draw(canvas);
-            if (mSlowToggled) {
+            if (mSlow) {
                 try {
                     Thread.sleep(16);
                 } catch (InterruptedException e) {}
@@ -63,7 +66,7 @@ public class MovingSurfaceViewActivity extends Activity implements Callback {
 
         public void setMyTranslationY(float ty) {
             setTranslationY(ty);
-            if (mSlowToggled) {
+            if (mSlow) {
                 invalidate();
             }
         }
@@ -86,7 +89,7 @@ public class MovingSurfaceViewActivity extends Activity implements Callback {
         int size = (int) (200 * density);
 
         content.addView(mSurfaceView, new FrameLayout.LayoutParams(
-                size, size, Gravity.CENTER));
+                size, size, Gravity.CENTER_HORIZONTAL | Gravity.TOP));
         mAnimator = ObjectAnimator.ofFloat(mSurfaceView, "myTranslationY",
                 0, size);
         mAnimator.setRepeatMode(ObjectAnimator.REVERSE);
@@ -103,7 +106,7 @@ public class MovingSurfaceViewActivity extends Activity implements Callback {
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Canvas canvas = holder.lockCanvas();
-        canvas.drawARGB(0xFF, 0x00, 0xFF, 0x00);
+        canvas.drawColor(Color.WHITE);
         holder.unlockCanvasAndPost(canvas);
     }
 
