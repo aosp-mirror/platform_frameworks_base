@@ -770,6 +770,19 @@ public class IpManager extends StateMachine {
         return (delta != ProvisioningChange.LOST_PROVISIONING);
     }
 
+    private boolean setIPv4Address(LinkAddress address) {
+        final InterfaceConfiguration ifcg = new InterfaceConfiguration();
+        ifcg.setLinkAddress(address);
+        try {
+            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
+            if (VDBG) Log.d(mTag, "IPv4 configuration succeeded");
+        } catch (IllegalStateException | RemoteException e) {
+            Log.e(mTag, "IPv4 configuration failed: ", e);
+            return false;
+        }
+        return true;
+    }
+
     private void clearIPv4Address() {
         try {
             final InterfaceConfiguration ifcg = new InterfaceConfiguration();
@@ -794,7 +807,6 @@ public class IpManager extends StateMachine {
     }
 
     private void handleIPv4Failure() {
-        // TODO: Figure out to de-dup this and the same code in DhcpClient.
         clearIPv4Address();
         mDhcpResults = null;
         final LinkProperties newLp = assembleLinkProperties();
@@ -944,7 +956,7 @@ public class IpManager extends StateMachine {
             // If we have a StaticIpConfiguration attempt to apply it and
             // handle the result accordingly.
             if (mConfiguration.mStaticIpConfig != null) {
-                if (applyStaticIpConfig()) {
+                if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
                     handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
                 } else {
                     if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
@@ -1050,6 +1062,21 @@ public class IpManager extends StateMachine {
                     }
                     break;
 
+                case DhcpClient.CMD_CLEAR_LINKADDRESS:
+                    clearIPv4Address();
+                    break;
+
+                case DhcpClient.CMD_CONFIGURE_LINKADDRESS: {
+                    final LinkAddress ipAddress = (LinkAddress) msg.obj;
+                    if (setIPv4Address(ipAddress)) {
+                        mDhcpClient.sendMessage(DhcpClient.EVENT_LINKADDRESS_CONFIGURED);
+                    } else {
+                        Log.e(mTag, "Failed to set IPv4 address!");
+                        transitionTo(mStoppingState);
+                    }
+                    break;
+                }
+
                 case DhcpClient.CMD_POST_DHCP_ACTION: {
                     // Note that onPostDhcpAction() is likely to be
                     // asynchronous, and thus there is no guarantee that we
@@ -1081,21 +1108,6 @@ public class IpManager extends StateMachine {
                     return NOT_HANDLED;
             }
             return HANDLED;
-        }
-
-        private boolean applyStaticIpConfig() {
-            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-            ifcg.setLinkAddress(mConfiguration.mStaticIpConfig.ipAddress);
-            ifcg.setInterfaceUp();
-            try {
-                mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-                if (DBG) Log.d(mTag, "Static IP configuration succeeded");
-            } catch (IllegalStateException | RemoteException e) {
-                Log.e(mTag, "Static IP configuration failed: ", e);
-                return false;
-            }
-
-            return true;
         }
     }
 }
