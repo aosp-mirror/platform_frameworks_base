@@ -356,7 +356,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // Preload
             getUserShortcutsLocked(userId);
 
-            cleanupGonePackages(userId);
+            checkPackageChanges(userId);
         }
     }
 
@@ -1158,7 +1158,11 @@ public class ShortcutService extends IShortcutService.Stub {
      * - Sends a notification to LauncherApps
      * - Write to file
      */
-    private void userPackageChanged(@NonNull String packageName, @UserIdInt int userId) {
+    void packageShortcutsChanged(@NonNull String packageName, @UserIdInt int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format(
+                    "Shortcut changes: package=%s, user=%d", packageName, userId));
+        }
         notifyListeners(packageName, userId);
         scheduleSaveUser(userId);
     }
@@ -1284,7 +1288,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 ps.addDynamicShortcut(this, newShortcut);
             }
         }
-        userPackageChanged(packageName, userId);
+        packageShortcutsChanged(packageName, userId);
         return true;
     }
 
@@ -1323,7 +1327,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
             }
         }
-        userPackageChanged(packageName, userId);
+        packageShortcutsChanged(packageName, userId);
 
         return true;
     }
@@ -1353,7 +1357,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 ps.addDynamicShortcut(this, newShortcut);
             }
         }
-        userPackageChanged(packageName, userId);
+        packageShortcutsChanged(packageName, userId);
 
         return true;
     }
@@ -1370,7 +1374,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         Preconditions.checkStringNotEmpty((String) shortcutIds.get(i)));
             }
         }
-        userPackageChanged(packageName, userId);
+        packageShortcutsChanged(packageName, userId);
     }
 
     @Override
@@ -1380,7 +1384,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts(this);
         }
-        userPackageChanged(packageName, userId);
+        packageShortcutsChanged(packageName, userId);
     }
 
     @Override
@@ -1729,7 +1733,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 launcher.pinShortcuts(
                         ShortcutService.this, userId, packageName, shortcutIds);
             }
-            userPackageChanged(packageName, userId);
+            packageShortcutsChanged(packageName, userId);
         }
 
         @Override
@@ -1841,13 +1845,15 @@ public class ShortcutService extends IShortcutService.Stub {
     };
 
     /**
-     * Called when a user is unlocked.  Check all known packages still exist, and otherwise
-     * perform cleanup.
+     * Called when a user is unlocked.
+     * - Check all known packages still exist, and otherwise perform cleanup.
+     * - If a package still exists, check the version code.  If it's been updated, may need to
+     *   update timestamps of its shortcuts.
      */
     @VisibleForTesting
-    void cleanupGonePackages(@UserIdInt int ownerUserId) {
+    void checkPackageChanges(@UserIdInt int ownerUserId) {
         if (DEBUG) {
-            Slog.d(TAG, "cleanupGonePackages() ownerUserId=" + ownerUserId);
+            Slog.d(TAG, "checkPackageChanges() ownerUserId=" + ownerUserId);
         }
         final ArrayList<PackageWithUser> gonePackages = new ArrayList<>();
 
@@ -1858,10 +1864,15 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (spi.getPackageInfo().isShadow()) {
                     return; // Don't delete shadow information.
                 }
-                if (isPackageInstalled(spi.getPackageName(), spi.getPackageUserId())) {
-                    return; // Package not gone.
+                final int versionCode = getApplicationVersionCode(
+                        spi.getPackageName(), spi.getPackageUserId());
+                if (versionCode >= 0) {
+                    // Package still installed, see if it's updated.
+                    getUserShortcutsLocked(ownerUserId).handlePackageUpdated(
+                            this, spi.getPackageName(), versionCode);
+                } else {
+                    gonePackages.add(PackageWithUser.of(spi));
                 }
-                gonePackages.add(PackageWithUser.of(spi));
             });
             if (gonePackages.size() > 0) {
                 for (int i = gonePackages.size() - 1; i >= 0; i--) {
@@ -1890,6 +1901,12 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             forEachLoadedUserLocked(user ->
                     user.attemptToRestoreIfNeededAndSave(this, packageName, userId));
+
+            final int versionCode = getApplicationVersionCode(packageName, userId);
+            if (versionCode < 0) {
+                return; // shouldn't happen
+            }
+            getUserShortcutsLocked(userId).handlePackageUpdated(this, packageName, versionCode);
         }
     }
 
@@ -1976,6 +1993,17 @@ public class ShortcutService extends IShortcutService.Stub {
 
     boolean isPackageInstalled(String packageName, int userId) {
         return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_INSTALLED);
+    }
+
+    /**
+     * @return the version code of the package, or -1 if the app is not installed.
+     */
+    int getApplicationVersionCode(String packageName, int userId) {
+        final ApplicationInfo ai = injectApplicationInfo(packageName, userId);
+        if ((ai == null) || ((ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0)) {
+            return -1;
+        }
+        return ai.versionCode;
     }
 
     // === Backup & restore ===
@@ -2100,7 +2128,7 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println(mResetInterval);
             pw.print("    maxUpdatesPerInterval: ");
             pw.println(mMaxUpdatesPerInterval);
-            pw.print("    maxDynamicShortcuts:");
+            pw.print("    maxDynamicShortcuts: ");
             pw.println(mMaxDynamicShortcuts);
             pw.println();
 
