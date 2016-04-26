@@ -536,16 +536,37 @@ public class WebViewUpdateServiceImpl {
         }
 
         /**
+         * Both versionCodes should be from a WebView provider package implemented by Chromium.
+         * VersionCodes from other kinds of packages won't make any sense in this method.
+         *
+         * An introduction to Chromium versionCode scheme:
+         * "BBBBPPPAX"
+         * BBBB: 4 digit branch number. It monotonically increases over time.
+         * PPP: patch number in the branch. It is padded with zeroes to the left. These three digits may
+         * change their meaning in the future.
+         * A: architecture digit.
+         * X: A digit to differentiate APKs for other reasons.
+         *
+         * This method takes the "BBBB" of versionCodes and compare them.
+         *
+         * @return true if versionCode1 is higher than or equal to versionCode2.
+         */
+        private static boolean versionCodeGE(int versionCode1, int versionCode2) {
+            int v1 = versionCode1 / 100000;
+            int v2 = versionCode2 / 100000;
+
+            return v1 >= v2;
+        }
+
+        /**
          * Returns whether this provider is valid for use as a WebView provider.
          */
         public boolean isValidProvider(WebViewProviderInfo configInfo,
                 PackageInfo packageInfo) {
-            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    && packageInfo.versionCode < getMinimumVersionCode()
+            if (!versionCodeGE(packageInfo.versionCode, getMinimumVersionCode())
                     && !mSystemInterface.systemIsDebuggable()) {
-                // Non-system package webview providers may be downgraded arbitrarily low, prevent
-                // that by enforcing minimum version code. This check is only enforced for user
-                // builds.
+                // Webview providers may be downgraded arbitrarily low, prevent that by enforcing
+                // minimum version code. This check is only enforced for user builds.
                 return false;
             }
             if (providerHasValidSignature(configInfo, packageInfo, mSystemInterface) &&
