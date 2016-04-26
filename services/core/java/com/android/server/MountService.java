@@ -2648,6 +2648,8 @@ class MountService extends IMountService.Stub
      */
     @Override
     public int getPasswordType() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+            "no permission to access the crypt keeper");
 
         waitForReady();
 
@@ -2672,6 +2674,8 @@ class MountService extends IMountService.Stub
      */
     @Override
     public void setField(String field, String contents) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+            "no permission to access the crypt keeper");
 
         waitForReady();
 
@@ -2690,6 +2694,8 @@ class MountService extends IMountService.Stub
      */
     @Override
     public String getField(String field) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+            "no permission to access the crypt keeper");
 
         waitForReady();
 
@@ -2714,6 +2720,8 @@ class MountService extends IMountService.Stub
      */
     @Override
     public boolean isConvertibleToFBE() throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+            "no permission to access the crypt keeper");
 
         waitForReady();
 
@@ -2728,8 +2736,9 @@ class MountService extends IMountService.Stub
 
     @Override
     public String getPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
                 "only keyguard can retrieve password");
+
         if (!isReady()) {
             return new String();
         }
@@ -2752,6 +2761,9 @@ class MountService extends IMountService.Stub
 
     @Override
     public void clearPassword() throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+                "only keyguard can clear password");
+
         if (!isReady()) {
             return;
         }
