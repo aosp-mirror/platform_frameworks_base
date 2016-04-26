@@ -69,7 +69,7 @@
         <RadioButton
                 android:id="@+id/silent_importance"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="40dp"
                 android:paddingStart="32dp"
                 android:text="@string/show_silently"
                 style="@style/TextAppearance.NotificationGuts.Radio"
@@ -77,7 +77,7 @@
         <RadioButton
                 android:id="@+id/block_importance"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="40dp"
                 android:paddingStart="32dp"
                 android:text="@string/block"
                 style="@style/TextAppearance.NotificationGuts.Radio"
@@ -85,7 +85,7 @@
         <RadioButton
                 android:id="@+id/reset_importance"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="40dp"
                 android:paddingStart="32dp"
                 style="@style/TextAppearance.NotificationGuts.Radio"
                 android:buttonTint="@color/notification_guts_buttons" />
