@@ -44,6 +44,14 @@ Use this intent to access external storage directories. To get a list of
 all available volumes, including removable media volumes, use
 <code>StorageManager.getVolumesList()</code>.</p>
 
+<p>
+On secondary volumes, such as external SD cards, pass in null when calling
+<code>StorageVolume.createAccessIntent()</code> to request access to the entire
+volume, instead of a specific directory.
+<code>StorageVolume.createAccessIntent()</code> returns null if you pass in
+null to the primary volume, or if you pass in an invalid directory name.
+</p>
+
 <p>The following code snippet is an example of how to open the
 <code>Pictures</code> directory in the primary shared storage:</p>
 
@@ -122,4 +130,15 @@ user.</p>
 
 <p>If the user denies access to an external directory, do not immediately
 request access again. Repeatedly insisting on access results in a poor user
-experience.</p>
+experience. If a request is denied by the user, and the app requests access
+again, the UI displays a <b>Don't ask again</b> checkbox:</p>
+
+<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png"
+srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
+{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>Figure 1.</strong> An application making a
+second request for access to removable media.</p>
+
+<p>If the user selects <b>Don't ask again</b> and denies the request, all
+future requests for the given directory from your app will be automatically
+denied, and no request UI will be presented to the user.</p>
