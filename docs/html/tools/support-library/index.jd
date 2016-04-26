@@ -36,8 +36,8 @@ page.title=Support Library
 
 <p>Including the Support Libraries in your Android project is considered a best practice for
   application developers, depending on the range of platform versions your app is targeting
-  and the APIs that it uses. Using the features the libraries provide can help you improve the look of your
-  application, increase performance and broaden the reach of your application to more users.
+  and the APIs that it uses. Using the features the libraries provide can help you improve the look
+  of your application, increase performance and broaden the reach of your application to more users.
   If you use the Android
   <a href="{@docRoot}tools/projects/templates.html">code template</a> tools, you will notice that
   all the Android application templates include one or more of the Support Libraries by default.</p>
@@ -59,9 +59,225 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
-  <p id="rev23-2-1">
+  <p id="rev23-3-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+    alt="">Android Support Library, revision 23.3.0</a> <em>(April
+    2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added <code>AppLaunchChecker</code> to help track how your app
+          has been launched by the user in the past.
+          <code>hasStartedFromLauncher()</code> lets you know if the user has
+          launched your app from the home screen before, or if it has only
+          been started by other means (for example, to view specific web
+          URLs).
+          </li>
+
+          <li>Fixed a memory leak in
+          <code>MediaBrowserServiceCompat.mConnections</code>. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=205220">Issue
+          205220</a>)
+          </li>
+
+          <li>Fixed issue where {@link android.support.v4.view.ViewPager}
+          does not account for page margins when flipping page. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203816">Issue
+          203816</a>)
+          </li>
+          <li>{@link android.support.v4.app.Fragment#onRequestPermissionsResult
+            Fragment.onRequestPermissionsResult()} is now delivered to child
+            fragments.
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue in {@link
+          android.support.v7.widget.AppCompatSpinner} that could cause
+          multiple popups to appear. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=205052">Issue
+          205052</a>)
+          </li>
+
+          <li>Fixed an issue with how borderless buttons were colored.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202967">Issue
+          202967</a>)
+          </li>
+
+          <li>Fixed a compatibility issue between {@link
+          android.support.v7.app.AppCompatDialogFragment } and {@link
+          android.support.v7.app.AlertDialog}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=204805">Issue
+            204805</a>)
+          </li>
+
+          <li>Reverted changes to <code>TintResources</code> that were causing
+            memory and configuration issues.  (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=205236">Issue
+            205236</a>)</li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-mediarouter">v7
+        mediarouter library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed {@link android.support.v7.app.MediaRouteControllerDialog}
+          volume slider’s behavior. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202299">Issue
+          202299</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href="features.html#v7-preference">v7 Preference</a>
+        library:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed issue where {@link
+          android.support.v7.preference.PreferenceFragmentCompat} would crash
+          if <code>dividerHeight</code> is specified. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=204778">Issue
+          204778</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-recyclerview">v7
+        recyclerview library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where {@link
+          android.support.v7.widget.RecyclerView} would not invoke scroll
+          callbacks if the range of visible items shrank. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=200987">Issue
+          200987</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.v7.widget.RecyclerView} would freeze if it was in
+          linear layout, was weighted, and contained images. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203276">Issue
+          203276</a>)
+          </li>
+
+          <li>Fixed a crash in {@link
+          android.support.v7.widget.OrientationHelper#getStartAfterPadding
+          OrientationHelper.getStartAfterPadding()}. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=180521">Issue
+          180521</a>)
+          </li>
+
+          <li>Fixed a crash with usages of
+          <code>android:nestedScrollingEnabled</code>. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=197932">Issue
+          197932</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where a hidden bottom sheet would handle touch
+          events. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203654">Issue
+          203654</a>)
+          </li>
+
+          <li>Fixed a layout issue with <code>BottomSheetBehavior</code> when
+          <code>fitsSystemWindows</code> is true. (<a class="external-link"
+          href=
+          "https://code.google.com/p/android/issues/detail?id=203057">Issue
+          203057</a>)
+          </li>
+
+          <li>Fixed an accessibility issue with {@link
+          android.support.design.widget.Snackbar}. (<a class="external-link"
+          href=
+          "https://code.google.com/p/android/issues/detail?id=182145">Issue
+          182145</a>)
+          </li>
+
+          <li>Fixed a crash on {@link android.support.design.widget.Snackbar}
+          swipe. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203924">Issue
+          203924</a>)
+          </li>
+
+          <li>Fixed a bug in {@link
+          android.support.design.widget.AppBarLayout} with
+          <code>enterAlways</code>. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203661">Issue
+          203661</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.design.widget.TextInputLayout} unnecessarily clears
+          {@link android.widget.EditText} object's background color filter.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203357">Issue
+          203357</a>)
+          </li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+<!-- end of collapsible section: 23.3.0 -->
+
+<div class="toggle-content closed">
+  <p id="rev23-2-1">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
     alt="">Android Support Library, revision 23.2.1</a> <em>(March
     2016)</em>
   </p>
@@ -361,7 +577,7 @@ page.title=Support Library
     </dl>
   </div>
 </div>
-<!-- end of collapsible section -->
+<!-- end of collapsible section: 23.2.1 -->
 
 <div class="toggle-content closed">
   <p id="rev23-2-0">
@@ -718,7 +934,7 @@ android {
     </dl>
   </div>
 </div>
-<!-- end of collapsible section -->
+<!-- end of collapsible section: 23.2.0 -->
 
 <div class="toggle-content closed">
   <p id="rev23-1-1"><a href="#" onclick="return toggleContent(this)">
