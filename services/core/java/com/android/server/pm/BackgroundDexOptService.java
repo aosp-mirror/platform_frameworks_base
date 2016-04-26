@@ -148,7 +148,7 @@ public class BackgroundDexOptService extends JobService {
                     // jobs because PackageDexOptimizer.performDexOpt is synchronized.
                     pm.performDexOpt(pkg,
                             /* instruction set */ null,
-                            /* checkProfiles */ false,
+                            /* checkProfiles */ true,
                             PackageManagerService.REASON_BOOT,
                             /* force */ false);
                 }
