@@ -45,12 +45,14 @@ class ShortcutPackageInfo {
     private static final String TAG_SIGNATURE = "signature";
     private static final String ATTR_SIGNATURE_HASH = "hash";
 
+    private static final int VERSION_UNKNOWN = -1;
+
     /**
      * When true, this package information was restored from the previous device, and the app hasn't
      * been installed yet.
      */
     private boolean mIsShadow;
-    private int mVersionCode;
+    private int mVersionCode = VERSION_UNKNOWN;
     private ArrayList<byte[]> mSigHashes;
 
     private ShortcutPackageInfo(int versionCode, ArrayList<byte[]> sigHashes, boolean isShadow) {
@@ -60,7 +62,7 @@ class ShortcutPackageInfo {
     }
 
     public static ShortcutPackageInfo newEmpty() {
-        return new ShortcutPackageInfo(0, new ArrayList<>(0), /* isShadow */ false);
+        return new ShortcutPackageInfo(VERSION_UNKNOWN, new ArrayList<>(0), /* isShadow */ false);
     }
 
     public boolean isShadow() {
@@ -73,6 +75,10 @@ class ShortcutPackageInfo {
 
     public int getVersionCode() {
         return mVersionCode;
+    }
+
+    public void setVersionCode(int versionCode) {
+        mVersionCode = versionCode;
     }
 
     public boolean hasSignatures() {

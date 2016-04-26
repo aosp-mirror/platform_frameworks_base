@@ -176,6 +176,17 @@ class ShortcutUser {
         });
     }
 
+    /**
+     * Called when a package is updated.
+     */
+    public void handlePackageUpdated(ShortcutService s, @NonNull String packageName,
+            int newVersionCode) {
+        if (!mPackages.containsKey(packageName)) {
+            return;
+        }
+        getPackageShortcuts(s, packageName).handlePackageUpdated(s, newVersionCode);
+    }
+
     public void attemptToRestoreIfNeededAndSave(ShortcutService s, @NonNull String packageName,
             @UserIdInt int packageUserId) {
         forPackageItem(packageName, packageUserId, spi -> {

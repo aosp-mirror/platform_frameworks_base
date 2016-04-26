@@ -109,6 +109,27 @@ class ShortcutPackage extends ShortcutPackageItem {
         return getPackageUserId();
     }
 
+    /**
+     * Called when a shortcut is about to be published.  At this point we know the publisher package
+     * exists (as opposed to Launcher trying to fetch shortcuts from a non-existent package), so
+     * we do some initialization for the package.
+     */
+    private void onShortcutPublish(ShortcutService s) {
+        // Make sure we have the version code for the app.  We need the version code in
+        // handlePackageUpdated().
+        if (getPackageInfo().getVersionCode() < 0) {
+            final int versionCode = s.getApplicationVersionCode(getPackageName(), getOwnerUserId());
+            if (ShortcutService.DEBUG) {
+                Slog.d(TAG, String.format("Package %s version = %d", getPackageName(),
+                        versionCode));
+            }
+            if (versionCode >= 0) {
+                getPackageInfo().setVersionCode(versionCode);
+                s.scheduleSaveUser(getOwnerUserId());
+            }
+        }
+    }
+
     @Override
     protected void onRestoreBlocked(ShortcutService s) {
         // Can't restore due to version/signature mismatch.  Remove all shortcuts.
@@ -153,6 +174,9 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void addDynamicShortcut(@NonNull ShortcutService s,
             @NonNull ShortcutInfo newShortcut) {
+
+        onShortcutPublish(s);
+
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
@@ -387,6 +411,40 @@ class ShortcutPackage extends ShortcutPackageItem {
         mApiCallCount = 0;
     }
 
+    /**
+     * Called when the package is updated.  If there are shortcuts with resource icons, update
+     * their timestamps.
+     */
+    public void handlePackageUpdated(ShortcutService s, int newVersionCode) {
+        if (getPackageInfo().getVersionCode() >= newVersionCode) {
+            // Version hasn't changed; nothing to do.
+            return;
+        }
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Package %s updated, version %d -> %d", getPackageName(),
+                    getPackageInfo().getVersionCode(), newVersionCode));
+        }
+
+        getPackageInfo().setVersionCode(newVersionCode);
+
+        boolean changed = false;
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+
+            if (si.hasIconResource()) {
+                changed = true;
+                si.setTimestamp(s.injectCurrentTimeMillis());
+            }
+        }
+        if (changed) {
+            // This will send a notification to the launcher, and also save .
+            s.packageShortcutsChanged(getPackageName(), getPackageUserId());
+        } else {
+            // Still save the version code.
+            s.scheduleSaveUser(getPackageUserId());
+        }
+    }
+
     public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
@@ -413,17 +471,20 @@ class ShortcutPackage extends ShortcutPackageItem {
         getPackageInfo().dump(s, pw, prefix + "  ");
         pw.println();
 
-        pw.println("      Shortcuts:");
+        pw.print(prefix);
+        pw.println("  Shortcuts:");
         long totalBitmapSize = 0;
         final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
         final int size = shortcuts.size();
         for (int i = 0; i < size; i++) {
             final ShortcutInfo si = shortcuts.valueAt(i);
-            pw.print("        ");
+            pw.print(prefix);
+            pw.print("    ");
             pw.println(si.toInsecureString());
             if (si.getBitmapPath() != null) {
                 final long len = new File(si.getBitmapPath()).length();
-                pw.print("          ");
+                pw.print(prefix);
+                pw.print("      ");
                 pw.print("bitmap size=");
                 pw.println(len);
 
