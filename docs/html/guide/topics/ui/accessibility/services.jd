@@ -409,7 +409,7 @@ public class MyAccessibilityService extends AccessibilityService {
 <h3 id="focus-types">Using focus types</h3>
 
 <p>Android 4.1 (API Level 16) introduces a new type of user interface focus called <em>Accessibility
-  Focus</em>. This type of focus can be used by accessibility services to select any visible user
+  Focus</em>. Accessibility services can used this type of focus to select any visible user
   interface element and act on it. This focus type is different from the more well known <em>Input
   Focus</em>, which determines what on-screen user interface element receives input when a user
   types characters, presses <strong>Enter</strong> on a keyboard or pushes the center button of a
