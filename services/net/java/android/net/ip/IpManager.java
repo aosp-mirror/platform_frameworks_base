@@ -41,7 +41,6 @@ import android.util.LocalLog;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.State;
@@ -330,7 +329,6 @@ public class IpManager extends StateMachine {
     // TODO: Revert this hack once IpManager and Nat464Xlat work in concert.
     private static final String CLAT_PREFIX = "v4-";
 
-    private final Object mLock = new Object();
     private final State mStoppedState = new StoppedState();
     private final State mStoppingState = new StoppingState();
     private final State mStartedState = new StartedState();
@@ -350,6 +348,7 @@ public class IpManager extends StateMachine {
     /**
      * Non-final member variables accessed only from within our StateMachine.
      */
+    private LinkProperties mLinkProperties;
     private ProvisioningConfiguration mConfiguration;
     private IpReachabilityMonitor mIpReachabilityMonitor;
     private DhcpClient mDhcpClient;
@@ -359,13 +358,6 @@ public class IpManager extends StateMachine {
     private ApfFilter mApfFilter;
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
-
-    /**
-     * Member variables accessed both from within the StateMachine thread
-     * and via accessors from other threads.
-     */
-    @GuardedBy("mLock")
-    private LinkProperties mLinkProperties;
 
     public IpManager(Context context, String ifName, Callback callback)
                 throws IllegalArgumentException {
@@ -506,12 +498,6 @@ public class IpManager extends StateMachine {
         sendMessage(CMD_SET_MULTICAST_FILTER, enabled);
     }
 
-    public LinkProperties getLinkProperties() {
-        synchronized (mLock) {
-            return new LinkProperties(mLinkProperties);
-        }
-    }
-
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println("APF dump:");
@@ -586,10 +572,8 @@ public class IpManager extends StateMachine {
         mTcpBufferSizes = "";
         mHttpProxy = null;
 
-        synchronized (mLock) {
-            mLinkProperties = new LinkProperties();
-            mLinkProperties.setInterfaceName(mInterfaceName);
-        }
+        mLinkProperties = new LinkProperties();
+        mLinkProperties.setInterfaceName(mInterfaceName);
     }
 
     private void recordMetric(final int type) {
@@ -695,11 +679,8 @@ public class IpManager extends StateMachine {
             mIpReachabilityMonitor.updateLinkProperties(newLp);
         }
 
-        ProvisioningChange delta;
-        synchronized (mLock) {
-            delta = compareProvisioning(mLinkProperties, newLp);
-            mLinkProperties = new LinkProperties(newLp);
-        }
+        ProvisioningChange delta = compareProvisioning(mLinkProperties, newLp);
+        mLinkProperties = new LinkProperties(newLp);
 
         if (DBG) {
             switch (delta) {
@@ -714,9 +695,7 @@ public class IpManager extends StateMachine {
     }
 
     private boolean linkPropertiesUnchanged(LinkProperties newLp) {
-        synchronized (mLock) {
-            return Objects.equals(newLp, mLinkProperties);
-        }
+        return Objects.equals(newLp, mLinkProperties);
     }
 
     private LinkProperties assembleLinkProperties() {
@@ -970,7 +949,7 @@ public class IpManager extends StateMachine {
                 } else {
                     if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
                     recordMetric(IPCE_IPMGR_PROVISIONING_FAIL);
-                    mCallback.onProvisioningFailure(getLinkProperties());
+                    mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
                     transitionTo(mStoppingState);
                 }
             } else {
