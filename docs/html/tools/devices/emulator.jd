@@ -248,7 +248,7 @@ Use your computer keyboard to type characters and enter emulator shortcuts.</p>
  </tr>
  <tr>
     <td><nobr>Pinch and spread</nobr></td>
-    <td><div>Pressing Alt or Option (⌥) brings up a pinch gesture multi-touch
+    <td><div>Pressing Ctrl or Command (⌘) brings up a pinch gesture multi-touch
     interface. The mouse acts as the first finger, and across the anchor point
     is the second finger. Drag the cursor to move the first point.</div>
     <div>Clicking the left mouse button acts like touching down both points, and
