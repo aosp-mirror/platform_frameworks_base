@@ -299,13 +299,9 @@ location is in <code>~/.android/</code> on OS X and Linux, in <code>C:\Documents
 Settings\&lt;user&gt;\.android\</code> on Windows XP, and in
 <code>C:\Users\&lt;user&gt;\.android\</code> on Windows Vista and Windows 7.</p>
 
-<p>The next time you build, the build tools will regenerate a new keystore and debug key.</p>
-
-<p>Note that, if your development machine is using a non-Gregorian locale, the build tools may
-erroneously generate an already-expired debug certificate, so that you get an error when trying
-to compile your application. For workaround information, see the troubleshooting topic
-<a href="{@docRoot}resources/faq/troubleshooting.html#signingcalendar">I can't compile my app
-because the build tools generated an expired debug certificate</a>.</p>
+<p>The next time you build and run your app, the build tools will regenerate a
+  new keystore and debug key. Note that you must run your app, building alone
+  does not regenerate the keystore and debug key.</p>
 
 
 <h2 id="signing-manually">Signing Your App Manually</h2>
