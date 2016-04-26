@@ -204,10 +204,20 @@ LOCAL_LDLIBS += -latomic
 
 <h4>Compatibility</h4>
 
-<p>Around 99% of tests pass when compiling {@code libc++} with Clang 3.4 for all supported ABIs.
-The failures are mostly in the areas of {@code wchar_t} and locales that Android bionic
-doesn't support. Switching locale from the default produces the following warning in
-{@code logcat}:</p>
+<p>The NDK's libc++ is not stable. Not all the tests pass, and the test suite is not comprehensive.
+Some known issues are:</p>
+
+<ul>
+    <li>Using {@code c++_shared} on ARM can crash when an exception is thrown.</li>
+    <li>Support for {@code wchar_t} and the locale APIs is limited.</li>
+</ul>
+
+<p>You should also make sure to check the "Known Issues" section of the changelog for the NDK
+release you are using.</p>
+
+<p class="note"><strong>Warning: </strong>Attempting to change to an unsupported locale will
+<strong>not</strong> fail. The operation will succeed, but the locale will not change and the
+following message will appear in {@code logcat}.</p>
 
 <pre>
 newlocale() WARNING: Trying to set locale to en_US.UTF-8 other than "", "C" or "POSIX"
