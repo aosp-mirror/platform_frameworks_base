@@ -652,6 +652,7 @@ public class PackageParser {
     public final static int PARSE_TRUSTED_OVERLAY = 1<<9;
     public final static int PARSE_ENFORCE_CODE = 1<<10;
     public final static int PARSE_IS_EPHEMERAL = 1<<11;
+    public final static int PARSE_FORCE_SDK = 1<<12;
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 

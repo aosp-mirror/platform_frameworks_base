@@ -684,6 +684,14 @@ public abstract class PackageManager {
     public static final int INSTALL_DONT_KILL_APP = 0x00001000;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that this package is an
+     * upgrade to a package that refers to the SDK via release letter.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FORCE_SDK = 0x00002000;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
