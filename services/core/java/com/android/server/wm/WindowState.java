@@ -73,6 +73,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -90,6 +91,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -2717,6 +2719,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mWillReplaceWindow = false;
         mReplacingWindow = null;
         mAnimateReplacingWindow = false;
+    }
+
+    void requestUpdateWallpaperIfNeeded() {
+        if (mDisplayContent != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+            mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            mDisplayContent.layoutNeeded = true;
+            mService.mWindowPlacerLocked.requestTraversal();
+        }
     }
 
     float translateToWindowX(float x) {
