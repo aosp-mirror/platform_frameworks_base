@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -50,7 +51,6 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Build.VERSION_CODES;
 import android.speech.tts.TextToSpeech;
@@ -61,9 +61,12 @@ import android.util.ArraySet;
 import android.util.LocaleList;
 import android.util.Log;
 
+import android.util.MemoryIntArray;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -1282,6 +1285,29 @@ public final class Settings {
     public static final String CALL_METHOD_GET_GLOBAL = "GET_global";
 
     /**
+     * @hide - Specifies that the caller of the fast-path call()-based flow tracks
+     * the settings generation in order to cache values locally. If this key is
+     * mapped to a <code>null</code> string extra in the request bundle, the response
+     * bundle will contain the same key mapped to a parcelable extra which would be
+     * an {@link android.util.MemoryIntArray}. The response will also contain an
+     * integer mapped to the {@link #CALL_METHOD_GENERATION_INDEX_KEY} which is the
+     * index in the array clients should use to lookup the generation. For efficiency
+     * the caller should request the generation tracking memory array only if it
+     * doesn't already have it.
+     *
+     * @see #CALL_METHOD_GENERATION_INDEX_KEY
+     */
+    public static final String CALL_METHOD_TRACK_GENERATION_KEY = "_track_generation";
+
+    /**
+     * @hide Key with the location in the {@link android.util.MemoryIntArray} where
+     * to look up the generation id of the backing table.
+     *
+     * @see #CALL_METHOD_TRACK_GENERATION_KEY
+     */
+    public static final String CALL_METHOD_GENERATION_INDEX_KEY = "_generation_index";
+
+    /**
      * @hide - User handle argument extra to the fast-path call()-based requests
      */
     public static final String CALL_METHOD_USER_KEY = "_user";
@@ -1424,9 +1450,42 @@ public final class Settings {
         }
     }
 
+    private static final class GenerationTracker {
+        private final MemoryIntArray mArray;
+        private final int mIndex;
+        private int mCurrentGeneration;
+
+        public GenerationTracker(@NonNull MemoryIntArray array, int index) {
+            mArray = array;
+            mIndex = index;
+            mCurrentGeneration = readCurrentGeneration();
+        }
+
+        public boolean isGenerationChanged() {
+            final int currentGeneration = readCurrentGeneration();
+            if (currentGeneration >= 0) {
+                if (currentGeneration == mCurrentGeneration) {
+                    return false;
+                }
+                mCurrentGeneration = currentGeneration;
+            }
+            return true;
+        }
+
+        private int readCurrentGeneration() {
+            try {
+                return mArray.get(mIndex);
+            } catch (IOException e) {
+                Log.e(TAG, "Error getting current generation", e);
+            }
+            return -1;
+        }
+    }
+
     // Thread-safe.
     private static class NameValueCache {
-        private final String mVersionSystemProperty;
+        private static final boolean DEBUG = false;
+
         private final Uri mUri;
 
         private static final String[] SELECT_VALUE =
@@ -1435,7 +1494,6 @@ public final class Settings {
 
         // Must synchronize on 'this' to access mValues and mValuesVersion.
         private final HashMap<String, String> mValues = new HashMap<String, String>();
-        private long mValuesVersion = 0;
 
         // Initially null; set lazily and held forever.  Synchronized on 'this'.
         private IContentProvider mContentProvider = null;
@@ -1445,9 +1503,10 @@ public final class Settings {
         private final String mCallGetCommand;
         private final String mCallSetCommand;
 
-        public NameValueCache(String versionSystemProperty, Uri uri,
-                String getCommand, String setCommand) {
-            mVersionSystemProperty = versionSystemProperty;
+        @GuardedBy("this")
+        private GenerationTracker mGenerationTracker;
+
+        public NameValueCache(Uri uri, String getCommand, String setCommand) {
             mUri = uri;
             mCallGetCommand = getCommand;
             mCallSetCommand = setCommand;
@@ -1482,22 +1541,18 @@ public final class Settings {
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             if (isSelf) {
-                long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
-
-                // Our own user's settings data uses a client-side cache
                 synchronized (this) {
-                    if (mValuesVersion != newValuesVersion) {
-                        if (LOCAL_LOGV || false) {
-                            Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current "
-                                    + newValuesVersion + " != cached " + mValuesVersion);
+                    if (mGenerationTracker != null) {
+                        if (mGenerationTracker.isGenerationChanged()) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Generation changed for type:"
+                                        + mUri.getPath() + " in package:"
+                                        + cr.getPackageName() +" and user:" + userHandle);
+                            }
+                            mValues.clear();
+                        } else if (mValues.containsKey(name)) {
+                            return mValues.get(name);
                         }
-
-                        mValues.clear();
-                        mValuesVersion = newValuesVersion;
-                    }
-
-                    if (mValues.containsKey(name)) {
-                        return mValues.get(name);  // Could be null, that's OK -- negative caching
                     }
                 }
             } else {
@@ -1518,12 +1573,42 @@ public final class Settings {
                         args = new Bundle();
                         args.putInt(CALL_METHOD_USER_KEY, userHandle);
                     }
+                    boolean needsGenerationTracker = false;
+                    synchronized (this) {
+                        if (isSelf && mGenerationTracker == null) {
+                            needsGenerationTracker = true;
+                            if (args == null) {
+                                args = new Bundle();
+                            }
+                            args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
+                            if (DEBUG) {
+                                Log.i(TAG, "Requested generation tracker for type: "+ mUri.getPath()
+                                        + " in package:" + cr.getPackageName() +" and user:"
+                                        + userHandle);
+                            }
+                        }
+                    }
                     Bundle b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
                     if (b != null) {
-                        String value = b.getPairValue();
+                        String value = b.getString(Settings.NameValueTable.VALUE);
                         // Don't update our cache for reads of other users' data
                         if (isSelf) {
                             synchronized (this) {
+                                if (needsGenerationTracker) {
+                                    MemoryIntArray array = b.getParcelable(
+                                            CALL_METHOD_TRACK_GENERATION_KEY);
+                                    final int index = b.getInt(
+                                            CALL_METHOD_GENERATION_INDEX_KEY, -1);
+                                    if (array != null && index >= 0) {
+                                        if (DEBUG) {
+                                            Log.i(TAG, "Received generation tracker for type:"
+                                                    + mUri.getPath() + " in package:"
+                                                    + cr.getPackageName() + " and user:"
+                                                    + userHandle + " with index:" + index);
+                                        }
+                                        mGenerationTracker = new GenerationTracker(array, index);
+                                    }
+                                }
                                 mValues.put(name, value);
                             }
                         } else {
@@ -1592,8 +1677,6 @@ public final class Settings {
      * functions for accessing individual settings entries.
      */
     public static final class System extends NameValueTable {
-        public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
-
         private static final float DEFAULT_FONT_SCALE = 1.0f;
 
         /** @hide */
@@ -1608,7 +1691,6 @@ public final class Settings {
             Uri.parse("content://" + AUTHORITY + "/system");
 
         private static final NameValueCache sNameValueCache = new NameValueCache(
-                SYS_PROP_SETTING_VERSION,
                 CONTENT_URI,
                 CALL_METHOD_GET_SYSTEM,
                 CALL_METHOD_PUT_SYSTEM);
@@ -3913,8 +3995,6 @@ public final class Settings {
      * APIs for those values, not modified directly by applications.
      */
     public static final class Secure extends NameValueTable {
-        public static final String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
-
         /**
          * The content:// style URL for this table
          */
@@ -3923,7 +4003,6 @@ public final class Settings {
 
         // Populated lazily, guarded by class object:
         private static final NameValueCache sNameValueCache = new NameValueCache(
-                SYS_PROP_SETTING_VERSION,
                 CONTENT_URI,
                 CALL_METHOD_GET_SECURE,
                 CALL_METHOD_PUT_SECURE);
@@ -6360,8 +6439,6 @@ public final class Settings {
      * explicitly modify through the system UI or specialized APIs for those values.
      */
     public static final class Global extends NameValueTable {
-        public static final String SYS_PROP_SETTING_VERSION = "sys.settings_global_version";
-
         /**
          * The content:// style URL for global secure settings items.  Not public.
          */
@@ -8412,7 +8489,6 @@ public final class Settings {
 
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = new NameValueCache(
-                    SYS_PROP_SETTING_VERSION,
                     CONTENT_URI,
                     CALL_METHOD_GET_GLOBAL,
                     CALL_METHOD_PUT_GLOBAL);
