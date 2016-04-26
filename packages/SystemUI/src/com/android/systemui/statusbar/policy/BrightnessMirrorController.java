@@ -25,12 +25,14 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
  * Controls showing and hiding of the brightness mirror.
  */
 public class BrightnessMirrorController {
 
+    private final NotificationStackScrollLayout mStackScroller;
     public long TRANSITION_DURATION_OUT = 150;
     public long TRANSITION_DURATION_IN = 200;
 
@@ -45,10 +47,13 @@ public class BrightnessMirrorController {
         mScrimBehind = (ScrimView) statusBarWindow.findViewById(R.id.scrim_behind);
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
+        mStackScroller = (NotificationStackScrollLayout) statusBarWindow.findViewById(
+                R.id.notification_stack_scroller);
     }
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
+        mStackScroller.setFadedOut(true);
         mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, Interpolators.ALPHA_OUT);
         outAnimation(mNotificationPanel.animate())
                 .withLayer();
@@ -62,6 +67,7 @@ public class BrightnessMirrorController {
                     @Override
                     public void run() {
                         mBrightnessMirror.setVisibility(View.INVISIBLE);
+                        mStackScroller.setFadedOut(false);
                     }
                 });
     }
@@ -69,7 +75,8 @@ public class BrightnessMirrorController {
     private ViewPropertyAnimator outAnimation(ViewPropertyAnimator a) {
         return a.alpha(0.0f)
                 .setDuration(TRANSITION_DURATION_OUT)
-                .setInterpolator(Interpolators.ALPHA_OUT);
+                .setInterpolator(Interpolators.ALPHA_OUT)
+                .withEndAction(null);
     }
     private ViewPropertyAnimator inAnimation(ViewPropertyAnimator a) {
         return a.alpha(1.0f)
