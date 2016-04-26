@@ -32,7 +32,7 @@ href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
 <img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
 
 
-<h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
+<h2 id="get-as13">Get Android Studio 2.1</h2>
 
 <p>The Android N platform adds support for <a
 href="{@docRoot}preview/j8-jack.html">Java 8 language features</a>,
@@ -41,55 +41,14 @@ is currently supported only in Android Studio 2.1. So if you want to
 use Java 8 language features, you need to use Android Studio 2.1 to
 build your app. Otherwise, you don't need to use the Jack compiler, but you
 still need to update to JDK 8 to compile against the Android N platform,
-as described below.
-</p>
+as described below.</p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+<p>If you already have Android Studio installed, make sure you have Android
+Studio 2.1 or higher by clicking <strong>Help > Check for Update</strong>
+(on Mac, <strong>Android Studio > Check for Updates</strong>).</p>
 
-<p>Android Studio 2.1 is currently available as a preview in the canary
-release channel. If you already
-have Android Studio and don't want to update to the canary channel, you can
-download Android Studio 2.1 as a separate installation and use it
-for development with Android N, leaving your primary Android Studio
-environment unaffected.</p>
-
-<p>To download Android Studio 2.1 as a separate installation, follow these
-steps (or if you want to receive Android Studio 2.1 as an update to your
-existing installation, skip to step 6):</p>
-
-<ol>
-  <li>Edit the name of your
-  existing Android Studio installation and append the version number. This way,
-  when you install the new version, it will not override the existing one.</li>
-  <li>Download the appropriate ZIP file for your operating system from the
-    <a href="http://tools.android.com/download/studio/canary/latest"
-    >canary channel download page</a>.
-  </li>
-  <li>Unzip the package and move the Android Studio 2.1 contents to the
-    appropriate location for applications on your system, then launch it.</li>
-  <li>In the setup wizard, click <strong>Next</strong> a couple times to
-  reach the SDK Components Setup screen. Here,
-  you must set a different path for the <strong>Android SDK Location</strong>.
-  It can be any directory you want, but it must not be the default path, which
-  is the same directory used by your original version of Android Studio (unless
-  you changed that one yourself). The SDK location for Android Studio 2.1
-  must be different because the N Preview SDK packages are not compatible with
-  versions of Android Studio lower than 2.1.</p>
-  </li>
-  <li>Continue with the setup wizard until you reach the Android Studio IDE.</li>
-  <li>Open the Settings dialog
-    (<strong>File &gt; Settings</strong> on Windows/Linux, or
-    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
-    panel, select <strong>Appearance &amp; Behavior &gt; System Settings &gt;
-    Updates</strong>.
-  </li>
-  <li>On the Updates panel, select the <strong>Automatically
-    check updates for</strong> check box and select
-    <strong>Canary Channel</strong> from the drop-down list.
-  </li>
-</ol>
-
-<p>Keep this settings window open for the next step.</p>
+<p>If you don't have it, <a href="{@docRoot}sdk/">download Android Studio
+2.1 here</a>.</p>
 
 
 <h2 id="get-sdk">Get the N Preview SDK</h2>
@@ -98,17 +57,10 @@ existing installation, skip to step 6):</p>
 Android N Preview SDK in Android Studio as follows:</p>
 
 <ol>
-  <li>While still viewing the Updates panel (step 4 from above),
-  select the <strong>Automatically
-    check updates for Android SDK</strong> check box and select
-    <strong>Preview Channel</strong> from the drop-down list.
-  </li>
-  <li>Click <strong>Check Now</strong>.</li>
+  <li>Open the SDK Manager by clicking <strong>Tools > Android >
+  SDK Manager</strong>.</li>
 
-  <li>In the left panel, select <strong>Appearance &amp; Behavior &gt;
-  System Settings &gt; Android SDK</strong>.
-
-  <li>Click the <strong>SDK Platforms</strong> tab, then select the
+  <li>In the <strong>SDK Platforms</strong> tab, select the
   <strong>Android N Preview</strong> check box.</li>
 
   <li>Click the <strong>SDK Tools</strong> tab, then select the
@@ -199,7 +151,7 @@ how to configure your project with the Jack compiler.</p>
 <pre>
 android {
   compileSdkVersion <strong>'android-N'</strong>
-  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  buildToolsVersion <strong>'24.0.0-rc3'</strong>
   ...
 
   defaultConfig {
