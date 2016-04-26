@@ -314,6 +314,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Notify that recents is now visible
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
+
+        // Notify of the next draw
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+
+                    @Override
+                    public boolean onPreDraw() {
+                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        EventBus.getDefault().post(new RecentsDrawnEvent());
+                        return true;
+                    }
+                });
     }
 
     @Override
@@ -397,23 +409,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Notify of the next draw
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-
-                    @Override
-                    public boolean onPreDraw() {
-                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        EventBus.getDefault().post(new RecentsDrawnEvent());
-                        return true;
-                    }
-                });
     }
 
     @Override
