@@ -370,19 +370,6 @@ public class UserRestrictionsUtils {
                                 android.provider.Settings.Secure.LOCATION_MODE_OFF,
                                 userId);
                     }
-                    // Send out notifications as some clients may want to reread the
-                    // value which actually changed due to a restriction having been
-                    // applied.
-                    final String property =
-                            android.provider.Settings.Secure.SYS_PROP_SETTING_VERSION;
-                    long version = SystemProperties.getLong(property, 0) + 1;
-                    SystemProperties.set(property, Long.toString(version));
-
-                    final String name = android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
-                    final Uri url = Uri.withAppendedPath(
-                            android.provider.Settings.Secure.CONTENT_URI, name);
-                    context.getContentResolver().notifyChange(url, null, true, userId);
-
                     break;
                 case UserManager.DISALLOW_DEBUGGING_FEATURES:
                     if (newValue) {
