@@ -121,7 +121,7 @@
       <li><a href="<?cs var:toroot ?>guide/topics/resources/overview.html">
           <span class="en">Overview</span>
         </a></li>
-        <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
           <span class="en">Providing Resources</span>
         </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/resources/accessing-resources.html">
@@ -129,9 +129,12 @@
         </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
             <span class="en">Handling Runtime Changes</span>
-          </a></li>
+        </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
           <span class="en">Localization</span>
+        </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/resources/complex-xml-resources.html">
+          <span class="en">Complex XML Resources</span>
         </a></li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">

@@ -9,6 +9,7 @@ page.title=Resources Overview
     <li><a href="accessing-resources.html">Accessing Resources</a></li>
     <li><a href="runtime-changes.html">Handling Runtime Changes</a></li>
     <li><a href="localization.html">Localization</a></li>
+    <li><a href="complex-xml-resources.html">Complex XML Resources</a></li>
   </ol>
 
   <h2>Reference</h2>
@@ -79,6 +80,9 @@ code or from other XML resources.</dd>
   <dd>A bottom-up guide to localizing your application using alternative resources. While this is
 just one specific use of alternative resources, it is very important in order to reach more
 users.</dd>
+  <dt><strong><a href="complex-xml-resources.html">Complex XML Resources</a></strong></dt>
+  <dd>An XML format for building complex resources like animated vector drawables in a single
+XML file.</dd>
   <dt><strong><a href="available-resources.html">Resource Types</a></strong></dt>
   <dd>A reference of various resource types you can provide, describing their XML elements,
 attributes, and syntax. For example, this reference shows you how to create a resource for
