@@ -36,6 +36,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertDynamicOnly;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertShortcutIds;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.findShortcut;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.hashSet;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
@@ -644,6 +645,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.flags = ApplicationInfo.FLAG_INSTALLED
                 | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
+        pi.applicationInfo.versionCode = version;
         pi.signatures = genSignatures(signatures);
 
         return pi;
@@ -655,6 +657,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private void updatePackageInfo(String packageName, Consumer<PackageInfo> c) {
         c.accept(mInjectedPackages.get(packageName));
+    }
+
+    private void updatePackageVersion(String packageName, int increment) {
+        updatePackageInfo(packageName, pi -> {
+            pi.versionCode += increment;
+            pi.applicationInfo.versionCode += increment;
+        });
     }
 
     private void uninstallPackage(int userId, String packageName) {
@@ -3839,7 +3848,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Start uninstalling.
         uninstallPackage(USER_10, LAUNCHER_1);
-        mService.cleanupGonePackages(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
@@ -3859,7 +3868,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Uninstall.
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
-        mService.cleanupGonePackages(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
@@ -3878,7 +3887,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
         uninstallPackage(USER_P0, LAUNCHER_1);
-        mService.cleanupGonePackages(USER_0);
+        mService.checkPackageChanges(USER_0);
 
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
@@ -3896,7 +3905,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        mService.cleanupGonePackages(USER_P0);
+        mService.checkPackageChanges(USER_P0);
         
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
@@ -4148,6 +4157,193 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+    }
+
+    public void testHandlePackageUpdate() throws Throwable {
+
+        // Set up shortcuts and launchers.
+
+        final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"),
+                    makeShortcutWithIcon("s2", res32x32),
+                    makeShortcutWithIcon("s3", res32x32),
+                    makeShortcutWithIcon("s4", bmp32x32))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"),
+                    makeShortcutWithIcon("s2", bmp32x32))));
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("s1", res32x32))));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("s1", res32x32),
+                    makeShortcutWithIcon("s2", res32x32))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("s1", bmp32x32),
+                    makeShortcutWithIcon("s2", bmp32x32))));
+        });
+
+        LauncherApps.Callback c0 = mock(LauncherApps.Callback.class);
+        LauncherApps.Callback c10 = mock(LauncherApps.Callback.class);
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.registerCallback(c0, new Handler(Looper.getMainLooper()));
+        });
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.registerCallback(c10, new Handler(Looper.getMainLooper()));
+        });
+
+        mInjectedCurrentTimeLillis = START_TIME + 100;
+
+        ArgumentCaptor<List> shortcuts;
+
+        // First, call the event without updating the versions.
+        reset(c0);
+        reset(c10);
+
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_10));
+
+        waitOnMainThread();
+
+        // Version not changed, so no callback.
+        verify(c0, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+        verify(c10, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+
+        // Next, update the version info for package 1.
+        reset(c0);
+        reset(c10);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+
+        // Then send the broadcast, to only user-0.
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
+
+        waitOnMainThread();
+
+        // User-0 should get the notification.
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(HANDLE_USER_0));
+
+        // User-10 shouldn't yet get the notification.
+        verify(c10, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+        assertShortcutIds(shortcuts.getValue(), "s1", "s2", "s3", "s4");
+        assertEquals(START_TIME,
+                findShortcut(shortcuts.getValue(), "s1").getLastChangedTimestamp());
+        assertEquals(START_TIME + 100,
+                findShortcut(shortcuts.getValue(), "s2").getLastChangedTimestamp());
+        assertEquals(START_TIME + 100,
+                findShortcut(shortcuts.getValue(), "s3").getLastChangedTimestamp());
+        assertEquals(START_TIME,
+                findShortcut(shortcuts.getValue(), "s4").getLastChangedTimestamp());
+
+        // Next, send unlock even on user-10.  Now we scan packages on this user and send a
+        // notification to the launcher.
+        mInjectedCurrentTimeLillis = START_TIME + 200;
+
+        when(mMockUserManager.isUserRunning(eq(USER_10))).thenReturn(true);
+
+        reset(c0);
+        reset(c10);
+        mService.handleUnlockUser(USER_10);
+
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+
+        verify(c10).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(HANDLE_USER_10));
+
+        assertShortcutIds(shortcuts.getValue(), "s1", "s2");
+        assertEquals(START_TIME + 200,
+                findShortcut(shortcuts.getValue(), "s1").getLastChangedTimestamp());
+        assertEquals(START_TIME + 200,
+                findShortcut(shortcuts.getValue(), "s2").getLastChangedTimestamp());
+
+
+        // Do the same thing for package 2, which doesn't have resource icons.
+        mInjectedCurrentTimeLillis = START_TIME + 300;
+
+        reset(c0);
+        reset(c10);
+        updatePackageVersion(CALLING_PACKAGE_2, 10);
+
+        // Then send the broadcast, to only user-0.
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_2, USER_0));
+        mService.handleUnlockUser(USER_10);
+
+        waitOnMainThread();
+
+        verify(c0, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+
+        verify(c10, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                any(List.class),
+                any(UserHandle.class));
+
+        // Do the same thing for package 3
+        mInjectedCurrentTimeLillis = START_TIME + 400;
+
+        reset(c0);
+        reset(c10);
+        updatePackageVersion(CALLING_PACKAGE_3, 100);
+
+        // Then send the broadcast, to only user-0.
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_3, USER_0));
+        mService.handleUnlockUser(USER_10);
+
+        waitOnMainThread();
+
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_3),
+                shortcuts.capture(),
+                eq(HANDLE_USER_0));
+
+        // User 10 doesn't have package 3, so no callback.
+        verify(c10, times(0)).onShortcutsChanged(
+                eq(CALLING_PACKAGE_3),
+                any(List.class),
+                any(UserHandle.class));
+
+        assertShortcutIds(shortcuts.getValue(), "s1");
+        assertEquals(START_TIME + 400,
+                findShortcut(shortcuts.getValue(), "s1").getLastChangedTimestamp());
     }
 
     private void backupAndRestore() {
