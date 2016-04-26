@@ -249,6 +249,7 @@ dependencies {
 }
 </pre>
 
+
 <p>
   To use JUnit 4 test classes, make sure to specify <a href=
   "{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code
@@ -265,9 +266,39 @@ android {
 }
 </pre>
 
-<h2 id="build">
-  Build and Run Your Tests
-</h2>
+<h3 id="testartifacts">Work With Test Artifacts</h3>
+<p>Android Studio has two types of test artifacts: Android Instrumentation Tests
+and Unit Tests. Previously, you could work with just one test artifact at a
+time. Now, both test artifacts are enabled.
+The advantage of enabling both test artifacts is that any changes you make to
+the underlying code affect
+them both. For example, if you rename a class that both test artifacts access,
+both will know about the class name refactoring.</p>
+
+<p>The figure shows what your project looks like with both test
+artifacts enabled. Notice the shading of both test artifacts.</p>
+
+<!-- Commenting out for now, but leaving it in case we need to add it back.
+<img src="{@docRoot}images/training/testartifactseparate.png" style="float:left;width:250px;margin-right:20px" /> -->
+<img src="{@docRoot}images/training/testartifactcombined.png" style="float:left;width:250px" />
+<!-- Commenting out for now, but leaving it in case we need to add it back.
+<p>
+By default, both test artifacts are enabled in Android Studio. To enable just
+one, deselect <strong>Enable all test artifacts</strong> in your preferences:
+</p>
+
+<ol>
+<li>Select
+<strong>Android Studio</strong> > <strong>Preferences</strong> > <strong>Build,
+Execution, Deployment</strong> > <strong>Build Tools</strong> >
+<strong>Gradle</strong> > <strong>Experimental</strong>.</li>
+<li>Deselect the test artifacts option.</li>
+<li>Click <strong>OK</strong>.</li>
+</ol>
+-->
+
+<h2 id="build">Build and Run Your Tests</h2>
+
 
 <p>
   Android Studio provides all the tools you need to build, run, and analyze
@@ -293,13 +324,17 @@ android {
 </p>
 
 <ol>
+
   <li>In the <em>Project</em> window, right click on the project and
   synchronize your project.
   </li>
 
-  <li>Open the <em>Build Variants</em> window by clicking the left-hand tab,
-  then change the test artifact to <em>Unit Tests</em>.
-  </li>
+  <!--
+<li>If you enabled one test artifact only, open the
+<strong>Build Variants</strong> window by clicking the left-hand tab, then
+change the test artifact to <em>Unit Tests</em>.
+</li>
+-->
 
   <li>In the <em>Project</em> window, navigate to your unit test class or
   method, then right-click it and select <strong>Run</strong> <img src=
@@ -313,6 +348,7 @@ android {
       </li>
     </ul>
   </li>
+
 </ol>
 
 <p>
@@ -330,10 +366,13 @@ android {
   To run your instrumented tests:
 </p>
 
-<ol>
-  <li>Open the <em>Build Variants</em> window by clicking the left-hand tab,
-  then set the test artifact to <em>Android Instrumentation Tests</em>.
-  </li>
+<ul>
+  <!--
+<li>If you enabled one test artifact only, open the
+<strong>Build Variants</strong> window by clicking the left-hand tab, then set
+the test artifact to <em>Android Instrumentation Tests</em>.
+</li>
+-->
 
   <li>In the <em>Project</em> window, navigate to your instrumented test class
   or method, then right-click and run it using the Android Test configuration.
@@ -342,7 +381,7 @@ android {
   "{@docRoot}images/tools/as-run.png" alt="" style=
   "vertical-align:bottom;margin:0;">.
   </li>
-</ol>
+</ul>
 
 <p>
   The <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin
@@ -401,6 +440,7 @@ android {
     billing account</a> and associate it with the project you just created.
   </li>
 </ol>
+
 
 <h4 id="configure-matrix">
 Configure a test matrix and run a test
