@@ -191,6 +191,13 @@ public class ActivityInfo extends ComponentInfo
     public int resizeMode;
 
     /**
+     * Name of the VrListenerService component to run for this activity.
+     * @see android.R.attr#enableVrMode
+     * @hide
+     */
+    public String requestedVrComponent;
+
+    /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
      * true, the system may instantiate it in the some process as the
@@ -794,6 +801,7 @@ public class ActivityInfo extends ComponentInfo
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
         windowLayout = orig.windowLayout;
         resizeMode = orig.resizeMode;
+        requestedVrComponent = orig.requestedVrComponent;
     }
 
     /**
@@ -896,6 +904,9 @@ public class ActivityInfo extends ComponentInfo
                     + windowLayout.heightFraction + ", " + windowLayout.gravity);
         }
         pw.println(prefix + "resizeMode=" + resizeModeToString(resizeMode));
+        if (requestedVrComponent != null) {
+            pw.println(prefix + "requestedVrComponent=" + requestedVrComponent);
+        }
         super.dumpBack(pw, prefix, flags);
     }
 
@@ -939,6 +950,7 @@ public class ActivityInfo extends ComponentInfo
             dest.writeInt(0);
         }
         dest.writeInt(resizeMode);
+        dest.writeString(requestedVrComponent);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -972,6 +984,7 @@ public class ActivityInfo extends ComponentInfo
             windowLayout = new WindowLayout(source);
         }
         resizeMode = source.readInt();
+        requestedVrComponent = source.readString();
     }
 
     /**
