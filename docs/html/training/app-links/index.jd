@@ -16,7 +16,7 @@ page.tags=androidm,marshmallow
     </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing API Support in Android Studio</a></li>
+    <li><a href="{@docRoot}tools/help/app-link-indexing.html">Supporting URLs and App Indexing in Android Studio</a></li>
   </ol>
   </div>
 </div>
