@@ -5096,6 +5096,19 @@ public class PackageParser {
             return latestUse;
         }
 
+        public long getLatestForegroundPackageUseTimeInMills() {
+            int[] foregroundReasons = {
+                PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY,
+                PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE
+            };
+
+            long latestUse = 0L;
+            for (int reason : foregroundReasons) {
+                latestUse = Math.max(latestUse, mLastPackageUsageTimeInMills[reason]);
+            }
+            return latestUse;
+        }
+
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))

@@ -69,11 +69,12 @@ public class PackageManagerServiceUtils {
         long now = System.currentTimeMillis();
         for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
             PackageParser.Package pkg = i.next();
-            long then = pkg.getLatestPackageUseTimeInMills();
+            long then = pkg.getLatestForegroundPackageUseTimeInMills();
             if (then + dexOptLRUThresholdInMills < now) {
                 if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
-                          ((then == 0) ? "never" : new Date(then)));
+                    Log.i(TAG, "Skipping dexopt of " + pkg.packageName +
+                            " last used in foreground: " +
+                            ((then == 0) ? "never" : new Date(then)));
                 }
                 i.remove();
                 skipped++;
@@ -110,6 +111,18 @@ public class PackageManagerServiceUtils {
             if (pkgNames.contains(pkg.packageName)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Adding pre boot system app " + result.size() + ": " +
+                            pkg.packageName);
+                }
+                result.add(pkg);
+            }
+        }
+        remainingPkgs.removeAll(result);
+
+        // Give priority to apps used by other apps.
+        for (PackageParser.Package pkg : remainingPkgs) {
+            if (PackageDexOptimizer.isUsedByOtherApps(pkg)) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Adding app used by other apps " + result.size() + ": " +
                             pkg.packageName);
                 }
                 result.add(pkg);
