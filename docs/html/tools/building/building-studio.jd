@@ -394,11 +394,10 @@ parent.link=index.html
         <li>Change the app manifest
         </li>
 
-        <li>Change resources reference by the app manifest
+        <li>Change resources referenced by the app manifest
         </li>
 
-        <li>Change an Android widget UI element (requires a <a href="#rerun">
-          Clean and Rerun</a>)
+        <li>Change an Android widget UI element
         </li>
       </ul>
     </td>
@@ -415,8 +414,17 @@ parent.link=index.html
         If your build process automatically updates any part of the app manifest,
         such as automatically iterating <code>versionCode</code> or
         <code>versionName</code>, you will not be able to benefit from the full
-        performance of Instant Run. We recommend that you disable automatic updates
-        to any part in the app manifest in your debug build variants.
+        performance of Instant Run. When using Instant Run, you should disable
+        automatic updates to any part in the app manifest in your debug build
+        variants.
+      </p>
+
+      <p>
+        When updating an Android widget UI element, you need to perform a <a href=
+        "#rerun">Clean and Rerun</a> to see your changes. Alternatively, because
+        performing clean builds may take longer while using Instant Run, you can
+        temporarily <a href="#disable-ir">disable Instant Run</a> while making
+        updates to your widget UI.
       </p>
     </td>
   </tr>
@@ -608,7 +616,49 @@ android {
 <p>
   You should experiment with these settings by incrementing their values and
   observing the effect on your build times. You could experience a negative
-  impact to performance if you allocate too many resources to the DEX'ing process.
+  impact to performance if you allocate too many resources to the dexing process.
+</p>
+
+<h4>
+  Enabling dexing-in-process and incremental Java compilation
+</h4>
+
+<p>
+  <a href="{@docRoot}tools/revisions/gradle-plugin.html#revisions">Android
+  Plugin for Gradle version 2.1.0</a> and higher features additional build
+  process improvements, including incremental Java compilation and
+  dexing-in-process. Incremental Java compilation is enabled by default and
+  reduces compilation time during development by only recompiling portions of
+  the source that have changed or need to be recompiled.
+</p>
+
+<p>
+  Dexing-in-process performs dexing within the build process rather than in a
+  separate, external VM processes. This not only makes incremental builds much
+  faster, but also significantly speeds up full builds. To enable this feature,
+  you need to set the Gradle daemon's maximum heap size to at least 2048 MB. You
+  can do this by including the following in your project's
+  <code>gradle.properties</code> file:
+
+<pre>
+org.gradle.jvmargs = -Xmx2048m
+</pre>
+
+</p>
+
+<p>
+  If you have defined a value for <a class="external-link" href=
+  "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html#com.android.build.gradle.internal.dsl.DexOptions:javaMaxHeapSize">
+  <code>javaMaxHeapSize</code></a> in your module-level <code>build.gradle</code>
+  file, you need to set the daemon's max heap size to the value of
+  <code>javaMaxHeapSize</code> + 1024 MB. For example, if you have set
+  <code>javaMaxHeapSize</code> to "2g", you need to add the following to your
+  project's <code>gradle.properties</code> file:
+
+<pre>
+org.gradle.jvmargs = -Xmx3072m
+</pre>
+
 </p>
 
 <h4 id="windows-defender">

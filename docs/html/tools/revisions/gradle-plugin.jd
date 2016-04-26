@@ -73,7 +73,7 @@ page.title=Android Plugin for Gradle Release Notes
   Structure</strong> &gt; <strong>Project</strong> menu in Android Studio, or
   the top-level <code>build.gradle</code> file. The plugin version applies to
   all modules built in that Android Studio project. The following example sets
-  the Android Plugin for Gradle to version 2.0.0 from the
+  the Android Plugin for Gradle to version 2.1.0 from the
   <code>build.gradle</code> file:
 </p>
 
@@ -81,7 +81,7 @@ page.title=Android Plugin for Gradle Release Notes
 buildscript {
   ...
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.0.0'
+    classpath 'com.android.tools.build:gradle:2.1.0'
   }
 }
 </pre>
@@ -138,6 +138,108 @@ distributionUrl = https\://services.gradle.org/distributions/gradle-2.10-all.zip
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 2.1.0</a> <em>(April 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.10 or higher.
+        </li>
+
+        <li>
+          <a href="{@docRoot}tools/revisions/build-tools.html">Build Tools 23.0.2</a>
+          or higher.
+        </li>
+      </ul>
+    </dd>
+
+    <dt>New:</dt>
+    <dd>
+      <ul>
+        <li>Added support for the N Developer Preview, JDK 8, and <a href=
+        "{@docRoot}preview/j8-jack.html">Java 8 language features</a> using the Jack
+        toolchain. To find out more, read the <a href=
+        "{@docRoot}preview/overview.html">N Preview guide</a>.
+
+          <p class="note">
+            <strong>Note:</strong> <a href=
+            "{@docRoot}tools/building/building-studio.html#instant-run">Instant
+            Run</a> does not currently work with Jack and will be disabled while
+            using the new toolchain. You only need to use Jack if you are developing
+            for the N Preview and want to use the supported Java 8 language features.
+          </p>
+        </li>
+
+        <li>Added default support for incremental Java compilation to reduce
+        compilation time during development. It does this by only recompiling
+        portions of the source that have changed or need to be recompiled. To disable
+        this feature, add the following code to your module-level
+        <code>build.gradle</code> file:
+
+<pre>
+android {
+  ...
+  compileOptions {
+    incremental false
+  }
+}
+</pre>
+        </li>
+
+        <li>
+          <p>
+          Added support for dexing-in-process which performs dexing within the build
+          process rather than in a separate, external VM processes. This not only makes
+          incremental builds faster, but also speeds up full builds. The feature is
+          enabled by default for projects that have set the Gradle daemon's maximum heap
+          size to at least 2048 MB. You can do this by including the following in your
+          project's <code>gradle.properties</code> file:
+
+<pre>
+org.gradle.jvmargs = -Xmx2048m
+</pre>
+          </p>
+
+          <p>
+          If you have defined a value for <a class="external-link" href=
+          "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html#com.android.build.gradle.internal.dsl.DexOptions:javaMaxHeapSize">
+          <code>javaMaxHeapSize</code></a> in your module-level <code>build.gradle</code>
+          file, you need to set <code>org.gradle.jvmargs</code> to the value of
+          <code>javaMaxHeapSize</code> + 1024 MB. For example, if you have set
+          <code>javaMaxHeapSize</code> to "2048m", you need to add the following to your
+          project's <code>gradle.properties</code> file:
+
+<pre>
+org.gradle.jvmargs = -Xmx3072m
+</pre>
+          </p>
+
+          <p>
+            To disable dexing-in-process, add the following code to your module-level
+            <code>build.gradle</code> file:
+
+<pre>
+android {
+  ...
+  dexOptions {
+      dexInProcess false
+  }
+}
+</pre>
+          </p>
+        </li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 2.0.0</a> <em>(April 2016)</em>
   </p>
 
