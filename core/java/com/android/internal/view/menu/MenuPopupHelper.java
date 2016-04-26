@@ -104,6 +104,9 @@ public class MenuPopupHelper implements MenuHelper {
      */
     public void setForceShowIcon(boolean forceShowIcon) {
         mForceShowIcon = forceShowIcon;
+        if (mPopup != null) {
+            mPopup.setForceShowIcon(forceShowIcon);
+        }
     }
 
     /**
