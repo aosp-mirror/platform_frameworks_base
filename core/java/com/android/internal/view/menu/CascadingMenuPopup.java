@@ -349,21 +349,18 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly);
 
-        // Apply "force show icon" setting. There are 4 cases:
-        // (1) This is the top level menu. Only add spacing for icons if forced.
+        // Apply "force show icon" setting. There are 3 cases:
+        // (1) This is the top level menu and icon spacing is forced. Add spacing.
         // (2) This is a submenu. Add spacing if any of the visible menu items has an icon.
-        // (3) This is a top level menu that is not an overflow menu. Add spacing if any of the
-        //     visible menu items has an icon.
-        // (4) This is an overflow menu or a top level menu that doesn't have "force" set.
-        //     Don't allow spacing.
+        // (3) This is the top level menu and icon spacing isn't forced. Do not add spacing.
         if (!isShowing() && mForceShowIcon) {
           // Case 1
           adapter.setForceShowIcon(true);
-        } else if (isShowing() || !isShowing() && !mForceShowIcon && !mOverflowOnly) {
-          // Case 2 or 3
+        } else if (isShowing()) {
+          // Case 2
           adapter.setForceShowIcon(MenuPopup.shouldPreserveIconSpacing(menu));
         }
-        // Case 4: Else, don't allow spacing for icons.
+        // Case 3: Else, don't allow spacing for icons (default behavior; do nothing).
 
         final int menuWidth = measureIndividualMenuWidth(adapter, null, mContext, mMenuMaxWidth);
         final MenuPopupWindow popupWindow = createPopupWindow();
