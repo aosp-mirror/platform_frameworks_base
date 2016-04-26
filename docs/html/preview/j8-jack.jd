@@ -66,6 +66,12 @@ installed the Android N Preview SDK, see <a href=
     "https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">Repeatable
     annotations</a>
   </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
+    Method References</a>
+  </li>
 </ul>
 
 
@@ -75,30 +81,45 @@ installed the Android N Preview SDK, see <a href=
 
 <ul>
   <li>Reflection and language-related APIs:
-  </li>
-
-  <li style="list-style: none; display: inline">
     <ul>
-      <li>{@code java.lang.FunctionalInterface}
+      <li>
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html">
+        {@code java.lang.FunctionalInterface}</a>
       </li>
 
-      <li>{@code java.lang.annotation.Repeatable}
+      <li>
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Repeatable.html">
+        {@code java.lang.annotation.Repeatable}</a>
       </li>
 
-      <li>{@code java.lang.reflect.Method.isDefault()}
+      <li>
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html#isDefault--">
+        {@code java.lang.reflect.Method.isDefault()}</a>
       </li>
 
       <li>and Reflection APIs associated with repeatable annotations, such as
-      {@code AnnotatedElement.getAnnotationsByType(Class)}
+      <a class="external-link" href=
+      "https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
+        {@code AnnotatedElement.getAnnotationsByType(Class)}</a>
       </li>
     </ul>
   </li>
-  <li>Utility APIs:
-  </li>
 
-  <li style="list-style: none; display: inline">
+  <li>Utility APIs:
     <ul>
-      <li>{@code java.util.function}
+      <li>
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">
+        {@code java.util.function}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html">
+        {@code java.util.stream}</a>
       </li>
     </ul>
   </li>
@@ -169,8 +190,9 @@ android {
 </h3>
 
 <p>
-  Instant Run, introduced in Android Studio 2.0 (Beta), does not currently work
-  with Jack and will be disabled while using the new toolchain.
+  <a href="{@docRoot}tools/building/building-studio.html#instant-run">Instant
+  Run</a> does not currently work with Jack and will be disabled while using
+  the new toolchain.
 </p>
 
 <p>Because Jack does not generate intermediate class files when compiling an
@@ -185,12 +207,6 @@ examples of these tools are:</p>
   instrumentation tests with JaCoCo)
   </li>
 </ul>
-
-<p>
-  Calls to an interface's default method on a <a class="external-link" href=
-  "https://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Proxy.html"><code>
-  Proxy</code></a> instance fail with an exception.
-</p>
 
 <p>If you find other problems while using Jack, <a href=
 "http://tools.android.com/filing-bugs">please report bugs</a>.</p>
