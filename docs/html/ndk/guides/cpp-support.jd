@@ -220,11 +220,6 @@ newlocale() WARNING: Trying to set locale to en_US.UTF-8 other than "", "C" or "
 <p>We do not recommend using {@code libc++} with GCC 4.6 because of GCC 4.6's limited c++11
 support.</p>
 
-<p>For information on {@code libc++} tests that fail to compile, {@code black_list*} in
-{@code $NDK/tests/device/test-libc++-shared-full/jni/Android.mk}. For information about tests
-that fail to run correctly, see {@code $NDK/tests/device/test-libc++-shared-full/BROKEN_RUN}.
-{@code $NDK}, here, is the your NDK installation's root directory.</p>
-
 
 <h2 id="ic">Important Considerations</h2>
 
