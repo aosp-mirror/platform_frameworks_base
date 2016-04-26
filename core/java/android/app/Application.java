@@ -33,7 +33,7 @@ import android.os.Bundle;
  * AndroidManifest.xml's &lt;application&gt; tag, which will cause that class
  * to be instantiated for you when the process for your application/package is
  * created.
- * 
+ *
  * <p class="note">There is normally no need to subclass Application.  In
  * most situation, static singletons can provide the same functionality in a
  * more modular way.  If your singleton needs a global context (for example
@@ -84,7 +84,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /**
      * Called when the application is starting, before any activity, service,
      * or receiver objects (excluding content providers) have been created.
-     * Implementations should be as quick as possible (for example using 
+     * Implementations should be as quick as possible (for example using
      * lazy initialization of state) since the time spent in this function
      * directly impacts the performance of starting the first activity,
      * service, or receiver in a process.
@@ -179,7 +179,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     // ------------------ Internal API ------------------
-    
+
     /**
      * @hide
      */
