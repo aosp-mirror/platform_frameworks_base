@@ -861,7 +861,9 @@ public final class BridgeContext extends Context {
                         resValue = mRenderResources.resolveResValue(resValue);
 
                         if (defaultPropMap != null) {
-                            defaultPropMap.put(attrName,
+                            defaultPropMap.put(
+                                    frameworkAttr ? SdkConstants.PREFIX_ANDROID + attrName :
+                                            attrName,
                                     new Property(preResolve, resValue.getValue()));
                         }
 
@@ -932,7 +934,8 @@ public final class BridgeContext extends Context {
             @Nullable StyleResourceValue style, int[] attrs) throws Resources.NotFoundException {
         List<Pair<String, Boolean>> attributes = searchAttrs(attrs);
 
-        BridgeTypedArray ta = Resources_Delegate.newTypeArray(mSystemResources, attrs.length, false);
+        BridgeTypedArray ta =
+                Resources_Delegate.newTypeArray(mSystemResources, attrs.length, false);
 
         PropertiesMap defaultPropMap = new PropertiesMap();
         // for each attribute, get its name so that we can search it in the style
@@ -943,11 +946,11 @@ public final class BridgeContext extends Context {
                 // look for the value in the given style
                 ResourceValue resValue;
                 String attrName = attribute.getFirst();
+                boolean frameworkAttr = attribute.getSecond();
                 if (style != null) {
-                    resValue = mRenderResources.findItemInStyle(style, attrName,
-                            attribute.getSecond());
+                    resValue = mRenderResources.findItemInStyle(style, attrName, frameworkAttr);
                 } else {
-                    resValue = mRenderResources.findItemInTheme(attrName, attribute.getSecond());
+                    resValue = mRenderResources.findItemInTheme(attrName, frameworkAttr);
                 }
 
                 if (resValue != null) {
@@ -955,8 +958,10 @@ public final class BridgeContext extends Context {
                     String preResolve = resValue.getValue();
                     // resolve it to make sure there are no references left.
                     resValue = mRenderResources.resolveResValue(resValue);
-                    ta.bridgeSetValue(i, attrName, attribute.getSecond(), resValue);
-                    defaultPropMap.put(attrName, new Property(preResolve, resValue.getValue()));
+                    ta.bridgeSetValue(i, attrName, frameworkAttr, resValue);
+                    defaultPropMap.put(
+                            frameworkAttr ? SdkConstants.ANDROID_PREFIX + attrName : attrName,
+                            new Property(preResolve, resValue.getValue()));
                 }
             }
         }
