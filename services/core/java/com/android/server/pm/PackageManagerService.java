@@ -7207,7 +7207,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             performDexOpt(pkg.packageName,
                     null /* instructionSet */,
-                    false /* checkProfiles */,
+                    true /* checkProfiles */,
                     causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
                     false /* force */);
         }
