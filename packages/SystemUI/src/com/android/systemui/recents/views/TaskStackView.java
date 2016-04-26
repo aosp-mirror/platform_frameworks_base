@@ -1938,7 +1938,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(final MultiWindowStateChangedEvent event) {
-        if (event.inMultiWindow) {
+        if (event.inMultiWindow || !event.showDeferredAnimation) {
             setTasks(event.stack, true /* allowNotifyStackChanges */);
         } else {
             // Reset the launch state before handling the multiwindow change
