@@ -4409,7 +4409,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wtoken.hidden || wtoken.mAppStopped) {
                     wtoken.allDrawn = false;
                     wtoken.deferClearAllDrawn = false;
-                    wtoken.waitingToShow = true;
+
+                    // If the app was already visible, don't reset the waitingToShow state.
+                    if (wtoken.hidden) {
+                        wtoken.waitingToShow = true;
+                    }
 
                     if (wtoken.clientHidden) {
                         // In the case where we are making an app visible
