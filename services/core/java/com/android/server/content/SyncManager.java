@@ -1301,7 +1301,7 @@ public class SyncManager {
         }
 
         getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
-                syncOperation.target.userId, "sync");
+                syncOperation.target.userId, syncOperation.wakeLockName());
     }
 
     /**
