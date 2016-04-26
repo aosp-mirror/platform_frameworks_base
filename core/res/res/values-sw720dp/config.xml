@@ -19,7 +19,4 @@
          used for picking activities to handle an intent. -->
     <integer name="config_maxResolverActivityColumns">4</integer>
 
-    <!-- Enable cascading submenus. -->
-    <bool name="config_enableCascadingSubmenus">true</bool>
-
 </resources>
