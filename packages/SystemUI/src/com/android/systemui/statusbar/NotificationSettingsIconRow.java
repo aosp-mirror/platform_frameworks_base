@@ -244,7 +244,6 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     }
 
     public void setIconLocation(boolean onLeft) {
-        updateVerticalLocation();
         if ((mIconPlaced && onLeft == mOnLeft) || mSnapping || mParent == null
                 || mGearIcon.getWidth() == 0) {
             // Do nothing
