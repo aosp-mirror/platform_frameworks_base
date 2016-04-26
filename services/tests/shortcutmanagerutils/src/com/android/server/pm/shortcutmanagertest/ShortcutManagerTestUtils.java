@@ -413,6 +413,16 @@ public class ShortcutManagerTestUtils {
         }
     }
 
+    public static ShortcutInfo findShortcut(List<ShortcutInfo> list, String id) {
+        for (ShortcutInfo si : list) {
+            if (si.getId().equals(id)) {
+                return si;
+            }
+        }
+        fail("Shortcut " + id + " not found in the list");
+        return null;
+    }
+
     public static Bitmap pfdToBitmap(ParcelFileDescriptor pfd) {
         assertNotNull(pfd);
         try {
