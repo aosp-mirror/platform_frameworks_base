@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
@@ -437,10 +438,15 @@ public class PersistentDataBlockService extends SystemService {
         }
 
         @Override
-        public void setOemUnlockEnabled(boolean enabled) {
+        public void setOemUnlockEnabled(boolean enabled) throws SecurityException {
             // do not allow monkey to flip the flag
             if (ActivityManager.isUserAMonkey()) {
                 return;
+            }
+            // Do not allow oem unlock modification if it has been disallowed.
+            if (Settings.Global.getInt(getContext().getContentResolver(),
+                    Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
+                throw new SecurityException("OEM unlock has been disallowed.");
             }
             enforceOemUnlockPermission();
             enforceIsAdmin();

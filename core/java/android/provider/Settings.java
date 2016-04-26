@@ -8759,6 +8759,15 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_CELLULAR_ON_BOOT = "enable_cellular_on_boot";
+
+        /**
+         * Whether toggling OEM unlock is disallowed. If disallowed, it is not possible to enable or
+         * disable OEM unlock.
+         * <p>
+         * Type: int (0: allow OEM unlock setting. 1: disallow OEM unlock)
+         * @hide
+         */
+        public static final String OEM_UNLOCK_DISALLOWED = "oem_unlock_disallowed";
     }
 
     /**
