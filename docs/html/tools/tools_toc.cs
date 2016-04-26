@@ -123,6 +123,16 @@
 
       <li class="nav-section">
         <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/devices/emulator.html">
+            <span class="en">Android Emulator</span></a></div>
+         <ul>
+           <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Android Emulator
+           Command-Line Features</a></li>
+         </ul>
+       </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>tools/debugging/debugging-studio.html">
             <span class="en">Debugging Tools</span></a></div>
           <ul>
@@ -219,14 +229,7 @@ class="en">Tools Help</span></a></div>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
 
-       <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>tools/devices/emulator.html">
-            <span class="en">Virtual Device Emulator</span></a></div>
-         <ul>
-           <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Command Reference</a></li>
-         </ul>
-       </li>
+
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
 
     </ul>
