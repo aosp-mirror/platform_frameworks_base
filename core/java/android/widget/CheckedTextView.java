@@ -185,17 +185,20 @@ public class CheckedTextView extends TextView implements Checkable {
             d.setCallback(this);
             d.setVisible(getVisibility() == VISIBLE, false);
             d.setState(CHECKED_STATE_SET);
-            setMinHeight(d.getIntrinsicHeight());
 
+            // Record the intrinsic dimensions when in "checked" state.
+            setMinHeight(d.getIntrinsicHeight());
             mCheckMarkWidth = d.getIntrinsicWidth();
+
             d.setState(getDrawableState());
-            applyCheckMarkTint();
         } else {
             mCheckMarkWidth = 0;
         }
 
         mCheckMarkDrawable = d;
         mCheckMarkResource = resId;
+
+        applyCheckMarkTint();
 
         // Do padding resolution. This will call internalSetPadding() and do a
         // requestLayout() if needed.
