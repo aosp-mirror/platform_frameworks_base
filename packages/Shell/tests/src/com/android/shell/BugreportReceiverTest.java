@@ -63,6 +63,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
@@ -517,7 +518,14 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
                 mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_dont_repeat));
         final boolean firstTime = propertyState == null || propertyState == STATE_UNKNOWN;
         if (firstTime) {
-            assertTrue("Checkbox should be checked by default", dontShowAgain.isChecked());
+            if (Build.TYPE.equals("user")) {
+                assertFalse("Checkbox should NOT be checked by default on user builds",
+                        dontShowAgain.isChecked());
+                mUiBot.click(dontShowAgain, "dont-show-again");
+            } else {
+                assertTrue("Checkbox should be checked by default on build type " + Build.TYPE,
+                        dontShowAgain.isChecked());
+            }
         } else {
             assertFalse("Checkbox should not be checked", dontShowAgain.isChecked());
             mUiBot.click(dontShowAgain, "dont-show-again");
