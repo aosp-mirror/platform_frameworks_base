@@ -593,7 +593,7 @@ parent.link=index.html
 android {
   ...
   dexOptions {
-    maxProcessCount 8
+    maxProcessCount 4
     javaMaxHeapSize "2g"
   }
 }
