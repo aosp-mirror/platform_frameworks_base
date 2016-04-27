@@ -50,6 +50,7 @@ struct {
 struct SensorOffsets
 {
     jclass      clazz;
+    //fields
     jfieldID    name;
     jfieldID    vendor;
     jfieldID    version;
@@ -64,7 +65,9 @@ struct SensorOffsets
     jfieldID    requiredPermission;
     jfieldID    maxDelay;
     jfieldID    flags;
+    //methods
     jmethodID   setType;
+    jmethodID   setUuid;
     jmethodID   init;
 } gSensorOffsets;
 
@@ -102,6 +105,7 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
 
     sensorOffsets.setType = _env->GetMethodID(sensorClass, "setType", "(I)Z");
+    sensorOffsets.setUuid = _env->GetMethodID(sensorClass, "setUuid", "(JJ)V");
     sensorOffsets.init = _env->GetMethodID(sensorClass, "<init>", "()V");
 
     // java.util.List;
@@ -192,11 +196,26 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
                             requiredPermission);
         env->SetIntField(sensor, sensorOffsets.maxDelay, nativeSensor.getMaxDelay());
         env->SetIntField(sensor, sensorOffsets.flags, nativeSensor.getFlags());
+
         if (env->CallBooleanMethod(sensor, sensorOffsets.setType, nativeSensor.getType())
                 == JNI_FALSE) {
             jstring stringType = getInternedString(env, &nativeSensor.getStringType());
             env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
         }
+
+        // java.util.UUID constructor UUID(long a, long b) assumes the two long inputs a and b
+        // correspond to first half and second half of the 16-byte stream in big-endian,
+        // respectively, if the byte stream is serialized according to RFC 4122 (Sec. 4.1.2).
+        //
+        // For Java UUID 12345678-90AB-CDEF-1122-334455667788, the byte stream will be
+        // (uint8_t) {0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF, ....} according RFC 4122.
+        //
+        // According to Java UUID constructor document, the long parameter a should be always
+        // 0x12345678980ABCDEF regardless of host machine endianess. Thus, htobe64 is used to
+        // convert int64_t read directly, which will be in host-endian, to the big-endian required
+        // by Java constructor.
+        const int64_t (&uuid)[2] = nativeSensor.getUuid().i64;
+        env->CallVoidMethod(sensor, sensorOffsets.setUuid, htobe64(uuid[0]), htobe64(uuid[1]));
     }
     return sensor;
 }
@@ -212,32 +231,7 @@ nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject s
         return false;
     }
 
-    Sensor const* const list = sensorList[index];
-    const SensorOffsets& sensorOffsets(gSensorOffsets);
-    jstring name = getInternedString(env, &list->getName());
-    jstring vendor = getInternedString(env, &list->getVendor());
-    jstring requiredPermission = getInternedString(env, &list->getRequiredPermission());
-    env->SetObjectField(sensor, sensorOffsets.name,      name);
-    env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
-    env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
-    env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
-    env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
-    env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
-    env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
-    env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
-    env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
-                     list->getFifoReservedEventCount());
-    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
-                     list->getFifoMaxEventCount());
-    env->SetObjectField(sensor, sensorOffsets.requiredPermission,
-                        requiredPermission);
-    env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
-    env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
-    if (env->CallBooleanMethod(sensor, sensorOffsets.setType, list->getType()) == JNI_FALSE) {
-        jstring stringType = getInternedString(env, &list->getStringType());
-        env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
-    }
-    return true;
+    return translateNativeSensorToJavaSensor(env, sensor, *sensorList[index]) != NULL;
 }
 
 static void
