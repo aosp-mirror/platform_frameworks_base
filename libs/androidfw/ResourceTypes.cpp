@@ -3008,7 +3008,7 @@ String8 ResTable_config::toString() const {
 
 struct ResTable::Header
 {
-    Header(ResTable* _owner) : owner(_owner), ownedData(NULL), header(NULL),
+    explicit Header(ResTable* _owner) : owner(_owner), ownedData(NULL), header(NULL),
         resourceIDMap(NULL), resourceIDMapSize(0) { }
 
     ~Header()

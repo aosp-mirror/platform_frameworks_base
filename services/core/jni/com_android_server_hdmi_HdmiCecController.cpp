@@ -84,7 +84,7 @@ private:
 // it to service thread.
 class CecEventWrapper : public LightRefBase<CecEventWrapper> {
 public:
-    CecEventWrapper(const hdmi_event_t& event) {
+    explicit CecEventWrapper(const hdmi_event_t& event) {
         // Copy message.
         switch (event.type) {
         case HDMI_EVENT_CEC_MESSAGE:

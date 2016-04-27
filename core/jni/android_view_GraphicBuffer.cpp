@@ -88,7 +88,7 @@ static struct {
 
 class GraphicBufferWrapper {
 public:
-    GraphicBufferWrapper(const sp<GraphicBuffer>& buffer): buffer(buffer) {
+    explicit GraphicBufferWrapper(const sp<GraphicBuffer>& buffer): buffer(buffer) {
     }
 
     sp<GraphicBuffer> buffer;
