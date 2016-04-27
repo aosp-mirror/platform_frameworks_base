@@ -49,9 +49,52 @@ select <strong>Android Studio > Check for updates</strong>).</p>
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
+
 <div class="toggle-content open">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Studio v2.1.0</a> <em>(April 2016)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+<p>The primary changes in this update provide support for development with the
+<a href="{@docRoot}preview/index.html">Android N Preview</a>.</p>
+
+<p>The Android N platform adds support for <a
+href="{@docRoot}preview/j8-jack.html">Java 8 language features</a>, which
+require a new experimental compiler called Jack. The latest version of Jack is
+currently supported only in Android Studio 2.1. So if you want to use Java 8
+language features, you need to use Android Studio 2.1 to build your app.</p>
+
+<p class="note"><strong>Note:</strong> <a
+href="{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a>
+is disabled when you enable the Jack compiler because they currently are not
+compatible.</p>
+
+<p>Although Android Studio 2.1 is now stable, the Jack compiler is still
+experimental and you must enable it with <a
+href="{@docRoot}preview/j8-jack.html#configuration">the <code>jackOptions</code>
+property</a> in your <code>build.gradle</code> file.</p>
+
+<p>Other than the changes to support the N Preview, Android Studio 2.1
+includes minor bug fixes and the following enhancements:</p>
+    <ul>
+      <li>The Java-aware C++ debugger is now enabled by default when you're
+using an N device or emulator and select <strong>Native</strong> debugger mode
+(in the <strong>Debugger</strong> tab for your run/debug configuration).</li>
+    </ul>
+    <p>For other build enhancements, including incremental Java compilation
+    and dexing-in-process,update your <a
+href="{@docRoot}tools/revisions/gradle-plugin.html">Android Plugin for
+Gradle</a> to version 2.1.0.</p>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v2.0.0</a> <em>(April 2016)</em>
   </p>
 
