@@ -105,15 +105,19 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 <pre>
 &lt;uses-feature android:name="android.hardware.touchscreen"
         android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.faketouch"
+        android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.telephony"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.camera"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.nfc"
         android:required="false"/&gt;
-&lt;uses-feature android:name="android.hardware.gps"
+&lt;uses-feature android:name="android.hardware.location.gps"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.microphone"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.sensor"
         android:required="false"/&gt;
 </pre>
 

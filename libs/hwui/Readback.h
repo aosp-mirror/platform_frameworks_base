@@ -24,9 +24,19 @@
 namespace android {
 namespace uirenderer {
 
+// Keep in sync with PixelCopy.java codes
+enum class CopyResult {
+    Success = 0,
+    UnknownError = 1,
+    Timeout = 2,
+    SourceEmpty = 3,
+    SourceInvalid = 4,
+    DestinationInvalid = 5,
+};
+
 class Readback {
 public:
-    static bool copySurfaceInto(renderthread::RenderThread& renderThread,
+    static CopyResult copySurfaceInto(renderthread::RenderThread& renderThread,
             Surface& surface, SkBitmap* bitmap);
 };
 

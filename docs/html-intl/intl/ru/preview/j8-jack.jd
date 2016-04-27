@@ -1,0 +1,183 @@
+page.title=Возможности языка Java 8
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">Поддерживаемые API-интерфейсы и возможности языка Java 8</a>
+      </li>
+      <li>
+        <a href="#configuration">Активация возможностей Java 8 и набора инструментов Jack</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>В Android N появилась поддержка возможностей языка Java 8,
+которые можно использовать при разработке приложений для Android N.
+На данной странице приведены описания новых возможностей языка, поддерживаемых в Android N
+Preview, объяснено как настроить проект для их использования, а также указаны известные
+проблемы, с которыми можно столкнуться.
+</p>
+
+<p>Для использования этих функций необходимо загрузить и установить Android
+Studio 2.1 (предварительная версия) и Android N Preview SDK, который включает набор инструментов
+Jack и обновленный подключаемый модуль Android для Gradle. Если вы еще не установили
+Android N Preview SDK, см. <a href="{@docRoot}preview/setup-sdk.html">Настройка среды разработки для Android N</a>.</p>
+
+
+
+<p class="note">
+  <strong>Примечание.</strong> Использование новых возможностей языка Java 8 не является обязательным требованием
+при разработке приложений для платформы Android N. Если вы не хотите
+писать код с использованием возможностей языка Java 8, можно указать
+Java 7 в качестве значения совместимости для проекта, однако все-равно
+необходимо будет выполнить компиляцию с JDK 8 для осуществления сборки на платформе Android N.
+</p>
+
+<h2 id="supported-features">
+  Поддерживаемые API-интерфейсы и возможности языка Java 8
+</h2>
+
+<p>
+  В настоящее время Android поддерживает не все возможности языка Java 8.
+Однако при разработке приложений для
+Android N Preview доступны следующие функции.
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">Статические
+и заданные по умолчанию методы интерфейсов</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
+Лямбда-выражения</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">Повторяющиеся
+примечания</a>
+  </li>
+</ul>
+
+
+<p>
+  Кроме того, доступны следующие API-интерфейсы для реализации возможностей языка Java 8.
+</p>
+
+<ul>
+  <li>API-интерфейсы отражения и языковых функций:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface};
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable};
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()};
+      </li>
+
+      <li>а также API-интерфейсы отражения, связанные с повторяющимися примечаниями, например,
+{@code AnnotatedElement.getAnnotationsByType(Class)}.
+      </li>
+    </ul>
+  </li>
+  <li>Вспомогательные API:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>Примечание.</strong> В Android N реализация
+лямбда-выражений выполнена с помощью анонимных классов. Данный подход обеспечивает их
+обратную совместимость и возможность выполнения в предыдущих версиях Android. При тестировании
+лямбда-выражений в предыдущих версиях перейдите в файл {@code
+  build.gradle} и установите для параметров {@code compileSdkVersion} и {@code
+  targetSdkVersion} значения 23 или ниже.
+</p>
+
+<h2 id="configuration">
+  Активация возможностей Java 8 и набора инструментов Jack
+</h2>
+
+<p>
+  Для использования новых возможностей языка Java 8 необходимо также использовать
+новый <a class="external-link" href="https://source.android.com/source/jack.html">набор инструментов Jack</a>. С его помощью
+Android компилирует языковой источник Java в считываемый Android байткод Dalvik Executable (dex).
+В Jack предусмотрен собственный формат библиотеки {@code .jack}, большинство функциональных возможностей набора
+инструментов предоставляется в рамках одного инструмента: перекомпоновка, сжатие, обфускация и
+использование нескольких файлов DEX.
+</p>
+
+<p>Ниже представлено сравнение двух наборов инструментов, используемых для сборки файлов DEX в Android.</p>
+<ul>
+  <li>Старый набор инструментов javac:<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>Новый набор инструментов Jack:<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Настройка Gradle
+</h3>
+
+<p>
+  Чтобы использовать возможности языка Java 8 и набор инструментов Jack для проекта, добавьте
+в файл модуля {@code build.gradle} следующий код:
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  Известные проблемы
+</h3>
+
+<p>
+  Функция Instant Run, появившаяся в Android Studio 2.0 (Beta), не работает
+с набором инструментов Jack и будет отключена при его использовании.
+</p>
+
+<p>Поскольку набор инструментов Jack не создает промежуточные файлы классов при компиляции
+приложения, инструменты, которые используют такие файлы, пока с Jack не работают. Примеры таких
+инструментов приведены ниже.</p>
+
+<ul>
+  <li>Детекторы Lint, работающие c файлами классов.
+  </li>
+
+  <li>Инструменты и библиотеки, которым требуются файлы классов приложения (например, JaCoCo
+и Mockito)</li>
+</ul>
+
+<p>Если вы обнаружите другие проблемы во время использования набора инструментов Jack, <a href="http://tools.android.com/filing-bugs">сообщите о них</a>.</p>

@@ -105,26 +105,25 @@ public class DhcpClient extends StateMachine {
     /* Commands from controller to start/stop DHCP */
     public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
     public static final int CMD_STOP_DHCP                   = PUBLIC_BASE + 2;
-    public static final int CMD_RENEW_DHCP                  = PUBLIC_BASE + 3;
 
     /* Notification from DHCP state machine prior to DHCP discovery/renewal */
-    public static final int CMD_PRE_DHCP_ACTION             = PUBLIC_BASE + 4;
+    public static final int CMD_PRE_DHCP_ACTION             = PUBLIC_BASE + 3;
     /* Notification from DHCP state machine post DHCP discovery/renewal. Indicates
      * success/failure */
-    public static final int CMD_POST_DHCP_ACTION            = PUBLIC_BASE + 5;
+    public static final int CMD_POST_DHCP_ACTION            = PUBLIC_BASE + 4;
     /* Notification from DHCP state machine before quitting */
-    public static final int CMD_ON_QUIT                     = PUBLIC_BASE + 6;
+    public static final int CMD_ON_QUIT                     = PUBLIC_BASE + 5;
 
     /* Command from controller to indicate DHCP discovery/renewal can continue
      * after pre DHCP action is complete */
-    public static final int CMD_PRE_DHCP_ACTION_COMPLETE    = PUBLIC_BASE + 7;
+    public static final int CMD_PRE_DHCP_ACTION_COMPLETE    = PUBLIC_BASE + 6;
 
     /* Command and event notification to/from IpManager requesting the setting
      * (or clearing) of an IPv4 LinkAddress.
      */
-    public static final int CMD_CLEAR_LINKADDRESS           = PUBLIC_BASE + 8;
-    public static final int CMD_CONFIGURE_LINKADDRESS       = PUBLIC_BASE + 9;
-    public static final int EVENT_LINKADDRESS_CONFIGURED    = PUBLIC_BASE + 10;
+    public static final int CMD_CLEAR_LINKADDRESS           = PUBLIC_BASE + 7;
+    public static final int CMD_CONFIGURE_LINKADDRESS       = PUBLIC_BASE + 8;
+    public static final int EVENT_LINKADDRESS_CONFIGURED    = PUBLIC_BASE + 9;
 
     /* Message.arg1 arguments to CMD_POST_DHCP notification */
     public static final int DHCP_SUCCESS = 1;
@@ -135,7 +134,7 @@ public class DhcpClient extends StateMachine {
     private static final int CMD_KICK             = PRIVATE_BASE + 1;
     private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
     private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
-    private static final int CMD_ONESHOT_TIMEOUT  = PRIVATE_BASE + 4;
+    private static final int CMD_RENEW_DHCP       = PRIVATE_BASE + 4;
 
     // For message logging.
     private static final Class[] sMessageClasses = { DhcpClient.class };
@@ -177,7 +176,6 @@ public class DhcpClient extends StateMachine {
     private final WakeupMessage mKickAlarm;
     private final WakeupMessage mTimeoutAlarm;
     private final WakeupMessage mRenewAlarm;
-    private final WakeupMessage mOneshotTimeoutAlarm;
     private final String mIfaceName;
 
     private boolean mRegisteredForPreDhcpNotification;
@@ -243,10 +241,6 @@ public class DhcpClient extends StateMachine {
         mTimeoutAlarm = makeWakeupMessage("TIMEOUT", CMD_TIMEOUT);
         // Used to schedule DHCP renews.
         mRenewAlarm = makeWakeupMessage("RENEW", CMD_RENEW_DHCP);
-        // Used to tell the caller when its request (CMD_START_DHCP or CMD_RENEW_DHCP) timed out.
-        // TODO: when the legacy DHCP client is gone, make the client fully asynchronous and
-        // remove this.
-        mOneshotTimeoutAlarm = makeWakeupMessage("ONESHOT_TIMEOUT", CMD_ONESHOT_TIMEOUT);
     }
 
     public void registerForPreDhcpNotification() {
@@ -506,29 +500,12 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    // The one-shot timeout is used to implement the timeout for CMD_START_DHCP. We can't use a
-    // state timeout to do this because obtaining an IP address involves passing through more than
-    // one state (specifically, it passes at least once through DhcpInitState and once through
-    // DhcpRequestingState). The one-shot timeout is created when CMD_START_DHCP is received, and is
-    // cancelled when exiting DhcpState (either due to a CMD_STOP_DHCP, or because of an error), or
-    // when we get an IP address (when entering DhcpBoundState). If it fires, we send ourselves
-    // CMD_ONESHOT_TIMEOUT and notify the caller that DHCP failed, but we take no other action. For
-    // example, if we're in DhcpInitState and sending DISCOVERs, we continue to do so.
-    //
-    // The one-shot timeout is not used for CMD_RENEW_DHCP because that is implemented using only
-    // one state, so we can just use the state timeout.
-    private void scheduleOneshotTimeout() {
-        final long alarmTime = SystemClock.elapsedRealtime() + DHCP_TIMEOUT_MS;
-        mOneshotTimeoutAlarm.schedule(alarmTime);
-    }
-
     class StoppedState extends LoggingState {
         @Override
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
                 case CMD_START_DHCP:
-                    scheduleOneshotTimeout();
                     if (mRegisteredForPreDhcpNotification) {
                         transitionTo(mWaitBeforeStartState);
                     } else {
@@ -571,7 +548,6 @@ public class DhcpClient extends StateMachine {
 
         @Override
         public void exit() {
-            mOneshotTimeoutAlarm.cancel();
             if (mReceiveThread != null) {
                 mReceiveThread.halt();  // Also closes sockets.
                 mReceiveThread = null;
@@ -585,10 +561,6 @@ public class DhcpClient extends StateMachine {
             switch (message.what) {
                 case CMD_STOP_DHCP:
                     transitionTo(mStoppedState);
-                    return HANDLED;
-                case CMD_ONESHOT_TIMEOUT:
-                    if (DBG) Log.d(TAG, "Timed out");
-                    notifyFailure();
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -822,7 +794,6 @@ public class DhcpClient extends StateMachine {
         @Override
         public void enter() {
             super.enter();
-            mOneshotTimeoutAlarm.cancel();
             notifySuccess();
             // TODO: DhcpStateMachine only supported renewing at 50% of the lease time,
             // and did not support rebinding. Now that the legacy DHCP client is gone, fix this.
@@ -888,7 +859,7 @@ public class DhcpClient extends StateMachine {
         @Override
         protected void timeout() {
             transitionTo(mDhcpInitState);
-            sendMessage(CMD_ONESHOT_TIMEOUT);
+            notifyFailure();
         }
     }
 

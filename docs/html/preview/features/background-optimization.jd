@@ -59,9 +59,9 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 <ul>
   <li>Apps targeting the Preview do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
-  register to receive them in their manifest. Apps running in the foreground
-  can still listen for {@code CONNECTIVITY_CHANGE} on their main thread by
-  registering a {@link android.content.BroadcastReceiver} with {@link
+  register to receive them in their manifest. Apps that are running can still
+  listen for {@code CONNECTIVITY_CHANGE} on their main thread by registering a
+  {@link android.content.BroadcastReceiver} with {@link
   android.content.Context#registerReceiver Context.registerReceiver()}.
   </li>
 
@@ -165,9 +165,8 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  Apps running in the foreground can still listen for {@code
-  CONNECTIVITY_CHANGE} with a registered {@link
-  android.content.BroadcastReceiver}. However, the {@link
+  Apps that are running can still listen for {@code CONNECTIVITY_CHANGE} with a
+  registered {@link android.content.BroadcastReceiver}. However, the {@link
   android.net.ConnectivityManager} API provides a more robust method to request
   a callback only when specified network conditions are met.
 </p>

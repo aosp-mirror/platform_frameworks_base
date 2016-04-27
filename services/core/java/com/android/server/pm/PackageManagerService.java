@@ -1220,12 +1220,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Initial version of the file had no version number and stored one
             // package-timestamp pair per line.
             // Note that the first line has already been read from the InputStream.
-            String line = firstLine;
-            while (true) {
-                if (line == null) {
-                    break;
-                }
-
+            for (String line = firstLine; line != null; line = readLine(in, sb)) {
                 String[] tokens = line.split(" ");
                 if (tokens.length != 2) {
                     throw new IOException("Failed to parse " + line +
@@ -1244,8 +1239,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         reason++) {
                     pkg.mLastPackageUsageTimeInMills[reason] = timestamp;
                 }
-
-                line = readLine(in, sb);
             }
         }
 

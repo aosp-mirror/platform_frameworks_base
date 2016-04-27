@@ -18,13 +18,11 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.PixelCopy;
-import android.graphics.PixelCopy.OnPixelCopyFinished;
-import android.graphics.PixelCopy.Response;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Gravity;
+import android.view.PixelCopy;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -32,7 +30,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -52,12 +49,25 @@ public class GetBitmapSurfaceViewActivity extends Activity implements SurfaceHol
         Button button = new Button(this);
         button.setText("Copy bitmap to /sdcard/surfaceview.png");
         button.setOnClickListener((View v) -> {
-            Bitmap b = Bitmap.createBitmap(
-                            mSurfaceView.getWidth(),
-                            mSurfaceView.getHeight(),
-                            Bitmap.Config.ARGB_8888);
+            final Bitmap b = Bitmap.createBitmap(
+                    mSurfaceView.getWidth(), mSurfaceView.getHeight(),
+                    Bitmap.Config.ARGB_8888);
             PixelCopy.request(mSurfaceView, b,
-                    mOnCopyFinished, mSurfaceView.getHandler());
+                    (int result) -> {
+                        if (result != PixelCopy.SUCCESS) {
+                            Toast.makeText(GetBitmapSurfaceViewActivity.this,
+                                    "Failed to copy", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        try {
+                            try (FileOutputStream out = new FileOutputStream(
+                                    Environment.getExternalStorageDirectory() + "/surfaceview.png");) {
+                                b.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            }
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                    }, mSurfaceView.getHandler());
         });
 
         content.addView(mSurfaceView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
@@ -66,25 +76,6 @@ public class GetBitmapSurfaceViewActivity extends Activity implements SurfaceHol
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
         setContentView(content);
     }
-
-    private final OnPixelCopyFinished mOnCopyFinished = new OnPixelCopyFinished() {
-        @Override
-        public void onPixelCopyFinished(Response response) {
-            if (!response.success) {
-                Toast.makeText(GetBitmapSurfaceViewActivity.this,
-                        "Failed to copy", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            try {
-                try (FileOutputStream out = new FileOutputStream(
-                        Environment.getExternalStorageDirectory() + "/surfaceview.png");) {
-                    response.bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                }
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-    };
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {

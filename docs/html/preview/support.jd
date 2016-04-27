@@ -67,23 +67,23 @@ page.image=images/cards/card-n-support_2x.png
 </p>
 
 <ul>
-  <li>Can’t connect to hidden SSID or non-broadcast Wi-Fi (bug <a href=
+  <li>Can’t connect to hidden SSID or non-broadcast Wi-Fi. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
   </li>
 
-  <li>Microphone mute state persists across activities (bug <a href=
+  <li>Microphone mute state persists across activities. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
   </li>
 
-  <li>Changing Multiwindow focus pauses YouTube (bug <a href=
+  <li>Changing multi-window focus pauses YouTube. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
   </li>
 
-  <li>Direct Reply may close open activity (bug <a href=
+  <li>Direct Reply may close open activity. (bug <a href=
   "https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
   </li>
 
-  <li>Various stability fixes
+  <li>Various stability fixes.
   </li>
 </ul>
 
@@ -96,6 +96,14 @@ page.image=images/cards/card-n-support_2x.png
 </p>
 
 <ul>
+
+  <li>The development tool components and support libraries have been updated
+  for the DP2 release. Make sure to update your preview development environment
+  before developing for DP2. For instructions on setting up your development
+  environment, see
+  <a href="{@docRoot}preview/setup-sdk.html">Set Up the Preview</a>.
+  </li>
+
   <li>This release has various stability and performance issues on all devices
   that make it <strong>not suitable for daily use on phone or tablet</strong>,
   especially for non-developers.
@@ -128,6 +136,12 @@ page.image=images/cards/card-n-support_2x.png
   <li>This preview release supports the following devices: Nexus 5X, Nexus 6,
   Nexus 6P, Nexus 9, and Pixel C, as well as General Mobile 4G
   (Android One). Support for Nexus Player is coming soon.
+  </li>
+
+
+  <li><a href=
+  "https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> has
+  been updated to handle API changes between DP1 and DP2.
   </li>
 </ul>
 
@@ -174,39 +188,115 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-
 <h4>Setup wizard</h4>
 
 <ul>
   <li>The option to restore data on a new device (or newly reset device) from
   "Your Google Account" is not actionable in the setup wizard. You must restore
-  data from an existing device using NFC or set it up as a new device.
+  data from an existing device by selecting "another Android device" in the
+  setup wizard, or else set it up as a new device.
   </li>
 </ul>
 
-<h4>App compatibility</h4>
+<h4>OEM unlock</h4>
 
 <ul>
-  <li>Tapping on the image of a product in the Amazon app to enlarge it causes
-  the app to crash.
+  <li>On some devices, <strong>Enable OEM unlock</strong> is grayed out in
+  "Developer Options" while running DP2.<br>
+  <strong>Workaround:</strong> Opt in to
+  the Android Beta Program (if you are not already opted in) by visiting
+  <a href="https://www.google.com/android/beta" class=
+  "external-link">www.google.com/android/beta</a>. Then, opt out and accept the
+  downgrade OTA. Opting out causes the device to downgrade to Android 6.0. You
+  should now be able to choose <strong>Enable OEM unlock</strong> in
+  "Developer Options". Personal data is erased when you downgrade the
+  device; however, unlocking the bootloader would have erased this data anyway.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Work Security Challenge
+    <ul>
+      <li>After migration to N, or after the user creates work profiles, work
+      profiles can't create keys in the keystore until the user changes their
+      pattern, PIN, or password, or sets up a Work Challenge.
+      </li>
+
+      <li>In Direct boot mode, applying the passcode restrictions to the device
+      causes the work profile to be unlocked, even though the device is locked.
+      This makes the work profile accessible even though it should be protected
+      by the device lock screen.
+      </li>
+    </ul>
   </li>
 
-  <li>"The Spectator" app crashes on launch.
+  <li>Always On VPN
+    <ul>
+      <li>If Always On VPN mode is turned on, but VPN is not available, apps
+      connect over the ordinary network. Apps should be offline if they have no
+      VPN connection available.
+      </li>
+
+      <li>When Always On mode is on, a VPN connection is not established after
+      a device reboots into Direct boot mode, even after the user unlocks the
+      secure lock screen.
+      </li>
+    </ul>
   </li>
 
-  <li>May be unable to open downloaded archives in the Downloads app.
+  <li>Suspend Packages
+    <ul>
+      <li>Device admins can suspend critical system packages, which may lead to
+      unexpected behavior, such as placing calls despite the "Telephone
+      disabled" dialog being displayed.
+      </li>
+    </ul>
   </li>
 
-  <li>Calendar app crashes on docking to multi-window.
+  <li>Other
+    <ul>
+      <li>The Settings app crashes on launch if {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} is set to true when
+      the user inserts physical media such as an SD card.
+      </li>
+
+      <li>The first check-in in a Work Profile takes several minutes to
+      complete.
+      </li>
+    </ul>
   </li>
+</ul>
+
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>Gaps between binding numbers and non-zero
+      as the first binding number causes {@code vkCreateGraphicsPipeline()} to fail.</li>
+      <li>Vulkan exhibits incorrect sampling behavior on projected texture coordinates.</li>
+      <li>in the multithreadCmdBuffer sample, {@code vkCmdClearColorImage()} crashes when
+      running with the N-DP2 driver.</li>
+      <li>Return values from {@code vkGetPhysicalDeviceFormatProperties()} do not set a value
+      for {@code VkFormatProperties::linearTilingFeatures}, which takes a value of 0 as
+      a result.</li>
+      <li>Vulkan floating point frame buffer attachments are not handled correctly.</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V shaders may trigger driver asserts.</li>
+      <li>Some pipeline configurations may cause {@code vkCreateGraphicsPipeline()}
+      to crash.</li>
+  </ul>
 </ul>
 
 <h4>Device-specific issues</h4>
 
-
 <dl>
   <dt>
-    <strong>Seed</strong>
+    <strong>Android One</strong>
   </dt>
 
   <dd>
@@ -214,7 +304,7 @@ page.image=images/cards/card-n-support_2x.png
   </dd>
 
   <dt>
-    <strong>Ryu</strong>
+    <strong>Pixel C</strong>
   </dt>
 
   <dd>
@@ -222,12 +312,29 @@ page.image=images/cards/card-n-support_2x.png
   </dd>
 
   <dt>
-    <strong>Shamu</strong>
+    <strong>Nexus 6</strong>
   </dt>
 
   <dd>
     Camera pictures in portrait orientation are corrupted, except for HDR+
     photos.
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    Playback of Netflix HD content is known to fail on Nexus Player.
+  </dd>
+
+  <dd>
+    Any application that relies on dynamic video resolution changes may fail on
+    Nexus Player.
+  </dd>
+
+  <dd>
+    Any application that use the VP9 video codec may fail on Nexus Player.
   </dd>
 </dl>
 
@@ -338,7 +445,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="afw">Android for Work</h4>
+<h4>Android for Work</h4>
 
 <ul>
   <li>Work Security Challenge
@@ -441,11 +548,6 @@ page.image=images/cards/card-n-support_2x.png
       not display Notifications as expected.
       </li>
 
-      <li>The version of Google Apps Device Policy that is bundled with N
-      Developer Preview does not yet support the Work Profile Security
-      Challenge feature. Developers should instead use TestDPC to test this
-      feature.
-      </li>
     </ul>
   </li>
 </ul>

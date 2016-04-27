@@ -1,0 +1,328 @@
+page.title=Уведомления
+page.tags=notifications
+helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!-- table of contents -->
+<h2>Содержание:</h2>
+<ol>
+  <li><a href="#direct">Прямой ответ</a></li>
+  <li><a href="#bundle">Группы уведомлений</a></li>
+  <li><a href="#custom">Собственные представления</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>В Android N представлено несколько новых API-интерфейсов, позволяющих
+публиковать заметные и интерактивные уведомления.</p>
+
+<p>Существующий API-интерфейс уведомлений {@link android.support.v4.app.RemoteInput}
+в Android N расширен для поддержки внутренних ответов на смартфонах. С помощью этой возможности
+ пользователи могут быстро отвечать на сообщения в панели уведомлений, не открывая приложение.</p>
+
+<p>
+  Android N также позволяет группировать несколько похожих
+  уведомлений, чтобы они отображались как одно. Для этого в Android N используется существующий метод {@link
+  android.support.v4.app.NotificationCompat.Builder#setGroup
+  NotificationCompat.Builder.setGroup()}. Пользователи могут развернуть все
+  уведомления и выполнить различные действия, например ответить на сообщение
+  или закрыть каждое из уведомлений по отдельности в панели уведомлений.
+</p>
+
+<p>Наконец, в Android N представлены новые API-интерфейсы, позволяющие
+использовать системные элементы в собственных представлениях уведомлений вашего приложения. Благодаря им
+уведомления отображаются единообразно на основе
+стандартных шаблонов.</p>
+
+<p>В этом документе рассматриваются некоторые наиболее важные изменения,
+ которые следует учитывать при использовании новых уведомлений в приложениях.</p>
+
+<h2 id="direct">Прямой ответ</h2>
+
+<p>С помощью прямых ответов пользователи
+ Android N могут быстро отвечать на текстовые сообщения и обновлять списки задач непосредственно в интерфейсе
+уведомлений. На мобильных устройствах действие внутреннего ответа обозначается
+ как дополнительная кнопка в уведомлении. Если пользователь набирает ответ на клавиатуре, система
+ прикрепляет текст ответа к намерению,
+ указанному для действия уведомления, и передает намерение в ваше
+ приложение.
+
+
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
+<p class="img-caption">
+  <strong>Рисунок 1.</strong> В Android N добавлена кнопка <strong>Reply</strong>.
+
+</p>
+
+<h3>Добавление действий внутренних ответов</h3>
+
+<p>Создание действия уведомления, которое поддерживает прямой ответ:
+</p>
+
+<ol>
+<li>Создайте экземпляр класса {@link android.support.v4.app.RemoteInput.Builder},
+ который можно добавить в действие
+уведомления. Конструктор класса принимает строку, которую система использует как
+ ключ для введенного текста. Потом ваше приложение использует этот ключ для получения
+ текста.
+
+<pre>
+// Key for the string that's delivered in the action's intent
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li>Прикрепите объект {@link android.support.v4.app.RemoteInput}
+ к действию с помощью метода <code>addRemoteInput()</code>.
+
+<pre>
+// Create the reply action and add the remote input
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>Примените действие к уведомлению и отправьте его.
+
+<pre>
+// Build the notification and add the action
+Notification notification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, notification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> Система запрашивает у пользователя ввод ответа, если он инициирует
+действие уведомления. </p>
+
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png" srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Рисунок 2.</strong> Пользователь вводит текст в панели уведомлений.
+</p>
+
+<h3>Получение введенного пользователем текста из внутреннего ответа</h3>
+
+<p>Получение введенного пользователем текста из интерфейса
+уведомлений в операции, объявленной в намерении действия:</p>
+<ol>
+<li> Вызовите метод {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()}, передав намерение действия уведомления
+ в качестве входного параметра. Этот метод возвращает объект {@link android.os.Bundle},
+ содержащий текст ответа.
+</li>
+
+<pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+
+<li>Запросите группу, используя ключ результата (предоставленный конструктору {@link
+  android.support.v4.app.RemoteInput.Builder}).
+</li>
+</ol>
+
+<p>В следующем фрагменте кода показано, как метод извлекает введенный
+текст из группы:</p>
+
+<pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+            }
+    return null;
+ }
+</pre>
+
+<p>Приложения могут применять логику, чтобы определить, какие действия следует выполнить с полученным
+текстом.
+Для интерактивных приложений (например, чатов) предоставьте больше контекста в самом уведомлении
+ (например, несколько строк истории чата, в том числе собственные сообщения пользователя),
+ чтобы у пользователя было достаточно информации для ответа.
+Когда пользователь отвечает через {@link android.support.v4.app.RemoteInput},
+ добавьте текст в историю ответов, применив метод {@code setRemoteInputHistory()}.
+</p>
+
+<h2 id="bundle">Группы уведомлений</h2>
+
+<p>Android N предоставляет разработчикам новый способ отображения
+ очереди уведомлений: <i>группы уведомлений</i>. Они похожи на
+  <a href="{@docRoot}training/wearables/notifications/stacks.html">стеки
+ уведомлений</a> в Android Wear. Например, если приложение создает уведомления
+ для входящих сообщений и получено несколько сообщений, объедините
+ уведомления в одну группу. Для группировки похожих уведомлений используйте
+ существующий метод {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()}.</p>
+
+<p>
+  Уведомления в группе формируют иерархию,
+  на вершине которой находится родительское уведомление, отображающее
+ сводную информацию о группе. Пользователь может постепенно
+ раскрывать группу уведомлений, при этом система показывает дополнительные
+  сведения. Если пользователь раскрывает группу, система отображает больше
+ информации о всех дочерних уведомлениях. Если же пользователь
+ развернет одно из уведомлений, его содержимое показывается полностью.
+</p>
+
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png" srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Рисунок 3.</strong> Пользователь может постепенно раскрывать группу уведомлений.
+
+</p>
+
+<p>Добавление уведомлений в группу описано в разделе 
+<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Добавление
+каждого уведомления в группу</a>.</p>
+
+
+<h3 id="best-practices">Рекомендации по работе с группами уведомлений</h3>
+<p>В этом разделе описываются рекомендации по использованию групп
+уведомлений вместо уведомлений {@link android.app.Notification.InboxStyle InboxStyle},
+ которые были доступны в предыдущих версиях платформы
+ Android.</p>
+
+<h3>Ситуации, в которых следует использовать группы уведомлений</h3>
+
+<p>Вам следует использовать группы уведомлений, только если выполняются
+все следующие условия.</p>
+
+<ul>
+  <li>Дочерние уведомления являются полноценными уведомлениями, которые можно
+ показать отдельно без сводной информации о группе.</li>
+  <li>Отображение дочерних уведомлений по отдельности имеет смысл. Например:
+
+  </li>
+  <ul>
+    <li>в дочерних уведомлениях можно выполнять какие-либо соответствующие им действия;</li>
+    <li>дочернему уведомлению предшествует больше информации, чем требуется пользователю.</li>
+  </ul>
+</ul>
+
+<p>Примером использования групп уведомлений может служить приложение
+для обмена сообщениями, которое показывает список входящих сообщений,
+или почтовое приложение, отображающее список полученных писем.</p>
+
+<p>
+К примерам ситуаций, когда предпочтительнее использовать одно
+ уведомление, относятся отдельные сообщения от одного пользователя или
+ списочное представление однострочных текстовых элементов. Для них можно использовать
+{@link android.app.Notification.InboxStyle InboxStyle} или
+{@link android.app.Notification.BigTextStyle BigTextStyle}.
+
+</p>
+
+<h3 id ="post">Отображение группы уведомлений</h3>
+
+<p>
+  Приложение всегда должно публиковать сводную информацию группы, даже если эта группа содержит
+ всего одно дочернее уведомление. В этом случае система не показывает сводную информацию, а
+ непосредственно отображает это уведомление. Это обеспечивает
+ единообразие интерфейса при
+ пролистывании дочернего элемента группы.
+</p>
+
+<p class="note">
+  <strong>Примечание.</strong> Эта версия Android N пока еще не
+ блокирует отображение сводной информации для групп уведомлений, содержащих только один дочерний элемент. Эта
+ возможность будет добавлена в следующих версиях Android N.
+</p>
+
+<h3>Всплывающие уведомления</h3>
+
+<p>Хотя система обычно отображает дочерние уведомления в виде группы,
+ их можно временно показывать в виде
+ <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">всплывающих
+уведомлений</a>. Эта возможность очень удобна, так как позволяет
+ быстро получить доступ к последнему дочернему уведомлению и связанным с ним действиям.
+</p>
+
+
+<h3>Обратная совместимость</h3>
+
+<p>
+  И группы уведомлений, и удаленный ввод входили в состав API {@link
+  android.app.Notification} для поддержки устройств
+ Android Wear, начиная с Android 5.0 (уровень API 21). Если вы уже использовали эти API-интерфейсы для создания уведомлений,
+ вам нужно только убедиться, что поведение приложения соответствует
+ описанным выше рекомендациям, и рассмотреть возможность реализации {@code
+  setRemoteInputHistory()}.
+</p>
+
+<p>
+  Для поддержки обратной совместимости те же API-интерфейсы доступны в
+ классе {@link android.support.v4.app.NotificationCompat}
+ вспомогательной библиотеки, что позволяет реализовать уведомления, работающие в предыдущих версиях Android.
+ На смартфонах и планшетах пользователи видят только сводное уведомление,
+ поэтому в приложении все равно должно быть уведомление
+ в стиле Inbox или аналогичное уведомление, содержащее всю информацию о группе. Так как устройства Android
+Wear позволяют пользователям видеть все дочерние уведомления даже
+ на более ранних уровнях платформы, эти уведомления следует создавать независимо от уровня API.
+
+</p>
+
+<h2 id="custom"> Собственные представления</h2>
+<p>Начиная с Android N, вы можете настраивать представления уведомлений
+и по-прежнему получать системные элементы, такие как заголовки уведомлений, действия и
+расширяемые макеты.</p>
+
+<p>Для этого в Android N добавлены следующие API-интерфейсы, позволяющие
+ настраивать собственные представления.</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> Определяет стиль для всех уведомлений, кроме
+уведомлений мультимедиа.</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> Определяет стиль для уведомлений мультимедиа.</dd>
+</dl>
+
+<p>Чтобы воспользоваться этим новым API-интерфейсом, вызовите метод {@code setStyle()}, передав в него
+нужный стиль собственного представления.</p>
+
+<p>В этом фрагменте показано, как создать собственный объект уведомления с помощью метода
+{@code DecoratedCustomViewStyle()}.</p>
+
+<pre>
+Notification noti = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>

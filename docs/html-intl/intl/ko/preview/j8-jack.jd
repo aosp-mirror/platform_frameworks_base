@@ -1,0 +1,183 @@
+page.title=Java 8 언어 기능
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">지원되는 Java 8 언어 기능 및 API</a>
+      </li>
+      <li>
+        <a href="#configuration">Java 8 기능 및 Jack 툴체인 활성화</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N은 Java 8 언어 기능을 지원합니다.
+Java 8 언어 기능은 Android N을 대상으로 하는 앱을 개발할 때 사용할 수 있습니다.
+이 페이지에서는 Android N Preview에서 지원되는 새로운 언어 기능과,
+프로젝트를 적절히 설정하여 언어 기능을 사용하는 방법,
+발생할 수도 있는 알려진 문제를 설명합니다.
+</p>
+
+<p>이 기능을 사용하려면 Android
+Studio 2.1(프리뷰)와 Android N Preview SDK를 다운로드하고 설정해야 합니다. 여기에는 필수
+Jack 툴체인과 업데이트된 Gradle용 Android 플러그인이 포함됩니다. 아직
+Android N Preview SDK를 설치하지 않았다면 <a href="{@docRoot}preview/setup-sdk.html">Android N용 개발 설정</a>을 참조하세요.</p>
+
+
+
+<p class="note">
+  <strong>참고:</strong> 새로운 Java 8 언어 기능은
+Android N 플랫폼을 대상으로 하는 앱 개발에 필요한 요구 사항은 아닙니다.
+Java 8 언어 기능으로 코드를 작성하고 싶지 않다면,
+프로젝트의 소스와 대상 호환성 값을 Java 7로 설정할 수 있지만
+Android N 플랫폼용으로 구축하려면 JDK 8로 컴파일해야 합니다.
+</p>
+
+<h2 id="supported-features">
+  지원되는 Java 8 언어 기능 및 API
+</h2>
+
+<p>
+  Android는 현재 모든 Java 8 언어 기능을 지원하지 않습니다. 그러나 현재 다음 기능은
+Android N Preview를 대상으로 하는
+앱을 개발할 때 이용할 수 있습니다.
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">기본
+및 정적 인터페이스 메서드</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
+    람다 식</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">반복 가능한
+    주석</a>
+  </li>
+</ul>
+
+
+<p>
+  또한, 다음 Java 8 언어 기능 API를 사용할 수 있습니다.
+</p>
+
+<ul>
+  <li>Reflection 및 언어 관련 API:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface}
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable}
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()}
+      </li>
+
+      <li>반복 가능한 주석과 관련된 Reflection API
+      예: {@code AnnotatedElement.getAnnotationsByType(Class)}
+      </li>
+    </ul>
+  </li>
+  <li>Utility API:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>참고:</strong> Android N은 익명 클래스에 대한 람다 식의 구현을
+기반으로 합니다. 이 방식을 사용하면
+이전 버전과 호환되고 이전 버전의 Android에서 실행할 수 있습니다.
+이전 버전에서 람다 식을 테스트하려면 {@code
+  build.gradle} 파일에서 {@code compileSdkVersion}과 {@code
+  targetSdkVersion}을 23 이하로 설정하십시오.
+</p>
+
+<h2 id="configuration">
+  Java 8 기능 및 Jack 툴체인 활성화
+</h2>
+
+<p>
+  새로운 Java 8 언어 기능을 사용하려면
+새로운 <a class="external-link" href="https://source.android.com/source/jack.html">Jack 툴체인</a>을 사용해야 합니다. 이 새로운
+Android 툴체인은 Java 언어 소스를 Android에서 읽을 수 있는 Dex
+바이트코드로 컴파일하고, 자체 {@code .jack} 라이브러리 형식이 있으며, 단일 도구로는 가장 많은 툴체인
+기능(리패키징, 축소, 난독화, 멀티덱스)을
+제공합니다.
+</p>
+
+<p>다음은 Android DEX 파일을 빌드하는 데 사용하는 2개의 툴체인을 비교한 것입니다.</p>
+<ul>
+  <li>레거시 javac 툴체인:<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>새로운 Jack 툴체인:<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Gradle 구성
+</h3>
+
+<p>
+  프로젝트에서 Java 8 언어 기능과 Jack을 활성화하려면
+모듈별 {@code build.gradle} 파일에 다음을 입력합니다.
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  알려진 문제
+</h3>
+
+<p>
+  Android Studio 2.0(베타)에 도입된 Instant Run은
+현재 Jack과 호환되며 새로운 툴체인을 사용하는 동안 비활성화됩니다.
+</p>
+
+<p>Jack이 앱을 컴파일할 때 중간 클래스 파일을 생성하지 않으므로
+이런 파일에 의존하는 도구는 현재 Jack과 호환되지 않습니다. 이러한 도구의 예시는
+다음과 같습니다.</p>
+
+<ul>
+  <li>클래스 파일에 적용되는 Lint 탐지기
+  </li>
+
+  <li>앱의 클래스 파일이 필요한 도구와 라이브러리(예: JaCoCo
+ 및 Mockito)</li>
+</ul>
+
+<p>Jack을 사용하는 동안 다른 문제를 발견하면 <a href="http://tools.android.com/filing-bugs">버그를 보고해주세요</a>.</p>

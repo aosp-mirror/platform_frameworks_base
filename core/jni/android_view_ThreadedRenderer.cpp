@@ -668,7 +668,7 @@ static void android_view_ThreadedRenderer_setContentDrawBounds(JNIEnv* env,
     proxy->setContentDrawBounds(left, top, right, bottom);
 }
 
-static jboolean android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
+static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jobject clazz, jobject jsurface, jobject jbitmap) {
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
@@ -782,7 +782,7 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveFrameMetricsObserver",
             "(JJ)V",
             (void*)android_view_ThreadedRenderer_removeFrameMetricsObserver },
-    { "nCopySurfaceInto", "(Landroid/view/Surface;Landroid/graphics/Bitmap;)Z",
+    { "nCopySurfaceInto", "(Landroid/view/Surface;Landroid/graphics/Bitmap;)I",
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
 };
 

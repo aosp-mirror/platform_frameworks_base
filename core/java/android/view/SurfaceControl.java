@@ -88,6 +88,7 @@ public class SurfaceControl {
     private static native void nativeSetOverrideScalingMode(long nativeObject,
             int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
+    private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -654,6 +655,13 @@ public class SurfaceControl {
         }
 
         nativeSetDisplaySize(displayToken, width, height);
+    }
+
+    public static Display.HdrCapabilities getHdrCapabilities(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetHdrCapabilities(displayToken);
     }
 
     public static IBinder createDisplay(String name, boolean secure) {

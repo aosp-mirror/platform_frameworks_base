@@ -1,0 +1,183 @@
+page.title=Tính năng của Ngôn ngữ Java 8
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">Các tính năng và API của Ngôn ngữ Java 8 được hỗ trợ</a>
+      </li>
+      <li>
+        <a href="#configuration">Kích hoạt các tính năng của Java 8 và Jack Toolchain</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N cung cấp hỗ trợ cho các tính năng của ngôn ngữ Java 8
+   mà bạn có thể sử dụng khi phát triển các ứng dụng nhắm mục tiêu Android N.
+  Trang này mô tả các tính năng ngôn ngữ mới được hỗ trợ trong Bản xem trước
+  Android N, cách thiết lập dự án đúng để sử dụng chúng và các vấn đề
+  đã biết mà bạn có thể gặp phải.
+</p>
+
+<p>Để bắt đầu sử dụng các tính năng này, bạn cần tải xuống và cài đặt Android
+Studio 2.1 (bản xem trước) và SDK của Bản xem trước Android N gồm có Jack toolchain
+cần thiết và Bổ trợ Android được cập nhật cho Gradle. Nếu bạn chưa
+cài đặt SDK Bản xem trước Android N, hãy xem <a href="{@docRoot}preview/setup-sdk.html">Thiết lập để Phát triển dành cho Android N</a>.</p>
+
+
+
+<p class="note">
+  <strong>Lưu ý:</strong> Sử dụng các tính năng mới của ngôn ngữ Java 8 không phải là một
+  yêu cầu để phát triển các ứng dụng nhắm mục tiêu nền tảng Android N. Nếu bạn
+   không muốn viết mã với các tính năng của ngôn ngữ Java 8 thì bạn có đặt các giá trị
+  mã nguồn và tương thích mục tiêu thành Java 7. Tuy nhiên, bạn vẫn
+  phải biên dịch với JDK 8 để dựng cho nền tảng Android N.
+</p>
+
+<h2 id="supported-features">
+  Các tính năng và API của Ngôn ngữ Java 8 được hỗ trợ
+</h2>
+
+<p>
+  Hiện thời, Android không hỗ trợ tất cả các tính năng của ngôn ngữ Java 8. Tuy nhiên,
+  các tính năng sau sẽ sử dụng được khi phát triển ứng dụng nhắm mục tiêu
+  Bản xem trước Android N:
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">Các
+   phương thức giao diện mặc định và tĩnh</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
+    Biểu thức Lambda</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">Chú giải
+    lặp lại</a>
+  </li>
+</ul>
+
+
+<p>
+  Ngoài ra, các API tính năng của ngôn ngữ Java 8 cũng được hỗ trợ:
+</p>
+
+<ul>
+  <li>Các API phản chiếu và liên quan đến ngôn ngữ:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface}
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable}
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()}
+      </li>
+
+      <li>và các API Phản chiếu liên quan tới các chú giải lặp lại, như
+{@code AnnotatedElement.getAnnotationsByType(Class)}
+      </li>
+    </ul>
+  </li>
+  <li>Các API tiện ích:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Android N kế thừa việc triển khai các
+   biểu thức lambda trên các lớp ẩn danh. Phương pháp này cho phép chúng
+  tương thích ngược và có thể chạy trên các phiên bản Android cũ hơn. Để kiểm thử
+  các biểu thức lambda trên các phiên bản cũ hơn, hãy nhớ vào tệp {@code
+  build.gradle} và đặt {@code compileSdkVersion} và {@code
+  targetSdkVersion} thành 23 hoặc thấp hơn.
+</p>
+
+<h2 id="configuration">
+  Kích hoạt các tính năng của Java 8 và Jack Toolchain
+</h2>
+
+<p>
+  Để sử dụng các tính năng mới của ngôn ngữ Java 8 bạn cũng cần sử dụng
+  <a class="external-link" href="https://source.android.com/source/jack.html">Jack toolchain</a> mới. Toolchain Android
+  mới sẽ biên dịch mã nguồn của ngôn ngữ Java sang mã bytecode
+   dex đọc được của Android, có định dạng thư viện {@code .jack}  riêng của nó và cung cấp hầu hết các tính năng
+   toolchain dưới dạng một phần của công cụ riêng lẻ: đóng gói lại, thu gọn, làm rối mã và
+  multidex.
+</p>
+
+<p>Sau đây là phần so sánh hai toolchain được sử dụng để dựng các tệp DEX Android:</p>
+<ul>
+  <li>Javac toolchain cũ:<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>Jack toolchain mới:<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Cấu hình Gradle
+</h3>
+
+<p>
+  Để kích hoạt các tính năng ngôn ngữ Java 8 và Jack cho dự án của bạn, hãy nhập
+   nội dung sau vào tệp {@code build.gradle} theo mô-đun:
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  Vấn đề đã biết
+</h3>
+
+<p>
+  Instant Run, được giới thiệu trong Android Studio 2.0 (Beta), hiện không hoạt động
+  với Jack và sẽ bị vô hiệu hóa khi sử dụng toolchain mới.
+</p>
+
+<p>Bởi vì Jack không tạo ra các tệp lớp trung gian khi biên dịch một
+ứng dụng, các công cụ phụ thuộc vào những tệp này hiện thời không hoạt động với Jack. Một số
+ví dụ về các công cụ này là:</p>
+
+<ul>
+  <li>Bộ dò Lint hoạt động trên các tệp lớp
+  </li>
+
+  <li>Các công cụ và thư viện đòi hỏi các tệp lớp của ứng dụng (như JaCoCo
+  và Mockito)</li>
+</ul>
+
+<p><a href="http://tools.android.com/filing-bugs">Vui lòng thông báo lỗi</a> nếu bạn phát hiện các vấn đề khác khi sử dụng Jack.</p>
