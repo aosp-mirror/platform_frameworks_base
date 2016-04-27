@@ -40,6 +40,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -877,6 +878,19 @@ public class ZenModeConfig implements Parcelable {
             rt.exitAtAlarm = exitAtAlarm;
             rt.nextAlarm = nextAlarm;
             return rt;
+        }
+
+        @Override
+        public String toString() {
+            return "ScheduleInfo{" +
+                    "days=" + Arrays.toString(days) +
+                    ", startHour=" + startHour +
+                    ", startMinute=" + startMinute +
+                    ", endHour=" + endHour +
+                    ", endMinute=" + endMinute +
+                    ", exitAtAlarm=" + exitAtAlarm +
+                    ", nextAlarm=" + nextAlarm +
+                    '}';
         }
     }
 
