@@ -151,7 +151,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int WINDOW_ID_UNKNOWN = -1;
 
-    private static int sIdCounter = 0;
+    // Each service has an ID. Also provide one for magnification gesture handling
+    public static final int MAGNIFICATION_GESTURE_HANDLER_ID = 0;
+
+    private static int sIdCounter = MAGNIFICATION_GESTURE_HANDLER_ID + 1;
 
     private static int sNextWindowId;
 
@@ -182,8 +185,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final MainHandler mMainHandler;
 
     private MagnificationController mMagnificationController;
-
-    private boolean mUnregisterMagnificationOnReset;
 
     private InteractionBridge mInteractionBridge;
 
@@ -784,11 +785,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             float scale, float centerX, float centerY) {
         synchronized (mLock) {
             notifyMagnificationChangedLocked(region, scale, centerX, centerY);
-
-            if (mUnregisterMagnificationOnReset && scale == 1.0f) {
-                mUnregisterMagnificationOnReset = false;
-                mMagnificationController.unregister();
-            }
         }
     }
 
@@ -1736,25 +1732,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void updateMagnificationLocked(UserState userState) {
-        final int userId = userState.mUserId;
-        if (userId == mCurrentUserId && mMagnificationController != null) {
-            if (userState.mIsDisplayMagnificationEnabled ||
-                    userHasMagnificationServicesLocked(userState)) {
-                mMagnificationController.setUserId(userState.mUserId);
-            } else {
-                // If the user no longer has any magnification-controlling
-                // services and is not using magnification gestures, then
-                // reset the state to normal.
-                if (mMagnificationController.resetIfNeeded(true)) {
-                    // Animations are still running, so wait until we receive a
-                    // callback verifying that we've reset magnification.
-                    mUnregisterMagnificationOnReset = true;
-                } else {
-                    mUnregisterMagnificationOnReset = false;
-                    mMagnificationController.unregister();
-                    mMagnificationController = null;
-                }
-            }
+        if (userState.mUserId != mCurrentUserId) {
+            return;
+        }
+
+        if (userState.mIsDisplayMagnificationEnabled ||
+                userHasMagnificationServicesLocked(userState)) {
+            // Initialize the magnification controller if necessary
+            getMagnificationController();
+            mMagnificationController.register();
+        } else if (mMagnificationController != null) {
+            mMagnificationController.unregister();
         }
     }
 
@@ -2152,7 +2140,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         synchronized (mLock) {
             if (mMagnificationController == null) {
                 mMagnificationController = new MagnificationController(mContext, this, mLock);
-                mMagnificationController.register();
                 mMagnificationController.setUserId(mCurrentUserId);
             }
             return mMagnificationController;
@@ -2886,7 +2873,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identity = Binder.clearCallingIdentity();
             try {
                 final Region region = Region.obtain();
-                getMagnificationController().getMagnifiedRegion(region);
+                getMagnificationController().getMagnificationRegion(region);
                 return region;
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2957,7 +2944,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identity = Binder.clearCallingIdentity();
             try {
                 return getMagnificationController().setScaleAndCenter(
-                        scale, centerX, centerY, animate);
+                        scale, centerX, centerY, animate, mId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3090,10 +3077,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mInstalledServices.remove(mAccessibilityServiceInfo);
                     userState.mEnabledServices.remove(mComponentName);
                     userState.destroyUiAutomationService();
-                    if (readConfigurationForUserStateLocked(userState)) {
-                        onUserStateChangedLocked(userState);
-                    }
                 }
+                if (mId == getMagnificationController().getIdOfLastServiceToMagnify()) {
+                    getMagnificationController().resetIfNeeded(true);
+                }
+                onUserStateChangedLocked(userState);
             }
         }
 

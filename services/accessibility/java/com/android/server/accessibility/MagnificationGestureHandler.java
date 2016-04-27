@@ -237,7 +237,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         final float eventX = event.getX();
         final float eventY = event.getY();
         if (mMagnificationController.isMagnifying()
-                && mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
+                && mMagnificationController.magnificationRegionContains(eventX, eventY)) {
             final float scale = mMagnificationController.getScale();
             final float scaledOffsetX = mMagnificationController.getOffsetX();
             final float scaledOffsetY = mMagnificationController.getOffsetY();
@@ -381,7 +381,8 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + distanceX
                         + " scrollY: " + distanceY);
             }
-            mMagnificationController.offsetMagnifiedRegionCenter(distanceX, distanceY);
+            mMagnificationController.offsetMagnifiedRegionCenter(distanceX, distanceY,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return true;
         }
 
@@ -421,7 +422,8 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
             final float pivotX = detector.getFocusX();
             final float pivotY = detector.getFocusY();
-            mMagnificationController.setScale(scale, pivotX, pivotY, false);
+            mMagnificationController.setScale(scale, pivotX, pivotY, false,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return true;
         }
 
@@ -469,14 +471,14 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                     }
                     final float eventX = event.getX();
                     final float eventY = event.getY();
-                    if (mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
+                    if (mMagnificationController.magnificationRegionContains(eventX, eventY)) {
                         if (mLastMoveOutsideMagnifiedRegion) {
                             mLastMoveOutsideMagnifiedRegion = false;
-                            mMagnificationController.setCenter(eventX,
-                                    eventY, true);
+                            mMagnificationController.setCenter(eventX, eventY, true,
+                                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
                         } else {
-                            mMagnificationController.setCenter(eventX,
-                                    eventY, false);
+                            mMagnificationController.setCenter(eventX, eventY, false,
+                                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
                         }
                     } else {
                         mLastMoveOutsideMagnifiedRegion = true;
@@ -571,7 +573,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                    if (!mMagnificationController.magnifiedRegionContains(
+                    if (!mMagnificationController.magnificationRegionContains(
                             event.getX(), event.getY())) {
                         transitionToDelegatingStateAndClear();
                         return;
@@ -616,7 +618,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                         return;
                     }
                     mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
-                    if (!mMagnificationController.magnifiedRegionContains(
+                    if (!mMagnificationController.magnificationRegionContains(
                             event.getX(), event.getY())) {
                         transitionToDelegatingStateAndClear();
                         return;
@@ -726,7 +728,8 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             if (!mMagnificationController.isMagnifying()) {
                 final float targetScale = mMagnificationController.getPersistedScale();
                 final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
-                mMagnificationController.setScaleAndCenter(scale, up.getX(), up.getY(), true);
+                mMagnificationController.setScaleAndCenter(scale, up.getX(), up.getY(), true,
+                        AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             } else {
                 mMagnificationController.reset(true);
             }
@@ -742,7 +745,8 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
             final float targetScale = mMagnificationController.getPersistedScale();
             final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
-            mMagnificationController.setScaleAndCenter(scale, down.getX(), down.getY(), true);
+            mMagnificationController.setScaleAndCenter(scale, down.getX(), down.getY(), true,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
             transitionToState(STATE_VIEWPORT_DRAGGING);
         }
