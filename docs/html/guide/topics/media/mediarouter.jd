@@ -458,8 +458,8 @@ public class MediaRouterPlaybackActivity extends ActionBarActivity {
 <p class="note">
   <strong>Note:</strong> In order for Wireless Display routes to show up in the media route
   selection dialog, users must enable this option in the Settings app. The option is under
-  the <em>Display</em> category and is called <em>Cast screen</em> on Android 4.4 (KitKat) and higher
-  devices and <em>Wireless Display</em> on Android 4.2.x (Jelly Bean) devices. For more information
+  the <em>Display</em> category and is called <em>Cast screen</em> on Android 4.4 (KitKat)
+  and higher devices. For more information
   on enabling this feature see this
   <a href="https://support.google.com/nexus/answer/2865484">Wireless display</a> support page.
 </p>

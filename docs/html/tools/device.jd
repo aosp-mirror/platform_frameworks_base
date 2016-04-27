@@ -59,10 +59,10 @@ access on the phone, which let you:</p>
   <li>Plus many more options to simulate app stresses or enable debugging options.</li>
 </ul>
 <p>To access these settings, open the <em>Developer options</em> in the
-system Settings. On Android 4.2 and higher, the Developer options screen is
+system Settings. On Android 4.2 and higher, the <strong>Developer options</strong> screen is
 hidden by default. To make it visible, go to
 <b>Settings &gt; About phone</b> and tap <b>Build number</b> seven times. Return to the previous
-screen to find Developer options at the bottom.</p>
+screen to find <strong>Developer options</strong> at the bottom.</p>
 
 
 
@@ -89,17 +89,12 @@ the <code>&lt;application></code> element.</p>
     <p class="note"><strong>Note:</strong> If you manually enable debugging in the manifest
  file, be sure to disable it in your release build (your published application
 should usually <em>not</em> be debuggable).</p></li>
-  <li>Enable <strong>USB debugging</strong> on your device.
-    <ul>
-      <li>On most devices running Android 3.2 or older, you can find the option under
-        <strong>Settings > Applications > Development</strong>.</li>
-      <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
-        <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
+  <li>Enable <strong>USB debugging</strong> on your device by going to
+    <strong>Settings > Developer options</strong>.
+	    <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
         options</strong> is hidden by default. To make it available, go
         to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
         seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
-      </li>
-    </ul>
   </li>
   <li>Set up your system to detect your device.
     <ul>
