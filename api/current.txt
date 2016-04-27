@@ -17207,9 +17207,6 @@ package android.icu.text {
     method public android.icu.text.UnicodeSet addAll(java.lang.Iterable<?>);
     method public android.icu.text.UnicodeSet addAll(T...);
     method public T addAllTo(T);
-    method public java.lang.String[] addAllTo(java.lang.String[]);
-    method public static U addAllTo(java.lang.Iterable<T>, U);
-    method public static T[] addAllTo(java.lang.Iterable<T>, T[]);
     method public void addMatchSetTo(android.icu.text.UnicodeSet);
     method public android.icu.text.UnicodeSet applyIntPropertyValue(int, int);
     method public final android.icu.text.UnicodeSet applyPattern(java.lang.String);
@@ -17223,10 +17220,6 @@ package android.icu.text {
     method public android.icu.text.UnicodeSet cloneAsThawed();
     method public android.icu.text.UnicodeSet closeOver(int);
     method public android.icu.text.UnicodeSet compact();
-    method public static int compare(java.lang.CharSequence, int);
-    method public static int compare(int, java.lang.CharSequence);
-    method public static int compare(java.lang.Iterable<T>, java.lang.Iterable<T>);
-    method public static int compare(java.util.Collection<T>, java.util.Collection<T>, android.icu.text.UnicodeSet.ComparisonStyle);
     method public int compareTo(android.icu.text.UnicodeSet);
     method public int compareTo(android.icu.text.UnicodeSet, android.icu.text.UnicodeSet.ComparisonStyle);
     method public int compareTo(java.lang.Iterable<java.lang.String>);
@@ -17269,7 +17262,6 @@ package android.icu.text {
     method public android.icu.text.UnicodeSet removeAll(android.icu.text.UnicodeSet);
     method public android.icu.text.UnicodeSet removeAll(java.lang.Iterable<T>);
     method public final android.icu.text.UnicodeSet removeAllStrings();
-    method public static boolean resemblesPattern(java.lang.String, int);
     method public android.icu.text.UnicodeSet retain(int, int);
     method public final android.icu.text.UnicodeSet retain(int);
     method public final android.icu.text.UnicodeSet retain(java.lang.CharSequence);
@@ -17284,7 +17276,6 @@ package android.icu.text {
     method public int spanBack(java.lang.CharSequence, android.icu.text.UnicodeSet.SpanCondition);
     method public int spanBack(java.lang.CharSequence, int, android.icu.text.UnicodeSet.SpanCondition);
     method public java.util.Collection<java.lang.String> strings();
-    method public static java.lang.String[] toArray(android.icu.text.UnicodeSet);
     method public java.lang.String toPattern(boolean);
     field public static final int ADD_CASE_MAPPINGS = 4; // 0x4
     field public static final android.icu.text.UnicodeSet ALL_CODE_POINTS;
@@ -17403,11 +17394,8 @@ package android.icu.util {
     ctor protected CECalendar(int, int, int);
     ctor protected CECalendar(java.util.Date);
     ctor protected CECalendar(int, int, int, int, int, int);
-    method public static int ceToJD(long, int, int, int);
-    method protected abstract int getJDEpochOffset();
     method protected int handleComputeMonthStart(int, int, boolean);
     method protected int handleGetLimit(int, int);
-    method public static void jdToCE(int, int, int[]);
   }
 
   public abstract class Calendar implements java.lang.Cloneable java.lang.Comparable java.io.Serializable {
@@ -17635,7 +17623,6 @@ package android.icu.util {
     ctor public CopticCalendar(int, int, int);
     ctor public CopticCalendar(java.util.Date);
     ctor public CopticCalendar(int, int, int, int, int, int);
-    method protected deprecated int getJDEpochOffset();
     method protected deprecated int handleGetExtendedYear();
     field public static final int AMSHIR = 5; // 0x5
     field public static final int BABA = 1; // 0x1
@@ -17806,11 +17793,11 @@ package android.icu.util {
     ctor public IslamicCalendar(java.util.Date);
     ctor public IslamicCalendar(int, int, int);
     ctor public IslamicCalendar(int, int, int, int, int, int);
+    method public android.icu.util.IslamicCalendar.CalculationType getCalculationType();
     method protected int handleComputeMonthStart(int, int, boolean);
     method protected int handleGetExtendedYear();
     method protected int handleGetLimit(int, int);
-    method public boolean isCivil();
-    method public void setCivil(boolean);
+    method public void setCalculationType(android.icu.util.IslamicCalendar.CalculationType);
     field public static final int DHU_AL_HIJJAH = 11; // 0xb
     field public static final int DHU_AL_QIDAH = 10; // 0xa
     field public static final int JUMADA_1 = 4; // 0x4
@@ -18248,7 +18235,6 @@ package android.icu.util {
     method public int getMicro();
     method public int getMilli();
     method public int getMinor();
-    method public static void main(java.lang.String[]);
     field public static final android.icu.util.VersionInfo ICU_VERSION;
     field public static final android.icu.util.VersionInfo UCOL_BUILDER_VERSION;
     field public static final android.icu.util.VersionInfo UCOL_RUNTIME_VERSION;
