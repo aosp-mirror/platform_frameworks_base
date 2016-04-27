@@ -29,8 +29,16 @@
       zh-tw-lang="設定預覽版 SDK">
       Set Up to Develop</a></div>
   </li>
+
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
+      es-lang="Pruebe en un dispositivo"
+      ja-lang="デバイス上でテストする"
+      ko-lang="기기에서 테스트"
+      pt-br-lang="Testar em um dispositivo"
+      ru-lang="Тестирование на устройстве"
+      zh-cn-lang="在设备上测试"
+      zh-tw-lang="在裝置上測試">
       Test on a Device</a></div>
   </li>
 
@@ -47,9 +55,23 @@
        </a></div>
       <ul>
         <li><a href="<?cs var:toroot ?>preview/features/background-optimization.html"
-        >Background Optimizations</a></li>
+              es-lang="Optimizaciones en segundo plano"
+              ja-lang="バックグラウンド処理の最適化"
+              ko-lang="백그라운드 최적화"
+              pt-br-lang="Otimizações em segundo plano"
+              ru-lang="Оптимизация фоновых процессов"
+              zh-cn-lang="后台优化"
+              zh-tw-lang="背景最佳化">Background Optimizations
+              </a></li>
         <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
-        >Language and Locale</a></li>
+              es-lang="Idioma y configuración regional"
+              ja-lang="言語とロケール"
+              ko-lang="언어 및 로케일"
+              pt-br-lang="Idioma e localidade"
+              ru-lang="Язык и языковой стандарт"
+              zh-cn-lang="语言和区域设置"
+              zh-tw-lang="語言和地區設定">Language and Locale
+              </a></li>
       </ul>
   </li>
 
@@ -66,31 +88,80 @@
       <ul>
 
         <li><a href="<?cs var:toroot ?>preview/features/multi-window.html"
-        >Multi-Window Support</a></li>
+              es-lang="Compatibilidad con ventanas múltiples"
+              ja-lang="マルチ ウィンドウのサポート"
+              ko-lang="다중 창 지원"
+              pt-br-lang="Suporte a várias janelas"
+              ru-lang="Поддержка многооконного режима"
+              zh-cn-lang="多窗口支持"
+              zh-tw-lang="多視窗支援">
+        Multi-Window Support</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
-        >Notifications</a></li>
+              es-lang="Notificaciones"
+              ja-lang="通知"
+              ko-lang="알림"
+              pt-br-lang="Notificações"
+              ru-lang="Уведомления"
+              zh-cn-lang="通知"
+              zh-tw-lang="通知">
+        Notifications</a></li>
 
-        <li><a href="<?cs var:toroot ?>preview/features/data-saver.html"
-        >Data Saver</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/data-saver.html">
+        Data Saver</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/tv-recording-api.html"
-        >TV Recording</a></li>
+              es-lang="Grabación de TV"
+              ja-lang="TV の録画"
+              ko-lang="TV 녹화"
+              pt-br-lang="Gravação para TV"
+              ru-lang="Запись ТВ"
+              zh-cn-lang="TV 录制"
+              zh-tw-lang="電視錄製">
+        TV Recording</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/security-config.html"
-        >Network Security Configuration</a></li>
+              es-lang="Configuración de seguridad de la red"
+              ja-lang="ネットワーク セキュリティ構成"
+              ko-lang="네트워크 보안 구성"
+              pt-br-lang="Configurações de segurança de rede"
+              ru-lang="Конфигурация сетевой безопасности"
+              zh-cn-lang="网络安全配置"
+              zh-tw-lang="網路安全性設定">
+        Network Security Configuration</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
-        >ICU4J Support</a></li>
+              es-lang="API de ICU4J del framework de Android"
+              ja-lang="ICU4J Android フレームワーク API"
+              ko-lang="ICU4J Android 프레임워크 API"
+              pt-br-lang="APIs de estrutura do Android para ICU4J"
+              ru-lang="API-интерфейсы ICU4J в платформе Android"
+              zh-cn-lang="ICU4J Android 框架 API"
+              zh-tw-lang="ICU4J Android 架構 API">
+        ICU4J Support</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/j8-jack.html"
-        >Java 8 Language Features</a></li>
+              es-lang="Funciones del lenguaje Java 8"
+              ja-lang="Java 8 の機能"
+              ko-lang="Java 8 언어 기능"
+              pt-br-lang="Recursos de linguagem do Java 8"
+              ru-lang="Возможности языка Java 8"
+              zh-cn-lang="Java 8 语言功能"
+              zh-tw-lang="Java 8 語言功能">
+        Java 8 Language Features</a></li>
 
-        <li><a href="<?cs var:toroot ?>preview/features/afw.html"
-        >Android for Work Updates</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/afw.html">
+        Android for Work Updates</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/scoped-folder-access.html"
-        >Scoped Directory Access</a></li>
+              es-lang="Acceso a directorios determinados"
+              ja-lang="特定のディレクトリへのアクセス"
+              ko-lang="범위가 지정된 디렉터리 액세스"
+              pt-br-lang="Acesso a diretórios com escopo"
+              ru-lang="Доступ к выделенным каталогам"
+              zh-cn-lang="作用域目录访问"
+              zh-tw-lang="限定範圍目錄存取">
+        Scoped Directory Access</a></li>
       </ul>
   </li>
 

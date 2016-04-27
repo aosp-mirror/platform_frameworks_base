@@ -1,0 +1,440 @@
+page.title=プログラムの概要
+page.metaDescription= 次期 Android バージョン用のアプリを準備しましょう。
+page.image=images/cards/card-n-overview_2x.png
+meta.tags="プレビュー", "デベロッパー", "android"
+page.tags="preview", "developer", "android"
+
+@jd:body
+<!--
+<div class="cols" style=
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 3 is now available
+  </h3>
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+  </div>
+</div>
+-->
+
+<p>
+  <strong>Android N Developer Preview</strong> には、Android の次期バージョンに備えてアプリをテストし、最適化するための機能がすべて備わっています。N Developer Preview 用のツールをダウンロードするだけで、今すぐ無料でご利用いただけます。
+
+
+
+</p>
+
+
+
+
+
+
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        ハードウェアとエミュレータのイメージ
+      </h5>
+
+      <p>
+        さまざまなデバイスやエミュレータでアプリを動かしてテストできます。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        最新のプラットフォームのコード
+      </h5>
+
+      <p>
+        プレビュー期間は毎月アップデートされるので、最新のプラットフォームで変更された箇所のテストを実施できます。
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        デベロッパー不具合の優先
+      </h5>
+
+      <p>
+        最初の数週間でデベロッパーから報告された問題に優先的に対応するので、テストの実施とフィードバックはお早めにお願いします。
+
+      </p>
+    </div>
+
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        新しい動作や機能
+      </h5>
+
+      <p>
+        新しいプラットフォーム動作への対応や、新機能を利用した開発を早い段階で開始できます。
+      </p>
+    </div>
+
+    <div class="col-4of12">
+        <h5>
+        OTA 配信によるアップデート
+      </h5>
+
+      <p>
+        Android ベータ版プログラムによる無線でのシームレスなアップデートに対応しているため、イメージを書き込む必要がありません。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        フィードバックとサポート
+      </h5>
+
+      <p>
+        <a href="{@docRoot}preview/bug">Issue Tracker</a> で問題を報告し、フィードバックを送ってください。<a href="{@docRoot}preview/dev-community">N&nbsp;デベロッパー コミュニティ</a>では、他のデベロッパーと情報交換をすることができます。
+
+
+
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>New in the Android N Developer Preview: </p>
+
+<ul>
+  <li> Accompanying Android Beta Program for consumers, starting later in the preview</li>
+  <li> More supported devices, including devices from OEM partners</li>
+  <li> Seamless OTAs for your devices, from initial release to final N release without flashing</li>
+</ul>
+-->
+
+<h2 id="timeline">スケジュールとアップデート</h2>
+<img src="{@docRoot}images/n-preview-updates_2x.png">
+
+<p>
+  N Developer Preview の対象期間は、2016 年 3 月 9 日から AOSP と OEM 向けの Android N の正式リリース（2016 年 の第 3 四半期を予定）までの間です。
+
+</p>
+
+<p>
+  主要な開発マイルストーンでアップデートをリリースしますので、開発やテスト用の環境としてご利用ください。リリース間隔は基本的には各月（4 週から 6 週に 1 回）の予定です。マイルストーンについては、以下をご覧ください。
+
+
+</p>
+
+<ul>
+  <li><strong><a href="{@docRoot}preview/support.html">Preview 1</a></strong>（初回リリース、アルファ版）</li>
+  <li><strong>Preview 2</strong>（追加アップデート、ベータ版）</li>
+  <li><strong>Preview 3</strong>（追加アップデート、ベータ版）</li>
+  <li><strong>Preview 4</strong>（最終版の API と正式な SDK、Google Play への公開）</li>
+  <li><strong>Preview 5</strong>（最終テスト用の最終版とほぼ同じシステム イメージ）</li>
+  <li>AOSP とエコシステムへの<strong>最終リリース</strong></li>
+</ul>
+
+<p>
+  各アップデートには、SDK ツールとプレビュー版のシステム イメージ、エミュレータ、参考資料、API の差分情報が含まれます。
+
+</p>
+
+<p>
+  <strong>最初の 3 つのプレビュー マイルストーン</strong>では、<strong>初期段階のテストや開発用の環境</strong>を提供します。それを利用して既存のアプリにおける互換性の問題を特定し、新規プラットフォームへの移行や主な作業計画を立ててください。この期間は各種機能や API、ファイル互換性の問題など、あらゆるフィードバックを受け付けている貴重な期間です。ぜひ <a href="{@docRoot}preview/bug">Issue Tracker</a> を使用して、皆様のご意見をお聞かせください。いただいたフィードバックをもとに、一部の API を改善してアップデートで提供する予定です。
+
+
+
+
+
+
+</p>
+
+<p>
+  <strong>Preview 4 と 5</strong> には、開発に使用する <strong>Android N の最終版の API と SDK</strong>、システム動作や機能のテストに使用する最終版とほぼ同じシステム イメージが含まれます。この時点で Android N の標準 API レベルが確定しますので、以後は既存アプリの最終的な互換性テストを開始し、Android N の API や機能を使った新しいコードを改善できるようになります。
+
+
+
+
+</p>
+
+<p>
+  さらに Preview 4 以降では、正式な API レベルの Android N を搭載している<strong>デバイスにアプリを公開</strong>できるようになります（Android ベータ版プログラムにオプトインしたユーザーのデバイスなどが対象）。なお、アプリは Google Play のアルファ版やベータ版のチャネルで先に配信できるので、ストア全体に公開する前に、Android ベータ版のユーザーに事前にアプリをテストしてもらうことが可能です。
+
+
+
+
+
+</p>
+
+<p>
+  Android N でテストや開発を行う場合、プレビューのアップデートがリリースされるたびに<strong>開発環境を最新の状態に更新する</strong>ことを強くお勧めします。その際はテスト用のデバイスを Android ベータ版プログラムに登録して、マイルストーンごとに<strong>無線（OTA）でアップデート</strong>を取得するようにしておくと便利です。もしくはプレビュー イメージを手動でダウンロードして書き込むこともできます。
+
+
+
+
+
+</p>
+
+<p>
+  プレビュー アップデートをご利用いただけるようになった際は <a href="http://android-developers.blogspot.com/">Android デベロッパー ブログ</a>、本サイト、<a href="{@docRoot}preview/dev-community">Android N デベロッパー コミュニティ</a>でお知らせします。
+
+
+</p>
+
+
+<h2 id="preview_tools">N Developer Preview の概要</h2>
+
+<p>
+  N Developer Preview は、既存のアプリをさまざまな画面サイズ、ネットワーク テクノロジー、CPU や GPU チップセット、ハードウェア アーキテクチャでテストするために必要なものをすべて備えています。
+
+
+</p>
+
+<h3 id="sdk_tools">SDK ツール</h3>
+
+<p>各コンポーネントは <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a> の SDK Manager を使ってダウンロードできます。</p>
+
+<ul>
+  <li> N Developer Preview の <strong>SDK とツール</strong>
+  <li> N Developer Preview の<strong>エミュレータ システム イメージ</strong>（32 ビット版と 64 ビット版）
+  <li> N Developer Preview の <strong>Android TV 版エミュレータ システム イメージ</strong>（32 ビット版）
+  <li> N Developer Preview サポート ライブラリ（新規アプリのテンプレート用）
+</ul>
+
+<p>
+  上記のツールは、必要に応じて各マイルストーンでアップデートします。
+</p>
+
+<h3 id="hardware_system_images">ハードウェアのシステム イメージ</h3>
+
+<p>
+  N Developer Preview に含まれる Nexus などのハードウェアのシステム イメージを使用すると、実機でテストや開発ができます。ハードウェア イメージの一覧は、<a href="{@docRoot}preview/download.html">デバイス イメージ</a>のページでご確認ください。
+
+
+</p>
+
+<p>
+  これらのデバイス用のシステム イメージは、各マイルストーンでアップデートします。アップデートされたシステム イメージは、何度でもダウンロードしてテスト用のデバイスに手動で書き込むことができます。自動化されたテスト環境では、繰り返しデバイスに再書き込みをする必要があるので、この方法は特に便利です。
+
+
+
+
+</p>
+
+<p class="note"><strong>注:</strong> 昨年のプレビュー版とは違い、<strong>手動で書き込みをしたデバイスは OTA アップデートを取得できなくなります</strong>。そのため、今年はデバイスを Android ベータ版プログラムに登録して、OTA を取得するようにしてください。 詳細は次のセクションに記載しています。
+
+
+
+</p>
+
+<h3 id="android_beta">Android ベータ版プログラムによる OTA アップデート</h3>
+
+<p>
+  Android N は、新たに無線（OTA）アップデート プログラムに対応しています。このプログラムに登録しているデバイスには、Android N の最新プレビュー版へのアップデートが直接自動配信されます。登録は無料で、Google アカウントに登録済みの対象機種を所有していれば誰でもご利用いただけます。
+
+
+
+</p>
+
+<p>
+  このプログラムに登録するには、まず <a href="https://g.co/androidbeta">Android ベータ版プログラム</a>のサイトに移動します。このページには、Android ベータ版プログラムに登録可能なアカウントに登録済みデバイスの一覧が表示されます。
+
+
+
+</p>
+
+<ol>
+  <li> Android N のアップデートを取得するデバイスを選択します。
+  <li> [Enroll] をクリックして利用規約を読み、合意したら [OK] をクリックします。
+</ol>
+
+<p>
+  登録が完了すると、すぐにデバイスにアップデートが配信されます。ほとんどの場合、Android N に移行する際にデータのオールリセットは不要ですが、デバイスの登録前には大事なデータをバックアップしておくことをお勧めします。
+
+
+
+</p>
+
+<p>
+  デバイスにアップデートが配信されたら、できるだけ早めにダウンロードしてインストールするようにしてください。そうすることで常に最新のシステム UI や 動作、API、さまざまな機能の変更点を把握できます。
+
+
+</p>
+
+<p>
+  Developer Preview の終了時には、登録デバイスに Android N の正式リリース版へのアップデートが配信されます。
+
+</p>
+
+<p>
+  デバイスはいつでも Android ベータ版プログラムへの登録を解除できます。登録を解除する前には、デバイス上のデータを必ずバックアップしておいてください。
+
+
+</p>
+
+  <p class="note"><strong>注:</strong> 登録を解除すると、<strong>デバイスはファクトリー リセットされ</strong>、Android 6.0 Marshmallow の最新バージョンになります（デバイスを登録する前のバージョンに戻るとは限りません）。確実にクリーン インストールを行うため、連絡先やメッセージ、写真などのデバイス上のデータは削除されます。
+
+
+
+
+
+
+</p>
+
+<h3 id="documentation_and_sample_code">ドキュメントとサンプル コード</h3>
+
+<p>
+  Developer Preview サイトにあるドキュメントで、Android&nbsp;N の詳細をご確認いただけます。
+
+</p>
+
+<ul>
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Android N 向けの開発準備</a>では、はじめの手順をステップごとに説明しています。
+
+</li>
+  <li> <a href="{@docRoot}preview/behavior-changes.html">動作の変更点</a> には、集中的にテストを実施すべき箇所が記載されています。
+</li>
+  <li> 新規 API に関するドキュメントには、<a href="{@docRoot}preview/api-overview.html">API 概要</a>、ダウンロード可能な <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API リファレンス</a>などが含まれています。また、マルチ ウィンドウのサポート、バンドル通知、マルチロケールのサポートなどの主要機能についての詳細なデベロッパー ガイドも含まれています。
+
+
+
+  <li> <a href="{@docRoot}preview/samples.html">サンプル コード</a>では、パーミッションや他の新機能の使用方法を確認できます。
+
+  <li> 現行バージョンの N Developer Preview の<a href="{@docRoot}preview/support.html#release-notes">リリース ノート</a>では、変更履歴や差分レポートなどを確認できます。
+
+
+</ul>
+
+<h4 id="reference">ダウンロード可能な API リファレンス</h4>
+
+<p>
+  初期のプレビュー アップデートでは、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">Android N プラットフォーム用の API リファレンス</a>の最新版を個別の zip ファイルとしてダウンロードできます。このリファレンスには差分レポートも含まれているので、API 23 や以前のアップデートからの API の変更点をご確認いただけます。
+
+
+
+
+</p>
+
+<p>
+  Android N の API が最終決定して正式な API レベルが割り当てられた時点で、API リファレンスを <a href="https://developer.android.com">https://developer.android.com</a> で公開します。
+
+</p>
+
+<h3 id="support_resources">
+  サポート リソース
+</h3>
+
+<p>
+  N Developer Preview のテスト中や開発中は、以下の方法で不具合の報告やフィードバックの送信を行ってください。
+
+</p>
+
+<ul>
+  <li> <strong>主なフィードバック手段</strong>は、<a href="https://code.google.com/p/android-developer-preview/">N Developer Preview Issure Tracker</a> です。これを使うと、バグやパフォーマンスの問題、一般的なフィードバックを報告できます。さらに<a href="{@docRoot}preview/bug">既知の問題</a>や、その回避方法もご確認いただけます。報告いただいた問題は常に最新の情報に更新されるので、重要度が判定されたり、問題が Android エンジニア チームに引き継がれたことを確認できます。
+
+
+
+
+ </li>
+  <li> <a href="{@docRoot}preview/dev-community">Android N デベロッパー コミュニティ</a>は、Android N に携わっている<strong>デベロッパー同士がつながる</strong> Google+ のコミュニティです。Android N について意見交換をしたり、疑問点を解消したりする場としてご活用ください。Google はこのコミュニティを管理し、必要に応じて回答やアドバイスをします。
+
+
+
+</li>
+</ul>
+
+<h3 id="targeting">ターゲット、プレビュー API、公開</h3>
+
+<p>
+  N Developer Preview では開発専用のシステムと、<strong>標準 API レベルを持たない</strong> Android ライブラリを提供します。アプリのテストで互換動作を除外する場合（強く推奨します）、アプリの <code><a href=
+  "{@docRoot}preview/setup-sdk.html#create-update">targetSdkVersion</a></code> を <code>“N”</code> に設定することで Android N の プレビュー版を対象にすることができます。
+
+
+
+
+
+</p>
+
+<p>
+  Android N Developer Preview では、<strong>プレビュー API</strong> を提供しています。この API は、2016 年の第 3 四半期に予定している最終版 SDK のリリースまで正式版ではありません。そのため、プログラム開始後の数週間は特に<strong>軽微な API 変更が発生することが予想されます</strong>。変更点の概要については、Android N Developer Preview がアップデートされるたびにお知らせします。
+
+
+
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong> プレビュー API は変更される可能性がありますが、システムの基幹にかかわる機能には変更はありませんので、すぐにテストしていただけます。
+
+
+</p>
+
+<p>
+  Google Play では <strong>N Developer Preview を対象としたアプリの配信を禁止</strong>しています。Android N の最終版 SDK がリリースされてからは、正式な Android N の API レベルを対象にして、アルファ版またはベータ版のリリース チャンネルでアプリを Google Play に公開できます。それまでは、Android N を対象とするアプリをテスターに配信する場合は、電子メールで送付するか、自身のサイトから直接ダウンロードしてもらうようにしてください。
+
+
+
+
+
+</p>
+
+<p>
+  AOSP と OEM 向けの Android N のフルリリースは 2016 年度の第 3 四半期を予定しています。その後は、Android N 向けのアプリを Google Play の公式リリース チャンネルで配信いただけます。
+
+
+</p>
+
+
+<h2 id="how_to_get_started">開始するには</h2>
+
+<p>
+  以下の手順で Android N を使用したアプリのテストを開始できます。
+</p>
+
+<ol>
+  <li> <a href="{@docRoot}preview/api-overview.html">API 概要</a>や<a href="{@docRoot}preview/behavior-changes.html">動作の変更点</a>を参照して、新機能や自身のアプリへの影響をご確認ください。特に新しい<a href="{@docRoot}preview/features/notification-updates.html">通知</a>機能と<a href="{@docRoot}preview/features/multi-window.html">マルチ ウィンドウ</a>機能について把握しておくことをお勧めします。
+
+
+
+</li>
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Preview SDK のセットアップ</a>手順に従い、ご利用の環境をセットアップしてテスト用デバイスの設定をします。
+</li>
+  <li> <a href="https://developers.google.com/android/nexus/images">書き込み手順</a>に従い、最新の Android N のシステム イメージを 自身のデバイスに書き込みます。
+ </li>
+  <li> <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API リファレンス</a>や <a href="{@docRoot}preview/samples.html">Android N のサンプル</a>を参考に API の新機能について理解を深め、それらを自身のアプリに利用する方法をご検討ください。
+
+
+  <li> <a href="{@docRoot}preview/dev-community">Android N デベロッパー コミュニティ</a>に参加すると、最新のニュースを入手でき、新しいプラットフォームを利用している開発者同士で交流ができます。
+
+</li>
+</ol>
+
+<p>
+  Android N Developer Preview プログラムへの参加をお待ちしています。
+</p>

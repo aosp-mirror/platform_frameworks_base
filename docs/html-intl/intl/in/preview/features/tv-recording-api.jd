@@ -1,0 +1,120 @@
+page.title=Perekaman TV
+page.keywords=preview,sdk,tv,recording
+page.tags=androidn
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#supporting">Menunjukkan Dukungan untuk Perekaman</a></li>
+    <li><a href="#recording">Merekam Sesi</a></li>
+    <li><a href="#errors">Menangani Kesalahan Perekaman</a></li>
+    <li><a href="#sessions">Mengelola Sesi yang Direkam</a></li>
+    <li><a href="#best">Praktik Terbaik</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Layanan input TV memungkinkan pengguna menghentikan sementara dan melanjutkan pemutaran saluran melalui
+API perekaman atau time-shifting. Android N telah berkembang hingga ke perekaman
+dengan memungkinkan pengguna menyimpan beberapa sesi rekaman.</p>
+
+<p>Pengguna bisa menjadwalkan rekaman terlebih dahulu, atau memulai rekaman sambil menonton
+suatu acara. Setelah sistem menyimpan rekaman, pengguna bisa melihat-lihat, menata,
+dan memutar kembali rekaman tersebut menggunakan aplikasi TV di sistem.</p>
+
+<p>Jika Anda ingin menyediakan fungsionalitas perekaman untuk layanan input TV,
+Anda harus menunjukkan pada sistem bahwa aplikasi Anda mendukung perekaman, mengimplementasikan
+kemampuan untuk merekam acara, menangani dan memberitahukan setiap kesalahan yang terjadi
+selama perekaman, serta mengelola sesi yang telah Anda rekam.</p>
+
+<h2 id="supporting">Menunjukkan Dukungan untuk Perekaman</h2>
+
+<p>Untuk memberi tahu sistem bahwa layanan input TV Anda mendukung perekaman, ikuti
+langkah-langkah ini:</p>
+
+<ol>
+<li>Dalam metode<code>TvInputService.onCreate()</code> Anda, buat objek
+<code>TvInputInfo</code> baru menggunakan kelas <code>TvInputInfo.Builder</code>.
+</li>
+<li>Saat membuat objek <code>TvInputInfo</code> baru, panggil
+<code>setCanRecord(true)</code> sebelum memanggil <code>build()</code> untuk
+menunjukkan bahwa layanan Anda mendukung perekaman.</li>
+<li>Daftarkan objek <code>TvInputInfo</code> Anda pada sistem dengan memanggil
+<code>TvInputService.updateTvInputInfo()</code>.</li>
+</ol>
+
+<h2 id="recording">Merekam Sesi</h2>
+
+<p>Setelah layanan input TV Anda didaftarkan bahwa ia mendukung fungsionalitas
+perekaman, sistem akan memanggil
+<code>TvInputService.onCreateRecordingSession()</code> Anda bila perlu mengakses
+implementasi perekaman aplikasi Anda. Implementasikan subkelas
+<code>TvInputService.RecordingSession</code> Anda sendiri dan kembalikan
+bila callback <code>onCreateRecordingSession()</code> dipicu.
+ Subkelas ini bertanggung jawab mengalihkan ke saluran data yang benar,
+merekam data yang diminta, dan memberitahukan status perekaman serta kesalahan ke
+sistem.</p>
+
+<p>Bila sistem memanggil <code>RecordingSession.onTune()</code>, dengan meneruskan
+URI saluran, setel ke saluran yang ditetapkan URI. Beri tahu sistem bahwa
+aplikasi Anda telah disetel ke saluran yang diinginkan dengan memanggil <code>notifyTuned()</code>,
+atau, jika aplikasi Anda tidak bisa disetel ke saluran yang tepat, panggil
+<code>notifyError()</code>.</p>
+
+<p>Sistem berikutnya akan memanggil callback <code>RecordingSession.onStartRecording()</code>.
+ Aplikasi Anda harus segera mulai merekam. Bila sistem memanggil
+callback ini, sistem mungkin akan memberikan URI yang berisi informasi tentang program
+yang akan direkam. Bila perekaman selesai, Anda perlu menyalin data
+ini ke tabel data <code>RecordedPrograms</code>.</p>
+
+<p>Terakhir, sistem akan memanggil <code>RecordingSession.onStopRecording()</code>.
+Pada tahap ini, aplikasi Anda harus segera berhenti merekam. Anda juga perlu
+membuat entri dalam tabel <code>RecordedPrograms</code>. Entri ini harus
+menyertakan URI data sesi yang direkam dalam kolom
+<code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code>, dan informasi
+program yang diberikan sistem dalam panggilan awal ke
+<code>onStartRecording()</code>.</p>
+
+<p>Untuk detail selengkapnya tentang cara mengakses tabel <code>RecordedPrograms</code>
+lihat <a href="#sessions">Mengelola Sesi yang Direkam</a>.</p>
+
+<h2 id="errors">Menangani Kesalahan Perekaman</h2>
+
+<p>Jika terjadi kesalahan selama perekaman, rendering data yang terekam menjadi tidak bisa digunakan,
+beri tahu sistem dengan memanggil <code>RecordingSession.notifyError()</code>.
+Begitu pula, Anda bisa memanggil <code>notifyError()</code> setelah sesi perekaman dibuat
+agar sistem mengetahui bahwa aplikasi Anda tidak bisa lagi merekam sesi.</p>
+
+<p>Jika terjadi kesalahan selama perekaman, namun Anda ingin menyediakan rekaman parsial
+yang bisa digunakan pengguna untuk pemutaran, panggil
+<code>RecordingSession.notifyRecordingStopped()</code> untuk memungkinkan sistem
+menggunakan sesi parsial.</p>
+
+<h2 id="sessions">Mengelola Sesi yang Direkam</h2>
+
+<p>Sistem menyimpan informasi untuk semua sesi yang direkam dari semua
+aplikasi saluran yang mampu merekam dalam tabel penyedia konten <code>TvContract.RecordedPrograms</code>.
+ Informasi ini bisa diakses lewat URI konten
+<code>RecordedPrograms.Uri</code>. Gunakan API konten penyedia untuk
+membaca, menambah, dan menghapus entri dari tabel ini.</p>
+
+<p>Untuk informasi selengkapnya tentang menangani data penyedia konten, lihat
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Dasar-Dasar Penyedia Konten</a>.</p>
+
+<h2 id="best">Praktik Terbaik</h2>
+
+<p>Perangkat TV mungkin memiliki penyimpanan terbatas, jadi pertimbangkan sebaik mungkin saat
+mengalokasikan penyimpanan untuk menyimpan sesi rekaman. Gunakan
+<code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code> bila
+tidak cukup ruang untuk menyimpan sesi rekaman.</p>
+
+<p>Bila pengguna memulai perekaman, Anda harus memulai perekaman data
+secepatnya. Untuk memfasilitasinya, selesaikan setiap tugas yang memakan waktu di awal,
+seperti mengakses dan mengalokasikan ruang penyimpanan, saat sistem memanggil callback
+<code>onCreateRecordingSession()</code>. Hal ini akan memungkinkan Anda memulai
+perekaman dengan segera bila callback <code>onStartRecording()</code>
+dipicu.</p>

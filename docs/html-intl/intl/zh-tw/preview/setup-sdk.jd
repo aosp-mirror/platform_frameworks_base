@@ -1,0 +1,226 @@
+page.title=設定 Preview
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+<ol>
+  <li><a href="#get-as13">取得 Android Studio 2.1</a></li>
+  <li><a href="#get-sdk">取得 Android N SDK</a>
+    <ol>
+      <li><a href="#docs-dl">參考文件</a>
+    </ol>
+  </li>
+  <li><a href="#java8">取得 Java 8 JDK 與 JRE</a></li>
+  <li><a href="#create-update">更新或建立專案</a></li>
+  <li><a href="#next">後續步驟</a></li>
+</ol>
+  </div>
+</div>
+
+<p>如果要開發適用於「Android N Preview」的應用程式，您必須為您的開發人員環境進行一些更新，如此頁面上所述。
+</p>
+
+<p>如果只要在 Android N 系統映像上測試您應用程式的相容性，請依照<a href="{@docRoot}preview/download.html">在 Android N 裝置上測試</a>中的指南執行。
+</p>
+
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
+
+
+<h2 id="get-as13">取得 Android Studio 2.1 (預覽版)</h2>
+
+<p>Android N 平台新增對 <a href="{@docRoot}preview/j8-jack.html">Java 8 語言功能</a>的支援，它需要名為 Jack 的新編譯器。目前，只有 Android Studio 2.1 中才支援最新的 Jack 版本。因此，如果要使用 Java 8 語言功能，您必須使用 Android Studio 2.1 來建置您的應用程式。否則，您不需要使用 Jack 編譯器，但您仍需要更新到 JDK 8 以針對 Android N 編譯，如下所述。
+
+
+
+
+
+
+</p>
+
+<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>Android Studio 2.1 目前在早期測試發行管道中是以預覽版形式提供。如果您已經有 Android Studio 但不想要更新到早期測試管道，您可以下載 Android Studio 2.1 並另行安裝，並使用它來針對 Android N 進行開發，這樣並不會影響您的主要 Android Studio 環境。
+
+
+
+
+</p>
+
+<p>如果要下載 Android Studio 2.1 並另行安裝，請依照這些步驟執行 (或者，如果要以現有安裝之更新的形式接收 Android Studio 2.1，請跳到步驟 4)：
+
+</p>
+
+<ol>
+  <li>編輯現有 Android Studio 安裝的名稱，並附加版本號碼。這樣，當您安裝新版本時，它將不會覆寫現有的版本。
+
+</li>
+  <li>從<a href="http://tools.android.com/download/studio/canary/latest">早期測試管道下載頁面</a>針對您的作業系統下載適當的 ZIP 檔案。
+
+  </li>
+  <li>將套件解壓縮，並將 Android Studio 2.1 內容移動到系統上應用程式的適當位置，然後將它啟動。
+</li>
+  <li>開啟 [Settings] 對話方塊 (在 Windows/Linux 上是 [File] &gt; [Settings]<strong></strong>，在 Mac 上是 [Android Studio] &gt; [Preferences]<strong></strong>)。在左面板中，選取 [Appearance &amp; Behavior] &gt; [System Settings] &gt; [Updates]<strong></strong>。
+
+
+
+
+  </li>
+  <li>在 [Updates] 面板上，選取 [Automatically check updates for]<strong></strong> 核取方塊，然後從下拉式清單選取 [Canary Channel]<strong></strong>。
+
+
+  </li>
+</ol>
+
+<p>針對下一個步驟，將此設定視窗維持開啟。</p>
+
+
+<h2 id="get-sdk">取得 N Preview SDK</h2>
+
+<p>如果要開始使用 Android N API 來開發，您必須在 Android Studio 中安裝 Android N Preview SDK，如下所示：
+</p>
+
+<ol>
+  <li>在仍於 [Updates] 面板 (上面的步驟 4) 中檢視時，選取 [Automatically check updates for Android SDK]<strong></strong> 核取方塊，然後從下拉式清單中選取 [Preview Channel]<strong></strong>。
+
+
+
+  </li>
+  <li>按一下 [Check Now]<strong></strong>。</li>
+
+  <li>在左面板中，選取 [Appearance &amp; Behavior] &gt; [System Settings] &gt; [Android SDK]<strong></strong>。
+
+
+  <li>按一下 [SDK Platforms]<strong></strong> 分頁，然後選取 [Android N Preview]<strong></strong> 核取方塊。
+</li>
+
+  <li>按一下 [SDK Tools]<strong></strong> 分頁，然後選取 [Android SDK Build Tools]<strong></strong>、[Android SDK Platform-Tools]<strong></strong> 與 [Android SDK Tools]<strong></strong> 核取方塊。
+
+
+
+  </li>
+
+  <li>按一下 [OK]<strong></strong>，然後接受要安裝之任何套件的授權合約。
+
+  </li>
+</ol>
+
+<h3 id="docs-dl">取得 N Preview 參考文件</h3>
+
+<p>
+  您可以在 N Preview 參考文件 (可從下表下載) 中找到有關 Android N API 的詳細資訊。此套件包含 Android 開發人員網站的已刪節離線版本，而且包括適用於 Android N API 的已更新 API 參考資料與 API 差異報告。
+
+
+
+
+</p>
+
+<table>
+  <tr>
+    <th scope="col">文件</th>
+    <th scope="col">總和檢查碼</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap">
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip">n-preview-1-docs.zip</a></td>
+    <td width="100%">
+      MD5：4ab33ccbe698f46f125cc5b807cf9c2f<br>
+      SHA-1：6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
+    </td>
+  </tr>
+<table>
+
+
+
+<h2 id="java8">取得 Java 8 JDK 與 JRE</h2>
+
+<p>如果要針對 Android N 平台編譯您的應用程式，您必須使用 Java 8 開發人員套件 (JDK 8)，而且如果要使用某些工具來搭配 Android Studio 2.1，您必須安裝 Java 8 執行階段環境 (JRE 8)。因此，如果您沒有最新版本的 JDK 8 與 JRE 8，請立即下載。
+
+
+
+</p>
+
+<p>接著，在 Android Studio 中設定 JDK 版本，如下所示：</p>
+
+<ol>
+  <li>在 Android Studio 中開啟 Android 專案，然後選取 [File] &gt; [Project Structure] 以開啟 [Project Structure] 對話方塊 <strong></strong>(或者，您可以選取 [File] &gt; [Other Settings] &gt; [Default Project Structure]<strong></strong>，以針對所有專案設定預設值)。
+
+
+
+
+   </li>
+   <li>在對話方塊的左面板中，按一下 [SDK Location]<strong></strong>。
+   </li>
+   <li>在 [JDK Location]<strong></strong> 欄位中，輸入 Java 8 JDK 的位置 (按一下右邊的按鈕以瀏覽您的檔案)，然後按一下 [OK]<strong></strong>8 。
+
+
+   </li>
+</ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700" alt="" />
+
+
+<h2 id="create-update">更新或建立專案</h2>
+
+<p>
+  如果要使用 Android N API，您必須適當地設定您的專案。
+</p>
+
+<p>如果計畫使用 Java 8 語言功能，您也應該閱讀 <a href="{@docRoot}preview/j8-jack.html">Java 8 語言功能</a>，以取得支援之 Java 8 功能以及如何搭配 Jack 編譯器設定您專案的詳細資訊。
+
+
+</p>
+
+
+<h3 id="update">更新現有的專案</h3>
+
+<p>開啟模組的 <code>build.gradle</code> 檔案並更新值，如下所示：
+
+
+</p>
+
+<pre>
+android {
+  compileSdkVersion <strong>'android-N'</strong>
+  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'N'</strong>
+     targetSdkVersion <strong>'N'</strong>
+     ...
+  }
+  ...
+}</pre>
+
+
+<h3 id="create">建立新專案</h3>
+
+
+<p>使用 Android N Preview SDK 建立新的開發專案：</p>
+
+<ol>
+  <li>按一下 [File] &gt; [New Project]<strong></strong>，並依照步驟執行，直到到達 [Target Android Devices] 頁面。
+
+  </li>
+  <li>在此頁面上，選取 [Phone and Tablet]<strong></strong> 選項。</li>
+  <li>在 [Phone and Tablet]<strong></strong> 選項下，在 [Minimum SDK]<strong></strong> 選項清單中，選取 [N: Android API 23, N Preview (Preview)]<strong></strong>。
+
+</li>
+</ol>
+
+
+<h2 id="next">後續步驟</h2>
+
+<ul>
+  <li>依照<a href="{@docRoot}preview/download.html">在 Android N 裝置上測試</a>中的指南執行。</li>
+  <li>深入了解 Android N 平台的<a href="{@docRoot}preview/behavior-changes.html">行為變更</a>與 <a href="{@docRoot}preview/api-overview.html">Android N API 與功能</a>。
+
+
+</li>
+</ul>
+
