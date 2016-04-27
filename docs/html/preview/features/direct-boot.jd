@@ -58,7 +58,7 @@ credential encrypted storage.</p>
 can run during Direct Boot mode or access device encrypted
 storage. Apps register with the system by marking components as
 <i>encryption aware</i>. To mark your component as encryption aware, set the
-<code>android:encryptionAware</code> attribute to true in your manifest.<p>
+<code>android:directBootAware</code> attribute to true in your manifest.<p>
 
 <p>Encryption aware components can register to receive a
 <code>LOCKED_BOOT_COMPLETED</code> broadcast message from the
@@ -72,7 +72,7 @@ intent filter for <code>LOCKED_BOOT_COMPLETED</code>, in the app manifest:</p>
 
 <pre>
 &lt;receiever
-  android:encryptionAware="true" &gt;
+  android:directBootAware="true" &gt;
   ...
   &lt;intent-filter&gt;
     &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
@@ -87,13 +87,13 @@ device encrypted storage as well as credential encrypted storage.</p>
 
 <p>To access device encrypted storage, create a second
 {@link android.content.Context} instance by calling
-<code>Context.createDeviceEncryptedStorageContext()</code>. All storage API
+<code>Context.createDeviceProtectedStorageContext()</code>. All storage API
 calls made using this context access the device encrypted storage. The
 following example accesses the device encrypted storage and opens an existing
 app data file:</p>
 
 <pre>
-Context directBootContext = Context.createDeviceEncryptedStorageContext();
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
 // Access appDataFilename that lives in device encrypted storage
 FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
 // Use inStream to read content...
@@ -125,8 +125,8 @@ the user has unlocked the device.</p>
 
 <p>If a user updates their device to use Direct Boot mode, you might have
 existing data that needs to get migrated to device encrypted storage. Use
-<code>Context.migrateSharedPreferencesFrom()</code> and
-<code>Context.migrateDatabaseFrom()</code> to migrate preference and database
+<code>Context.moveSharedPreferencesFrom()</code> and
+<code>Context.moveDatabaseFrom()</code> to migrate preference and database
 data between credential encrypted storage and device encrypted storage.</p>
 
 <p>Use your best judgment when deciding what data to migrate from credential
