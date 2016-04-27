@@ -156,10 +156,9 @@ page.image=images/cards/card-n-changes_2x.png
 <ul>
   <li>Apps targeting Android N do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
-  have manifest entries to request notification of these events. Apps running
-  in the foreground can still listen for {@code CONNECTIVITY_CHANGE} on their
-  main thread if they request notification with a {@link
-  android.content.BroadcastReceiver}.
+  have manifest entries to request notification of these events. Apps that are
+  running can still listen for {@code CONNECTIVITY_CHANGE} on their main thread
+  if they request notification with a {@link android.content.BroadcastReceiver}.
   </li>
 
   <li>Apps cannot send or receive {@link
