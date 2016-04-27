@@ -235,7 +235,6 @@ public class TaskViewHeader extends FrameLayout
 
         // Initialize the icon and description views
         mIconView = (ImageView) findViewById(R.id.icon);
-        mIconView.setClickable(false);
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
@@ -459,6 +458,8 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(t.dismissDescription);
+        mDismissButton.setOnClickListener(this);
+        mDismissButton.setClickable(false);
 
         // When freeform workspaces are enabled, then update the move-task button depending on the
         // current task
@@ -474,6 +475,8 @@ public class TaskViewHeader extends FrameLayout
                         ? mLightFreeformIcon
                         : mDarkFreeformIcon);
             }
+            mMoveTaskButton.setOnClickListener(this);
+            mMoveTaskButton.setClickable(false);
         }
 
         if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
@@ -491,6 +494,7 @@ public class TaskViewHeader extends FrameLayout
         if (touchExplorationEnabled) {
             mIconView.setContentDescription(t.appInfoDescription);
             mIconView.setOnClickListener(this);
+            mIconView.setClickable(true);
         }
     }
 
@@ -509,15 +513,15 @@ public class TaskViewHeader extends FrameLayout
         mTask = null;
         mIconView.setImageDrawable(null);
         if (touchExplorationEnabled) {
-            mIconView.setOnClickListener(null);
+            mIconView.setClickable(false);
         }
     }
 
     /** Animates this task bar if the user does not interact with the stack after a certain time. */
     void startNoUserInteractionAnimation() {
         int duration = getResources().getInteger(R.integer.recents_task_enter_from_app_duration);
-        mDismissButton.setOnClickListener(this);
         mDismissButton.setVisibility(View.VISIBLE);
+        mDismissButton.setClickable(true);
         if (mDismissButton.getVisibility() == VISIBLE) {
             mDismissButton.animate()
                     .alpha(1f)
@@ -529,8 +533,8 @@ public class TaskViewHeader extends FrameLayout
         }
         if (mMoveTaskButton != null) {
             if (mMoveTaskButton.getVisibility() == VISIBLE) {
-                mMoveTaskButton.setOnClickListener(this);
                 mMoveTaskButton.setVisibility(View.VISIBLE);
+                mMoveTaskButton.setClickable(true);
                 mMoveTaskButton.animate()
                         .alpha(1f)
                         .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
@@ -550,12 +554,12 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setVisibility(View.VISIBLE);
         mDismissButton.animate().cancel();
         mDismissButton.setAlpha(1f);
-        mDismissButton.setOnClickListener(this);
+        mDismissButton.setClickable(true);
         if (mMoveTaskButton != null) {
             mMoveTaskButton.setVisibility(View.VISIBLE);
             mMoveTaskButton.animate().cancel();
             mMoveTaskButton.setAlpha(1f);
-            mMoveTaskButton.setOnClickListener(this);
+            mMoveTaskButton.setClickable(true);
         }
     }
 
@@ -566,11 +570,11 @@ public class TaskViewHeader extends FrameLayout
     void resetNoUserInteractionState() {
         mDismissButton.setVisibility(View.INVISIBLE);
         mDismissButton.setAlpha(0f);
-        mDismissButton.setOnClickListener(null);
+        mDismissButton.setClickable(false);
         if (mMoveTaskButton != null) {
             mMoveTaskButton.setVisibility(View.INVISIBLE);
             mMoveTaskButton.setAlpha(0f);
-            mMoveTaskButton.setOnClickListener(null);
+            mMoveTaskButton.setClickable(false);
         }
     }
 
