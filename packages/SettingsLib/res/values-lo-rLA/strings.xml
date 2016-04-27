@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ປ່ອຍສັນຍານຜ່ານ Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ການປ່ອຍສັນຍານ"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ການປ່ອຍສັນຍານ &amp; ຮັອດສະປອດເຄື່ອນທີ່"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"ແອັບເຮັດວຽກທັງໝົດ"</string>
     <string name="user_guest" msgid="8475274842845401871">"ແຂກ"</string>
     <string name="unknown" msgid="1592123443519355854">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ຜູ່ໃຊ້: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"ເປີດການຕັ້ງຄ່າລະບົບສະເຄາະສຽງ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ລະບົບທີ່ຕ້ອງການ"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ທົ່ວໄປ"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ຣີເຊັດລະດັບສຽງການເວົ້າ"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ຣີເຊັດລະດັບສຽງທີ່ເວົ້າຂໍ້ຄວາມອອກສຽງໃຫ້ເປັນຄ່າເລີ່ມຕົ້ນ."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"ຊ້າຫຼາຍ"</item>
     <item msgid="4795095314303559268">"ຊ້າ"</item>

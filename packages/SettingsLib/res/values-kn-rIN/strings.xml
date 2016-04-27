@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್‌"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ಟೆಥರಿಂಗ್‌"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ಟೆಥರಿಂಗ್ &amp; ಪೋರ್ಟಬಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"ಎಲ್ಲ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="user_guest" msgid="8475274842845401871">"ಅತಿಥಿ"</string>
     <string name="unknown" msgid="1592123443519355854">"ಅಜ್ಞಾತ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"ಎಂಜಿನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸು"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ಪ್ರಾಶಸ್ತ್ಯದ ಎಂಜಿನ್"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ಸಾಮಾನ್ಯ"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ಉಚ್ಛಾರಣೆ ಪಿಚ್‌ ಅನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ಡೀಫಾಲ್ಟ್‌ಗೆ ಪಠ್ಯವನ್ನು ಉಚ್ಛರಿಸುವ ರೀತಿಯಲ್ಲಿ ಪಿಚ್‌ ಅನ್ನು ಮರುಹೊಂದಿಸಿ."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"ತುಂಬಾ ನಿಧಾನ"</item>
     <item msgid="4795095314303559268">"ನಿಧಾನ"</item>
