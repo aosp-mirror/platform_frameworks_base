@@ -1958,7 +1958,7 @@ class ContextImpl extends Context {
             }
 
             if (res != null) {
-                if (!res.exists()) {
+                if (!res.exists() && android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
                     Log.wtf(TAG, "Data directory doesn't exist for package " + getPackageName(),
                             new Throwable());
                 }
