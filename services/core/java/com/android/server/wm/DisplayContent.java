@@ -364,8 +364,8 @@ class DisplayContent {
             final ArrayList<Task> tasks = stack.getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
-                final WindowState win = task.getTopVisibleAppMainWindow();
-                if (win == null) {
+                AppWindowToken token = task.getTopVisibleAppToken();
+                if (token == null || !token.isVisible()) {
                     continue;
                 }
 
@@ -375,20 +375,18 @@ class DisplayContent {
                  * We also remove the outside touch area for resizing for all freeform
                  * tasks (including the focused).
                  *
-                 * (For freeform focused task, the below logic will first remove the enlarged
-                 * area, then add back the inner area.)
+                 * We save the focused task region once we find it, and add it back at the end.
                  */
+
+                if (task == focusedTask) {
+                    addBackFocusedTask = true;
+                    mTmpRect2.set(mTmpRect);
+                }
+
                 final boolean isFreeformed = task.inFreeformWorkspace();
                 if (task != focusedTask || isFreeformed) {
                     task.getDimBounds(mTmpRect);
                     if (isFreeformed) {
-                        // If we're removing a freeform, focused app from the exclusion region,
-                        // we need to add back its touchable frame later. Remember the touchable
-                        // frame now.
-                        if (task == focusedTask) {
-                            addBackFocusedTask = true;
-                            mTmpRect2.set(mTmpRect);
-                        }
                         // If the task is freeformed, enlarge the area to account for outside
                         // touch area for resize.
                         mTmpRect.inset(-delta, -delta);
