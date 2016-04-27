@@ -79,7 +79,8 @@ import java.util.concurrent.TimeoutException;
  * battery life.
  */
 public final class BatteryStatsService extends IBatteryStats.Stub
-        implements PowerManagerInternal.LowPowerModeListener {
+        implements PowerManagerInternal.LowPowerModeListener,
+        BatteryStatsImpl.PlatformIdleStateCallback {
     static final String TAG = "BatteryStatsService";
 
     /**
@@ -173,6 +174,33 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
+    private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPLACE)
+                    .onUnmappableCharacter(CodingErrorAction.REPLACE)
+                    .replaceWith("?");
+    private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
+    private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
+    private static final int MAX_LOW_POWER_STATS_SIZE = 512;
+
+    @Override
+    public String getPlatformLowPowerStats() {
+        mUtf8BufferStat.clear();
+        mUtf16BufferStat.clear();
+        mDecoderStat.reset();
+        int bytesWritten = getPlatformLowPowerStats(mUtf8BufferStat);
+        if (bytesWritten < 0) {
+            return null;
+        } else if (bytesWritten == 0) {
+            return "Empty";
+        }
+        mUtf8BufferStat.limit(bytesWritten);
+        mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
+        mUtf16BufferStat.flip();
+        return mUtf16BufferStat.toString();
+    }
+
     BatteryStatsService(File systemDir, Handler handler) {
         // Our handler here will be accessing the disk, use a different thread than
         // what the ActivityManagerService gave us (no I/O on that one!).
@@ -182,9 +210,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandler = new BatteryStatsHandler(thread.getLooper());
 
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
-        mStats = new BatteryStatsImpl(systemDir, handler, mHandler);
+        mStats = new BatteryStatsImpl(systemDir, handler, mHandler, this);
     }
-    
+
     public void publish(Context context) {
         mContext = context;
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
