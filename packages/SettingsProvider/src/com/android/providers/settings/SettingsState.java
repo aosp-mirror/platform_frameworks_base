@@ -16,7 +16,6 @@
 
 package com.android.providers.settings;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -157,6 +156,10 @@ final class SettingsState {
     // The settings provider must hold its lock when calling here.
     public int getVersionLocked() {
         return mVersion;
+    }
+
+    public Setting getNullSetting() {
+        return mNullSetting;
     }
 
     // The settings provider must hold its lock when calling here.
