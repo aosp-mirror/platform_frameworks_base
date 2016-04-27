@@ -158,6 +158,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mDefaultColorTransformId;
         private int mActiveColorTransformId;
         private boolean mActiveColorTransformInvalid;
+        private Display.HdrCapabilities mHdrCapabilities;
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
@@ -172,6 +173,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             } else {
                 mBacklight = null;
             }
+            mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
         }
 
         public boolean updatePhysicalDisplayInfoLocked(
@@ -371,6 +373,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 for (int i = 0; i < mSupportedColorTransforms.size(); i++) {
                     mInfo.supportedColorTransforms[i] = mSupportedColorTransforms.valueAt(i);
                 }
+                mInfo.hdrCapabilities = mHdrCapabilities;
                 mInfo.appVsyncOffsetNanos = phys.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = phys.presentationDeadlineNanos;
                 mInfo.state = mState;
