@@ -34,7 +34,6 @@ LOCAL_SRC_FILES:= \
     com_google_android_gles_jni_EGLImpl.cpp \
     com_google_android_gles_jni_GLImpl.cpp.arm \
     android_app_Activity.cpp \
-    android_app_ApplicationLoaders.cpp \
     android_app_NativeActivity.cpp \
     android_app_admin_SecurityLog.cpp \
     android_opengl_EGL14.cpp \
@@ -174,6 +173,7 @@ LOCAL_SRC_FILES:= \
     android_content_res_Configuration.cpp \
     android_animation_PropertyValuesHolder.cpp \
     com_android_internal_net_NetworkStatsFactory.cpp \
+    com_android_internal_os_PathClassLoaderFactory.cpp \
     com_android_internal_os_Zygote.cpp \
     com_android_internal_util_VirtualRefBasePtr.cpp \
     com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp
