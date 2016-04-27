@@ -179,7 +179,6 @@ extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
 extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
 extern int register_android_app_backup_FullBackup(JNIEnv *env);
-extern int register_android_app_ApplicationLoaders(JNIEnv* env);
 extern int register_android_app_Activity(JNIEnv *env);
 extern int register_android_app_ActivityThread(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
@@ -200,6 +199,7 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
+extern int register_com_android_internal_os_PathClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 
@@ -1355,6 +1355,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
     REG_JNI(register_android_os_MemoryFile),
+    REG_JNI(register_com_android_internal_os_PathClassLoaderFactory),
     REG_JNI(register_com_android_internal_os_Zygote),
     REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
     REG_JNI(register_android_hardware_Camera),
@@ -1386,7 +1387,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_FileBackupHelperBase),
     REG_JNI(register_android_backup_BackupHelperDispatcher),
     REG_JNI(register_android_app_backup_FullBackup),
-    REG_JNI(register_android_app_ApplicationLoaders),
     REG_JNI(register_android_app_Activity),
     REG_JNI(register_android_app_ActivityThread),
     REG_JNI(register_android_app_NativeActivity),
