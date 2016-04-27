@@ -58,7 +58,7 @@ installed the Android N Preview SDK, see <a href=
   <li>
     <a class="external-link" href=
     "https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
-    Lambda expressions</a>
+    Lambda expressions</a> (also available on API level 23 and lower)
   </li>
 
   <li>
@@ -70,10 +70,17 @@ installed the Android N Preview SDK, see <a href=
   <li>
     <a class="external-link" href=
     "https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
-    Method References</a>
+    Method References</a> (also available on API level 23 and lower)
   </li>
 </ul>
 
+<p class="note">
+  <strong>Note:</strong> To test lambda expressions and method references on
+  earlier versions of Android, go to your {@code build.gradle}
+  file, and set {@code compileSdkVersion} and {@code targetSdkVersion} to 23 or
+  lower. You will still need to <a href="#configuration">enable the Jack
+  toolchain</a> to use these Java 8 features.
+</p>
 
 <p>
   Additionally, the following Java 8 language feature APIs are now available:
@@ -125,15 +132,6 @@ installed the Android N Preview SDK, see <a href=
   </li>
 </ul>
 
-<p class="note">
-  <strong>Note:</strong> The Android N bases its implementation of
-  lambda expressions on anonymous classes. This approach allows them to be
-  backwards compatible and executable on earlier versions of Android. To test
-  lambda expressions on earlier versions, remember to go to your {@code
-  build.gradle} file, and set {@code compileSdkVersion} and {@code
-  targetSdkVersion} to 23 or lower.
-</p>
-
 <h2 id="configuration">
   Enabling Java 8 Features and the Jack Toolchain
 </h2>
@@ -166,7 +164,7 @@ installed the Android N Preview SDK, see <a href=
 
 <p>
   To enable the Java 8 language features and Jack for your project, enter the
-  following in your module-specific {@code build.gradle} file:
+  following in your module-level {@code build.gradle} file:
 </p>
 
 <pre>
@@ -185,7 +183,7 @@ android {
 }
 </pre>
 
-<h3>
+<h3 id="known-issues">
   Known Issues
 </h3>
 
@@ -209,4 +207,4 @@ examples of these tools are:</p>
 </ul>
 
 <p>If you find other problems while using Jack, <a href=
-"http://tools.android.com/filing-bugs">please report bugs</a>.</p>
+"http://tools.android.com/filing-bugs">please file a bug</a>.</p>
