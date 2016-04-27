@@ -1,26 +1,39 @@
 page.title=SDK Manager
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#updatecheck">Enabling Automatic Update Checking</a></li>
+  <li><a href="#run">Running the SDK Manager</a></li>
+  <li><a href="#Recommended">Recommended Packages</a></li>
+  <li><a href="#AddingSites">Adding New Sites</a></li>
+</ol>
+
+</div>
+</div>
 
 <p>The Android SDK Manager separates the SDK tools, platforms, and other components into packages
 for easy access and management. You can also customize which sites the SDK Manager checks for new
 or updated SDK packages and add-on tools. For example, you can configure the SDK Manager
-to automatically check for updates and notify you when an installed SDK Tools package is updated.
+to automatically check for updates and notify you when updates are available.
 When you receive such a notification, you can then quickly decide whether to download the changes.  </p>
 
-<p>By default, Android Studio does not check for Android SDK updates. To enable automatic Android
-SDK checking: </p>
+<h2 id="updatecheck">Enabling Automatic Update Checking</h2>
+<p>To enable automatic update checking: </p>
 <ol>
   <li>Choose <strong>File</strong> &gt; <strong>Settings</strong>
     &gt; <strong>Appearance & Behavior</strong> &gt; <strong>System Settings</strong>
     &gt; <strong>Updates</strong>. </li>
-  <li>Check the <strong>Automatically check updates for Android SDK</strong> checkbox and select an
+  <li>Select the <strong>Automatically check updates for</strong> checkbox and select an
     <ahref="{@docRoot}tools/studio/studio-config.html#update-channel">update channel</a>.</li>
 
 
   <li>Click <strong>OK</strong> or <strong>Apply</strong> to enable the update checking. </li>
 </ol>
 
+<h2 id="run">Running the SDK Manager</h2>
 <p>You can launch the SDK Manager in one of the following ways:</p>
 <ul>
   <li>From the Android Studio <strong>File</strong> menu:  <strong>File</strong> &gt;
@@ -32,13 +45,17 @@ SDK checking: </p>
     (<img src="{@docRoot}images/tools/sdk-manager-studio.png" style="vertical-align:sub;margin:0;height:17px" alt="" />)
     in the menu bar.  </li>
 </ul>
+<p>The SDK Manager appears.</p>
+<img src="{@docRoot}images/tools/studio-sdk-manager-packages.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
+SDK platforms and packages that are available and installed along with the SDK update sites.</p>
 
 <p class="note"><strong>Tip:</strong> The standalone SDK Manager is still available from the
-command line, but we recommend it only for use with standalone SDK installations.</p>
+command line, but we recommend it for use with standalone SDK installations only.</p>
 
-<p>By default, the SDK Manager installs the latest packages and tools. Click the checkbox next to
+<p>Click the checkbox next to
 each additional SDK platform and tool that you want to install. Clear the
-checkbox to uninstall a SDK platform or tool. Click <strong>Apply</strong> or <strong>OK</strong>
+checkbox to uninstall an SDK platform or tool. Click <strong>Apply</strong> or <strong>OK</strong>
 to update the packages and tools. </p>
 
 <p class="note"><strong>Tip:</strong> When an update is available for an installed
@@ -49,16 +66,14 @@ to the checkbox to indicate the pending update. An update icon
 (<img src="{@docRoot}images/tools/studio-sdk-removal-icon.png" style="vertical-align:sub;margin:0;height:17px" alt="" />) appears next to the checkbox to
 indicate pending removals.</p>
 
-<p>Click the <em>SDK Update Sites</em> tab to manage which SDK sites Android Studio checks for
+<p>Click the <strong>SDK Update Sites</strong> tab to manage which SDK sites Android Studio checks for
 tool and add-on updates. </p>
 
-<img src="{@docRoot}images/tools/studio-sdk-manager-packages.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
-SDK platforms and packages that are available and installed along with the SDK update sites.</p>
 
-<p>There are several different packages available for the Android SDK. The table below describes
+
+<p>There are several different packages available for the Android SDK. The following section describes
 most of the available packages and where they're located in your SDK directory
-once you download them.</p>
+after you download them.</p>
 
 
 
@@ -76,43 +91,44 @@ once you download them.</p>
     Be sure to respond to the Android Studio update prompts to keep your SDK Platform-tools
     up-to-date.</dd>
   <dt>SDK Platform</dt>
-  <dd><strong>Required.</strong><em> At least one platform</em> is required in your
-environment so you're able to compile your application. In order to provide the best user experience
+  <dd><strong>Required.</strong> At least one platform is required in your
+environment to be able to compile your application. To provide the best user experience
 on the latest devices, we recommend that you use the latest platform version as your build target.
 You'll still be able to run your app on older versions, but you must build against the latest
 version in order to use new features when running on devices with the latest version of Android.
-  <p>The SDK Manager downloads the latest Android version. It also downloads the earliest version
-  of Android (Android 2.2 (API level 8)) that we recommend that your app support. </p></dd>
+  </dd>
   <dt>System Image</dt>
   <dd>Recommended. Although you might have one or more Android-powered devices on which to test
  your app, it's unlikely you have a device for every version of Android your app supports. It's
-a good practice to download system images for all versions of Android your app supports and test
-your app running on them with the
-<a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>. Each SDK platform package
-contains the supported system images. Click <strong>Show Package Details</strong> to display the available
+a good practice to download system images for all versions of Android that your
+app supports and then test
+your app against these Android versions by using the
+<a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a>. Click <strong>Show Package Details</strong> to display the available
 system images for each available platform. You can also download system images when creating
 Android Virtual Devices (AVDs) in the
 <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>. </dd>
 
-  <dt>Android Support Library</dt>
-  <dd>Recommended. Includes a static library that provides an extended set of
-  APIs that are compatible with most versions of Android. It's required for
+
+  <dt>Android Support Repository</dt>
+  <dd>Recommended. Includes a local Maven repository for the Android Data
+  Binding Library, Android Testing Support Library, and Android Support
+  Libraries. The Android Support Libraries provide an extended set of
+  APIs that are compatible with most versions of Android. They're required for
   products such as <a href="{@docRoot}wear/index.html">Android Wear</a>, <a
   href="{@docRoot}tv/index.html">Android TV</a>, and <a
   href="https://developers.google.com/cast/">Google Cast</a>. For more
-  information, read <a href="{@docRoot}tools/support-library/index.html">Support
-  Library</a>.
-  </dd>
-
-  <dt>Android Support Repository</dt>
-  <dd>Recommended. Includes local Maven repository for Support libraries.</dd>
+  information about each of the libraries in the Android Support Repository,
+  see <a href="{@docRoot}tools/data-binding/guide.html">Data Binding Guide</a>,
+  <a href="{@docRoot}tools/testing-support-library/index.html">Testing Support
+  Library</a>, and <a href="{@docRoot}tools/support-library/index.html">Support
+  Library</a>.</dd>
 
   <dt>Google Play services</dt>
   <dd>Recommended. Includes the Google Play services client library, which
-  provides a variety of features and services for your 
+  provides a variety of features and services for your
   apps, such as <a
   href="https://developers.google.com/identity/sign-in/android/">Google
-  sign-in</a>,<a
+  sign-in</a>, <a
   href="https://developers.google.com/maps/documentation/android-api/">Google
   Maps</a>, <a href="https://developers.google.com/games/services/">Games
   achievements and leaderboards</a>, and much more.</dd>
@@ -122,45 +138,44 @@ Android Virtual Devices (AVDs) in the
 
 
 <p class="note"><strong>Tip:</strong> For easy access to the SDK tools from a command line, add the
-location of the SDK's <code>tools/</code> and
+location of the SDK <code>tools/</code> and
 <code>platform-tools</code> to your <code>PATH</code> environment variable.</p>
 
 
-<p>The above list is not comprehensive and you can <a
+<p>The previous list is not comprehensive and you can <a
 href="#AddingSites">add new sites</a> to download additional packages from third parties.</p>
 
 <p>In some cases, an SDK package may require a specific minimum revision of
-another package or SDK tool.
-The development tools will notify you with warnings if there is dependency that you need to
-address. The Android SDK Manager also enforces dependencies by requiring any
-packages that are needed by those you have selected.</p>
+another package or SDK tool. The SDK Manager automatically notifies you of any
+dependencies and downloads the required packages or tools.
+In addition, development tools notify you if there are dependencies that you need to
+address. </p>
 
 
 
 <h2 id="AddingSites">Adding New Sites</h2>
 
-<p>The <em>SDK Update Sites</em> tab displays the sites that Android Studio checks for Android SDK
-and third-party updates. You can add other sites that host their own Android SDK add-ons, then
+<p>The <strong>SDK Update Sites</strong> tab displays the sites that Android Studio checks for Android SDK
+and third-party updates. You can add other sites that host their own Android SDK add-ons, and then
 download the SDK add-ons from those sites.</p>
 
 <p>For example, a mobile carrier or device manufacturer might offer additional
-API libraries that are supported by their own Android-powered devices. In order
-to develop using their libraries, you must install their Android SDK add-on, if it's not already
-available as a <em>third-party add-on</em>. </p>
+API libraries that are supported by their own Android-powered devices.
+To develop using their libraries, you must install their Android SDK add-on, if it's not already
+available as a third-party add-on.</p>
 
 <p>If a carrier or device manufacturer has hosted an SDK add-on repository file
 on their website, follow these steps to add their site to the Android SDK Manager:</p>
 
 <ol>
   <li>Click the <strong>SDK Update Sites</strong> tab.</li>
-  <li>Click the <strong>Add</strong> icon in the tools area and enter the name and URL of the
-    <code>add-on</code> site.</li>
-  <li>Click <strong>OK</strong>.</li>
-  <li>Make sure the checkbox is checked in the <em>Enabled</em> column.</li>
-  <li>Click <strong>OK</strong> or <strong>Apply</strong>.</li>
-</ol>
-<p>Any SDK packages available from the site appear in the <em>SDK Platforms</em> or
-<em>SDK Tools</em> tabs.</p>
+  <li>Click <strong>Add</strong> <img src="{@docRoot}images/tools/sdk-iadd.png" style="vertical-align:sub;margin:0;height:17px" alt="" />. </li>
+  <li>Type the name and URL of the
+    add-on site, and then cick <strong>OK</strong>.</li>
+  <li>Make sure the checkbox is selected in the <strong>Enabled</strong> column.</li>
 
+<p>Any SDK packages available from the site appear in the <strong>SDK Platforms</strong> or
+<strong>SDK Tools</strong> tabs.</p>
+</ol>
 
 
