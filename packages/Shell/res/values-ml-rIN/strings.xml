@@ -29,8 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ബഗ് റിപ്പോർട്ടുകൾ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ബഗ് റിപ്പോർട്ട് ഫയൽ വായിക്കാനായില്ല"</string>
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"സിപ്പ് ഫയലിലേക്ക് ബഗ് റിപ്പോർട്ട് വിശദാംശങ്ങൾ ചേർക്കാൻ കഴിഞ്ഞില്ല"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"പേരില്ലാത്തവർ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"വിശദാംശങ്ങൾ"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"സ്‌ക്രീൻഷോട്ട്"</string>

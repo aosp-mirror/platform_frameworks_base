@@ -29,8 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Daha göstərməyin"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Baq hesabatları"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Baq hesabat faylı oxunmur"</string>
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Zip faylı üçün baq hesabat detalları əlavə edilmədi"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"adsız"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detallar"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"displey görüntüsü"</string>

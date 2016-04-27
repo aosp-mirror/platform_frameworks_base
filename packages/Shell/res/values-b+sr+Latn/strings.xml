@@ -29,8 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ne prikazuj ponovo"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Izveštaji o greškama"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Datoteka izveštaja o grešci ne može da se pročita"</string>
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Dodavanje detalja izveštaja o grešci u zip datoteku nije uspelo"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"neimenovano"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalji"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Snimci ekrana"</string>

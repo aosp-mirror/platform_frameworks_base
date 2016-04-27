@@ -29,7 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"不要再顯示"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"錯誤報告"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"無法讀取錯誤報告檔案"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"無法在 ZIP 檔案中加入錯誤報告"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"無法將錯誤報告詳細資料加入 ZIP 檔案"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"未命名"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"詳細資訊"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"螢幕擷取畫面"</string>
