@@ -32,7 +32,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#key_attestation">Key Attestation</a></li>
         <li><a href="#network_security_config">Network Security Config</a></li>
         <li><a href="#default_trusted_ca">Default Trusted CA</a></li>
-        <li><a href="apk_signature_v2">APK signature scheme v2</a></li>
+        <li><a href="#apk_signature_v2">APK signature scheme v2</a></li>
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#launcher_shortcuts">Launcher shortcuts</a></li>
       </ol>
