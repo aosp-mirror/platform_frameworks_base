@@ -846,7 +846,7 @@ public class SettingsProvider extends ContentProvider {
 
                 // Special case for location (sigh).
                 if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
-                    return null;
+                    continue;
                 }
 
                 Setting setting = mSettingsRegistry.getSettingLocked(
@@ -871,7 +871,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Special case for location (sigh).
         if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
-            return null;
+            return mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
+                    owningUserId).getNullSetting();
         }
 
         // Get the value.
