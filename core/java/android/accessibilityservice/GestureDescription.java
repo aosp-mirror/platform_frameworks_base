@@ -18,7 +18,6 @@ package android.accessibilityservice;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.RectF;
@@ -26,10 +25,8 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
-import android.view.ViewConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -160,9 +157,10 @@ public final class GestureDescription {
         private final List<StrokeDescription> mStrokes = new ArrayList<>();
 
         /**
-         * Add a stroke to the gesture description. Up to {@code MAX_STROKE_COUNT} paths may be
-         * added to a gesture, and the total gesture duration (earliest path start time to latest path
-         * end time) may not exceed {@code MAX_GESTURE_DURATION_MS}.
+         * Add a stroke to the gesture description. Up to
+         * {@link GestureDescription#getMaxStrokeCount()} paths may be
+         * added to a gesture, and the total gesture duration (earliest path start time to latest
+         * path end time) may not exceed {@link GestureDescription#getMaxGestureDuration()}.
          *
          * @param strokeDescription the stroke to add.
          *
@@ -201,10 +199,13 @@ public final class GestureDescription {
         long mEndTime;
         private float mTimeToLengthConversion;
         private PathMeasure mPathMeasure;
+        // The tap location is only set for zero-length paths
+        float[] mTapLocation;
 
         /**
-         * @param path The path to follow. Must have exactly one contour, and that contour must
-         * have nonzero length. The bounds of the path must not be negative.
+         * @param path The path to follow. Must have exactly one contour. The bounds of the path
+         * must not be negative. The path must not be empty. If the path has zero length
+         * (for example, a single {@code moveTo()}), the stroke is a touch that doesn't move.
          * @param startTime The time, in milliseconds, from the time the gesture starts to the
          * time the stroke should start. Must not be negative.
          * @param duration The duration, in milliseconds, the stroke takes to traverse the path.
@@ -225,10 +226,18 @@ public final class GestureDescription {
                     || (bounds.left < 0)) {
                 throw new IllegalArgumentException("Path bounds must not be negative");
             }
+            if (path.isEmpty()) {
+                throw new IllegalArgumentException("Path is empty");
+            }
             mPath = new Path(path);
             mPathMeasure = new PathMeasure(path, false);
             if (mPathMeasure.getLength() == 0) {
-                throw new IllegalArgumentException("Path has zero length");
+                // Treat zero-length paths as taps
+                Path tempPath = new Path(path);
+                tempPath.lineTo(-1, -1);
+                mTapLocation = new float[2];
+                PathMeasure pathMeasure = new PathMeasure(tempPath, false);
+                pathMeasure.getPosTan(0, mTapLocation, null);
             }
             if (mPathMeasure.nextContour()) {
                 throw new IllegalArgumentException("Path has more than one contour");
@@ -237,12 +246,10 @@ public final class GestureDescription {
              * Calling nextContour has moved mPathMeasure off the first contour, which is the only
              * one we care about. Set the path again to go back to the first contour.
              */
-            mPathMeasure.setPath(path, false);
+            mPathMeasure.setPath(mPath, false);
             mStartTime = startTime;
             mEndTime = startTime + duration;
-            if (duration > 0) {
-                mTimeToLengthConversion = getLength() / duration;
-            }
+            mTimeToLengthConversion = getLength() / duration;
         }
 
         /**
@@ -278,6 +285,11 @@ public final class GestureDescription {
 
         /* Assumes hasPointForTime returns true */
         boolean getPosForTime(long time, float[] pos) {
+            if (mTapLocation != null) {
+                pos[0] = mTapLocation[0];
+                pos[1] = mTapLocation[1];
+                return true;
+            }
             if (time == mEndTime) {
                 // Close to the end time, roundoff can be a problem
                 return mPathMeasure.getPosTan(getLength(), pos, null);
