@@ -87,7 +87,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * resource qualifier.
      *
      * @deprecated Do not set or read this directly. Use {@link #getLocales()} and
-     * {@link #setLocales(LocaleList)}.
+     * {@link #setLocales(LocaleList)}. If only the primary locale is needed,
+     * <code>getLocales().get(0)</code> is now the preferred accessor.
      */
     @Deprecated public Locale locale;
 
