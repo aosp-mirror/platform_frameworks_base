@@ -251,7 +251,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
   </dt>
 
   <dd>
@@ -273,7 +273,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -308,12 +309,13 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   The following new methods have been added to the {@link android.app.Activity}
   class to support multi-window display. For details on each method, see the
-  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK Reference</a>.
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+  Reference</a>.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -321,7 +323,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
@@ -329,14 +331,14 @@ android:supportsPictureInPicture=["true" | "false"]
 
     <p class="note">
       <strong>Note:</strong> Picture-in-picture mode is a special case of
-      multi-window mode. If <code>myActivity.inPictureInPicture()</code>
-      returns true, then <code>myActivity.inMultiWindow()</code> also returns
-      true.
+      multi-window mode. If <code>myActivity.isInPictureInPictureMode()</code>
+      returns true, then <code>myActivity.isInMultiWindowMode()</code> also
+      returns true.
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
@@ -347,7 +349,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
@@ -360,14 +362,14 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   There are also {@link android.app.Fragment} versions of each of these
-  methods, for example <code>Fragment.inMultiWindow()</code>.
+  methods, for example <code>Fragment.isInMultiWindowMode()</code>.
 </p>
 
 <h3 id="entering-pip">Entering picture-in-picture mode</h3>
 
 <p>
   To put an activity in picture-in-picture mode, call the new method
-  <code>Activity.enterPictureInPicture()</code>. This method has no effect if
+  <code>Activity.enterPictureInPictureMode()</code>. This method has no effect if
   the device does not support picture-in-picture mode. For more information,
   see the <a href="picture-in-picture.html">Picture-in-Picture</a> documentation.
 </p>
