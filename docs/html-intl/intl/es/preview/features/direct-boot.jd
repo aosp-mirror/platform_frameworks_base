@@ -1,0 +1,180 @@
+page.title=Arranque directo
+page.keywords=preview,sdk,direct boot
+page.tags=androidn
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Contenido del documento</h2>
+  <ol>
+    <li><a href="#run">Solicitar acceso para ejecutar durante el arranque directo</a></li>
+    <li><a href="#access">Acceder al almacenamiento cifrado por dispositivo</a></li>
+    <li><a href="#notification">Recibir notificaciones sobre el desbloqueo del usuario</a></li>
+    <li><a href="#migrating">Migrar datos existentes</a></li>
+    <li><a href="#testing">Probar la aplicación con reconocimiento de cifrado</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android N se ejecuta en un modo <i>de arranque directo</i> seguro
+cuando el dispositivo se enciende pero el usuario no lo ha
+desbloqueado. Para permitir esto, el sistema brinda dos ubicaciones de almacenamiento para los datos:</p>
+
+<ul>
+<li><i>Almacenamiento cifrado por credencial:</i>es la ubicación de almacenamiento predeterminada
+y solo está disponible después de que el usuario desbloquea el dispositivo.</li>
+<li><i>Almacenamiento cifrado por dispositivo:</i>es una ubicación de almacenamiento que está disponible tanto
+durante el modo de arranque directo como después de que el usuario desbloquea el dispositivo.</li>
+</ul>
+
+<p>De forma predeterminada, las aplicaciones no se ejecutan durante el modo de arranque directo.
+Si necesita que su aplicación se ejecute durante el modo de arranque directo, puede registrar
+los componentes de la aplicación que deberían ejecutarse durante este modo. Algunos casos comunes de
+aplicaciones que necesitan ejecutarse durante el modo de arranque directo incluyen los siguientes:</p>
+
+<ul>
+<li>aplicaciones que tienen notificaciones programadas, como aplicaciones
+de alarma;</li>
+<li>aplicaciones que generan notificaciones de usuario importantes, como aplicaciones de mensajes SMS;</li>
+<li>aplicaciones que brindan servicios de accesibilidad, como Talkback.</li>
+</ul>
+
+<p>Si necesita que su aplicación acceda a datos mientras se ejecuta el modo de arranque directo, use
+el almacenamiento cifrado por dispositivo. Este tipo de almacenamiento contiene datos
+cifrados con una clave que solo está disponible luego de que el dispositivo haya realizado un inicio
+verificado correctamente.</p>
+
+<p>Para los datos que se deben cifrar con una clave asociada con credenciales del
+usuario, como un PIN o una contraseña, use el almacenamiento cifrado por credencial.
+Este tipo de almacenamiento solo está disponible luego de que el usuario haya desbloqueado
+correctamente el dispositivo y hasta que el usuario reinicie nuevamente el dispositivo. Si el
+usuario habilita el bloqueo de pantalla luego de desbloquear el dispositivo, esto no bloquea
+el almacenamiento cifrado por credencial.</p>
+
+<h2 id="run">Solicitar acceso para ejecutar durante el arranque directo</h2>
+
+<p>Debes registrar los componentes de las aplicaciones con el sistema antes de que estas puedan
+ejecutarse durante el modo de arranque directo o acceder al almacenamiento cifrado por
+dispositivo. Para registrar una aplicación en el sistema, debes marcar los componentes como
+<i>reconocimiento de cifrado</i>. Para marcar su dispositivo como "con reconocimiento de cifrado" , configure el atributo 
+<code>android:encryptionAware</code> como verdadero en el manifiesto.<p>
+
+<p>Los componentes con reconocimiento de cifrado pueden registrarse para recibir un mensaje de difusión 
+<code>LOCKED_BOOT_COMPLETED</code> del
+sistema cuando el dispositivo se haya reiniciado. En este momento, el almacenamiento
+cifrado por dispositivo está disponible, y el componente puede ejecutar tareas que se deben
+ejecutar durante el modo de arranque directo, como disparar una alarma programada.</p>
+
+<p>El siguiente fragmento de código es un ejemplo de cómo registrar un
+{@link android.content.BroadcastReceiver} como reconocimiento de cifrado y de cómo agregar un
+filtro de intenciones para <code>LOCKED_BOOT_COMPLETED</code> en el manifiesto de la aplicación:</p>
+
+<pre>
+&lt;receiever
+  android:encryptionAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Una vez que el usuario haya desbloqueado el dispositivo, todos los componentes podrán acceder tanto al
+almacenamiento cifrado por dispositivo como al almacenamiento cifrado por credencial.</p>
+
+<h2 id="access">Acceder al almacenamiento cifrado por dispositivo</h2>
+
+<p>Para acceder al almacenamiento cifrado por dispositivo, crea una segunda
+instancia de {@link android.content.Context} llamando a
+<code>Context.createDeviceEncryptedStorageContext()</code>. Todas las llamadas
+de API de almacenamiento que se hacen usando este contexto acceden al almacenamiento cifrado por dispositivo. El siguiente
+ejemplo accede al almacenamiento cifrado por dispositivo y abre un archivo de datos de la aplicación
+existente:</p>
+
+<pre>
+Context directBootContext = Context.createDeviceEncryptedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>Solo debes usar el almacenamiento cifrado por dispositivo para
+información que debe ser accesible durante el modo de arranque directo.
+No uses este tipo de almacenamiento como un almacenamiento cifrado de propósito general.
+Para información privada del usuario o datos cifrados que no son necesarios durante
+el modo de arranque directo, usa el almacenamiento cifrado por credencial.</p>
+
+<h2 id="notification">Recibir notificaciones sobre el desbloqueo del usuario</h2>
+
+<p>Una vez que el usuario desbloquea el dispositivo después de reiniciarlo, la aplicación puede cambiar y acceder
+al almacenamiento cifrado por credencial y usar servicios del sistema comunes que
+dependen de credenciales de usuario.</p>
+
+<p>Para recibir una notificación cuando el usuario desbloquea el dispositivo luego de reiniciarlo,
+registra un {@link android.content.BroadcastReceiver} de un componente en ejecución
+para que escuche el mensaje <code>ACTION_USER_UNLOCKED</code>. O puedes
+recibir el mensaje existente {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED}, que ahora indica que el dispositivo se ha iniciado y
+que el usuario ha desbloqueado el dispositivo.</p>
+
+<p>Puedes consultar directamente si el usuario ha desbloqueado el dispositivo llamando a
+<code>UserManager.isUserUnlocked()</code>.</p>
+
+<h2 id="migrating">Migrar datos existentes</h2>
+
+<p>Si un usuario actualiza el dispositivo para usar el modo de arranque directo, es posible que haya
+datos existentes que se deben migrar al almacenamiento cifrado por dispositivo. Usa
+<code>Context.migrateSharedPreferencesFrom()</code> y
+<code>Context.migrateDatabaseFrom()</code> para migrar los datos de preferencia y de base de datos
+del almacenamiento cifrado por credencial al almacenamiento cifrado por dispositivo.</p>
+
+<p>Debes tener cuidado cuando decidas qué datos migrar entre
+estos dos tipos de almacenamiento. No deberías migrar
+información de usuario privada, como contraseñas o tokens de autorización, al
+ almacenamiento cifrado por dispositivo. En algunos casos, es posible que debas gestionar
+conjuntos separados de datos en ambos tipos de almacenamiento cifrado.</p>
+
+<h2 id="testing">Probar la aplicación con reconocimiento de cifrado</h2>
+
+<p>Prueba la aplicación con reconocimiento de cifrado usando el nuevo modo de arranque directo. Hay dos
+maneras de habilitar el arranque directo.</p>
+
+<p class="caution"><strong>Advertencia:</strong> habilitar el arranque directo
+borrará todos los datos de usuario del dispositivo.</p>
+
+<p>Para los dispositivos compatibles que tienen Android N instalado, habilita
+el arranque directo mediante una de las siguientes opciones:</p>
+
+<ul>
+<li>En el dispositivo, habilita las <b>Developer options</b> si no lo haz hecho aún
+yendo a <b>Settings &gt; About phone</b> y presionando <b>Build number</b>
+siete veces. Una vez que aparezca la pantalla Developer options, dirígete a
+<b>Settings &gt; Developer options</b> y selecciona
+<b>Convert to file encryption</b>.</li>
+<li>Usa los siguientes comandos shell ADB para permitir el modo de arranque directo:
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>También está disponible un modo de arranque directo emulado en caso de que debas cambiar
+de modo en los dispositivos de prueba. El modo emulado solo debería usarse durante
+el desarrollo, y puede provocar la pérdida de datos. Para habilitar el modo de arranque directo emulado,
+debes establecer un patrón de bloqueo en el dispositivo, elegir "No thanks" si te pregunta si deseas un
+inicio seguro cuando estás estableciendo el patrón de bloqueo y, luego, usar el
+siguiente comando shell ADB:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>Para deshabilitar el modo de arranque directo emulado, usa el siguiente comando:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>Usar estos comandos provoca el reinicio del dispositivo.</p>

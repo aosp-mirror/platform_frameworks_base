@@ -1,0 +1,440 @@
+page.title=計劃總覽
+page.metaDescription=讓您的應用程式為下一版 Android 做好準備。
+page.image=images/cards/card-n-overview_2x.png
+meta.tags="preview", "developer", "android"
+page.tags="preview", "developer", "android"
+
+@jd:body
+<!--
+<div class="cols" style=
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 3 is now available
+  </h3>
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+  </div>
+</div>
+-->
+
+<p>
+  歡迎使用「Android N Developer Preview」<strong></strong>，本計劃提供為新版 Android 測試和最佳化您應用程式所需的一切。它是免費的，而且您可以下載「N Developer Preview」工具來立刻開始。
+
+
+
+</p>
+
+
+
+
+
+
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        硬體與模擬器映像
+      </h5>
+
+      <p>
+        在各種裝置上或在模擬器上執行並測試您的應用程式。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        最新的平台程式碼
+      </h5>
+
+      <p>
+        我們將在 Preview 期間提供每月更新，讓您能夠針對最新的平台變更進行測試。
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        開發人員問題的優先順序
+      </h5>
+
+      <p>
+        在前幾個星期內，我們將讓開發人員優先回報問題，因此請儘快測試並提供意見回饋。
+
+      </p>
+    </div>
+
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        新行為與功能
+      </h5>
+
+      <p>
+        儘早開始開發以支援新的平台行為，並使用新功能來開發。
+      </p>
+    </div>
+
+    <div class="col-4of12">
+        <h5>
+        更新是透過隔空傳輸 (OTA) 方式傳遞
+      </h5>
+
+      <p>
+        透過「Android Beta 計劃」，可以在任何支援的裝置上透過無接縫的隔空傳輸方式取得更新。不需要刷機。
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        意見回饋與支援
+      </h5>
+
+      <p>
+        使用我們的<a href="{@docRoot}preview/bug">問題追蹤器</a>回報問題並提供意見回饋。與 <a href="{@docRoot}preview/dev-community">N&nbsp;開發人員社群</a>中的開發人員互動。
+
+
+
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>New in the Android N Developer Preview: </p>
+
+<ul>
+  <li> Accompanying Android Beta Program for consumers, starting later in the preview</li>
+  <li> More supported devices, including devices from OEM partners</li>
+  <li> Seamless OTAs for your devices, from initial release to final N release without flashing</li>
+</ul>
+-->
+
+<h2 id="timeline">時間軸與更新</h2>
+<img src="{@docRoot}images/n-preview-updates_2x.png">
+
+<p>
+  「N Developer Preview」計畫日期從 2016 年 3 月 9 日到最終 Android N 公開發行版釋出給 AOSP 與 OEM 為止 (預計是 2016 年第 3 季)。
+
+</p>
+
+<p>
+  在關鍵開發里程碑，我們將為您的開發與測試環境傳遞更新。一般而言，您可以預期每個月 (4 到 6 週的間隔) 都能收到更新。里程碑列出如下。
+
+
+</p>
+
+<ul>
+  <li><strong><a href="{@docRoot}preview/support.html">預覽版 1</a></strong> (初始版本，Alpha)</li>
+  <li><strong>預覽版 2</strong> (遞增更新，Beta)</li>
+  <li><strong>預覽版 3</strong> (遞增更新，Beta)</li>
+  <li><strong>預覽版 4</strong> (最終 API 與正式 SDK，Play 發佈)</li>
+  <li><strong>預覽版 5</strong> (用於最終測試的近最終系統映像)</li>
+  <li><strong>最終版本</strong> (推出給 AOSP 與生態系統)</li>
+</ul>
+
+<p>
+  每個更新都包括 SDK 工具、預覽版系統映像、模擬器、參考文件與 API 差異。
+
+</p>
+
+<p>
+  <strong>前三個預覽版里程碑</strong>提供<strong>早期測試與開發環境</strong>，可協助您發現目前應用程式中的相容性問題，並針對在新平台運作的目標規劃遷移或功能工作。您可以在這個優先順序期間將您對功能與 API 和檔案相容性問題的意見回饋提供給我們 &mdash; 對於上述所有問題，請使用<a href="{@docRoot}preview/bug">問題追蹤器</a>。您可以預期這些更新之間會有一些 API 變更。
+
+
+
+
+
+
+</p>
+
+<p>
+  在<strong>預覽版 4 與 5</strong>，您將能存取<strong>最終 N API 與 SDK</strong> 以進行開發，並存取接近最終系統映像來測試系統行為與功能。Android N 在此時將提供標準 API 層級。您可以開始為您的舊版應用程式執行最終相容性測試，並調整使用 N API 或功能的任何新程式碼。
+
+
+
+
+</p>
+
+<p>
+  此外，從預覽版 4 開始，您可以<strong>發佈應用程式到執行 Android N 的裝置 (在正式 API 層級)</strong>，例如已選擇加入 Android Beta 計劃的使用者裝置。您可以先發佈到 Google Play 的 Alpha 與 Beta 管道，以便在廣泛於商店中散佈之前，先透過 Android Beta 使用者測試您的應用程式。
+
+
+
+
+
+</p>
+
+<p>
+  當您在 Android N 上測試及開發時，強烈建議您在預覽版更新發行時立即更新，<strong>讓您的開發環境保持在最新狀態</strong>。為簡化此程序，您可以在 Android Beta 計劃中註冊您的測試裝置，並在每個里程碑取得<strong>隔空傳輸 (OTA) 更新</strong>。或者，我們也會提供已更新的預覽版映像讓您下載並手動刷新。
+
+
+
+
+
+</p>
+
+<p>
+  我們將透過 <a href="http://android-developers.blogspot.com/">Android 開發人員部落格</a>，還有此網站與 <a href="{@docRoot}preview/dev-community">Android N 開發人員社群</a>來通知您有可用的預覽版更新。
+
+
+</p>
+
+
+<h2 id="preview_tools">N Developer Preview 中有什麼？</h2>
+
+<p>
+  「N Developer Preview」包括您針對各種不同螢幕大小、網路技術、 CPU/GPU 晶片組與硬體架構，測試現有應用程式所需的一切。
+
+
+</p>
+
+<h3 id="sdk_tools">SDK 工具</h3>
+
+<p>您可以透過 <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a> 中的 SDK Manager 下載這些元件：</p>
+
+<ul>
+  <li> N Developer Preview <strong>SDK 工具</strong>
+  <li> N Developer Preview <strong>模擬器系統映像</strong> (32 位元與 64 位元)
+  <li> N Developer Preview <strong>模擬器系統映像 (適用於 Android TV)</strong> (32 位元)
+  <li> N Developer Preview 支援程式庫 (適用於新的應用程式範本)
+</ul>
+
+<p>
+  我們將視需要在每個里程碑提供這些開發工具的更新。
+</p>
+
+<h3 id="hardware_system_images">硬體系統映像</h3>
+
+<p>
+  「N Developer Preview」包括 Nexus 以及在實體裝置上測試及開發時可以使用的其他硬體系統映像。如需硬體映像的完整清單，請參閱<a href="{@docRoot}preview/download.html">裝置映像</a>頁面。
+
+
+</p>
+
+<p>
+  我們將在每個里程碑傳遞已更新的系統映像。您可以下載已更新的系統映像並手動將它刷到您的測試裝置，而且刷機頻率無限制。當您需要在自動化測試環境多次刷新您裝置時，這特別實用。
+
+
+
+
+</p>
+
+<p class="note"><strong>注意</strong>：<strong>手動刷新的裝置將無法像去年的預覽版一樣取得 OTA 更新</strong>。今年，您可以透過在「Android Beta 計劃」註冊裝置以取得 OTA &mdash; 請參閱下一節的詳細資料。
+
+
+
+</p>
+
+<h3 id="android_beta">透過 Android Beta 計劃取得 OTA 更新</h3>
+
+<p>
+  Android N 中的其中一個新功能是隔空傳輸 (OTA) 更新計劃，它可以自動將最新的 Android N 預覽版更新直接傳遞給已註冊此計劃的裝置。加入此計劃完全免費，而且此計劃開放給所有擁有支援裝置並已註冊 Google 帳戶的人。
+
+
+
+</p>
+
+<p>
+  如果要註冊此計劃，請瀏覽 <a href="https://g.co/androidbeta">Android Beta 計劃</a>網站。您將會看到已在您的帳戶註冊且符合加入 Android Beta 計劃的所有裝置。
+
+
+
+</p>
+
+<ol>
+  <li> 選擇要接收 Android N 更新的裝置
+  <li> 按一下 [Enroll]，閱讀並同意服務條款，然後按一下 [OK]。
+</ol>
+
+<p>
+  一旦註冊，您的裝置很快就會收到更新。在大部分情況下，您不需要執行完整重設以將您的資料移到 Android N，但建議您先備份重要資料，再註冊裝置。
+
+
+
+</p>
+
+<p>
+  當更新傳遞到您的裝置之後，建議您儘快下載並安裝。您將能掌握系統 UI、行為、API 與功能的最新變更。
+
+
+</p>
+
+<p>
+  在「Developer Preview」結束時，您已註冊的裝置將會收到正式 Android N 版本的更新。
+
+</p>
+
+<p>
+  您可以隨時取消註冊 Android Beta 計劃。在取消註冊之前，請務必備份裝置上的資料。
+
+
+</p>
+
+  <p class="note"><strong>注意</strong>：當您取消註冊時，<strong>系統會將您的裝置還原為出廠預設值</strong>並更新到最新版本的 Android 6.0 Marshmallow (不一定是註冊裝置之前安裝的版本)。為確保乾淨的安裝，系統會將您的資料從裝置清除，包括聯絡人、訊息與相片等。
+
+
+
+
+
+
+</p>
+
+<h3 id="documentation_and_sample_code">文件與範例程式碼</h3>
+
+<p>
+  「Developer Preview」網站上提供這些文件資源，協助您了解 Android&nbsp;N：
+
+</p>
+
+<ul>
+  <li> <a href="{@docRoot}preview/setup-sdk.html">設定以針對 Android N 開發</a>提供逐步指示協助您開始。
+
+</li>
+  <li> <a href="{@docRoot}preview/behavior-changes.html">行為變更</a>指出要測試的關鍵區域。
+</li>
+  <li> 新 API 的文件，包括 <a href="{@docRoot}preview/api-overview.html">API 總覽</a>、可下載的 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 參考資料</a>與詳細關鍵功能 (例如多視窗支援、整合式通知、多地區設定支援等) 的開發人員指南。
+
+
+
+  <li> 示範如何支援權限與其他新功能的<a href="{@docRoot}preview/samples.html">範例程式碼</a>。
+
+  <li> 適用於目前 N Developer Preview 的<a href="{@docRoot}preview/support.html#release-notes">版本資訊</a>，包括變更資訊與差異報告。
+
+
+</ul>
+
+<h4 id="reference">可下載的 API 參考資料</h4>
+
+<p>
+  在早期預覽版更新期間，您能以獨立 zip 壓縮檔的形式下載最新的 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Android N 平台 API 參考資料</a>。下載的參考資料也包括差異報告，可協助您瞭解自 API 23 與前次更新之後的 API 變更。
+
+
+
+
+</p>
+
+<p>
+  當 Android N API 邁入最終階段且我們為它指派正式 API 層級時，我們將在 <a href="https://developer.android.com">https://developer.android.com</a> 為您提供線上 API 參考資料。
+
+</p>
+
+<h3 id="support_resources">
+  支援資源
+</h3>
+
+<p>
+  在「N Developer Preview」上測試及開發時，請使用這些管道來回報問題及提供意見回饋：
+
+</p>
+
+<ul>
+  <li> <a href="https://code.google.com/p/android-developer-preview/">N Developer Preview 問題追蹤器</a>是您的<strong>主要意見回饋管道</strong>。您可以透過此問題追蹤器來回報錯誤、效能問題與一般意見回饋。您也可以檢查<a href="{@docRoot}preview/bug">已知問題</a>並尋找變通方式步驟。當您的問題經過分類並傳送給 Android 工程團隊檢閱時，我們會通知您。
+
+
+
+
+ </li>
+  <li> <a href="{@docRoot}preview/dev-community">Android N 開發人員社群</a>是您能<strong>與其他 Android N 開發人員聯絡</strong>的 Google+ 社群。您可以分享有關 Android N 的觀察或想法，或尋找解答。我們會主持社群並視需要提供解答與指導方針。
+
+
+
+</li>
+</ul>
+
+<h3 id="targeting">目標設定、預覽版 API 及發佈</h3>
+
+<p>
+  「N Developer Preview」提供僅供開發的系統與<strong>沒有標準 API 層級</strong>的 Android 程式庫。如果要選擇退出相容性行為以測試您的應用程式 (強烈建議)，您可以透過將您應用程式的 <code><a href=
+  "{@docRoot}preview/setup-sdk.html#create-update">targetSdkVersion</a></code> 設定為 <code>“N”</code>，以便以 Android N 預覽版。做為目標。
+
+
+
+
+
+</p>
+
+<p>
+  「Android N Developer Preview」提供<strong>預覽版 API</strong> &mdash; 在最終版 SDK (目前規劃在 2016 年第 3 季) 發行之前的都不是正式 API。這表示您可以預期這段時間會有<strong>小幅度的 API 變更</strong>，特別是在計劃開始的前幾週。隨著每次更新「Android N Developer Preview」，我們將提供變更摘要。
+
+
+
+
+
+</p>
+
+<p class="note">
+  <strong>注意</strong>：雖然預覽版 API 可能會變更，基本系統行為均已穩定且能夠立即測試。
+
+
+</p>
+
+<p>
+  Google Play <strong>會防止發佈目標為 N Developer Preview 的應用程式</strong>。當 Android N 最終 SDK 可用時，您將能以正式 Android N API 層級做為目標，並透過 Alpha 與 Beta 發行管道將您的應用程式發佈到 Google Play。同時，如果要將目標為 Android N 的應用程式散佈給測試人員，您可以透過電子郵件或您網站的直接下載連結來完成。
+
+
+
+
+
+</p>
+
+<p>
+  在完全將 Android N 釋出給 AOSP 與 OEM 時 (預計是 2016 年第 3 季)，您可以將以 Android N 為目標的發佈發佈給 Google Play 中的公開發行管道。
+
+
+</p>
+
+
+<h2 id="how_to_get_started">如何開始</h2>
+
+<p>
+  開始使用 Android N 測試您的應用程式：
+</p>
+
+<ol>
+  <li> 檢閱 <a href="{@docRoot}preview/api-overview.html">API 總覽</a>與<a href="{@docRoot}preview/behavior-changes.html">行為變更</a>以瞭解新功能，以及它會如何影響您的應用程式。特別是瞭解新的<a href="{@docRoot}preview/features/notification-updates.html">通知</a>功能與<a href="{@docRoot}preview/features/multi-window.html">多視窗支援</a>。
+
+
+
+</li>
+  <li> 依照<a href="{@docRoot}preview/setup-sdk.html">設定 Preview SDK</a> 的指示來設定您的環境，並設定測試裝置。
+</li>
+  <li> 依照<a href="https://developers.google.com/android/nexus/images">刷新指示</a>，將您的裝置刷新為最新的 Android N 系統映像。
+ </li>
+  <li> 檢閱 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 參考資料</a>與 <a href="{@docRoot}preview/samples.html">Android N 範例</a>，以深入瞭解新的 API 功能以及如何在您的應用程式中運用。
+
+
+  <li> 加入 <a href="{@docRoot}preview/dev-community">Android N 開發人員社群</a>以取得最新消息，並與使用新平台的開發人員聯絡
+
+</li>
+</ol>
+
+<p>
+  感謝您參與「Android N Developer Preview」計劃！
+</p>

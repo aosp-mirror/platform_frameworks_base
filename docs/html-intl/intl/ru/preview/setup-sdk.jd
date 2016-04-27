@@ -1,0 +1,226 @@
+page.title=Установка предварительной
+версииmeta.keywords="предварительная версия", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+<ol>
+  <li><a href="#get-as13">Установка Android Studio 2.1</a></li>
+  <li><a href="#get-sdk">Установка Android N SDK</a>
+    <ol>
+      <li><a href="#docs-dl">Справочная документация</a>
+    </ol>
+  </li>
+  <li><a href="#java8">Установка Java 8 JDK и JRE</a></li>
+  <li><a href="#create-update">Обновление или создание проекта</a></li>
+  <li><a href="#next">Дальнейшие действия</a></li>
+</ol>
+  </div>
+</div>
+
+<p>Создание приложений для Android N Preview требует некоторых обновлений среды разработки,
+описанных в этом документе.</p>
+
+<p>Чтобы просто протестировать совместимость вашего приложения на системном образе
+Android N, следуйте рекомендациям руководства <a href="{@docRoot}preview/download.html">Тест на устройстве Android N</a>.</p>
+
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
+
+
+<h2 id="get-as13">Установка Android Studio 2.1 (предварительная версия)</h2>
+
+<p>Платформа Android N добавляет поддержку <a href="{@docRoot}preview/j8-jack.html">возможностей языка Java 8</a>,
+которые требуют наличия нового компилятора, именуемого Jack. Последняя версия Jack
+в настоящее время поддерживается только в Android Studio 2.1. Поэтому если вы хотите использовать возможности
+языка Java 8 для
+разработки своего приложения, вам понадобится Android Studio 2.1. В противном случае вам не потребуется использовать компилятор Jack,
+однако все равно придется выполнить обновление до JDK 8 для компиляции под платформу Android N,
+как описано ниже.
+</p>
+
+<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>Предварительная версия Android Studio 2.1 в настоящее время доступна на канале обновлений Canary.
+Если у вас уже есть Android Studio
+и вы не хотите обновлять ее до версии канала Canary, вы можете загрузить
+Android Studio 2.1 для отдельной установки и использовать ее для разработки
+под Android N, не затрагивая основную среду Android Studio.
+</p>
+
+<p>Чтобы загрузить Android Studio 2.1 для отдельной установки, выполните следующие шаги
+(если вы хотите обновить существующую установку Android Studio до версии 2.1, начните с шага 4).
+</p>
+
+<ol>
+  <li>Измените название существующей установки Android Studio, добавив к ней номер версии.
+Таким образом, при установке новая версия не заменит собой существующую.
+</li>
+  <li>Загрузите соответствующий ZIP-архив для своей операционной системы со
+<a href="http://tools.android.com/download/studio/canary/latest">страницы загрузки канала Canary</a>.
+  </li>
+  <li>Разархивируйте пакет и переместите содержимое Android Studio 2.1 в подходящее
+место для приложений вашей системы, затем запустите программу установки.</li>
+  <li>Откройте окно "Settings"
+(<strong>File &gt; Settings</strong> для Windows/Linux, или
+<strong>Android Studio &gt; Preferences</strong> для Mac). В левой
+панели выберите <strong>Appearance &amp; Behavior &gt; System Settings &gt;
+Updates</strong>.
+  </li>
+  <li>На панели "Updates" установите флажок <strong>Automatically
+check updates for</strong> и выберите
+<strong>Canary Channel</strong> в выпадающем списке.
+  </li>
+</ol>
+
+<p>Оставьте это окно настроек открытым для следующего шага.</p>
+
+
+<h2 id="get-sdk">Установка N Preview SDK</h2>
+
+<p>Чтобы начать разработку с использованием API-интерфейсов Android N, необходимо установить 
+Android N Preview SDK в Android Studio, выполнив следующие шаги.</p>
+
+<ol>
+  <li>На открытой панели "Updates" (шаг 4 выше)
+установите флажок <strong>Automatically
+check updates for Android SDK</strong> и выберите
+<strong>Preview Channel</strong> в выпадающем списке.
+  </li>
+  <li>Щелкните <strong>Check Now</strong>.</li>
+
+  <li>В левой панели выберите <strong>Appearance &amp; Behavior &gt; System
+Settings &gt; Android SDK</strong>.
+
+  <li>Выберите вкладку <strong>SDK Platforms</strong> и установите флажок
+<strong>Android N Preview</strong>.</li>
+
+  <li>Откройте вкладку <strong>SDK Tools</strong> и установите флажки
+<strong>Android SDK Build Tools</strong>, <strong>Android SDK
+Platform-Tools</strong> и <strong>Android SDK Tools</strong>.
+
+  </li>
+
+  <li>Нажмите <strong>OK</strong> и примите лицензионные
+соглашения для всех устанавливаемых пакетов.
+  </li>
+</ol>
+
+<h3 id="docs-dl">Загрузка справочной документации по N Preview</h3>
+
+<p>
+  Подробная информация по API-интерфейсам Android N содержится в справочной документации N Preview,
+которую можно загрузить из следующей таблицы.
+Этот пакет содержит сокращенную автономную версию веб-сайта для разработчиков Android
+и включает в себя обновленный справочник по API-интерфейсам Android N, а также сведения о различиях
+API.
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Документация</th>
+    <th scope="col">Контрольные суммы</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap">
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip">n-preview-1-docs.zip</a></td>
+    <td width="100%">
+      MD5: 4ab33ccbe698f46f125cc5b807cf9c2f<br>
+      SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
+    </td>
+  </tr>
+<table>
+
+
+
+<h2 id="java8">Установка Java 8 JDK и JRE</h2>
+
+<p>Чтобы скомпилировать ваше приложение для платформы Android N, необходимо использовать 
+Java 8 Developer Kit (JDK 8), а для использования некоторых инструментов с Android
+Studio 2.1 необходимо установить Java 8 Runtime Environment (JRE 8). Поэтому если у вас еще
+нет последних версий каждого из этих пакетов, загрузите JDK 8 и JRE 8
+прямо сейчас.</p>
+
+<p>Установите версию JDK в Android Studio, выполнив следующие шаги.</p>
+
+<ol>
+  <li>Откройте проект Android в Android Studio, затем откройте
+окно "Project Structure", выбрав <strong>File &gt; Project
+Structure</strong>. (Вы также можете установить структуру по умолчанию для всех проектов,
+выбрав <strong>File &gt; Other Settings &gt; Default Project Structure</strong>).
+
+   </li>
+   <li>В левой панели окна щелкните <strong>SDK Location</strong>.
+   </li>
+   <li>В поле <strong>JDK Location</strong> укажите расположение
+Java 8 JDK (нажмите кнопку справа
+для просмотра своих файлов), затем нажмите <strong>OK</strong>.
+   </li>
+</ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700" alt="" />
+
+
+<h2 id="create-update">Обновление или создание проекта</h2>
+
+<p>
+  Для использования API-интерфейсов Android N ваш проект должен быть сконфигурирован соответствующим образом.
+</p>
+
+<p>Если вы планируете использовать возможности языка Java 8, ознакомьтесь в документе
+<a href="{@docRoot}preview/j8-jack.html">Возможности языка Java 8</a>
+с информацией о поддерживаемых возможностях Java 8 и о настройке
+проекта с компилятором Jack.</p>
+
+
+<h3 id="update">Обновление существующего проекта</h3>
+
+<p>Откройте файл
+<code>build.gradle</code> для своего модуля и укажите в нем следующие значения:
+
+</p>
+
+<pre>
+android {
+  compileSdkVersion <strong>'android-N'</strong>
+  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'N'</strong>
+     targetSdkVersion <strong>'N'</strong>
+     ...
+  }
+  ...
+}</pre>
+
+
+<h3 id="create">Создание нового проекта</h3>
+
+
+<p>Чтобы создать новый проект разработки с использованием Android N Preview SDK выполните следующие действия.</p>
+
+<ol>
+  <li>Выберите <strong>File &gt; New Project</strong> и выполняйте указания, пока не перейдете на страницу
+"Target Android Devices".
+  </li>
+  <li>На этой странице выберите вариант <strong>Phone and Tablet</strong>.</li>
+  <li>В разделе <strong>Phone and Tablet</strong> перейдите в список <strong>Minimum
+SDK</strong> и выберите
+<strong>N: Android API 23, N Preview (Preview)</strong>.</li>
+</ol>
+
+
+<h2 id="next">Дальнейшие действия</h2>
+
+<ul>
+  <li>Выполните рекомендации руководства <a href="{@docRoot}preview/download.html">Тест на устройстве Android N</a>.</li>
+  <li>Более подробную информацию о платформе Android N можно найти в документе
+<a href="{@docRoot}preview/behavior-changes.html">Изменения в работе</a>
+и в описании <a href="{@docRoot}preview/api-overview.html">API-интерфейсов и возможностей Android N</a>.
+</li>
+</ul>
+

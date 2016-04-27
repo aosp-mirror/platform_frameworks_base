@@ -1,0 +1,541 @@
+page.title=Pruebe en un dispositivo
+meta.tags=“Versión preliminar”, “Nexus”,“imagen de sistema”
+page.tags="preview", "androidn"
+page.image=images/cards/card-n-downloads_2x.png
+
+@jd:body
+
+<div style="position:relative; min-height:600px">
+
+  <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+
+    <p class="sdk-terms-intro">Antes de descargar e instalar los componentes del
+      Android Preview SDK, debe aceptar los términos y las
+      condiciones que se describen a continuación.</p>
+
+    <h2 class="norule">Términos y condiciones</h2>
+
+    <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
+Este es el Contrato de licencia de la versión preliminar del SDK de Android (el “Contrato de licencia”).
+
+1. Introducción
+
+1.1 Se le otorga la licencia de la versión preliminar del SDK de Android (denominada “Versión preliminar” en el Contrato de licencia e incluye específicamente los archivos de sistema de Android, las API agrupadas y los archivos de biblioteca de la Versión preliminar, si se encuentran disponibles), sujeto a los términos del Contrato de licencia. El contrato de licencia establece una relación legal vinculante entre usted y Google, con respecto a la utilización que usted haga de la Preview.
+
+1.2 "Android" hace referencia al conjunto de software Android para dispositivos, tal como se encuentra disponible en el proyecto de código abierto de Android, ubicado en la siguiente dirección URL: http://source.android.com/, y sus actualizaciones frecuentes.
+
+1.3 “Compatible con Android” se refiere a cualquier implementación de Android que (i) cumpla con el documento Definición de compatibilidad de Android, que está disponible en el sitio web de compatibilidad de Android (http://source.android.com/compatibility) y que puede actualizarse esporádicamente; y (ii) apruebe satisfactoriamente la prueba de Compatibilidad con Android, “CTS” (en inglés, Android Compatibility Test Suite).
+
+1.4 "Google" significa Google Inc., una empresa de Delaware con su sede principal en 1600 Amphitheatre Parkway, Mountain View, CA 94043, Estados Unidos.
+
+2. Aceptación del Contrato de licencia
+
+2.1 Para poder utilizar la Versión preliminar, primero debe aceptar el Contrato de licencia. Si no acepta el Contrato de licencia, no podrá utilizar la Versión preliminar.
+
+2.2 Al hacer clic para aceptar o utilizar la Versión preliminar, por medio del presente, usted acepta los términos del Contrato de licencia.
+
+2.3 Usted no puede utilizar la Versión preliminar ni aceptar el Contrato de licencia si tiene prohibido recibir la Versión preliminar en virtud de las leyes de los Estados Unidos o de otros países, lo que incluye el país donde es residente o desde el que utilizará la Versión preliminar.
+
+2.4 Si usted utilizará la Versión preliminar de forma interna, dentro de su compañía u organización, usted acepta quedar sujeto al Contrato de licencia en representación de su empleador u otra entidad, y expresa y garantiza que tiene plena autoridad legal para vincular a su empleador o a dicha entidad al Contrato de licencia. Si no posee la autoridad exigida, no podrá aceptar el Contrato de licencia ni usar la Versión preliminar en representación de su empleador u otra entidad.
+
+3. Licencia de la Preview de Google
+
+3.1 Conforme a los términos de este contrato de licencia, Google le otorga una licencia limitada, con validez mundial, libre de regalías, no asignable, no exclusiva y que no puede otorgar una sublicencia para utilizar la Preview con el único propósito de desarrollar aplicaciones para ejecutar en implementaciones compatibles de Android.
+
+3.2 No puede utilizar esta Preview para desarrollar aplicaciones para otras plataformas (incluyendo implementaciones incompatibles de Android) o para desarrollar otro SDK. Por supuesto, usted tiene la libertad para desarrollar aplicaciones para otras plataformas, incluyendo implementaciones incompatibles de Android, siempre y cuando esta Preview no sea utilizada con ese propósito.
+
+3.3 Usted acepta que Google o terceros poseen todos los derechos legales, títulos e intereses en relación con la Preview, incluidos derechos de propiedad intelectual que existan en ésta. "Derechos de propiedad intelectual" hace referencia a todos los derechos de la ley de patentes, la ley de derechos de autor, la ley de secreto comercial, la ley de marca comercial y cualquier otro derecho de propiedad. Google se reserva todos los derechos que no se le otorguen expresamente.
+
+3.4 No podrá utilizar la Versión preliminar para ningún otro propósito que no esté expresamente permitido en el Contrato de licencia. Excepto en la medida que lo exijan las licencias correspondientes de terceros, no podrá: (a) copiar (excepto con fines de copia de seguridad), modificar, adaptar, redistribuir, descompilar, utilizar técnicas de ingeniería inversa, desarmar ni crear trabajos derivados de la Preview ni de ninguna de sus partes; ni (b) cargar ninguna parte de la Preview en un teléfono móvil ni en ningún otro dispositivo de hardware (a excepción de una computadora personal), ni podrá combinar ninguna parte de la Preview con otro software, ni distribuir algún software o dispositivo que incorpore alguna parte de la Preview.
+
+3.5 El uso, la reproducción y la distribución de los componentes de la Preview con licencia de software de código abierto están regidos exclusivamente por los términos de la licencia de ese software de código abierto y no de este Contrato de licencia. Usted acepta mantener la licencia en buenas condiciones con respecto a dichas licencias de software de código abierto en virtud de todos los derechos otorgados y acepta abstenerse de realizar alguna acción que pueda poner fin, suspender o violar dichos derechos.
+
+3.6 Usted acepta que la forma y la naturaleza de la Versión preliminar que proporciona Google pueden cambiar sin brindarle aviso previo y que las versiones futuras de la Versión preliminar pueden ser incompatibles con las aplicaciones desarrolladas en versiones anteriores de la Versión preliminar. Usted acepta que Google puede (de forma permanente o temporal) dejar de proporcionarles la Versión preliminar (o cualquiera de las características incluidas en ella) a usted o a los usuarios, generalmente, a criterio exclusivo de Google, sin brindarle aviso previo.
+
+3.7 Ninguna declaración de este Contrato de licencia le otorga el derecho de utilizar alguno de los nombres comerciales, las marcas comerciales, las marcas de servicio, los logotipos, los nombres de dominio ni otras características distintivas de marca de Google.
+
+3.8 Usted acepta que no eliminará, ocultará ni alterará ninguno de los avisos de derechos de propiedad (lo que incluye los avisos de marca comercial y derechos de autor) que pudieran estar anexados o incluidos en la Versión preliminar.
+
+4. Uso que usted realiza de la Versión preliminar 4.1 Google acepta que ninguna declaración del Contrato de licencia le concede a Google derecho, título o interés alguno de su parte (o de parte de sus licenciantes), en virtud del Contrato de licencia, con respecto a las aplicaciones de software que usted desarrolle mediante el uso de la Versión preliminar, lo que incluye los derechos de propiedad intelectual que conlleven esas aplicaciones. 4.2 Usted acepta utilizar la Versión preliminar y escribir aplicaciones únicamente conforme a lo que permite (a) este Contrato de licencia y (b) las leyes, regulaciones, o prácticas y pautas generalmente aceptadas pertinentes en las jurisdicciones relevantes (lo que incluye las leyes sobre la exportación de datos o software hacia los Estados Unidos u otros países relevantes y desde ellos). 4.3 Usted acepta que si utiliza la Versión preliminar para desarrollar aplicaciones, protegerá la privacidad y los derechos legales de los usuarios.
+
+
+
+
+
+ Si los usuarios le proporcionan sus nombres de usuario, contraseñas u otra información de inicio de sesión o información personal, debe comunicarles a los usuarios que la información se encontrará disponible para su aplicación, y debe proporcionarles a dichos usuarios un aviso de privacidad con protección y validez legal. Si su aplicación almacena información personal o confidencial proporcionada por los usuarios, lo debe hacer de forma segura. Si los usuarios le proporcionan información sobre la cuenta de Google, su aplicación solo puede usar esa información para acceder a la cuenta de Google del usuario siempre que este le haya otorgado permiso para hacerlo y con los fines para los que se lo haya otorgado.
+
+4.4 Usted acepta que no participará en ninguna actividad con la Versión preliminar (lo que incluye el desarrollo o la distribución de una aplicación) que interfiera, interrumpa, dañe o acceda sin autorización a servidores, redes u otras propiedades o servicios de Google o de algún tercero.
+
+4.5 Usted acepta que es el único responsable (y que Google no asume responsabilidades hacia usted ni terceros) de los datos, el contenido o los recursos que usted cree, transmita o muestre a través de Android o las aplicaciones para Android, y de las consecuencias de sus acciones (lo que incluye la pérdida o el daño que Google pudiera sufrir) al hacerlo.
+
+4.6 Usted acepta que es el único responsable (y que Google no asume responsabilidades hacia usted ni terceros) de cualquier incumplimiento de sus obligaciones en virtud de este Contrato de licencia, los contratos aplicables de terceros o los términos del servicio, o cualquier ley o regulación pertinentes, y de las consecuencias (lo que incluye las pérdidas o los daños que pudieran sufrir Google o algún tercero) de dichos incumplimientos.
+
+4.7 La Versión preliminar se encuentra en desarrollo, y sus pruebas y comentarios son una parte importante del proceso de desarrollo. Al utilizar la Versión preliminar, usted reconoce que la implementación de algunas características aún se encuentra en desarrollo y que no debe confiar en que la Versión preliminar contará con todas las funcionalidades de una versión estable. Usted acepta no distribuir públicamente ni enviar ninguna aplicación que utilice esta Versión preliminar, ya que esta Versión preliminar ya no se admitirá tras el lanzamiento del SDK oficial de Android.
+
+5. Sus credenciales de desarrollador
+
+5.1 Usted acepta que es responsable de mantener la confidencialidad de toda credencial de desarrollador que Google pudiera otorgarle o que usted pudiera escoger, y que será el único responsable de todas las aplicaciones que se desarrollen con sus credenciales de desarrollador.
+
+6. Privacidad e información
+
+6.1 A fin de poder innovar y mejorar de forma continua la Versión preliminar, Google podría recopilar ciertas estadísticas de uso del software, lo que incluye, entre otras características, un identificador único, la dirección IP asociada, el número de versión del software e información sobre las herramientas o los servicios de la Versión preliminar que se estén utilizando y la manera en que se estén utilizando. Antes de que se recopile esta información, la Versión preliminar se lo notificará y le solicitará su permiso. Si no otorga su permiso, no se recopilará la información.
+
+6.2 Los datos recopilados se analizan en el agregado para mejorar la Versión preliminar y se conservan de acuerdo con la política de privacidad de Google que se encuentra en el sitio http://www.google.com/policies/privacy/.
+
+7. Aplicaciones de terceros
+
+7.1 Si utiliza la Versión preliminar para ejecutar aplicaciones desarrolladas por un tercero o que accedan a datos, contenido o recursos proporcionados por un tercero, usted acepta que Google no es responsable de esas aplicaciones, datos, contenido ni recursos. Usted comprende que todos los datos, contenidos o recursos a los que podría acceder a través de esas aplicaciones de terceros son exclusiva responsabilidad de la persona que los origina y que Google no es responsable de las pérdidas ni los daños que usted pudiera experimentar como consecuencia del uso o acceso de cualquiera de esas aplicaciones, datos, contenido o recursos de terceros.
+
+7.2 Usted debe saber que los datos, el contenido y los recursos que se le presentan a través de esa aplicación de un tercero pueden estar protegidos por derechos de propiedad intelectual que les pertenecen a sus proveedores (o a otras personas o compañías en representación de estos). No puede modificar, alquilar, arrendar, prestar, vender, distribuir ni crear obras derivadas basadas en esos datos, contenidos o recursos (en su totalidad o en parte), a menos que los propietarios pertinentes le hayan otorgado permiso específicamente para hacerlo.
+
+7.3 Usted acepta que el uso que haga de las aplicaciones, los datos, el contenido o los recursos de ese tercero puede estar sujeto a términos independientes entre usted y el tercero correspondiente.
+
+8. Uso de las API de Google
+
+8.1 API de Google
+
+8.1.1 Si utiliza alguna API para recuperar datos de Google, usted acepta que los datos pueden estar protegidos por derechos de propiedad intelectual que le pertenecen a Google o a las partes que proporcionan esos datos (o a otras personas o empresas en representación de estos). El uso que realice de cualquiera de esas API puede estar sujeto a términos de servicio adicionales. No puede modificar, alquilar, arrendar, prestar, vender, distribuir ni crear obras derivadas basadas en esos datos (en su totalidad o en parte), a menos que los términos de servicio correspondientes lo permitan.
+
+8.1.2 Si utiliza alguna API para recuperar datos de un usuario de Google, usted acepta y acuerda que solo podrá recuperar datos con el consentimiento explícito del usuario y solo con los fines limitados para los que el usuario le haya otorgado permiso para hacerlo.
+
+9. Finalización del Contrato de licencia
+
+9.1 Este Contrato de licencia tendrá vigencia hasta que lo revoquen usted o Google, como se indica a continuación.
+
+9.2 Si desea rescindir el Contrato de licencia, puede hacerlo al interrumpir el uso que realiza de la Versión preliminar y de las credenciales de desarrollador pertinentes.
+
+9.3 Google puede, en cualquier momento, rescindir el Contrato de licencia, con causa o sin ella, después de notificárselo a usted.
+
+9.4 El Contrato de licencia finalizará automáticamente, sin previo aviso ni acción alguna, tras la primera de las siguientes situaciones:
+(A) cuando Google deje de proporcionar la Versión preliminar o ciertas partes de esta a los usuarios en el país donde usted reside o desde el que utiliza el servicio; y
+(B) cuando Google emita una versión final del SDK de Android.
+
+9.5 Si el Contrato de licencia se rescinde, se revocará la licencia que usted recibió en virtud de dicho contrato; usted deberá suspender inmediatamente todo uso de la Versión preliminar y las disposiciones de los párrafos 10, 11, 12 y 14 seguirán vigentes indefinidamente.
+
+10. EXENCIONES DE RESPONSABILIDAD
+
+10.1 USTED COMPRENDE Y ACEPTA EXPRESAMENTE QUE EL USO QUE REALICE DE LA VERSIÓN PRELIMINAR ES BAJO SU PROPIO RIESGO Y QUE LA VERSIÓN PRELIMINAR SE PROPORCIONA “EN LAS CONDICIONES EN LAS QUE SE ENCUENTRA” Y “SUJETA A DISPONIBILIDAD” SIN GARANTÍAS DE NINGÚN TIPO POR PARTE DE GOOGLE.
+
+10.2 EL USO QUE USTED REALICE DE LA VERSIÓN PRELIMINAR Y DE TODO MATERIAL DESCARGADO U OBTENIDO DE ALGUNA OTRA MANERA MEDIANTE EL USO DE LA VERSIÓN PRELIMINAR ES A SU ENTERO RIESGO Y DISCRECIÓN, Y USTED ES EL ÚNICO RESPONSABLE DE CUALQUIER DAÑO QUE PUDIERA SUFRIR SU SISTEMA INFORMÁTICO U OTRO DISPOSITIVO, O DE LA PÉRDIDA DE DATOS COMO CONSECUENCIA DE DICHO USO. SIN PERJUICIO DE LO MENCIONADO ANTERIORMENTE, USTED COMPRENDE QUE LA VERSIÓN PRELIMINAR NO ES UNA VERSIÓN ESTABLE, Y PUEDE CONTENER ERRORES, DEFECTOS Y VULNERABILIDADES DE SEGURIDAD QUE PUEDEN PROVOCAR DAÑOS SIGNIFICATIVOS, LO QUE INCLUYE LA PÉRDIDA COMPLETA E IRRECUPERABLE DEL USO DE SU SISTEMA INFORMÁTICO U OTRO DISPOSITIVO.
+
+10.3 GOOGLE TAMBIÉN RECHAZA TODAS LAS GARANTÍAS Y CONDICIONES DE CUALQUIER TIPO, EXPRESAS O IMPLÍCITAS, INCLUIDAS, ENTRE OTRAS, LAS GARANTÍAS Y CONDICIONES DE COMERCIABILIDAD, IDONEIDAD PARA UN FIN DETERMINADO Y NO VIOLACIÓN.
+
+11. LIMITACIÓN DE RESPONSABILIDADES
+
+11.1 USTED COMPRENDE Y ACEPTA EXPRESAMENTE QUE GOOGLE, SUS SUBSIDIARIAS Y FILIALES, Y SUS LICENCIANTES NO SERÁN RESPONSABLES ANTE USTED, EN VIRTUD DE NINGUNA TEORÍA DE RESPONSABILIDAD, POR NINGÚN DAÑO DIRECTO, INDIRECTO, INCIDENTAL, ESPECIAL, RESULTANTE NI PUNITIVO EN EL QUE PODRÍA HABER INCURRIDO, LO QUE INCLUYE LA PÉRDIDA DE DATOS, YA SEA QUE SE LE HAYA NOTIFICADO O NO A GOOGLE O A SUS REPRESENTANTES, O SOBRE CUYA POSIBILIDAD ESTOS DEBERÍAN HABER SABIDO.
+
+12. Indemnización
+
+12.1 Hasta el grado máximo que permita la ley, usted acepta defender, indemnizar y eximir de responsabilidades a Google, sus filiales y sus respectivos directores, funcionarios, empleados y agentes, de todo tipo de reclamo, acción legal y proceso judicial, así como de las pérdidas, responsabilidades, daños, costos y gastos (incluidos los honorarios razonables de abogados) que surjan o se acumulen (a) del uso que usted realiza de la Versión preliminar, (b) de cualquier aplicación que desarrolle en la Versión preliminar que infrinja algún derecho de propiedad intelectual de cualquier persona, o que difame a cualquier persona o viole sus derechos de publicidad o privacidad, y (c) del incumplimiento por su parte del Contrato de licencia.
+
+13. Cambios en el Contrato de licencia
+
+13.1 Google puede realizar cambios en el Contrato de licencia a medida que distribuye nuevas versiones de la Versión preliminar. Cuando se realicen esos cambios, Google emitirá una nueva versión del Contrato de licencia, que estará disponible en el sitio web donde se ponga a la venta la Versión preliminar.
+
+14. Términos legales generales
+
+14.1 El Contrato de licencia constituye el contrato legal integral entre usted y Google, y rige el uso que usted realice de la Versión preliminar (a excepción de los servicios que Google pueda proporcionarle en virtud de un contrato por escrito independiente), y reemplaza totalmente cualquier contrato anterior entre usted y Google en relación con la Versión preliminar.
+
+14.2 Usted acepta que, si Google no ejerce ni impone un derecho o recurso legal especificados en el Contrato de licencia (o sobre el que Google tenga beneficios conforme a cualquier ley aplicable), esto no se considerará una renuncia formal a los derechos por parte de Google y Google aún seguirá recibiendo los beneficios de esos derechos o recursos legales.
+
+14.3 Si algún tribunal judicial con jurisdicción para decidir sobre este asunto determina que alguna de las disposiciones de este Contrato de licencia no es válida, se eliminará esa disposición del Contrato de licencia sin que eso afecte la validez del resto del contrato. Las disposiciones restantes del Contrato de licencia continuarán siendo válidas y aplicables.
+
+14.4 Usted reconoce y acepta que cada miembro del grupo de compañías de las que Google es la compañía central serán terceros beneficiarios del Contrato de licencia, y que esas otras empresas tendrán el derecho de imponer directamente cualquier disposición y ampararse en las disposiciones de este Contrato de licencia que les confieran un beneficio (o que confieran derechos a su favor). Además de esto, ninguna otra persona o compañía serán terceros beneficiarios del Contrato de licencia.
+
+14.5 RESTRICCIONES DE EXPORTACIÓN. LA VERSIÓN PRELIMINAR ESTÁ SUJETA A LAS LEYES Y REGULACIONES DE EXPORTACIÓN DE LOS ESTADOS UNIDOS. DEBE CUMPLIR CON TODAS LAS LEYES Y REGULACIONES DE EXPORTACIÓN NACIONALES E INTERNACIONALES QUE SE APLIQUEN A LA VERSIÓN PRELIMINAR. ESAS LEYES INCLUYEN RESTRICCIONES EN RELACIÓN CON LOS DESTINOS, USUARIOS FINALES Y USO FINAL.
+
+14.6 Usted no puede asignar ni transferir el Contrato de licencia sin la aprobación previa por escrito de Google y todo intento de asignación sin dicha aprobación no tendrá validez. No podrá delegar sus responsabilidades u obligaciones otorgadas en virtud del Contrato de licencia sin la aprobación previa por escrito de Google.
+
+14.7 El Contrato de licencia y su relación con Google conforme al Contrato de licencia se regirán por las leyes del estado de California, independientemente de los principios de conflictos entre leyes. Usted y Google aceptan presentarse ante la jurisdicción exclusiva de los tribunales del condado de Santa Clara, California, para resolver cualquier asunto legal que pudiera surgir del Contrato de licencia. Sin perjuicio de esto, usted acepta que Google aún podrá aplicar reparaciones conforme a mandato judicial (o a un tipo equivalente de desagravio legal) en cualquier jurisdicción.
+  </div><!-- sdk terms -->
+
+
+
+    <div id="sdk-terms-form">
+      <p>
+        <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+        <label id="agreeLabel" for="agree">He leído y acepto los términos y las condiciones anteriores.</label>
+      </p>
+      <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+    </div>
+
+
+  </div><!-- end TOS -->
+
+
+  <div id="landing">
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Contenido del documento</h2>
+      <ol>
+        <li><a href="#device-preview">Configurar un dispositivo de hardware</a>
+          <ol>
+            <li><a href="#ota">Obtener actualizaciones inalámbricas</a></li>
+            <li><a href="#flash">Actualizar manualmente un dispositivo</a></li>
+            <li><a href="#revertDevice">Desinstalar</a></li>
+          </ol>
+        </li>
+        <li><a href="#setupAVD">Configurar un emulador</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Para ejecutar y probar tu aplicación en la plataforma nueva necesitas configurar el tiempo de ejecución de Android N
+  . Puedes realizar eso de las siguientes maneras:
+</p>
+
+<ul>
+  <li>Instalar Android N en un dispositivo de hardware compatible o</li>
+  <li>Configurar un emulador de Android a través de la ejecución de Android N</li>
+</ul>
+
+<p>
+  Si deseas un entorno para realizarle pruebas básicas de compatibilidad a tu aplicación en la plataforma nueva
+ , todo lo que necesitas es tu actual APK y un dispositivo de hardware o
+  emulador. No necesitas actualizar todo tu entorno de desarrollo 
+  para realizar pruebas básicas.
+</p>
+
+<p>
+  Si deseas modificar tu aplicación para seleccionar como destino Android N o usar las API nuevas de Android N,
+   debes configurar un entorno de desarrollo que esté actualizado para que admita 
+  Android N. En <a href="{@docRoot}preview/setup-sdk.html">Configuración para el desarrollo de
+  Android N</a> se ofrece información detallada.
+</p>
+
+
+<h2 id="device-preview">Configurar un dispositivo de hardware</h2>
+
+<p>
+  En la N Developer Preview se ofrecen actualizaciones del sistema para una variedad de dispositivos de hardware 
+que puedes usar para realizarle pruebas a tu aplicación, desde teléfonos hasta tablets y TV.
+</p>
+
+<p>
+  Si tienes acceso a un dispositivo compatible, puedes actualizarlo a una versión "milestone" de la Developer Preview
+  de las siguientes maneras:
+</p>
+
+<ul>
+  <li><strong>Registrar el dispositivo en actualizaciones automáticas del sistema vía OTA</strong> a través del
+  <a href="https://g.co/androidbeta">Programa de Android beta</a>. Una vez registrado, tu dispositivo recibirá actualizaciones inalámbricas regulares (OTA)
+  de todas las compilaciones de hitos en la N Developer Preview. Se recomienda este
+  enfoque porque te permite realizar una transición sin inconvenientes desde tu entorno actual
+  a través de varios lanzamientos de la N Developer Preview.</li>
+  <li><strong>Descargar una imagen de sistema de la Developer Preview y actualizar el dispositivo</strong>.
+  Las actualizaciones OTA no se proporcionan de manera automática para los dispositivos que actualizas de manera manual, pero
+  puedes registrar esos dispositivos en el Programa de Android beta para obtener actualizaciones OTA. </li>
+</ul>
+
+<h3 id="ota">Registrar el dispositivo en actualizaciones automáticas OTA</h3>
+
+<p>
+  Si tienes acceso a un dispositivo compatible (consulta la lista en la tabla de descargas
+  ), puedes recibir actualizaciones inalámbricas para mostrar versiones de Android
+  registrando el dispositivo en el <a href="https://g.co/androidbeta">Programa de Android beta</a>. Estas actualizaciones
+  se descargan de manera automática y actualizarán tu dispositivo como otras
+  actualizaciones oficiales del sistema.
+</p>
+
+<p>
+  Puedes dar de baja el registro de un dispositivo en cualquier momento. El dispositivo recibirá una actualización OTA
+  para la versión de producción más reciente de Android que se encuentre disponible para ese dispositivo
+  (por ejemplo, Android 6.0 Marshmallow). La actualización requiere un restablecimiento completo del dispositivo
+  , entonces se quitarán los datos del usuario en el dispositivo. Asegúrate de <strong>realizar una
+  copia de seguridad de los datos importantes</strong> antes de dar de baja un dispositivo.
+</p>
+
+<p>
+  Para obtener más información y para registrar tu dispositivo, consulta
+  el sitio web del <a href="https://g.co/androidbeta">Programa de Android beta</a> .
+</p>
+
+<p class="note"><strong>Nota:</strong>
+  Dar de baja el registro requiere un restablecimiento completo del dispositivo. Realice una copia de seguridad de los
+  datos importantes primero.
+</p>
+
+<h3 id="flash">Actualizar un dispositivo manualmente</h3>
+
+<p>
+  En cualquier momento, puedes descargar las últimas imágenes de sistema de la Developer Preview y
+  puedes actualizarlas manualmente en tu dispositivo. Consulta la siguiente tabla para descargar la imagen de
+  sistema para tu dispositivo de prueba. La actualización manual de un dispositivo es útil si necesitas
+  un control preciso del entorno de prueba o necesitas reinstalar con frecuencia,
+  como en pruebas automatizadas. 
+</p>
+
+<!-- You can flash by ota or system image --><p>
+  El proceso de instalación de una imagen de sistema en un dispositivo <strong>elimina todos los datos del
+ dispositivo</strong>, por lo tanto, deberás hacer una copia de seguridad de los datos en primer lugar.
+</p>
+
+<p>
+  Después de que realices una copia de seguridad y que descargues la siguiente imagen de sistema que
+  se adecua a tu dispositivo, sigue las instrucciones que se describen en <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+  para actualizar la imagen en tu dispositivo.
+</p>
+
+<p>
+  Las imágenes de sistema actualizadas de manera manual <strong>no
+  reciben actualizaciones OTA de manera automática</strong> para posteriores "milestone"
+  de la Developer Preview. Asegúrate de mantener tu entorno actualizado y actualiza una
+  nueva imagen de sistema en cada "milestone" de la Developer Preview.
+</p>
+
+<p>
+  Si decides que quieres obtener actualizaciones OTA después de actualizar de manera manual un dispositivo, 
+  lo único que debes hacer es registrar el dispositivo en el <a href="https://g.co/androidbeta">Programa
+  de Android beta</a>. Puedes registrar el dispositivo en cualquier momento para recibir la siguiente actualización de la Preview
+  vía inalámbrica. 
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Dispositivo</th>
+    <th scope="col">Descarga/sumas de comprobación</th>
+  </tr>
+
+  <tr id="bullhead">
+    <td>Nexus 5X <br>“bullhead”</td>
+    <td><a href="#top" onclick="onDownload(this)">bullhead-npc56p-preview-6c877a3d.tgz</a><br>
+      MD5: b5cf874021023b398f5b983b24913f5d<br>
+      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+    </td>
+  </tr>
+
+  <tr id="shamu">
+    <td>Nexus 6 <br>“shamu”</td>
+    <td><a href="#top" onclick="onDownload(this)">shamu-npc56p-preview-54b13c67.tgz</a><br>
+      MD5: af183638cf34e0eb944a1957d7696f60<br>
+      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
+    </td>
+  </tr>
+
+  <tr id="angler">
+    <td>Nexus 6P <br>“angler”</td>
+    <td><a href="#top" onclick="onDownload(this)">angler-npc56p-preview-85ffc1b1.tgz</a><br>
+      MD5: bc4934ea7bd325753eee1606d3725a24<br>
+      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+    </td>
+  </tr>
+
+  <tr id="volantis">
+    <td>Nexus 9 <br>“volantis”</td>
+    <td><a href="#top" onclick="onDownload(this)">volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
+      MD5: c901334c6158351e945f188167ae56f4<br>
+      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>“volantisg”</td>
+    <td><a href="#top" onclick="onDownload(this)">volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
+      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
+      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+    </td>
+  </tr>
+
+  <tr id="fugu">
+    <td>Nexus Player <br>“fugu”</td>
+    <td><a href="#top" onclick="onDownload(this)">fugu-npc56r-preview-7027d5b6.tgz</a><br>
+      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
+      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    </td>
+  </tr>
+
+  <tr id="ryu">
+    <td>Pixel C <br>“ryu”</td>
+    <td><a href="#top" onclick="onDownload(this)">ryu-npc56p-preview-335a86a4.tgz</a><br>
+      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
+      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    </td>
+  </tr>
+  <tr id="seed">
+    <td>4G móviles en general (Android One) <br>“seed”</td>
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
+      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
+      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    </td>
+  </tr>
+
+</table>
+
+<h3 id="revertDevice">Desinstalar la Preview de un dispositivo</h3>
+
+<p>
+  Si quieres desinstalar la Preview de un dispositivo, puedes hacerlo de las
+  siguientes maneras: </p>
+  <ul>
+    <li><strong>Obtener una imagen de sistema con las especificaciones de fábrica</strong> y luego actualízala de manera manual 
+    para el dispositivo.
+      <ul>
+          <li>Para <strong>los dispositivos Nexus y Pixel C</strong>, consulta la página
+        <a href="http://developers.google.com/android/nexus/images">Imágenes de fábrica para dispositivos Nexus
+        </a>para descargas. </li>
+        <li>Para <strong>otros dispositivos</strong>, comunícate directamente con el fabricante del dispositivo
+        . De manera alternativa, si el dispositivo es compatible con
+        el Programa de Android beta, puedes registrar el dispositivo en el
+        programa y luego darlo de baja (consulta a continuación).</li>
+      </ul>
+    </li>
+    <li><strong>Dar de baja el dispositivo del Programa de Android beta</strong>. Si el
+    dispositivo se registra en el <a href="https://g.co/androidbeta">Programa de Android beta
+    </a>, independientemente del dispositivo, puedes simplemente darlo de baja desde el programa.
+  <p>
+    El dispositivo recibirá una actualización OTA para la versión de producción más reciente
+     de Android que se encuentre disponible para ese dispositivo  (por ejemplo, Android 6.0 Marshmallow).
+     La actualización requiere un restablecimiento completo del dispositivo, entonces se quitarán
+     los datos del usuario en el dispositivo. Asegúrate de <strong>realizar una  copia de seguridad de los datos importantes</strong> antes
+    de dar de baja un dispositivo.
+  </p>
+  </li>
+</ul>
+
+<p class="note"><strong>Nota:</strong>
+  Desinstalar una imagen de sistema de la Developer Preview antes
+  del final del programa requiere un restablecimiento completo del dispositivo y elimina todos los datos del usuario
+  en el dispositivo.
+</p>
+
+
+<h2 id="setupAVD">Configurar un emulador</h2>
+
+<p>Para usar el emulador de Android para la ejecución de la Android N Preview, necesitas
+descargar Android N Preview SDK y crear un dispositivo virtual para el
+emulador.</p>
+
+<p>Primero, descarga Android N Preview SDK de la siguiente manera (si
+ya lo obtuviste durante <a href="{@docRoot}preview/setup-sdk.html">la configuración
+para desarrollar Android N</a>, puedes omitir esta parte):
+
+<ol>
+  <li>En Android Studio, abre el diálogo de configuración
+    (<strong>File &gt; Settings</strong> en Windows y Linux, o
+    <strong>Android Studio &gt; Preferences</strong> en Mac). En el panel
+    izquierdo, selecciona <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Haz clic en la pestaña <strong>SDK platforms</strong> y luego selecciona la casilla de verificación
+  <strong>Android N Preview</strong>.</li>
+
+  <li>Haz clic en la pestaña <strong>SDK Tools</strong> y luego selecciona las casillas de verificación
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong> y
+    <strong>Android SDK Tools</strong>.
+  </li>
+
+  <li>Haz clic en <strong>OK</strong> y acepta los contratos
+    de licencia para instalar cualquier paquete.
+  </li>
+</ol>
+
+<p>Ahora debes tener <strong>Android SDK Built-Tools 24.0 0 rc1</strong>,
+<strong>Platform-Tools 24.0.0 rc1</strong>, y <strong>SDK Tools
+25.0.9</strong>. Si no actualizas las SDK Tools a 25.0.9, luego no podrás
+ejecutar las imágenes de sistema x86_64 para Android N.</p>
+
+
+<p>Ahora crea un dispositivo virtual con la imagen de sistema de Android N:</p>
+
+<ol>
+  <li>Abre el Administrador de AVD seleccionando <strong>Tools &gt; Android &gt;
+    AVD Manager</strong>.</li>
+  <li>Haz clic en <strong>Create Virtual Device</strong>.</li>
+  <li>Selecciona un dispositivo como Nexus 5X, Nexus 6P, Nexus 9, o Android TV,
+    luego haz clic en <strong>Next</strong>.</li>
+  <li>Selecciona la imagen de sistema <strong>N</strong> (con la ABI
+    <strong>x86</strong> ), luego haz clic en <strong>Next</strong>.
+    (Solo las imágenes de sistema x86 son actualmente compatibles con el emulador de Android
+para la Android N Preview).
+  <li>Completa el resto de la configuración AVD y haz clic en
+    <strong>Finish</strong>.</li>
+</ol>
+
+<p>Ahora puedes lanzar el emulador de Android con el AVD de la Android N Preview.</p>
+
+<p>
+A fin de garantizar la mejor experiencia en el emulador de Android, instala la
+Android Studio 2.1 Preview, que admite el <a href="http://tools.android.com/tech-docs/emulator">emulador Android 2.0 Beta</a>
+con mayor rendimiento en comparación con el emulador en
+Android Studio 1.5.</p>
+
+<p class="note"><strong>Nota:</strong>
+  Si actualmente estás usando Android Studio 2.0 Beta, existe un problema conocido
+  que no te permite crear AVD con las imágenes de sistema de la N Preview;
+  por el momento necesitas usar la muestra de Android Studio 2.1 para crear AVD.
+</p>
+
+<p>Para obtener más información sobre la creación de dispositivos virtuales, consulte la <a href="{@docRoot}tools/devices/index.html">Administración de dispositivos virtuales.</a>
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div><!-- landing -->
+
+</div><!-- relative wrapper -->
+
+
+
+<script>
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/preview/";
+  function onDownload(link) {
+
+    $("#downloadForRealz").html("Download " + $(link).text());
+    $("#downloadForRealz").attr('href', urlRoot + $(link).text());
+
+    $("#tos").fadeIn('fast');
+    $("#landing").fadeOut('fast');
+
+    return true;
+  }
+
+
+  function onAgreeChecked() {
+    /* verify that the TOS is agreed */
+    if ($("input#agree").is(":checked")) {
+      /* reveal the download button */
+      $("a#downloadForRealz").removeClass('disabled');
+    } else {
+      $("a#downloadForRealz").addClass('disabled');
+    }
+  }
+
+  function onDownloadForRealz(link) {
+    if ($("input#agree").is(':checked')) {
+    /*
+      $("#tos").fadeOut('fast');
+      $("#landing").fadeIn('fast');
+    */
+
+      ga('send', 'event', 'M Preview', 'System Image', $("#downloadForRealz").html());
+
+    /*
+      location.hash = "";
+    */
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  $(window).hashchange( function(){
+    if (location.hash == "") {
+      location.reload();
+    }
+  });
+
+</script>

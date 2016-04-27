@@ -1,0 +1,183 @@
+page.title=Java 8 語言功能
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">支援的 Java 8 語言功能與 API</a>
+      </li>
+      <li>
+        <a href="#configuration">啟用 Java 8 功能與 Jack 工具鏈</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N 引進對 Java 8 語言功能的支援，供您在開發目標為 Android N 的應用程式時使用。此頁面描述「Android N Preview」中支援的新語言功能、如何正確地設定您的專案以使用它們，以及您可能會遇到的所有已知問題。
+
+
+
+
+</p>
+
+<p>如果要開始使用這些功能，您必須下載並安裝 Android Studio 2.1 (預覽版) 與 Android N Preview SDK，其中包括必要的 Jack 工具鏈與適用於 Gradle 的已更新 Android 外掛程式。如果尚未安裝 Android N Preview SDK，請參閱<a href="{@docRoot}preview/setup-sdk.html">設定以針對 Android N 開發</a>。
+
+
+</p>
+
+
+
+<p class="note">
+  <strong>注意：</strong>使用新的 Java 8 語言功能並不是開發以 Android N 平台為目標之應用程式的需求。如果不想使用 Java 8 語言功能撰寫程式碼，您可以將專案的來源與目標相容性值維持設定為 Java 7，但仍必須與 JDK 8 相容，以針對 Android N 平台建置。
+
+
+
+
+</p>
+
+<h2 id="supported-features">
+  支援的 Java 8 語言功能與 API
+</h2>
+
+<p>
+  Android 目前不支援所有 Java 8 語言功能。然而，開發目標為「Android N Preview」的應用程式時，可以使用下列功能：
+
+
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">預設與靜態介面方法</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">Lambda 運算式</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">可重複的註解</a>
+
+  </li>
+</ul>
+
+
+<p>
+  此外，下列 Java 8 語言功能 API 現已可用：
+</p>
+
+<ul>
+  <li>Reflection 與語言相關 API：
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface}
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable}
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()}
+      </li>
+
+      <li>與 Reflection API (與可重複的註解關聯)，例如 {@code AnnotatedElement.getAnnotationsByType(Class)}
+
+      </li>
+    </ul>
+  </li>
+  <li>公用程式 API：
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>注意：</strong>Android N 的 Lambda 運算式實作是以匿名類別為基礎。此方法可讓它們向下相容並可在舊版 Android 上執行。如果要在舊版上測試 Lambda 運算式，請務必移至您的 {@code
+  build.gradle} 檔案，並將 {@code compileSdkVersion} 與 {@code
+  targetSdkVersion} 設定為 23 或更低的層級。
+
+
+
+</p>
+
+<h2 id="configuration">
+  啟用 Java 8 功能與 Jack 工具鏈
+</h2>
+
+<p>
+  如果要使用新的 Java 8 語言功能，您也必須使用新的 <a class="external-link" href="https://source.android.com/source/jack.html">Jack 工具鏈</a>。這個新的 Android 工具鏈可將 Java 語言原始程式碼編譯成 Android 可讀取的 Dex 位元組程式碼、具有其自己的 {@code .jack} 程式庫格式，並在單一工具之外提供最多工具鏈功能：重新封裝、縮減、混淆 (Obfuscation ) 與多 Dex (Multidex)。
+
+
+
+
+
+</p>
+
+<p>以下是用來建置 Android DEX 檔案之兩個工具鏈的比較：</p>
+<ul>
+  <li>傳統 javac 工具鏈：<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>新的 Jack 工具鏈：<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  設定 Gradle
+</h3>
+
+<p>
+  如果要為您的專案啟用 Java 8 語言功能與 Jack，請在您的模組特定 {@code build.gradle} 檔案中輸入下列內容：
+
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  已知問題
+</h3>
+
+<p>
+  立即執行 (在 Android Studio 2.0 (Beta) 引進) 目前無法搭配 Jack 使用，而且會將它停用並使用新的工具鏈。
+
+</p>
+
+<p>因為 Jack 在編譯應用程式時不會產生中繼類別檔案，相依於這些檔案的工具目前無法搭配 Jack 使用。這些工具的某些範例為：
+
+</p>
+
+<ul>
+  <li>在類別檔案上運作的 Lint 偵測器
+  </li>
+
+  <li>需要應用程式類別檔案 (例如 JaCoCo 與 Mockito) 的工具與程式庫
+</li>
+</ul>
+
+<p>如果在使用 Jack 時發現任何問題，請<a href="http://tools.android.com/filing-bugs">回報錯誤</a>。</p>
