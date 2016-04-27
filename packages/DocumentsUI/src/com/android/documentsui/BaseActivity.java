@@ -32,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,7 +47,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 import android.widget.Spinner;
 
 import com.android.documentsui.SearchViewManager.SearchManagerListener;
@@ -78,6 +78,12 @@ public abstract class BaseActivity extends Activity
     List<EventListener> mEventListeners = new ArrayList<>();
 
     private final String mTag;
+    private final ContentObserver mRootsCacheObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            new HandleRootsChangedTask(BaseActivity.this).execute(getCurrentRoot());
+        }
+    };
 
     @LayoutRes
     private int mLayoutId;
@@ -118,14 +124,8 @@ public abstract class BaseActivity extends Activity
 
         mRoots = DocumentsApplication.getRootsCache(this);
 
-        mRoots.setOnCacheUpdateListener(
-                new RootsCache.OnCacheUpdateListener() {
-                    @Override
-                    public void onCacheUpdate() {
-                        new HandleRootsChangedTask(BaseActivity.this)
-                                .execute(getCurrentRoot());
-                    }
-                });
+        getContentResolver().registerContentObserver(
+                RootsCache.sNotificationUri, false, mRootsCacheObserver);
 
         mSearchManager = new SearchViewManager(this, icicle);
 
@@ -190,7 +190,7 @@ public abstract class BaseActivity extends Activity
 
     @Override
     protected void onDestroy() {
-        mRoots.setOnCacheUpdateListener(null);
+        getContentResolver().unregisterContentObserver(mRootsCacheObserver);
         super.onDestroy();
     }
 
@@ -793,6 +793,7 @@ public abstract class BaseActivity extends Activity
 
     private static final class HandleRootsChangedTask
             extends PairedTask<BaseActivity, RootInfo, RootInfo> {
+        RootInfo mCurrentRoot;
         DocumentInfo mDefaultRootDocument;
 
         public HandleRootsChangedTask(BaseActivity activity) {
@@ -802,11 +803,10 @@ public abstract class BaseActivity extends Activity
         @Override
         protected RootInfo run(RootInfo... roots) {
             assert(roots.length == 1);
-
-            final RootInfo currentRoot = roots[0];
+            mCurrentRoot = roots[0];
             final Collection<RootInfo> cachedRoots = mOwner.mRoots.getRootsBlocking();
             for (final RootInfo root : cachedRoots) {
-                if (root.getUri().equals(currentRoot.getUri())) {
+                if (root.getUri().equals(mCurrentRoot.getUri())) {
                     // We don't need to change the current root as the current root was not removed.
                     return null;
                 }
@@ -824,6 +824,14 @@ public abstract class BaseActivity extends Activity
         @Override
         protected void finish(RootInfo defaultRoot) {
             if (defaultRoot == null) {
+                return;
+            }
+
+            // If the activity has been launched for the specific root and it is removed, finish the
+            // activity.
+            final Uri uri = mOwner.getIntent().getData();
+            if (uri != null && uri.equals(mCurrentRoot.getUri())) {
+                mOwner.finish();
                 return;
             }
 
