@@ -1,0 +1,603 @@
+page.title=Vulkan Validation Layers on Android
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#gls">Getting Layer Source</a></li>
+        <li><a href="#ias">Android Studio Integration</a>
+        <ol>
+            <li><a href="#asbl">Building Layers</a></li>
+            <li><a href="#asil">Installing Layers</a></li>
+        </ol>
+        </li>
+        <li><a href="#cli">Integrating on the Command Line</a>
+            <ol>
+            <li><a href="#clibl">Building Layers</a></li>
+            <li><a href="#cliil">Installing Layers</a></li>
+            </ol>
+        </li>
+        <li><a href="#verifying">Verifying Layer Build</a></li>
+        <li><a href="#enabling">Enabling Layers</a></li>
+        <li><a href="#debug">Enabling the Debug Callback</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+Most explicit graphics APIs do not perform error-checking, because doing so can result in a
+performance penalty. Vulkan provides error-checking in a manner that lets you use this feature at
+development time, but exclude it from the release build of your app, thus avoiding the penalty when
+it matters most. You do this by enabling <em>validation layers</em>. Validation layers intercept
+or hook Vulkan entry points for various debug and validation purposes.
+</p>
+
+<p>
+Each validation layer can contain definitions for one or more of these entry points, and
+intercepts the entry points for which it contains definitions. When a validation
+layer does not define an entry point, the system passes the entry point on to the next
+layer. Ultimately, an entry point not defined in any layer reaches the driver, the
+base level, unvalidated.
+</p>
+
+<p>
+The Android SDK, NDK, and Vulkan samples include Vulkan validation layers for
+use during development. You can hook these validation layers into the graphics stack, allowing
+them to report validation issues.  This instrumentation allows you to catch and fix misuses
+during development.
+</p>
+
+<p>
+This page explains how to:
+<ul>
+   <li>Get source code for validation layers.</li>
+   <li>Build the layers.</li>
+   <li>Incorporate the layers into your app.</li>
+</ul>
+</p>
+
+<h2 id="gls">Getting Layer Source</h2>
+<p>
+This section explains how to build layers from source.
+If you have precompiled layers, you can skip this section, and instead read about how to
+install your layers using <a href="#asil">Android Studio</a> or from the <a href="cliil">
+command line</a>.
+</p>
+<h3 id="ftn">From the NDK (Recommended)</h3>
+
+<p>
+<a href="{@docRoot}ndk/downloads/index.html">NDK Revision 12</a> and later contains source
+code for Android validation layers that is known-good, and ready to build. This code resides under
+the {@code &lt;ndk-root&gt;/sources/third_party/vulkan/src/build-android/generated/gradle-build}
+directory. This version of the layers should be sufficient for most needs. If so, your next task is
+to <a href="#building">build them</a>. Alternatively, you can pull source code from the
+Khronos Group repository.
+</pre>
+</p>
+
+<h3 id="ftr">From the repository</h3>
+
+<p>
+Although we recommend that you use the source code provided with the NDK, you can also pull more
+recent versions of the source code directly from the
+<a class="external-link" href="https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers">
+GitHub repository</a> belonging to the Khronos Group. To do so, perform the following steps.
+</p>
+
+<ol style="1">
+<li>
+Clone the Vulkan directory by entering the following command in your terminal window:
+
+<pre class="no-pretty-print">
+$ git clone git@github.com:KhronosGroup/Vulkan-LoaderAndValidationLayers.git
+</pre>
+
+<p class="note"><strong>Note: </strong>You must have a private SSH key associated with
+GitHub, or this command fails with a {@code Permission denied (publickey)} message.</p>
+</li>
+
+<li>
+Navigate to the directory containing the layer source code, and
+check out the repo's stable Android branch, called {@code android_layers}:
+
+<pre class="no-pretty-print">
+$ cd Vulkan-LoaderAndValidationLayers
+$ git checkout android_layers
+</pre>
+</li>
+
+<li>
+Prepare to build by following the preparation instructions for your platform. These instructions
+are in the {@code BUILD.md} file contained in the local instance of the repository you cloned.
+</li>
+
+</ol>
+
+<h3 id="ias">Android Studio Integration</h3>
+<p>
+Android Studio builds the validation layers when it builds the rest of the app.
+This flow makes it easier for you to trace through the layers at runtime. Each layer's
+source code corresponds to a single Gradle project, which you can specify directly in your Android
+Studio app. For example, there is a {@code build.gradle} project for threading, and another
+one for parameter validation.
+</p>
+
+<h4 id="asbl">Building layers</h4>
+
+<p>
+To integrate layers directory into Android Studio application, perform these steps:
+</p>
+<li>
+Add layers to your Android Studio application's project by specifying their corresponding
+Gradle projects in {@code settings.gradle}, which is normally a peer to app directory.
+The following example shows how to do this, based on the assumption that you're
+<a href="#ftn">using the {@code build.gradle} files from the NDK</a>.
+
+<pre>
+// configure your path to the source code generated on your machine
+def layerProjRoot = file('/path/to/ndk-root/.../build-android/generated/gradle-build')
+String[] layers = ['threading',
+                   'parameter_validation',
+                   'object_tracker',
+                   'core_validation',
+                   'device_limits',
+                   'image',
+                   'swapchain',
+                   'unique_objects']
+for (layer in layers) {
+    include ":"+ layer
+    project(":" + layer.toString()).projectDir = new File("${layerProjRoot}/${layer}")
+}
+</pre>
+</li>
+
+Your next step is to provide the built layers to the app by installing them.
+
+<h4 id="asil">Installing layers</h4>
+
+<li>
+To install your layers, add the layer Gradle projects to your application's jniLibs dependencies
+in your {@code build.gradle} module. This module normally resides under the {@code app/} directory.
+The following example shows how to do this:
+
+<pre>
+android.sources {
+    main {
+        jni { ... }
+        jniLibs {
+            dependencies {
+                project ":threading"
+                project ":parameter_validation"
+                project ":object_tracker"
+                project ":core_validation"
+                project ":device_limits"
+                project ":image"
+                project ":swapchain"
+                project ":unique_objects"
+            }
+        }
+    }
+} // android.sources
+</pre>
+</li>
+<li>
+Develop, build, and debug as you usually would. When you build, Android Studio automatically
+builds the layers and copies them into your APK.
+</li>
+<li>
+Debug your application. Android Studio allows you to trace through the layer source code.
+</li>
+<li>
+For best performance, remove the layers before you do your release build.
+</li>
+</ol>
+
+
+<h3 id="cli">From the Command Line</h3>
+
+This section explains how to build and install your layers if your project does not use
+Android Studio.
+
+<h4 id="clibl">Building layers</h4>
+
+<p>
+To build validation layers on Linux or OS X, enter these commands on the command line:
+</p>
+<ol>
+<li>
+Using Gradle:
+<pre class="no-pretty-print">
+$ cd build-android
+$ ./android-generate
+$ cd generated/gradle-build
+$ # configure SDK and NDK path in local.properties
+$ gradlew assembleAllDebug
+</pre>
+</li>
+<li>
+Using Android makefiles:
+<pre class="no-pretty-print">
+$ cd build-android
+$ ./android-generate
+$ ndk-build
+</pre>
+</li>
+</ol>
+
+<p>
+To build validation layers on Windows, enter these commands on the command line:
+</p>
+<ol>
+<li>
+Using Gradle:
+<pre class="no-pretty-print">
+&gt; cd build-android
+&gt; android-generate.bat
+&gt; cd generated\gradle-build
+&gt; REM configure SDK and NDK path in local.properties
+&gt; gradlew.bat assembleAllDebug
+</pre>
+</li>
+<li>
+Using Android makefiles:
+<pre class="no-pretty-print">
+&gt; cd build-android
+&gt; android-generate.bat
+&gt; ndk-build.cmd
+</pre>
+</li>
+</ol>
+
+
+
+</p>
+</li>
+</ol>
+
+<h4 id="cliil">Installing layers</h4>
+
+<p>
+After building the layers, you must provide them to your app. To do so, you must first
+create a {@code jniLibs} folder in your app's project directory under
+{@code ./src/main/}, and copy the libs to it. The following example shows how to do this.
+</p>
+
+<pre class="no-pretty-print">
+$ mkdir ./src/main/jniLibs
+</pre>
+
+<p>
+The next step depends on whether you are using Gradle or Android makefiles. If you're using
+Gradle, each built layer resides in its own directory. Consolidate the layers into a single
+directory, as the following example shows:
+</p>
+
+<pre class="no-pretty-print">
+$ cp -r .../build-android/generated/gradle-build/threading/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/parameter_validation/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/object_tracker/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/core_validation/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/device_limits/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/image/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/swapchain/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+$ cp -r .../build-android/generated/gradle-build/unique_objects/build/outputs/native/debug/all/lib/* ./src/main/jniLibs/
+</pre>
+
+If you're using Android makefiles, the built layers reside in {@code lib} folders,
+with one {@code lib} folder under each architecture’s root directory. Consolidate the
+makefiles under the {@code jniLibs} directory as this example shows:
+</p>
+<pre class="no-pretty-print">
+$ cp -r .../build-android/libs/* ./src/main/jniLibs/
+</pre>
+</li>
+</ol>
+
+<h2 id="verifying">Verifying Layer Build</h2>
+
+<p>
+Regardless of whether you build using Gradle or Android makefiles, the build process produces
+a file structure like the following:
+</p>
+
+<pre class="no-pretty-print">
+src/main/jniLibs/
+  arm64-v8a/
+    libVkLayer_core_validation.so
+    libVkLayer_device_limits.so
+    libVkLayer_image.so
+    libVkLayer_object_tracker.so
+    libVkLayer_parameter_validation.so
+    libVkLayer_swapchain.so
+    libVkLayer_threading.so
+    libVkLayer_unique_objects.so
+  armeabi-v7a/
+    libVkLayer_core_validation.so
+    ...
+</pre>
+
+<p>
+The following example shows how to verify that your APK contains the validation layers
+as expected:
+</p>
+
+<pre class="no-pretty-print">
+$ jar -xvf project.apk
+ ...
+ inflated: lib/arm64-v8a/libVkLayer_threading.so
+ inflated: lib/arm64-v8a/libVkLayer_object_tracker.so
+ inflated: lib/arm64-v8a/libVkLayer_swapchain.so
+ inflated: lib/arm64-v8a/libVkLayer_unique_objects.so
+ inflated: lib/arm64-v8a/libVkLayer_parameter_validation.so
+ inflated: lib/arm64-v8a/libVkLayer_image.so
+ inflated: lib/arm64-v8a/libVkLayer_core_validation.so
+ inflated: lib/arm64-v8a/libVkLayer_device_limits.so
+ ...
+</pre>
+
+
+<h2 id="enabling">Enabling Layers</h2>
+
+<p>The Vulkan API allows an app to enable both instance layers and device layers.</p>
+
+<h3>Instance layers</h3>
+
+<p>
+A layer that can intercept Vulkan instance-level entry points is called an instance layer.
+Instance-level entry points are those with {@code VkInstance} or {@code VkPhysicalDevice}
+as the first parameter.
+</p>
+
+<p>
+You can call {@code vkEnumerateInstanceLayerProperties()} to list the available instance layers
+and their properties. The system enables instance layers when {@code vkCreateInstace()} executes.
+</p>
+
+<p>
+The following code snippet shows how an app can use the Vulkan API to programmatically enable and
+query an instance layer:
+</p>
+
+<pre>
+// Get instance layer count using null pointer as last parameter
+uint32_t instance_layer_present_count = 0;
+vkEnumerateInstanceLayerProperties(&instance_layer_present_count, nullptr);
+
+// Enumerate instance layers with valid pointer in last parameter
+VkLayerProperties* layer_props =
+    (VkLayerProperties*)malloc(instance_layer_present_count * sizeof(VkLayerProperties));
+vkEnumerateInstanceLayerProperties(&instance_layer_present_count, layer_props));
+
+// Make sure the desired instance validation layers are available
+// NOTE:  These are not listed in an arbitrary order.  Threading must be
+//        first, and unique_objects must be last.  This is the order they
+//        will be inserted by the loader.
+const char *instance_layers[] = {
+    "VK_LAYER_GOOGLE_threading",
+    "VK_LAYER_LUNARG_parameter_validation",
+    "VK_LAYER_LUNARG_object_tracker",
+    "VK_LAYER_LUNARG_core_validation",
+    "VK_LAYER_LUNARG_device_limits",
+    "VK_LAYER_LUNARG_image",
+    "VK_LAYER_LUNARG_swapchain",
+    "VK_LAYER_GOOGLE_unique_objects"
+};
+
+uint32_t instance_layer_request_count =
+    sizeof(instance_layers) / sizeof(instance_layers[0]);
+for (uint32_t i = 0; i < instance_layer_request_count; i++) {
+    bool found = false;
+    for (uint32_t j = 0; j < instance_layer_present_count; j++) {
+        if (strcmp(instance_layers[i], layer_props[j].layerName) == 0) {
+            found = true;
+        }
+    }
+    if (!found) {
+        error();
+    }
+}
+
+// Pass desired instance layers into vkCreateInstance
+VkInstanceCreateInfo instance_info = {};
+instance_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+instance_info.enabledLayerCount = instance_layer_request_count;
+instance_info.ppEnabledLayerNames = instance_layers;
+...
+</pre>
+
+<h3>Device layers</h3>
+
+<p>
+A layer that can intercept device-level entry points is called a device layer. Device-level entry
+points are those whose first parameter is {@code VkDevice}, {@code VkCommandBuffer},
+or {@code VkQueue}. The list of
+device layers to enable is included in the {@code ppEnabledLayerNames} field of the
+{@code VkDeviceCreateInfo}
+struct that the app passes into {@code vkCreateDevice()}.
+</p>
+
+<p>
+You can call {@code vkEnumerateDeviceLayerProperties} to list the available layers
+and their properties. The system enables device layers when it calls {@code vkCreateDevice()}.
+</p>
+
+<p>
+The following code snippet shows how an app can use the Vulkan API to programmatically enable a
+device layer.
+</p>
+
+<pre>
+
+// Get device layer count using null as last parameter
+uint32_t device_layer_present_count = 0;
+vkEnumerateDeviceLayerProperties(&device_layer_present_count, nullptr);
+
+// Enumerate device layers with valid pointer in last parameter
+VkLayerProperties* layer_props =
+   (VkLayerProperties *)malloc(device_layer_present_count * sizeof(VkLayerProperties));
+vkEnumerateDeviceLayerProperties(physical_device, device_layer_present_count, layer_props));
+
+// Make sure the desired device validation layers are available
+// Ensure threading is first and unique_objects is last!
+const char *device_layers[] = {
+    "VK_LAYER_GOOGLE_threading",
+    "VK_LAYER_LUNARG_parameter_validation",
+    "VK_LAYER_LUNARG_object_tracker",
+    "VK_LAYER_LUNARG_core_validation",
+    "VK_LAYER_LUNARG_device_limits",
+    "VK_LAYER_LUNARG_image",
+    "VK_LAYER_LUNARG_swapchain",
+    "VK_LAYER_GOOGLE_unique_objects"
+};
+
+uint32_t device_layer_request_count =
+   sizeof(device_layers) / sizeof(device_layers[0]);
+for (uint32_t i = 0; i < device_layer_request_count; i++) {
+    bool found = false;
+    for (uint32_t j = 0; j < device_layer_present_count; j++) {
+        if (strcmp(device_layers[i],
+           layer_props[j].layerName) == 0) {
+            found = true;
+        }
+    }
+    if (!found) {
+        error();
+    }
+}
+
+// Pass desired device layers into vkCreateDevice
+VkDeviceCreateInfo device_info = {};
+device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+device_info.enabledLayerCount = device_layer_request_count;
+device_info.ppEnabledLayerNames = device_layers;
+...
+</pre>
+
+<h2 id="debug">Enabling the Debug Callback</h2>
+
+<p>
+The Debug Report extension {@code VK_EXT_debug_report} allows your application to control
+layer behavior when an event occurs.</p>
+
+<p>
+Before using this extension, you must first make sure that the platform supports it.
+The following example shows how to check for debug extension support and
+register a callback if the extension is supported.
+</p>
+
+<pre>
+// Get the instance extension count
+uint32_t inst_ext_count = 0;
+vkEnumerateInstanceExtensionProperties(nullptr, &inst_ext_count, nullptr);
+
+// Enumerate the instance extensions
+VkExtensionProperties* inst_exts =
+    (VkExtensionProperties *)malloc(inst_ext_count * sizeof(VkExtensionProperties));
+vkEnumerateInstanceExtensionProperties(nullptr, &inst_ext_count, inst_exts);
+
+const char * enabled_inst_exts[16] = {};
+uint32_t enabled_inst_ext_count = 0;
+
+// Make sure the debug report extension is available
+for (uint32_t i = 0; i < inst_ext_count; i++) {
+    if (strcmp(inst_exts[i].extensionName,
+    VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0) {
+        enabled_inst_exts[enabled_inst_ext_count++] =
+            VK_EXT_DEBUG_REPORT_EXTENSION_NAME;
+    }
+}
+
+if (enabled_inst_ext_count == 0)
+    return;
+
+// Pass the instance extensions into vkCreateInstance
+VkInstanceCreateInfo instance_info = {};
+instance_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+instance_info.enabledExtensionCount = enabled_inst_ext_count;
+instance_info.ppEnabledExtensionNames = enabled_inst_exts;
+
+PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
+PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
+
+vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)
+    vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)
+    vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+
+assert(vkCreateDebugReportCallbackEXT);
+assert(vkDestroyDebugReportCallbackEXT);
+
+// Create the debug callback with desired settings
+VkDebugReportCallbackEXT debugReportCallback;
+if (vkCreateDebugReportCallbackEXT) {
+    VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo;
+    debugReportCallbackCreateInfo.sType =
+        VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
+    debugReportCallbackCreateInfo.pNext = NULL;
+    debugReportCallbackCreateInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT |
+                                          VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                                          VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+    debugReportCallbackCreateInfo.pfnCallback = DebugReportCallback;
+    debugReportCallbackCreateInfo.pUserData = NULL;
+
+    vkCreateDebugReportCallbackEXT(instance, &debugReportCallbackCreateInfo,
+                                   nullptr, &debugReportCallback);
+}
+
+// Later, when shutting down Vulkan, call the following
+if (vkDestroyDebugReportCallbackEXT) {
+   vkDestroyDebugReportCallbackEXT(instance, debugReportCallback, nullptr);
+}
+
+</pre>
+
+Once your app has registered and enabled the debug callback, the system routes debugging
+messages to a callback that you register. An example of such a callback appears below:
+</p>
+
+
+<pre>
+#include &lt;android/log.h&gt;
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
+                                   VkDebugReportFlagsEXT msgFlags,
+                                   VkDebugReportObjectTypeEXT objType,
+                                   uint64_t srcObject, size_t location,
+                                   int32_t msgCode, const char * pLayerPrefix,
+                                   const char * pMsg, void * pUserData )
+{
+   if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+       __android_log_print(ANDROID_LOG_ERROR,
+                           "AppName",
+                           "ERROR: [%s] Code %i : %s",
+                           pLayerPrefix, msgCode, pMsg);
+   } else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
+       __android_log_print(ANDROID_LOG_WARN,
+                           "AppName",
+                           "WARNING: [%s] Code %i : %s",
+                           pLayerPrefix, msgCode, pMsg);
+   } else if (msgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+       __android_log_print(ANDROID_LOG_WARN,
+                           "AppName",
+                           "PERFORMANCE WARNING: [%s] Code %i : %s",
+                           pLayerPrefix, msgCode, pMsg);
+   } else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+       __android_log_print(ANDROID_LOG_INFO,
+                           "AppName", "INFO: [%s] Code %i : %s",
+                           pLayerPrefix, msgCode, pMsg);
+   } else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+       __android_log_print(ANDROID_LOG_VERBOSE,
+                           "AppName", "DEBUG: [%s] Code %i : %s",
+                           pLayerPrefix, msgCode, pMsg);
+   }
+
+   // Returning false tells the layer not to stop when the event occurs, so
+   // they see the same behavior with and without validation layers enabled.
+   return VK_FALSE;
+}
+</pre>
+
+
+
