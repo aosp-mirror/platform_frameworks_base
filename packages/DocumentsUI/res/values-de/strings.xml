@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Schließen"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Diese Dateien wurden nicht kopiert: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Diese Dateien wurden nicht verschoben: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Diese Dateien wurden nicht gelöscht: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Folgende Dateien wurden in ein anderes Format konvertiert: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> Dateien wurden in die Zwischenablage kopiert.</item>
@@ -137,4 +138,6 @@
       <item quantity="other">Möchtest du <xliff:g id="COUNT_1">%1$d</xliff:g> Elemente löschen?</item>
       <item quantity="one">Möchtest du <xliff:g id="COUNT_0">%1$d</xliff:g> Element löschen?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Du kannst nur maximal 1000 Elemente gleichzeitig auswählen"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Du kannst nur 1000 Elemente auswählen"</string>
 </resources>

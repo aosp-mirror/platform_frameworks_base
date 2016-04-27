@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"അടയ്‌ക്കുക"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"ഈ ഫയലുകൾ പകർത്തിയില്ല: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ഈ ഫയലുകൾ നീക്കിയില്ല: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"ഈ ഫയലുകൾ ഇല്ലാതാക്കിയില്ല: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ഈ ഫയലുകൾ മറ്റൊരു ഫോർമാറ്റിലേക്ക് പരിവർത്തനം ചെയ്യപ്പെട്ടു: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഫയലുകൾ ക്ലിപ്പ്‌ബോർഡിലേക്ക് പകർത്തി.</item>
@@ -137,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഇനങ്ങൾ ഇല്ലാതാക്കണോ?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഇനം ഇല്ലാതാക്കണോ?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ക്ഷമിക്കണം, നിങ്ങൾക്ക് 1000 ഇനങ്ങൾ മാത്രമാണ് ഒരുസമയം തിരഞ്ഞെടുക്കാൻ കഴിയുക."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"1000 ഇനങ്ങൾ മാത്രമാണ് തിരഞ്ഞെടുക്കാൻ കഴിഞ്ഞത്"</string>
 </resources>

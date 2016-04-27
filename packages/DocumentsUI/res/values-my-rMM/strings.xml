@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"ပိတ်ပါ"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"ဤဖိုင်များကို မကူးယူခဲ့ပါ − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ဤဖိုင်များကို မရွှေ့ခဲ့ပါ − <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"ဤဖိုင်များကို ဖျက်၍မရခဲ့ပါ − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ဤဖိုင်များကို အခြားပုံစံစနစ်တစ်ခုသို့ ပြောင်းလဲခဲ့သည် − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်ကိုအချက်အလက်သိမ်းတဲ့နေရာသို့ ကူးယူပါ။</item>
@@ -137,4 +138,6 @@
       <item quantity="other">အကြောင်းအရာ <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
       <item quantity="one">အကြောင်းအရာ <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ဝမ်းနည်းပါသည်။ တစ်ကြိမ်လျှင် အခု ၁၀၀၀ အထိသာ ရွေးချယ်နိုင်ပါသည်"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"အခု ၁၀၀၀ သာ ရွေးချယ်နိုင်သည်"</string>
 </resources>
