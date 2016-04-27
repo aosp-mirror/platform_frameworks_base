@@ -548,21 +548,25 @@ parent.link=index.html
   When you deploy a clean build, Android Studio instruments your app to allow
   Instant Run to push code and resource updates. Although updating the running
   app happens much more quickly, the first build may take longer to complete.
-  You can improve the build process by configuring a few DEX options, such as
-  <code>maxProcessCount</code> and <code>javaMaxHeapSize</code>.
+  You can improve the build process by configuring a few <a class=
+  "external-link" href=
+  "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html">
+  <code>DexOptions</code></a> settings:
 </p>
 
 <dl>
   <dt>
-    <code>maxProcessCount</code>
+    <a class="external-link" href=
+    "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html#com.android.build.gradle.internal.dsl.DexOptions:maxProcessCount">
+    <code>maxProcessCount</code></a>
   </dt>
 
   <dd>
-    Sets the maximum number of DEX processes that can be started
-    concurrently. If the Gradle daemon is already running, you need to
-    stop the process before initializing it with a new maximum process count.
-    You can terminate the Gradle daemon by calling one of the following from
-    the <em>Terminal</em> window:
+    Sets the maximum number of DEX processes that can be started concurrently.
+    If the Gradle daemon is already running, you need to stop the process
+    before initializing it with a new maximum process count. You can terminate
+    the Gradle daemon by calling one of the following from the
+    <em>Terminal</em> window:
     <ul>
       <li>On Windows, call <code>gradlew --stop</code>
       </li>
@@ -573,7 +577,9 @@ parent.link=index.html
   </dd>
 
   <dt>
-    <code>javaMaxHeapSize</code>
+    <a class="external-link" href=
+    "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html#com.android.build.gradle.internal.dsl.DexOptions:javaMaxHeapSize">
+    <code>javaMaxHeapSize</code></a>
   </dt>
 
   <dd>
@@ -593,7 +599,7 @@ parent.link=index.html
 android {
   ...
   dexOptions {
-    maxProcessCount 4
+    maxProcessCount 4 // this is the default value
     javaMaxHeapSize "2g"
   }
 }
