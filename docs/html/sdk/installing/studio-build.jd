@@ -84,13 +84,13 @@ directory.</p>
     usage when the application is -running on a device.</li>
   </ul>
 
-<p class="note"><b>Note:</b> Apps are limited to a 65K method reference limit. If your app reaches
+<p class="note"><b>Note:</b> Apps are limited to a 64K method reference limit. If your app reaches
 this limit, the build process outputs the following error message:
 
 <pre>Unable to execute dex: method ID not in [0, 0xffff]: 65536.</pre>
 
 To avoid this error, see
-<a href="{@docRoot}tools/building/multidex.html">Building Apps with Over 65K Methods</a>.
+<a href="{@docRoot}tools/building/multidex.html">Building Apps with Over 64K Methods</a>.
 </p>
 
 
