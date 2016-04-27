@@ -3530,7 +3530,6 @@ METADATA['en'].collections = {
       "distribute/googleplay/index.html#opportunities",
       "distribute/analyze/improve-roi.html",
       "distribute/users/expand-to-new-markets.html",
-      "distribute/users/promote-with-ads.html",
       "distribute/analyze/index.html",
       "distribute/users/app-invites.html",
       "distribute/users/ota-installs.html",
