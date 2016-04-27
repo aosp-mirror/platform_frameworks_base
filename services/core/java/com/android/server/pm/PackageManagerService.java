@@ -13806,6 +13806,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageParser.Package oldPackage;
         final String pkgName = pkg.packageName;
         final int[] allUsers;
+        final int[] installedUsers;
 
         // First find the old package info and check signatures
         synchronized(mPackages) {
@@ -13848,6 +13849,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // In case of rollback, remember per-user/profile install state
             allUsers = sUserManager.getUserIds();
+            installedUsers = ps.queryInstalledUsers(allUsers, true);
         }
 
         // Update what is removed
@@ -13855,6 +13857,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         res.removedInfo.uid = oldPackage.applicationInfo.uid;
         res.removedInfo.removedPackage = oldPackage.packageName;
         res.removedInfo.isUpdate = true;
+        res.removedInfo.origUsers = installedUsers;
         final int childCount = (oldPackage.childPackages != null)
                 ? oldPackage.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
@@ -19421,12 +19424,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     public int movePackage(final String packageName, final String volumeUuid) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
+        final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
         final int moveId = mNextMoveId.getAndIncrement();
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    movePackageInternal(packageName, volumeUuid, moveId);
+                    movePackageInternal(packageName, volumeUuid, moveId, user);
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to move " + packageName, e);
                     mMoveCallbacks.notifyStatusChanged(moveId,
@@ -19438,8 +19442,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     private void movePackageInternal(final String packageName, final String volumeUuid,
-            final int moveId) throws PackageManagerException {
-        final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
+            final int moveId, UserHandle user) throws PackageManagerException {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final PackageManager pm = mContext.getPackageManager();
 
