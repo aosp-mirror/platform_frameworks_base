@@ -13,16 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp">
-    <vector android:width="18dp"
-            android:height="18dp"
-            android:viewportWidth="24.0"
-            android:viewportHeight="24.0">
-
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M12.0,17.273l6.1800003,3.7269993 -1.6350002,-7.0290003 5.455,-4.7269993 -7.191,-0.6170006 -2.809,-6.627 -2.809,6.627 -7.191,0.6170006 5.455,4.7269993 -1.6349998,7.0290003z"/>
-    </vector>
-</inset>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="17.0dp"
+        android:height="17.0dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12.700000,10.000000c-0.800000,-2.300000 -3.000000,-4.000000 -5.700000,-4.000000c-3.300000,0.000000 -6.000000,2.700000 -6.000000,6.000000s2.700000,6.000000 6.000000,6.000000c2.600000,0.000000 4.800000,-1.700000 5.700000,-4.000000L17.000000,14.000000l0.000000,4.000000l4.000000,0.000000l0.000000,-4.000000l2.000000,0.000000l0.000000,-4.000000L12.700000,10.000000zM7.000000,14.000000c-1.100000,0.000000 -2.000000,-0.900000 -2.000000,-2.000000c0.000000,-1.100000 0.900000,-2.000000 2.000000,-2.000000s2.000000,0.900000 2.000000,2.000000C9.000000,13.100000 8.100000,14.000000 7.000000,14.000000z"/>
+</vector>
