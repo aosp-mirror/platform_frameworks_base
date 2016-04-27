@@ -112,7 +112,7 @@ public class SearchManagerService extends ISearchManager.Stub {
             if (um.getUserInfo(userId) == null) {
                 throw new IllegalStateException("User " + userId + " doesn't exist");
             }
-            if (!um.isUserUnlocked(userId)) {
+            if (!um.isUserUnlockingOrUnlocked(userId)) {
                 throw new IllegalStateException("User " + userId + " isn't unlocked");
             }
         } finally {

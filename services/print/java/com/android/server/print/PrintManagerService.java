@@ -727,7 +727,7 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageModified(String packageName) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
+                    if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
 
                     synchronized (mLock) {
@@ -742,7 +742,7 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
+                    if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
 
                     synchronized (mLock) {
@@ -757,7 +757,7 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public boolean onHandleForceStop(Intent intent, String[] stoppedPackages,
                         int uid, boolean doit) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return false;
+                    if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return false;
                     synchronized (mLock) {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
@@ -795,7 +795,7 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageAdded(String packageName, int uid) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
+                    if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
                     synchronized (mLock) {
                         if (hasPrintService(packageName)) {
                             UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
@@ -812,7 +812,7 @@ public final class PrintManagerService extends SystemService {
         }
 
         private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority) {
-            if (!mUserManager.isUserUnlocked(userId)) {
+            if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
                 throw new IllegalStateException(
                         "User " + userId + " must be unlocked for printing to be available");
             }

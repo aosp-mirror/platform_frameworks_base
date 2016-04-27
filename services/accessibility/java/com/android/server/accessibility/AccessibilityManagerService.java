@@ -1245,8 +1245,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void updateServicesLocked(UserState userState) {
         Map<ComponentName, Service> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
-        boolean isUnlocked = mContext.getSystemService(UserManager.class)
-                .isUserUnlocked(userState.mUserId);
+        boolean isUnlockingOrUnlocked = mContext.getSystemService(UserManager.class)
+                .isUserUnlockingOrUnlocked(userState.mUserId);
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
@@ -1256,7 +1256,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Service service = componentNameToServiceMap.get(componentName);
 
             // Ignore non-encryption-aware services until user is unlocked
-            if (!isUnlocked && !installedService.isDirectBootAware()) {
+            if (!isUnlockingOrUnlocked && !installedService.isDirectBootAware()) {
                 Slog.d(LOG_TAG, "Ignoring non-encryption-aware service " + componentName);
                 continue;
             }
