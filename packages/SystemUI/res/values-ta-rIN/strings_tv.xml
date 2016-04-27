@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"இயக்கு"</string>
     <string name="pip_pause" msgid="8412075640017218862">"இடைநிறுத்து"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIPஐக் கட்டுப்படுத்த, "<b>"முகப்பைப்"</b>" பிடித்திருக்கவும்"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"பிக்ச்சர் இன் பிக்ச்சர்"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"இது நீங்கள் அடுத்த வீடியோவை இயக்கும் வரை தற்போதுள்ள வீடியோவை வைத்திருக்கும். அதைக் கட்டுப்படுத்த, "<b>"முகப்பு"</b>" என்பதை அழுத்திப் பிடிக்கவும்."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"சரி"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"நிராகரி"</string>
 </resources>

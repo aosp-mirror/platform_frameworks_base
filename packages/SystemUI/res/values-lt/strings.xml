@@ -73,7 +73,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Išsaugoma ekrano kopija..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Išsaugoma ekrano kopija."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrano kopija užfiksuota."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Palieskite, kad peržiūrėtumėte ekrano kopiją."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Palieskite, kad peržiūrėtumėte ekrano kopiją."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nepavyko užfiksuoti ekrano kopijos."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Išsaugant ekrano kopiją iškilo problemų."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Negalima išsaugoti ekrano kopijos dėl ribotos saugyklos vietos."</string>
@@ -120,8 +120,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Stiprus duomenų signalas."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Prisijungta prie „<xliff:g id="WIFI">%s</xliff:g>“."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Prisijungta prie „<xliff:g id="BLUETOOTH">%s</xliff:g>“."</string>
-    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
-    <skip />
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Prisijungta prie <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Nėra „WiMAX“ signalo."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Viena „WiMAX“ signalo juosta."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Dvi „WiMAX“ signalo juostos."</string>
@@ -152,17 +151,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Kraštas"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nėra SIM kortelės."</string>
-    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobiliojo ryšio duomenys"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobiliojo ryšio duomenys įjungti"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobiliojo ryšio duomenys išjungti"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"„Bluetooth“ įrenginio kaip modemo naudojimas."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lėktuvo režimas."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nėra SIM kortelės."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Keičiamas operatoriaus tinklas."</string>
-    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
-    <skip />
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Atidaryti išsamią akumuliatoriaus informaciją"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> proc."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistemos nustatymai"</string>
@@ -202,13 +198,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Funkcija „Netrukdyti“ įjungta. Tik prioritetiniai įvykiai."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Įjungta funkcija „Netrukdyti“, visiška tyla."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Funkcija „Netrukdyti“ įjungta. Leidžiami tik signalai."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Netrukdyti."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Funkcija „Netrukdyti“ išjungta."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Funkcija „Netrukdyti“ išjungta."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Funkcija „Netrukdyti“ įjungta."</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"„Bluetooth“."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"„Bluetooth“ išjungtas."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"„Bluetooth“ įjungtas."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Prijungiamas „Bluetooth“."</string>
@@ -274,10 +268,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nėra pasiekiamų susietų įrenginių"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Šviesumas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatinis kaitaliojimas"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automatiškai sukti ekraną"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Nustatyti kaip <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Kaitaliojimas užrakintas"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stačias"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Gulsčias"</string>
@@ -296,8 +288,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Neprisijungta"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tinklo nėra"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
-    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
-    <skip />
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"„Wi-Fi“ įjungtas"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nėra jokių pasiekiamų „Wi-Fi“ tinklų"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Perdavimas"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Perduodama"</string>
@@ -351,7 +342,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mažiau skubūs pranešimai toliau"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Palieskite dar kartą, kad atidarytumėte"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Palieskite dar kartą, kad atidarytumėte"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Perbraukite aukštyn, kad atrakintumėte"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Perbraukite iš telefono piktogramos"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Perbraukite iš „Voice Assist“ piktogramos"</string>
@@ -429,7 +420,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Išskleisti"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sutraukti"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekranas prisegtas"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Tai bus rodoma, kol atsegsite. Kad atsegtumėte, palieskite ir palaikykite „Atgal“."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Tai bus rodoma, kol atsegsite. Palieskite ir palaikykite „Atgal“, kad atsegtumėte."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Supratau"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, ačiū"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Slėpti „<xliff:g id="TILE_LABEL">%1$s</xliff:g>“?"</string>
@@ -439,15 +430,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Leisti"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Atmesti"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ yra garsumo valdymo dialogo langas"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Palieskite, kad atkurtumėte originalą."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Palieskite, kad atkurtumėte originalą."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Naudojate darbo profilį"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Palieskite, kad įjungtumėte garsą."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Palieskite, kad nustatytumėte vibravimą. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Palieskite, kad nutildytumėte. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
-    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
-    <skip />
-    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
-    <skip />
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Rodomi „%s“ garsumo valdikliai. Perbraukite į viršų, kad atsisakytumėte."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Garsumo valdikliai paslėpti"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistemos naudotojo sąsajos derinimo priemonė"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rodyti įterptą akumuliat. įkrovos procentinę vertę"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rodyti akumuliatoriaus įkrovos lygio procentinę vertę būsenos juostos piktogramoje, kai įrenginys nėra įkraunamas"</string>
@@ -643,27 +632,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Išklotinės elementas „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ pašalintas"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Išklotinės elementas „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ perkeltas į <xliff:g id="POSITION">%2$d</xliff:g> padėtį"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Sparčiųjų nustatymų redagavimo priemonė."</string>
-    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
-    <skip />
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"„<xliff:g id="ID_1">%1$s</xliff:g>“ pranešimas: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Programa gali neveikti naudojant skaidytą ekraną."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Programoje nepalaikomas skaidytas ekranas."</string>
-    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Atidaryti nustatymus."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Atidaryti sparčiuosius nustatymus."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Uždaryti sparčiuosius nustatymus."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signalas nustatytas."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prisijungta kaip <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nėra interneto ryšio."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Atidaryti išsamią informaciją."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Atidaryti „<xliff:g id="ID_1">%s</xliff:g>“ nustatymus."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Redaguoti nustatymų tvarką."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g> psl. iš <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

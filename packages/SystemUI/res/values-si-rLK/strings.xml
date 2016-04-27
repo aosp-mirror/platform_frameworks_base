@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"තිර රුව සුරැකෙමින් පවතී…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"තිර රුව සුරැකෙමින් පවතී."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"තිර රුව ග්‍රහණය කරන ලදි."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"ඔබගේ තිර රුව බැලීමට ස්පර්ශ කරන්න."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"ඔබගේ තිර රුව බැලීමට තට්ටු කරන්න."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"තිර රුව ග්‍රහණය කිරීමට නොහැකි විය."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"තිර රුව සුරකින අතරතුර ගැටලුවක් ඇති විය."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය."</string>
@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"මෙය සීනු, සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු, සියලු ශබ්ද සහ කම්පන අවහිර කරයි."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"හදිසිය අඩු දැනුම් දීම් පහත"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"විවෘත කිරීමට නැවත ස්පර්ශ කරන්න"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"අගුළු ඇරීමට ස්වයිප් කරන්න."</string>
     <string name="phone_hint" msgid="4872890986869209950">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="voice_hint" msgid="8939888732119726665">"හඬ සහාය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
@@ -418,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"දිග හරින්න"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"හකුළන්න"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"එපා ස්තූතියි"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
@@ -428,7 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ඉඩ දෙන්න"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ධාරිතා සංවාදයයි"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"මුල් තත්ත්වය නැවත ප්‍රතිසාධනය කිරීමට ස්පර්ශ කරන්න."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"මුල් තත්ත්වය නැවත ප්‍රතිසාධනය කිරීමට තට්ටු කරන්න."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ඔබ ඔබේ කාර්යාල පැතිකඩ භාවිත කරමින් සිටී"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. නිහඬ කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. කම්පනය කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
