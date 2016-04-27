@@ -123,6 +123,9 @@ public final class PixelCopy {
     public static void request(@NonNull Surface source, @NonNull Bitmap dest,
             @NonNull OnPixelCopyFinishedListener listener, @NonNull Handler listenerThread) {
         validateBitmapDest(dest);
+        if (!source.isValid()) {
+            throw new IllegalArgumentException("Surface isn't valid, source.isValid() == false");
+        }
         // TODO: Make this actually async and fast and cool and stuff
         int result = ThreadedRenderer.copySurfaceInto(source, dest);
         listenerThread.post(new Runnable() {

@@ -383,6 +383,15 @@
         </activity>
 
         <activity
+                android:name="VideoViewCaptureActivity"
+                android:label="SurfaceView/GetBitmap with Video source">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="GLTextureViewActivity"
                 android:label="TextureView/OpenGL">
             <intent-filter>
