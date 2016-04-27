@@ -505,15 +505,14 @@ public class TextUtils {
         return false;
     }
 
-    /*
-     * @deprecated
-     * Do not use. This function only reverses individual {@code char}s and not their associated
-     * spans. It doesn't support surrogate pairs (that correspond to non-BMP code points),
-     * combining sequences or conjuncts either.
+    /**
+     * This function only reverses individual {@code char}s and not their associated
+     * spans. It doesn't support surrogate pairs (that correspond to non-BMP code points), combining
+     * sequences or conjuncts either.
+     * @deprecated Do not use.
      */
     @Deprecated
-    public static CharSequence getReverse(CharSequence source,
-                                          int start, int end) {
+    public static CharSequence getReverse(CharSequence source, int start, int end) {
         return new Reverser(source, start, end);
     }
 
