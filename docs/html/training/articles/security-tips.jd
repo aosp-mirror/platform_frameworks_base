@@ -150,7 +150,7 @@ limited by the <code><a
 href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
 &lt;grant-uri-permission element&gt;</a></code>.</p>
 
-<p>When accessing a content provider, use parameterized query methods such as 
+<p>When accessing a content provider, use parameterized query methods such as
 {@link android.content.ContentProvider#query(Uri,String[],String,String[],String) query()},
 {@link android.content.ContentProvider#update(Uri,ContentValues,String,String[]) update()}, and
 {@link android.content.ContentProvider#delete(Uri,String,String[]) delete()} to avoid
@@ -207,13 +207,13 @@ href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">signature
 protection level</a> on permissions for IPC communication between applications
 provided by a single developer.</p>
 
-<p>Do not leak permission-protected data.  This occurs when your app exposes data
-over IPC that is only available because it has a specific permission, but does
-not require that permission of any clients of it’s IPC interface. More
-details on the potential impacts, and frequency of this type of problem is
-provided in this research paper published at USENIX: <a
-href="http://www.cs.berkeley.edu/~afelt/felt_usenixsec2011.pdf">http://www.cs.be
-rkeley.edu/~afelt/felt_usenixsec2011.pdf</a></p>
+<p>Do not leak permission-protected data. This occurs when your app exposes
+data over IPC that is available only because your app has permission to access
+that data. The clients of your app's IPC interface may not have that same
+data-access permission. More details on the frequency and potential effects
+of this issue appear in <a class="external-link"
+href="https://www.usenix.org/legacy/event/sec11/tech/full_papers/Felt.pdf"> this
+research paper</a>, published at USENIX.
 
 
 
@@ -431,14 +431,14 @@ not execute JavaScript so cross-site-scripting is not possible.</p>
 <p>Use {@link android.webkit.WebView#addJavascriptInterface
 addJavaScriptInterface()} with
 particular care because it allows JavaScript to invoke operations that are
-normally reserved for Android applications.  If you use it, expose 
+normally reserved for Android applications.  If you use it, expose
 {@link android.webkit.WebView#addJavascriptInterface addJavaScriptInterface()} only to
 web pages from which all input is trustworthy.  If untrusted input is allowed,
 untrusted JavaScript may be able to invoke Android methods within your app.  In general, we
 recommend exposing {@link android.webkit.WebView#addJavascriptInterface
 addJavaScriptInterface()} only to JavaScript that is contained within your application APK.</p>
 
-<p>If your application accesses sensitive data with a 
+<p>If your application accesses sensitive data with a
 {@link android.webkit.WebView}, you may want to use the
 {@link android.webkit.WebView#clearCache clearCache()} method to delete any files stored
 locally. Server-side
