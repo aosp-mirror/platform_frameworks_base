@@ -138,6 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> элементті жою керек пе?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> элементті жою керек пе?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"Бір әрекетпен тек 1000 элемент таңдауға болады"</string>
+    <string name="too_many_selected" msgid="6781456208116966753">"Бір жолы тек 1000 элемент таңдауға болады"</string>
     <string name="too_many_in_select_all" msgid="8281987479885307456">"Тек 1000 элемент таңдалды"</string>
 </resources>

@@ -162,6 +162,6 @@
       <item quantity="other">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> פריטים?</item>
       <item quantity="one">האם למחוק <xliff:g id="COUNT_0">%1$d</xliff:g> פריט?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"מצטערים, ניתן לבחור עד אלף פריטים בלבד בבת אחת"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"ניתן לבחור אלף פריטים בלבד"</string>
+    <string name="too_many_selected" msgid="6781456208116966753">"מצטערים, ניתן לבחור בבת אחת אלף פריטים לכל היותר"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"ניתן לבחור אלף פריטים לכל היותר"</string>
 </resources>
