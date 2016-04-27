@@ -95,9 +95,9 @@ The class {@link android.app.Notification.Builder Notification.Builder} was adde
 
 <p>Notifications, as an important part of the Android user interface, have their own design guidelines.
 The material design changes introduced in Android 5.0 (API level 21) are of particular
-importance, and you should review the <a href="{@docRoot}training/material/index.html">Material Design</a>
-training for more information. To learn how to design notifications and their interactions, read the
-<a href="{@docRoot}design/patterns/notifications.html">Notifications</a> design guide.</p>
+importance, and you should review the <a href="{@docRoot}training/material/index.html">Material
+Design</a> training for more information. To learn how to design notifications and their interactions,
+read the <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> design guide.</p>
 
 <h2 id="CreateNotification">Creating a Notification</h2>
 
@@ -326,8 +326,8 @@ mBuilder.setStyle(inBoxStyle);
     <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design guide.
 </p>
 <p class="note">
-    <strong>Note:</strong> This Gmail feature requires the "inbox" expanded layout, which is
-    part of the expanded notification feature available starting in Android 4.1.
+    <strong>Note:</strong> This Gmail feature requires the "inbox" expanded layout, which is part
+    of the expanded notification feature.
 </p>
 <p>
     The following section describes how to update notifications and also how to remove them.
@@ -892,7 +892,8 @@ based on the {@link android.media.RemoteControlClient}, which is now deprecated.
 {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
 method, which converts actions into clickable icons.</p>
 
-<p class="note"><strong>Note:</strong> The template and the {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+<p class="note"><strong>Note:</strong> The template and the
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
 method are not included in the support library, so these features run in Android 5.0 and higher
 only.</p>
 

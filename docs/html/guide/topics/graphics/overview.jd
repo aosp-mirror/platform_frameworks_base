@@ -8,7 +8,7 @@ page.title=Animation and Graphics Overview
   <h3 id="animation">Animation</h3>
   
   <p>The Android framework provides two animation systems: property animation
-  (introduced in Android 3.0) and view animation. Both animation systems are viable options,
+  and view animation. Both animation systems are viable options,
   but the property animation system, in general, is the preferred method to use, because it
   is more flexible and offers more features. In addition to these two systems, you can utilize Drawable
   animation, which allows you to load drawable resources and display them one frame after
