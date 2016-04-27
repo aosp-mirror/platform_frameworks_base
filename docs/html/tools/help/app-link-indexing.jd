@@ -1,4 +1,4 @@
-page.title=Deep Link and App Indexing API Support in Android Studio
+page.title=Supporting URLs and App Indexing in Android Studio
 parent.title=Tools
 parent.link=index.html
 page.tags=app indexing
@@ -9,11 +9,13 @@ page.tags=app indexing
   <h2>In this document</h2>
 <ol>
   <li><a href="#workflow">Typical Workflow</a></li>
-  <li><a href="#intent">Adding an Intent Filter for Deep Linking and Google Search</a></li>
+  <li><a href="#intent">Adding an Intent Filter for URL Support and Google Search</a></li>
   <li><a href="#indexing">Adding App Indexing API Skeleton Code to an Activity</a></li>
-  <li><a href="#testintent">Testing a Deep Link</a></li>
+  <li><a href="#testintent">Testing a URL</a></li>
   <li><a href="#testindexing">Viewing App Indexing API Messages in the logcat Monitor</a></li>
   <li><a href="#lint">Configuring Lint</a></li>
+  <li><a href="#appindexingtest">Performing a Google App Indexing Test</a></li>
+
 </ol>
 
  <h2>See also</h2>
@@ -48,15 +50,16 @@ page.tags=app indexing
 </div>
 </div>
 
-<p>Android Studio helps you add deep links, app indexing, and search functionality to your apps.
+<p>Android Studio helps you add support for URLs, app indexing, and search
+functionality to your apps.
   These features can help to drive more traffic to your
   app, discover which app content is used most, make it easier for users to find content in an
   installed app, and attract new users.</p>
 
 <h2 id="workflow">Typical Workflow</h2>
 
-<p>To use Android Studio to add deep link, app indexing, and search features to your app, follow
-  these basic steps:</p>
+<p>To use Android Studio to add support for URL, app indexing, and search
+features to your app:</p>
 
 <ol>
 <li>Add intent filters and code to handle incoming intents.</li>
@@ -64,23 +67,25 @@ page.tags=app indexing
 <li>Add App Indexing API code.</li>
 </ol>
 
-<p>Intent filters and the App Indexing API are ways to implement deep links and app indexing, but
+<p>Intent filters and the App Indexing API are ways to implement URL support
+and app indexing, but
   there are other possible implementations as well. See
   <a href="https://developers.google.com/app-indexing/reference/deeplinks"
   class="external-link">Alternate Android Indexing Methods</a>
   for more information.</p>
 
-<h3 id="aboutintent">Intent filters for deep links</h3>
+<h3 id="aboutintent">Intent filters for URLs</h3>
 
 <p>Android Studio can create a basic intent filter in your manifest that you can customize to
-  define deep link URLs for your app. You can then write Java code in an activity to handle the
+  define URLs for your app. You can then write Java code in an activity to handle the
   intent. This implementation lets users directly open the specified app activity by
-  clicking a deep link. Users can see the deep links in google.com in a browser, in the
+  clicking a URL. Users can see the URLs in google.com in a browser, in the
   Google Search app, and in Google Now on Tap. </p>
 
-<h3 id="aboutassociation">Website association with deep links</h3>
+<h3 id="aboutassociation">Website association with URLs</h3>
 
-<p>After setting up deep links for your app, you can associate your website with your app by using
+<p>After setting up URL support for your app, you can associate your website
+with your app by using
   the Google Search Console and Google Play Developer Console. Afterward, Google indexes your app
   for URLs defined in
   your intent filters and begins to include them in search results. In addition, you can optionally
@@ -91,11 +96,11 @@ page.tags=app indexing
 <p>As an alternative to associating your app with a website,
   for Android 6.0 (API level 23) and higher, you can add
   <a href="{@docRoot}training/app-links/index.html"
-  >default handlers and verification for deep links</a>
+  >default handlers and verification for URLs</a>
   instead.</p>
 
-<p>Chrome displaying google.com serves search results with deep links that are accessible to both
-  signed-in users and those who aren't. Google Search app users must be signed in to see deep links
+<p>Chrome displaying google.com serves search results with URLs that are accessible to both
+  signed-in users and those who aren't. Google Search app users must be signed in to see URLs
   in their search results. </p>
 
 <h3 id="aboutapi">App Indexing API code in activities</h3>
@@ -108,24 +113,27 @@ page.tags=app indexing
   class="external-link">Googlebot</a>
   can’t get content from your app.</p>
 
-<h3 id="abouttest">Deep link and App Indexing API testing</h3>
+<h3 id="abouttest">URL support and App Indexing API testing</h3>
 
 <p>Android Studio helps you test your code with the following features:</p>
 
 <ul>
-<li>Deep link testing helps you verify that a specified deep link can launch an app. </li>
+<li>URL support testing helps you verify that a specified URL can launch an app.
+</li>
 <li>The logcat Monitor helps you test App Indexing API calls in an activity. </li>
-<li>The Android Lint tool has warnings for certain issues involving deep links and the App Indexing
+<li>The Android Lint tool has warnings for certain issues involving URL support
+and the App Indexing
   API. These warnings and errors appear in the Code Editor and in Lint inspection results.</li>
+  <li>A Google App Indexing test checks whether Google can index a URL by
+  either crawling your app page or using the App Indexing API.</li>
 </ul>
 
-<p>The details for implementing deep links and app indexing are described next.
+<p>The details for implementing URL support and app indexing are described next.
 
 
-<h2 id="intent">Adding an Intent Filter for Deep Linking and Google Search</h2>
+<h2 id="intent">Adding an Intent Filter for URL Support and Google Search</h2>
 
-<p>To use Android Studio features to add an intent filter defining a deep link, follow these
-  steps:</p>
+<p>To use Android Studio features to add an intent filter defining a URL:</p>
 
 <ol>
 <li>In the <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>
@@ -138,11 +146,11 @@ page.tags=app indexing
     style="vertical-align:sub;margin:0;height:17px" alt="Lightbulb icon" /> appears. Click
   <img src="{@docRoot}images/tools/ai-ilightbulb.png"
   style="vertical-align:sub;margin:0;height:17px" alt="Lightbulb icon" />
-  and select <strong>Create Deep Link</strong>.</li>
+  and select <strong>Create URL</strong>.</li>
 <li>Right-click in an <code>&lt;activity&gt;</code> element and select <strong>Generate</strong>
-  &gt; <strong>Deep Link</strong>.</li>
+  &gt; <strong>URL</strong>.</li>
 <li>Place your cursor in an activity, and then select <strong>Code</strong> &gt;
-  <strong>Generate</strong> &gt; <strong>Deep Link</strong>.</li>
+  <strong>Generate</strong> &gt; <strong>URL</strong>.</li>
 </ul>
 
 <p>The Code Editor adds skeleton code using the
@@ -154,7 +162,7 @@ page.tags=app indexing
 <p>The Code Editor adds an intent filter similar to the following:</p>
 <pre>
 &lt;!-- ATTENTION: This intent was auto-generated. Follow instructions at
- https://g.co/AppIndexing/AndroidStudio to publish your Android app deep links. --&gt;
+ https://g.co/AppIndexing/AndroidStudio to publish your URLs. --&gt;
 &lt;intent-filter&gt;
    &lt;action android:name="android.intent.action.VIEW" /&gt;
 
@@ -177,19 +185,20 @@ page.tags=app indexing
 
 <p>We recommend that you define a <code>&lt;data&gt;</code> element that supports URLs that you’ll
   add in the future. In the previous sample code, for example, Google will index any URLs starting
-  with <code>www.example.com/gizmos</code>. Also, remember to
-  include a deep link for your app home screen so it’s included in search results. </p>
+  with <code>http://www.example.com/gizmos</code>. Also, remember to
+  include a URL for your app home screen so it’s included in search results. </p>
 
-<p>Deep link URLs can be the same as the URLs of the comparable pages on your website.</p>
+<p>The URLs you specify in your intent filters can be the same as the URLs of
+the comparable pages on your website.</p>
 
 <li>In the corresponding activity,
   <a href="{@docRoot}training/app-indexing/deep-linking.html#handling-intents">add Java code</a>
   to read data from the intent filter and direct the app to respond accordingly. </li>
-<li><a href="#testintent">Test your deep link</a>.</li>
+<li><a href="#testintent">Test your URL</a>.</li>
 
 </ol>
 
-<p>To support Google Search for your deep links, follow these steps:</p>
+<p>To support Google Search for your URLs:</p>
 <ol>
 <li><a href="https://developers.google.com/app-indexing/android/app#declare-a-website-association"
   class="external-link">Define an association</a>
@@ -198,7 +207,7 @@ page.tags=app indexing
   <a href="{@docRoot}training/app-links/index.html">link default handling and verification</a>.</p>
 <li>Optionally
   <a href="https://developers.google.com/app-indexing/android/app#create-the-noindexxml-file"
-  class="external-link">exclude app URLs</a>
+  class="external-link">exclude certain URLs</a>
   from the Google index.</li>
 <li>Optionally <a href="#indexing">add App Indexing API code</a> to support additional search
   features.</li>
@@ -207,27 +216,28 @@ page.tags=app indexing
 
 <p>To test and debug your links, you can use the following Android Studio features:</p>
 <ul>
-<li><a href="#testintent">Launch your deep link</a> in Android Studio to test that it works.</li>
+<li><a href="#testintent">Launch your URL</a> in Android Studio to test that it works.</li>
 <li><a href="#lint">Enable the following Android Lint categories</a>:</li>
 <ul>
-<li><strong>Missing Support for Google App Indexing</strong></li>
-<li><strong>Incorrect Usage of App Link for Google App Indexing</strong></li>
+<li><strong>Missing support for Google App Indexing</strong></li>
+<li><strong>URL not supported by app for Google App Indexing</strong></li>
 </ul>
+<li><a href="#appindexingtest">Perform a Google App Indexing Test</a>.</li>
 </ul>
 
 <p>In addition, you can
   <a href="https://developers.google.com/app-indexing/android/test#preview-your-apk-on-search-console"
   class="external-link">preview your APK in the Google Search Console</a>
-  to test your deep links, whether the app is associated with a website or not. </p>
+  to test your URLs, whether the app is associated with a website or not. </p>
 
 
 
 <h2 id="indexing">Adding App Indexing API Skeleton Code to an Activity</h2>
 
-<p>After adding deep links, you can add App Indexing API code to an activity to support additional
-  search features.  </p>
+<p>After adding URL support to your app, you can add App Indexing API code to
+an activity to support additional search features.  </p>
 
-<p>To add App Indexing API code to an activity, follow these steps:</p>
+<p>To add App Indexing API code to an activity:</p>
 <ol>
 <li>In <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>
   in the <em>Project</em> window, double-click the activity Java file to open it in the
@@ -297,9 +307,9 @@ page.tags=app indexing
                // this app activity's content,
                // make sure this auto-generated web page URL is correct.
                // Otherwise, set the URL to null.
-               Uri.parse("http://host/path"),
-               // TODO: Make sure this auto-generated app deep link URI is correct.
-               Uri.parse("android-app://com.example/http/host/path")
+               Uri.parse("http://www.example.com/gizmos"),
+               // TODO: Make sure this auto-generated app URL is correct.
+               Uri.parse("android-app://com.example/http/www.example.com/gizmos")
        );
        AppIndex.AppIndexApi.start(client, viewAction);
    }
@@ -317,9 +327,9 @@ page.tags=app indexing
                // this app activity's content,
                // make sure this auto-generated web page URL is correct.
                // Otherwise, set the URL to null.
-               Uri.parse("http://host/path"),
-               // TODO: Make sure this auto-generated app deep link URI is correct.
-               Uri.parse("android-app://com.example/http/host/path")
+               Uri.parse("http://www.example.com/gizmos"),
+               // TODO: Make sure this auto-generated app URL is correct.
+               Uri.parse("android-app://com.example/http/www.example.com/gizmos")
        );
        AppIndex.AppIndexApi.end(client, viewAction);
        client.disconnect();
@@ -363,7 +373,9 @@ page.tags=app indexing
 <ul>
 <li><a href="#testindexing">Examine logcat Monitor Messages</a>.</li>
 <li><a href="#lint">Enable the following Android Lint category</a>:
-  <strong>Missing Support for Google App Indexing API</strong></li>
+  <strong>Missing support for Google App Indexing API</strong></li>
+
+<li><a href="#appindexingtest">Perform a Google App Indexing Test</a>.</li>
 </ul>
 
 <p>In addition, you can
@@ -371,12 +383,12 @@ page.tags=app indexing
   class="external-link">preview your APK in the Google Search Console</a>.</p>
 
 
-<h2 id="testintent">Testing a Deep Link</h2>
+<h2 id="testintent">Testing a URL</h2>
 
-<p>When you run your app from Android Studio, you can specify a deep link to launch so you can
+<p>When you run your app from Android Studio, you can specify a URL to launch so you can
   test it.</p>
 
-<p>To launch a deep link from Android Studio, follow these steps:</p>
+<p>To launch a URL from Android Studio:</p>
 <ol>
 <li>In Android Studio, open your project in
   <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>.</li>
@@ -385,14 +397,14 @@ page.tags=app indexing
 <li>In the <em>Run/Debug Configurations</em> dialog, beneath <strong>Android Application,</strong>
   select the module you want to test.</li>
 <li>Select the <strong>General</strong> tab. </li>
-<li>In the <strong>Launch</strong> field, select <strong>Deep Link</strong>. </li>
-<li>In the <strong>Deep Link</strong> field, click <strong>…</strong> to select from a list of
-  defined deep links.</li>
+<li>In the <strong>Launch</strong> field, select <strong>URL</strong>. </li>
+<li>In the <strong>URL</strong> field, click <strong>…</strong> to select from a list of
+  defined URLs.</li>
 
 <p>Or type the URL you want to test, for example, <code>http://example.com/gizmos</code>. </p>
 <li>Click <strong>OK</strong>.</li>
 <li>Select <strong>Run</strong> &gt; <strong>Run app</strong> or <strong>Debug app</strong>.</li>
-<li>If the <em>Device Chooser</em> dialog appears, select a connected device or an
+<li>If the <em>Select Deployment Target</em> dialog appears, select a connected device or an
   emulator, and click <strong>OK</strong>.</li>
 
 <p>If the link is successful, the app launches in the device or emulator, and displays the app at
@@ -411,12 +423,12 @@ page.tags=app indexing
 
 <p>The logcat Monitor can display app indexing log messages to determine if your App Indexing API
   code is pushing the correct data to the cloud. For example, you can check the app title and the
-  URL. The logcat Monitor is part of Android Monitor in Android Studio. </p>
+  URL. The logcat Monitor is part of Android Monitor in Android Studio.</p>
 
-<p>Follow these steps:</p>
+<p>To view App Indexing API messages in the logcat Monitor:</p>
 <ol>
-<li>Run your app in Android Studio so it <a href="#testintent">launches a deep link</a>.</li>
-<li><a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>
+<li>Run your app in Android Studio so it <a href="#testintent">launches a URL</a>.</li>
+<li><a href="{@docRoot}tools/help/am-logcat.html#running">Display Android Monitor</a>
   and click the <strong>logcat</strong> tab.</li>
 <li><a href="{@docRoot}tools/help/am-logcat.html#level">Set the log level</a> to
   <strong>Verbose</strong>.</li>
@@ -445,10 +457,10 @@ page.tags=app indexing
 
 <h2 id="lint">Configuring Lint</h2>
 
-<p>You can use the Android Studio built-in Lint tool to check whether you have valid deep links
+<p>You can use the Android Studio built-in Lint tool to check whether you have valid URLs
   defined in the manifest and have implemented the App Indexing API correctly in activities.</p>
 
-<p>You can view deep link and app indexing warnings and errors in two ways: </p>
+<p>You can view URL and app indexing warnings and errors in two ways: </p>
 <ul>
 <li>As pop-up text in the Code Editor. When Lint finds a problem, it highlights the problematic
   code in yellow, or underlines the code in red for more serious issues.</li>
@@ -458,7 +470,7 @@ page.tags=app indexing
 
 
 
-<p>To set default Lint checks for deep links and the App Indexing API, follow these steps:</p>
+<p>To set default Lint checks for URLs and the App Indexing API:</p>
 <ol>
 <li>In Android Studio, open your project in
   <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>.
@@ -472,25 +484,24 @@ page.tags=app indexing
   respectively. </li>
 <li>Expand the <strong>Android Lint</strong> category and change the Lint settings as needed:</li>
 <ul>
-<li><strong>Missing Support for Google App Indexing</strong> - Reports a warning if the app hasn’t
-  implemented deep links, which are used by Google Search. This warning setting is enabled by
+<li><strong>Missing support for Google App Indexing</strong> - Reports a warning if the app hasn’t
+  implemented URLs, which are used by Google Search. This warning setting is enabled by
   default.</li>
-<li><strong>Missing Support for Google App Indexing API</strong> - Reports if an app hasn’t
+<li><strong>Missing support for Google App Indexing API</strong> - Reports if an app hasn’t
   implemented the App Indexing API at all. This warning setting is disabled by default.</li>
-<li><strong>Incorrect Usage of App Link for Google App Indexing</strong> - Reports deep link
+<li><strong>URL not supported by app for Google App Indexing</strong> - Reports URL
   errors in manifest code. This error setting is enabled by default.</li>
 </ul>
 
 <p>For example, the following Lint warning appears for the first setting:</p>
-<p><img src="{@docRoot}images/tools/ai-lint.png" /></p>
+<p><img src="{@docRoot}images/tools/ai-lint.png" alt="Lint warning" /></p>
 
 <li>Click <strong>OK</strong>.</li>
 </ol>
 
 
 
-<p>To produce a list of Lint checks displayed in the <em>Inspection Results</em> window,
-  follow these steps:</p>
+<p>To produce a list of Lint checks displayed in the <em>Inspection Results</em> window:</p>
 <ol>
 <li>In Android Studio, open your project in
   <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>
@@ -504,7 +515,7 @@ page.tags=app indexing
   dialog, optionally click <strong>Manage</strong> to define a new profile, specify the Lint
   settings you want, and then click <strong>OK</strong>.</li>
 <p>In the <em>Inspections</em>  dialog, you can search for the string "app indexing"
-to find the deep link and App Indexing API Lint checks. Note that changing Lint settings for a
+to find the URL and App Indexing API Lint checks. Note that changing Lint settings for a
 profile in the <em>Inspections</em> dialog doesn’t change the default settings, as described in
 the previous procedure. It does change the settings for profiles displayed in the
 <em>Inspections</em> dialog, however.</p>
@@ -512,3 +523,87 @@ the previous procedure. It does change the settings for profiles displayed in th
 <p>The results appear in the <em>Inspection Results</em> window.</p>
 
 </ol>
+
+
+<h2 id="appindexingtest">Performing a Google App Indexing Test</h2>
+
+<p>You can use a Google App Indexing Test to check whether Google can index
+a URL by either crawling your app page or using the App Indexing API.
+Google can index the URL if your app supports at least one of the following:
+</p>
+<ul>
+<li>Googlebot can open and crawl the page identified by the URL.</li>
+<li>Your app sends the correct data by using the App Indexing API.</li>
+</ul>
+
+<p>To perform a Google App Indexing Test: </p>
+<ol>
+<li>Add <a href="#intent">URL</a> and
+<a href="#indexing">App Indexing API</a> support to your app.
+</li>
+<li>While your project is open in Android Studio, select <strong>Tools</strong>
+&gt; <strong>Android</strong> &gt; <strong>Google App Indexing Test</strong>.
+</li>
+<li>In the <em>Google App Indexing Test</em> dialog, select a
+<strong>Module</strong>, <strong>URL</strong>, and <strong>Language</strong>.
+</li>
+<li>Log in if you see a message asking you to log into a Google Cloud Platform
+account.</li>
+<li>In the <em>Google App Indexing Test</em> dialog, click <strong>OK</strong>.
+</li>
+
+<p>Android Studio builds the APK and starts the test. The test can take a few
+minutes to complete. The results appear in a new tab in the Code Editor.</p>
+<p><img src="{@docRoot}images/tools/ai-appindexingtest.png"
+alt="Google App Indexing Test results" /></p>
+
+<p>If the app preview on the right shows the screen that corresponds to the URL
+you're testing, then Googlebot can find the URL.</p>
+
+<li>Correct any issues the test identifies, and repeat the test as often as
+needed.</li>
+</li>
+</ol>
+
+<p>The following table lists common errors and warnings you might encounter.</p>
+
+<table>
+  <tr>
+    <th scope="col">Warning or Error</th>
+    <th scope="col">Description</th>
+  </tr>
+
+  <tr>
+    <td>Error: Google cannot index this page.</td>
+    <td>Your app can't be crawled by Googlebot or using the App Indexing API,
+     so Google isn't able to index this app.</td>
+  </tr>
+  <tr>
+    <td>Warning: The App URL you sent by using the App Indexing API doesn't
+    match the URL opened.</td>
+    <td>When calling the App Indexing API, the URL specified in the app must
+    match the opened URL.</td>
+  </tr>
+  <tr>
+    <td>Warning: Google cannot index this page using the App Indexing API
+    because the title is empty.</td>
+    <td>When calling the App Indexing API, the title shouldn't be empty.</td>
+  </tr>
+  <tr>
+    <td>Warning: Google can index this page using Googlebot crawling but
+    identified blocked resources.</td>
+    <td>The app references other resources, and some of them are blocked or
+    temporarily unavailable. If these resources aren't critical, it might not
+    matter. Check the preview on the right to see whether the content
+    displays correctly. To fix this issue, make sure the resources aren't
+    blocked by <a href="https://support.google.com/webmasters/answer/6062608"
+  class="external-link"><code>robots.txt</code></a>.</td>
+  </tr>
+  <tr>
+    <td>Warning: Google cannot index this page using the App Indexing API.</td>
+    <td>Your app isn’t using the App Indexing API. We recommended adding App
+    Indexing API support to your app.</td>
+  </tr>
+
+</table>
+

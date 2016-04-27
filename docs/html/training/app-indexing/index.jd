@@ -22,7 +22,7 @@ startpage=true
 target="_blank">App Indexing for Google Search</a></li>
 <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
 Filters</a></li>
-<li><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing API Support in Android Studio</a></li>
+<li><a href="{@docRoot}tools/help/app-link-indexing.html">Supporting URLs and App Indexing in Android Studio</a></li>
 </ul>
 </div>
 </div>
