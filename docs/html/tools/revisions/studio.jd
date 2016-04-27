@@ -84,7 +84,7 @@ using an N device or emulator and select <strong>Native</strong> debugger mode
 (in the <strong>Debugger</strong> tab for your run/debug configuration).</li>
     </ul>
     <p>For other build enhancements, including incremental Java compilation
-    and dexing-in-process,update your <a
+    and dexing-in-process, update your <a
 href="{@docRoot}tools/revisions/gradle-plugin.html">Android Plugin for
 Gradle</a> to version 2.1.0.</p>
   </div>
