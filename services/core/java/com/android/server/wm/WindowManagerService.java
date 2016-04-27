@@ -2764,6 +2764,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
 
+            if (win.mAttrs.surfaceInsets.left != 0
+                    || win.mAttrs.surfaceInsets.top != 0
+                    || win.mAttrs.surfaceInsets.right != 0
+                    || win.mAttrs.surfaceInsets.bottom != 0) {
+                winAnimator.setOpaqueLocked(false);
+            }
+
             boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
             final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
