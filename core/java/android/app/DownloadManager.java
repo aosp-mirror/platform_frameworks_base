@@ -16,12 +16,14 @@
 
 package android.app;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.ConnectivityManager;
@@ -29,9 +31,11 @@ import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
 import android.provider.Settings;
+import android.provider.MediaStore.Images;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -1183,6 +1187,84 @@ public class DownloadManager {
         } catch (SettingNotFoundException exc) {
             return null;
         }
+    }
+
+    /**
+     * Rename the given download if the download has completed
+     *
+     * @param context the {@link Context} to use in case need to update MediaProvider
+     * @param id the downloaded id
+     * @param displayName the new name to rename to
+     * @return true if rename was successful, false otherwise
+     * @hide
+     */
+    public boolean rename(Context context, long id, String displayName) {
+        if (!FileUtils.isValidFatFilename(displayName)) {
+            throw new SecurityException(displayName + " is not a valid filename");
+        }
+
+        Query query = new Query().setFilterById(id);
+        Cursor cursor = null;
+        String oldDisplayName = null;
+        String mimeType = null;
+        try {
+            cursor = query(query);
+            if (cursor == null) {
+                return false;
+            }
+            if (cursor.moveToFirst()) {
+                int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
+                if (DownloadManager.STATUS_SUCCESSFUL != status) {
+                    return false;
+                }
+                oldDisplayName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
+                mimeType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        if (oldDisplayName == null || mimeType == null) {
+            throw new IllegalStateException(
+                    "Document with id " + id + " does not exist");
+        }
+
+        final File parent = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS);
+
+        final File before = new File(parent, oldDisplayName);
+        final File after = new File(parent, displayName);
+
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+        if (!before.renameTo(after)) {
+            throw new IllegalStateException("Failed to rename to " + after);
+        }
+
+        // Update MediaProvider if necessary
+        if (mimeType.startsWith("image/")) {
+            context.getContentResolver().delete(Images.Media.EXTERNAL_CONTENT_URI,
+                    Images.Media.DATA + "=?",
+                    new String[] {
+                            before.getAbsolutePath()
+                    });
+
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            intent.setData(Uri.fromFile(after));
+            context.sendBroadcast(intent);
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_TITLE, displayName);
+        values.put(Downloads.Impl._DATA, after.toString());
+        values.putNull(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
+        long[] ids = {id};
+
+        return (mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
+                getWhereArgsForIds(ids)) == 1);
     }
 
     /**
