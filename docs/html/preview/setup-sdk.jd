@@ -55,7 +55,7 @@ environment unaffected.</p>
 
 <p>To download Android Studio 2.1 as a separate installation, follow these
 steps (or if you want to receive Android Studio 2.1 as an update to your
-existing installation, skip to step 4):</p>
+existing installation, skip to step 6):</p>
 
 <ol>
   <li>Edit the name of your
@@ -67,6 +67,16 @@ existing installation, skip to step 4):</p>
   </li>
   <li>Unzip the package and move the Android Studio 2.1 contents to the
     appropriate location for applications on your system, then launch it.</li>
+  <li>In the setup wizard, click <strong>Next</strong> a couple times to
+  reach the SDK Components Setup screen. Here,
+  you must set a different path for the <strong>Android SDK Location</strong>.
+  It can be any directory you want, but it must not be the default path, which
+  is the same directory used by your original version of Android Studio (unless
+  you changed that one yourself). The SDK location for Android Studio 2.1
+  must be different because the N Preview SDK packages are not compatible with
+  versions of Android Studio lower than 2.1.</p>
+  </li>
+  <li>Continue with the setup wizard until you reach the Android Studio IDE.</li>
   <li>Open the Settings dialog
     (<strong>File &gt; Settings</strong> on Windows/Linux, or
     <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
