@@ -499,6 +499,7 @@ public class ZygoteInit {
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
         try {
+            String sharedLibraries = "";
             for (String classPathElement : classPathElements) {
                 // System server is fully AOTed and never profiled
                 // for profile guided compilation.
@@ -508,9 +509,13 @@ public class ZygoteInit {
                         false /* newProfile */);
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                     installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
-                            dexoptNeeded, 0 /*dexFlags*/, "speed",
-                            null /*volumeUuid*/);
+                            dexoptNeeded, 0 /*dexFlags*/, "speed", null /*volumeUuid*/,
+                            sharedLibraries);
                 }
+                if (!sharedLibraries.isEmpty()) {
+                    sharedLibraries += ":";
+                }
+                sharedLibraries += classPathElement;
             }
         } catch (IOException | InstallerException e) {
             throw new RuntimeException("Error starting system_server", e);
