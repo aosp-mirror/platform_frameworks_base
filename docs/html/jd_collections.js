@@ -1782,7 +1782,7 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
     "https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
-    "http://android-developers.blogspot.com/2016/02/android-studio-20-beta.html",
+    "http://android-developers.blogspot.com/2016/04/android-studio-20.html",
     "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
