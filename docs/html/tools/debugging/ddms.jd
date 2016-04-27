@@ -25,6 +25,13 @@ parent.link=index.html
 
         </li>
       </ol>
+
+ <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></li>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a></li>
+  </ol>
+
     </div>
   </div>
 
@@ -180,16 +187,16 @@ parent.link=index.html
   <h3 id="profiling">Starting method profiling</h3>
 
   <p>Method profiling is a means to track certain metrics about a method, such as number of calls,
-  execution time, and time spent executing the method. If you want more granular control over 
-  where profiling data is collected, use the {@link android.os.Debug#startMethodTracing()} and 
-  {@link android.os.Debug#stopMethodTracing()} methods. For more information about generating trace logs, see 
+  execution time, and time spent executing the method. If you want more granular control over
+  where profiling data is collected, use the {@link android.os.Debug#startMethodTracing()} and
+  {@link android.os.Debug#stopMethodTracing()} methods. For more information about generating trace logs, see
   <a href="debugging-tracing.html">Profiling and Debugging UIs</a>.</p>
 
   <p>Before you start method profiling in DDMS, be aware of the following restrictions:</p>
     <ul>
       <li>Android 2.1 and earlier devices must
       have an SD card present and your application must have permission to write to the SD card.
-      <li>Android 2.2 and later devices do not need an SD card. The trace log files are 
+      <li>Android 2.2 and later devices do not need an SD card. The trace log files are
       streamed directly to your development machine.</li>
     </ul>
 
@@ -246,18 +253,18 @@ TrafficStats.tagSocket(outputSocket);
 TrafficStats.untagSocket(outputSocket);</pre>
 
 <p>Alternatively, the {@link java.net.URLConnection} APIs included in the platform
-automatically tag sockets internally based on the active tag (as identified by 
+automatically tag sockets internally based on the active tag (as identified by
 {@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}).
 These APIs correctly tag/untag sockets when recycled through
-keep-alive pools. In the following example,  
-{@link android.net.TrafficStats#setThreadStatsTag setThreadStatsTag()} 
-sets the active tag to be {@code 0xF00D}. 
-There can only be one active tag per thread. 
-That is the value that will 
+keep-alive pools. In the following example,
+{@link android.net.TrafficStats#setThreadStatsTag setThreadStatsTag()}
+sets the active tag to be {@code 0xF00D}.
+There can only be one active tag per thread.
+That is the value that will
 be returned by {@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}
-and thus used by the HTTP client to tag sockets. The {@code finally} statement 
-invokes 
-{@link android.net.TrafficStats#clearThreadStatsTag clearThreadStatsTag()} 
+and thus used by the HTTP client to tag sockets. The {@code finally} statement
+invokes
+{@link android.net.TrafficStats#clearThreadStatsTag clearThreadStatsTag()}
 to clear the tag.</p>
 
 <pre>TrafficStats.setThreadStatsTag(0xF00D);
@@ -297,56 +304,9 @@ displayed on devices running Android 4.0.3 or higher.</p>
   edit filter, and delete filter buttons let you manage your custom filters.</p>
 
   <h3 id="ops-location">Emulating phone operations and location</h3>
-  <p>The Emulator control tab lets you simulate a
-  phone's voice and data network status. This is useful when you want to test your application's
-  robustness in differing network environments.</p>
+  <p>The <strong>Emulator Control</strong> tab, shown in Figure 1, is no longer
+  supported. Use the
+  <a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a>
+  for these features.</p>
 
-  <h4>Changing network state, speed, and latency</h4>
-  <p>The Telephony Status section of the Emulator
-  controls tab lets you change different aspects of the phone's networks status, speed and latency.
-  The following options are available to you and are effective immediately after you set them:</p>
 
-  <ul>
-    <li>Voice - unregistered, home, roaming, searching, denied</li>
-
-    <li>Data - unregistered, home, roaming, searching, denied</li>
-
-    <li>Speed - Full, GSM, HSCSD, GPRS, EDGE, UMTS, HSDPA</li>
-
-    <li>Latency - GPRS, EDGE, UMTS</li>
-  </ul>
-
-  <h4>Spoofing calls or SMS text messages</h4>
-  <p>The Telephony Actions section of the Emulator
-  controls tab lets you spoof calls and messages. This is useful when you want to to test your
-  application's robustness in responding to incoming calls and messages that are sent to the phone.
-  The following actions are available to you:</p>
-
-  <ul>
-    <li>Voice - Enter a number in the <strong>Incoming number</strong> field and click 
-    <strong>Call</strong> to send a simulated call to the emulator or phone. Click the
-    <strong>Hang up</strong> button to terminate the call.</li>
-
-    <li>SMS - Enter a number in the <strong>Incoming number</strong> field and a message in the
-    <strong>Message:</strong> field and click the <strong>Send</strong> button to send the
-    message.</li>
-  </ul>
-
-  <h4>Setting the location of the phone</h4>
-  <p>If your application depends on the location of the phone, you can have DDMS send your
-  device or AVD a mock location. This is useful if you
-  want to test different aspects of your application's location specific features without
-  physically moving. The following geolocation data types are available to you:</p>
-
-  <ul>
-    <li>Manual - set the location by manually specifying decimal or sexagesimal longitude and
-    latitude values.</li>
-
-    <li>GPX - GPS eXchange file</li>
-
-    <li>KML - Keyhole Markup Language file</li>
-  </ul>
-
-  For more information about providing mock location data, see 
-  <a href="{@docRoot}guide/topics/location/strategies.html#MockData">Location Strategies</a>.
-  
