@@ -1221,14 +1221,14 @@
          {@link #AndroidManifestActivity activity},
          {@link #AndroidManifestActivityAlias activity-alias}, and
          {@link #AndroidManifestUsesLibrary uses-library}.  The application tag
-         appears as a child of the root {@link #AndroidManifest manifest} tag. -->
+         appears as a child of the root {@link #AndroidManifest manifest} tag in
+         an application's manifest file. -->
     <declare-styleable name="AndroidManifestApplication" parent="AndroidManifest">
-        <!-- An optional name of a class implementing the overall
-             {@link android.app.Application} for this package.  When the
-             process for your package is started, this class is instantiated
-             before any of the other application components.  Note that this
-             is not required, and in fact most applications will probably
-             not need it. -->
+        <!-- The (optional) fully-qualified name for a subclass of
+             {@link android.app.Application} that the system instantiates before
+             any other class when an app's process starts. Most applications
+             don't need this attribute. If it's not specified, the system
+             instantiates the base Application class instead.-->
         <attr name="name" />
         <attr name="theme" />
         <attr name="label" />
