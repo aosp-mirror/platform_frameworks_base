@@ -29,8 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"మళ్లీ చూపవద్దు"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"బగ్ నివేదికలు"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"బగ్ నివేదిక ఫైల్‌ను చదవడం సాధ్యపడలేదు"</string>
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"బగ్ నివేదిక వివరాలను జిప్ ఫైల్‌కు జోడించడం సాధ్యపడలేదు"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"పేరు లేనివి"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"వివరాలు"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"స్క్రీన్‌షాట్"</string>
