@@ -13,7 +13,7 @@ parent.link=index.html
         <li><a href="#commandline">Running lint from the command-line</a></li>
          <li><a href="#config">Configuring lint</a>
             <ol>
-		<LI><a href="#studio_config">Configuring lint in Android Studio</a></LI>
+		<LI><a href="#studio_config">Configuring Lint in Android Studio</a></LI>
                 <LI><a href="#pref">Configuring the lint file</a></LI>
                 <LI><a href="#src">Configuring lint checking in Java and XML source files</a></LI>
             </ol>
@@ -169,35 +169,68 @@ severity level.</p>
 <li>Per Version Control System (VCS) scopes</li>
 </ul>
 
-<h3 id="studio_config">Configuring lint in Android Studio</h3>
-<p>Android Studio allows you to enable or disable individual inspections and configure
-project-global, directory-specific, and file-specific settings for {@code lint}.</p>
+<h3 id="studio_config">Configuring Lint in Android Studio</h3>
 
-<p>You can manage inspection profiles and configure inspection severity within Android Studio using
-the <strong>File &gt; Settings &gt; Project Settings</strong> menu to open the <em>Inspections</em>
-page with a list of the supported profiles and inspections.</p>
-<p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
-<p class="img-caption"><strong>Figure 3.</strong> Inspection Configuration</p> 
+<p>The built-in Lint tool checks your code while you're using
+Android Studio. You can view warnings and errors in two ways: </p>
+<ul>
+<li>As pop-up text in the Code Editor. When Lint finds a problem, it highlights
+the problematic code in yellow, or underlines the code in red for more serious
+issues.</li>
+<li>In the Lint <em>Inspection Results</em> window after you select
+<strong>Analyze</strong> &gt; <strong>Inspect Code</strong>.</li>
+</ul>
 
-<h4>Global preferences</h4>
+
+
+<p>To set default Lint checks:</p>
 <ol>
-<li>To specify global project settings, select the project folder in the Project View and choose
-<strong>Analyze &gt; Inspect Code</strong>.</li>
+<li>In Android Studio, open your project.
+</li>
+<li>Select <strong>File</strong> &gt; <strong>Other Settings</strong> &gt;
+  <strong>Default Settings</strong>.</li>
+<li>In the <em>Default Preferences</em> dialog, select <strong>Editor</strong>
+&gt; <strong>Inspections</strong>. </li>
+<li>In the <strong>Profile</strong> field, select <strong>Default</strong> or
+  <strong>Project Default</strong> to set the
+  <a href="https://www.jetbrains.com/help/idea/2016.1/specify-inspection-scope-dialog.html?origin=old_help"
+  class="external-link">scope</a> for Android Studio or just for this project,
+  respectively. </li>
+<li>Expand a category and change the Lint settings as needed.</li>
+<p>You can select individual checks, or entire categories.</p>
 
-<li>Specify your inspection scope and profile, and click <b>OK</b>.</li>
+<li>Click <strong>OK</strong>.</li>
 </ol>
-<p>The configured settings run the specified {@code lint} inspections. The {@code lint}
-inspections are also run whenever you build and run your Android project and modules.</p>
 
-<h4>Module and file-specific preferences</h4>
+
+
+<p>To produce a list of Lint checks displayed in the <em>Inspection Results</em>
+window:</p>
 <ol>
-<LI>Run the {@code lint} tool on your module by right-clicking on your module folder or file in the
-Project View and selecting  <strong>Analyze &gt; Inspect Code</strong>. This displays the
-{@code lint} inspection results
-with a list of issues that {@code lint} detected in your module.</LI>
-<li>From the <strong>Lint Warnings</strong> view, use the toolbar options to configure {@code lint}
-preferences for individual modules and files, and set the issue display options.</li>
+<li>In Android Studio, open your project
+  and select a portion of your project that you want to test.</li>
+<li>Select <strong>Analyze</strong> &gt; <strong>Inspect Code</strong>.</li>
+<li>In the <em>Specify Inspection Scope </em>dialog, select the inspection
+<a href="https://www.jetbrains.com/help/idea/2016.1/specify-inspection-scope-dialog.html?origin=old_help"
+  class="external-link">scope</a> and profile. </li>
+
+<p>The scope specifies the files you want to analyze, and the profile specifies
+the Lint checks you’d like to perform.</p>
+<li>If you want to change the Lint settings, click <strong>…</strong>. In the
+<em>Inspections</em> dialog, optionally click <strong>Manage</strong> to define
+a new profile, specify the Lint settings you want, and then click
+<strong>OK</strong>.</li>
+<p>In the <em>Inspections</em> dialog, you can search for a string
+to find Lint checks. Note that changing Lint settings for a
+profile in the <em>Inspections</em> dialog doesn’t change the default settings,
+as described in the previous procedure. It does change the settings for profiles
+displayed in the <em>Inspections</em> dialog, however.</p>
+<li>Click <strong>OK</strong>.</li>
+<p>The results appear in the <em>Inspection Results</em> window, organized by
+category.</p>
+
 </ol>
+
 
 
 <h3 id="pref">Configuring the lint file</h3>
@@ -289,7 +322,7 @@ file.  The <code>ignore</code> attribute is inherited by the children elements o
 in which the attribute is declared. In this example, the {@code lint} check is also disabled for the
 child <code>&lt;TextView&gt;</code> element. </p>
 <pre>
-&lt;LinearLayout 
+&lt;LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources" &gt;
