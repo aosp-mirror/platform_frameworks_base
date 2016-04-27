@@ -94,21 +94,6 @@ cache in the AVD directory.</p>
 For more information, see
 <a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 
-<h3 id="manifest">Manifest settings</h3>
-
-<p>For your app to use certain emulator device features, you need to specify
-in the manifest that your app will use them. For example, an Android Wear watch
-requires the following <code>&lt;uses-feature&gt;</code> setting:</p>
-
-<pre>
-&lt;uses-feature android:name="android.hardware.type.watch" /&gt;
-</pre>
-
-<p>There are also settings for camera, location, audio, microphone, phone,
-networking, TV, touchscreen, and more. For more information, see
-<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">
-&lt;uses-feature&gt;</a>.</p>
-
 <h3 id="system">System images</h3>
 
 <p>The Android Emulator runs a full
