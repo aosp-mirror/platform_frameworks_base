@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Үйлчилгээг хайж байна…"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi Calling"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi-аар дуудлага хийх болон мессеж илгээхээр бол эхлээд оператороосоо энэ төхөөрөмжийг тохируулж өгөхийг хүсээрэй. Дараа нь Тохиргооноос Wi-Fi дуудлага хийх үйлдлийг асаагаарай."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Операторт бүртгүүлэх"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi Дуудлага"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Идэвхгүй"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi илүү эрхэмлэдэг"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Үүрэн сүлжээг илүү эрхэмлэдэг"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Цагны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Телевизийн санах ой дүүрсэн байна. Зай гаргахын тулд зарим файлыг устгана уу."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Утасны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Сертификатын эрхийг суулгасан</item>
+      <item quantity="one">Сертификатын эрхийг суулгасан</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Тодорхойгүй гуравдагч талаас"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Таны ажлын мэдээллийн администратороос"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>-с"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ихэнх тохиолдолд үүнийг хэрэглэнэ үү. Энэ нь танд тайлангийн явцыг хянах болон асуудлын талаар дэлгэрэнгүйг мэдэх боломж олгоно. Таны бага ашигладаг, тайлагнахад хугацаа их шаарддаг зарим хэсгийг алгана."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Үүнийг ихэнх тохиолдолд ашиглана уу. Энэ нь танд тайлангийн явцыг хянах, асуудлын талаар дэлгэрэнгүй мэдээлэл оруулах болон дэлгэцийн агшин авахыг зөвшөөрнө. Мөн тайлагнахад урт хугацаа шаарддаг таны бага ашигладаг зарим хэсгийг алгасах болно."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Бүрэн тайлан"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Таны төхөөрөмж хариу үйлдэл үзүүлэхгүй байх, хэт удаан байх эсвэл танд тайлангийн бүх хэсэг хэрэгтэй үед ситемийн оролцоог хамгийн бага байлгах энэ сонголтыг ашиглана уу. Энэ нь дэлгэцийн зураг авах, эсвэл дэлгэрэнгүй мэдээлэлд хандахыг зөвшөөрөхгүй."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Таны төхөөрөмж хариу үзүүлэхгүй, эсвэл хэт удаан байх, танд тайлангийн бүх хэсэг шаардлагатай бол системийн оролцоог хамгийн бага байлгах энэ сонголтыг ашиглана уу. Дэлгэрэнгүй мэдээлэл нэмэх болон нэмэлт дэлгэцийн агшин авахыг зөвшөөрөхгүй."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_1">%d</xliff:g> секундад авна.</item>
       <item quantity="one">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_0">%d</xliff:g> секундад авна.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> цаг</item>
       <item quantity="one">1 цаг</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"одоо"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Видео алдаа"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Энэ видео энэ төхөөрөмж дээр урсгалаар гарч чадахгүй."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Энэ видеог тоглуулах боломжгүй."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Андройдыг дэвшүүлж байна…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Андройд эхэлж байна..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Хадгалалтыг сайжруулж байна."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Андройдыг дэвшүүлж байна"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Шинэчилж дуустал зарим апп хэвийн бус ажиллаж болзошгүй"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>-н <xliff:g id="NUMBER_0">%1$d</xliff:g> апп-г тохируулж байна."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Бэлдэж байна <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Апп-г эхлүүлж байна."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Жилийг сонгоно уу"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Энэ дэлгэцийг цуцлахын тулд Буцах болон Тойм-д зэрэг хүрч барина."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Энэ дэлгэцийг цуцлахын тулд Буцах товчлуурыг дараад, хүлээнэ үү."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Энэ дэлгэцийг цуцлахын тулд Тойм харагдацанд хүрч барина."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App-ыг тусгайлан тэмдэглэсэн байна: Энэ төхөөрөмж дээр тусгайлан тэмдэглэсэн сонголтыг устгах боломжгүй."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Танай админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Таны админ устгасан байна"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d минутын турш ( <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> хүртэл)</item>
       <item quantity="one">нэг минутын турш (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> хүртэл)</item>

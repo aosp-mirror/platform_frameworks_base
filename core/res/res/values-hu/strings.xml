@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Szolgáltatás keresése"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-hívás"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Ha Wi-Fi-n szeretne telefonálni és üzenetet küldeni, kérje meg szolgáltatóját, hogy állítsa be ezt a szolgáltatást. Ezután a Beállítások menüben kapcsolhatja be újra a Wi-Fi-hívást."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Regisztráljon a szolgáltatójánál"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi-hívás"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ki"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi előnyben részesítve"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobiladat-kapcsolat előnyben részesítve"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Az óra tárhelye megtelt. Szabadítson fel helyet néhány fájl törlésével."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"A tévé tárhelye megtelt. Hely felszabadításához töröljön néhány fájlt."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"A telefon tárhelye megtelt. Hely felszabadításához töröljön néhány fájlt."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Tanúsítványkibocsátók telepítve</item>
+      <item quantity="one">Tanúsítványkibocsátó telepítve</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ismeretlen harmadik fél által"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"A munkaprofil adminisztrátora által"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Megfigyelő: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Hibajelentés készítése"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ezzel információt fog gyűjteni az eszköz jelenlegi állapotáról, amelyet a rendszer e-mailben fog elküldeni. Kérjük, legyen türelemmel, amíg a hibajelentés elkészül, és küldhető állapotba kerül."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktív jelentés"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ezt használja a legtöbb esetben. Segítségével nyomon követheti a jelentés folyamatát, és további információkat kaphat a problémáról. A folyamat során kimaradhatnak az olyan kevésbé használt részek, amelyek jelentése túl sok időt igényel."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Ezt használja a legtöbb esetben. Segítségével nyomon követheti a jelentés folyamatát, további részleteket adhat meg a problémáról, illetve képernyőképeket készíthet. A folyamat során kimaradhatnak az olyan kevésbé használt részek, amelyek jelentése túl sok időt igényel."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Teljes jelentés"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Ezt a beállítást minimális rendszerzavar esetén használja, amikor eszköze nem válaszol, túl lassú, illetve ha minden jelentésrészre szüksége van. A rendszer nem készít képernyőképet, illetve nem engedélyezi a hozzáférést a további részletekhez."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Ezt a beállítást minimális rendszerzavar esetén használja, amikor eszköze nem válaszol, túl lassú, illetve ha minden jelentésrészre szüksége van. A rendszer nem teszi lehetővé további részletek megadását, illetve további képernyőképek készítését."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_1">%d</xliff:g> másodpercen belül.</item>
       <item quantity="one">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_0">%d</xliff:g> másodpercen belül.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> óra</item>
       <item quantity="one">1 óra</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"most"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobléma"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ezt a videót nem lehet megjeleníteni ezen az eszközön."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nem lehet lejátszani ezt a videót."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android frissítése folyamatban..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Az Android indítása…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tárhely-optimalizálás."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android frissítése folyamatban"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"A frissítés befejezéséig előfordulhat, hogy egyes alkalmazások nem megfelelően működnek."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Alkalmazás optimalizálása: <xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> előkészítése."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Kezdő alkalmazások."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Válassza ki az évet"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza és az Áttekintés lehetőséget egyszerre."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza lehetőséget."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"A képernyő rögzítésének feloldásához tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Az alkalmazás rögzítve van: a rögzítés feloldása nem engedélyezett ezen az eszközön."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de ezt sokkal ritkábban tesszük meg. Ez például azt jelentheti, hogy a képek csak azt követően jelennek meg, hogy rájuk koppintott."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Bekapcsolás"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d percen át (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Egy percen át (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

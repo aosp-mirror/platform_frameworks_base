@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवाको खोजी गर्दै…"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi कलिङ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi बाट कल गर्न र सन्देशहरू पठाउन, सबभन्दा पहिला यो सेवा सेटअप गर्न तपाईँको वाहकलाई भन्नुहोस्। त्यसपछि फेरि सेटिङहरूबाट Wi-Fi कलिङ सक्रिय पार्नुहोस्।"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"तपाईँको वाहकसँग दर्ता गर्नुहोस्"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi कलिङ"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेलुलर मनपराइयो"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV भण्डारण पूर्ण छ। ठाउँ खाली गर्नको लागि केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">प्रमाणपत्रका अख्तियारीहरूलाई स्थापना गरियो</item>
+      <item quantity="one">प्रमाणपत्रको अख्तियारीलाई स्थापना गरियो</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"अज्ञात तेस्रो पक्ष द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"तपाईँको काम प्रोफाइल प्रशासक द्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट लिनुहोस्"</string>
     <string name="bugreport_message" msgid="398447048750350456">"एउटा इमेल सन्देशको रूपमा पठाउनलाई यसले तपाईँको हालैको उपकरणको अवस्थाको बारेमा सूचना जम्मा गर्ने छ। बग रिपोर्ट सुरु गरेदेखि पठाउन तयार नभएसम्म यसले केही समय लिन्छ; कृपया धैर्य गर्नुहोस्।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"अन्तरक्रियामूलक रिपोर्ट"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"यसलाई बढी भन्दा बढी परिस्थितिहरूमा प्रयोग गर्नुहोस्।यसले तपाईँलाई रिपोर्टको प्रगति ट्र्याक गर्नका साथै समस्याका बारे थप विवरणहरू प्रविष्ट गर्न अनुमति दिन्छ।यसले रिपोर्ट गर्न लामो समय लिने केही कम्ती प्रयोग हुने खण्डहरूलाई मेटाउन सक्छ।"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बढी भन्दा बढी परिस्थितिहरूमा यसको प्रयोग गर्नुहोस्। यसले तपाईँलाई रिपोर्टको प्रगति ट्र्याक गर्न, समस्याका बारे थप विवरणहरू प्रविष्ट गर्न र स्क्रिनसटहरू लिन अनुमति दिन्छ। यसले रिपोर्ट गर्न लामो समय लिने केही कम प्रयोग हुने खण्डहरूलाई समावेश नगर्न सक्छ।"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"तपाईँको यन्त्र अनुत्तरदायी वा धेरै सुस्त हुँदा वा तपाईँलाई सबै रिपोर्ट खण्डहरूको आवश्यक पर्दा न्यूनतम प्रणाली हस्तक्षेपको लागि यो विकल्प प्रयोग गर्नुहोस्। स्क्रिनशट लिँदैन वा थप विवरणहरू प्रविष्ट गर्न तपाईँलाई अनुमति दिँदैन।"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तपाईँको यन्त्रले प्रतिक्रिया नदिँदा वा धेरै सुस्त चल्दा वा तपाईँलाई सबै रिपोर्ट सम्बन्धी खण्डहरूको आवश्यकता पर्दा प्रणालीमा न्यूनतम हस्तक्षेपका लागि यस विकल्पको प्रयोग गर्नुहोस्। यसले तपाईँलाई थप विवरणहरू प्रविष्ट गर्न वा स्क्रिनसटहरू लिन अनुमति दिँदैन।"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"> बग रिपोर्टको लागि <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
       <item quantity="one"> बग रिपोर्टको लागि <xliff:g id="NUMBER_0">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> घण्टा</item>
       <item quantity="one">1 घण्टा</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"अहिले"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"भिडियो समस्या"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"यो भिडियो यस उपकरणको लागि स्ट्रिमिङ गर्न मान्य छैन।"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"यो भिडियो चलाउन सक्दैन।"</string>
@@ -914,10 +930,10 @@
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"पठाउनुहोस्"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"गृह अनुप्रयोग चयन गर्नुहोस्"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s लाई गृहको रूपमा प्रयोग गर्नुहोस्"</string>
-    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"यस मार्फत छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s मार्फत छविलाई क्याप्चर गर्नुहोस्"</string>
-    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"छविलाई क्याप्चर गर्नुहोस्"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"यस मार्फत छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s मार्फत छविलाई कैंद गर्नुहोस्"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"छविलाई कैंद गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"फरक अनुप्रयोग प्रयोग गर्नुहोस्"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"प्रणाली सेटिङहरूमा पूर्वनिर्धारितलाई हटाउनुहोस् &gt; अनुप्रयोगहरू &gt; डाउनलोड।"</string>
@@ -955,6 +971,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"एन्ड्रोइड अपग्रेड हुँदैछ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"भण्डारण अनुकूलन गर्दै।"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android स्तरवृद्धि हुँदैछ"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"स्तरवृद्धि सम्पन्न नभएसम्म केही अनुप्रयोगहरू राम्ररी काम नगर्न सक्छन्"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"अनुप्रयोग अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
@@ -1475,7 +1493,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चयन गर्नुहोस्"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"यस पर्दालाई अनपिन गर्न एकै समय फिर्ता र सारांशलाई छोई पक्डिनुहोस्।"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"यस स्क्रिनलाई अनपिन गर्न पछाडि बटनलाई छोइराख्नुहोस्।"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यस पर्दालाई अनपिन गर्न सारांशलाई छुनुहोस् र पक्डनुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
@@ -1487,8 +1505,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"सक्रिय गर्नुहोस्"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
       <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>

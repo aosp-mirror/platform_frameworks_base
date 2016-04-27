@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"מחפש שירות"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏שיחות ב-Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"‏כדי להתקשר ולשלוח הודעות ברשת Wi-Fi, תחילה יש לבקש מהספק להגדיר את השירות. לאחר מכן, יש להפעיל שוב התקשרות Wi-Fi מ\'הגדרות\'."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"הירשם אצל הספק"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"‏שיחות Wi-Fi של %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"כבוי"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi מועדף"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"סלולרי מועדף"</string>
@@ -166,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"שטח האחסון של השעון מלא. מחק כמה קבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"האחסון בטלוויזיה מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"שטח האחסון של הטלפון מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="two">רשויות אישורים הותקנו</item>
+      <item quantity="many">רשויות אישורים הותקנו</item>
+      <item quantity="other">רשויות אישורים הותקנו</item>
+      <item quantity="one">רשות אישורים הותקנה</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"על ידי צד שלישי לא מוכר"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"על ידי המנהל של פרופיל העבודה שלך"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"על ידי <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -213,9 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
     <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד לשליחת ההודעה בפועל. אנא המתן בסבלנות."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"דוח אינטראקטיבי"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"השתמש באפשרות זו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח ולהזין פרטים נוספים על הבעיה. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ואשר יצירת הדיווח עליהם נמשכת זמן רב."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"השתמש באפשרות זו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח, להזין פרטים נוספים על הבעיה וליצור צילומי מסך. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ואשר יצירת הדיווח עליהם נמשכת זמן רב."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"דוח מלא"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"השתמש באפשרות זו כדי שההפרעה למערכת תהיה מזערית, כשהמכשיר אינו מגיב או איטי מדי, או כשאתה זקוק לכל קטעי הדוח. לא ניתן ליצור צילום מסך או להזין פרטים נוספים."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"השתמש באפשרות זו כדי שההפרעה למערכת תהיה מזערית, כשהמכשיר אינו מגיב או איטי מדי, או כשאתה זקוק לכל קטעי הדוח. לא ניתן להזין פרטים נוספים או ליצור צילומי מסך נוספים."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="two">יוצר צילום מסך לדוח על באג בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות.</item>
       <item quantity="many">יוצר צילום מסך לדוח על באג בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות.</item>
@@ -718,7 +727,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"סיסמה"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"כניסה"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"בודק..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"בטל נעילה"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"קול פועל"</string>
@@ -863,6 +872,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> שעות</item>
       <item quantity="one">שעה אחת</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"עכשיו"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"בעיה בווידאו"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"סרטון זה אינו חוקי להעברה כמדיה זורמת למכשיר זה."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"לא ניתן להפעיל סרטון זה."</string>
@@ -961,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android מבצע שדרוג…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏הפעלת Android מתחילה…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"מתבצעת אופטימיזציה של האחסון."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏Android מבצע שדרוג"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ייתכן שאפליקציות מסוימות לא יפעלו כראוי עד סיום השדרוג"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"מבצע אופטימיזציה של אפליקציה <xliff:g id="NUMBER_0">%1$d</xliff:g> מתוך <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"מכין את <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"מפעיל אפליקציות."</string>
@@ -1309,7 +1329,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"העברת מסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"מחפש מכשירים…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"הגדרות"</string>
-    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"התנתק"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"נתק"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"סורק..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"מתחבר..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"זמין"</string>
@@ -1344,7 +1364,7 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
@@ -1489,7 +1509,7 @@
     <string name="select_year" msgid="7952052866994196170">"בחר שנה"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"כדי לבטל את הקפאת המסך הזה, גע בו-זמנית נגיעה ממושכת ב\'הקודם\' ו\'סקירה\'."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"כדי לבטל את הצמדת המסך הזה, לחץ לחיצה ממושכת על הלחצן \'הקודם\'."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"כדי לבטל את הקפאת המסך הזה, גע נגיעה ממושכת ב\'סקירה\'."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"האפליקציה מוצמדת: ביטול ההצמדה אסור במכשיר הזה."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
@@ -1501,8 +1521,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

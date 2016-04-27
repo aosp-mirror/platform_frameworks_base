@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Vyhledávání služby"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Volání přes Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Chcete-li volat a odesílat textové zprávy přes síť Wi-Fi, nejprve požádejte operátora, aby vám tuto službu nastavil. Poté volání přes Wi-Fi opět zapněte v Nastavení."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrace u operátora"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Volání přes Wi-Fi: %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuto"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferována síť W-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferována mobilní síť"</string>
@@ -166,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Úložiště hodinek je plné. Uvolněte místo smazáním některých souborů."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Úložiště televize je plné. Uvolněte místo smazáním některých souborů."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Paměť telefonu je plná. Uvolněte místo smazáním některých souborů."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="few">Certifikační autority byly nainstalovány</item>
+      <item quantity="many">Certifikační autority byly nainstalovány</item>
+      <item quantity="other">Certifikační autority byly nainstalovány</item>
+      <item quantity="one">Certifikační autorita byla nainstalována</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Původce: neznámá třetí strana"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Od správce vašeho pracovního profilu"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Původce: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -213,9 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivní přehled"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Tato možnost se používá ve většině případů. Umožňuje sledovat průběh přehledu a zadat další podrobnosti o problému. Mohou být vynechány některé méně používané sekce, jejichž kontrola trvá dlouho."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Tato možnost se používá ve většině případů. Umožňuje sledovat průběh přehledu, zadat další podrobnosti o problému a pořizovat snímky obrazovky. Mohou být vynechány některé méně používané sekce, jejichž kontrola trvá dlouho."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Úplný přehled"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Tato možnost slouží k rychlému nahlášení, když zařízení neodpovídá, je příliš pomalé nebo pokud potřebujete zahrnout všechny sekce. Tímto způsobem nelze pořídit snímek obrazovky ani zadat další podrobnosti."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Tato možnost slouží k rychlému nahlášení, když zařízení neodpovídá, je příliš pomalé nebo pokud potřebujete zahrnout všechny sekce. Tímto způsobem nelze zadat více podrobností ani pořídit snímek obrazovky."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
@@ -863,6 +872,15 @@
       <item quantity="other">[<xliff:g id="COUNT">%d</xliff:g>] hodin</item>
       <item quantity="one">1 hodina</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"nyní"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Potíže s videem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Toto video nelze přenášet datovým proudem do tohoto zařízení."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nelze přehrát."</string>
@@ -961,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se upgraduje..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Spouštění systému Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Probíhá optimalizace úložiště."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android se upgraduje"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Před dokončením upgradu nemusí některé aplikace fungovat správně"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimalizování aplikace <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Příprava aplikace <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Spouštění aplikací."</string>
@@ -1489,7 +1509,7 @@
     <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslice <xliff:g id="KEY">%1$s</xliff:g> byla smazána"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Pracovní <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Chcete-li tuto obrazovku uvolnit, klepněte současně na možnosti Zpět a Přehled a podržte je."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Chcete-li tuto obrazovku uvolnit, klepněte na tlačítko Zpět a podržte jej."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Chcete-li tuto obrazovku uvolnit, klepněte na možnost Přehled a podržte ji."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikace je připnutá: Odepnutí v tomto zařízení není povoleno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
@@ -1501,8 +1521,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Smazáno administrátorem"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnout Spořič dat?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnout"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

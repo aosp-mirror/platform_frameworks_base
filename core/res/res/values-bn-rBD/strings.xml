@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা অনুসন্ধান করা হচ্ছে"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi কলিং"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi এর মাধ্যমে কল করতে ও বার্তা পাঠাতে, প্রথমে আপনার পরিষেবা প্রদানকারীকে এই পরিষেবার সেট আপ করার বিষয়ে জিজ্ঞাসা করুন। তারপরে আবার সেটিংস থেকে Wi-Fi কলিং চালু করুন।"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"আপনার পরিষেবা প্রদানকারীকে নথিভুক্ত করুন"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi কলিং"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"পছন্দের Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"পছন্দের মোবাইল নেটওয়ার্ক"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ঘড়ির সঞ্চয়স্থানে আর জায়গা খালি নেই৷ স্থান খালি করতে কিছু ফাইল মুছে দিন৷"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"টিভির সঞ্চয়স্থান পূর্ণ হয়েছে৷ স্থান মুক্ত করতে কিছু ফাইল মুছে ফেলুন৷"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ফোনের সঞ্চয়স্থানে আর জায়গা খালি নেই৷ স্থান খালি করতে কিছু ফাইল মুছে দিন৷"</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">টি শংসাপত্রের কর্তৃপক্ষকে ইনস্টল করা হয়েছে</item>
+      <item quantity="other">টি শংসাপত্রের কর্তৃপক্ষকে ইনস্টল করা হয়েছে</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"একটি অজানা তৃতীয় পক্ষের দ্বারা"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"আপনার কাজের প্রোফাইলের প্রশাসক দ্বারা"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> এর দ্বারা"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির প্রতিবেদন করুন"</string>
     <string name="bugreport_message" msgid="398447048750350456">"এটি একটি ই-মেল বার্তা পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; দয়া করে ধৈর্য রাখুন৷"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ইন্টারেক্টিভ প্রতিবেদন"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"বেশিভাগ পরিস্থিতিতে এটিকে ব্যবহার করুন৷ এটি আপনাকে প্রতিবেদনের কাজ কতটা হয়েছে তার উপর নজর রাখতে দেয় এবং সমস্যাটির সম্পর্কে আরো অনেক কিছু লিখতে দেয়৷ এটি হয়ত প্রতিবেদন করতে খুব বেশি সময় নেয় এমন কম-ব্যবহৃত বিভাগগুলি সরিয়ে দিতে পারে৷"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"বেশিরভাগ পরিস্থিতিতে এটিকে ব্যবহার করুন৷ এটি আপনাকে প্রতিবেদনের কাজ কতটা হয়েছে তার উপর নজর রাখতে দেয়, সমস্যাটির সম্পর্কে আরো অনেক কিছু লিখতে দেয় এবং স্ক্রীনশটগুলি নিতে দেয়৷ এটি হয়ত প্রতিবেদন করতে খুব বেশি সময় নেয় এমনকি কম-ব্যবহৃত বিভাগগুলি সরিয়ে দিতে পারে৷"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"সম্পূর্ণ প্রতিবেদন"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"যখন আপনার ডিভাইসটি প্রতিক্রিয়াবিহীন থাকে বা খুবই ধীর চলে বা যখন আপনার সমস্ত প্রতিবেদন বিভাগগুলির প্রয়োজন হয় তখন ন্যূনতম সিস্টেম হস্তক্ষেপের জন্য এই বিকল্পটি ব্যবহার করুন৷ কোনো স্ক্রীনশট নেয় না বা আপনাকে আরো বিবরণ লিখতে দেয় না৷"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"যখন আপনার ডিভাইসটি প্রতিক্রিয়াবিহীন থাকে বা খুবই ধীর চলে বা যখন আপনার সমস্ত প্রতিবেদন বিভাগগুলির প্রয়োজন হয় তখন ন্যূনতম সিস্টেম হস্তক্ষেপের জন্য এই বিকল্পটি ব্যবহার করুন৷ আপনাকে আরো বিশদ বিবরণ প্রবেশ করানোর বা অতিরিক্ত স্ক্রীনশর্ট নেওয়ার মঞ্জুরি দেয় না৷"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রীনশট নেওয়া হচ্ছে৷</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রীনশট নেওয়া হচ্ছে৷</item>
@@ -851,6 +858,15 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"এখন"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"ভিডিও সমস্যা"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"এই ভিডিওটি এই ডিভাইসে স্ট্রিমিং করার জন্য বৈধ নয়৷"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"এই ভিডিওটি চালানো যাবে না৷"</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android আপগ্রেড করা হচ্ছে..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android চালু হচ্ছে…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"সঞ্চয়স্থান অপ্টিমাইজ করা হচ্ছে৷"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android আপগ্রেড করা হচ্ছে"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"আপগ্রেড সম্পন্ন না হওয়া পর্যন্ত কিছু অ্যাপ্লিকেশান সঠিকভাবে কাজ নাও করতে পারে"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান অপ্টিমাইজ করা হচ্ছে৷"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> প্রস্তুত করা হচ্ছে৷"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"বছর নির্বাচন করুন"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> মুছে ফেলা হয়েছে"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"কর্মক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"এই স্ক্রীনটিকে আনপিন করতে, \'এক নজরে\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"অ্যাপ্লিকেশান পিন করা আছে: এই ডিভাইস এটিকে পিনমুক্ত করা মঞ্জুরিপ্রাপ্ত নয়৷"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রীন পিন করা হয়েছে"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"আপনার প্রশাসক দ্বারা আপডেট করা হয়েছে"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"আপনার প্রশাসক দ্বারা মুছে ফেলা হয়েছে"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার পটভূমিতে কিছু অ্যাপ্লিকেশানকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশান ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবিগুলিতে আলতো চাপ না দেওয়া পর্যন্ত সেগুলি প্রদর্শিত হবে না৷"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> পর্যন্ত)</item>
       <item quantity="other">%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> পর্যন্ত)</item>

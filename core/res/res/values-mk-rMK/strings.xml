@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пребарување за услуга"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Повикување преку Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"За повикување и испраќање пораки преку Wi-Fi, прво побарајте од операторот да ви ја постави оваа услуга. Потоа повторно вклучете повикување преку Wi-Fi во Поставки."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Регистрирајте се со операторот"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Повикување преку Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Исклучено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Се претпочита Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Се претпочита мобилна"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Складот за гледање е полн. Избришете некои датотеки за да ослободите простор."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Складот на телевизорот е полн. Избришете некои датотеки за да ослободите простор."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Меморијата на телефонот е полна. Избришете некои датотеки за да ослободите простор."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">Инсталирани се авторитети за сертификатот</item>
+      <item quantity="other">Инсталирани се авторитети за сертификатот</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Од страна на непознато трето лице"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Од администраторот на вашиот работен профил"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Од <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот и да внесете повеќе детали во врска со проблемот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Целосен извештај"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Користете ја опцијава за да имате минимално системско попречување кога уредот не реагира или е премногу бавен, или кога ви требаат сите делови на извештајот. Не прави слика од екранот, ниту ви дозволува да внесете повеќе детали."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Користете ја опцијава за да имате минимално системско попречување кога уредот не  реагира или е премногу бавен или пак кога ви се потребни сите делови од извештајот. Не ви дозволува да внесете повеќе детали или да сликате дополнителни слики од екранот."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунда.</item>
       <item quantity="other">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
@@ -851,6 +858,15 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> час</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часа</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"сега"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Проблем со видео"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Видеово не е важечко за постојан тек до уредов."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ова видео не може да се пушти."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се ажурира…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android стартува…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизирање на складирањето."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android се ажурира"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Некои апликации може да не работат правилно додека не се заврши надградбата"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Се оптимизира апликација <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Се подготвува <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Се стартуваат апликациите."</string>
@@ -1471,7 +1489,7 @@
     <string name="select_year" msgid="7952052866994196170">"Избери година"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Избришано <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"За да го откачите екранот, допрете и задржете Назад и Краток преглед во исто време."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"За да го откачите екранот, допрете и задржете Назад."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да го откачите екранот, допрете и задржете Краток преглед."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Апликацијата е закачена: откачување не е дозволено на уредов."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
@@ -1483,8 +1501,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до податоци, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

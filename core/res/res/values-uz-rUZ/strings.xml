@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xizmatlar qidirilmoqda"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi orqali qo‘ng‘iroqlarni amalga oshirish va xabarlar bilan almashinish uchun uyali aloqa operatoringizdan ushbu xizmatni yoqib qo‘yishni so‘rashingiz lozim. Keyin sozlamalarda Wi-Fi qo‘ng‘irog‘i imkoniyatini yoqib olishingiz mumkin."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Mobil operatoringiz yordamida ro‘yxatdan o‘ting"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi qo‘ng‘iroqlar"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzal ko‘rilsin"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil tarmoq afzal ko‘rilsin"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Sertifikat markazi sertifikatlari o‘rnatildi</item>
+      <item quantity="one">Sertifikat markazi sertifikati o‘rnatildi</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Noma‘lum uchinchi shaxslar tomonidan"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Ishchi profilingiz administratori tomonidan"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tomonidan"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisoboti"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Qurilmangiz holati haqidagi ma’lumotlar to‘planib, e-pochta orqali yuboriladi. Hisobotni tayyorlash biroz vaqt olishi mumkin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv hisobot"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Bundan maxsus vaziyatlarda foydalaning. Bu hisobot jarayonini kuzatish imkonini beradi va muammo haqida batafsil ma’lumotlarni ko‘rishingiz mumkin bo‘ladi. Hisobot uchun ko‘p vaqt oladigan kam ishlatiladigan bo‘limlar qoldirib ketilishi mumkin."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Bundan maxsus vaziyatlarda foydalaning. Bu hisobot jarayonini kuzatish imkonini beradi, muammo haqida batafsil ma’lumotlarni ko‘rishingiz va skrinshotlar olishingiz mumkin bo‘ladi. Hisobot uchun ko‘p vaqt oladigan kam ishlatiladigan bo‘limlar qoldirib ketilishi mumkin."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"To‘liq hisobot"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Qurilma javob bermaganda, juda sekinlashganda yoki barcha hisobot bo‘limlari zarur bo‘lganda kamroq tizim aralashuvlarisiz mazkur variantdan foydalaning. Skrinshot olinmaydi yoki batafsil ma’lumotlar ko‘rishingizga ruxsat berilmaydi."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Qurilma javob bermaganda, juda sekinlashganda yoki barcha hisobot bo‘limlari zarur bo‘lganda kamroq tizim aralashuvlarisiz mazkur variantdan foydalaning. Qo‘shimcha skrinshotlar olinmaydi yoki batafsil ma’lumotlar ko‘rishingizga ruxsat berilmaydi."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng olinadi.</item>
       <item quantity="one">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_0">%d</xliff:g> soniyadan so‘ng olinadi.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soat</item>
       <item quantity="one">1 soat</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"hozir"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video muammosi"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ushbu videoni mazkur qurilmada oqimli rejimda ijro etib bo‘lmaydi."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ushbu videoni ijro etib bo‘lmadi."</string>
@@ -910,7 +926,7 @@
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s: Bosh ilova sifatida foydalanish"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Suratga olish"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Suratga olish uchun ilovani tanlang:"</string>
-    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ilovasi orqali suratga olish"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s yordamida suratga oling"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Suratga olish"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ushbu amaldan standart sifatida foydalanish"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Boshqa ilovadan foydalanish"</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android yangilanmoqda…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ishga tushmoqda…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Xotira optimallashtirilmoqda."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android yangilanmoqda"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Yangilanish vaqtida ba’zi ilovalar to‘g‘ri ishlamasligi mumkin"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ilovalar optimallashtirilmoqda (<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>)."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> tayyorlanmoqda."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ilovalar ishga tushirilmoqda."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Yilni tanlash"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> o‘chirildi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ish <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ushbu ekrandan chiqish uchun “Orqaga” va “Umumiy nazar” tugmalarini bir vaqtda bosib turing."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Ushbu ekrandan chiqish uchun “Orqaga” tugmasini bosib turing."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ushbu ekrandan chiqish uchun “Umumiy nazar” tugmasini bosib turing."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ilova qadab qo‘yilgan. Uni ekrandan yechish ushbu qurilmada ta’qiqlangan."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran qadab qo‘yildi"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Trafik sarfini kamaytirish maqsadida Trafik tejash funksiyasi ba’zi ilovalarning orqa fonda internetdan foydalanishining oldini oladi. Siz hozirda foydalanayotgan ilova internetdan faqat talab etilgandagina foydalanishi mumkin. Bu degani, masalan, rasmlar ustiga bosilmaguncha, ular yuklanmaydi."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
       <item quantity="one">Bir daqiqa (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>

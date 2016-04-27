@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Soek vir diens"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-oproepe"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Om oproepe te maak en boodskappe oor Wi-Fi te stuur, vra jou diensverskaffer eers om hierdie diens op te stel. Skakel Wi-Fi-oproepe dan weer in Instellings aan."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registreer by jou diensverskaffer"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi-oproep"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Af"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Verkieslik Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Verkieslik sellulêr"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlosieberging is vol! Vee \'n paar lêers uit om plek te maak."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV-berging is vol. Vee \'n paar lêers uit om spasie beskikbaar te stel."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Foon se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Sertifikaatoutoriteite is geïnstalleer</item>
+      <item quantity="one">Sertifikaatoutoriteit is geïnstalleer</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Deur \'n onbekende derde party"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Deur jou werkprofieladministrateur"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Deur <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Neem foutverslag"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Dit sal inligting oor die huidige toestand van jou toestel insamel om as \'n e-posboodskap te stuur. Dit sal \'n tydjie neem vandat die foutverslag begin is totdat dit reg is om gestuur te word; wees asseblief geduldig."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiewe verslag"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Gebruik dit in die meeste omstandighede. Maak dit vir jou moontlik om die vordering van die verslag na te spoor en meer besonderhede oor die probleem in te voer. Dit sal dalk sommige afdelings weglaat wat minder gebruik word en waarvoor verslagdoening lank duur."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gebruik dit in die meeste gevalle. Maak dit vir jou moontlik om die vordering van die verslag na te spoor, meer besonderhede oor die probleem in te voer en skermkiekies te neem. Dit sal dalk sommige afdelings wat minder gebruik word en waarvoor verslagdoening lank duur, weglaat."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Volle verslag"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Gebruik hierdie opsie vir minimale stelselinmenging wanneer jou toestel nie reageer nie of te stadig is, of wanneer jy alle afdelings benodig. Neem nie \'n skermkiekie nie en laat jou nie toe om meer besonderhede in te voer nie."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gebruik hierdie opsie vir minimale stelselinmenging wanneer jou toestel nie reageer nie of te stadig is, of wanneer jy alle verslagafdelings benodig. Laat jou nie toe om meer besonderhede in te voer of bykomende skermkiekies te neem nie."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Neem skermkiekie vir foutverslag oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes.</item>
       <item quantity="one">Neem skermkiekie vir foutverslag oor <xliff:g id="NUMBER_0">%d</xliff:g> sekonde.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> uur</item>
       <item quantity="one">1 uur</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"nou"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobleem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Hierdie video is nie geldig vir stroming na hierdie toestel nie."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Kan nie hierdie video speel nie."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android gradeer tans op..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android begin tans …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimeer tans berging."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android gradeer tans op"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Sommige programme sal dalk nie behoorlik werk voordat die opgradering voltooi is nie"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimeer program <xliff:g id="NUMBER_0">%1$d</xliff:g> van <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Berei tans <xliff:g id="APPNAME">%1$s</xliff:g> voor."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Begin programme."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Kies jaar"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> uitgevee"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Om hierdie skerm te ontspeld, raak en hou tegelyk Terug en Oorsig."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Raak en hou Terug om hierdie skerm te ontspeld."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Om hierdie skerm te ontspeld, raak en hou Oorsig."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Program is vasgespeld: Dit mag nie op hierdie toestel ontspeld word nie."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skerm vasgespeld"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Deur jou administrateur uitgevee"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Om batterylewe te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Skakel Databespaarder aan?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Skakel aan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minute lank (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Een minuut lank (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
