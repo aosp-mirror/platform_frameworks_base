@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Prehrať"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pozastaviť"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Režim PIP ovládajte pomocou tlačidla "<b>"PLOCHA"</b></string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Obraz v obraze"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Táto možnosť podrží video v obraze, dokým prehráte ďalšie. Stlačením a podržaním tlačidla "<b>"HOME"</b>" ho môžete ovládať."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Dobre"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Odmietnuť"</string>
 </resources>

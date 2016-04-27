@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Wiedergeben"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausieren"</string>
     <string name="pip_hold_home" msgid="340086535668778109"><b>"STARTBILDSCHIRMTASTE"</b>" drücken, um PIP zu steuern"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Bild-in-Bild"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Dein Video wird dir so lange angezeigt, bis du ein anderes ansiehst. Taste "<b>"STARTBILDSCHIRM"</b>" zum Steuern drücken und halten."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Beenden"</string>
 </resources>

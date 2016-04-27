@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已拍攝螢幕擷取畫面。"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"輕觸即可查看螢幕擷圖。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"無法拍攝螢幕擷取畫面。"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"儲存螢幕擷圖時發生問題。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"由於儲存空間有限，因此無法儲存螢幕擷取畫面。"</string>
@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"再次輕觸即可開啟"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"再次輕觸即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑動即可解鎖"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑動手機圖示即可啟用"</string>
     <string name="voice_hint" msgid="8939888732119726665">"滑動語音小幫手圖示即可啟用"</string>
@@ -418,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住「返回」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住「返回」按鈕即可取消固定。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏<xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
@@ -428,7 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"允許"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在是預設的音量控制對話方塊。"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸這裡即可恢復原始設定。"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"輕觸即可恢復原始設定。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您正在使用 Work 設定檔"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕觸即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕觸即可設為震動，但系統可能會將無障礙服務一併設為靜音。"</string>

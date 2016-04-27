@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"I-play"</string>
     <string name="pip_pause" msgid="8412075640017218862">"I-pause"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"I-hold ang "<b>"HOME"</b>" para makontrol ang PIP"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Larawan sa loob ng larawan"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Pinapanatili nitong nakikita ang iyong video hanggang sa mag-play ka ng iba. Pindutin nang matagal ang "<b>"HOME"</b>" upang kontrolin ito."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"I-dismiss"</string>
 </resources>

@@ -25,7 +25,7 @@
     <string name="pip_pause" msgid="8412075640017218862">"ဆိုင်းငံ့ပါ"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP ကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို ဖိထားပါ"</string>
     <string name="pip_onboarding_title" msgid="7850436557670253991">"ပုံထဲမှပုံ"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"အခြားတစ်ခုမဖွင့်မချင်း ၎င်းသည် သင့်ဗီဒီယိုကို ပြသထားပါမည်။ ၎င်းကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို နှိပ်ပြီးဖိထားပါ။"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"နောက်တစ်ခုမဖွင့်မချင်း သင့်ဗီဒီယိုကို ပြသထားပါမည်။ ၎င်းကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို နှိပ်ပြီးဖိထားပါ။"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ရပါပြီ"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"ပယ်ပါ"</string>
 </resources>

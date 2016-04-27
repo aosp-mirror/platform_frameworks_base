@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"ਚਲਾਓ"</string>
     <string name="pip_pause" msgid="8412075640017218862">"ਰੋਕੋ"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP ਕੰਟਰੋਲ ਕਰਨ ਲਈ "<b>"ਹੋਮ"</b>" ਦਬਾਈ ਰੱਖੋ"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"ਤਸਵੀਰ-ਵਿੱਚ-ਤਸਵੀਰ"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"ਇਹ ਤੁਹਾਡੀ ਵੀਡੀਓ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਕੋਈ ਹੋਰ ਵੀਡੀਓ ਨਹੀਂ ਚਲਾਉਂਦੇ ਹੋ। ਇਸ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਲਈ "<b>"ਹੋਮ"</b>" ਬਟਨ ਨੂੰ ਦੱਬੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ਸਮਝ ਲਿਆ"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"ਖ਼ਾਰਜ ਕਰੋ"</string>
 </resources>

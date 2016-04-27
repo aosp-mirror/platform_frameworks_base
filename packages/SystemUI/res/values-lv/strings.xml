@@ -72,7 +72,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Notiek ekrānuzņēmuma saglabāšana..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Notiek ekrānuzņēmuma saglabāšana."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrānuzņēmums ir uzņemts."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Pieskarieties, lai skatītu ekrānuzņēmumu."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Pieskarieties, lai skatītu ekrānuzņēmumu."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nevarēja uzņemt ekrānuzņēmumu."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Saglabājot ekrānuzņēmumu, radās problēma."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Nevar saglabāt ekrānuzņēmumu, jo krātuvē nepietiek vietas."</string>
@@ -119,8 +119,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Pilna piekļuve datu signālam."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ir izveidots savienojums ar <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ir izveidots savienojum ar <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
-    <skip />
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Savienots ar ierīci <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Bez WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX viena josla."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX divas joslas."</string>
@@ -151,17 +150,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nav SIM kartes."</string>
-    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobilie dati"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobilie dati ir ieslēgti"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobilie dati ir atslēgti"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth piesaiste."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lidmašīnas režīms."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nav SIM kartes."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobilo sakaru operatora tīkla mainīšana."</string>
-    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
-    <skip />
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Atvērt akumulatora informāciju"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumulators: <xliff:g id="NUMBER">%d</xliff:g> procenti"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Notiek akumulatora uzlāde, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procenti."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistēmas iestatījumi"</string>
@@ -201,13 +197,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Statuss Netraucēt ir ieslēgts, izvēlēts iestatījums Tikai prioritārie."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Ieslēgts režīms “Netraucēt”, pilnīgs klusums."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Ieslēgts režīms “Netraucēt”, atļauti tikai signāli."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Netraucēt."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Statuss Netraucēt ir izslēgts."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Statuss Netraucēt tika izslēgts."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Statuss Netraucēt tika ieslēgts."</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth savienojums ir izslēgts."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth savienojums ir ieslēgts."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Notiek Bluetooth savienojuma izveide."</string>
@@ -273,10 +267,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nav pieejama neviena pārī savienota ierīce."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Spilgtums"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automātiska pagriešana"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automātiska ekrāna pagriešana"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Iestatīt uz <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Pagriešana bloķēta"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portrets"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Ainava"</string>
@@ -295,8 +287,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nav izveidots savienojums"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nav tīkla"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ir izslēgts"</string>
-    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
-    <skip />
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi savienojums ieslēgts"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nav pieejams neviens Wi-Fi tīkls."</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Apraide"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Notiek apraide…"</string>
@@ -350,7 +341,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mazāk steidzami paziņojumi tiek rādīti tālāk"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Pieskarieties vēlreiz, lai atvērtu."</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Pieskarieties vēlreiz, lai atvērtu"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Velciet uz augšu, lai atbloķētu"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Lai lietotu tālruni, velciet no ikonas"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Lai lietotu balss palīgu, velciet no ikonas"</string>
@@ -428,7 +419,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Izvērst"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sakļaut"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrāns ir piesprausts"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Šādi ekrāns būs redzams līdz brīdim, kad to atspraudīsiet. Lai atspraustu, pieskarieties vienumam “Atpakaļ” un turiet to nospiestu."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Ekrāns tiek rādīts, kamēr tas nav atsprausts. Lai atspraustu, pieskarieties taustiņam Atpakaļ un turiet to."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Sapratu!"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nē, paldies"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vai paslēpt vienumu <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -438,15 +429,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Atļaut"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Neatļaut"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ir skaļuma dialoglodziņš"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Pieskarieties, lai atjaunotu sākotnējo."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Pieskarieties, lai atjaunotu sākotnējo saturu."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Jūs izmantojat darba profilu."</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Pieskarieties, lai ieslēgtu skaņu."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Pieskarieties, lai iestatītu uz vibrozvanu. Var tikt izslēgti pieejamības pakalpojumu signāli."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Pieskarieties, lai izslēgtu skaņu. Var tikt izslēgti pieejamības pakalpojumu signāli."</string>
-    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
-    <skip />
-    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
-    <skip />
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Tiek rādītas %s skaļuma vadīklas. Velciet augšup, lai nerādītu."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Skaļuma vadīklas paslēptas"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistēmas saskarnes regulators"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rādīt akumulatora uzlādes līmeni procentos"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rādīt akumulatora uzlādes līmeni procentos statusa joslas ikonā, kad netiek veikta uzlāde"</string>
@@ -642,27 +631,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Elements <xliff:g id="TILE_NAME">%1$s</xliff:g> ir noņemts"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Elements <xliff:g id="TILE_NAME">%1$s</xliff:g> ir pārvietots uz <xliff:g id="POSITION">%2$d</xliff:g>. pozīciju"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Ātro iestatījumu redaktors."</string>
-    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
-    <skip />
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> paziņojums: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Iespējams, lietotnē nedarbosies ekrāna sadalīšana."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Lietotnē netiek atbalstīta ekrāna sadalīšana."</string>
-    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Atvērt iestatījumus."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Atvērt ātros iestatījumus."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Aizvērt ātros iestatījumus."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signāls ir iestatīts."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Pierakstījies kā <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nav piekļuves internetam."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Atvērt detalizēto informāciju."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Atvērt <xliff:g id="ID_1">%s</xliff:g> iestatījumus."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediģēt iestatījumu secību."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>
