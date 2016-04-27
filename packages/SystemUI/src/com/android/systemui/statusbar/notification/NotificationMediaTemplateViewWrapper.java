@@ -52,7 +52,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         // This also clears the existing types
         super.updateTransformedTypes();
         if (mActions != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ACTIONS,
                     mActions);
         }
     }
