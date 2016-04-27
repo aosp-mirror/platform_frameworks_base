@@ -19,6 +19,9 @@ package android.net.metrics;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
+
+import com.android.internal.util.MessageUtils;
 
 /**
  * {@hide}
@@ -72,15 +75,25 @@ public final class NetworkEvent extends IpConnectivityEvent implements Parcelabl
     };
 
     public static void logEvent(int netId, int eventType) {
-        logEvent(IPCE_NETMON_STATE_CHANGE, new NetworkEvent(netId, eventType, 0));
+        logEvent(new NetworkEvent(netId, eventType, 0));
     }
 
     public static void logValidated(int netId, long durationMs) {
-        logEvent(IPCE_NETMON_VALIDATED, new NetworkEvent(netId, NETWORK_VALIDATED, durationMs));
+        logEvent(new NetworkEvent(netId, NETWORK_VALIDATED, durationMs));
     }
 
     public static void logCaptivePortalFound(int netId, long durationMs) {
-        final NetworkEvent ev = new NetworkEvent(netId, NETWORK_CAPTIVE_PORTAL_FOUND, durationMs);
-        logEvent(IPCE_NETMON_CAPPORT_FOUND, ev);
+        logEvent(new NetworkEvent(netId, NETWORK_CAPTIVE_PORTAL_FOUND, durationMs));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("NetworkEvent(%d, %s, %dms)",
+                netId, Decoder.constants.get(eventType), durationMs);
+    }
+
+    final static class Decoder {
+        static final SparseArray<String> constants = MessageUtils.findMessageNames(
+                new Class[]{NetworkEvent.class}, new String[]{"NETWORK_"});
     }
 };

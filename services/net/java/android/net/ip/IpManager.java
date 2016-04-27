@@ -54,10 +54,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Objects;
 
-import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_OK;
-import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_PROVISIONING_FAIL;
-import static android.net.metrics.IpConnectivityEvent.IPCE_IPMGR_COMPLETE_LIFECYCLE;
-
 
 /**
  * IpManager
@@ -657,13 +653,13 @@ public class IpManager extends StateMachine {
         switch (delta) {
             case GAINED_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
-                recordMetric(IPCE_IPMGR_PROVISIONING_OK);
+                recordMetric(IpManagerEvent.PROVISIONING_OK);
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
             case LOST_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
-                recordMetric(IPCE_IPMGR_PROVISIONING_FAIL);
+                recordMetric(IpManagerEvent.PROVISIONING_FAIL);
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
@@ -847,7 +843,7 @@ public class IpManager extends StateMachine {
 
             resetLinkProperties();
             if (mStartTimeMillis > 0) {
-                recordMetric(IPCE_IPMGR_COMPLETE_LIFECYCLE);
+                recordMetric(IpManagerEvent.COMPLETE_LIFECYCLE);
                 mStartTimeMillis = 0;
             }
         }
@@ -960,7 +956,7 @@ public class IpManager extends StateMachine {
                     handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
                 } else {
                     if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
-                    recordMetric(IPCE_IPMGR_PROVISIONING_FAIL);
+                    recordMetric(IpManagerEvent.PROVISIONING_FAIL);
                     mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
                     transitionTo(mStoppingState);
                 }

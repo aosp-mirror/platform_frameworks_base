@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.net.ConnectivityMetricsLogger;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,50 +23,13 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-@SystemApi
 public abstract class IpConnectivityEvent {
-    // IPRM   = IpReachabilityMonitor
-    // DHCP   = DhcpClient
-    // NETMON = NetworkMonitorEvent
-    // CONSRV = ConnectivityServiceEvent
-    // IPMGR  = IpManager
-    // DNS    = DnsEvent
-    public static final int IPCE_IPRM_BASE                 = 0 * 1024;
-    public static final int IPCE_DHCP_BASE                 = 1 * 1024;
-    public static final int IPCE_NETMON_BASE               = 2 * 1024;
-    public static final int IPCE_CONSRV_BASE               = 3 * 1024;
-    public static final int IPCE_IPMGR_BASE                = 4 * 1024;
-    public static final int IPCE_DNS_BASE                  = 5 * 1024;
+    private static final int COMPONENT_TAG = ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY;
 
-    public static final int IPCE_IPRM_PROBE_STARTED        = IPCE_IPRM_BASE + 0;
-    public static final int IPCE_IPRM_PROBE_FAILURE        = IPCE_IPRM_BASE + 1;
-    public static final int IPCE_IPRM_NUD_FAILED           = IPCE_IPRM_BASE + 2;
-    public static final int IPCE_IPRM_PROVISIONING_LOST    = IPCE_IPRM_BASE + 3;
+    private static final ConnectivityMetricsLogger sMetricsLogger = new ConnectivityMetricsLogger();
 
-    public static final int IPCE_DHCP_RECV_ERROR           = IPCE_DHCP_BASE + 0;
-    public static final int IPCE_DHCP_PARSE_ERROR          = IPCE_DHCP_BASE + 1;
-    public static final int IPCE_DHCP_STATE_CHANGE         = IPCE_DHCP_BASE + 2;
-
-    public static final int IPCE_NETMON_STATE_CHANGE       = IPCE_NETMON_BASE + 0;
-    public static final int IPCE_NETMON_CHECK_RESULT       = IPCE_NETMON_BASE + 1;
-    public static final int IPCE_NETMON_VALIDATED          = IPCE_NETMON_BASE + 2;
-    public static final int IPCE_NETMON_PORTAL_PROBE       = IPCE_NETMON_BASE + 3;
-    public static final int IPCE_NETMON_CAPPORT_FOUND      = IPCE_NETMON_BASE + 4;
-
-    public static final int IPCE_CONSRV_DEFAULT_NET_CHANGE = IPCE_CONSRV_BASE + 0;
-
-    public static final int IPCE_IPMGR_PROVISIONING_OK     = IPCE_IPMGR_BASE + 0;
-    public static final int IPCE_IPMGR_PROVISIONING_FAIL   = IPCE_IPMGR_BASE + 1;
-    public static final int IPCE_IPMGR_COMPLETE_LIFECYCLE  = IPCE_IPMGR_BASE + 2;
-
-    public static final int IPCE_DNS_LOOKUPS               = IPCE_DNS_BASE + 0;
-
-    private static ConnectivityMetricsLogger mMetricsLogger = new ConnectivityMetricsLogger();
-
-    public static <T extends IpConnectivityEvent & Parcelable> void logEvent(int tag, T event) {
-        final long timestamp = System.currentTimeMillis();
-        final int componentTag = ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY;
+    public static <T extends IpConnectivityEvent & Parcelable> void logEvent(T event) {
         // TODO: consider using different component for DNS event.
-        mMetricsLogger.logEvent(timestamp, componentTag, tag, event);
+        sMetricsLogger.logEvent(System.currentTimeMillis(), COMPONENT_TAG, 0, event);
     }
 };

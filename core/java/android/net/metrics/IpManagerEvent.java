@@ -19,27 +19,39 @@ package android.net.metrics;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
+
+import com.android.internal.util.MessageUtils;
 
 /**
  * {@hide}
  */
 @SystemApi
 public final class IpManagerEvent extends IpConnectivityEvent implements Parcelable {
+
+    public static final int PROVISIONING_OK    = 1;
+    public static final int PROVISIONING_FAIL  = 2;
+    public static final int COMPLETE_LIFECYCLE = 3;
+
     public final String ifName;
+    public final int eventType;
     public final long durationMs;
 
-    private IpManagerEvent(String ifName, long duration) {
+    private IpManagerEvent(String ifName, int eventType, long duration) {
         this.ifName = ifName;
+        this.eventType = eventType;
         this.durationMs = duration;
     }
 
     private IpManagerEvent(Parcel in) {
         this.ifName = in.readString();
+        this.eventType = in.readInt();
         this.durationMs = in.readLong();
     }
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(ifName);
+        out.writeInt(eventType);
         out.writeLong(durationMs);
     }
 
@@ -59,6 +71,17 @@ public final class IpManagerEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logEvent(int eventType, String ifName, long durationMs) {
-        logEvent(eventType, new IpManagerEvent(ifName, durationMs));
+        logEvent(new IpManagerEvent(ifName, eventType, durationMs));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("IpManagerEvent(%s, %s, %dms)",
+                ifName, Decoder.constants.get(eventType), durationMs);
+    }
+
+    final static class Decoder {
+        static final SparseArray<String> constants = MessageUtils.findMessageNames(
+                new Class[]{IpManagerEvent.class}, new String[]{"PROVISIONING_", "COMPLETE_"});
     }
 };
