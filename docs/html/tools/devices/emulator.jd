@@ -1,4 +1,7 @@
-page.title=Using the Emulator
+page.title=Running Apps in the Android Emulator
+parent.title=Android Studio
+parent.link=index.html
+page.tags=emulator
 @jd:body
 
 <div id="qv-wrapper">
@@ -6,1568 +9,650 @@ page.title=Using the Emulator
 
   <h2>In this document</h2>
     <ol>
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#avds">Android Virtual Devices and the Emulator</a></li>
-      <li><a href="#starting">Starting and Stopping the Emulator</a></li>
-      <li><a href="#apps">Installing Applications on the Emulator</a></li>
-      <li><a href="#acceleration">Using Hardware Acceleration</a>
-        <ol>
-          <li><a href="#accel-graphics">Configuring Graphics Acceleration</a></li>
-          <li><a href="#accel-vm">Configuring Virtual Machine Acceleration</a></li>
-        </ol>
-      </li>
-      <li><a href="#sdcard">SD Card Emulation</a>
-        <ol>
-          <li><a href="#sdcard-creating">Creating an SD card image</a></li>
-          <li><a href="#sdcard-files">Copying files to an SD card image</a></li>
-          <li><a href="#sdcard-loading">Loading an SD card image</a></li>
-        </ol>
-      </li>
-      <li><a href="#diskimages">Working with Emulator Disk Images</a>
-	      <ol>
-	        <li><a href="#defaultimages">Default image files</a></li>
-	        <li><a href="#runtimeimages">Runtime images: user data and SD card</a></li>
-	        <li><a href="#temporaryimages">Temporary images</a></li>
-	      </ol>
-	    </li>
-      <li><a href="#emulatornetworking">Emulator Networking</a>
-	      <ol>
-          <li><a href="#networkaddresses">Network Address Space</a></li>
-          <li><a href="#networkinglimitations">Local Networking Limitations</a></li>
-          <li><a href="#redirection">Using Network Redirection</a></li>
-          <li><a href="#dns">Configuring the Emulator's DNS Settings</a></li>
-          <li><a href="#proxy">Using the Emulator with a Proxy</a></li>
-          <li><a href="#connecting">Interconnecting Emulator Instances</a></li>
-          <li><a href="#calling">Sending a Voice Call or SMS to Another Emulator Instance</a></li>
-        </ol>
-      </li>
-      <li><a href="#console">Using the Emulator Console</a>
-        <ol>
-          <li><a href="#portredirection">Port Redirection</a></li>
-          <li><a href="#geo">Geo Location Provider Emulation</a></li>
-          <li><a href="#events">Hardware Events Emulation</a></li>
-          <li><a href="#power">Device Power Characteristics</a></li>
-          <li><a href="#netstatus">Network Status</a></li>
-          <li><a href="#netdelay">Network Delay Emulation</a></li>
-          <li><a href="#netspeed">Network Speed Emulation</a></li>
-          <li><a href="#telephony">Telephony Emulation</a></li>
-          <li><a href="#sms">SMS Emulation</a></li>
-          <li><a href="#vm">VM State</a></li>
-          <li><a href="#window">Emulator Window</a></li>
-          <li><a href="#terminating">Terminating an Emulator Instance</a></li>
-        </ol>
-      </li>
-      <li><a href="#limitations">Emulator Limitations</a></li>
-      <li><a href="#troubleshooting">Troubleshooting Emulator Problems</a></li>
+      <li><a href="#about">About the Android Emulator</a></li>
+      <li><a href="#runningapp">Running an App in the Android Emulator</a></li>
+      <li><a href="#runningemulator">Launching the Android Emulator Without Running an App</a></li>
+      <li><a href="#navigate">Navigating on the Screen</a></li>
+      <li><a href="#tasks">Performing Basic Tasks in the Emulator</a></li>
+      <li><a href="#extended">Working With Extended Controls, Settings, and Help</a></li>
+
     </ol>
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
-    <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
+    <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator Command Line Features</a></li>
+    <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with
+    AVD Manager</a></li>
   </ol>
+
 </div>
 </div>
 
-<p>The Android SDK includes a virtual mobile device emulator
-that runs on your computer. The emulator lets you prototype, develop and test
-Android applications without using a physical device. </p>
+<p>The Android Emulator simulates a device and displays it on your development
+computer. It lets you prototype, develop, and test
+Android apps without using a hardware device. The emulator supports Android
+phone, tablet, Android Wear, and Android TV devices. It comes with predefined
+device types
+so you can get started quickly, and you can create your own device definitions
+and emulator skins.</p>
 
-<p>The Android emulator mimics all of the hardware and software features
-of a typical mobile device, except that it cannot place actual phone
-calls. It provides a variety of navigation and control keys, which you can "press"
-using your mouse or keyboard to generate events for your application. It also
-provides a screen in which your application is displayed, together with any other
-active Android applications. </p>
+<p>The Android Emulator is fast,
+powerful, and feature-rich. It can transfer information faster than using
+a connected hardware device, speeding up the development process. The
+multi-core feature lets the emulator take advantage of multiple core
+processors on your development computer to improve emulator performance even
+more.</p>
 
-<img src="{@docRoot}images/emulator@2x.png"
-srcset="{@docRoot}images/emulator.png 1x, {@docRoot}images/emulator@2x.png 2x" alt=""
-  width="367" height="330"/>
+<img src="{@docRoot}images/tools/e-emulator.png" style="height:400px" alt="emulator"/>
 
-<p>To let you model and test your application more easily, the emulator utilizes
-Android Virtual Device (AVD) configurations. AVDs let you define certain hardware
-aspects of your emulated phone and allow you to create many configurations to test
-many Android platforms and hardware permutations. Once your application is running on
+<h2 id="about">About the Android Emulator</h2>
+
+<p>You can launch an app on the emulator when you run your project, or you can
+drag an APK file onto the emulator to install it. As with a hardware device,
+after you install an app
+on a virual device, it remains until you uninstall or replace it. If needed, you
+can test how multiple apps, such as your own or system apps, work with each
+other.</p>
+
+<h3 id="features">Features for trying out your apps</h3>
+
+<p>You interact with the emulator just as you would with a hardware device, but
+using your mouse and keyboard, and emulator buttons and controls.
+The emulator supports virtual hardware buttons and touchscreens, including
+two-finger operations,
+as well as directional pads (D-pads), trackballs, wheels, and various
+sensors. You can dynamically resize the emulator window as needed, zoom in and
+out, change the orientation, and even take a screenshot.</p>
+
+<p>When your app is running on
 the emulator, it can use the services of the Android platform to invoke other
-applications, access the network, play audio and video, store and retrieve data,
-notify the user, and render graphical transitions and themes. </p>
+apps, access the network, play audio and video, accept audio input,
+store and retrieve data, notify the user, and render graphical transitions and
+themes. The emulator has controls that let
+you easily send incoming phone calls and text messages, specify
+the location of the device, simulate fingerprint scans, specify network
+speed and status, and simulate battery properties. The emulator can
+simulate an SD card and internal data storage; you can drag a file, such as a
+graphics or data file, onto the emulator to store it.</p>
 
-<p>The emulator also includes a variety of debug capabilities, such as a console
-from which you can log kernel output, simulate application interrupts (such as
-arriving SMS messages or phone calls), and simulate latency effects and dropouts
-on the data network.</p>
+<h3 id="avds">Android Virtual Device configurations</h3>
 
-
-
-<h2 id="overview">Overview</h2>
-
-<p>The Android emulator is an application that provides a virtual
-mobile device on which you can run your Android applications. It runs a full
-Android system stack, down to the kernel level, that includes a set of
-preinstalled applications (such as the dialer) that you can access from your
-applications. You can choose what version of the Android system you want to
-run in the emulator by configuring AVDs, and you can also customize the
-mobile device skin and key mappings. When launching the emulator and at runtime,
-you can use a variety of commands and options to control its behavior.
-</p>
-
-<p>The Android system images available through the Android SDK Manager contain
-code for the Android Linux kernel, the native libraries, the Dalvik VM, and the
-various Android packages (such as the Android framework and preinstalled
-applications). The emulator provides dynamic binary translation of device
-machine code to the OS and processor architecture of your development
-machine.</p>
-
-<p>The Android emulator supports many hardware features likely to be found on
-mobile devices, including: </p>
-
-<ul>
-  <li>An ARMv5, ARMv7, or x86 CPU</li>
-  <li>A 16-bit LCD display</li>
-  <li>One or more keyboards (a Qwerty-based keyboard and associated Dpad/Phone
-buttons)</li>
-  <li>A sound chip with output and input capabilities</li>
-  <li>Flash memory partitions (emulated through disk image files on the
-development machine)</li>
-  <li>A GSM modem, including a simulated SIM Card</li>
-  <li>A camera, using a webcam connected to your development computer.</li>
-  <li>Sensors like an accelerometer, using data from a USB-connected Android device.</li>
-</ul>
-
-<p>The following sections describe the emulator and its use for development of Android
-applications in more detail.</p>
-
-
-<h2 id="avds">Android Virtual Devices and the Emulator</h2>
-
-<p>To use the emulator, you first must create one or more AVD configurations. In each
-configuration, you specify an Android platform to run in the emulator and the set of hardware
-options and emulator skin you want to use. Then, when you launch the emulator, you specify
-the AVD configuration that you want to load. </p>
+<p>The emulator uses an Android Virtual Device (AVD) configuration to determine
+the look, functionality, and system image of the simulated device. AVDs let you
+define certain hardware aspects of your emulated devices and allow you to create
+many configurations to test different Android platforms and hardware
+permutations.</p>
 
 <p>Each AVD functions as an independent device, with its own private storage for
-user data, SD card, and so on. When you launch the emulator with an AVD configuration,
-it automatically loads the user data and SD card data from the AVD directory. By default,
-the emulator stores the user data, SD card data, and cache in the AVD directory.</p>
+user data, SD card, and so on. When you launch the emulator with an AVD
+configuration, it automatically loads the user data and SD card data from the
+AVD directory. By default, the emulator stores the user data, SD card data, and
+cache in the AVD directory.</p>
 
-<p>To create and manage AVDs you use the AVD Manager UI or the <code>android</code> tool
-that is included in the SDK.
-For complete information about how to set up AVDs, see <a
-href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
+<p>To create and manage AVDs, use the
+<a href="{@docRoot}tools/devices/managing-avds.html">AVD Manager</a>.
+For more information, see
+<a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 
+<h3 id="manifest">Manifest settings</h3>
 
-<h2 id="starting">Starting and Stopping the Emulator</h2>
+<p>For your app to use certain emulator device features, you need to specify
+in the manifest that your app will use them. For example, an Android Wear watch
+requires the following <code>&lt;uses-feature&gt;</code> setting:</p>
 
-<p>During development and testing of your application, you install and run your
-application in the Android emulator. You can launch the emulator as a standalone
-application from a command line, or you can run it from within your Android Studio
-development environment. In either case, you specify the AVD configuration to
-load and any startup options you want to use, as described in this document.
-</p>
-
-<p>You can run your application on a single instance of the emulator or,
-depending on your needs, you can start multiple emulator instances and run your
-application in more than one emulated device. You can use the emulator's
-built-in commands to simulate GSM phone calling or SMS between emulator
-instances, and you can set up network redirection that allows emulators to send
-data to one another. For more information, see <a href="#telephony">Telephony
-Emulation</a>, <a href="#sms">SMS Emulation</a>, and
-<a href="#emulatornetworking">Emulator Networking</a></p>
-
-<p>To start an instance of the emulator from the command line, navigate to the
-<code>tools/</code> folder of the SDK. Enter <code>emulator</code> command
-like this: </p>
-
-<pre>emulator -avd &lt;avd_name&gt; [&lt;options&gt;]</pre>
-
-<p>This initializes the emulator, loads an AVD configuration and displays the emulator
-window. For more information about command line options for the emulator, see the
-<a href="{@docRoot}tools/help/emulator.html">Android Emulator</a> tool reference.</p>
-
-<p class="note"><strong>Note:</strong> You can run multiple
-instances of the emulator concurrently, each with its own AVD configuration and
-storage area for user data, SD card, and so on.</p>
-
-<p>When you run your app from Android Studio, it installs and launches the
-app on your connected device or emulator (launching the emulator, if necessary).
-You can specify emulator startup options in the Run/Debug
-dialog, in the Target tab. When the emulator is running, you can issue
-console commands as described later in this document.</p>
-
-<p>If you are not working in Android Studio, see <a href="#apps">Installing Applications
-on the Emulator</a> for information about how to install your application.</p>
-
-<p>To stop an emulator instance, just close the emulator's window.</p>
-
-<p>For a reference of the emulator's startup commands and keyboard mapping, see
-the <a href="{@docRoot}tools/help/emulator.html">Android Emulator</a> tool
-reference.</p>
-
-
-<h2 id="apps">Installing Applications on the Emulator</h2>
-
-<p>If you don't have access to Android Studio, you can install your application on the
-emulator using the <a href="{@docRoot}tools/help/adb.html#move">adb</a> utility. Before
-installing the application, you need to build and package it into an <code>.apk</code> as described
-in <a href="{@docRoot}tools/building/index.html">Building and
-Running Apps</a>. Once the application is installed, you can start the emulator from the command
-line as described previously, using any startup options necessary.
-When the emulator is running, you can also connect to the emulator instance's
-<a href="#console">console</a> to issue commands as needed.</p>
-
-<p>As you update your code, you periodically package and install it on the emulator.
-The emulator preserves the application and its state data across restarts,
-in a user-data disk partition. To ensure that the application runs properly
-as you update it, you may need to delete the emulator's user-data partition.
-To do so, start the emulator with the <code>-wipe-data</code> option.
-For more information about the user-data partition and other emulator storage,
-see <a href="#diskimages">Working with Emulator Disk Images</a>.</p>
-
-
-<h2 id="acceleration">Using Hardware Acceleration</h2>
-
-<p>In order to make the Android emulator run faster and be more responsive, you can configure it to
-take advantage of hardware acceleration, using a combination of configuration options, specific
-Android system images and hardware drivers.</p>
-
-
-<h3 id="accel-graphics">Configuring Graphics Acceleration</h3>
-
-<p class="caution"><strong>Caution:</strong> As of SDK Tools Revision 17, the graphics
-acceleration feature for the emulator is experimental; be alert for incompatibilities and
-errors when using this feature. </p>
-
-<p>Graphics acceleration for the emulator takes advantage of your development computer's graphics
-hardware, specifically its graphics processing unit (GPU), to make screen drawing faster. To use
-the graphics acceleration feature, you must have the following versions of the Android development
-tools installed:</p>
-
-<ul>
-  <li>Android SDK Tools, Revision 17 or higher</li>
-  <li>Android SDK Platform API 15, Revision 3 or higher</li>
-</ul>
-
-<p>Use the <a href="{@docRoot}sdk/installing/index.html#AddingComponents">Android SDK
-Manager</a> to install these components:</p>
-
-<p class="note"><strong>Note:</strong> Not all applications are compatible with graphics hardware
-acceleration. In particular, the Browser application and applications using the {@link
-android.webkit.WebView} component are not compatible with graphics acceleration.</p>
-
-<p>To configure an AVD to use graphics acceleration:</p>
-
-<ol>
-  <li>Make sure you have the required SDK components installed (listed above).</li>
-  <li>Start the AVD Manager and create a new AVD with the <strong>Target</strong> value of
-<strong>Android 4.0.3 (API Level 15)</strong>, revision 3 or higher.</li>
-  <li>If you want to have graphics acceleration enabled by default for this AVD, in the
-<strong>Hardware</strong> section, click <strong>New</strong>, select <strong>GPU emulation</strong>
-and set the value to <strong>Yes</strong>.
-  <p class="note"><strong>Note:</strong> You can also enable graphics acceleration when you
-start an emulator using command line options as describe in the next section.</p>
-  </li>
-  <li>Name the AVD instance and select any other configuration options.
-  <p class="caution"><strong>Caution:</strong> Do not select the <strong>Snapshot: Enabled</strong>
-option. Snapshots are not supported for emulators with graphics acceleration enabled.</p>
-  </li>
-  <li>Click <strong>Create AVD</strong> to save the emulator configuration.</li>
-</ol>
-
-<p>If you set <strong>GPU emulation</strong> to <strong>Yes</strong> for your AVD, then graphics
-acceleration is automatically enabled when you run it. If you did not enable <strong>GPU
-emulation</strong> when you created the AVD, you can still enable it at runtime.</p>
-
-<p>To enable graphics acceleration at runtime for an AVD:</p>
-
-<ul>
-  <li>If you are running the emulator from the command line, just include the {@code -gpu on}
-option:
-<pre>emulator -avd &lt;avd_name&gt; -gpu on</pre>
-    <p class="note"><strong>Note:</strong> You must specify an AVD configuration that uses
-Android 4.0.3 (API Level 15, revision 3) or higher system image target. Graphics acceleration is not
-available for earlier system images.</p>
-  </li>
-  <li>If you are running the emulator from Android Studio, run your Android application using an AVD
-with the {@code -gpu on} option enabled:
-    <ol>
-      <li>In Android Studio, click your Android application module folder and then select
-      <strong>Run > Edit Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
-      run configuration or create a new configuration.</li>
-      <li>Under the <strong>Target Device </strong> options,
-      select the AVD you created in the previous procedure.</li>
-      <li>In the <strong>Emulator</strong> tab, in the
-      <strong>Additional command line options</strong> field, enter:<br>
-        {@code -gpu on}</li>
-      <li>Run your Android project using this run configuration.</li>
-    </ol>
-  </li>
-</ul>
-
-
-<h3 id="accel-vm">Configuring Virtual Machine Acceleration</h2>
-
-<p class="caution"><strong>Caution:</strong> As of SDK Tools Revision 17, the virtual machine
-acceleration feature for the emulator is experimental; be alert for incompatibilities and errors
-when using this feature.</p>
-
-<p>Many modern CPUs provide extensions for running virtual machines (VMs) more efficiently. Taking
-advantage of these extensions with the Android emulator requires some additional configuration of
-your development system, but can significantly improve the execution speed. Before attempting to use
-this type of acceleration, you should first determine if your development system’s CPU supports one
-of the following virtualization extensions technologies:</p>
-
-<ul>
-  <li>Intel Virtualization Technology (VT, VT-x, vmx) extensions</li>
-  <li>AMD Virtualization (AMD-V, SVM) extensions (only supported for Linux)</li>
-</ul>
-
-<p>The specifications from the manufacturer of your CPU should indicate if it supports
-virtualization extensions. If your CPU does not support one of these virtualization technologies,
-then you cannot use virtual machine acceleration.</p>
-
-<p class="note"><strong>Note:</strong> Virtualization extensions are typically enabled through
-your computer's BIOS and are frequently turned off by default. Check the documentation for your
-system's motherboard to find out how to enable virtualization extensions.</p>
-
-<p>Once you have determined that your CPU supports virtualization extensions, make sure you can work
-within these additional requirements of running an emulator inside an accelerated virtual
-machine:</p>
-
-<ul>
-  <li><strong>x86 AVD Only</strong> - You must use an AVD that is uses an x86 system image target.
-AVDs that use ARM-based system images cannot be accelerated using the emulator configurations
-described here.</li>
-  <li><strong>Not Inside a VM</strong> - You cannot run a VM-accelerated emulator inside another
-virtual machine, such as a VirtualBox or VMWare-hosted virtual machine. You must run the emulator
-directly on your system hardware.</li>
-  <li><strong>Other VM Drivers</strong> - If you are running another virtualization technology on
-your system such as VirtualBox or VMWare, you may need to unload the driver for that virtual machine
-hosting software before running an accelerated emulator.</li>
-  <li><strong>OpenGL&reg; Graphics</strong> - Emulation of OpenGL ES graphics may not perform at the
-same level as an actual device.</li>
-</ul>
-
-<p>To use virtual machine acceleration with the emulator, you need the following version of Android
-development tools. Use the <a href="{@docRoot}sdk/installing/index.html#AddingComponents">Android SDK
-Manager</a> to install these components:</p>
-
-<ul>
-  <li>Android SDK Tools, Revision 17 or higher</li>
-  <li>Android x86-based system image</li>
-</ul>
-
-<p>If your development environment meets all of the requirements for running a VM-accelerated
-emulator, you can use the AVD Manager to create an x86-based AVD configuration:</p>
-
-<ol>
-  <li>In the Android SDK Manager, make sure you have an x86-based <strong>System Image</strong>
-    installed for your target Android version. If you do not have an x86 <strong>System
-    Image</strong> installed, select one in the Android SDK Manager and install it.
-    <p class="note"><strong>Tip:</strong> System images are listed under each API Level in the SDK
-    Manager. An x86 system image may not be available for all API levels.</p>
-  </li>
-  <li>Start the AVD Manager and create a new AVD with an x86 value for the
-<strong>CPU/ABI</strong> field. You may need to select a specific <strong>Target</strong> value, or
-select a <strong>Target</strong> value and then select a specific <strong>CPU/ABI</strong>
-option.</li>
-  <li>Name the emulator instance and select any other configuration options.</li>
-  <li>Click <strong>Create AVD</strong> to save the emulator configuration.</li>
-</ol>
-
-<h4 id="vm-windows">Configuring VM Acceleration on Windows</h4>
-
-<p>Virtual machine acceleration for Windows requires the installation of the Intel Hardware
-Accelerated Execution Manager (Intel HAXM). The software requires an Intel CPU with
-Virtualization Technology (VT) support and one of the following operating systems:</p>
-
-<ul>
-  <li>Windows 7 (32/64-bit)</li>
-  <li>Windows Vista (32/64-bit)</li>
-  <li>Windows XP (32-bit only)</li>
-</ul>
-
-<p>To install the virtualization driver:</p>
-
-<ol>
-  <li>Start the Android SDK Manager, select <strong>Extras</strong> and then select <strong>Intel
-Hardware Accelerated Execution Manager</strong>.</li>
-  <li>After the download completes, execute {@code
-<sdk>/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.exe}.</li>
-  <li>Follow the on-screen instructions to complete installation.</li>
-  <li>After installation completes, confirm that the virtualization driver is operating correctly by
-opening a command prompt window and running the following command:
-    <pre>sc query intelhaxm</pre>
-    <p>You should see a status message including the following information:</p>
 <pre>
-SERVICE_NAME: intelhaxm
-       ...
-       STATE              : 4  RUNNING
-       ...
-</pre>
-  </li>
-</ol>
-
-<p>To run an x86-based emulator with VM acceleration:</p>
-<ul>
-  <li>If you are running the emulator from the command line, just specify an x86-based AVD:
-<pre>emulator -avd &lt;avd_name&gt;</pre>
-    <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
-name, otherwise VM acceleration will not be enabled.</p>
-  </li>
-  <li>If you are running the emulator from Android Studio, run your Android application with an x86-based
-AVD:
-    <ol>
-      <li>In Android Studio, click your Android project folder and then select <strong>Run > Edit
-Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
-run configuration or create a new configuration.</li>
-      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
-previously.</li>
-      <li>Run your Android project using this run configuration.</li>
-    </ol>
-  </li>
-</ul>
-
-<p>You can adjust the amount of memory available to the Intel HAXM kernel extension by re-running
-its installer.</p>
-
-<p>You can stop using the virtualization driver by uninstalling it. Re-run the installer or use
-the Control Panel to remove the software.</p>
-
-
-<h4 id="vm-mac">Configuring VM Acceleration on Mac</h4>
-
-<p>Virtual machine acceleration on a Mac requires the installation of the Intel Hardware Accelerated
-Execution Manager (Intel HAXM) kernel extension to allow the Android emulator to make use of CPU
-virtualization extensions. The kernel extension is compatible with Mac OS X Snow Leopard (version
-10.6.0) and higher.</p>
-
-<p>To install the Intel HAXM kernel extension:</p>
-
-<ol>
-  <li>Start the Android SDK Manager, select <strong>Extras</strong> and then select <strong>Intel
-Hardware Accelerated Execution Manager</strong>.
-  <li>After the download completes, execute
-    {@code <sdk>/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.dmg}.</li>
-  <li>Double click the <strong>IntelHAXM.mpkg</strong> icon to begin installation.</li>
-  <li>Follow the on-screen instructions to complete installation.</li>
-  <li>After installation completes, confirm that the new kernel extension is operating correctly by
-opening a terminal window and running the following command:
-    <pre>kextstat | grep intel</pre>
-    <p>You should see a status message containing the following extension name, indicating that the
-      kernel extension is loaded:</p>
-    <pre>com.intel.kext.intelhaxm</pre>
-  </li>
-</ol>
-
-<p>To run an x86-based emulator with VM acceleration:</p>
-<ul>
-  <li>If you are running the emulator from the command line, just specify an x86-based AVD:
-<pre>emulator -avd &lt;avd_name&gt;</pre>
-    <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
-name, otherwise VM acceleration will not be enabled.</p>
-  </li>
-  <li>If you are running the emulator from Andriod Studio, run your Android application with an x86-based
-AVD:
-    <ol>
-      <li>In Android Studio, click your Android module folder and then select <strong>Run > Edit
-Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
-run configuration or create a new configuration.</li>
-      <li>Under the <strong>Target Device</strong> options,
-      select the x86-based AVD you created previously.</li>
-      <li>Run your Android project using this run configuration.</li>
-    </ol>
-  </li>
-</ul>
-
-<p>You can adjust the amount of memory available to the Intel HAXM kernel extension by re-running
-the installer.</p>
-
-<p>You can stop using the virtualization kernel driver by uninstalling it. Before removing it, shut
-down any running x86 emulators. To unload the virtualization kernel driver, run the following
-command in a terminal window:</p>
-
-<pre>sudo /System/Library/Extensions/intelhaxm.kext/Contents/Resources/uninstall.sh</pre>
-
-<h4 id="vm-linux">Configuring VM Acceleration on Linux</h4>
-
-<p>Linux-based systems support virtual machine acceleration through the KVM software package. Follow
-<a href="https://www.google.com/?q=kvm+installation">instructions for installing KVM</a> on your
-Linux system, and verify that KVM is enabled. In addition to following the installation
-instructions, be aware of these configuration requirements:</p>
-
-<ul>
-  <li>Running KVM requires specific user permissions, make sure you have sufficient permissions
-according to the KVM installation instructions.</li>
-  <li>If you use another virtualization technology in your Linux platform, unload its kernel driver
-before running the x86 emulator. For example, the VirtualBox driver program is {@code vboxdrv}.</li>
-</ul>
-
-<p>To run an x86-based emulator with VM acceleration:</p>
-
-<ul>
-  <li>If you are running the emulator from the command line, start the emulator with an x86-based
-AVD and include the KVM options:
-<pre>emulator -avd &lt;avd_name&gt; -qemu -m 512 -enable-kvm</pre>
-    <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
-name, otherwise VM acceleration will not be enabled.</p>
-  </li>
-  <li>If you are running the emulator from Android Studio, run your Android application with an
-  x86-based AVD and include the KVM options:
-    <ol>
-      <li>In Android Studio, click your Android module folder and then select <strong>Run > Edit
-Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
-run configuration or create a new configuration.</li>
-      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
-previously.</li>
-      <li>In the <strong>Emulator</strong> tab, in the
-      <strong>Additional command line options</strong> field, enter:
-      <pre>-qemu -m 512 -enable-kvm</pre>
-      </li>
-      <li>Run your Android project using this run configuration.</li>
-    </ol>
-  </li>
-</ul>
-
-<p class="note"><strong>Important:</strong> When using the {@code -qemu} command line option, make sure
-it is the last parameter in your command. All subsequent options are interpreted as qemu-specific
-parameters.</p>
-
-
-<h2 id="sdcard">SD Card Emulation</h2>
-
-<p>You can create a disk image and then load it to the emulator at startup, to
-simulate the presence of a user's SD card in the device. To do this, you can specify
-an SD card image when you create an AVD, or you can use the mksdcard utility included
-in the SDK.</p>
-
-<p>The following sections describe how to create an SD card disk image, how to copy
-files to it, and how to load it in the emulator at startup. </p>
-
-<p>Note that you can only load a disk image at emulator startup. Similarly, you
-can not remove a simulated SD card from a running emulator. However, you can
-browse, send files to, and copy/remove files from a simulated SD card either
-with adb or the emulator. </p>
-
-<p>The emulator supports emulated SDHC cards, so you can create an SD card image
-of any size up to 128 gigabytes.</p>
-
-
-<h3 id="sdcard-creating">Creating an SD card image</h3>
-
-<p>There are several ways of creating an SD card image. The easiest way is to use the
-<strong>AVD Manager</strong> to create a new SD card by specifying a size when you create an AVD.
-You can also use the {@code android} command line tool when creating an AVD. Just add the
-<code>-c</code> option to your command: </p>
-
-<pre>android create avd -n &lt;avd_name&gt; -t &lt;targetID&gt; -c &lt;size&gt;[K|M]</pre>
-
-<p>The <code>-c</code> option can also be used to to specify a path to an SD card
-image for the new AVD. For more information, see <a
-href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing Virtual Devices
-from the Command Line</a>.
-</p>
-
-<p>You can also use the mksdcard tool, included in the SDK, to create a FAT32 disk
-image that you can load in the emulator at startup. You can access mksdcard in
-the tools/ directory of the SDK and create a disk image like this: </p>
-
-<pre>mksdcard &lt;size&gt; &lt;file&gt;</pre>
-
-<p>For example:</p>
-
-<pre>mksdcard 1024M sdcard1.iso</pre>
-
-<p>For more information, see <a
-href="{@docRoot}tools/help/mksdcard.html"><code>mksdcard</code></a>.</p>
-
-
-<h3 id="sdcard-files">Copying files to an SD card image</h3>
-
-<p>Once you have created the disk image, you can copy files to it prior to
-loading it in the emulator. To copy files, you can mount the image as a loop
-device and then copy the files to it, or you can use a utility such as {@code mtools} to
-copy the files directly to the image. The {@code mtools} package is available for Linux,
-Mac, and Windows.</p>
-
-<p>Alternatively, you can use the {@code adb push} command to move files onto an SD card image
-while it is loaded in an emulator. For more information see the <a
-href="{@docRoot}tools/help/adb.html#copyfiles">{@code adb push}</a> documentation.</p>
-
-<h3 id="sdcard-loading">Loading an SD card image</h3>
-
-<p>By default, the emulator loads the SD card image that is stored with the active
-AVD (see the <code>-avd</code> startup option).</p>
-
-<p>Alternatively, you can start the emulator with the
-<code>-sdcard</code> flag and specify the name and path of your image (relative
-to the current working directory): </p>
-
-<pre>emulator -sdcard &lt;filepath&gt;</pre>
-
-
-<h2 id="diskimages">Working with Emulator Disk Images</h2>
-
-<p>The emulator uses mountable disk images stored on your development machine to
-simulate flash (or similar) partitions on an actual device. For example, it uses a
-disk image containing an emulator-specific kernel, the Android system, a
-ramdisk image, and writeable images for user data and simulated SD card.</p>
-
-<p>To run properly, the emulator requires access to a specific set of disk image
-files. By default, the Emulator always looks for the disk images in the
-private storage area of the AVD in use. If no images exist there when
-the Emulator is launched, it creates the images in the AVD directory based on
-default versions stored in the SDK. </p>
-
-<p class="note"><strong>Note:</strong> The default storage location for
-AVDs is in <code>~/.android/avd</code> on OS X and Linux, <code>C:\Documents and
-Settings\&lt;user&gt;\.android\</code> on Windows XP, and
-<code>C:\Users\&lt;user&gt;\.android\</code>
-on Windows Vista.</p>
-
-<p>To let you use alternate or custom versions of the image files, the emulator
-provides startup options that override the default locations and filenames of
-the image files. When you use one of these options, the emulator searches for the image
-file under the image name or location that you specify; if it can not locate the
-image, it reverts to using the default names and location.</p>
-
-<p>The emulator uses three types of image files: default image files, runtime
-image files, and temporary image files. The sections below describe how to
-override the location/name of each type of file. </p>
-
-<h3 id="defaultimages">Default image files</h3>
-
-<p>When the emulator launches, but does not find an existing user data image in
-the active AVD's storage area, it creates a new one from a default version
-included in the SDK. The default user data image is read-only. The image
-files are read-only.</p>
-
-<p>The emulator provides the <code>-system &lt;dir&gt;</code> startup option to
-let you override the location where the emulator looks for the default
-user data image. </p>
-
-<p>The emulator also provides a startup option that lets you override the name
-of the default user data image, as described in the following table. When you use the
-option, the emulator looks in the default directory, or in a custom location
-(if you specified <code>-system &lt;dir&gt;</code>). </p>
-
-
-<table>
-<tr>
-  <th width="10%" >Name</th>
-    <th width="30%" >Description</th>
-    <th width="40%" >Comments</th>
-</tr>
-
-<!--
-<tr>
-  <td><code>kernel-qemu.img</code></td>
-  <td>The emulator-specific Linux kernel image</td>
-  <td>Override using <code>-kernel &lt;file&gt;</code></td>
-</tr>
-
-<tr>
-  <td><code>ramdisk.img</code></td>
-  <td>The ramdisk image used to boot the system.</td>
-  <td>Override using <code>-ramdisk &lt;file&gt;</code></td>
-</tr>
-
-<tr>
-  <td><code>system.img</code></td>
-  <td>The <em>initial</em> Android system image.</td>
-  <td>Override using <code>-image &lt;file&gt;</code></td>
-</tr>
--->
-<tr>
-  <td><code>userdata.img</code></td>
-  <td>The <em>initial</em> user-data disk image</td>
-  <td>Override using <code>-initdata &lt;file&gt;</code>. Also see
-<code>-data &lt;file&gt;</code>, below.</td>
-</tr>
-
-</table>
-
-<h3 id="runtimeimages">Runtime images: user data and SD card</h3>
-
-<p>At runtime, the emulator reads and writes data to two disk images: a
-user-data image and (optionally) an SD card image. These images emulate the user-data
-partition and removable storage media on actual device. </p>
-
-<p>The emulator provides a default user-data disk image. At startup, the emulator
-creates the default image as a copy of the system user-data image (user-data.img),
-described above. The emulator stores the new image with the files of the active AVD.</p>
-
-<!--
-<p>The emulator provides a startup option, <code>-datadir &lt;dir&gt;</code>,
-that you can use to override the location under which the emulator looks for the runtime
-image files. </p>
--->
-
-<p>The emulator provides startup options to let you override the actual names and storage
-locations of the runtime images to load, as described in the following table. When you use one
-of these options, the emulator looks for the specified file(s) in the current working directory,
-in the AVD directory, or in a custom location (if you specified a path with the filename). </p>
-
-<table>
-<tr>
-  <th width="10%" >Name</th>
-    <th width="30%" >Description</th>
-    <th width="40%" >Comments</th>
-</tr>
-<tr>
-  <td><code>userdata-qemu.img</code></td>
-  <td>An image to which the emulator writes runtime user-data for a unique user.</td>
-  <td>Override using <code>-data &lt;filepath&gt;</code>, where <code>&lt;filepath&gt;</code> is the
-path the image, relative to the current working directory. If you supply a filename only,
-the emulator looks for the file in the current working directory. If the file at <code>&lt;filepath&gt;</code> does
-not exist, the emulator creates an image from the default <code>userdata.img</code>, stores it under the name you
-specified, and persists user data to it at shutdown. </td>
-</tr>
-
-<tr>
-  <td><code>sdcard.img</code></td>
-  <td>An image representing an SD card inserted into the emulated device.</td>
-  <td>Override using <code>-sdcard &lt;filepath&gt;</code>, where <code>&lt;filepath&gt;</code> is the
-path the image, relative to the current working directory. If you supply a filename only,
-the emulator looks for the file in the current working directory. </td>
-</tr>
-
-</table>
-
-<h4>User-Data Image</h4>
-
-<p>Each emulator instance uses a writeable user-data image to store user- and
-session-specific data. For example, it uses the image to store a unique user's
-installed application data, settings, databases, and files. </p>
-
-<p>At startup, the emulator attempts to load a user-data image stored during
-a previous session. It looks for the file in the current working directory,
-in the AVD directory described in a previous section and at the custom location/name
-that you specified at startup. </p>
-
-<ul>
-<li>If it finds a user-data image, it mounts the image and makes it available
-to the system for reading and writing of user data. </li>
-<li>If it does not find one, it creates an image by copying the system user-data
-image (userdata.img), described above. At device power-off, the system persists
-the user data to the image, so that it will be available in the next session.
-Note that the emulator stores the new disk image at the location/name that you
-specify in <code>-data</code> startup option.</li>
-</ul>
-
-<p class="note"><strong>Note:</strong> Because of the AVD configurations used in the emulator,
-each emulator instance gets its own dedicated storage. There is no longer a need
-to use the <code>-d</code> option to specify an instance-specific storage area.</p>
-
-<h4>SD Card</h4>
-
-<P>Optionally, you can create a writeable disk image that the emulator can use
-to simulate removeable storage in an actual device. For information about how to create an
-emulated SD card and load it in the emulator, see <a href="#sdcard">SD Card Emulation</a></p>
-
-<p>You can also use the android tool to automatically create an SD Card image
-for you, when creating an AVD. For more information, see <a
-href="{@docRoot}tools/devices/managing-avds.html">Managing Virtual Devices with AVD
-Manager</a>.
-
-
-<h3 id="temporaryimages">Temporary Images</h3>
-
-<p>The emulator creates two writeable images at startup that it deletes at
-device power-off. The images are: </p>
-
-<ul>
-  <li>A writable copy of the Android system image</li>
-  <li>The <code>/cache</code> partition image</li>
-</ul>
-
-<p>The emulator does not permit renaming the temporary system image or
-persisting it at device power-off. </p>
-
-<p>The <code>/cache</code> partition image is initially empty, and is used by
-the browser to cache downloaded web pages and images. The emulator provides an
-<code>-cache &lt;file&gt;</code>, which specifies the name of the file in which
-to persist the <code>/cache</code> image at device power-off. If <code>&lt;file&gt;
-</code> does not exist, the emulator creates it as an empty file. </p>
-
-<p>You can also disable the use of the cache partition by specifying the
-<code>-nocache</code> option at startup. </p>
-
-
-<h2 id="emulatornetworking">Emulator Networking</h2>
-
-<p>The emulator provides versatile networking capabilities that you can use to
-set up complex modeling and testing environments for your application. The
-sections below introduce the emulator's network architecture and capabilities.
-</p>
-
-<h3 id="networkaddresses">Network Address Space</h3>
-
-<p>Each instance of the emulator runs behind a virtual router/firewall service
-that isolates it from your development machine's network interfaces and settings
-and from the internet. An emulated device can not see your development machine
-or other emulator instances on the network. Instead, it sees only that it is
-connected through Ethernet to a router/firewall.</p>
-
-<p>The virtual router for each instance manages the 10.0.2/24 network address
-space &mdash; all addresses managed by the router are in the form of
-10.0.2.&lt;xx&gt;, where &lt;xx&gt; is a number. Addresses within this space are
-pre-allocated by the emulator/router as follows:</p>
-
-<table>
-  <tr>
-    <th>Network Address</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>10.0.2.1</td>
-    <td>Router/gateway address </td>
-  </tr>
-  <tr>
-    <td>10.0.2.2</td>
-    <td>Special alias to your host loopback interface (i.e., 127.0.0.1 on your
-development machine)</td>
-  </tr>
-  <tr>
-    <td>10.0.2.3</td>
-    <td>First DNS server</td>
-  </tr>
-  <tr>
-    <td>10.0.2.4 / 10.0.2.5 / 10.0.2.6</td>
-    <td>Optional second, third and fourth DNS server (if any) </td>
-  </tr>
-  <tr>
-    <td>10.0.2.15</td>
-    <td>The emulated device's own network/ethernet interface</td>
-  </tr>
-  <tr>
-    <td>127.0.0.1</td>
-    <td>The emulated device's own loopback interface </td>
-  </tr>
-</table>
-
-<p>Note that the same address assignments are used by all running emulator
-instances. That means that if you have two instances running concurrently on
-your machine, each will have its own router and, behind that, each will have an
-IP address of 10.0.2.15. The instances are isolated by a router and can
-<em>not</em> see each other on the same network. For information about how to
-let emulator instances communicate over TCP/UDP, see <a
-href="#connecting">Connecting Emulator Instances</a>.</p>
-
-<p>Also note that the address 127.0.0.1 on your development machine corresponds
-to the emulator's own loopback interface. If you want to access services running
-on your development machine's loopback interface (a.k.a. 127.0.0.1 on your
-machine), you should use the special address 10.0.2.2 instead.</p>
-
-<p>Finally, note that each emulated device's pre-allocated addresses are
-specific to the Android emulator and will probably be very different on real
-devices (which are also very likely to be NAT-ed, i.e., behind a
-router/firewall)</p>
-
-
-<h3 id="networkinglimitations">Local Networking Limitations</h3>
-
-<p>Android applications running in an emulator can connect to the network available on your
-workstation. However, they connect through the emulator, not directly to hardware, and the emulator
-acts like a normal application on your workstation. This means that the emulator, and thus your
-Android applications, are subject to some limitations:</p>
-
-<ul>
-  <li>Communication with the emulated device may be blocked by a firewall
-program running on your machine.</li>
-  <li>Communication with the emulated device may be blocked by another
-(physical) firewall/router to which your machine is connected.</li>
-</ul>
-
-<p>The emulator's virtual router should be able to handle all outbound TCP and
-UDP connections/messages on behalf of the emulated device, provided your
-development machine's network environment allows it to do so. There are no
-built-in limitations on port numbers or ranges except the one imposed by your
-host operating system and network.</p>
-
-<p>Depending on the environment, the emulator may not be able to support other
-protocols (such as ICMP, used for "ping") might not be supported. Currently, the
-emulator does not support IGMP or multicast. </p>
-
-<h3 id="redirection">Using Network Redirection</h3>
-
-<p>To communicate with an emulator instance behind its virtual router, you need
-to set up network redirection on the virtual router. Clients can then connect
-to a specified guest port on the router, while the router directs traffic
-to/from that port to the emulated device's host port. </p>
-
-<p>To set up the network redirection, you create a mapping of host and guest
-ports/addresses on the emulator instance. There are two ways to set up
-network redirection: using emulator console commands and using the ADB tool, as
-described below. </p>
-
-
-<h4 id="consoleredir">Setting up Redirection through the Emulator Console</h4>
-
-<p>Each emulator instance provides a control console the you can connect to, to
-issue commands that are specific to that instance. You can use the
-<code>redir</code> console command to set up redirection as needed for an
-emulator instance. </p>
-
-<p>First, determine the console port number for the target emulator instance.
-For example, the console port number for the first emulator instance launched is
-5554. Next, connect to the console of the target emulator instance, specifying
-its console port number, as follows: </p>
-
-<pre><code>telnet localhost 5554</code></pre>
-
-<p>Once connected, use the <code>redir</code> command to work with redirection.
-To add a redirection, use:</p>
-
-<pre><code>add&nbsp;&lt;protocol&gt;:&lt;host-port&gt;:&lt;guest-port&gt;</code>
+&lt;uses-feature android:name="android.hardware.type.watch" /&gt;
 </pre>
 
-<p>where <code>&lt;protocol&gt;</code> is either <code>tcp</code> or <code>udp</code>,
-and <code>&lt;host-port&gt;</code> and <code>&lt;guest-port&gt;</code> sets the
-mapping between your own machine and the emulated system, respectively. </p>
-
-<p>For example, the following command sets up a redirection that handles all
-incoming TCP connections to your host (development) machine on 127.0.0.1:5000
-and will pass them through to the emulated system's 10.0.2.15:6000.:</p>
-
-<pre>redir add tcp:5000:6000</pre>
-
-<p>To delete a redirection, you can use the <code>redir del</code> command. To
-list all redirection for a specific instance, you can use <code>redir
-list</code>. For more information about these and other console commands, see
-<a href="#console">Using the Emulator Console</a>. </p>
-
-<p>Note that port numbers are restricted by your local environment. this typically
-means that you cannot use host port numbers under 1024 without special
-administrator privileges.  Also, you won't be able to set up a redirection for a
-host port that is already in use by another process on your machine. In that
-case, <code>redir</code> generates an error message to that effect. </p>
-
-<h4 id="adbredir">Setting Up Redirection through ADB</h4>
-
-<p>The Android Debug Bridge (ADB) tool provides port forwarding, an alternate
-way for you to set up network redirection. For more information, see <a
-href="{@docRoot}tools/help/adb.html#forwardports">Forwarding Ports</a> in the ADB
-documentation.</p>
-
-<p>Note that ADB does not currently offer any way to remove a redirection,
-except by killing the ADB server.</p>
-
-
-<h3 id="dns">Configuring the Emulator's DNS Settings</h3>
-
-<p>At startup, the emulator reads the list of DNS servers that your system is
-currently using. It then stores the IP addresses of up to four servers on this
-list and sets up aliases to them on the emulated addresses 10.0.2.3, 10.0.2.4,
-10.0.2.5 and 10.0.2.6 as needed.  </p>
-
-<p>On Linux and OS X, the emulator obtains the DNS server addresses by parsing
-the file <code>/etc/resolv.conf</code>. On Windows, the emulator obtains the
-addresses by calling the <code>GetNetworkParams()</code> API. Note that this
-usually means that the emulator ignores the content of your "hosts" file
-(<code>/etc/hosts</code> on Linux/OS X, <code>%WINDOWS%/system32/HOSTS</code>
- on Windows).</P>
-
-<p>When starting the emulator at the command line, you can also use the
-<code>-dns-server &lt;serverList&gt;</code> option to manually specify the
-addresses of DNS servers to use, where &lt;serverList&gt; is a comma-separated
-list of server names or IP addresses. You might find this option useful if you
-encounter DNS resolution problems in the emulated network (for example, an
-"Unknown Host error" message that appears when using the web browser).</p>
-
-
-<h3 id="proxy">Using the Emulator with a Proxy</h3>
-
-<p>If your emulator must access the Internet through a proxy server, you can use
-the <code>-http-proxy &lt;proxy&gt;</code> option when starting the emulator, to
-set up the appropriate redirection. In this case, you specify proxy information
-in <code>&lt;proxy&gt;</code> in one of these formats:</p>
-
-<pre>http://&lt;machineName&gt;:&lt;port&gt;</pre>
-
-<p>or</p>
-
-<pre>http://&lt;username&gt;:&lt;password&gt;@&lt;machineName&gt;:&lt;port&gt;</pre>
-
-<p>The <code>-http-proxy</code> option forces the emulator to use the specified
-HTTP/HTTPS proxy for all outgoing TCP connections. Redirection for UDP is not
-currently supported.</p>
-
-<p>Alternatively, you can define the environment variable
-<code>http_proxy</code> to the value you want to use for
-<code>&lt;proxy&gt;</code>. In this case, you do not need to specify a value for
-<code>&lt;proxy&gt;</code> in the <code>-http-proxy</code> command &mdash; the
-emulator checks the value of the <code>http_proxy</code> environment variable at
-startup and uses its value automatically, if defined. </p>
-
-<p>You can use the <code>-verbose-proxy</code> option to diagnose proxy
-connection problems.</p>
-
-
-<h3 id="connecting">Interconnecting Emulator Instances</h3>
-
-<p>To allow one emulator instance to communicate with another, you must set up
-the necessary network redirection as illustrated below. </p>
-
-<p>Assume that your environment is</p>
-
-<ul>
-  <li>A is you development machine</li>
-  <li>B is your first emulator instance, running on A</li>
-  <li>C is your second emulator instance, also running on A</li>
-</ul>
-
-<p>and you want to run a server on B, to which C will connect, here is how you
-could set it up: </p>
-
-<ol>
-  <li>Set up the server on B, listening to
-<code>10.0.2.15:&lt;serverPort&gt;</code></li>
-  <li>On B's console, set up a redirection from
-<code>A:localhost:&lt;localPort&gt;</code> to <code>
-B:10.0.2.15:&lt;serverPort&gt;</code></li>
-  <li>On C, have the client connect to <code>10.0.2.2:&lt;localPort&gt;</code></li>
-</ol>
-
-<p>For example, if you wanted to run an HTTP server, you can select
-<code>&lt;serverPort&gt;</code> as 80 and <code>&lt;localPort&gt;</code> as
-8080:</p>
-
-<ul>
-  <li>B listens on 10.0.2.15:80</li>
-  <li>On B's console, issue <code>redir add tcp:8080:80</code></li>
-  <li>C connects to 10.0.2.2:8080</li>
-</ul>
-
-<h3 id="calling">Sending a Voice Call or SMS to Another Emulator Instance</h3>
-
-<p>The emulator automatically forwards simulated voice calls and SMS messages from one instance to
-another. To send a voice call or SMS, use the dialer application or SMS application, respectively,
-from one of the emulators.</p>
-
-<p>To initiate a simulated voice call to another emulator instance:</p>
-<ol>
-<li>Launch the dialer application on the originating emulator instance.</li>
-<li>As the number to dial, enter the console port number of the instance you'd like to call. You can determine
-  the console port number of the target instance by checking its window title, where the
-  console port number is reported as "Android Emulator (&lt;port&gt;). </li>
-<li>Press "Dial". A new inbound call appears in the target emulator instance. </li>
-</ol>
-
-<p>To send an SMS message to another emulator instance, launch the SMS application (if available). Specify the console port number of the target emulator instance as as the SMS address, enter the message text, and send the message. The message is delivered to the target emulator instance. </p>
-
-<p>You can also connect to an emulator instance's console to simulate an incoming voice call or SMS. For more information, see <a href="#telephony">Telephony Emulation</a> and <a href="#sms">SMS Emulation</a>.
-
-
-<h2 id="console">Using the Emulator Console</h2>
-
-<p>Each running emulator instance provides a console that lets you query and control the emulated
-device environment. For example, you can use the console to manage port redirection, network
-characteristics, and telephony events while your application is running on the emulator. To
-access the console and enter commands, use telnet to connect to the console's port number.</p>
-
-<p>To connect to the console of any running emulator instance at any time, use this command: </p>
-
-<pre>telnet localhost &lt;console-port&gt;</pre>
-
-<p>An emulator instance occupies a pair of adjacent ports: a console port and an  {@code adb} port.
-The port numbers differ by 1, with the  {@code adb} port having the higher port number. The console
-of the first emulator instance running on a given machine uses console port 5554 and  {@code adb}
-port 5555. Subsequent instances use port numbers increasing by two &mdash; for example, 5556/5557,
-5558/5559, and so on. Up to 16 concurrent emulator instances can run a console facility. </p>
-
-<p>To connect to the emulator console, you must specify a valid console port. If multiple emulator instances are running, you need to determine the console port of the emulator instance you want to connect to. You can find the instance's console port listed in the title of the instance window. For example, here's the window title for an instance whose console port is 5554:</p>
-
-<p><code>Android Emulator (5554)</code></p>
-
-<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}tools/help/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
-
-<p class="note">Note: The emulator listens for connections on ports 5554-5587 and accepts connections only from localhost.</p>
-
-<p>Once you are connected to the console, you can then enter <code>help [command]</code> to see a list of console commands and learn about specific commands. </p>
-
-<p>To exit the console session, use <code>quit</code> or <code>exit</code>.</p>
-
-<p>The following sections below describe the major functional areas of the console.</p>
-
-
-<h3 id="portredirection">Port Redirection</h3>
-
-<p>You can use the console to add and remove port redirection while the emulator is running. After
-you connect to the console, manage port redirection by entering the following command:</p>
-
-<pre>redir &lt;list|add|del&gt; </pre>
-
-<p>The <code>redir</code> command supports the subcommands listed in the table below. </p>
-
-<table>
-<tr>
-  <th width="25%" >Subcommand
-  <th width="30%" >Description</th>
-  <th width="35%">Comments</th>
-</tr>
-
-  <tr>
-    <td><code>list</code></td>
-    <td>List the current port redirection.</td>
-  <td>&nbsp;</td>
-  </tr>
-
-
-<tr>
- <td><code>add&nbsp;&lt;protocol&gt;:&lt;host-port&gt;:&lt;guest-port&gt;</code></td>
-  <td>Add a new port redirection.</td>
-<td><ul><li>&lt;protocol&gt; must be either &quot;tcp&quot; or &quot;udp&quot;</li>
-<li>&lt;host-port&gt; is the port number to open on the host</li>
-<li>&lt;guest-port&gt; is the port number to route data to on the emulator/device</li>
-</ul></td>
-</tr>
-<tr>
-  <td><code>del &lt;protocol&gt;:&lt;host-port&gt;</code></td>
-  <td>Delete a port redirection.</td>
-<td>The meanings of &lt;protocol&gt; and &lt;host-port&gt; are listed in the previous row.</td>
-</tr>
-</table>
-
-
-<h3 id="geo">Geo Location Provider Emulation</h3>
-
-<p>You can use the console to set the geographic location reported to the applications running
-inside an emulator. Use the <code>geo</code> command to send a simple GPS fix to the
-emulator, with or without NMEA 1083 formatting:</p>
-
-<pre>geo &lt;fix|nmea&gt;</pre>
-
-<p>The <code>geo</code> command supports the subcommands listed in the table below.</p>
-
-<table>
-<tr>
-  <th width="25%">Subcommand</th>
-  <th width="30%">Description</th>
-  <th width="35%">Comments</th>
-</tr>
-
-  <tr>
-    <td><code>fix &lt;longitude&gt; &lt;latitude&gt; [&lt;altitude&gt;]</code></td>
-    <td>Send a simple GPS fix to the emulator instance.</td>
-  <td>Specify longitude and latitude in decimal degrees. Specify altitude in meters.</td>
-  </tr>
-<tr>
-  <td><code>nmea &lt;sentence&gt;</code></td>
-  <td>Send an NMEA 0183 sentence to the emulated device, as if it were sent from an emulated GPS modem.</td>
-<td><code>&lt;sentence&gt;</code> must begin with '$GP'. Only '$GPGGA' and '$GPRCM' sentences are currently supported.</td>
-</tr>
-</table>
-
-<p>You can issue the <code>geo</code> command as soon as an emulator instance is running. The
-emulator sets the location you enter by creating a mock location provider. This provider responds to
-location listeners set by applications, and also supplies the location to the {@link
-android.location.LocationManager}. Any application can query the location manager to obtain the
-current GPS fix for the emulated device by calling:
-
-<pre>LocationManager.getLastKnownLocation("gps")</pre>
-
-<p>For more information about the Location Manager, see {@link android.location.LocationManager}.
+<p>There are also settings for camera, location, audio, microphone, phone,
+networking, TV, touchscreen, and more. For more information, see
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">
+&lt;uses-feature&gt;</a>.</p>
+
+<h3 id="system">System images</h3>
+
+<p>The Android Emulator runs a full
+Android system stack, down to the kernel level, that includes a set of
+preinstalled apps (such as the dialer) that you can access from your
+apps. You can choose which version of the Android system you want to
+run in the emulator when creating AVDs.
 </p>
 
-<h3 id="events">Hardware Events Emulation</h3>
+<p>The Android system images available through the AVD Manager contain
+code for the Android Linux kernel, the native libraries, the VM, and the
+various Android packages (such as the Android framework and preinstalled
+apps).</p>
 
-<p>The {@code event} console commands sends hardware events to the emulator. The syntax for this
-command is as follows:</p>
-
-<pre>event &lt;send|types|codes|text&gt;</pre>
-
-<p>The <code>event</code> command supports the subcommands listed in the table below. </p>
-
-<table>
-<tr>
-  <th width="25%" >Subcommand
-  <th width="30%" >Description</th>
-  <th width="35%">Comments</th>
-</tr>
-
-  <tr>
-    <td><code>send &lt;type&gt;:&lt;code&gt;:&lt;value&gt; [...]</code></td>
-    <td>Send one or more events to the Android kernel. </td>
-  <td>You can use text names or integers for <code>&lt;type&gt;</code> and <code>&lt;value&gt;</code>.</td>
-  </tr>
-<tr>
-  <td><code>types</code></td>
-  <td>List all <code>&lt;type&gt;</code> string aliases supported by the <code>event</code> subcommands.</td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-  <td><code>codes &lt;type&gt;</code></td>
-  <td>List all <code>&lt;codes&gt;</code> string aliases supported by the <code>event</code>
-   subcommands for the specified <code>&lt;type&gt;</code>.</td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-  <td><code>event text &lt;message&gt;</code></td>
-  <td>Simulate keypresses to send the specified string of characters as a message,</td>
-<td>The message must be a UTF-8 string. Unicode posts will be reverse-mapped according to the current device keyboard. Unsupported characters will be discarded silently.</td>
-</tr>
-</table>
-
-
-<h3 id="power">Device Power Characteristics</h3>
-
-<p>The {@code power} command controls the power state reported by the emulator to applications. The
-syntax for this command is as follows: </p>
-
-<pre>power &lt;display|ac|status|present|health|capacity&gt;</pre>
-
-<p>The <code>event</code> command supports the subcommands listed in the table below. </p>
-
-<table>
-<tr>
-  <th width="25%" >Subcommand </th>
-  <th width="30%" >Description</th>
-  <th width="35%">Comments</th>
-</tr>
-
-  <tr>
-    <td><code>display</code></td>
-    <td>Display battery and charger state.</td>
-  <td>&nbsp;</td>
-  </tr>
-<tr>
-  <td><code>ac &lt;on|off&gt;</code></td>
-  <td>Set AC charging state to on or off. </td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-  <td><code>status &lt;unknown|charging|discharging|not-charging|full&gt;</code></td>
-  <td>Change battery status as specified.</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr>
-  <td><code>present &lt;true|false&gt;</code></td>
-  <td>Set battery presence state.</td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-  <td><code>health &lt;unknown|good|overheat|dead|overvoltage|failure&gt;</code></td>
-  <td>Set battery health state.</td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-  <td><code>capacity &lt;percent&gt;</code></td>
-  <td>Set remaining battery capacity state (0-100).</td>
-<td>&nbsp;</td>
-</tr>
-</table>
-
-
-<h3 id="netstatus">Network Status</h3>
-
-<p>You can use the console to check the network status and current delay and speed characteristics. To do so, connect to the console and use the <code>netstatus</code> command. Here's an example of the command and its output. </p>
-
-<pre>network status
-</pre>
-
-
-<h3 id="netdelay">Network Delay Emulation</h3>
-
-<p>The emulator lets you simulate various network latency levels, so that you can test your
-application in an environment more typical of the actual conditions in which it will run. You can
-set a latency level or range at emulator startup or you can use the console to change the latency,
-while the application is running in the emulator. </p>
-
-<p>To set latency at emulator startup, use the  <code>-netdelay</code> emulator option with a
-supported <code>&lt;delay&gt;</code> value, as listed in the table below. Here are some
-examples:</p>
-
-<pre>emulator -netdelay gprs
-emulator -netdelay 40 100</pre>
-
-<p>To make changes to  network delay while the emulator is running, connect to the console and use
-the <code>netdelay</code> command with a supported <code>&lt;delay&gt;</code> value from the table
-below.</p>
-
-<pre>network delay gprs</pre>
-
-<p>The format of network &lt;delay&gt; is one of the following (numbers are milliseconds):</p>
-
-<table style="clear:right;width:100%;">
-<tr>
-  <th width="30%" >Value</th>
-  <th width="35%" >Description</th><th width="35%">Comments</th></tr>
-
-  <tr><td><code>gprs</code></td><td>GPRS</td>
-  <td>(min 150, max 550)</td>
-  </tr>
-
-<tr><td><code>edge</code></td><td>EDGE/EGPRS</td>
-<td>(min 80, max 400)</td>
-</tr>
-<tr><td><code>umts</code></td><td>UMTS/3G</td>
-<td>(min 35, max 200)</td>
-</tr>
-<tr><td><code>none</code></td><td>No latency</td><td>(min 0, max 0)</td></tr>
-<tr><td><code>&lt;num&gt;</code></td>
-<td>Emulate an exact latency  (milliseconds).</td>
-<td>&nbsp;</td></tr>
-<tr><td><code>&lt;min&gt;:&lt;max&gt;</code></td>
-<td>Emulate an specified latency range (min, max milliseconds).</td>
-<td>&nbsp;</td></tr>
-</table>
-
-
-<h3 id="netspeed">Network Speed Emulation</h3>
-
-<p>The emulator also lets you simulate various network transfer rates.
-You can set a transfer rate or range at emulator startup or you can use the console to change the
-rate, while the application is running in the emulator.</p>
-
-<p>To set the network speed at emulator startup, use the  <code>-netspeed</code> emulator option with a supported
-<code>&lt;speed&gt;</code> value, as listed in the table below. Here are some examples:</p>
-
-<pre>emulator -netspeed gsm
-emulator -netspeed 14.4 80</pre>
-
-<p>To make changes to network speed while the emulator is running, connect to the console and use
-the <code>netspeed</code> command with a supported <code>&lt;speed&gt;</code> value from the table
-below.</p>
-
-<pre>network speed 14.4 80</pre>
-
-<p>The format of network <code>&lt;speed&gt;</code> is one of the following (numbers are
-kilobits/sec):</p>
-<table style="clear:right;width:100%;">
-<tbody>
-<tr>
-  <th width="30%">Value</th>
-  <th width="35%">Description</th><th width="35%">Comments</th></tr>
-
-  <tr>
-  <td><code>gsm</code></td>
-  <td>GSM/CSD</td><td>(Up: 14.4, down: 14.4)</td></tr>
-<tr>
-  <td><code>hscsd</code></td>
-  <td>HSCSD</td><td>(Up: 14.4, down: 43.2)</td></tr>
-<tr>
-  <td><code>gprs</code></td>
-  <td>GPRS</td><td>(Up: 40.0, down: 80.0)</td></tr>
-<tr>
-  <td><code>edge</code></td>
-  <td>EDGE/EGPRS</td>
-  <td>(Up: 118.4, down: 236.8)</td>
-</tr>
-<tr>
-  <td><code>umts</code></td>
-  <td>UMTS/3G</td><td>(Up: 128.0, down: 1920.0)</td></tr>
-<tr>
-  <td><code>hsdpa</code></td>
-  <td>HSDPA</td><td>(Up: 348.0, down: 14400.0)</td></tr>
-<tr>
-  <td><code>full</code></td>
-  <td>no limit</td><td>(Up: 0.0, down: 0.0)</td></tr>
-<tr>
-  <td><code>&lt;num&gt;</code></td>
-  <td>Set an exact rate used for both upload and download.</td><td></td></tr>
-<tr>
-  <td><code>&lt;up&gt;:&lt;down&gt;</code></td>
-  <td>Set exact rates for upload and download separately.</td><td></td></tr>
-</table>
-
-
-<h3 id="telephony">Telephony Emulation</h3>
-
-<p>The Android emulator includes its own GSM emulated modem that lets you simulate telephony
-functions in the emulator. For example, you can simulate inbound phone calls, establish data
-connections and terminate them. The Android system handles simulated calls exactly as it would
-actual calls. The emulator does not support call audio.</p>
-
-<p>You can use the {@code gsm} command to access the emulator's telephony functions after connecting
-to the console. The syntax for this command is as follows:</p>
-
-<pre>gsm &lt;call|accept|busy|cancel|data|hold|list|voice|status&gt; </pre>
-
-<p>The <code>gsm</code> command supports the subcommands listed in the table below. </p>
-<table>
-  <tr>
-    <th>Subcommand </th>
-    <th width="25%">Description</th>
-    <th>Comments</th>
-  </tr>
-  <tr>
-    <td><code>call &lt;phonenumber&gt;</code></td>
-    <td>Simulate an inbound phone call from &lt;phonenumber&gt;.</td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td><code>accept &lt;phonenumber&gt;</code></td>
-    <td>Accept an inbound call from &lt;phonenumber&gt; and change the call's state "active".</td>
-    <td>You can change a call's state to "active" only if its current state is "waiting" or "held".</td>
-  </tr>
-  <tr>
-    <td><code>busy &lt;phonenumber&gt;</code></td>
-    <td>Close an outbound call to &lt;phonenumber&gt; and change the call's state to "busy".</td>
-    <td>You can change a call's state to "busy" only if its current state is "waiting".</td>
-  </tr>
-  <tr>
-    <td><code>cancel &lt;phonenumber&gt;</code></td>
-    <td>Terminate an inbound or outbound phone call to/from &lt;phonenumber&gt;.</td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td><code>data &lt;state&gt;</code></td>
-    <td>Change the state of the GPRS data connection to &lt;state&gt;.</td>
-    <td>Supported &lt;state&gt; values are:<br />
+<h3 id="dependencies">Dependencies and prerequisites</h3>
+<p>The Android Emulator has the following requirements:</p>
     <ul>
-          <li><code>unregistered</code> -- No network available</li>
-          <li><code>home</code> -- On local network, non-roaming</li>
-          <li><code>roaming</code> -- On roaming network</li>
-          <li><code>searching</code> -- Searching networks</li>
-          <li><code>denied</code> -- Emergency calls only</li>
-          <li><code>off</code> -- Same as 'unregistered'</li>
-      <li><code>on</code> -- same as 'home'</li>
-    </ul>
-          </td>
-  </tr>
-  <tr>
-    <td><code>hold</code></td>
-    <td>Change the state of a call to "held". </td>
-    <td>You can change a call's state to "held" only if its current state is	 "active" or "waiting". </td>
-  </tr>
-  <tr>
-    <td><code>list</code></td>
-    <td>List all inbound and outbound calls and their states.</td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td><code>voice &lt;state&gt;</code></td>
-    <td>Change the state of the GPRS voice connection to &lt;state&gt;.</td>
-    <td>Supported &lt;state&gt; values are:<br />
-    <ul>
-    <li><code>unregistered</code> -- No network available</li>
-    <li><code>home</code> -- On local network, non-roaming</li>
-    <li><code>roaming</code> -- On roaming network</li>
-    <li><code>searching</code> -- Searching networks</li>
-    <li><code>denied</code> -- Emergency calls only</li>
-    <li><code>off</code> -- Same as 'unregistered'</li>
-    <li><code>on</code> -- Same as 'home'</li>
-    </ul>
-    </td>
-  </tr>
-
-  <tr>
-    <td><code>status</code></td>
-    <td>Report the current GSM voice/data state.</td>
-    <td>Values are those described for the <code>voice</code> and <code>data</code> commands.</td>
-  </tr>
-</table>
-
-
-<h3 id="sms">SMS Emulation</h3>
-
-<p>The Android emulator console lets you generate an SMS message and direct it to an emulator
-instance. Once you connect to an emulator instance, you can generate an emulated incoming SMS using
-the following command:</p>
-
-<pre>sms send &lt;senderPhoneNumber&gt; &lt;textmessage&gt;</pre>
-
-<p>where <code>&lt;senderPhoneNumber&gt;</code> contains an arbitrary numeric string. </p>
-
-<p>The console forwards the SMS message to the Android framework, which passes it through to an application that handles that message type. </p>
-
-
-<h3 id="vm">VM State</h3>
-
-<p>You can use the <code>vm</code> command to control the VM on an emulator instance. The syntax for
-this command is as follows: </p>
-
-<pre>vm &lt;start|stop|status&gt;</pre>
-
-<p>The <code>vm</code> command supports the subcommands listed in the table below. </p>
-
-<table>
-<tr>
-  <th width="25%">Subcommand</th>
-  <th width="30%">Description</th>
-  <th width="35%">Comments</th>
-</tr>
-<tr>
-    <td><code>start</code></td>
-    <td>Start the VM on the instance. </td>
-  <td>&nbsp;</td>
-</tr>
-<tr>
-    <td><code>stop</code></td>
-    <td>Stop the VM on the instance. </td>
-  <td>&nbsp;</td>
-</tr>
-<tr>
-    <td><code>start</code></td>
-    <td>Display the current status of the VM (running or stopped). </td>
-  <td>&nbsp;</td>
-</tr>
-</table>
-
-
-<h3 id="window">Emulator Window</h3>
-
-<p>You can use the <code>window</code> command to manage the emulator window. The syntax for this
-command is as follows: </p>
-
-<pre>window &lt;scale&gt;</pre>
-
-<p>The <code>vm</code> command supports the subcommands listed in the table below. </p>
-
-<table>
-<tr>
-  <th width="25%">Subcommand</th>
-  <th width="30%">Description</th>
-  <th width="35%">Comments</th>
-</tr>
-<tr>
-    <td><code>scale &lt;scale&gt;</code></td>
-    <td>Scale the emulator window.</td>
-  <td>A number between 0.1 and 3 that sets the scaling factor. You can
-  also specify scale as a DPI value if you add the suffix "dpi" to the scale value. A value of "auto"
-  tells the emulator to select the best window size.</td>
-</tr>
-</table>
-
-
-<h3 id="terminating">Terminating an Emulator Instance</h3>
-
-<p>You can terminate an emulator instance through the console, using the <code>kill</code> command.</p>
-
-
-<h2 id="limitations">Emulator Limitations</h2>
-
-<p>The functional limitations of the emulator include: </p>
-<ul>
-  <li>No support for placing or receiving actual phone calls. You can simulate phone calls (placed
-    and received) through the emulator console, however. </li>
-  <li>No support for USB connections</li>
-  <li>No support for device-attached headphones</li>
-  <li>No support for determining network connected state</li>
-  <li>No support for determining battery charge level and AC charging state</li>
-  <li>No support for determining SD card insert/eject</li>
-  <li>No support for Bluetooth</li>
+  <li>Android Studio 2.0 or higher</li>
+  <li>SDK Tools 25.0.10 or higher</li>
+  <li><a href="{@docRoot}sdk/index.html#Requirements">System
+  requirements</a></li>
+  <li>Newly created AVDs to replace any AVDs for emulator 24.0.<em>x</em> or
+  lower</li>
+  <li>Active network connection for certain operations, such as testing app
+  features that require it</li>
+    <li>adb integration enabled through <strong>Tools</strong> &gt;
+    <strong>Android</strong> &gt; <strong>Enable ADB Integration</strong>
+    </li>
 </ul>
 
+<h3 id="limitations">What's not supported</h3>
 
-<h2 id="troubleshooting">Troubleshooting Emulator Problems</h2>
+<p>The Android Emulator supports most features of a device, but doesn't
+include virtual hardware for:</p>
+<ul>
+<li>WiFi</li>
+<li>Bluetooth</li>
+<li>NFC</li>
+<li>SD card insert/eject</li>
+<li>Device-attached headphones</li>
+<li>USB</li>
+</ul>
+<p>The watch emulator for Android Wear doesn't support the Overview
+(Recent Apps) button, D-pad, and fingerprint sensor.</p>
 
-<p>The {@code adb} utility sees the emulator as an actual physical device. For this reason, you
-might have to use the {@code -d} flag with some common {@code adb} commands, such as
-<code>install</code>. The {@code -d} flag lets you specify which of several connected devices to use
-as the target of a command. If you don't specify {@code -d}, the emulator targets the first
-device in its list. For more information about {@code adb}, see <a
-href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>.</p>
+<p>While most end users of phones and tablets tend to use earlier API levels,
+Android Wear and Android TV users tend to use the latest releases. Using recent
+releases can give you a better experience using the emulator.
+</p>
 
-<p>For emulators running on Mac OS X, if you see an error {@code Warning: No DNS servers found}
-when starting the emulator, check to see whether you have an <code>/etc/resolv.conf</code> file. If
-not, please run the following line in a command window:</p>
-    <pre>ln -s /private/var/run/resolv.conf /etc/resolv.conf</pre>
+<h2 id="runningapp">Running an App in the Android Emulator</h2>
 
-<p>See <a href="{@docRoot}resources/faq/index.html">Frequently Asked Questions</a> for more
-troubleshooting information. </p>
+<p>You can run an app from an Android Studio project. Or, you can run an app
+that's been installed on the emulator as you would run any app on a device.</p>
+
+<p>To start the emulator and run an app in your project:</p>
+<ol>
+<li>Open an Android Studio project and select Run <img src="{@docRoot}images/tools/e-irun.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Run icon" />.</li>
+  <p>The <em>Select Deployment Target</em> dialog appears.</p>
+<img src="{@docRoot}images/tools/e-selectdeploymenttarget.png"
+style="height:250px" alt="Select Deployment Target dialog" />
+<li>If you receive an error or warning message at the top of the dialog, click
+the link to correct the problem or get more information.</li>
+<p>The <strong>No USB devices or running emulators detected</strong> warning
+means that you don’t currently have any emulators running, or any detected
+hardware devices connected to your computer. If you
+don’t have hardware devices connected to your computer, or any emulators
+running, you can ignore it. </p>
+<p>Some errors you must fix before you can continue, such as certain Hardware
+Accelerated Execution Manager (Intel® HAXM) errors.</p>
+<li>In the <em>Select Deployment Target</em> dialog, select an existing emulator
+definition, and then click <strong>OK</strong>.</p>
+<p>If you don’t see a definition you want to use, click <strong>Create New
+Emulator</strong> to launch the AVD Manager. After you define a new AVD, in
+the <em>Select Deployment
+Target</em> dialog, click <strong>OK</strong>.</p>
+<p>If you want to use this emulator definition as the default for your project,
+select <strong>Use same selection for future launches</strong>.</p>
+<p>The emulator launches and displays your app.</p>
+<li>Test your app in the emulator.</li>
+<p>You can use the features described in the following sections:</p>
+<ul>
+<li><a href="#navigate">Navigating on the Screen</a></li>
+<li><a href="#tasks">Performing Basic Tasks in the Emulator</a></li>
+<li><a href="#extended">Working With Extended Controls, Settings, and Help</a></li>
+</ul>
+<li>To close the emulator, click Close <img src="{@docRoot}images/tools/e-iclose.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Close icon" />.</li>
+  <p>The emulator device stores the installed app so you can run it again, if
+  needed. You need to uninstall an app to remove it. If you run the project
+  again on the same emulator, it replaces the app with the new version.</p>
+</ol>
+
+<h2 id="runningemulator">Launching the Android Emulator Without Running an App</h2>
+
+<p>To start the emulator:</p>
+<ol>
+<li><a href="{@docRoot}tools/devices/managing-avds.html">Open the AVD Manager</a>.</li>
+<li>Double-click an AVD, or click Run <img src="{@docRoot}images/tools/e-irun.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Run icon" />.</li>
+  <p>The Android Emulator appears.</p>
+  <p>While the emulator is running, you can run Android Studio projects and
+  choose the
+  emulator as the target device. You can also drag one or more APKs onto the
+  emulator to install them, and then run them.</p>
+</ol>
+
+
+<h2 id="navigate">Navigating on the Screen</h2>
+
+<p>Use your computer mouse pointer to mimic your finger on the touchscreen;
+select menu items and input fields; and click buttons and controls.
+Use your computer keyboard to type characters and enter emulator shortcuts.</p>
+<table  border="0" style="clear:left;">
+<tr>
+    <th scope="col">Feature</th>
+    <th scope="col">Description</th>
+  </tr>
+
+ <tr>
+    <td>Swipe the screen</td>
+    <td>Point to the screen, press and hold the primary mouse button, swipe
+    across the screen, and then release.</td>
+ </tr>
+ <tr>
+    <td>Drag an item</td>
+    <td>Point to an item on the screen, press and hold the primary mouse
+    button, move the item, and then release.</td>
+ </tr>
+ <tr>
+    <td>Tap <div>(touch)</div></td>
+    <td>Point to the screen, press the primary mouse button, and then release.
+    For example, you could click a text field to start typing in it, select an
+    app, or press a button.</td>
+ </tr>
+ <tr>
+    <td>Double tap</td>
+    <td>Point to the screen, press the primary mouse button quickly twice,
+    and then release.</td>
+ </tr>
+ <tr>
+    <td>Touch and hold</td>
+    <td>Point to an item on the screen, press the primary mouse button, hold,
+    and then release. For example, you could open options for an item. </td>
+ </tr>
+ <tr>
+    <td>Type</td>
+    <td>You can type in the emulator by using your computer keyboard, or using
+    a keyboard that pops up on the emulator screen. For example, you could
+    type in a text field after you selected it.</td>
+ </tr>
+ <tr>
+    <td><nobr>Pinch and spread</nobr></td>
+    <td><div>Pressing Alt or Option (⌥) brings up a pinch gesture multi-touch
+    interface. The mouse acts as the first finger, and across the anchor point
+    is the second finger. Drag the cursor to move the first point.</div>
+    <div>Clicking the left mouse button acts like touching down both points, and
+    releasing acts like picking both up.</div></td>
+ </tr>
+</table>
+
+<h2 id="tasks">Performing Basic Tasks in the Emulator</h2>
+
+<p>The panel on the right side of the emulator lets you perform various tasks.
+You can also drag files onto the emulator to install apps and download files.
+</p>
+<table  border="0" style="clear:left;">
+ <tr>
+    <th scope="col">Feature</th>
+    <th scope="col">Description</th>
+    <th scope="col">Keyboard Shortcut</th>
+ </tr>
+ <tr>
+    <td>Close<br><img src="{@docRoot}images/tools/e-iclose.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Close icon" /></td>
+    <td>Close the emulator.</td>
+    <td></td>
+ </tr>
+ <tr>
+    <td>Minimize<br><img src="{@docRoot}images/tools/e-iminimize.png"
+  style="vertical-align:sub;margin:0;height:9px" alt="Minimize icon" /></td>
+    <td>Minimize the emulator window.</td>
+    <td></td>
+ </tr>
+ <tr>
+    <td>Resize</td>
+    <td>Resize the emulator as you would any other operating system window. The
+emulator maintains an aspect ratio appropriate for your device.</td>
+    <td>⌘↑ and ⌘↓</td>
+ </tr>
+ <tr>
+    <td>Power<br><img src="{@docRoot}images/tools/e-ipower.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Power icon" /></td>
+    <td>Click to turn the screen on or off.<br>Click and hold to turn the device
+    on or off. </td>
+    <td><div>Ctrl+P</div> <div>⌘P</div></td>
+ </tr>
+ <tr>
+    <td>Volume Up<br><img src="{@docRoot}images/tools/e-ivolumeup.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Volume Up icon" /></td>
+    <td>Click to view a slider control and turn the volume up. Click again to
+    turn it up more, or use the slider control to change the volume. </td>
+    <td><div>Ctrl+=</div><div>⌘=</div></td>
+ </tr>
+ <tr>
+    <td>Volume Down<br><img src="{@docRoot}images/tools/e-ivolumedown.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Volume Down icon" /></td>
+    <td>Click to view a slider control and turn the volume down. Click again to
+    turn it down more, or use the slider control to change the volume. </td>
+    <td><div>Ctrl+-</div><div>⌘-<div></td>
+ </tr>
+ <tr>
+    <td>Rotate Left<br><img src="{@docRoot}images/tools/e-irotateleft.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Rotate Left icon" /></td>
+    <td>Rotate the phone 90 degrees counterclockwise.</td>
+    <td><div>Ctrl+Left</div><div>⌘←</div></td>
+ </tr>
+ <tr>
+    <td>Rotate Right<br><img src="{@docRoot}images/tools/e-irotateright.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Rotate Right icon" /></td>
+    <td>Rotate the phone 90 degrees clockwise.</td>
+    <td><div>Ctrl+Right</div><div>⌘→</div></td>
+ </tr>
+ <tr>
+    <td>Take Screenshot<br><img src="{@docRoot}images/tools/e-itakescreenshot.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Take Screenshot icon" />
+  </td>
+    <td>Click to take a screenshot of the device. The default save location is
+    your computer desktop. To change the save location, select
+    <strong>…</strong> > <strong>Settings</strong>. The emulator creates a
+    file with the name <code>Screenshot_<em>yyyymmdd-hhmmss</em>.png</code>
+    using the year, month, day, hour, minute, and second of the capture, for
+    example, <code>Screenshot_20160219-145848.png</code>. </td>
+    <td><div>Ctrl+S</div><div>⌘S<div></td>
+ </tr>
+ <tr>
+    <td><nobr>Enter Zoom Mode</nobr><br><img src="{@docRoot}images/tools/e-izoom.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Enter Zoom Mode icon" />
+  </td>
+    <td><p>Click so the cursor changes to the zoom icon:</p>
+<ul>
+  <li> Left-click the screen to zoom in by 25%, up to a maximum of about twice
+  the screen resolution of the virtual device.
+  <li> Right-click to zoom out.
+  <li> Left-click and drag to select a box-shaped area to zoom in on.
+  <li> Right-click and drag a selection box to reset to default zoom.
+  <li> Ctrl-click to touch the screen while in zoom mode.
+</ul>
+<p>Click Enter Zoom Mode again to return to normal screen size.</p></td>
+    <td><div>Ctrl+Z</div><div>⌘Z</div>
+    <div>While in zoom mode:</div>
+    <div>Ctrl+Up</div><div>Ctrl+Down</div>
+    <div>Ctrl+Shift+Up</div><div>Ctrl+Shift+Down</div>
+    <div>Ctrl+Shift+Left</div><div>Ctrl+Shift+Right</div>
+    <div>⌘↑ and ⌘↓</div>
+    <div>⇧⌘↑ and ⇧⌘↓</div>
+    <div>⇧⌘← and ⇧⌘→</div></td>
+ </tr>
+ <tr>
+    <td>Back<br><img src="{@docRoot}images/tools/e-iback.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Back icon" /></td>
+    <td>Return to the previous screen, or close a dialog box, an options menu,
+    the Notifications panel, or the onscreen keyboard. </td>
+    <td><div>Ctrl+Backspace</div>
+    <div>⌘⌫</div></td>
+ </tr>
+ <tr>
+    <td>Home<br><img src="{@docRoot}images/tools/e-ihome.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Home icon" /></td>
+    <td>Return to the Home screen. Press and hold to open the item specific to
+    your API level. </td>
+    <td><div>Ctrl+H</div><div>⌘⇧H</div></td>
+ </tr>
+ <tr>
+    <td><div>Overview<br><img src="{@docRoot}images/tools/e-ioverview.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Overview icon" /></div>
+  <div>(Recent Apps)</div></td>
+    <td>Tap to open a list of thumbnail images of apps you’ve worked with
+    recently. To open an app, tap it. To remove a thumbnail from the list,
+    swipe it left or right. This button isn't supported for Android Wear.</td>
+    <td><div>Ctrl+O</div><div>⌘O</div></td>
+ </tr>
+ <tr>
+    <td>Menu</td>
+    <td>Type the keyboard shortcut to simulate the Menu button, for example,
+    to open the menu for the selected app.</td>
+    <td><div>Ctrl+M</div><div>⌘M</div></td>
+ </tr>
+ <tr>
+    <td>More<br><img src="{@docRoot}images/tools/e-imore.png"
+  style="vertical-align:sub;margin:0;height:9px" alt="More icon" /></td>
+    <td>Click to access other features and settings, described in the next
+    table.</td>
+    <td></td>
+ </tr>
+ <tr>
+    <td>Install an APK</td>
+    <td>Drag an APK file onto the emulator screen. An APK Installer dialog
+    appears. When the installation completes, you can view the app in your
+    apps list.The app didn’t install if a dialog appears that says “APK failed
+    to install.”</td>
+    <td></td>
+ </tr>
+ <tr>
+    <td>Add a file</td>
+    <td>Drag any file onto the emulator screen. It’s placed in the
+    <code>/sdcard/Download</code> directory. Navigate to the file using the
+    method for the API level. For example, for API 22, this is the navigation
+    path: <strong>Settings</strong> > <strong>Device: Storage & USB</strong>
+    &gt; <strong>Internal Storage</strong> &gt; <strong>Explore</strong>
+    (Virtual SD Card). </td>
+    <td></td>
+ </tr>
+ <tr>
+    <td>Toggle trackball mode</td>
+    <td></td>
+    <td>F6</td>
+ </tr>
+</table>
+
+<h2 id="extended">Working With the Extended Controls, Settings, and Help</h2>
+
+<p>The extended controls let you send data, change device properties, control
+apps, and more. To access the controls, select <strong>…</strong> in the
+emulator panel and then select the option you want in the left panel of the
+<em>Extended Controls</em> dialog.</p>
+
+<table  border="0" style="clear:left;">
+ <tr>
+    <th scope="col">Feature</th>
+    <th scope="col">Description</th>
+    <th scope="col">Keyboard Shortcuts</th>
+ </tr>
+ <tr>
+    <td>Location</td>
+    <td>
+<p>The emulator lets you simulate “my location” information: the location where
+the emulated device is currently located. For example, if you click My Location
+<img src="{@docRoot}images/tools/e-ilocation.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="My Location icon" />
+ in Google Maps and then send a location, the map shows it.</p>
+ <p>To send a GPS location:</p>
+<ol>
+  <li> Select <strong>Decimal</strong> or <strong>Sexagesimal</strong>.</li>
+  <li> Specify the location.</li>
+
+<p>In decimal mode, enter a <strong>Latitude</strong> value in the range -90.0
+to +90.0 degrees and a <strong>Longitude</strong> value in the range -180.0 to
++180.0 degrees.</p>
+<p>In sexigesimal mode, enter a three-part <strong>Latitude</strong> value in
+the range -90 to +90 degrees, 0 to 59 minutes, and 0.0 to 60.0
+seconds. Enter a <strong>Longitude</strong> value in the range -180 to +180
+degrees, 0 to 59 minutes, and 0.0 to 60.0 seconds.</p>
+<p>For the latitude, - indicates south and + indicates north; for the longitude,
+- indicates west and + indicates east. The + is optional.</p>
+<p>Optionally specify an <strong>Altitude</strong> value in the range
+-1,000.0 to +10,000.0 meters.</p>
+
+  <li> Click <strong>Send</strong>.</li>
+</ol>
+<p>To use geographic data from a GPS exchange format (GPX) or Keyhole Markup
+Language (KML) file:</p>
+<ol>
+  <li> Click <strong>Load GPX/KML</strong>.</li>
+  <li> In the file dialog, select a file on your computer and click
+  <strong>Open</strong>.</li>
+  <li> Optionally select a <strong>Speed</strong>.</li>
+<p>The speed defaults to the <strong>Delay</strong> value (<strong>Speed
+1X</strong>). You can increase the speed by double (<strong>Speed</strong>
+<strong>2X</strong>), triple (<strong>Speed 3X</strong>), and so on.</p>
+
+  <li> Click Run <img src="{@docRoot}images/tools/e-irun.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Run icon" />.</li>
+</ol>
+</td>
+    <td><div>Ctrl+Shift+L</div><div>⇧⌘L</div></td>
+ </tr>
+ <tr>
+    <td>Cellular</td>
+    <td><p>The emulator lets you simulate various network conditions. You can
+    approximate the network speed for different network protocols, or you can
+    specify <strong>Full</strong>, which transfers data as quickly as your
+    computer allows. Specifying a network protocol is always slower than
+    <strong>Full</strong>. You can also specify the voice and data network
+    status, such as roaming. The defaults are set in the AVD.</p>
+    <p>Select a <strong>Network type</strong>:</p>
+<ul>
+  <li> GSM - Global System for Mobile Communications</li>
+  <li> HSCSD - High-Speed Circuit-Switched Data</li>
+  <li> GPRS - Generic Packet Radio Service</li>
+  <li> EDGE - Enhanced Data rates for GSM Evolution</li>
+  <li> UMTS - Universal Mobile Telecommunications System</li>
+  <li> HSPDA - High-Speed Downlink Packet Access</li>
+  <li> Full (default)</li>
+</ul>
+<p>Select a <strong>Voice status</strong>, <strong>Data status</strong>, or
+both:</p>
+<ul>
+  <li> Home (default)</li>
+  <li> Roaming</li>
+  <li> Searching</li>
+  <li> Denied (emergency calls only)</li>
+  <li> Unregistered (off)</li>
+</ul>
+</td>
+    <td><div>Ctrl+Shift+C</div><div>⇧⌘C</td>
+ </tr>
+ <tr>
+    <td>Battery</td>
+    <td><p>You can simulate the battery properties of a device to see how your
+    app performs under different conditions. To select a <strong>Charge
+    level</strong>, use the slider control.</p>
+    <p>Select a <strong>Charger connection</strong> value:</p>
+<ul>
+  <li>None</li>
+  <li>AC charger</li>
+</ul>
+<p>Select a <strong>Battery health</strong> value:</p>
+<ul>
+  <li> Good (default)</li>
+  <li> Failed</li>
+  <li> Dead</li>
+  <li> Overvoltage</li>
+  <li> Overheated</li>
+  <li> Unknown</li>
+</ul>
+<p>Select a <strong>Battery status </strong>value:</p>
+<ul>
+  <li> Unknown</li>
+  <li> Charging (default)</li>
+  <li> Discharging</li>
+  <li> Not charging</li>
+  <li> Full</li>
+</ul>
+</td>
+    <td><div>Ctrl+Shift+B</div><div>⇧⌘B</div></td>
+ </tr>
+ <tr>
+    <td>Phone</td>
+    <td><p>The emulator lets you simulate incoming phone calls and text
+    messages. Note that the information flow is one way, from the control to
+    the emulator. For example, the control doesn’t change its state if the
+    emulator hangs up; you need to end the call in the control.</p>
+    <p>To initiate a call to the emulator:</p>
+<ol>
+  <li> Select or type a phone number in the <strong>From</strong> field.</li>
+  <li> Click <strong>Call Device</strong>.</li>
+  <li> Optionally click <strong>Hold Call</strong> to put the call on hold.</li>
+  <li> To end the call, click <strong>End Call</strong>.</li>
+</ol>
+<p>To send a text message to the emulator:</p>
+<ol>
+  <li> Select or type a phone number in the <strong>From</strong> field.</li>
+  <li> Type a message in the <strong>SMS message</strong> field.</li>
+  <li> Click <strong>Send Message</strong>.</li>
+</ol>
+</td>
+    <td><div>Ctrl+Shift+P</div><div>⇧⌘P</div></td>
+ </tr>
+ <tr>
+    <td>Directional Pad</td>
+    <td><p>If the AVD has the directional pad enabled in the hardware profile,
+    you can use the directional pad controls with the emulator. However, not
+    all devices can support the directional pad; for example, an Android watch.
+    The buttons simulate the following actions:</p>
+<img src="{@docRoot}images/tools/e-dpad.png"
+  style="vertical-align:sub;margin:0;width:244px" alt="Directional Pad Control" />
+</td>
+    <td><div>Ctrl+Shift+D</div><div>⇧⌘D</div></td>
+ </tr>
+ <tr>
+    <td>Fingerprint</td>
+    <td><p>This control can simulate 10 different fingerprint scans. You can
+    use it to test fingerprint integration in your app. This feature isn't
+    supported for Android Wear.</p>
+    <p>To simulate a fingerprint scan on the virtual device:</p>
+<ol>
+  <li> Prepare an app to receive a fingerprint.</li>
+  <li> Select a <strong>Fingerprint</strong> value.</li>
+  <li> Click <strong>Touch Sensor</strong>.</li>
+</ol>
+</td>
+    <td><div>Ctrl+Shift+F</div><div>⇧⌘F</div></td>
+ </tr>
+ <tr>
+    <td>Settings</td>
+    <td><p>You can specify the following settings:</p>
+<ul>
+  <li> <strong>Emulator window theme</strong> - Select Light or Dark.</li>
+  <li> <strong>Send keyboard shortcuts to</strong> - By default, some keyboard
+  combinations will trigger emulator control shortcuts. If you’re developing
+  an app that includes keyboard shortcuts, such as one targeted at
+  devices with Bluetooth keyboards, you can change this setting to send
+  <em>all</em> keyboard input to the virtual device, including input
+  that would be a shortcut in the emulator.</li>
+  <li> <strong>Screenshot save location</strong> - Click the folder icon to
+  specify a location to save screenshots of the emulator screen.</li>
+  <li> <strong>Use detected ADB location</strong> - If you're running the
+  emulator from Android Studio, you should select this setting (the default).
+  If you run the emulator from outside Android Studio and want it to use a
+  specific adb executable, deselect this option and specify the SDK Tools
+  location. If this setting is incorrect, features such as drag-and-drop app
+  install and file copy, and screenshot capture, won't work. </li>
+  <li> <strong>When to send crash reports</strong> - Select Always, Never, or
+  Ask. </li>
+</ul>
+</td>
+    <td>Ctrl+Shift+S<br>⇧⌘S</td>
+ </tr>
+ <tr>
+    <td>Help > Keyboard Shortcuts</td>
+    <td><p>See the keyboard shortcuts that the emulator accepts. For the
+    shortcuts to work, you need to:</p>
+<ul>
+  <li>Select <strong>Settings</strong> > <strong>Send keyboard shortcuts
+  to</strong> > <strong>Emulator controls (default)</strong>.</li>
+</ul>
+</td>
+    <td>F1<br>⌘/</td>
+ </tr>
+ <tr>
+    <td>Help > Emulator Help</td>
+    <td><p>To go to the online documentation for the emulator, click
+    <strong>Documentation</strong>.</p>
+    <p>To file a bug against the emulator, click <strong>File a Bug</strong>.
+    </p>
+    <p>To make suggestions, click <strong>Send Feedback</strong>.</p>
+    <p>All of these links require an internet connection and a browser.</p> </td>
+    <td>F1<br>⌘/</td>
+ </tr>
+ <tr>
+    <td>Help > About</td>
+    <td><p>See which adb port the emulator uses, as well as the Android and
+    emulator version numbers. Compare the latest available emulator version
+    with your version to determine if you have the latest software installed.
+    </p>
+    <p>The emulator serial number is <strong>emulator-<em></strong>adb_port</em>,
+    which you can specify as an adb command line option, for example.</p></td>
+    <td>F1<br>⌘/</td>
+ </tr>
+</table>
+
+
+
+
+
