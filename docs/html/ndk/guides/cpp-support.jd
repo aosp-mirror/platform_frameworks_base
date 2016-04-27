@@ -213,9 +213,6 @@ doesn't support. Switching locale from the default produces the following warnin
 newlocale() WARNING: Trying to set locale to en_US.UTF-8 other than "", "C" or "POSIX"
 </pre>
 
-<p>We do not recommend using {@code libc++} with GCC 4.6 because of GCC 4.6's limited c++11
-support.</p>
-
 
 <h2 id="ic">Important Considerations</h2>
 
