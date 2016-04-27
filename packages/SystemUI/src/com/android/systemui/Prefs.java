@@ -44,6 +44,7 @@ public final class Prefs {
         Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN,
         Key.QS_HOTSPOT_ADDED,
         Key.QS_DATA_SAVER_ADDED,
+        Key.QS_DATA_SAVER_DIALOG_SHOWN,
         Key.QS_INVERT_COLORS_ADDED,
         Key.QS_WORK_ADDED,
         Key.QS_NIGHT_ADDED,
@@ -63,6 +64,7 @@ public final class Prefs {
         String TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN = "TvPictureInPictureOnboardingShown";
         String QS_HOTSPOT_ADDED = "QsHotspotAdded";
         String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
+        String QS_DATA_SAVER_DIALOG_SHOWN = "QsDataSaverDialogShown";
         String QS_INVERT_COLORS_ADDED = "QsInvertColorsAdded";
         String QS_WORK_ADDED = "QsWorkAdded";
         String QS_NIGHT_ADDED = "QsNightAdded";
