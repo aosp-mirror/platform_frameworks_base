@@ -80,7 +80,7 @@ see <a href="{@docRoot}distribute/googleplay/tv.html">Distributing to Android TV
 </tr>
 
 <tr>
-  <td rowspan="4" id="launcher">
+  <td rowspan="5" id="launcher">
     Launcher
   </td>
 
@@ -127,6 +127,18 @@ see <a href="{@docRoot}distribute/googleplay/tv.html">Distributing to Android TV
     <p style="margin-bottom:.5em;">
       If the app is a game, it appears in the Games row in the Android TV Launcher.<br>
       (<a href="{@docRoot}training/tv/games/index.html#manifest">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-LS">
+    TV-LS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App runs successfully when the user selects the application banner from the home screen.
+      (<a href="{@docRoot}training/tv/start/start.html#run">Learn how</a>)
     </p>
   </td>
 </tr>
@@ -239,6 +251,36 @@ see <a href="{@docRoot}distribute/googleplay/tv.html">Distributing to Android TV
   </td>
 </tr>
 
+<tr>
+  <td rowspan="2" id="search">
+    Search
+  </td>
+
+  <td id="TV-SD">
+    TV-SD
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      In-app search results are navigable using D-pad controls, unless the app
+      requires a gamepad controller, as specified in <a href="#TV-GP">TV-GP</a>.
+      (<a href="{@docRoot}training/tv/start/navigation.html#d-pad-navigation">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="TV-SB">
+    TV-SB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      An in-app search query should show up in the search box, similar to the user interface provided
+      by {@link android.support.v17.leanback.app.SearchFragment}, and results should be relevant to
+      that query.
+      (<a href="{@docRoot}training/tv/discovery/in-app-search.html">Learn how</a>)
+    </p>
+  </td>
+</tr>
 
 </table>
 
