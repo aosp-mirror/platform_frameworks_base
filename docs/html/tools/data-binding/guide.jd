@@ -1655,13 +1655,31 @@ public static ColorDrawable convertColorToDrawable(int color) {
 <h3 id="studio_support">Android Studio Support for Data Binding</h3>
 
 <p>
-Android Studio supports syntax highlighting of data binding expressions, and flags any expression
-language syntax errors in the editor.
-</p>
+Android Studio supports many of the code editing features for data binding code.
+For example, it supports the following features for data binding expressions:</p>
+<ul>
+<li>Syntax highlighting</li>
+<li>Flagging of expression language syntax errors</li>
+<li>XML code completion</li>
+<li>References, including <a class="external-link"
+href="https://www.jetbrains.com/help/idea/2016.1/navigation-in-source-code.html?origin=old_help">
+navigation</a> (such as navigate to a declaration) and
+<a class="external-link"
+href="https://www.jetbrains.com/help/idea/2016.1/viewing-inline-documentation.html?origin=old_help">
+quick documentation</a></li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Arrays and a
+<a href="https://docs.oracle.com/javase/tutorial/java/generics/types.html"
+class="external-link">generic type</a>, such as the {@link
+android.databinding.Observable} class, might display
+errors when there are no errors.</p>
+
 <p>
-The Preview pane displays default values for data binding expressions if provided. In the following
-example excerpt of an element from a layout XML file, the Preview pane displays the
-{@code PLACEHOLDER} default text value in the <code>TextView</code>.
+The Preview pane displays default values for data binding expressions if
+provided. In the following
+example excerpt of an element from a layout XML file, the Preview pane displays
+the {@code PLACEHOLDER} default text value in the <code>TextView</code>.
 </p>
 
 <pre>
@@ -1671,8 +1689,11 @@ example excerpt of an element from a layout XML file, the Preview pane displays 
 </pre>
 
 <p>
-If you need to display a default value during the design phase of your project, you
-can also use tools attributes instead of default expression values, as described in
-<a class="external-link" href="http://tools.android.com/tips/layout-designtime-attributes">
+If you need to display a default value during the design phase of your project,
+you can also use tools attributes instead of default expression values, as
+described in
+<a class="external-link"
+href="http://tools.android.com/tips/layout-designtime-attributes">
 Designtime Layout Attributes</a>.
 </p>
+
