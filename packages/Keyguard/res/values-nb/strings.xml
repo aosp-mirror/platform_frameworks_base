@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Du må tegne mønsteret når du bytter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Du må skrive inn PIN-koden når du bytter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Du må skrive inn passordet når du bytter profil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Enhetsadministratoren har låst enheten"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Enheten ble låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Enheten er ikke blitt låst opp de siste <xliff:g id="NUMBER_1">%d</xliff:g> timene. Bekreft mønsteret.</item>
       <item quantity="one">Enheten er ikke blitt låst opp den siste <xliff:g id="NUMBER_0">%d</xliff:g> timen. Bekreft mønsteret.</item>

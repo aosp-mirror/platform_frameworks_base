@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Mynsturs er krafist þegar þú skiptir um snið"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN-númers er krafist þegar þú skiptir um snið"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Aðgangsorðs er krafist þegar þú skiptir um snið"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Stjórnandi hefur læst tækinu"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Tækinu var læst handvirkt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustund. Staðfestu mynstrið.</item>
       <item quantity="other">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustundir. Staðfestu mynstrið.</item>

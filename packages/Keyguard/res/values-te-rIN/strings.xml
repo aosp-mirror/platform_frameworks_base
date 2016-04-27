@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"మీరు ప్రొఫైల్‌లు మారినప్పుడు నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"మీరు ప్రొఫైల్‌లు మారినప్పుడు PIN నమోదు చేయడం ఆవశ్యకం"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"మీరు ప్రొఫైల్‌లు మారినప్పుడు పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"పరికర నిర్వాహకులు పరికరాన్ని లాక్ చేసారు"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
       <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>

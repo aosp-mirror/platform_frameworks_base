@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ต้องใช้รูปแบบเมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ต้องระบุ PIN เมื่อคุณเปลี่ยนโปรไฟล์"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ต้องป้อนรหัสผ่านเมื่อคุณเปลี่ยนโปรไฟล์"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"ผู้ดูแลอุปกรณ์ล็อกอุปกรณ์ไว้"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"มีผู้ล็อกอุปกรณ์ด้วยตัวเอง"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_1">%d</xliff:g> ชั่วโมง ยืนยันรูปแบบ</item>
       <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์เป็นเวลา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมง ยืนยันรูปแบบ </item>

@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Απαιτείται μοτίβο κατά την εναλλαγή προφίλ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Απαιτείται PIN κατά την εναλλαγή προφίλ"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Απαιτείται κωδικός πρόσβασης κατά την εναλλαγή προφίλ"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Η συσκευή κλειδώθηκε από το διαχειριστή της"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Η συσκευή κλειδώθηκε με μη αυτόματο τρόπο"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε το μοτίβο.</item>
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί για <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε το μοτίβο.</item>

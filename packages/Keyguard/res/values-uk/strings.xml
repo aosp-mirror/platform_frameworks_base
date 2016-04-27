@@ -123,10 +123,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Під час переходу в інший профіль потрібно ввести ключ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Під час переходу в інший профіль потрібно ввести PIN-код"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Під час переходу в інший профіль потрібно ввести пароль"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Адміністратор заблокував пристрій"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Пристрій заблоковано вручну"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Ви не розблоковували пристрій <xliff:g id="NUMBER_1">%d</xliff:g> годину. Підтвердьте ключ.</item>
       <item quantity="few">Ви не розблоковували пристрій <xliff:g id="NUMBER_1">%d</xliff:g> години. Підтвердьте ключ.</item>

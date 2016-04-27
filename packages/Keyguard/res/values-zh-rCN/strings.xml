@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切换资料后需要绘制解锁图案"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"切换资料后需要输入 PIN 码"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"切换资料后需要输入密码"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"设备管理员已锁定此设备"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"此设备已手动锁定"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认解锁图案。</item>
       <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认解锁图案。</item>

@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ပရိုဖိုင်များကို သင် ပြောင်းလျှင် ပုံစံ လိုအပါသည်"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ပရိုဖိုင်များကို သင် ပြောင်းလျှင် PIN လိုအပါသည်"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ပရိုဖိုင်များကို သင် ပြောင်းလျှင် စကားဝှက် လိုအပါသည်"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"စက်ပစ္စည်းစီမံခန့်ခွဲသူသည် စက်ပစ္စည်းကို လော့ခ်ချထားသည်"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">စက်ကိရိယာအား <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ သော့ပိတ်ထား၏။ ပုံစံအား အတည်ပြုပါ။</item>
       <item quantity="one">စက်ကိရိယာအား <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ သော့ပိတ်ထား၏။ ပုံစံအား အတည်ပြုပါ။</item>

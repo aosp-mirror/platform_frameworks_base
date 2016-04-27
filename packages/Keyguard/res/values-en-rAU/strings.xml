@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pattern required when you switch profiles"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN required when you switch profiles"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Password required when you switch profiles"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Device administrator locked device"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Device was locked manually"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm pattern.</item>
       <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_0">%d</xliff:g> hour. Confirm pattern.</item>
