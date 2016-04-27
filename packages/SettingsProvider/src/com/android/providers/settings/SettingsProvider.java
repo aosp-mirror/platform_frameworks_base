@@ -1458,7 +1458,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static MatrixCursor packageSettingForQuery(Setting setting, String[] projection) {
-        if (setting == null) {
+        if (setting.isNull()) {
             return new MatrixCursor(projection, 0);
         }
         MatrixCursor cursor = new MatrixCursor(projection, 1);
@@ -1483,7 +1483,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static void appendSettingToCursor(MatrixCursor cursor, Setting setting) {
-        if (setting == null) {
+        if (setting.isNull()) {
             return;
         }
         final int columnCount = cursor.getColumnCount();
@@ -2210,7 +2210,7 @@ public class SettingsProvider extends ContentProvider {
                     Setting currentSetting = secureSettings.getSettingLocked(
                             Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT);
                     if (defaultComponent != null && !defaultComponent.isEmpty() &&
-                        currentSetting == null) {
+                        currentSetting.isNull()) {
                         secureSettings.insertSettingLocked(
                                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
                                 defaultComponent,
@@ -2226,7 +2226,7 @@ public class SettingsProvider extends ContentProvider {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         Setting currentSetting = globalSettings.getSettingLocked(
                                 Settings.Global.ADD_USERS_WHEN_LOCKED);
-                        if (currentSetting == null) {
+                        if (currentSetting.isNull()) {
                             globalSettings.insertSettingLocked(
                                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                                     getContext().getResources().getBoolean(
@@ -2252,7 +2252,7 @@ public class SettingsProvider extends ContentProvider {
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     Setting currentSetting = secureSettings.getSettingLocked(
                             Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
-                    if (currentSetting == null) {
+                    if (currentSetting.isNull()) {
                         secureSettings.insertSettingLocked(
                                 Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
                                 getContext().getResources().getBoolean(
@@ -2268,7 +2268,7 @@ public class SettingsProvider extends ContentProvider {
 
                     Setting currentSetting = secureSettings.getSettingLocked(
                             Settings.Secure.ENABLED_VR_LISTENERS);
-                    if (currentSetting == null) {
+                    if (currentSetting.isNull()) {
                         ArraySet<ComponentName> l =
                                 SystemConfig.getInstance().getDefaultVrComponents();
 
