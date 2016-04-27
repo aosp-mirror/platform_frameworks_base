@@ -112,7 +112,7 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 <p class="note">
   <strong>Note:</strong> A {@link android.content.BroadcastReceiver} registered with
   {@link android.content.Context#registerReceiver Context.registerReceiver()}
-  continues to receive these broadcasts while the app is in the foreground.
+  continues to receive these broadcasts while the app is running.
 </p>
 
 <h3 id="sched-jobs">
@@ -269,7 +269,7 @@ public static void scheduleJob(Context context) {
           MY_BACKGROUND_JOB,
           new ComponentName(context, MediaContentJob.class));
   builder.addTriggerContentUri(
-          new JobInfo.TriggerContentUri(MEDIA_URI,
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
           JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
   js.schedule(builder.build());
 }
