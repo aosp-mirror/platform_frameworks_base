@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -197,6 +198,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public void focus() {
+        setVisibility(VISIBLE);
         mController.addRemoteInput(mEntry);
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
@@ -273,6 +275,63 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 p = p.getParent();
             }
         }
+    }
+
+    public boolean isActive() {
+        return mEditText.isFocused();
+    }
+
+    public void stealFocusFrom(RemoteInputView other) {
+        other.close();
+        setPendingIntent(other.mPendingIntent);
+        setRemoteInput(other.mRemoteInputs, other.mRemoteInput);
+        focus();
+    }
+
+    /**
+     * Tries to find an action in {@param actions} that matches the current pending intent
+     * of this view and updates its state to that of the found action
+     *
+     * @return true if a matching action was found, false otherwise
+     */
+    public boolean updatePendingIntentFromActions(Notification.Action[] actions) {
+        boolean found = false;
+        if (mPendingIntent == null || actions == null) {
+            return false;
+        }
+        Intent current = mPendingIntent.getIntent();
+        if (current == null) {
+            return false;
+        }
+
+        for (Notification.Action a : actions) {
+            RemoteInput[] inputs = a.getRemoteInputs();
+            if (a.actionIntent == null || inputs == null) {
+                continue;
+            }
+            Intent candidate = a.actionIntent.getIntent();
+            if (!current.filterEquals(candidate)) {
+                continue;
+            }
+
+            RemoteInput input = null;
+            for (RemoteInput i : inputs) {
+                if (i.getAllowFreeFormInput()) {
+                    input = i;
+                }
+            }
+            if (input == null) {
+                continue;
+            }
+            setPendingIntent(a.actionIntent);
+            setRemoteInput(inputs, input);
+            return true;
+        }
+        return false;
+    }
+
+    public PendingIntent getPendingIntent() {
+        return mPendingIntent;
     }
 
     /**
