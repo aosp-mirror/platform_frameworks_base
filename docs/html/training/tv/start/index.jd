@@ -50,6 +50,10 @@ startpage=true
     Getting Started with TV Apps</a></dt>
     <dd>Learn how to create a new Android Studio project for TV apps or modify your existing
       app project to run on TV devices.</dd>
+  <dt><a href="{@docRoot}training/tv/start/hardware.html">
+    Handling TV Hardware</a></dt>
+    <dd>Learn how to check if your app is running on TV hardware, handle unsupported hardware
+      features, and manage controller devices.</dd>
   <dt><a href="{@docRoot}training/tv/start/layouts.html">
     Building TV Layouts</a></dt>
     <dd>Learn the minimum requirements for TV layouts and how to implement them.</dd>
@@ -57,8 +61,4 @@ startpage=true
     Creating TV Navigation</a></dt>
     <dd>Learn the requirements for TV navigation and how to implement TV-compatible
       navigation.</dd>
-  <dt><a href="{@docRoot}training/tv/start/hardware.html">
-    Handling TV Hardware</a></dt>
-    <dd>Learn how to check if your app is running on TV hardware, handle unsupported hardware
-      features, and manage controller devices.</dd>
 </dl>
