@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.graphics.Rect;
@@ -118,6 +119,8 @@ public class NotificationContentView extends FrameLayout {
     private int mTransformationStartVisibleType;
     private boolean mUserExpanding;
     private int mSingleLineWidthIndention;
+    private PendingIntent mPreviousExpandedRemoteInputIntent;
+    private PendingIntent mPreviousHeadsUpRemoteInputIntent;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -280,13 +283,19 @@ public class NotificationContentView extends FrameLayout {
             mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
+        mPreviousExpandedRemoteInputIntent =
+                mExpandedRemoteInput != null ? mExpandedRemoteInput.getPendingIntent() : null;
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
+            mExpandedRemoteInput = null;
         }
+        mPreviousHeadsUpRemoteInputIntent =
+                mHeadsUpRemoteInput != null ? mHeadsUpRemoteInput.getPendingIntent() : null;
         if (mHeadsUpChild != null) {
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
+            mHeadsUpRemoteInput = null;
         }
         mContractedChild = null;
         mExpandedChild = null;
@@ -496,6 +505,12 @@ public class NotificationContentView extends FrameLayout {
         }
         int visibleType = calculateVisibleType();
         if (visibleType != mVisibleType || force) {
+            View visibleView = getViewForVisibleType(visibleType);
+            if (visibleView != null) {
+                visibleView.setVisibility(VISIBLE);
+                transferRemoteInputFocus(visibleType);
+            }
+
             if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
                     || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
                     || (visibleType == VISIBLE_TYPE_SINGLELINE && mSingleLineView != null)
@@ -557,6 +572,19 @@ public class NotificationContentView extends FrameLayout {
                 }
             }
         });
+    }
+
+    private void transferRemoteInputFocus(int visibleType) {
+        if (visibleType == VISIBLE_TYPE_HEADSUP
+                && mHeadsUpRemoteInput != null
+                && (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive())) {
+            mHeadsUpRemoteInput.stealFocusFrom(mExpandedRemoteInput);
+        }
+        if (visibleType == VISIBLE_TYPE_EXPANDED
+                && mExpandedRemoteInput != null
+                && (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive())) {
+            mExpandedRemoteInput.stealFocusFrom(mHeadsUpRemoteInput);
+        }
     }
 
     /**
@@ -736,6 +764,8 @@ public class NotificationContentView extends FrameLayout {
         updateShowingLegacyBackground();
         selectLayout(false /* animate */, true /* force */);
         setDark(mDark, false /* animate */, 0 /* delay */);
+        mPreviousExpandedRemoteInputIntent = null;
+        mPreviousHeadsUpRemoteInputIntent = null;
     }
 
     private void updateSingleLineView() {
@@ -771,19 +801,23 @@ public class NotificationContentView extends FrameLayout {
 
         View bigContentView = mExpandedChild;
         if (bigContentView != null) {
-            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasRemoteInput);
+            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasRemoteInput,
+                    mPreviousExpandedRemoteInputIntent);
         } else {
             mExpandedRemoteInput = null;
         }
+
         View headsUpContentView = mHeadsUpChild;
         if (headsUpContentView != null) {
-            mHeadsUpRemoteInput = applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
+            mHeadsUpRemoteInput = applyRemoteInput(headsUpContentView, entry, hasRemoteInput,
+                    mPreviousHeadsUpRemoteInputIntent);
         } else {
             mHeadsUpRemoteInput = null;
         }
     }
 
-    private RemoteInputView applyRemoteInput(View view, NotificationData.Entry entry, boolean hasRemoteInput) {
+    private RemoteInputView applyRemoteInput(View view, NotificationData.Entry entry,
+            boolean hasRemoteInput, PendingIntent existingPendingIntent) {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
@@ -814,6 +848,24 @@ public class NotificationContentView extends FrameLayout {
                 existing.setBackgroundColor(NotificationColorUtil.ensureTextBackgroundColor(color,
                         mContext.getColor(R.color.remote_input_text),
                         mContext.getColor(R.color.remote_input_hint)));
+
+                if (existingPendingIntent != null || existing.isActive()) {
+                    // The current action could be gone, or the pending intent no longer valid.
+                    // If we find a matching action in the new notification, focus, otherwise close.
+                    Notification.Action[] actions = entry.notification.getNotification().actions;
+                    if (existingPendingIntent != null) {
+                        existing.setPendingIntent(existingPendingIntent);
+                    }
+                    if (existing.updatePendingIntentFromActions(actions)) {
+                        if (!existing.isActive()) {
+                            existing.focus();
+                        }
+                    } else {
+                        if (existing.isActive()) {
+                            existing.close();
+                        }
+                    }
+                }
             }
             return existing;
         }
