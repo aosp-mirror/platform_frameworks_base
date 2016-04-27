@@ -186,7 +186,7 @@ NDK to rebuild {@code libc++} from sources by adding the following line to your
 LIBCXX_FORCE_REBUILD := true
 </pre>
 
-<h4>atomic support</h4>
+<h4>Atomic support</h4>
 
 <p>If you include {@code <atomic>}, it's likely that you also need {@code libatomic}.
 If you are using {@code ndk-build}, add the following line:</p>
@@ -200,10 +200,6 @@ LOCAL_LDLIBS += -latomic
 <pre>
 -latomic
 </pre>
-
-<p class="note"><strong>Note: </strong>{@code -latomic} is only available for GCC 4.8.
-Because Clang 3.5 and Clang 3.6 use GCC 4.8's headers and libraries, as well as its
-{@code as} and {@code ld} options, those versions of Clang also get {@code -latomic}.</p>
 
 
 <h4>Compatibility</h4>
