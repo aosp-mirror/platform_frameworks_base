@@ -21,9 +21,10 @@ page.tags=vector
  <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Create Vector Drawables</a></li>
-    <li><a href="http://www.google.com/design/icons" class="external-link">Material Icons</a></li>
+    <li><a href="https://www.google.com/design/icons" class="external-link">Material Icons</a></li>
     <li><a href="{@docRoot}reference/android/graphics/drawable/Drawable.html">Drawable Class</a></li>
     <li><a href="{@docRoot}reference/android/graphics/drawable/VectorDrawable.html">VectorDrawable Class</a></li>
+    <li><a href="https://android-developers.blogspot.com/2016/02/android-support-library-232.html" class="external-link">Android Support Library 23.2</a></li>
   </ol>
 
   <h2>Videos</h2>
@@ -49,21 +50,33 @@ screen sizes and resolutions because you can display one vector drawable on all 
 <h2 id="about">About Vector Asset Studio</h2>
 
 <p>Vector Asset Studio adds a vector graphic to the project as an XML file that describes the image.
-Maintaining one XML file can be easier than updating multiple raster graphics at various resolutions.</p>
+Maintaining one XML file can be easier than updating multiple raster graphics at various
+resolutions.</p>
 
-<p>Android 4.4 (API level 20) and lower doesn't support vector drawables. If your minimum API level
-is set at one of these API levels, Vector Asset Studio also directs Gradle to generate raster images
-of the vector drawable for backward-compatibility. You can refer to vector assets as
-{@link android.graphics.drawable.Drawable} in Java code or <code>@drawable</code> in XML code; when
-your app runs, the corresponding vector or raster image displays automatically depending on the API
-level.</p>
+<p>Android 4.4 (API level 20) and lower doesn't support vector drawables. If
+your minimum API level is set at one of these API levels, you have two options
+when using Vector Asset Studio:
+generate Portable Network Graphic (PNG) files (the default) or use the Support
+Library.</p>
+
+<p>For backward-compatibility, Vector Asset Studio generates
+raster images of the vector drawable. You can refer to vector assets as
+{@link android.graphics.drawable.Drawable} in Java code or
+<code>@drawable</code> in XML code; when your app runs, the corresponding vector
+or raster image displays automatically depending on the API level.</p>
+
+<p>To instead use Android Support Library 23.2 or higher, you must add
+some statements to your <code>build.gradle</code> file. This technique uses
+vector drawables only.</p>
+
 
 
 <h3 id="types">Supported vector graphic types</h3>
 
 <p>The Google material design specification provides <a href="http://www.google.com/design/icons" class="external-link">material icons</a>
 that you can use in your Android apps. Vector
-Asset Studio helps you choose, import, and size material icons, as well as define opacity and the
+Asset Studio helps you choose, import, and size material icons, as well as
+define opacity and the
 Right-to-Left (RTL) mirroring setting.</p>
 
 <p>Vector Asset Studio also helps you to import your own SVG files. SVG is an XML-based open
@@ -72,6 +85,11 @@ standard, but not all features. When you specify an SVG file, Vector Asset Studi
 feedback about whether the graphics code is supported or not. If the SVG code is supported, it
 converts the file into an XML file containing {@link
 android.graphics.drawable.VectorDrawable} code.</p>
+
+<p>For Android 5.0 (API level 21) and higher, you can use the {@link
+android.graphics.drawable.AnimatedVectorDrawable} class to animate the properties of {@link
+android.graphics.drawable.VectorDrawable}. For more information, see
+<a href="{@docRoot}training/material/animations.html#AnimVector">Animating Vector Drawables</a>.</p>
 
 <h3 id="when">Considerations for SVG files</h3>
 
@@ -93,9 +111,47 @@ isn't black, the icon color might instead blend with the tint color.</p>
 
 <h3 id="apilevel">Vector drawable support at different API levels</h3>
 
+<p>The following table summarizes the two techniques you can use for
+backward-compatibility with Android 4.4 (API level 20) and lower:</p>
+
+
+<table>
+  <tr>
+    <th scope="col">Technique</th>
+    <th scope="col">Graphics Type</th>
+    <th scope="col">VectorDrawable XML Elements</th>
+    <th scope="col">Android Plugin for Gradle</th>
+    <th scope="col">Build Flags</th>
+    <th scope="col">App Code</th>
+  </tr>
+
+  <tr>
+    <td><strong>PNG generation</strong></td>
+    <td>Vector and PNG</td>
+    <td><a href="#apilevel">Subset supported</a></td>
+    <td>1.5.0 or higher</td>
+    <td>Default</td>
+    <td>Variety of coding techniques supported</td>
+  </tr>
+  <tr>
+    <td><strong>Support Library 23.2 or higher</strong></td>
+    <td>Vector</td>
+    <td>Full support</td>
+    <td>2.0 or higher</td>
+    <td>Support Library statements required</td>
+    <td><a href="https://android-developers.blogspot.com/2016/02/android-support-library-232.html" class="external-link">Subset of coding techniques supported</a></td>
+  </tr>
+
+</table>
+
+<p>Using vector graphics can produce a smaller APK, but the initial loading
+of vector graphics can take longer.</p>
+
+<h4 id="pngoption">PNG generation for backward-compatibility</h4>
+
 <p>Android 5.0 (API level 21) and higher provides vector drawable support. If your app has a
 minimum API level that is lower, Vector Asset Studio adds the vector drawable file to your
-project; also, at build time, Gradle creates Portable Network Graphic (PNG) raster images at various
+project; also, at build time, Gradle creates PNG raster images at various
 resolutions. Gradle generates the PNG densities specified by the Domain Specific Language (DSL)
 <a href="http://google.github.io/android-gradle-dsl/1.4/com.android.build.gradle.internal.dsl.ProductFlavor.html#com.android.build.gradle.internal.dsl.ProductFlavor:generatedDensities" class="external-link">generatedDensities</a> property
 in a <code>build.gradle</code> file. To generate PNGs, the build system requires Android
@@ -163,14 +219,33 @@ Changing the values in the code should not cause any issues, as long as they’r
 you want to add XML elements, you need to make sure that they’re supported based on your minimum API
 level.</p>
 
-<p>For Android 5.0 (API level 21) and higher, you can use the {@link
-android.graphics.drawable.AnimatedVectorDrawable} class to animate the properties of {@link
-android.graphics.drawable.VectorDrawable}. For more information, see
-<a href="{@docRoot}training/material/animations.html#AnimVector">Animating Vector Drawables</a>.</p>
+<h4 id="sloption">Support Library for backward-compatibility</h4>
+
+<p>This technique requires Android Support Library 23.2 or higher and Android
+Plugin for Gradle 2.0 or higher, and uses vector drawables only. Before using
+Vector Asset Studio, you must add a statement to your
+<code>build.gradle</code> file:</p>
+
+<pre>
+android {
+  defaultConfig {
+    vectorDrawables.useSupportLibrary = true
+  }
+}
+
+dependencies {
+  compile 'com.android.support:appcompat-v7:23.2.0'
+}
+ </pre>
+
+ <p>You must also use coding techniques that are compatible with the Support
+ Library. For more information, see
+ <a href="https://android-developers.blogspot.com/2016/02/android-support-library-232.html"
+ class="external-link">Android Support Library 23.2</a>.</p>
 
 <h2 id="running">Running Vector Asset Studio</h2>
 
-<p>Follow these steps to start Vector Asset Studio:</p>
+<p>To start Vector Asset Studio:</p>
 
 <ol>
   <li>In Android Studio, open an Android app project.</li>
@@ -208,7 +283,8 @@ android.graphics.drawable.VectorDrawable}. For more information, see
 
 <h3 id="materialicon">Adding a material icon</h3>
 
-<p>After you <a href="#running">open Vector Asset Studio</a>, you can add a material icon as follows:</p>
+<p>After you <a href="#running">open Vector Asset Studio</a>, you can add a material icon as
+follows:</p>
 
 <ol>
   <li>In Vector Asset Studio, select <strong>Material Icon</strong>.</li>
@@ -235,7 +311,7 @@ android.graphics.drawable.VectorDrawable}. For more information, see
       display a mirror image of it in this case. Note that if you’re working with an older project,
       you might also
       need to add <code>android:supportsRtl="true"</code> to your app manifest. Auto-mirroring is
-      supported on Android 5.0 (API level 21) and higher only.</li>
+      supported on Android 5.0 (API level 21) and higher, and the Support Library.</li>
     </ul>
   <li>Click <strong>Next</strong>.</li>
   <li>Optionally change the module and resource directory:</li>
@@ -244,13 +320,15 @@ android.graphics.drawable.VectorDrawable}. For more information, see
       resource. For more information, see
       <a href="{@docRoot}sdk/installing/create-project.html#CreatingAModule">Creating an Android Module</a>.</li>
       <li><strong>Res Directory</strong> - Select the resource source set where you want to add the
-      vector asset: <code>src/main/res</code>, <code>src/debug/res</code>, <code>src/release/res</code>,
+      vector asset: <code>src/main/res</code>, <code>src/debug/res</code>,
+      <code>src/release/res</code>,
       or a user-defined source set. The main source set applies to all build variants, including
       debug and release. The debug and release source sets override the main source set and apply
       to one version of a build. The debug source set is for debugging only. To define a new source
       set, select <strong>File</strong> > <strong>Project Structure</strong> > <strong>app</strong> >
       <strong>Build Types</strong>. For example, you could define a beta source set and create a
-      version of an icon that includes the text "BETA” in the bottom right corner. For more information, see
+      version of an icon that includes the text "BETA” in the bottom right corner.
+      For more information, see
       <a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants">Working with Build Variants</a>.</li>
     </ul>
     <p>The <strong>Output Directories</strong> area displays the vector image and the directory
@@ -258,21 +336,26 @@ android.graphics.drawable.VectorDrawable}. For more information, see
   <li>Click <strong>Finish</strong>.</li>
   <p>Vector Asset Studio adds an XML file defining the vector drawable to the project in the
   <code>app/src/main/res/drawable/</code> folder. From the
-  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a> of the <em>Project</em>
+  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a> of the
+  <em>Project</em>
   window, you can view the generated vector XML file in the <strong>drawable</strong> folder.</p>
   <li>Build the project.</li>
-  <p>If the minimum API level is Android 4.4 (API level 20) and lower, Vector Asset Studio generates
-  PNG files. From the <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a>
+  <p>If the minimum API level is Android 4.4 (API level 20) and lower, and you
+  haven't enabled the Support Library technique, Vector Asset Studio generates
+  PNG files. From the
+  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a>
   of the <em>Project</em> window, you can view the generated PNG and XML files in the
   <code>app/build/generated/res/pngs/debug/</code> folder.</p>
-  <p>You should not edit these generated raster files, but instead work with the vector XML file. The
+  <p>You should not edit these generated raster files, but instead work with the vector XML file.
+  The
   build system regenerates the raster files automatically when needed so you don’t need to maintain
   them.</p>
 </ol>
 
 <h3 id="svg">Importing a Scalable Vector Graphic (SVG)</h3>
 
-<p>After you <a href="#running">open Vector Asset Studio</a>, you can import an SVG file as follows:</p>
+<p>After you <a href="#running">open Vector Asset Studio</a>, you can import an SVG file as
+follows:</p>
 
 <ol>
   <li>In Vector Asset Studio, select <strong>Local SVG file</strong>.</li>
@@ -286,7 +369,8 @@ android.graphics.drawable.VectorDrawable}. For more information, see
   <p>In this case, you can’t use Vector Asset Studio to add the graphics file. Click
     <strong>More</strong> to view the errors. For a list of supported elements, see
   <a href="#apilevel">Vector Drawable Support at Different API Levels</a>.</p>
-  <li>Optionally change the resource name, size, opacity, and Right-To-Left (RTL) mirroring setting:</li>
+  <li>Optionally change the resource name, size, opacity, and Right-To-Left (RTL) mirroring
+  setting:</li>
     <ul>
       <li><strong>Resource name</strong> - Type a new name if you don’t want to use the default
       name. Vector Asset Studio automatically creates a unique name (adds a number to the end of the
@@ -306,7 +390,7 @@ android.graphics.drawable.VectorDrawable}. For more information, see
       display a mirror image of it in this case. Note that if you’re working with an older project,
       you might
       need to add <code>android:supportsRtl="true"</code> to your app manifest.  Auto-mirroring is
-      supported on Android 5.0 (API level 21) and higher only.</li>
+      supported on Android 5.0 (API level 21) and higher, and the Support Library.</li>
     </ul>
   <li>Click <strong>Next</strong>.</li>
   <li>Optionally change the module and resource directory:</li>
@@ -321,7 +405,8 @@ android.graphics.drawable.VectorDrawable}. For more information, see
       to one version of a build. The debug source set is for debugging only. To define a new source
       set, select <strong>File</strong> > <strong>Project Structure</strong> > <strong>app</strong> >
       <strong>Build Types</strong>. For example, you could define a beta source set and create a
-      version of an icon that includes the text "BETA” in the bottom right corner. For more information, see
+      version of an icon that includes the text "BETA” in the bottom right corner.
+      For more information, see
       <a href="{@docRoot}tools/building/configuring-gradle.html#workBuildVariants">Working with Build Variants</a>.</li>
     </ul>
     <p>The <strong>Output Directories</strong> area displays the vector image and the directory
@@ -329,14 +414,18 @@ android.graphics.drawable.VectorDrawable}. For more information, see
   <li>Click <strong>Finish</strong>.</li>
   <p>Vector Asset Studio adds an XML file defining the vector drawable to the project in the
   <code>app/src/main/res/drawable/</code> folder. From the
-  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a> of the <em>Project</em>
+  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a> of the
+  <em>Project</em>
   window, you can view the generated vector XML file in the <strong>drawable</strong> folder.</p>
   <li>Build the project.</li>
-  <p>If the minimum API level is Android 4.4 (API level 20) and lower, Vector Asset Studio generates
-  PNG files. From the <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a>
+  <p>If the minimum API level is Android 4.4 (API level 20) and lower, and you
+  haven't enabled the Support Library technique, Vector Asset Studio generates
+  PNG files. From the
+  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a>
   of the <em>Project</em> window, you can view the generated PNG and XML files in the
   <code>app/build/generated/res/pngs/debug/</code> folder.</p>
-  <p>You should not edit these generated raster files, but instead work with the vector XML file. The
+  <p>You should not edit these generated raster files, but instead work with the vector XML file.
+  The
   build system regenerates the raster files automatically when needed so you don’t need to maintain
   them.</p>
 </ol>
@@ -349,12 +438,13 @@ layout shows a vector asset displayed on a button:</p>
 
 <img src="{@docRoot}images/tools/vas-layout.png" />
 
-<p>Follow these steps to display a vector asset on a widget, as shown in the figure:</p>
+<p>To display a vector asset on a widget, as shown in the figure:</p>
 
 <ol>
   <li>Open a project and <a href="#running">import a vector asset</a>.</li>
   <li>In the <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a> of
-  the <em>Project</em> window, double-click a layout XML file, such as <code>content_main.xml</code>.</li>
+  the <em>Project</em> window, double-click a layout XML file, such as
+  <code>content_main.xml</code>.</li>
   <li>Click the <strong>Design</strong> tab to display the
   <a href="{@docRoot}sdk/installing/studio-layout.html">Layout Editor</a>.</li>
   <li>Drag the {@link
@@ -365,13 +455,16 @@ android.widget.ImageButton} widget from the <em>Palette</em> window onto the Lay
     <strong>Drawable</strong> folder, and select a vector asset. Click <strong>OK</strong>.</li>
   <p>The vector asset appears on the <code>ImageButton</code> in the layout.</p>
   <li>To change the color of the image to the accent color defined in the theme, locate the
-  <strong>tint</strong> property in the <em>Properties</em> window and click <strong>…</strong> .</li>
+  <strong>tint</strong> property in the <em>Properties</em> window and click <strong>…</strong> .
+  </li>
   <li>In the <em>Resources</em> dialog, select the <strong>Project</strong> tab, navigate to the
-  <strong>Color</strong> folder, and select <strong>colorAccent</strong>. Click <strong>OK</strong>.</li>
+  <strong>Color</strong> folder, and select <strong>colorAccent</strong>. Click <strong>OK</strong>.
+  </li>
   <p>The color of the image changes to the accent color in the layout.</p>
 </ol>
 
-<p>The <code>ImageButton</code> code should be similar to the following:</p>
+<p>If you're not using the Support Library technique, the
+<code>ImageButton</code> code should be similar to the following:</p>
 
 <pre>
 &lt;ImageButton
@@ -417,17 +510,25 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 </pre>
 </ul>
 
+<p>For the Support Library technique, you must use coding techniques that are
+compatible with the Support Library. For more information, see
+ <a href="https://android-developers.blogspot.com/2016/02/android-support-library-232.html"
+ class="external-link">Android Support Library 23.2</a>.</p>
+
 
 <h2 id="code">Modifying XML Code Generated by Vector Asset Studio</h2>
 
 <p>You can modify the vector asset XML code, but not the PNGs and corresponding XML code generated
-at build time. However, we don't recommended it. Vector Asset Studio makes sure that the vector
+at build time. However, we don't recommended it.</p>
+
+<p>When using the PNG generation technique, Vector Asset Studio makes sure that the vector
 drawable and the PNGs match, and that the manifest contains the proper code. If you add code that's
 <a href="#apilevel">not supported</a> on Android 4.4 (API level 20) and lower, your vector and PNG
 images might differ. You also need to make sure that the manifest contains the code to support your
 changes.</p>
 
-<p>Follow these steps to modify the vector XML file:</p>
+<p>To modify the vector XML file when you're not using the Support Library
+technique:</p>
 
 <ol>
   <li>In the <em>Project</em> window, double-click the generated vector XML file in the
@@ -450,7 +551,8 @@ changes.</p>
       supported.</li>
    </ul>
   <p>For example, if you didn’t select the RTL option in Vector Asset Studio but realize you now
-  need it, you can add the <a href="{@docRoot}reference/android/R.attr.html#autoMirrored">autoMirrored</a>
+  need it, you can add the
+  <a href="{@docRoot}reference/android/R.attr.html#autoMirrored">autoMirrored</a>
   attribute later. To view the RTL version, select <strong>Preview Right-to-Left Layout</strong> in
   the <img src="{@docRoot}images/tools/vas-rtlmenu.png" style="vertical-align:sub;margin:0;height:17px" alt="" />
   menu of the <em>Preview</em> window. (Select <strong>None</strong> to remove the RTL preview.)</p>
@@ -466,7 +568,8 @@ changes.</p>
   unsupported in Android 4.4 (API level 20) and lower don't appear in the generated PNG files. As a
   result, when you add code, you should always check that the generated PNGs match the vector
   drawable. To do so, you could double-click the PNG in the
-  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a> of the <em>Project</em>
+  <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Project view</a> of the
+  <em>Project</em>
   window; the left margin of the code editor also displays the PNG image when your code refers to
   the drawable.</p>
   <img src="{@docRoot}images/tools/vas-imageincode.png" />
@@ -475,11 +578,12 @@ changes.</p>
 
 <h2 id="delete">Deleting a Vector Asset from a Project</h2>
 
-<p>Follow these steps to remove a vector asset from a project:</p>
+<p>To remove a vector asset from a project:</p>
 
 <ol>
   <li>In the <em>Project</em> window, delete the generated vector XML file by selecting the file and
-  pressing the <strong>Delete</strong> key (or select <strong>Edit</strong> > <strong>Delete</strong>).</li>
+  pressing the <strong>Delete</strong> key (or select <strong>Edit</strong> >
+  <strong>Delete</strong>).</li>
   <p>The <em>Safe Delete</em> dialog appears.</p>
   <li>Optionally select options to find where the file is used in the project, and click
   <strong>OK</strong>.</li>
@@ -493,14 +597,23 @@ changes.</p>
 
 <h2 id="apk">Delivering an App Containing Vector Drawables</h2>
 
-<p>When your minimum API level includes Android 4.4 (API level 20) or lower, you have corresponding
-  vector and raster images in your project. In this case, you have two options for delivering your
-  APK files:</p>
+<p>If you used the Support Library technique or your minimum API level is
+Android 5.0 (API level 21) or higher, your APK will contain the vector images
+that you added with Vector Asset Studio.
+These APKs will be smaller than if the vector images were converted to PNGs.
+</p>
+
+
+<p>When your minimum API level includes Android 4.4 (API level 20) or lower,
+ and you have corresponding vector and raster images in your project,
+ you have two options for delivering your APK files:</p>
 
 <ul>
-  <li>Create one APK that includes both the vector images and the corresponding raster
-    representations. This solution is the simplest to implement.</li>
-  <li>Create separate APKs for different API levels. When you don’t include the corresponding
-    raster images in the APK for Android 5.0 (API level 21) and higher, the APK can be much smaller in
-    size. For more information, see <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</li>
+  <li>Create one APK that includes both the vector images and the corresponding
+  raster representations. This solution is the simplest to implement.</li>
+  <li>Create separate APKs for different API levels. When you don’t include the
+  corresponding raster images in the APK for Android 5.0 (API level 21) and
+  higher, the APK can be much smaller in size. For more information, see
+  <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>.
+  </li>
 </ul>
