@@ -14,12 +14,15 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 
 public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
@@ -53,6 +56,29 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleClick() {
+        if (Prefs.getBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, false)) {
+            // Do it right away.
+            toggleDataSaver();
+            return;
+        }
+        // Shows dialog first
+        SystemUIDialog dialog = new SystemUIDialog(mContext);
+        dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
+        dialog.setMessage(com.android.internal.R.string.data_saver_description);
+        dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleDataSaver();
+                    }
+                });
+        dialog.setNegativeButton(com.android.internal.R.string.cancel, null);
+        dialog.setShowForAllUsers(true);
+        dialog.show();
+        Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
+    }
+
+    private void toggleDataSaver() {
         mState.value = !mDataSaverController.isDataSaverEnabled();
         MetricsLogger.action(mContext, getMetricsCategory(), mState.value);
         mDataSaverController.setDataSaverEnabled(mState.value);
