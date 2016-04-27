@@ -51,14 +51,6 @@ public class KeyframeSet implements Keyframes {
         mInterpolator = mLastKeyframe.getInterpolator();
     }
 
-    /**
-     * If subclass has variables that it calculates based on the Keyframes, it should reset them
-     * when this method is called because Keyframe contents might have changed.
-     */
-    @Override
-    public void invalidateCache() {
-    }
-
     public List<Keyframe> getKeyframes() {
         return mKeyframes;
     }
