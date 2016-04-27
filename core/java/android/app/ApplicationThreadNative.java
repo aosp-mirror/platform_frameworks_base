@@ -749,6 +749,12 @@ public abstract class ApplicationThreadNative extends Binder
             schedulePictureInPictureModeChanged(b, inPip);
             return true;
         }
+        case HANDLE_TRUST_STORAGE_UPDATE_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            handleTrustStorageUpdate();
+            return true;
+        }
 
         }
 
@@ -1520,6 +1526,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(isInPipMode ? 1 : 0);
         mRemote.transact(SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void handleTrustStorageUpdate() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(HANDLE_TRUST_STORAGE_UPDATE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }
