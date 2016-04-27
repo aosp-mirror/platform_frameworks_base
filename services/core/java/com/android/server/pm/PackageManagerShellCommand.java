@@ -74,6 +74,8 @@ class PackageManagerShellCommand extends ShellCommand {
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
     int mTargetUser;
+    boolean mBrief;
+    boolean mComponents;
 
     PackageManagerShellCommand(PackageManagerService service) {
         mInterface = service;
@@ -842,11 +844,19 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private Intent parseIntentAndUser() throws URISyntaxException {
         mTargetUser = UserHandle.USER_CURRENT;
+        mBrief = false;
+        mComponents = false;
         Intent intent = Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
             @Override
             public boolean handleOption(String opt, ShellCommand cmd) {
                 if ("--user".equals(opt)) {
                     mTargetUser = UserHandle.parseUserArg(cmd.getNextArgRequired());
+                    return true;
+                } else if ("--brief".equals(opt)) {
+                    mBrief = true;
+                    return true;
+                } else if ("--components".equals(opt)) {
+                    mComponents = true;
                     return true;
                 }
                 return false;
@@ -855,6 +865,34 @@ class PackageManagerShellCommand extends ShellCommand {
         mTargetUser = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), mTargetUser, false, false, null, null);
         return intent;
+    }
+
+    private void printResolveInfo(PrintWriterPrinter pr, String prefix, ResolveInfo ri,
+            boolean brief, boolean components) {
+        if (brief || components) {
+            final ComponentName comp;
+            if (ri.activityInfo != null) {
+                comp = new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
+            } else if (ri.serviceInfo != null) {
+                comp = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
+            } else if (ri.providerInfo != null) {
+                comp = new ComponentName(ri.providerInfo.packageName, ri.providerInfo.name);
+            } else {
+                comp = null;
+            }
+            if (comp != null) {
+                if (!components) {
+                    pr.println(prefix + "priority=" + ri.priority
+                            + " preferredOrder=" + ri.preferredOrder
+                            + " match=0x" + Integer.toHexString(ri.match)
+                            + " specificIndex=" + ri.specificIndex
+                            + " isDefault=" + ri.isDefault);
+                }
+                pr.println(prefix + comp.flattenToShortString());
+                return;
+            }
+        }
+        ri.dump(pr, prefix);
     }
 
     private int runResolveActivity() {
@@ -871,7 +909,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("No activity found");
             } else {
                 PrintWriterPrinter pr = new PrintWriterPrinter(pw);
-                ri.dump(pr, "");
+                printResolveInfo(pr, "", ri, mBrief, mComponents);
             }
         } catch (RemoteException e) {
             throw new RuntimeException("Failed calling service", e);
@@ -893,11 +931,18 @@ class PackageManagerShellCommand extends ShellCommand {
             if (result == null || result.size() <= 0) {
                 pw.println("No activities found");
             } else {
-                pw.print(result.size()); pw.println(" activities found:");
-                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
-                for (int i=0; i<result.size(); i++) {
-                    pw.print("  Activity #"); pw.print(i); pw.println(":");
-                    result.get(i).dump(pr, "    ");
+                if (!mComponents) {
+                    pw.print(result.size()); pw.println(" activities found:");
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        pw.print("  Activity #"); pw.print(i); pw.println(":");
+                        printResolveInfo(pr, "    ", result.get(i), mBrief, mComponents);
+                    }
+                } else {
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        printResolveInfo(pr, "", result.get(i), mBrief, mComponents);
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -920,11 +965,18 @@ class PackageManagerShellCommand extends ShellCommand {
             if (result == null || result.size() <= 0) {
                 pw.println("No services found");
             } else {
-                pw.print(result.size()); pw.println(" services found:");
-                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
-                for (int i=0; i<result.size(); i++) {
-                    pw.print("  Service #"); pw.print(i); pw.println(":");
-                    result.get(i).dump(pr, "    ");
+                if (!mComponents) {
+                    pw.print(result.size()); pw.println(" services found:");
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        pw.print("  Service #"); pw.print(i); pw.println(":");
+                        printResolveInfo(pr, "    ", result.get(i), mBrief, mComponents);
+                    }
+                } else {
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        printResolveInfo(pr, "", result.get(i), mBrief, mComponents);
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -947,11 +999,18 @@ class PackageManagerShellCommand extends ShellCommand {
             if (result == null || result.size() <= 0) {
                 pw.println("No receivers found");
             } else {
-                pw.print(result.size()); pw.println(" receivers found:");
-                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
-                for (int i=0; i<result.size(); i++) {
-                    pw.print("  Receiver #"); pw.print(i); pw.println(":");
-                    result.get(i).dump(pr, "    ");
+                if (!mComponents) {
+                    pw.print(result.size()); pw.println(" receivers found:");
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        pw.print("  Receiver #"); pw.print(i); pw.println(":");
+                        printResolveInfo(pr, "    ", result.get(i), mBrief, mComponents);
+                    }
+                } else {
+                    PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                    for (int i = 0; i < result.size(); i++) {
+                        printResolveInfo(pr, "", result.get(i), mBrief, mComponents);
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -1409,13 +1468,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: short summary");
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
-        pw.println("  resolve-activity [--user USER_ID] INTENT");
+        pw.println("  resolve-activity [--brief] [--components] [--user USER_ID] INTENT");
         pw.println("    Prints the activity that resolves to the given Intent.");
-        pw.println("  query-activities [--user USER_ID] INTENT");
+        pw.println("  query-activities [--brief] [--components] [--user USER_ID] INTENT");
         pw.println("    Prints all activities that can handle the given Intent.");
-        pw.println("  query-services [--user USER_ID] INTENT");
+        pw.println("  query-services [--brief] [--components] [--user USER_ID] INTENT");
         pw.println("    Prints all services that can handle the given Intent.");
-        pw.println("  query-receivers [--user USER_ID] INTENT");
+        pw.println("  query-receivers [--brief] [--components] [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given Intent.");
         pw.println("  suspend [--user USER_ID] TARGET-PACKAGE");
         pw.println("    Suspends the specified package (as user).");
