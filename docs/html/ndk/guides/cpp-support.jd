@@ -170,7 +170,7 @@ STLPORT_FORCE_REBUILD := true
 named {@code libgnustl_shared.so}.</p>
 
 
-<h3 id="cs">libC++ runtime:</h3>
+<h3 id="cs">libc++ runtime:</h3>
 <p>This runtime is an Android port of <a href="http://libcxx.llvm.org/">LLVM libc++</a>. Its
 shared library file is named {@code libc++_shared.so}.</p>
 
