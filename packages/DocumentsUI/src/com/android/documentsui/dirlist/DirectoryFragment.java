@@ -712,10 +712,10 @@ public class DirectoryFragment extends Fragment
             void onDocumentsReady(List<DocumentInfo> docs) {
                 Intent intent;
 
-                // Filter out directories - those can't be shared.
+                // Filter out directories and virtual files - those can't be shared.
                 List<DocumentInfo> docsForSend = new ArrayList<>();
                 for (DocumentInfo doc: docs) {
-                    if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
+                    if (!doc.isDirectory() && !doc.isVirtualDocument()) {
                         docsForSend.add(doc);
                     }
                 }
