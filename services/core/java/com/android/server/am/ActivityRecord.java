@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
@@ -820,6 +821,11 @@ final class ActivityRecord {
 
     boolean isResizeableOrForced() {
         return !isHomeActivity() && (isResizeable() || service.mForceResizableActivities);
+    }
+
+    boolean isNonResizableOrForced() {
+        return !isHomeActivity() && info.resizeMode != RESIZE_MODE_RESIZEABLE
+                && info.resizeMode != RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
     }
 
     boolean supportsPictureInPicture() {
