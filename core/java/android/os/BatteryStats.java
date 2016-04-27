@@ -1070,6 +1070,9 @@ public abstract class BatteryStats implements Parcelable {
         public int statSoftIrqTime;
         public int statIdlTime;
 
+        // Platform-level low power state stats
+        public String statPlatformIdleState;
+
         public HistoryStepDetails() {
             clear();
         }
@@ -1099,6 +1102,7 @@ public abstract class BatteryStats implements Parcelable {
             out.writeInt(statIrqTime);
             out.writeInt(statSoftIrqTime);
             out.writeInt(statIdlTime);
+            out.writeString(statPlatformIdleState);
         }
 
         public void readFromParcel(Parcel in) {
@@ -1119,6 +1123,7 @@ public abstract class BatteryStats implements Parcelable {
             statIrqTime = in.readInt();
             statSoftIrqTime = in.readInt();
             statIdlTime = in.readInt();
+            statPlatformIdleState = in.readString();
         }
     }
 
@@ -4788,6 +4793,8 @@ public abstract class BatteryStats implements Parcelable {
                             pw.print(sb);
                             pw.print(")");
                         }
+                        pw.print(", PlatformIdleStat ");
+                        pw.print(rec.stepDetails.statPlatformIdleState);
                         pw.println();
                     } else {
                         pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
@@ -4821,6 +4828,8 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(rec.stepDetails.statSoftIrqTime);
                         pw.print(',');
                         pw.print(rec.stepDetails.statIdlTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statPlatformIdleState);
                         pw.println();
                     }
                 }
