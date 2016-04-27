@@ -59,14 +59,13 @@ the instruction sets each ABI supports.</p>
 </tr>
 
 <tr>
-<td><a href="#v7a">{@code armeabi-v7a} ({@code armeabi-v7a-hard)}</a></td>
+<td><a href="#v7a">{@code armeabi-v7a}</a></td>
 <td>
 <li>armeabi</li>
 <li>Thumb-2</li>
 <li>VFPv3-D16</li>
 <li>Other, optional</li></td>
-<td>Hard float when specified as {@code armeabi-v7a-hard}.
-Incompatible with ARMv5, v6 devices.</td>
+<td>Incompatible with ARMv5, v6 devices.</td>
 </tr>
 
 <tr>
@@ -162,7 +161,7 @@ code by default unless you specify different behavior using the
 <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>
 file.</p>
 
-<h3 id="v7a">armeabi-v7a (armeabi-v7a-hard)</h3>
+<h3 id="v7a">armeabi-v7a</h3>
 <p>This ABI extends armeabi to include several
 <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0406c/index.html">
 CPU instruction set extensions</a>. The instruction extensions that this Android-specific
@@ -196,31 +195,6 @@ machine code for NEON, see
 enforce the rule that the compiler must pass all double values in core register pairs during
 function calls, instead of dedicated floating-point ones. The system can perform all internal
 computations using the FP registers. Doing so speeds up the computations greatly.</p>
-
-<p>Although the requirement to use core register pairs produces a modest performance hit, it ensures
-compatibility with all existing armeabi binaries. If you need the additional
-performance, you can specify your ABI as {@code armeabi-v7a-hard} instead. Doing so
-allows you to use hard floats, while still linking with Android native APIs
-that use {@code softfp}. For more information, refer to the comments in
-{@code $NDK/tests/device/hard-float/jni/android.mk}.</p>
-
-<p class="note"><strong>Note:</strong> You cannot specify {@code APP_ABI} as both
-{@code armeabi-v7a} and {@code armeabi-v7a-hard}. In either case, the build system places the
-shared libraries in the {@code armeabi-v7a/} directory.</p>
-
-<h3 id="hard">armeabi-v7a-hard</h3>
-<p>This variant of the {@code armeabi-v7a} ABI is unique to the NDK. The NDK build
-system adds the following flags in addition to those that it uses for the
-{@code armeabi-v7a} ABI:</p>
-
-<pre class="no-pretty-print">
-TARGET_CFLAGS += -mhard-float -D_NDK_MATH_NO_SOFTFP=1
-TARGET_LDFLAGS += -Wl,--no-warn-mismatch -lm_hard
-</pre>
-
-<p>The compiler compiles all code with hard-float, and links it with {@code libm_hard.a}.
-This math library is the same one as {@code libm.a}, except that it follows hard-float ABI
-conventions. In the APK, the generated shared libraries reside in {@code /lib/armeabi-v7a/}.</p>
 
 <h3 id="arm64-v8a">arm64-v8a</h3>
 <p>This ABI is for ARMv8-based CPUs that support AArch64. It also includes the NEON and
