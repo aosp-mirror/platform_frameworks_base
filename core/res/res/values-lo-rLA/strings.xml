@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ຊອກຫາບໍລິການ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ການ​ໂທ Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"ເພື່ອ​ໂທ ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ​ຢູ່​ເທິງ Wi-Fi, ກ່ອນ​ອື່ນ​ໝົດ​ໃຫ້​ຖ້າມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ ເພື່ອ​ຕັ້ງ​ການ​ບໍ​ລິ​ການ​ນີ້. ຈາກນັ້ນ​ເປີດການ​ໂທ Wi-Fi ອີກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"ລົງ​ທະ​ບຽນ​ກັບ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"ການ​ໂທ %s Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ເລືອກໃຊ້ເຊລລູລາກ່ອນ"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ໃນ​ໂມງ​ເຕັມ​ແລ້ວ. ໃຫ້​ລຶບ​ໄຟ​ລ໌​ບາງ​ອັນ​ທີ່ບໍ່​ໄດ້​ໃຊ້​ອອກ​ເພື່ອ​ເພີ່ມ​ເນື້ອ​ທີ່​ຫວ່າງ."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ບ່ອນ​ເກັບ​ຂໍ້​ມູນໂທລະພາບເຕັມ. ລຶບ​ບາງ​ໄຟ​ລ໌ ເພື່ອ​ໃຫ້​ມີ​ຊ່ອງ​ຫວ່າງ​."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">ຕິດຕັ້ງໃບຮັບຮອງຜູ້ມີອຳນາດແລ້ວ</item>
+      <item quantity="one">ຕິດຕັ້ງໃບຮັບຮອງຜູ້ມີອຳນາດແລ້ວ</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ໂດຍບຸກຄົນທີສາມທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ຕາມ​ຜູ້​ຄວບ​ຄຸມ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ໂດຍ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"ໃຊ້ລາຍງານຂໍ້ບົກພ່ອງ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ນີ້ຈະເປັນການເກັບກຳຂໍ້ມູນກ່ຽວກັບ ສະຖານະປັດຈຸບັນຂອງອຸປະກອນທ່ານ ເພື່ອສົ່ງເປັນຂໍ້ຄວາມທາງອີເມວ. ມັນຈະໃຊ້ເວລາໜ້ອຍນຶ່ງ ໃນການເລີ່ມຕົ້ນການລາຍງານຂໍ້ຜິດພາດ ຈົນກວ່າຈະພ້ອມທີ່ຈະສົ່ງໄດ້, ກະລຸນາລໍຖ້າ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ລາຍງານແບບໂຕ້ຕອບ"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ໃຊ້ອັນນີ້ພາຍໃຕ້ສະພາບການສ່ວນໃຫຍ່. ມັນອະນຸຍາດໃຫ້ທ່ານຕິດຕາມຄວາມຄືບໜ້າຂອງລາຍງານ ແລະ ປ້ອນລາຍລະອຽດເພີ່ມເຕີມກ່ຽວກັບບັນຫາ. ມັນອາດຈະຕັດບາງສ່ວນທີ່ບໍ່ຄ່ອຍໄດ້ໃຊ້ທີ່ໃຊ້ເວລາດົນໃນການລາຍງານອອກໄປ."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ໃຊ້ພາຍໃຕ້ສະຖານະການສ່ວນໃຫຍ່. ມັນອະນຸຍາດໃຫ້ທ່ານສາມາດຕິດຕາມສະຖານະລາຍງານ, ປ້ອນລາຍລະອຽດເພີ່ມເຕີມກ່ຽວກັບບັນຫາ ແລະ ຖ່າຍຮູບໜ້າຈໍໄດ້. ມັນອາດລະເລີຍພາກສ່ວນທີ່ບໍ່ຄ່ອຍໃຊ້ທີ່ໃຊ້ເວລາລາຍງານດົນອອກໄປ."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ລາຍງານເຕັມ"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"ໃຊ້ຕົວເລືອກນີ້ເພື່ອໃຫ້ມີການລົບກວນລະບົບໜ້ອຍສຸດ ເມື່ອອຸປະກອນຂອງທ່ານບໍ່ຕອບສະໜອງ ຫຼືຊ້າເກີນໄປ ຫຼື ເມື່ອທ່ານຕ້ອງການທຸກສ່ວນຂອງລາຍງານ. ຈະບໍ່ມີການຖ່າຍພາບໜ້າຈໍ ຫຼືອະນຸຍາດໃຫ້ທ່ານປ້ອນລາຍລະອຽດຕື່ມອີກ."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ໃຊ້ຕົວເລືອກນີ້ເພື່ອໃຫ້ມີການລົບກວນລະບົບໜ້ອຍທີ່ສຸດໃນເວລາທີ່ອຸປະກອນຂອງທ່ານບໍ່ຕອບສະໜອງ ຫຼື ເຮັດວຽກຊ້າເກີນໄປ ຫຼື ເມື່ອທ່ານຕ້ອງການລາຍງານທຸກພາກສ່ວນ. ຕົວເລືອກນີ້ຈະບໍ່ອະນຸຍາດໃຫ້ທ່ານລະບຸລາຍລະອຽດເພີ່ມເຕີມ ຫຼື ຖ່າຍຮູບໜ້າຈໍໃສ່ຕື່ມໄດ້."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ.</item>
       <item quantity="one">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_0">%d</xliff:g> ວິນາທີ.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ</item>
       <item quantity="one">1 ຊົ່ວໂມງ</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"ຕອນນີ້"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"ບັນຫາວິດີໂອ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ວິດີໂອນີ້ບໍ່ຖືກຕ້ອງສຳລັບການສະແດງໃນອຸປະກອນນີ້."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ບໍ່ສາມາດຫຼິ້ນວິດີໂອນີ້ໄດ້."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"ກຳລັງອັບເກຣດ Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"ກຳ​ລັງ​ເລີ່ມລະ​ບົບ​ Android …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ການ​ປັບ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ໃຫ້​ເໝາະ​ສົມ."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"ກຳລັງອັບເກຣດ Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ບາງແອັບອາດບໍ່ສາມາດເຮັດວຽກໄດ້ປົກກະຕິຈົນກວ່າຈະອັບເກຣດສຳເລັດ"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"ກຳ​ລັງ​ກຽມ <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ກຳລັງເປີດແອັບຯ."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"ເລືອກ​ປີ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດປຸ່ມ ​ກັບ​ຄືນ ແລະ ພາບ​ຮວມ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ໃຫ້ແຕະທີ່​ປຸ່ມກັບຄືນຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ ຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ແອັບ​ຖືກ​ປັກ​ໝຸດ​ແລ້ວ: ບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຖອນ​ປັກ​ໝຸດ​ຢູ່​ເທິງ​ອຸ​ປະ​ກອນ​ນີ້."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດໃຊ້ຕົວປະຢັດຂໍ້ມູນບໍ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ເປີດໃຊ້"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

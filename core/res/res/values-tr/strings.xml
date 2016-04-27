@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Hizmet Aranıyor"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Kablosuz Çağrı"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Kablosuz ağ üzerinden telefon etmek ve ileti göndermek için ilk önce operatörünüzden bu hizmeti ayarlamasını isteyin. Sonra tekrar Ayarlar\'dan Kablosuz çağrı özelliğini açın."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Operatörünüze kaydolun"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Kablosuz Çağrı"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Kapalı"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Kablosuz bağlantı tercih edildi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Hücresel ağ tercih edildi"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Saat depolama alanınız dolu. Lütfen yer boşaltmak için bazı dosyaları silin."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV depolama alanı dolu. Boş alan açmak için bazı dosyaları silin."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefonun depolama alanı dolu! Yer açmak için bazı dosyaları silin."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Sertifika yetkilileri yüklendi</item>
+      <item quantity="one">Sertifika yetkilisi yüklendi</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bunu, bilinmeyen üçüncü taraflar yapabilir"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"İş profili yöneticiniz tarafından"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tarafından"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Hata raporu al"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bu rapor, e-posta iletisi olarak göndermek üzere cihazınızın şu anki durumuyla ilgili bilgi toplar. Hata raporu başlatıldıktan sonra hazır olması biraz zaman alabilir, lütfen sabırlı olun."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Etkileşimli rapor"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Çoğu durumda bunu kullanın. Bu seçenek, raporun ilerleme durumunu takip etmenize ve sorunla ilgili daha fazla ayrıntı girmenize olanak sağlar. Rapor edilmesi uzun süren ve az kullanılan bazı bölümleri yok sayabilir."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Çoğu durumda bunu kullanın. Bu seçenek, raporun ilerleme durumunu takip etmenize, sorunla ilgili daha fazla ayrıntı girmenize ve ekran görüntüleri almanıza olanak tanır. Rapor edilmesi uzun süren ve az kullanılan bazı bölümleri yok sayabilir."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Tam rapor"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Cihazınız yanıt vermediğinde veya çok yavaş çalıştığında ya da tüm rapor bölümlerine ihtiyacınız olduğunda, sistemle minimum etkileşim için bu seçeneği kullanın. Bu seçenekte ekran görüntüsü alınmaz veya daha fazla ayrıntı girmenize izin verilmez."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Cihazınız yanıt vermediğinde veya çok yavaş çalıştığında ya da tüm rapor bölümlerine ihtiyacınız olduğunda, sisteme müdahaleyi en aza indirmek için bu seçeneği kullanın. Daha fazla ayrıntı girmenize veya başka ekran görüntüleri almanıza izin vermez."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde hata raporu ekran görüntüsü alınıyor.</item>
       <item quantity="one">Hata raporu ekran görüntüsü <xliff:g id="NUMBER_0">%d</xliff:g> saniye içinde alınacak.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
       <item quantity="one">1 saat</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"şimdi"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video sorunu"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Bu video bu cihazda akış için uygun değil."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Bu video oynatılamıyor."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android yeni sürüme geçiriliyor..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android başlatılıyor…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Depolama optimize ediliyor."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android yeni sürüme geçiriliyor"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Yeni sürüme geçiş işlemi tamamlanana kadar bazı uygulamalar düzgün çalışmayabilir"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> uygulama optimize ediliyor."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> hazırlanıyor."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uygulamalar başlatılıyor"</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Yılı seçin"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Bu ekranın sabitlemesini kaldırmak için Geri ve Genel Bakış\'a aynı anda dokunup basılı tutun."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Bu ekranın sabitlemesini kaldırmak için Geri\'ye dokunup basılı tutun."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Bu ekranın sabitlemesini kaldırmak için Genel Bakış\'a dokunup basılı tutun."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Uygulama sabitlendi. Bu cihazda sabitlemenin kaldırılmasına izin verilmiyor."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran sabitlendi"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Yöneticiniz tarafından silindi"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pil tasarrufu özelliği, pil ömrünü iyileştirmeye yardımcı olmak için cihazın performansını düşürür, titreşimi, konum hizmetlerini ve arka plan verilerinin çoğunu sınırlar. Senkronizasyona dayalı olarak çalışan e-posta, mesajlaşma uygulamaları ve diğer uygulamalar, bunları açmadığınız sürece güncellenmeyebilir.\n\nCihazınız şarj olurken pil tasarrufu otomatik olarak kapatılır."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Şu anda kullandığınız bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Veri Tasarrufu açılsın mı?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aç"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

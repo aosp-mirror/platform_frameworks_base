@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"సేవ కోసం శోధిస్తోంది"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi కాలింగ్"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fiలో కాల్‌లు చేయడం మరియు సందేశాలు పంపడం కోసం ముందుగా ఈ సేవను సెటప్ చేయడానికి మీ క్యారియర్‌ను అడగండి. ఆపై సెట్టింగ్‌ల నుండి మళ్లీ Wi-Fi కాలింగ్‌ను ఆన్ చేయండి."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"మీ క్యారియర్‌తో నమోదు చేయండి"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi కాలింగ్"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ఆఫ్‌లో ఉంది"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fiకి ప్రాధాన్యత"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"సెల్యులార్‌కి ప్రాధాన్యత"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"వాచ్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"టీవీ నిల్వ నిండింది. ఖాళీ స్థలం కోసం కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"ఫోన్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">ప్రమాణపత్ర అధికారాలు ఇన్‌స్టాల్ చేయబడ్డాయి</item>
+      <item quantity="one">ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"తెలియని మూడవ పక్షం ద్వారా"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"మీ కార్యాలయ ప్రొఫైల్ నిర్వాహకుని ద్వారా"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ద్వారా"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"చాలా సందర్భాల్లో ఇది ఉపయోగించబడుతుంది. ఇది మిమ్మల్ని నివేదిక ప్రోగ్రెస్ ట్రాక్ చేయడానికి మరియు సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి అనుమతిస్తుంది. ఇది నివేదించడానికి అధిక సమయం పట్టే తక్కువగా వినియోగించే విభాగాలను విడిచిపెట్టవచ్చు."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది నివేదిక ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"పూర్తి నివేదిక"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"మీ పరికరం ప్రతిస్పందించనప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని నివేదిక విభాగాలు అవసరమైనప్పుడు ఏర్పడే కనీస స్థాయి సిస్టమ్ అంతరాయానికి ఈ ఎంపిక ఉపయోగించబడుతుంది. ఇది స్క్రీన్‌షాట్ తీయదు లేదా మరిన్ని వివరాలను నమోదు చేయడానికి మిమ్మల్ని అనుమతించదు."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని నివేదిక విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
       <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> గంటలు</item>
       <item quantity="one">1 గంట</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"ఇప్పుడు"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"వీడియో సమస్య"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ఈ పరికరంలో ప్రసారం చేయడానికి ఈ వీడియో చెల్లదు."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ఈ వీడియోను ప్లే చేయడం సాధ్యపడదు."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android అప్‌గ్రేడ్ అవుతోంది…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"నిల్వను అనుకూలపరుస్తోంది."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android అప్‌గ్రేడ్ అవుతోంది"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"అప్‌గ్రేడ్ పూర్తయ్యే వరకు కొన్ని అనువర్తనాలు సరిగ్గా పని చేయకపోవచ్చు"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో <xliff:g id="NUMBER_0">%1$d</xliff:g> అనువర్తనాన్ని అనుకూలీకరిస్తోంది."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ని సిద్ధం చేస్తోంది."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"అనువర్తనాలను ప్రారంభిస్తోంది."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"సంవత్సరాన్ని ఎంచుకోండి"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, వెనుకకు తాకి అలాగే నొక్కి ఉంచండి."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, అవలోకనం నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"అనువర్తనం పిన్ చేయబడింది: ఈ పరికరంలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని అనువర్తనాలను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న అనువర్తనం డేటాను ప్రాప్యత చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
       <item quantity="one">ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>

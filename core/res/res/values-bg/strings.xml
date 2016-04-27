@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Обаждания през Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"За да извършвате обаждания и да изпращате съобщения през Wi-Fi, първо помолете оператора си да настрои тази услуга. След това включете отново функцията за обаждания през Wi-Fi от настройките."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Регистриране с оператора ви"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s – обаждания през Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Изключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предпочита се Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Предпочита се клетъчна мрежа"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Хранилището на часовника е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Хранилището на телевизора е пълно. Изтрийте някои файлове, за да освободите място."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Хранилището на телефона е пълно. Изтрийте файлове, за да освободите място."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Сертифициращите органи са инсталирани</item>
+      <item quantity="one">Сертифициращият орган е инсталиран</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"От неизвестна трета страна"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"От администратора на служебния ви потребителски профил"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"От <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Сигнал за програмна грешка"</string>
     <string name="bugreport_message" msgid="398447048750350456">"По този начин ще се събере информация за текущото състояние на устройството ви, която да се изпрати като имейл съобщение. След стартирането на процеса ще мине известно време, докато сигналът за програмна грешка бъде готов за подаване. Моля, имайте търпение."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен сигнал"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Използвайте тази опция в повечето случаи. Тя ви позволява да проследявате напредъка на сигнала и да въвеждате още данни за проблема. Възможно е някои по-малко използвани секции, за които подаването на сигнал отнема дълго време, да бъдат пропуснати."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Използвайте тази опция в повечето случаи. Тя ви позволява да следите напредъка на сигнала, да въвеждате допълнителни подробности за проблема и да правите екранни снимки. Възможно е да бъдат пропуснати някои по-рядко използвани секции, за които подаването на сигнал отнема дълго време."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Пълен сигнал"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Използвайте тази опция, за да възпрепятствате минимално работата на системата, ако устройството не реагира, функционира твърде бавно или са ви нужни всички секции за подаване на сигнал. Не можете да направите екранна снимка, нито да въведете допълнителни подробности."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Използвайте тази опция, за да възпрепятствате минимално работата на системата, когато устройството не реагира, функционира твърде бавно или са ви нужни всички секции за подаване на сигнал. Не можете да въвеждате други подробности, нито да правите допълнителни екранни снимки."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
       <item quantity="one">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_0">%d</xliff:g> секунда.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часа</item>
       <item quantity="one">1 час</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"сега"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Проблем с видеоклипа"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Този видеоклип не е валиден за поточно предаване към това устройство."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Този видеоклип не може да се пусне."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се надстройва..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android се стартира…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Хранилището се оптимизира."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android се надстройва"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Някои приложения може да не работят правилно, докато надстройването не завърши"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизира се приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> от <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Приложенията се стартират."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Избиране на година"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Изтрихте <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> за работа"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"За да освободите екрана, докоснете и задръжте едновременно бутона за връщане назад и този за общ преглед."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"За да освободите този екран, докоснете и задръжте бутона за връщане назад."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да освободите този екран, докоснете и задръжте бутона „Общ преглед“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Приложението е фиксирано. Освобождаването му не е разрешено на това устройство."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранът е фиксиран"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Изтрито от администратора ви"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"С цел удължаване на живота на батерията режимът за запазването й намалява ефективността на устройството ви и ограничава вибрирането, услугите за местоположение и повечето данни на заден план. Приложенията за електронна поща, съобщения и др., които разчитат на синхронизиране, може да не се актуализират, освен ако не ги отворите.\n\nРежимът за запазване на батерията се изключва автоматично, когато устройството ви се зарежда."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да осъществява достъп до информацията, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Ще вкл. ли Икономия на данни?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">За една минута (до <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

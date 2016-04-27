@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Кызмат изделүүдө"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi Чалуу"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi аркылуу чалууларды аткарып жана билдирүүлөрдү жөнөтүү үчүн адегенде операторуңуздан бул кызматты орнотушун сураныңыз. Андан соң, Жөндөөлөрдөн Wi-Fi чалууну кайра күйгүзүңүз."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Операторуңузга катталыңыз"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi Чалуу"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өчүк"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi тандалган"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Уюлдук тармак тандалган"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Саат сактагычы толуп калды. Орун бошотуу үчүн айрым файлдарды жок кылыңыз."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Сыналгынын сактагычы толуп калды. Айрым файлдарды жок кылып орун бошотуңуз."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Телефондун сактагычы толуп калды. Орун бошотуш үчүн кээ бир файлдарды өчүрүңүз."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">ТБнун тастыктамалары орнотулду</item>
+      <item quantity="one">ТБнун тастыктамасы орнотулду</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Аныкталбаган үчүнчү тараптардан"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Жумушуңуздун профайл администратору тарабынан"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> тарабынан"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Ката тууралуу билдирүү түзүү"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Бул сиздин түзмөгүңүздүн учурдагы абалын эмейл билдирүүсү катары жөнөтүш максатында маалымат чогултат. Ката тууралуу билдирүү түзүлүп башталып, жөнөтүлгөнгө чейин бир аз убакыт керек болот; сураныч, бир аз күтө туруңуз."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивдүү кабар"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ката жөнүндө кабардын абалын жана көйгөй тууралуу кошумча маалыматты көрсөтүү үчүн ушул функцияны колдонууну сунуштайбыз. Ката жөнүндө кабар жөнөтүлүп жатканда көп убакыт талап кылынбашы үчүн негизги бөлүмдөр гана көрүнөт."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Ката жөнүндө кабардын абалын жана көйгөй тууралуу кошумча маалыматты көрсөтүү үчүн ушул функцияны колдонууну сунуштайбыз. Ката жөнүндө кабар жөнөтүлүп жатканда көп убакыт талап кылынбашы үчүн негизги бөлүмдөр гана көрүнөт."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Толук кабар берүү"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Түзмөгүңүз жооп бербей же өтө жай иштеп жатса, ошондой эле жөндөөлөрдүн бардык бөлүмдөрүн карап чыккыңыз келсе, ушул функцияны колдонуңуз. Баса, ката жөнүндө кошумча маалыматты көрсөтүп же скриншотту ала албайсыз."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Түзмөгүңүз жооп бербей же өтө жай иштеп жатса, ошондой эле жөндөөлөрдүн бардык кабарлоо бөлүмдөрүн карап чыккыңыз келсе, ушул функцияны колдонуңуз. Баса, ката жөнүндө кошумча маалыматты көрсөтүп же дагы скриншотторду тарта албайсыз."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Мүчүлүштүк тууралуу кабарлоо үчүн <xliff:g id="NUMBER_1">%d</xliff:g> секундда скриншот алынат.</item>
       <item quantity="one">Мүчүлүштүк тууралуу кабарлоо үчүн <xliff:g id="NUMBER_0">%d</xliff:g> секундда скриншот алынат.</item>
@@ -413,8 +420,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Колдонмого жергиликтүү Bluetooth телефонун конфигурациялап, ыраактагы түзмөктөрдү таап, жупташуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX түйүнүнө туташуу жана андан ажыроо"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Колдонмого WiMAX жандырылгандыгы жана туташкан WiMAX түйүндөрү тууралуу маалыматтарын көрүүгө уруксат берет."</string>
-    <!-- no translation found for permlab_changeWimaxState (340465839241528618) -->
-    <skip />
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX абалын өзгөртүү"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Колдонмого планшетти WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Колдонмого сыналгыны WiMAX тармактарына туташтырып, алардан ажыратуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Колдонмого телефонду WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
@@ -852,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> саат</item>
       <item quantity="one">1 саат</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"азыр"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Видео маселеси"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Бул видеону ушул түзмөктө агылтып көрсөтүү мүмкүн эмес."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Бул видеону ойнотуу мүмкүн эмес."</string>
@@ -950,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android жаңыртылууда…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android жүргүзүлүүдө…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Сактагыч ыңгайлаштырылууда."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android жаңыртылууда"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Жаңыртуу аягына чыкмайынча айрым колдонмолор талаптагыдай иштебей калышы мүмкүн"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо ыңгайлаштырылууда."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Колдонмолорду иштетип баштоо"</string>
@@ -1470,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Жылды тандаңыз"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> өчүрүлдү"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Бул экранды бошотуу үчүн Артка жана Көз жүгүртүүнү чогуу басып, кармап туруңуз."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Бул экранды бошотуу үчүн \"Артка\" баскычын басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Бул экранды бошотуу үчүн Көз жүгүртүүнү басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Колдонмо кадалган: Бул түзмөктө бошотууга уруксат жок."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>
@@ -1482,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Трафиктин колдонулушун үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды өткөрөт, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары башкача иштеши мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Дайындарды үнөмдөгүч күйсүнбү?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
       <item quantity="one">Бир мүнөткө (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>

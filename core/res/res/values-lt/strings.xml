@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ieškoma paslaugos"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"„Wi-Fi“ skambinimas"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Jei norite skambinti ir siųsti pranešimus „Wi-Fi“ ryšiu, pirmiausia paprašykite operatoriaus nustatyti šią paslaugą. Tada vėl įjunkite skambinimą „Wi-Fi“ ryšiu „Nustatymų“ skiltyje."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Užregistruokite pas operatorių"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"„%s“ „Wi-Fi“ skambinimas"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Išjungta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Pageidautinas „Wi-Fi“ ryšys"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Pageidautinas mobilusis ryšys"</string>
@@ -166,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Laikrodžio saugykla pilna. Ištrinkite kelis failus, kad atlaisvintumėte vietos."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV saugykla pilna. Ištrinkite kai kuriuos failus, kad atlaisvintumėte vietos."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefono atmintis pilna. Ištrinkite kai kuriuos failus, kad atlaisvintumėte vietos."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">Sertifikato įgaliojimai įdiegti</item>
+      <item quantity="few">Sertifikato įgaliojimai įdiegti</item>
+      <item quantity="many">Sertifikato įgaliojimai įdiegti</item>
+      <item quantity="other">Sertifikato įgaliojimai įdiegti</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nežinoma trečioji šalis"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Darbo profilio administratorius"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -213,9 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Pranešti apie riktą"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bus surinkta informacija apie dabartinę įrenginio būseną ir išsiųsta el. pašto pranešimu. Šiek tiek užtruks, kol pranešimas apie riktą bus paruoštas siųsti; būkite kantrūs."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. ataskaita"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Naudokite tai esant daugumai aplinkybių. Galite stebėti ataskaitos eigą ir įvesti daugiau išsamios informacijos apie problemą. Gali būti praleidžiamos kelios nelabai naudingos skiltys, kurių ataskaitų teikimas ilgai trunka."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Naudokite tai esant daugumai aplinkybių. Galite stebėti ataskaitos eigą, įvesti daugiau išsamios informacijos apie problemą ir padaryti ekrano kopijų. Gali būti praleidžiamos kelios rečiau naudojamos skiltys, kurių ataskaitų teikimas ilgai trunka."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Išsami ataskaita"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Naudokite šią parinktį, kad būtų minimalūs sistemos trukdžiai, kai įrenginys nereaguoja ar yra per lėtas arba kai jums reikia visų skilčių. Nefiksuojama ekrano kopija arba leidžiama įvesti daugiau išsamios informacijos."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Naudokite šią parinktį, kad sistemos veikimas būtų kuo mažiau trikdomas, kai įrenginys nereaguoja ar yra per lėtas arba kai jums reikia visų ataskaitos skilčių. Negalėsite įvesti daugiau išsamios informacijos ar padaryti papildomų ekrano kopijų."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundės.</item>
       <item quantity="few">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundžių.</item>
@@ -863,6 +872,15 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> valandos</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> valandų</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"dabar"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Vaizdo įrašo problema"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Šis vaizdo įrašas netinkamas srautiniu būdu perduoti į šį įrenginį."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Negalima paleisti šio vaizdo įrašo."</string>
@@ -961,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"„Android“ naujovinama..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Paleidžiama „Android“…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizuojama saugykla."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"„Android“ naujovinama"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Kai kurios programos gali tinkamai neveikti, kol naujovinimo procesas nebus baigtas"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizuojama <xliff:g id="NUMBER_0">%1$d</xliff:g> progr. iš <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ruošiama „<xliff:g id="APPNAME">%1$s</xliff:g>“."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Paleidžiamos programos."</string>
@@ -1489,7 +1509,7 @@
     <string name="select_year" msgid="7952052866994196170">"Pasirinkite metus"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Ištrinta: <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Jei norite atsegti šį ekraną, vienu metu palieskite ir palaikykite „Atgal“ ir „Apžvalga“."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Jei norite atsegti šį ekraną, palieskite ir palaikykite „Atgal“."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Jei norite atsegti šį ekraną, palieskite ir palaikykite „Apžvalga“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Programa prisegta: šiame įrenginyje negalima atsegti."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrano prisegtas"</string>
@@ -1501,8 +1521,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Įj. Duomenų taupymo priemonę?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Įjungti"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minutę (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d minutes (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

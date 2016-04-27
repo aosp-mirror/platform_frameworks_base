@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Naghahanap ng Serbisyo"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pagtawag sa pamamagitan ng Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Upang tumawag at magpadala ng mga mensahe sa pamamagitan ng Wi-Fi, hilingin muna sa iyong carrier na i-set up ang serbisyong ito. Pagkatapos ay muling i-on ang pagtawag sa Wi-Fi mula sa Mga Setting."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Magparehistro sa iyong carrier"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Pagtawag sa Pamamagitan ng Wi-Fi ng %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mas gusto ang cellular"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Puno na ang storage ng relo. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Puno na ang storage ng TV. Mag-delete ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puno na ang storage ng telepono. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">May mga naka-install na certificate authority</item>
+      <item quantity="other">May mga naka-install na certificate authority</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Ng isang di-kilalang third party"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Ng administrator sa iyong profile sa trabaho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Ng <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Kunin ang ulat sa bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula ng ulat sa bug hanggang sa handa na itong maipadala; mangyaring magpasensya."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactive na ulat"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Gamitin ito sa karamihan ng sitwasyon. Nagbibigay-daan ito sa iyo na subaybayan ang pag-usad ng ulat at magbigay ng higit pang mga detalye tungkol sa problema. Maaari itong mag-alis ng ilan sa mga hindi masyadong ginagamit na seksyon na nangangailangan ng mahabang panahon upang iulat."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gamitin ito sa karamihan ng sitwasyon. Nagbibigay-daan ito sa iyo na masubaybayan ang pag-usad ng ulat, makapaglagay ng higit pang mga detalye tungkol sa problema, at makakuha ng mga screenshot. Maaari itong mag-alis ng ilan sa mga hindi masyadong ginagamit na seksyon na nangangailangan ng mahabang panahon upang iulat."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Buong ulat"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Gamitin ang opsyong ito para sa kaunting pagkaantala sa system kapag hindi tumutugon o masyadong mabagal ang iyong device, o kapag kailangan mo ang lahat ng seksyon ng ulat. Hindi ito kukuha ng screenshot o magbibigay-daan sa iyo na maglagay ng higit pang mga detalye."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gamitin ang opsyong ito para sa kaunting pagkaantala sa system kapag hindi tumutugon o masyadong mabagal ang iyong device, o kapag kailangan mo ang lahat ng seksyon ng ulat. Hindi ka pinapayagan na maglagay ng iba pang mga detalye o kumuha ng mga karagdagang screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> segundo.</item>
       <item quantity="other">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na segundo.</item>
@@ -851,6 +858,15 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> oras</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> na oras</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"ngayon"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema sa video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Hindi wasto ang video na ito para sa streaming sa device na ito."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Hindi ma-play ang video na ito."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Nag-a-upgrade ang Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Maaaring hindi gumana nang maayos ang ilang app hangga\'t hindi pa natatapos ang pag-upgrade"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ino-optimize ang app <xliff:g id="NUMBER_0">%1$d</xliff:g> ng <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Sinisimulan ang apps."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Pumili ng taon"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Overview nang sabay-sabay."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Overview."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Naka-pin ang app: Hindi pinapayagan ang pag-a-unpin sa device na ito."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Na-update ng iyong administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Na-delete ng iyong administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang pagganap ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Sa loob ng %1$d minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Sa loob ng %1$d na minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

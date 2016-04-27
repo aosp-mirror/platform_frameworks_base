@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"如要透過 Wi-Fi 撥打電話及傳送訊息，請先向您的流動網絡供應商要求設定此服務。然後再次在「設定」中開啟 Wi-Fi 通話。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"向您的流動網絡供應商註冊"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi 通話"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首選 Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"首選流動數據"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"手錶的儲存空間已滿。請刪除一些檔案，以騰出可用空間。"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"電視儲存空間已滿。請刪除部分檔案，以釋放儲存空間。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"手機的儲存空間已滿。請刪除一些檔案，以騰出可用空間。"</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">已安裝憑證</item>
+      <item quantity="one">已安裝憑證</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"由不明的第三方監管"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"由工作設定檔管理員監控"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"由 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 監管"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"取得錯誤報告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"這會收集您目前裝置狀態的相關資訊，並以電郵傳送給您。從開始建立錯誤報告到準備傳送需要一段時間，請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互動報告"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"在大部分情況下，建議您使用此選項，以便追蹤報告進度，以及輸入更多與問題相關的的資訊。系統可能會省略部分不常用的區段，藉此縮短產生報告的時間。"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"在大部分情況下，建議您使用此選項，以便追蹤報告進度、輸入更多與問題相關的詳細資料，以及擷取螢幕畫面。系統可能會省略一些不常用的部分，以縮短產生報告的時間。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整報告"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"如果裝置沒有反應或運作速度較慢，或您需要所有區段的報告時，建議使用此選項將系統的干擾程度降至最低。此選項不會擷取螢幕畫面，亦不允許您輸入更多資訊。"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"如果裝置沒有反應或運作速度較慢，或您需要完整的報告時，建議使用此選項將系統的干擾程度降至最低。此選項不允許您輸入更多詳細資料，或擷取更多螢幕畫面。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">系統將在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
       <item quantity="one">系統將在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時</item>
       <item quantity="one">1 小時</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"現在"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"影片問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"這部影片的格式無效，無法以串流傳送至這部裝置。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"無法播放這部影片。"</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"正在升級 Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在啟動…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在優化儲存空間。"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"正在升級 Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"部分應用程式需要完成升級方可正常運作"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在優化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"正在準備 <xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在啟動應用程式。"</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"如要取消固定這個畫面，請同時輕觸並按住 [返回] 和 [概覽]。"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"如要取消固定這個畫面，請輕觸並按住 [返回]。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"如要取消固定這個畫面，請輕觸並按住 [概覽]。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：不允許在此裝置上取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式仍可以存取資料，但存取頻率可能會降低。例如，除非您輕按圖片，否則系統可能不會顯示相關圖片。"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

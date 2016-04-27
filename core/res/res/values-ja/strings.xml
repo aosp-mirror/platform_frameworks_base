@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"サービスを検索中"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi経由で音声通話の発信やメッセージの送信を行うには、携帯通信会社にWi-Fiサービスを申し込んだ上で、設定画面でWi-Fi発信を再度ONにしてください。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"携帯通信会社に登録してください"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Wi-Fi通話（%s）"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"OFF"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi優先"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"モバイル優先"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ウォッチのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"テレビのストレージに空き容量がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">認証局がインストールされました</item>
+      <item quantity="one">認証局がインストールされました</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"仕事用プロファイルの管理者によって監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>によって監視される場合があります"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"バグレポートを取得"</string>
     <string name="bugreport_message" msgid="398447048750350456">"現在の端末の状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"対話型レポート"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報を確認することができます。レポート作成に時間がかかってもあまり使用されないセクションは省略されることがあります。"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報の確認やスクリーンショットの作成が可能です。レポート作成に時間がかかる、あまり使用されない項目は省略されることがあります。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完全レポート"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"端末の反応がないとき、または速度が遅すぎるときにシステムへの影響を最小限に抑えたい場合は、このオプションを使用します。またすべてのレポート セクションを表示したい場合にもこのオプションを使用します。スクリーンショットは作成されず、詳細情報も表示できません。"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"端末の反応がないとき、または動作が遅すぎるときにシステムへの影響を最小限に抑えたい場合は、このオプションを使用します。また、すべてのレポート項目を表示したい場合もこのオプションを使用します。詳細情報は表示されず、追加のスクリーンショットは作成されません。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間</item>
       <item quantity="one">1時間</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"現在"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"動画の問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"この動画はこの端末にストリーミングできません。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"この動画を再生できません。"</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Androidをアップグレードしています..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Androidの起動中…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ストレージを最適化しています。"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android のアップグレード中"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"アップグレードが完了するまで一部のアプリが正常に動作しない可能性があります"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>個中<xliff:g id="NUMBER_0">%1$d</xliff:g>個のアプリを最適化しています。"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>をペア設定しています。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"アプリを起動しています。"</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"年を選択"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"この画面の固定を解除するには[戻る]と[最近]を同時に押し続けます。"</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"この画面の固定を解除するには [戻る] を押し続けます。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"この画面の固定を解除するには[最近]を押し続けます。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"アプリは固定されています。この端末では固定を解除できません。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"管理者によって更新されています"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"管理者によって削除されました"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ON にする"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d分間（<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>まで）</item>
       <item quantity="one">1分間（<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>まで）</item>

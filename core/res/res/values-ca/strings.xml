@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"S\'està cercant el servei"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Trucades per Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Per fer trucades i enviar missatges per Wi-Fi, primer has de demanar a l\'operador de telefonia mòbil que configuri aquest servei. Després, torna a activar les trucades per Wi-Fi des de Configuració."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registra\'t amb el teu operador de telefonia mòbil"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Trucada de Wi-Fi de: %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivades"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per la Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferència per les dades mòbils"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"L\'emmagatzematge del rellotge està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"L\'emmagatzematge del televisor està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">Autoritats de certificació instal·lades</item>
+      <item quantity="one">Autoritat de certificació instal·lada</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Administrador del perfil professional"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Crea informe d\'errors"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu i se t\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactiu"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Utilitza aquesta opció en la majoria de circumstàncies. Et permet fer un seguiment del progrés de l\'informe i introduir més dades sobre el problema. És possible que ometi seccions poc utilitzades que requereixen molt de temps."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilitza aquesta opció en la majoria de circumstàncies. Et permet fer un seguiment del progrés de l\'informe, introduir més dades sobre el problema i fer captures de pantalla. És possible que ometi seccions poc utilitzades que requereixen molt de temps."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe complet"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Utilitza aquesta opció perquè la interferència en el sistema sigui mínima si el dispositiu no respon o va massa lent, o bé si necessites totes les seccions de l\'informe. No fa cap captura de pantalla ni et permet introduir més detalls."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilitza aquesta opció perquè la interferència en el sistema sigui mínima si el dispositiu no respon o va massa lent, o bé si necessites totes les seccions de l\'informe. No et permet introduir més dades ni fer més captures de pantalla."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons.</item>
       <item quantity="one">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_0">%d</xliff:g> segon.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hores</item>
       <item quantity="one">1 hora</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"ara"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema amb el vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Aquest vídeo no és vàlid per a la reproducció en aquest dispositiu."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"No es pot reproduir aquest vídeo."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android s\'està actualitzant..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"S\'està iniciant Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"S\'està optimitzant l\'emmagatzematge."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android s\'està actualitzant"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Pot ser que algunes aplicacions no funcionin correctament fins que no es completi l\'actualització"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"S\'està optimitzant l\'aplicació <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"S\'està preparant <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"S\'estan iniciant les aplicacions."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"Selecciona un any"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Per anul·lar la fixació d\'aquesta pantalla, mantén premudes les opcions Enrere i Visió general alhora."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Toca i mantén premuda l\'opció Enrere per deixar de fixar aquesta pantalla."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per anul·lar la fixació d\'aquesta pantalla, mantén premuda l\'opció Visió general."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"L\'administrador l\'ha actualitzat"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"L\'administrador ho ha suprimit"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durant 1 minut (fins a les <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

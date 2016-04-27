@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Wyszukiwanie usługi"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Połączenia przez Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Aby dzwonić i wysyłać wiadomości przez Wi-Fi, poproś swojego operatora o skonfigurowanie tej usługi. Potem ponownie włącz połączenia przez Wi-Fi w Ustawieniach."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Zarejestruj u operatora"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Połączenia przez Wi-Fi (%s)"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Wył."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferuj Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferuj sieć komórkową"</string>
@@ -166,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Pamięć w zegarku jest pełna. Usuń niektóre pliki, by zwolnić miejsce."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Pamięć telewizora jest pełna. Usuń jakieś pliki, by zwolnić miejsce."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamięć telefonu jest pełna. Usuń niektóre pliki, aby zwolnić miejsce."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="few">Urzędy certyfikacji zostały zainstalowane</item>
+      <item quantity="many">Urzędy certyfikacji zostały zainstalowane</item>
+      <item quantity="other">Urzędy certyfikacji zostały zainstalowane</item>
+      <item quantity="one">Urząd certyfikacji został zainstalowany</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Przez nieznany podmiot zewnętrzny"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Przez administratora Twojego profilu do pracy"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Przez <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -213,9 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Zgłoś błąd"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Informacje o bieżącym stanie urządzenia zostaną zebrane i wysłane e-mailem. Przygotowanie zgłoszenia błędu do wysłania chwilę potrwa, więc zachowaj cierpliwość."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktywny"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu i podanie dodatkowych szczegółów problemu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu, podanie dodatkowych szczegółów problemu i wykonanie zrzutów ekranu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Pełny raport"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Użyj tej opcji, jeśli chcesz zminimalizować zakłócenia pracy systemu, gdy urządzenie nie reaguje, działa wolno lub gdy potrzebujesz wszystkich sekcji raportu. Nie jest wykonywany zrzutu ekranu i nie można podać więcej szczegółów."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Użyj tej opcji, jeśli chcesz zminimalizować zakłócenia pracy systemu, gdy urządzenie nie reaguje, działa wolno lub gdy potrzebujesz wszystkich sekcji raportu. Nie można podać więcej szczegółów ani wykonać dodatkowych zrzutów ekranu."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Zrzut ekranu do raportu o błędzie zostanie zrobiony za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Zrzut ekranu do raportu o błędzie zostanie zrobiony za <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
@@ -863,6 +872,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> godziny</item>
       <item quantity="one">1 godzina</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"teraz"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem z filmem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ten film nie nadaje się do strumieniowego przesyłania do tego urządzenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nie można odtworzyć tego filmu."</string>
@@ -961,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android jest uaktualniany..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android się uruchamia…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optymalizacja pamięci."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android jest uaktualniany"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektóre aplikacje mogą nie działać prawidłowo, dopóki nie zakończy się aktualizacja."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optymalizowanie aplikacji <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uruchamianie aplikacji."</string>
@@ -1489,7 +1509,7 @@
     <string name="select_year" msgid="7952052866994196170">"Wybierz rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Aby odpiąć ten ekran, naciśnij i przytrzymaj jednocześnie Wstecz i Przegląd."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Aby odpiąć ten ekran, naciśnij i przytrzymaj Wstecz."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Aby odpiąć ten ekran, naciśnij i przytrzymaj Przegląd."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacja jest przypięta. Nie możesz jej odpiąć na tym urządzeniu."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
@@ -1501,8 +1521,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Zaktualizowane przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Usunięty przez administratora"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">Przez %1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">Przez %1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

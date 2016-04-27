@@ -126,11 +126,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Vyhľadávanie služby"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Volanie cez Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Ak chcete volať a odosielať správy prostredníctvom siete Wi-Fi, kontaktujte najskôr svojho operátora v súvislosti s nastavením tejto služby. Potom opäť zapnite v Nastaveniach volanie cez Wi-Fi."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"Registrujte sa so svojím operátorom"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Volanie siete Wi-Fi %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Uprednostniť Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Uprednostniť mobilné pripojenie"</string>
@@ -166,7 +170,12 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Ukladací priestor hodiniek je plný. Uvoľnite miesto odstránením niektorých súborov."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Úložisko televízora je plné. Uvoľnite miesto odstránením niektorých súborov."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pamäť telefónu je plná. Odstráňte niektoré súbory a uvoľnite miesto."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="few">Boli nainštalované certifikačné autority</item>
+      <item quantity="many">Boli nainštalované certifikačné autority</item>
+      <item quantity="other">Boli nainštalované certifikačné autority</item>
+      <item quantity="one">Bola nainštalovaná certifikačná autorita</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Neznámou treťou stranou"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Správcom vášho pracovného profilu"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Doménou <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -213,9 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie chyby"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktívne nahlásenie"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia a zadať ďalšie podrobnosti o probléme. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia, zadávať ďalšie podrobnosti o probléme a vytvárať snímky obrazovky. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Úplné nahlásenie"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Táto možnosť slúži na minimalizáciu zásahov do systému, keď zariadenie neodpovedá, je príliš pomalé alebo potrebujete zahrnúť všetky sekcie prehľadu. Týmto spôsobom nie je možné vytvoriť snímku obrazovky ani zadať ďalšie podrobnosti."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Táto možnosť slúži na minimalizáciu zásahov do systému, keď zariadenie neodpovedá, je príliš pomalé alebo potrebujete zahrnúť všetky sekcie hlásenia. Neumožňuje zadať ďalšie podrobnosti ani vytvoriť dodatočné snímky obrazovky."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Snímka obrazovky pre hlásenie chyby sa vytvorí o <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Snímka obrazovky pre hlásenie chyby sa vytvorí o <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
@@ -863,6 +872,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hodín</item>
       <item quantity="one">1 hodina</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"teraz"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problém s videom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Je nám ľúto, ale toto video sa nedá streamovať do tohto zariadenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nie je možné prehrať."</string>
@@ -961,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Prebieha inovácia systému Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektoré aplikácie môžu správne fungovať až po dokončení inovácie"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Prebieha spúšťanie aplikácií."</string>
@@ -1489,7 +1509,7 @@
     <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ak chcete uvoľniť túto obrazovku, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Späť a podržte ho."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikácia je pripnutá. Uvoľnenie nie je na tomto zariadení povolené."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
@@ -1501,8 +1521,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizované správcom"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Odstránený správcom"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Ak chcete znížiť spotrebu dát, dátový server zabráni niektorým aplikáciam odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú momentálne používate, môže pristupovať k dátam, ale môže to robiť menej často. Znamená to, že napríklad obrázky sa nezobrazia, kým na ne neklepnete."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Zapnúť Šetrič dát?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

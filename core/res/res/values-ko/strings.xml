@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"서비스 검색 중"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 통화"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"Wi-Fi를 사용하여 전화를 걸고 메시지를 보내려면 먼저 이동통신사에 문의하여 이 기능을 설정해야 합니다. 그런 다음 설정에서 Wi-Fi 통화를 사용 설정하시기 바랍니다."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"이동통신사에 등록"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi 통화"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi를 기본으로 설정"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"데이터 네트워크를 기본으로 설정"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"시계 저장공간이 가득 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 확보하세요."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="other">인증기관 설치됨</item>
+      <item quantity="one">인증기관 설치됨</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자의 모니터링"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"직장 프로필 관리자에 의해 모니터링될 수 있음"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"버그 신고"</string>
     <string name="bugreport_message" msgid="398447048750350456">"현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"대화형 보고서"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적할 수 있고 문제에 대한 세부정보를 입력할 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적하고 문제에 대한 세부정보를 입력하고 스크린샷을 찍을 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"전체 보고서"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"기기가 응답하지 않거나 반응 속도가 너무 느린 경우 또는 모든 신고 섹션이 필요한 경우 이 최소 시스템 간섭 옵션을 사용합니다. 스크린샷을 찍지 않으며 세부정보 입력을 허용하지 않습니다."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"기기가 응답하지 않거나 너무 느리거나 모든 보고서 섹션이 필요한 경우 이 옵션을 사용하여 시스템 방해를 최소화합니다. 세부정보를 추가하거나 스크린샷을 추가로 찍을 수 없습니다."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">버그 신고 스크린샷을 <xliff:g id="NUMBER_1">%d</xliff:g>초 후에 찍습니다.</item>
       <item quantity="one">버그 신고 스크린샷을 <xliff:g id="NUMBER_0">%d</xliff:g>초 후에 찍습니다.</item>
@@ -851,6 +858,15 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>시간</item>
       <item quantity="one">1시간</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"지금"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"영상 문제"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"이 기기로 스트리밍하기에 적합하지 않은 동영상입니다."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"동영상을 재생할 수 없습니다."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android 업그레이드 중.."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android가 시작되는 중…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"저장소 최적화 중"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android 업그레이드 중"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"특정 앱은 업그레이드가 완료될 때까지 제대로 작동하지 않을 수 있습니다."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"앱을 시작하는 중입니다."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"연도 선택"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"화면 고정을 해제하려면 \'뒤로\'와 \'개요\'를 동시에 길게 터치합니다."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"화면 고정을 해제하려면 \'뒤로\'를 길게 터치합니다."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"화면 고정을 해제하려면 \'개요\'를 길게 터치합니다."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"앱이 고정되었습니다. 이 기기에서는 고정 해제를 허용하지 않습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 세이버는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 즉, 예를 들어 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 세이버를 사용할까요?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>

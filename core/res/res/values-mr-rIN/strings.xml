@@ -124,11 +124,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा शोधत आहे"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"वाय-फाय कॉलिंग"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"वाय-फायवरून कॉल करण्यासाठी आणि संदेश पाठविण्यासाठी, प्रथम आपल्या वाहकास ही सेवा सेट करण्यास सांगा. नंतर सेटिंग्जमधून पुन्हा वाय-फाय कॉलिंग चालू करा."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"आपल्या वाहकासह नोंदणी करा"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s वाय-फाय कॉलिंग"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाय-फाय प्राधान्यकृत"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेल्युलर प्राधान्यकृत"</string>
@@ -164,7 +168,10 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"पाहण्याचे संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"टीव्ही संचयन भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"फोन संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5106721205300213569) -->
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">प्रमाणपत्र अधिकार स्थापित केला</item>
+      <item quantity="other">प्रमाणपत्र अधिकार स्थापित केले</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"एका अज्ञात तृतीय पक्षाद्वारे"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"आपल्या कार्य प्रोफाईल प्रशासकाकडून"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारे"</string>
@@ -211,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"दोष अहवाल घ्या"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. दोष अहवाल प्रारंभ करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"बहुतांश प्रसंगांमध्‍ये याचा वापर करा. ते आपल्‍याला अहवालाच्या प्रगतीचा मागोवा घेण्‍याची आणि समस्येविषयी अधिक तपशील प्रविष्‍ट करण्‍याची अनुमती देतात. ते अहवाल देण्‍यासाठी बराच वेळ घेणार्‍या कमी वापरलेल्या विभागांना कदाचित वगळेल."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते आपल्याला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील प्रविष्ट करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"आपले डिव्‍हाइस प्रतिसाद देत नाही किंवा खूप धीमे होते किंवा आपल्‍याला सर्व अहवाल विभागांची आवश्‍यकता असते तेव्‍हा कमीत कमी सिस्टीम हस्तक्षेपासाठी या पर्यायाचा वापर करा. स्क्रीनशॉट घेत नाही किंवा आपल्‍याला अधिक तपशील प्रविष्‍ट करण्‍याची अनुमती देत नाही."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"आपले डिव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे होते किंवा आपल्याला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टीम हस्तक्षेपासाठी या पर्यायाचा वापर करा. आपल्याला आणखी तपशील प्रविष्ट करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
       <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
@@ -851,6 +858,15 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> तास</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> तास</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"आत्ता"</string>
+    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
+    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
+    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
+    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
+    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
+    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
+    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
+    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"व्हिडिओ समस्या"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"या डिव्हाइसवर प्रवाहित करण्यासाठी हा व्हिडिओ वैध नाही."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"हा व्हिडिओ प्ले करू शकत नाही."</string>
@@ -949,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android श्रेणीसुधारित होत आहे..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ करत आहे…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"संचयन ऑप्टिमाइझ करत आहे."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android श्रेणीसुधारित होत आहे"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"श्रेणीसुधारणा पूर्ण होईपर्यंत काही अॅप्स योग्यरित्या कार्य करणार नाहीत"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अॅप ऑप्टिमाइझ करत आहे."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करीत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
@@ -1469,7 +1487,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष निवडा"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटविली"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"ही स्क्रीन अनपिन करण्यासाठी, एकाच वेळी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="lock_to_app_toast" msgid="4921623036476880316">"ही स्क्रीन अनपिन करण्यासाठी, परत ला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अॅप पिन केलेला आहे: या डिव्हाइसवर अनपिन करण्यास अनुमती नाही."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
@@ -1481,8 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
-    <!-- no translation found for data_saver_description (6015391409098303235) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण प्रतिमा टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d मिनिटासाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>
       <item quantity="other">%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>
