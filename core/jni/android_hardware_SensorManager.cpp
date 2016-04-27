@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #define LOG_TAG "SensorManager"
 
-#include <map>
+#include "JNIHelp.h"
+#include "android_os_MessageQueue.h"
+#include "core_jni_helpers.h"
+#include "jni.h"
 
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
-
+#include <android_runtime/AndroidRuntime.h>
+#include <gui/Sensor.h>
+#include <gui/SensorEventQueue.h>
+#include <gui/SensorManager.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/Vector.h>
 
-#include <gui/Sensor.h>
-#include <gui/SensorManager.h>
-#include <gui/SensorEventQueue.h>
-
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_os_MessageQueue.h"
-#include <android_runtime/AndroidRuntime.h>
-
-#include "core_jni_helpers.h"
+#include <endian.h>   // htobe64
+#include <map>
 
 namespace {
 
