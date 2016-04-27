@@ -149,7 +149,10 @@ public class Model {
 
         mCursor.moveToPosition(-1);
         for (int pos = 0; pos < mCursorCount; ++pos) {
-            mCursor.moveToNext();
+            if (!mCursor.moveToNext()) {
+                Log.e(TAG, "Fail to move cursor to next pos: " + pos);
+                return;
+            }
             positions[pos] = pos;
 
             // Generates a Model ID for a cursor entry that refers to a document. The Model ID is a
