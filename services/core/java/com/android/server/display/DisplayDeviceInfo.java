@@ -165,6 +165,11 @@ final class DisplayDeviceInfo {
     public Display.ColorTransform[] supportedColorTransforms = Display.ColorTransform.EMPTY_ARRAY;
 
     /**
+     * The HDR capabilities this display claims to support.
+     */
+    public Display.HdrCapabilities hdrCapabilities;
+
+    /**
      * The nominal apparent density of the display in DPI used for layout calculations.
      * This density is sensitive to the viewing distance.  A big TV and a tablet may have
      * the same apparent density even though the pixels on the TV are much bigger than
@@ -288,6 +293,7 @@ final class DisplayDeviceInfo {
                 || colorTransformId != other.colorTransformId
                 || defaultColorTransformId != other.defaultColorTransformId
                 || !Arrays.equals(supportedColorTransforms, other.supportedColorTransforms)
+                || !Objects.equal(hdrCapabilities, other.hdrCapabilities)
                 || densityDpi != other.densityDpi
                 || xDpi != other.xDpi
                 || yDpi != other.yDpi
@@ -321,6 +327,7 @@ final class DisplayDeviceInfo {
         colorTransformId = other.colorTransformId;
         defaultColorTransformId = other.defaultColorTransformId;
         supportedColorTransforms = other.supportedColorTransforms;
+        hdrCapabilities = other.hdrCapabilities;
         densityDpi = other.densityDpi;
         xDpi = other.xDpi;
         yDpi = other.yDpi;
@@ -349,6 +356,7 @@ final class DisplayDeviceInfo {
         sb.append(", colorTransformId ").append(colorTransformId);
         sb.append(", defaultColorTransformId ").append(defaultColorTransformId);
         sb.append(", supportedColorTransforms ").append(Arrays.toString(supportedColorTransforms));
+        sb.append(", HdrCapabilities ").append(hdrCapabilities);
         sb.append(", density ").append(densityDpi);
         sb.append(", ").append(xDpi).append(" x ").append(yDpi).append(" dpi");
         sb.append(", appVsyncOff ").append(appVsyncOffsetNanos);

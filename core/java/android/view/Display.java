@@ -719,10 +719,12 @@ public final class Display {
 
     /**
      * Returns the display's HDR capabilities.
-     * @hide
      */
     public HdrCapabilities getHdrCapabilities() {
-        return new HdrCapabilities();
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hdrCapabilities;
+        }
     }
 
     /**
@@ -1127,7 +1129,6 @@ public final class Display {
      * For example, what HDR types it supports and details about the desired luminance data.
      * <p>You can get an instance for a given {@link Display} object with
      * {@link Display#getHdrCapabilities getHdrCapabilities()}.
-     * @hide
      */
     public static final class HdrCapabilities implements Parcelable {
         /**
@@ -1147,6 +1148,7 @@ public final class Display {
          */
         public static final int HDR_TYPE_HLG = 3;
 
+        /** @hide */
         @IntDef({
             HDR_TYPE_DOLBY_VISION,
             HDR_TYPE_HDR10,
@@ -1160,7 +1162,18 @@ public final class Display {
         private float mMaxAverageLuminance = INVALID_LUMINANCE;
         private float mMinLuminance = INVALID_LUMINANCE;
 
+        /**
+         * @hide
+         */
         public HdrCapabilities() {
+        }
+
+        public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
+                float maxAverageLuminance, float minLuminance) {
+            mSupportedHdrTypes = supportedHdrTypes;
+            mMaxLuminance = maxLuminance;
+            mMaxAverageLuminance = maxAverageLuminance;
+            mMinLuminance = minLuminance;
         }
 
         /**
@@ -1205,6 +1218,9 @@ public final class Display {
             readFromParcel(source);
         }
 
+        /**
+         * @hide
+         */
         public void readFromParcel(Parcel source) {
             int types = source.readInt();
             mSupportedHdrTypes = new int[types];
