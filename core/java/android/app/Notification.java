@@ -4268,15 +4268,19 @@ public class Notification implements Parcelable
         public RemoteViews makeBigContentView() {
 
             // Nasty
-            CharSequence oldBuilderContentText =
-                    mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT);
+            CharSequence text = mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT);
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, null);
 
             RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
 
-            mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, oldBuilderContentText);
+            mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, text);
 
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
+            if (TextUtils.isEmpty(bigTextText)) {
+                // In case the bigtext is null / empty fall back to the normal text to avoid a weird
+                // experience
+                bigTextText = mBuilder.processLegacyText(text);
+            }
             contentView.setTextViewText(R.id.big_text, bigTextText);
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
