@@ -33,6 +33,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
+    libmediadrm \
     libskia \
     libui \
     liblog \
