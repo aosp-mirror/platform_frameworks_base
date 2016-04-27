@@ -425,7 +425,12 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_METERED_APN_TYPES_STRINGS =
             "carrier_metered_apn_types_strings";
-
+    /**
+     * Default APN types that are roamig-metered by the carrier
+     * @hide
+     */
+    public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
+            "carrier_metered_roaming_apn_types_strings";
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
@@ -757,6 +762,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
+                new String[]{"default", "mms", "dun", "supl"});
+        sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
