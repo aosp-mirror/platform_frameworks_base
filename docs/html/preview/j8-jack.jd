@@ -23,7 +23,7 @@ page.keywords="android N", "Java 8", "Jack"
 </p>
 
 <p>To start using these features, you need to download and set up Android
-Studio 2.1 (preview) and the Android N Preview SDK, which includes the required
+Studio 2.1 and the Android N Preview SDK, which includes the required
 Jack toolchain and updated Android Plugin for Gradle. If you haven't yet
 installed the Android N Preview SDK, see <a href=
 "{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.</p>
