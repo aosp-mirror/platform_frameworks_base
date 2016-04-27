@@ -1251,10 +1251,6 @@ class WindowSurfacePlacer {
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
             }
-            if (mService.mAppTransition.getAppTransition()
-                    == AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS) {
-                appAnimator.startProlongAnimation(PROLONG_ANIMATION_AT_START);
-            }
         }
         return topOpeningApp;
     }
