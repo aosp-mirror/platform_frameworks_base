@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈ-ਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੀ ਵਰਤਮਾਨ ਡਿਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਤਰ ਕਰੇਗਾ। ਬਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ਜ਼ਿਆਦਾਤਰ ਹਾਲਾਤਾਂ ਵਿੱਚ ਇਸ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਇਹ ਤੁਹਾਨੂੰ ਰਿਪੋਰਟ ਦੀ ਪ੍ਰਗਤੀ ਨੂੰ ਟਰੈਕ ਕਰਨ, ਸਮੱਸਿਆ ਬਾਰੇ ਹੋਰ ਵੇਰਵੇ ਦਾਖਲ ਕਰਨ, ਅਤੇ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦਿੰਦਾ ਹੈ। ਇਹ ਉਹਨਾਂ ਘੱਟ-ਵਰਤੇ ਗਏ ਕੁਝ ਭਾਗਾਂ ਨੂੰ ਨਜ਼ਰ-ਅੰਦਾਜ਼ ਕਰ ਸਕਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਦੀ ਰਿਪੋਰਟ ਕਰਨ ਵਿੱਚ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ।"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ਪੂਰੀ ਰਿਪੋਰਟ"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ਜਦੋਂ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਪ੍ਰਤਿਕਿਰਿਆ ਨਾ ਕਰ ਰਹੀ ਹੋਵੇ ਜਾਂ ਬਹੁਤ ਹੀ ਹੌਲੀ ਹੋਵੇ, ਜਾਂ ਜਦੋਂ ਤੁਹਾਨੂੰ ਸਾਰੇ ਰਿਪੋਰਟ ਭਾਗਾਂ ਦੀ ਲੋੜ ਹੋਵੇ ਤਾਂ ਇਸ ਚੋਣ ਦੀ ਵਰਤੋਂ ਘੱਟ-ਤੋਂ-ਘੱਟ ਸਿਸਟਮ ਦਖ਼ਲ ਲਈ ਕਰੋ। ਤੁਹਾਨੂੰ ਹੋਰ ਵੇਰਵੇ ਦਾਖਲ ਕਰਨ ਜਾਂ ਵਾਧੂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਨਹੀਂ ਲੈਣ ਦਿੰਦਾ ਹੈ।"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">ਬੱਗ ਰਿਪੋਰਟ ਲਈ <xliff:g id="NUMBER_1">%d</xliff:g> ਸਕਿੰਟ ਵਿੱਚ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਿਆ ਜਾ ਰਿਹਾ ਹੈ।</item>
       <item quantity="other">ਬੱਗ ਰਿਪੋਰਟ ਲਈ <xliff:g id="NUMBER_1">%d</xliff:g> ਸਕਿੰਟ ਵਿੱਚ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਿਆ ਜਾ ਰਿਹਾ ਹੈ।</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ਹੁਣ"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ਅਪਗ੍ਰੇਡ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ਸਟੋਰੇਜ ਅਨੁਕੂਲ ਕਰ ਰਿਹਾ ਹੈ।"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android ਅੱਪਗ੍ਰੇਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਐਪਾਂ ਅੱਪਗ੍ਰੇਡ ਦੇ ਪੂਰੀ ਹੋਣ ਤੱਕ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰਨ"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> <xliff:g id="NUMBER_1">%2$d</xliff:g> ਦਾ ਐਪ ਅਨੁਕੂਲ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ਐਪਸ ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ।"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ਬੈਟਰੀ ਸਮਰੱਥਾ ਨੂੰ ਬਿਹਤਰ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ, ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਪਿਛੋਕੜ ਡਾਟਾ ਨੂੰ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਮੈਸੇਜਿੰਗ ਅਤੇ ਹੋਰ ਐਪਸ, ਜੋ ਸਿੰਕਿੰਗ ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਆਟੋਮੈਟਿਕਲੀ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਚਾਰਜ ਹੋ ਰਹੀ ਹੁੰਦੀ ਹੈ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ਡੈਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡੈਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡੈਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਵਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡੈਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ਚਾਲੂ ਕਰੋ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ) </item>
       <item quantity="other">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>

@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Baqı xəbər verin"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bu, sizin hazırkı cihaz durumu haqqında məlumat toplayacaq ki, elektron məktub şəklində göndərsin. Baq raportuna başlamaq üçün bir az vaxt lazım ola bilər, bir az səbr edin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"İnteraktiv hesabat"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Bir çox hallarda bundan istifadə edin. Bu hesabatın gedişatını izləməyə, problem haqqında daha ətraflı məlumat daxil etməyə və skrinşot etməyə imkan verir. Bu, çox vaxt tələb edən bəzi az istifadə olunan bölmələri ixtisar edə bilər."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Tam hesabat"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Cihazınız cavab verməyəndə və ya zəif işləyəndə və ya bütün hesabat bölmələri lazım olanda minimum sistem müdaxiləsi üçün bu seçimdən istifadə edin. Ətraflı məlumat daxil etməyə imkan vermir və ya əlavə skrinşot çəkmir."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Baq hesabatı üçün <xliff:g id="NUMBER_1">%d</xliff:g> saniyədə sktinşot çəkilir.</item>
       <item quantity="one">Baq hesabatı üçün <xliff:g id="NUMBER_0">%d</xliff:g> saniyədə skrinşot çəkilir.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
       <item quantity="one">1 saat</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"indi"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android təkmilləşdirilir..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android işə başlayır..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Yaddaş optimallaşdırılır."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android təkmilləşdirilir"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Güncəllənmə tamamlanana kimi bəzi tətbiqlər düzgün işləməyə bilər"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> əddədən <xliff:g id="NUMBER_0">%1$d</xliff:g> tətbiq optimallaşır."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> proqramının hazırlanması."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Tətbiqlər başladılır."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratorunuz tərəfindən silinib"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareyanın istismar müddətini təkmilləşdirmək üçün batareya qənaəti cihazınızın məhsuldarlığını azaldır və titrətmə, məkan xidmətləri və ən son fon məlumatlarını məhdudlaşdırır. Sinxronlaşmaya arxayın olan e-poçt, mesajlaşma və digər proqramlar siz onları açmayana kimi yenilənməyə bilər.\n\nCihazınız doldurulan zaman batareya qənaəti avtomatik olaraq sönür."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin çox az hissəsini tez-tez edə bilər. Bu o deməkdir ki, məsələn, üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Qənaəti aktiv edilsin?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d dəqiqəlik (saat <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> radəsinə qədər)</item>
       <item quantity="one">Bir dəqiqəlik (saat <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> radəsinə qədər)</item>

@@ -965,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang meningkatkan versi..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Memulai Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimalkan penyimpanan."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android sedang meningkatkan versi"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Beberapa aplikasi mungkin tidak berfungsi dengan baik jika peningkatan versi belum selesai"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimalkan aplikasi <xliff:g id="NUMBER_0">%1$d</xliff:g> dari <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Menyiapkan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Memulai aplikasi."</string>

@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Ustvari poročilo o napakah"</string>
     <string name="bugreport_message" msgid="398447048750350456">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivno poročilo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"To možnost uporabite v večini primerov. Omogoča spremljanje poteka poročila, vnos več podrobnosti o težavi in snemanje posnetkov zaslona. Morda bodo izpuščeni nekateri redkeje uporabljani razdelki, za katere je poročanje dolgotrajno."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Celotno poročilo"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"To možnost uporabite za najmanj motenj sistema, če je naprava neodzivna ali prepočasna oziroma ko potrebujete vse razdelke poročila. Ne omogoča vnosa več podrobnosti ali snemanja dodatnih posnetkov zaslona."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
       <item quantity="two">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
@@ -874,8 +872,7 @@
       <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ure</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ur</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"zdaj"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Poteka nadgradnja Androida ..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android se zaganja …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimiziranje shrambe."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Poteka nadgradnja Androida."</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Nekatere aplikacije morda ne bodo delovale pravilno, dokler ne bo dokončana nadgradnja."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimiranje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Pripravljanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Zagon aplikacij."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisal skrbnik"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko dostopa do podatkov, vendar to morda lahko počne manj pogosto. To na primer morda pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Vklop varčevanja s podatki?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Vklop"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%d minuto (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">%d minuti (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

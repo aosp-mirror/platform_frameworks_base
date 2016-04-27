@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Справаздача пра памылку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Будзе збiрацца iнфармацыя пра бягучы стан прылады, якая будзе адпраўляцца на электронную пошту. Стварэнне справаздачы пра памылкi зойме некаторы час."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Інтэрактыўная справаздача"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Выкарыстоўвайце ў большасці выпадкаў. Гэта дазваляе сачыць за ходам справаздачы, уводзіць дадатковыя звесткі аб праблеме і рабіць здымкі экрана. Могуць быць прапушчаны некаторыя раздзелы, якія выкарыстоўваюцца менш і паведаміць пра якія зойме шмат часу."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Поўная справаздача"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Выкарыстоўвайце гэту опцыю, каб забяспечыць мінімальнае ўмяшанне сістэмы, калі прылада не адказвае ці працуе занадта павольна, або калі вам патрэбны ўсе раздзелы справаздачы. Выкарыстоўваючы гэту опцыю, вы не зможаце ўвесці больш падрабязную інфармацыю або зрабіць дадатковыя здымкі экрана."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Здымак экрана для справаздачы пра памылкі будзе зроблены праз <xliff:g id="NUMBER_1">%d</xliff:g> секунду.</item>
       <item quantity="few">Здымак экрана для справаздачы пра памылкі будзе зроблены праз <xliff:g id="NUMBER_1">%d</xliff:g> секунды.</item>
@@ -874,8 +872,7 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> гадзін</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> гадзіны</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"зараз"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Абнаўленне Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android запускаецца..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Аптымізацыя сховішча."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Абнаўленне Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Пэўныя праграмы могуць не працаваць належным чынам, пакуль не скончыцца абнаўленне"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Аптымізацыя прыкладання <xliff:g id="NUMBER_0">%1$d</xliff:g> з <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Падрыхтоўка <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск прыкладанняў."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Выдалена вашым адміністратарам"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Каб паменшыць выкарыстанне даных, Эканомія трафіку не дазваляе некаторым праграмам адпраўляць ці атрымліваць даныя ў фонавым рэжыме. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але можа рабіць гэта радзей. Гэта можа азначаць, напрыклад, што відарысы не паказваюцца, пакуль вы не дакраняцеся да іх."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіку?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">На %1$d хвіліну (да <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">На %1$d хвіліны (да <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Txosten dinamikoa"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Aukera hau erabili beharko zenuke ia beti. Txostenaren jarraipena egin ahal izango duzu eta arazoari buruzko xehetasunak eman ahal izango dituzu. Baliteke gutxitan erabili behar izaten diren atalak ez agertzea, denbora aurrezteko."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Txosten osoa"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Erabili aukera hau sisteman ahalik eta traba gutxien eragiteko gailuak erantzuten ez duenean, mantsoegi dabilenean edo txosteneko atal guztiak behar dituzunean. Ez dizu uzten xehetasun gehiago idazten, ezta beste pantaila-argazkirik ateratzen ere."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Akatsen txostenaren argazkia aterako da <xliff:g id="NUMBER_1">%d</xliff:g> segundo barru.</item>
       <item quantity="one">Akatsen txostenaren argazkia aterako da <xliff:g id="NUMBER_0">%d</xliff:g> segundo barru.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ordu</item>
       <item quantity="one">Ordubete</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"orain"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android bertsio-berritzen ari da…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android abiarazten ari da…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memoria optimizatzen."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android bertsioa berritzen ari gara"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Aplikazio batzuek agian ez dute behar bezala funtzionatuko bertsioa berritzen amaitu arte."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> aplikazio optimizatzen."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> prestatzen."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikazioak abiarazten."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu nahi?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minutuz (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> arte)</item>
       <item quantity="one">Minutu batez (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> arte)</item>

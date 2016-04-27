@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Сигнал за програмна грешка"</string>
     <string name="bugreport_message" msgid="398447048750350456">"По този начин ще се събере информация за текущото състояние на устройството ви, която да се изпрати като имейл съобщение. След стартирането на процеса ще мине известно време, докато сигналът за програмна грешка бъде готов за подаване. Моля, имайте търпение."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен сигнал"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Използвайте тази опция в повечето случаи. Тя ви позволява да следите напредъка на сигнала, да въвеждате допълнителни подробности за проблема и да правите екранни снимки. Възможно е да бъдат пропуснати някои по-рядко използвани секции, за които подаването на сигнал отнема дълго време."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Пълен сигнал"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Използвайте тази опция, за да възпрепятствате минимално работата на системата, когато устройството не реагира, функционира твърде бавно или са ви нужни всички секции за подаване на сигнал. Не можете да въвеждате други подробности, нито да правите допълнителни екранни снимки."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
       <item quantity="one">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_0">%d</xliff:g> секунда.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часа</item>
       <item quantity="one">1 час</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"сега"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се надстройва..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android се стартира…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Хранилището се оптимизира."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android се надстройва"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Някои приложения може да не работят правилно, докато надстройването не завърши"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизира се приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> от <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Приложенията се стартират."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Изтрито от администратора ви"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"С цел удължаване на живота на батерията режимът за запазването й намалява ефективността на устройството ви и ограничава вибрирането, услугите за местоположение и повечето данни на заден план. Приложенията за електронна поща, съобщения и др., които разчитат на синхронизиране, може да не се актуализират, освен ако не ги отворите.\n\nРежимът за запазване на батерията се изключва автоматично, когато устройството ви се зарежда."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да осъществява достъп до информацията, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Ще вкл. ли Икономия на данни?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">За една минута (до <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

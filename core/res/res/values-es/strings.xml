@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de errores"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe completo"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utiliza esta opción para que la interferencia del sistema sea mínima cuando el dispositivo no responda o funcione demasiado lento, o bien cuando necesites todas las secciones del informe. No permite introducir más detalles ni hacer más capturas de pantalla."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">La captura de pantalla para el informe de errores se realizará en <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
       <item quantity="one">La captura de pantalla para el informe de errores se realizará en <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
       <item quantity="one">1 hora</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ahora"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Actualizando Android"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android se está iniciando…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamiento."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Actualizando Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Es posible que algunas aplicaciones no funcionen correctamente hasta que finalice la actualización"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>..."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicaciones"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado por tu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El Economizador de Datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, las imágenes no se mostrarán hasta que no las toques."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Economizador de Datos?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durante %1$d minutos (hasta las <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durante un minuto (hasta las <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

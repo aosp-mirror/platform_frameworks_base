@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది నివేదిక ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"పూర్తి నివేదిక"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని నివేదిక విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
       <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> గంటలు</item>
       <item quantity="one">1 గంట</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ఇప్పుడు"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android అప్‌గ్రేడ్ అవుతోంది…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"నిల్వను అనుకూలపరుస్తోంది."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android అప్‌గ్రేడ్ అవుతోంది"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"అప్‌గ్రేడ్ పూర్తయ్యే వరకు కొన్ని అనువర్తనాలు సరిగ్గా పని చేయకపోవచ్చు"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో <xliff:g id="NUMBER_0">%1$d</xliff:g> అనువర్తనాన్ని అనుకూలీకరిస్తోంది."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ని సిద్ధం చేస్తోంది."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"అనువర్తనాలను ప్రారంభిస్తోంది."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని అనువర్తనాలను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న అనువర్తనం డేటాను ప్రాప్యత చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
       <item quantity="one">ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
