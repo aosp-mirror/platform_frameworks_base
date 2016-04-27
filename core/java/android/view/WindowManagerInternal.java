@@ -54,13 +54,12 @@ public abstract class WindowManagerInternal {
     public interface MagnificationCallbacks {
 
         /**
-         * Called when the bounds of the screen content that is magnified changed.
-         * Note that not the entire screen is magnified.
+         * Called when the region where magnification operates changes. Note that this isn't the
+         * entire screen. For example, IMEs are not magnified.
          *
-         * @param magnifiedBounds the currently magnified region
-         * @param availableBounds the region available for magnification
+         * @param magnificationRegion the current magnification region
          */
-        public void onMagnifiedBoundsChanged(Region magnifiedBounds, Region availableBounds);
+        public void onMagnificationRegionChanged(Region magnificationRegion);
 
         /**
          * Called when an application requests a rectangle on the screen to allow
@@ -158,13 +157,11 @@ public abstract class WindowManagerInternal {
     public abstract void setMagnificationSpec(MagnificationSpec spec);
 
     /**
-     * Obtains the magnified and available regions.
+     * Obtains the magnification regions.
      *
-     * @param outMagnified the currently magnified region
-     * @param outAvailable the region available for magnification
+     * @param magnificationRegion the current magnification region
      */
-    public abstract void getMagnificationRegions(@NonNull Region outMagnified,
-            @NonNull Region outAvailable);
+    public abstract void getMagnificationRegion(@NonNull Region magnificationRegion);
 
     /**
      * Gets the magnification and translation applied to a window given its token.
