@@ -403,9 +403,7 @@ public class WebViewClient {
      *
      * @param view The WebView that is initiating the callback.
      * @param event The key event.
-     * @deprecated This method is subsumed by the more generic onUnhandledInputEvent.
      */
-    @Deprecated
     public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
         onUnhandledInputEventInternal(view, event);
     }
@@ -427,6 +425,7 @@ public class WebViewClient {
      *
      * @param view The WebView that is initiating the callback.
      * @param event The input event.
+     * @removed
      */
     public void onUnhandledInputEvent(WebView view, InputEvent event) {
         if (event instanceof KeyEvent) {
