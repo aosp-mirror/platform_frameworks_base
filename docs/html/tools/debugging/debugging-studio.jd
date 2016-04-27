@@ -31,6 +31,7 @@ page.title=Debugging with Android Studio
 <li><a href="{@docRoot}sdk/installing/studio-tips.html">
 Android Studio Tips and Tricks</a></li>
 <li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
+<li><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></li>
 <li><a href="{@docRoot}tools/help/monitor.html">Device Monitor</a></li>
 <li><a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a></li>
 </div>
@@ -99,18 +100,32 @@ the current thread and the object tree for a variable.</p>
 
 <h3 id="attachDebug">Attach the debugger to a running process</h3>
 
-<p>You don't always have to restart your app to debug it. To debug an app that you're already
-running:</p>
+<p>You don't always have to restart your app to debug it. To debug an app that
+you're already running:</p>
 
 <ol>
-<li>Click <strong>Attach debugger to Android proccess</strong>
-<img src="{@docRoot}images/tools/as-attach.png" alt=""
+<li>Click <strong>Attach debugger to Android process</strong>
+<img src="{@docRoot}images/tools/as-attach.png"
+alt="Attach debugger to Android process icon"
 style="vertical-align:bottom;margin:0;height:20px"/>.</li>
-<li>In the <em>Choose Process</em> window, select the device and app you want to attach the
-debugger to.</li>
-<li>To open the <em>Debug</em> tool window, click <strong>Debug</strong>
-<img src="{@docRoot}images/tools/as-debugwindowbutton.png"
-alt="" style="vertical-align:bottom;margin:0;height:20px"/>.</li>
+<li>In the <em>Choose Process</em> dialog, select the process you want to
+attach the debugger to.</li>
+<p>By default, the debugger shows the device and app process for the current
+project, as well as any connected hardware devices or virtual devices on your
+computer. Select <strong>Show all processes</strong> to show all processes on
+all devices; the display includes any services that your app created as well as
+system processes, for example.</p>
+<p>From the <strong>Debugger</strong> menu, you can select <strong>Java</strong>,
+<strong>Native</strong>, or <strong>Hybrid</strong>. The latter two options are
+available only if your project contains some native C or C++ source code.</p>
+<li>Click <strong>OK</strong>.</li>
+<p>The <em>Debug</em> window appears. In this case, notice the two tabs to the
+right of the Debug window title: one tab is for debugging native code and the
+other for Java code, as indicated by <strong>-java</strong>. </p>
+<img src="{@docRoot}images/tools/db-attachprocess.png" width="587"
+alt="" />
+<p>Separate debugging sessions have separate tabs and different port numbers,
+which are displayed in parentheses in the tab.</p>
 </ol>
 
 <h2 id="systemLog">Use the System Log</h2>
