@@ -21,6 +21,8 @@
 #include <BakedOpRenderer.h>
 #include <tests/common/TestUtils.h>
 
+#include <SkDashPathEffect.h>
+
 using namespace android::uirenderer;
 
 static BakedOpRenderer::LightInfo sLightInfo;
@@ -71,12 +73,17 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
     ASSERT_EQ(1, glopCount) << "Exactly one Glop expected";
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, onArc_position) {
+RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
     SkPaint strokePaint;
     strokePaint.setStyle(SkPaint::kStroke_Style);
     strokePaint.setStrokeWidth(4);
-    ArcOp op(Rect(10, 15, 20, 25), Matrix4::identity(), nullptr, &strokePaint, 0, 270, true);
-    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
+
+    float intervals[] = {1.0f, 1.0f};
+    auto dashEffect = SkDashPathEffect::Create(intervals, 2, 0);
+    strokePaint.setPathEffect(dashEffect);
+    dashEffect->unref();
+
+    auto textureGlopVerifier = [] (const Glop& glop) {
         // validate glop produced by renderPathTexture (so texture, unit quad)
         auto texture = glop.fill.texture.texture;
         ASSERT_NE(nullptr, texture);
@@ -85,15 +92,20 @@ RENDERTHREAD_TEST(BakedOpDispatcher, onArc_position) {
                 << "Should see conservative offset from PathCache::computeBounds";
         Rect expectedBounds(10, 15, 20, 25);
         expectedBounds.outset(expectedOffset);
-#if !HWUI_NEW_OPS
-        EXPECT_EQ(expectedBounds, glop.bounds) << "bounds outset by stroke 'offset'";
-#endif
+
         Matrix4 expectedModelView;
         expectedModelView.loadTranslate(10 - expectedOffset, 15 - expectedOffset, 0);
         expectedModelView.scale(10 + 2 * expectedOffset, 10 + 2 * expectedOffset, 1);
         EXPECT_EQ(expectedModelView, glop.transform.modelView)
                 << "X and Y offsets, and scale both applied to model view";
-    });
+    };
+
+    // Arc and Oval will render functionally the same glop, differing only in texture content
+    ArcOp arcOp(Rect(10, 15, 20, 25), Matrix4::identity(), nullptr, &strokePaint, 0, 270, true);
+    testUnmergedGlopDispatch(renderThread, &arcOp, textureGlopVerifier);
+
+    OvalOp ovalOp(Rect(10, 15, 20, 25), Matrix4::identity(), nullptr, &strokePaint);
+    testUnmergedGlopDispatch(renderThread, &ovalOp, textureGlopVerifier);
 }
 
 RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
