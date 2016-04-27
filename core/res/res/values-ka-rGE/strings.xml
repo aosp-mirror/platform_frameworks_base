@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"შექმენით შეცდომის ანგარიში"</string>
     <string name="bugreport_message" msgid="398447048750350456">"იგი შეაგროვებს ინფორმაციას თქვენი მოწყობილობის ამჟამინდელი მდგომარეობის შესახებ, რათა ის ელფოსტის შეტყობინების სახით გააგზავნოს. ხარვეზის ანგარიშის მომზადებასა და შეტყობინების გაგზავნას გარკვეული დრო სჭირდება. გთხოვთ, მოითმინოთ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ინტერაქტიული ანგარიში"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"გამოიყენეთ ეს ვარიანტი შემთხვევათა უმეტესობაში. ის საშუალებას მოგცემთ, თვალი მიადევნოთ ანგარიშის პროგრესს, პრობლემის შესახებ მეტი დეტალი შეიყვანოთ და გადაიღოთ ეკრანის ანაბეჭდები. ამ ვარიანტის არჩევის შემთხვევაში, შეიძლება მოხდეს ზოგიერთი ნაკლებად გამოყენებადი სექციის გამოტოვება, რომელთა შესახებ მოხსენებასაც დიდი დრო სჭირდება."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"სრული ანგარიში"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"გამოიყენეთ ეს ვარიანტი სისტემის ხარვეზების მინიმუმამდე დასაყვანად, როცა თქვენი მოწყობილობა არ რეაგირებს, მეტისმეტად ნელია, ან ანგარიშის ყველა სექცია გჭირდებათ. ამ შემთხვევაში, მეტი დეტალის შეყვანას ან დამატებითი ეკრანის ანაბეჭდების გადაღებას ვერ შეძლებთ."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">ხარვეზის შესახებ ანგარიშის ეკრანის ანაბეჭდის გადაღება მოხდება <xliff:g id="NUMBER_1">%d</xliff:g> წამში.</item>
       <item quantity="one">ხარვეზის შესახებ ანგარიშის ეკრანის ანაბეჭდის გადაღება მოხდება <xliff:g id="NUMBER_0">%d</xliff:g> წამში.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> საათი</item>
       <item quantity="one">1 საათი</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ახლა"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ახალ ვერსიაზე გადადის…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android იწყება…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"მეხსიერების ოპტიმიზირება."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"მიმდინარეობს აპლიკაციების ოპტიმიზაცია. დასრულებულია <xliff:g id="NUMBER_0">%1$d</xliff:g>, სულ <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"ემზადება <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"აპების ჩართვა"</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d წუთის განმავლობაში (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>-მდე)</item>
       <item quantity="one">ერთი წუთის განმავლობაში (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>-მდე)</item>

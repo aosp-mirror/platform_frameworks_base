@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Apri segnalazione bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapporto interattivo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Rapporto completo"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_1">%d</xliff:g> secondi.</item>
       <item quantity="one">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_0">%d</xliff:g> secondo.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ore</item>
       <item quantity="one">1 ora</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ora"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Aggiornamento di Android in corso"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Alcune app potrebbero non funzionare correttamente fino al completamento dell\'upgrade"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio applicazioni."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminato dall\'amministratore"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per aumentare la durata della batteria, la funzione di risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione, servizi di geolocalizzazione e la maggior parte dei dati in background. App di email, messaggi e altre app che si basano sulla sincronizzazione potrebbero essere aggiornate soltanto all\'apertura.\n\nLa funzione di risparmio energetico viene disattivata automaticamente quando il dispositivo è in carica."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Per %1$d minuti (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Per un minuto (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

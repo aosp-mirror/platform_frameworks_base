@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Foutenrapport genereren"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een foutenrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactief rapport"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gebruik deze optie in de meeste situaties. Hiermee kun je de voortgang van het rapport bijhouden, meer gegevens over het probleem opgeven en screenshots maken. Mogelijk worden bepaalde minder vaak gebruikte gedeelten weggelaten (waarvoor het lang zou duren om een rapport te genereren)."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Volledig rapport"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gebruik deze optie voor minimale systeemverstoring wanneer je apparaat niet reageert of te langzaam is, of wanneer je alle rapportgedeelten nodig hebt. Je kunt niet meer gegevens opgeven of extra screenshots maken."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Er wordt over <xliff:g id="NUMBER_1">%d</xliff:g> seconden een screenshot gemaakt voor het bugrapport.</item>
       <item quantity="one">Er wordt over <xliff:g id="NUMBER_0">%d</xliff:g> seconde een screenshot gemaakt voor het bugrapport.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> uur</item>
       <item quantity="one">1 uur</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"nu"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android wordt bijgewerkt..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android wordt gestart…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Opslagruimte wordt geoptimaliseerd."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> van <xliff:g id="NUMBER_1">%2$d</xliff:g> optimaliseren."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> voorbereiden."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps starten."</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Verwijderd door je beheerder"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Accubesparing beperkt de prestaties van je apparaat, de trilstand, locatieservices en de meeste achtergrondgegevens om de gebruiksduur van de accu te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld terwijl je apparaat wordt opgeladen."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. Een app die je momenteel gebruikt, kan data gebruiken, maar minder vaak. Dit kan bijvoorbeeld betekenen dat afbeeldingen niet worden weergegeven totdat je hierop tikt."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Databesparing inschakelen?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Inschakelen"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minuten (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Eén minuut (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

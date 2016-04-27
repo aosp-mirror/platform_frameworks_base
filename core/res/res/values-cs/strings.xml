@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivní přehled"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Tato možnost se používá ve většině případů. Umožňuje sledovat průběh přehledu, zadat další podrobnosti o problému a pořizovat snímky obrazovky. Mohou být vynechány některé méně používané sekce, jejichž kontrola trvá dlouho."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Úplný přehled"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Tato možnost slouží k rychlému nahlášení, když zařízení neodpovídá, je příliš pomalé nebo pokud potřebujete zahrnout všechny sekce. Tímto způsobem nelze zadat více podrobností ani pořídit snímek obrazovky."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
@@ -874,8 +872,7 @@
       <item quantity="other">[<xliff:g id="COUNT">%d</xliff:g>] hodin</item>
       <item quantity="one">1 hodina</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"nyní"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se upgraduje..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Spouštění systému Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Probíhá optimalizace úložiště."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimalizování aplikace <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Příprava aplikace <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Spouštění aplikací."</string>
@@ -1523,10 +1524,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Smazáno administrátorem"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnout Spořič dat?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnout"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

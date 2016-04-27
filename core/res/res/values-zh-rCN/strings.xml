@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"提交错误报告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互动式报告"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整报告"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"如果您的设备无响应或运行速度缓慢，或者您需要查看所有区段的报告信息，则建议您使用此选项将系统干扰程度降到最低。系统不支持您输入更多详细信息，也不会截取其他屏幕截图。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">系统将在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后对错误报告进行截屏。</item>
       <item quantity="one">系统将在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒后对错误报告进行截屏。</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小时</item>
       <item quantity="one">1 小时</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"现在"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在启动…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在优化存储空间。"</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在启动应用。"</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，省电模式会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n省电模式会在设备充电时自动关闭。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"要开启流量节省程序吗？"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"开启"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>

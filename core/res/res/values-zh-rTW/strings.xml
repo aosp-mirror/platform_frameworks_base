@@ -965,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"正在升級 Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在啟動…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在對儲存空間進行最佳化處理。"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"正在升級 Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"升級完成前，部分應用程式可能無法正常運作"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在最佳化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"正在準備升級「<xliff:g id="APPNAME">%1$s</xliff:g>」。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在啟動應用程式。"</string>

@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de erros"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Este informe recompilará información acerca do estado actual do teu dispositivo para enviala en forma de mensaxe de correo electrónico. O informe de erros tardará un pouco en completarse desde o seu inicio ata que estea preparado para enviarse, polo que che recomendamos que teñas paciencia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Usa esta opción na maioría das circunstancias. Permíteche realizar un seguimento do progreso do informe, introducir máis detalles sobre o problema e facer capturas de pantalla. É posible que omita algunhas seccións menos usadas para as que se tarda máis en facer o informe."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe completo"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Usa esta opción para que a interferencia sexa mínima cando o teu dispositivo non responda ou funcione demasiado lento, ou ben cando precises todas as seccións do informe. Non poderás introducir máis detalles nin facer máis capturas de pantalla."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Vaise facer unha captura de pantalla para o informe de erros en <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
       <item quantity="one">Vaise facer unha captura de pantalla para o informe de erros en <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
       <item quantity="one">Unha hora</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"agora"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Estase actualizando Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Estase iniciando Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamento."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Estase actualizando Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"É posible que algunhas aplicacións non funcionen correctamente ata que finalice o proceso de actualización"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicacións."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado polo administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para axudar a mellorar a duración da batería, a función aforro de batería reduce o rendemento do teu dispositivo e limita a vibración, os servizos de localización e a maioría dos datos en segundo plano. É posible que o correo electrónico, as mensaxes e outras aplicacións que dependen da sincronización non se actualicen a menos que os abras. \n\nA función aforro de batería desactívase automaticamente cando pos a cargar o teu dispositivo."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para contribuír a reducir o uso de datos, o Economizador de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Queres activar o economizador de datos?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durante %1$d minutos (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durante un minuto (ata as <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

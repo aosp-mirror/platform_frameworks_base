@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Thatha umbiko wesiphazamiso"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Lokhu kuzoqoqa ulwazi mayelana nesimo samanje sedivayisi yakho, ukuthumela imilayezo ye-imeyili. Kuzothatha isikhathi esincane kusuka ekuqaleni umbiko wesiphazamiso uze ulungele ukuthunyelwa; sicela ubekezele."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Umbiko obandakanyayo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Sebenzisa lokhu ngaphansi kwezimo eziningi. Kukuvumela ukuthi ulandele ukuqhubeka kombiko, ufake imininingwane engeziwe mayelana nenkinga, futhi uthathe izithombe zikrini. Ingasika okunye ukukhetha okuncane okuthatha isikhathi eside ukubika."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Umbiko ogcwele"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Sebenzisa le nketho ukuze uthole ukuphazamiseka okuncane kwesistimu uma idivayisi yakho ingaphenduli noma ihamba kancane kakhulu, noma udinga zonke izigaba zombiko. Ayikuvumeli ukuthi ufake imininingwane engeziwe noma uthathe isithombe-skrini esingeziwe."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Ithathela umbiko wesiphazamisi isithombe-skrini kumasekhondi angu-<xliff:g id="NUMBER_1">%d</xliff:g>.</item>
       <item quantity="other">Ithathela umbiko wesiphazamisi isithombe-skrini kumasekhondi angu-<xliff:g id="NUMBER_1">%d</xliff:g>.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> amahora</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> amahora</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"manje"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"I-Android ifaka ezakamuva..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"I-Android iyaqala…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ikhulisa isitoreji."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"I-Android iyathuthukiswa"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Ezinye izinhlelo zokusebenza kungenzeka zingasebenzi kahle kuze kuqedwe ukuthuthukiswa"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ukubeka ezingeni eliphezulu <xliff:g id="NUMBER_0">%1$d</xliff:g> uhlelo lokusebenza <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ukulungisela i-<xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Qalisa izinhlelo zokusebenza."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Isuswe ngumlawuli wakho"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Ukusiza ukuthuthukisa impilo yebhethri, isilondoloze sebhethri sehlisa ukusebenza kwedivayisi yakho futhi sikhawulele ukudlidliza, amasevisi wendawo, nedatha eningi yangasemuva. I-imeyili, imilayezo, nezinye izinhlelo zokusebenza ezincike ekuvumelaniseni zingahle zingabuyekezwa ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri siyavaleka ngokuzenzakalelayo uma idivayisi yakho ishaja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ukusiza ukwehlisa ukusetshenziswa kwedatha, iseva yedatha igwema ezinye izinhlelo zokusebenza ukuthi zithumele noma zamukele idatha ngasemuva. Uhlelo lokusebenza olisebenzisa okwamanje lingafinyelela idatha, kodwa lingenza kanjalo kancane. Lokhu kungachaza, isibonelo, ukuthi izithombe azibonisi uze uzithephe."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Vula iseva yedatha?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Vula"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Okwamaminithi angu-%1$d (kuze kube ngo-<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Okwamaminithi angu-%1$d (kuze kube ngo-<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

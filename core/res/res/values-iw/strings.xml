@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
     <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד לשליחת ההודעה בפועל. אנא המתן בסבלנות."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"דוח אינטראקטיבי"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"השתמש באפשרות זו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח, להזין פרטים נוספים על הבעיה וליצור צילומי מסך. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ואשר יצירת הדיווח עליהם נמשכת זמן רב."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"דוח מלא"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"השתמש באפשרות זו כדי שההפרעה למערכת תהיה מזערית, כשהמכשיר אינו מגיב או איטי מדי, או כשאתה זקוק לכל קטעי הדוח. לא ניתן להזין פרטים נוספים או ליצור צילומי מסך נוספים."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="two">יוצר צילום מסך לדוח על באג בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות.</item>
       <item quantity="many">יוצר צילום מסך לדוח על באג בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות.</item>
@@ -874,8 +872,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> שעות</item>
       <item quantity="one">שעה אחת</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"עכשיו"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android מבצע שדרוג…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏הפעלת Android מתחילה…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"מתבצעת אופטימיזציה של האחסון."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏Android מבצע שדרוג"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ייתכן שאפליקציות מסוימות לא יפעלו כראוי עד סיום השדרוג"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"מבצע אופטימיזציה של אפליקציה <xliff:g id="NUMBER_0">%1$d</xliff:g> מתוך <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"מכין את <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"מפעיל אפליקציות."</string>
@@ -1330,7 +1329,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"העברת מסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"מחפש מכשירים…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"הגדרות"</string>
-    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"התנתק"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"נתק"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"סורק..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"מתחבר..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"זמין"</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

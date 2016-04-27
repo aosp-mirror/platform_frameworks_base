@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"بگ کی اطلاع لیں"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ایک ای میل پیغام کے بطور بھیجنے کیلئے، یہ آپ کے موجودہ آلہ کی حالت کے بارے میں معلومات جمع کرے گا۔ بگ کی اطلاع شروع کرنے سے لے کر بھیجنے کیلئے تیار ہونے تک اس میں تھوڑا وقت لگے گا؛ براہ کرم تحمل سے کام لیں۔"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"متعامل رپورٹ"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"زیادہ تر حالات میں اسے استعمال کریں۔ یہ آپ کو رپورٹ کی پیش رفت کا پتہ رکھنے، مسئلہ سے متعلق زیادہ تفصیلات درج کرنے اور اسکرین شاٹس لینے کی اجازت دیتا ہے۔ شاید یہ کچھ ایسے کم استعمال ہونے والے سیکشنز کو خارج کر دے جو اطلاع کرنے میں زیادہ وقت لگاتے ہیں۔"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"مکمل رپورٹ"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"جب آپ کا آلہ غیر فعال یا بہت سست ہو یا جب آپ کو تمام رپورٹ سیکشنز درکار ہوں، تو کم سے کم سسٹم مداخلت کیلئے یہ اختیار استعمال کریں۔ یہ آپ کو مزید تفصیلات درج کرنے یا اضافی اسکرین شاٹس لینے کی اجازت نہیں دیتا۔"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">بگ رپورٹ کیلئے <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈز میں اسکرین شاٹ لیا جائے گا۔</item>
       <item quantity="one">بگ رپورٹ کیلئے <xliff:g id="NUMBER_0">%d</xliff:g> سیکنڈ میں اسکرین شاٹ لیا جائے گا۔</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> گھنٹے</item>
       <item quantity="one">1 گھنٹہ</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ابھی"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android اپ گریڈ ہو رہا ہے…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏Android شروع ہو رہا ہے…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"اسٹوریج کو بہترین بنایا جا رہا ہے۔"</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ایپ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g> کو بہتر بنایا جا رہا ہے۔"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> تیار ہو رہی ہے۔"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ایپس شروع ہو رہی ہیں۔"</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"آپ کے منتظم کی جانب سے حذف کر دیا گیا"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر منحصر دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"آن کریں"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> تک)</item>
       <item quantity="one">ایک منٹ کیلئے (تک <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

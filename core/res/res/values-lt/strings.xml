@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Pranešti apie riktą"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bus surinkta informacija apie dabartinę įrenginio būseną ir išsiųsta el. pašto pranešimu. Šiek tiek užtruks, kol pranešimas apie riktą bus paruoštas siųsti; būkite kantrūs."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. ataskaita"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Naudokite tai esant daugumai aplinkybių. Galite stebėti ataskaitos eigą, įvesti daugiau išsamios informacijos apie problemą ir padaryti ekrano kopijų. Gali būti praleidžiamos kelios rečiau naudojamos skiltys, kurių ataskaitų teikimas ilgai trunka."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Išsami ataskaita"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Naudokite šią parinktį, kad sistemos veikimas būtų kuo mažiau trikdomas, kai įrenginys nereaguoja ar yra per lėtas arba kai jums reikia visų ataskaitos skilčių. Negalėsite įvesti daugiau išsamios informacijos ar padaryti papildomų ekrano kopijų."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundės.</item>
       <item quantity="few">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundžių.</item>
@@ -874,8 +872,7 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> valandos</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> valandų</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"dabar"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"„Android“ naujovinama..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Paleidžiama „Android“…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizuojama saugykla."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizuojama <xliff:g id="NUMBER_0">%1$d</xliff:g> progr. iš <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ruošiama „<xliff:g id="APPNAME">%1$s</xliff:g>“."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Paleidžiamos programos."</string>
@@ -1523,10 +1524,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Įj. Duomenų taupymo priemonę?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Įjungti"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minutę (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d minutes (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

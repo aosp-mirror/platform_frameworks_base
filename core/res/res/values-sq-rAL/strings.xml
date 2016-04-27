@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Merr raportin e defekteve në kod"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktiv"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Përdore këtë në shumicën e rrethanave. Të lejon të gjurmosh progresin e raportit dhe të fusësh më shumë detaje rreth problemit dhe të regjistrosh pamje të ekranit. Mund të fshijë disa seksione që përdoren më pak të cilat kërkojnë shumë kohë për t\'u raportuar."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Raporti i plotë"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Përdore këtë opsion për interferencë minimale kur pajisja nuk përgjigjet ose është tepër e ngadaltë, ose kur të nevojiten të gjitha seksionet. Nuk të lejon që të fusësh më shumë të dhëna ose të regjistrosh pamje të të tjera ekrani."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_1">%d</xliff:g> sekonda.</item>
       <item quantity="one">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_0">%d</xliff:g> sekondë.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> orë</item>
       <item quantity="one">1 orë</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"tani"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"\"Androidi\" po përditësohet…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"\"Androidi\" po fillon…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Po përshtat ruajtjen."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android po përmirësohet"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Disa aplikacione mund të mos funksionojnë si duhet deri sa të përfundojë përmirësimi"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Po përshtat aplikacionin <xliff:g id="NUMBER_0">%1$d</xliff:g> nga gjithsej <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Po përgatit <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikacionet e fillimit."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për një minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
