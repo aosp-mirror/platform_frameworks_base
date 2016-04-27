@@ -569,7 +569,7 @@ void BakedOpDispatcher::onOvalOp(BakedOpRenderer& renderer, const OvalOp& op, co
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
         const AutoTexture holder(texture);
         if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.right,
+            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
                     *texture, *(op.paint));
         }
     } else {
