@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Cal introduir el patró en canviar de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Cal introduir el PIN en canviar de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Cal introduir la contrasenya en canviar de perfil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"L\'administrador ha bloquejat el dispositiu"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"El dispositiu s\'ha bloquejat manualment"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Fa <xliff:g id="NUMBER_1">%d</xliff:g> hores que no es desbloqueja el dispositiu. Confirma el patró.</item>
       <item quantity="one">Fa <xliff:g id="NUMBER_0">%d</xliff:g> hora que no es desbloqueja el dispositiu. Confirma el patró.</item>

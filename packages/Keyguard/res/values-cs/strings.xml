@@ -123,10 +123,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Po přepnutí profilů je vyžadováno gesto"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Po přepnutí profilů je vyžadován kód PIN"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Po přepnutí profilů je vyžadováno heslo"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Správce zařízení toto zařízení uzamkl"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Zařízení bylo ručně uzamčeno"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="few">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>
       <item quantity="many">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>

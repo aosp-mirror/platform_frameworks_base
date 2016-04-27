@@ -123,10 +123,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Po prepnutí profilov musíte zadať bezpečnostný vzor"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Po prepnutí profilov musíte zadať kód PIN"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Po prepnutí profilov musíte zadať heslo"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Zariadenie uzamkol správca"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Zariadenie bolo uzamknuté ručne"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="few">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
       <item quantity="many">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_1">%d</xliff:g> hodiny. Potvrďte vzor.</item>
