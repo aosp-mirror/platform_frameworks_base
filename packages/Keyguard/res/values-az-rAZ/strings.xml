@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profillər arasında keçid edərkən qəlib kod tələb olunur"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profillər arasında keçid edərkən PIN kod tələb olunur"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profillər arasında keçid edərkən parol tələb olunur"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Cihaz administratoru cihazı kilidlədi"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Cihaz əl ilə kilidləndi"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Cihaz <xliff:g id="NUMBER_1">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>
       <item quantity="one">Cihaz <xliff:g id="NUMBER_0">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>

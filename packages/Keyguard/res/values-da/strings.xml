@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Du skal indtaste et mønster, når du skifter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Du skal indtaste en pinkode, når du skifter profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Du skal indtaste en adgangskode, når du skifter profil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Enhedsadministratoren har låst enheden"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Enheden blev låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>

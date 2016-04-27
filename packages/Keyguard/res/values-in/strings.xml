@@ -119,10 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pola diperlukan jika Anda beralih profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN diperlukan jika Anda beralih profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Sandi diperlukan jika Anda beralih profil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Perangkat dikunci oleh administrator"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Perangkat dikunci secara manual"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi pola.</item>
       <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi pola.</item>

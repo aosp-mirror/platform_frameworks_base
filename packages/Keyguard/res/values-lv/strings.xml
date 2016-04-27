@@ -121,10 +121,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pārslēdzot profilus, ir jāievada atbloķēšanas kombinācija."</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Pārslēdzot profilus, ir jāievada PIN kods."</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Pārslēdzot profilus, ir jāievada parole."</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Ierīces administratora bloķēta ierīce"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Ierīce tika bloķēta manuāli"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="zero">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet kombināciju.</item>
       <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet kombināciju.</item>
