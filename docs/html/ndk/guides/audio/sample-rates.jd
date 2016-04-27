@@ -1,0 +1,151 @@
+page.title=Sample Rates
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#best">Best Practices for Sampling and Resampling</a></li>
+        <li><a href="#info">For More Information</a></li>
+      </ol>
+    </div>
+  </div>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=6Dl6BdrA-sQ">
+<div>
+    <h3>Video</h3>
+    <p>Sample Rates: Why Can't We All Just Agree?</p>
+</div>
+</a>
+
+<p>As of Android 5.0 (Lollipop), the audio resamplers are now entirely based
+on FIR filters derived from a Kaiser windowed-sinc function. The Kaiser windowed-sinc
+offers the following properties:
+<ul>
+    <li>It is straightforward to calculate for its design parameters (stopband
+ ripple, transition bandwidth, cutoff frequency, filter length).</li>
+<li>It is nearly optimal for reduction of stopband energy compared to overall
+energy.</li>
+</ul>
+See P.P. Vaidyanathan, <a class="external-link"
+href="https://drive.google.com/file/d/0B7tBh7YQV0DGak9peDhwaUhqY2c/view">
+<i>Multirate Systems and Filter Banks</i></a>, p. 50 for discussions of the
+Kaiser Window and its optimality and relationship to Prolate Spheroidal
+Windows.</p>
+
+<p>The design parameters are automatically computed based on internal
+quality determination and the sampling ratios desired. Based on the
+design parameters, the windowed-sinc filter is generated.  For music use,
+the resampler for 44.1 to 48 kHz and vice versa is generated at a higher
+quality than for arbitrary frequency conversion.</p>
+
+<p>The audio resamplers provide increased quality, as well as speed
+to achieve that quality. But resamplers can introduce small amounts
+of passband ripple and aliasing harmonic noise, and they can cause some high
+frequency loss in the transition band, so avoid using them unnecessarily.</p>
+
+<h2 id="best">Best Practices for Sampling and Resampling</h2>
+<p>This section describes some best practices to help you avoid problems with sampling rates.</p>
+<h3>Choose the sampling rate to fit the device</h3>
+
+<p>In general, it is best to choose the sampling rate to fit the device,
+typically 44.1 kHz or 48 kHz.  Use of a sample rate greater than
+48 kHz will typically result in decreased quality because a resampler must be
+used to play back the file.</p>
+
+<h3>Use simple resampling ratios (fixed versus interpolated polyphases)</h3>
+
+<p>The resampler operates in one of the following modes:</p>
+<ul>
+    <li>Fixed polyphase mode. The filter coefficients for each polyphase are precomputed.</li>
+    <li>Interpolated polyphase mode. The filter coefficients for each polyphase must
+be interpolated from the nearest two precomputed polyphases.</li>
+</ul>
+<p>The resampler is fastest in fixed polyphase mode, when the ratio of input
+rate over output rate L/M (taking out the greatest common divisor)
+has M less than 256.  For example, for 44,100 to 48,000 conversion, L = 147,
+M = 160.</p>
+
+<p>In fixed polyphase mode, the sampling rate is locked for as
+many samples converted and does not change.  In interpolated polyphase
+mode, the sampling rate is approximate. The drift is generally on the
+order of one sample over a few hours of playback on a 48-kHz device.
+This is not usually a concern because approximation error is much less than
+frequency error of internal quartz oscillators, thermal drift, or jitter
+ (typically tens of ppm).</p>
+
+<p>Choose simple-ratio sampling rates such as 24 kHz (1:2) and 32 kHz (2:3) when playing back
+ on a 48-kHz device, even though other sampling
+rates and ratios may be permitted through AudioTrack.</p>
+
+<h3>Use upsampling rather than downsampling when changing sample rates</h3>
+
+<p>Sampling rates can be changed on the fly. The granularity of
+such change is based on the internal buffering (typically a few hundred
+samples), not on a sample-by-sample basis. This can be used for effects.</p>
+
+<p>Do not dynamically change sampling rates when
+downsampling. When changing sample rates after an audio track is
+created, differences of around 5 to 10 percent from the original rate may
+trigger a filter recomputation when downsampling (to properly suppress
+aliasing). This can consume computing resources and may cause an audible click
+if the filter is replaced in real time.</p>
+
+<h3>Limit downsampling to no more than 6:1</h3>
+
+<p>Downsampling is typically triggered by hardware device requirements. When the
+ Sample Rate converter is used for downsampling,
+try to limit the downsampling ratio to no more than 6:1 for good aliasing
+suppression (for example, no greater downsample than 48,000 to 8,000). The filter
+lengths adjust to match the downsampling ratio, but you sacrifice more
+transition bandwidth at higher downsampling ratios to avoid excessively
+increasing the filter length. There are no similar aliasing concerns for
+upsampling.  Note that some parts of the audio pipeline
+may prevent downsampling greater than 2:1.</p>
+
+<h3 id="latency">If you are concerned about latency, do not resample</h3>
+
+<p>Resampling prevents the track from being placed in the FastMixer
+path, which means that significantly higher latency occurs due to the additional,
+ larger buffer in the ordinary Mixer path. Furthermore,
+ there is an implicit delay from the filter length of the resampler,
+ though this is typically on the order of one millisecond or less,
+ which is not as large as the additional buffering for the ordinary Mixer path
+ (typically 20 milliseconds).</p>
+
+<h2 id="info">For More Information</h2>
+<p>This section lists some additional resources about sampling and resampling.</p>
+
+<h3>Sample rates</h3>
+
+<p>
+<a href="http://en.wikipedia.org/wiki/Sampling_%28signal_processing%29" class="external-link" >
+Sampling (signal processing)</a> at Wikipedia.</p>
+
+<h3>Resampling</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Sample_rate_conversion" class="external-link" >
+Sample rate conversion</a> at Wikipedia.</p>
+
+<p><a href="http://source.android.com/devices/audio/src.html" class="external-link" >
+Sample Rate Conversion</a> at source.android.com.</p>
+
+<h3>The high bit-depth and high kHz controversy</h3>
+
+<p><a href="http://people.xiph.org/~xiphmont/demo/neil-young.html" class="external-link" >
+24/192 Music Downloads ... and why they make no sense</a>
+by Christopher "Monty" Montgomery of Xiph.Org.</p>
+
+<p><a href="https://www.youtube.com/watch?v=cIQ9IXSUzuM" class="external-link" >
+D/A and A/D | Digital Show and Tell</a>
+video by Christopher "Monty" Montgomery of Xiph.Org.</p>
+
+<p><a href="http://www.trustmeimascientist.com/2013/02/04/the-science-of-sample-rates-when-higher-is-better-and-when-it-isnt/" class="external-link">
+The Science of Sample Rates (When Higher Is Better - And When It Isn't)</a>.</p>
+
+<p><a href="http://www.image-line.com/support/FLHelp/html/app_audio.htm" class="external-link" >
+Audio Myths &amp; DAW Wars</a></p>
+
+<p><a href="http://forums.stevehoffman.tv/threads/192khz-24bit-vs-96khz-24bit-debate-interesting-revelation.317660/" class="external-link">
+192kHz/24bit vs. 96kHz/24bit "debate"- Interesting revelation</a></p>
