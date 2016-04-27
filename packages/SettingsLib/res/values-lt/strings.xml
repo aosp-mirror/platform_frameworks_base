@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"„Bluetooth“ susiejimas"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Susiejimas"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Susiej. ir perk. vieš. int. pr. tašk."</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Darbo profilis"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Visos darbo programos"</string>
     <string name="user_guest" msgid="8475274842845401871">"Svečias"</string>
     <string name="unknown" msgid="1592123443519355854">"Nežinomas"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Naudotojas: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Paleisti variklio nustatymus"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Pageidaujamas variklis"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Bendra"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Iš naujo nustatyti kalbėjimo toną"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Iš naujo nustatyti toną, kuriuo sakomas tekstas, į numatytąjį."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Labai lėtas"</item>
     <item msgid="4795095314303559268">"Lėtas"</item>

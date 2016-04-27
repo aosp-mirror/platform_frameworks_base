@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Anclaje a red Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Anclaje a red"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Anclaje a red y zona portátil"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Perfil de trabajo"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Todas las apps de trabajo"</string>
     <string name="user_guest" msgid="8475274842845401871">"Invitado"</string>
     <string name="unknown" msgid="1592123443519355854">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Iniciar configuración de motor"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Motor preferido"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"General"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Restablecer el tono de voz"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Restablecer a predeterminado el tono en el que se lee el texto."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Muy lenta"</item>
     <item msgid="4795095314303559268">"Lenta"</item>

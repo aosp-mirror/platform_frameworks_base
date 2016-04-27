@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Ancoratge de Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Ancoratge a xarxa"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Ancoratge a la xarxa i zona Wi-Fi"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Perfil professional"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Totes les aplic. de feina"</string>
     <string name="user_guest" msgid="8475274842845401871">"Convidat"</string>
     <string name="unknown" msgid="1592123443519355854">"Desconegut"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Usuari: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Obre la configuració del motor"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Motor preferit"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"General"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Restableix el to de la veu"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Restableix el to predeterminat amb què es llegeix el text."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Molt lenta"</item>
     <item msgid="4795095314303559268">"Lenta"</item>

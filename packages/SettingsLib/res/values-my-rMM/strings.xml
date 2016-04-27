@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ဘလူးတုသ်တဆင့်ပြန်ချိတ်ဆက်"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"တဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"အလုပ် ပရိုဖိုင်"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="user_guest" msgid="8475274842845401871">"ဧည့်သည်"</string>
     <string name="unknown" msgid="1592123443519355854">"အကြောင်းအရာ မသိရှိ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"သုံးစွဲသူ၊ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"အင်ဂျင်ဆက်တင်များကိုဖွင့်ခြင်း"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ဦးစားပေးအင်ဂျင်"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ယေဘုယျ"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"စကားပြော အသံအနေအထားကို ပြန်လည်သတ်မှတ်ပါ"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"စာသားကို မူလပြောသည့် အသံအနေအထားသို့ ပြန်လည်သတ်မှတ်ပါ။"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"အလွန်နှေး"</item>
     <item msgid="4795095314303559268">"နှေး"</item>
