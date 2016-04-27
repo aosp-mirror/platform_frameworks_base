@@ -468,17 +468,11 @@ for the Android N Preview.)
 <p>You can now launch the Android Emulator with the Android N Preview AVD.</p>
 
 <p>
-For the best experience in the Android Emulator, install
-Android Studio 2.1 Preview, which supports the <a
-href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>
-with much faster performance compared to the Emulator in
+For the best experience in the Android Emulator, make sure you're using
+Android Studio 2.1 or higher, which supports <a
+href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0</a>
+with much faster performance compared to the emulator in
 Android Studio 1.5.</p>
-
-<p class="note"><strong>Note:</strong>
-  If you're currently using Android Studio 2.0 Beta, there's a known issue
-  that prevents you from creating AVDs with the N Preview system images, so
-  you currently need to use the Android Studio 2.1 preview to create AVDs.
-</p>
 
 <p>For more information about creating virtual devices, see <a href=
   "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
