@@ -54,7 +54,6 @@ public final class UserState {
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
     public boolean switching;
-    public boolean initializing;
 
     /**
      * The last time that a provider was reported to usage stats as being brought to important
@@ -103,7 +102,6 @@ public final class UserState {
         pw.print(prefix);
         pw.print("state="); pw.print(stateToString(state));
         if (switching) pw.print(" SWITCHING");
-        if (initializing) pw.print(" INITIALIZING");
         pw.println();
     }
 }
