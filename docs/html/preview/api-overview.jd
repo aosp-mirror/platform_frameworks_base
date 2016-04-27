@@ -346,14 +346,13 @@ Saver and make an effort to limit foreground and background data usage.</p>
 
 <p>
   Vulkan is only available to apps on devices with Vulkan-capable hardware,
-  such as Nexus 5X, Nexus 6P, and Nexus Player. We're working closely with our
+  such as Nexus 5X and Nexus 6P. We're working closely with our
   partners to bring Vulkan to more devices as soon as possible.
 </p>
 
 <p>
-  For more information, see the <!-- TODO: Insert link to blog post -->Vulkan
-  Developer Tools blog post or the <a href=
-  "{@docRoot}ndk/guides/graphics/index.html">API documentation</a> itself.
+  For more information, see the the <a href=
+  "{@docRoot}ndk/guides/graphics/index.html">API documentation</a>.
 </p>
 
 <h2 id="tile_api">Quick Settings Tile API</h2>
