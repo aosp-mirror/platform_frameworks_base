@@ -218,13 +218,12 @@ Android Studio, as denoted by revision number. </p>
       to optimize your app or game.
       </li>
 
-      <li>Added support for Google App Indexing integration and testing. Add deep
-      links, app indexing, and search functionality to your apps to help drive more
-      traffic to your app, discover which app content is used most, and attract new
-      users. Test and validate your URL links in your app all within Android
-      Studio. Learn more about implementing and testing <a href=
-      "{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing
-      APIs</a>.
+      <li>Added Google App Indexing Test. Add support for URLs, app
+      indexing, and search functionality to your apps to help drive more
+      traffic to your app, discover which app content is used most, and attract
+      new users. Test and validate URLs in your app all within Android
+      Studio. See <a href=
+      "{@docRoot}tools/help/app-link-indexing.html">Supporting URLs and App Indexing in Android Studio</a>.
       </li>
 
       <li>Upgrades from the latest IntelliJ 15 release, including improved code
