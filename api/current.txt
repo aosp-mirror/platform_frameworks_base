@@ -51025,6 +51025,10 @@ package java.nio {
 
 package java.nio.channels {
 
+  public class AcceptPendingException extends java.lang.IllegalStateException {
+    ctor public AcceptPendingException();
+  }
+
   public class AlreadyBoundException extends java.lang.IllegalStateException {
     ctor public AlreadyBoundException();
   }
@@ -51033,8 +51037,66 @@ package java.nio.channels {
     ctor public AlreadyConnectedException();
   }
 
+  public abstract interface AsynchronousByteChannel implements java.nio.channels.AsynchronousChannel {
+    method public abstract void read(java.nio.ByteBuffer, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> read(java.nio.ByteBuffer);
+    method public abstract void write(java.nio.ByteBuffer, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> write(java.nio.ByteBuffer);
+  }
+
+  public abstract interface AsynchronousChannel implements java.nio.channels.Channel {
+    method public abstract void close() throws java.io.IOException;
+  }
+
+  public abstract class AsynchronousChannelGroup {
+    ctor protected AsynchronousChannelGroup(java.nio.channels.spi.AsynchronousChannelProvider);
+    method public abstract boolean awaitTermination(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public abstract boolean isShutdown();
+    method public abstract boolean isTerminated();
+    method public final java.nio.channels.spi.AsynchronousChannelProvider provider();
+    method public abstract void shutdown();
+    method public abstract void shutdownNow() throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousChannelGroup withCachedThreadPool(java.util.concurrent.ExecutorService, int) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousChannelGroup withFixedThreadPool(int, java.util.concurrent.ThreadFactory) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousChannelGroup withThreadPool(java.util.concurrent.ExecutorService) throws java.io.IOException;
+  }
+
   public class AsynchronousCloseException extends java.nio.channels.ClosedChannelException {
     ctor public AsynchronousCloseException();
+  }
+
+  public abstract class AsynchronousServerSocketChannel implements java.nio.channels.AsynchronousChannel java.nio.channels.NetworkChannel {
+    ctor protected AsynchronousServerSocketChannel(java.nio.channels.spi.AsynchronousChannelProvider);
+    method public abstract void accept(A, java.nio.channels.CompletionHandler<java.nio.channels.AsynchronousSocketChannel, ? super A>);
+    method public abstract java.util.concurrent.Future<java.nio.channels.AsynchronousSocketChannel> accept();
+    method public final java.nio.channels.AsynchronousServerSocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousServerSocketChannel bind(java.net.SocketAddress, int) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousServerSocketChannel open(java.nio.channels.AsynchronousChannelGroup) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousServerSocketChannel open() throws java.io.IOException;
+    method public final java.nio.channels.spi.AsynchronousChannelProvider provider();
+    method public abstract java.nio.channels.AsynchronousServerSocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
+  }
+
+  public abstract class AsynchronousSocketChannel implements java.nio.channels.AsynchronousByteChannel java.nio.channels.NetworkChannel {
+    ctor protected AsynchronousSocketChannel(java.nio.channels.spi.AsynchronousChannelProvider);
+    method public abstract java.nio.channels.AsynchronousSocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
+    method public abstract void connect(java.net.SocketAddress, A, java.nio.channels.CompletionHandler<java.lang.Void, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Void> connect(java.net.SocketAddress);
+    method public abstract java.net.SocketAddress getRemoteAddress() throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousSocketChannel open(java.nio.channels.AsynchronousChannelGroup) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousSocketChannel open() throws java.io.IOException;
+    method public final java.nio.channels.spi.AsynchronousChannelProvider provider();
+    method public abstract void read(java.nio.ByteBuffer, long, java.util.concurrent.TimeUnit, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public final void read(java.nio.ByteBuffer, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> read(java.nio.ByteBuffer);
+    method public abstract void read(java.nio.ByteBuffer[], int, int, long, java.util.concurrent.TimeUnit, A, java.nio.channels.CompletionHandler<java.lang.Long, ? super A>);
+    method public abstract java.nio.channels.AsynchronousSocketChannel setOption(java.net.SocketOption<T>, T) throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousSocketChannel shutdownInput() throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousSocketChannel shutdownOutput() throws java.io.IOException;
+    method public abstract void write(java.nio.ByteBuffer, long, java.util.concurrent.TimeUnit, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public final void write(java.nio.ByteBuffer, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> write(java.nio.ByteBuffer);
+    method public abstract void write(java.nio.ByteBuffer[], int, int, long, java.util.concurrent.TimeUnit, A, java.nio.channels.CompletionHandler<java.lang.Long, ? super A>);
   }
 
   public abstract interface ByteChannel implements java.nio.channels.ReadableByteChannel java.nio.channels.WritableByteChannel {
@@ -51053,7 +51115,9 @@ package java.nio.channels {
     method public static java.nio.channels.ReadableByteChannel newChannel(java.io.InputStream);
     method public static java.nio.channels.WritableByteChannel newChannel(java.io.OutputStream);
     method public static java.io.InputStream newInputStream(java.nio.channels.ReadableByteChannel);
+    method public static java.io.InputStream newInputStream(java.nio.channels.AsynchronousByteChannel);
     method public static java.io.OutputStream newOutputStream(java.nio.channels.WritableByteChannel);
+    method public static java.io.OutputStream newOutputStream(java.nio.channels.AsynchronousByteChannel);
     method public static java.io.Reader newReader(java.nio.channels.ReadableByteChannel, java.nio.charset.CharsetDecoder, int);
     method public static java.io.Reader newReader(java.nio.channels.ReadableByteChannel, java.lang.String);
     method public static java.io.Writer newWriter(java.nio.channels.WritableByteChannel, java.nio.charset.CharsetEncoder, int);
@@ -51072,11 +51136,16 @@ package java.nio.channels {
     ctor public ClosedSelectorException();
   }
 
+  public abstract interface CompletionHandler {
+    method public abstract void completed(V, A);
+    method public abstract void failed(java.lang.Throwable, A);
+  }
+
   public class ConnectionPendingException extends java.lang.IllegalStateException {
     ctor public ConnectionPendingException();
   }
 
-  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.NetworkChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.MulticastChannel java.nio.channels.ScatteringByteChannel {
     ctor protected DatagramChannel(java.nio.channels.spi.SelectorProvider);
     method public abstract java.nio.channels.DatagramChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel connect(java.net.SocketAddress) throws java.io.IOException;
@@ -51155,12 +51224,38 @@ package java.nio.channels {
     ctor public IllegalBlockingModeException();
   }
 
+  public class IllegalChannelGroupException extends java.lang.IllegalArgumentException {
+    ctor public IllegalChannelGroupException();
+  }
+
   public class IllegalSelectorException extends java.lang.IllegalArgumentException {
     ctor public IllegalSelectorException();
   }
 
+  public class InterruptedByTimeoutException extends java.io.IOException {
+    ctor public InterruptedByTimeoutException();
+  }
+
   public abstract interface InterruptibleChannel implements java.nio.channels.Channel {
     method public abstract void close() throws java.io.IOException;
+  }
+
+  public abstract class MembershipKey {
+    ctor protected MembershipKey();
+    method public abstract java.nio.channels.MembershipKey block(java.net.InetAddress) throws java.io.IOException;
+    method public abstract java.nio.channels.MulticastChannel channel();
+    method public abstract void drop();
+    method public abstract java.net.InetAddress group();
+    method public abstract boolean isValid();
+    method public abstract java.net.NetworkInterface networkInterface();
+    method public abstract java.net.InetAddress sourceAddress();
+    method public abstract java.nio.channels.MembershipKey unblock(java.net.InetAddress);
+  }
+
+  public abstract interface MulticastChannel implements java.nio.channels.NetworkChannel {
+    method public abstract void close() throws java.io.IOException;
+    method public abstract java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface) throws java.io.IOException;
+    method public abstract java.nio.channels.MembershipKey join(java.net.InetAddress, java.net.NetworkInterface, java.net.InetAddress) throws java.io.IOException;
   }
 
   public abstract interface NetworkChannel implements java.nio.channels.Channel {
@@ -51210,6 +51305,10 @@ package java.nio.channels {
   public static abstract class Pipe.SourceChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ReadableByteChannel java.nio.channels.ScatteringByteChannel {
     ctor protected Pipe.SourceChannel(java.nio.channels.spi.SelectorProvider);
     method public final int validOps();
+  }
+
+  public class ReadPendingException extends java.lang.IllegalStateException {
+    ctor public ReadPendingException();
   }
 
   public abstract interface ReadableByteChannel implements java.nio.channels.Channel {
@@ -51289,6 +51388,10 @@ package java.nio.channels {
     method public final int validOps();
   }
 
+  public class ShutdownChannelGroupException extends java.lang.IllegalStateException {
+    ctor public ShutdownChannelGroupException();
+  }
+
   public abstract class SocketChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.NetworkChannel java.nio.channels.ScatteringByteChannel {
     ctor protected SocketChannel(java.nio.channels.spi.SelectorProvider);
     method public abstract java.nio.channels.SocketChannel bind(java.net.SocketAddress) throws java.io.IOException;
@@ -51322,6 +51425,10 @@ package java.nio.channels {
 
   public abstract interface WritableByteChannel implements java.nio.channels.Channel {
     method public abstract int write(java.nio.ByteBuffer) throws java.io.IOException;
+  }
+
+  public class WritePendingException extends java.lang.IllegalStateException {
+    ctor public WritePendingException();
   }
 
 }
@@ -51368,6 +51475,15 @@ package java.nio.channels.spi {
     method public final boolean isOpen();
     method public final java.nio.channels.spi.SelectorProvider provider();
     method protected abstract java.nio.channels.SelectionKey register(java.nio.channels.spi.AbstractSelectableChannel, int, java.lang.Object);
+  }
+
+  public abstract class AsynchronousChannelProvider {
+    ctor protected AsynchronousChannelProvider();
+    method public abstract java.nio.channels.AsynchronousChannelGroup openAsynchronousChannelGroup(int, java.util.concurrent.ThreadFactory) throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousChannelGroup openAsynchronousChannelGroup(java.util.concurrent.ExecutorService, int) throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousServerSocketChannel openAsynchronousServerSocketChannel(java.nio.channels.AsynchronousChannelGroup) throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousSocketChannel openAsynchronousSocketChannel(java.nio.channels.AsynchronousChannelGroup) throws java.io.IOException;
+    method public static java.nio.channels.spi.AsynchronousChannelProvider provider();
   }
 
   public abstract class SelectorProvider {
