@@ -31,6 +31,8 @@ page.image=images/cards/card-n-changes_2x.png
   </li>
   <li><a href="#ndk">NDK Apps Linking to Platform Libraries</a></li>
   <li><a href="#afw">Android for Work</a></li>
+  <li><a href="#annotations">Annotations Retention</a></li>
+  <li><a href="#other">Other Important Points</a></li>
 </ol>
 
 <h2>See Also</h2>
@@ -183,7 +185,6 @@ page.image=images/cards/card-n-changes_2x.png
   "{@docRoot}preview/features/background-optimization.html">Background
   Optimizations</a>.
 </p>
-
 
 <h2 id="perm">Permissions Changes</h2>
 
@@ -467,7 +468,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
   <li>Reset password restrictions for device admins now apply to profile
   owners. Device admins can no longer use
-  <code>DevicePolicyManager.resetPassword()</code> to clear passwords or change
+  {@code DevicePolicyManager.resetPassword()} to clear passwords or change
   ones that are already set. Device admins can still set a password, but only
   when the device has no password, PIN, or pattern.
   </li>
@@ -497,7 +498,26 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   <a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.
 </p>
 
-<h2 id="other">Other important points</h2>
+<h2 id="annotations">Annotations Retention</h2>
+
+<p>
+Android N fixes a bug where the visibility of annotations was being ignored.
+This issue enabled the runtime to access annotations that it should not have been
+able to. These annotations included:
+</p>
+
+<ul>
+   <li>{@code VISIBILITY_BUILD}: Intended to be visible only at build time.</li>
+   <li>{@code VISIBILITY_SYSTEM}: Intended to be visible at runtime, but only to the
+   underlying system.</li>
+</ul>
+
+<p>
+If your app has relied on this behavior, please add a retention policy to annotations that must
+be available at runtime. You do so by using {@code @Retention(RetentionPolicy.RUNTIME)}.
+</p>
+
+<h2 id="other">Other Important Points</h2>
 
 <ul>
 <li>When an app is running on Android N, but targets a lower API level,
@@ -524,6 +544,32 @@ and should not crash on subsequent starts. You can verify app behavior
 by changing font size (<strong>Setting</strong> >
 <strong>Display</strong> > <strong>Font size</strong>), and then restoring
 the app from Recents.
+</li>
+
+<li>
+Due to a bug in previous versions of Android, the system did not flag writing
+to a TCP socket on the main thread as a strict-mode violation. Android N fixes this bug.
+Apps that exhibit this behavior now throw an {@code android.os.NetworkOnMainThreadException}.
+Generally, performing network operations on the main thread is a bad idea because these operations
+usually have a high tail latency that causes ANRs and jank.
+</li>
+
+<li>
+The {@code Debug.startMethodTracing()} family of methods now defaults to
+storing output in your package-specific directory on shared storage,
+instead of at the top level
+of the SD card.  This means apps no longer need to request the {@code WRITE_EXTERNAL_STORAGE} permission to use these APIs.
+</li>
+
+<li>
+Many platform APIs have now started checking for large payloads being sent
+across {@link android.os.Binder} transactions, and the
+system now rethrows {@code TransactionTooLargeExceptions}
+as {@code RuntimeExceptions}, instead of silently logging or suppressing them.  One
+common example is storing too much data in
+{@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()},
+which causes {@code ActivityThread.StopInfo} to throw a
+{@code RuntimeException} when your app targets Android N.
 </li>
 </ul>
 
