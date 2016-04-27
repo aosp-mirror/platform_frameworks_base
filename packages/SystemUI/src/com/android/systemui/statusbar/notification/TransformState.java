@@ -100,8 +100,17 @@ public class TransformState {
         boolean transformY = (transformationFlags & TRANSOFORM_Y) != 0;
         boolean transformScale = transformScale();
         // lets animate the positions correctly
-        if (transformationAmount == 0.0f) {
-            int[] otherPosition = otherState.getLocationOnScreen();
+        if (transformationAmount == 0.0f
+                || transformX && getTransformationStartX() == UNDEFINED
+                || transformY && getTransformationStartY() == UNDEFINED
+                || transformScale && getTransformationStartScaleX() == UNDEFINED
+                || transformScale && getTransformationStartScaleY() == UNDEFINED) {
+            int[] otherPosition;
+            if (transformationAmount != 0.0f) {
+                otherPosition = otherState.getLaidOutLocationOnScreen();
+            } else {
+                otherPosition = otherState.getLocationOnScreen();
+            }
             int[] ownStablePosition = getLaidOutLocationOnScreen();
             if (customTransformation == null
                     || !customTransformation.initTransformation(this, otherState)) {
