@@ -912,9 +912,9 @@ public final class Sensor {
      * its type and name.
      */
     public int getId() {
-        if (mUuid == ALL_0_UUID) {
+        if (mUuid.equals(ALL_0_UUID)) {
             return 0;
-        } else if (mUuid == ALL_F_UUID) {
+        } else if (mUuid.equals(ALL_F_UUID)) {
             return -1;
         } else {
             int id = Math.abs(mUuid.hashCode()) + 1;
@@ -1138,5 +1138,27 @@ public final class Sensor {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Sets the UUID associated with the sensor.
+     *
+     * NOTE: to be used only by native bindings in SensorManager.
+     *
+     * @see #getUuid
+     * @see UUID
+     */
+    private void setUuid(long msb, long lsb) {
+        // reuse static object if possible
+        if (msb == lsb) {
+            if (msb == 0L) {
+                mUuid = ALL_0_UUID;
+                return;
+            } else if (msb == ~0L) {
+                mUuid = ALL_F_UUID;
+                return;
+            }
+        }
+        mUuid = new UUID(msb, lsb);
     }
 }
