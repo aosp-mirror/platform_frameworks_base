@@ -498,6 +498,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
+    // Special String to skip shared libraries check during compilation.
+    private static final String SPECIAL_SHARED_LIBRARY = "&";
+
     final ServiceThread mHandlerThread;
 
     final PackageHandler mHandler;
@@ -2332,7 +2335,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
                                         getCompilerFilterForReason(REASON_SHARED_APK),
-                                        StorageManager.UUID_PRIVATE_INTERNAL);
+                                        StorageManager.UUID_PRIVATE_INTERNAL,
+                                        SPECIAL_SHARED_LIBRARY);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -7304,12 +7308,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 // Currently this will do a full compilation of the library by default.
-                pdo.performDexOpt(depPackage, instructionSets, false /* checkProfiles */,
+                pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
+                        false /* checkProfiles */,
                         getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY));
             }
         }
 
-        return pdo.performDexOpt(p, instructionSets, checkProfiles, targetCompilerFilter);
+        return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
+                targetCompilerFilter);
     }
 
     Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
@@ -14715,11 +14721,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
+            // Shared libraries for the package need to be updated.
+            synchronized (mPackages) {
+                try {
+                    updateSharedLibrariesLPw(pkg, null);
+                } catch (PackageManagerException e) {
+                    Slog.e(TAG, "updateSharedLibrariesLPw failed: " + e.getMessage());
+                }
+            }
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
             // Do not run PackageDexOptimizer through the local performDexOpt
             // method because `pkg` is not in `mPackages` yet.
-            int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
-                    false /* checkProfiles */, getCompilerFilterForReason(REASON_INSTALL));
+            int result = mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+                    null /* instructionSets */, false /* checkProfiles */,
+                    getCompilerFilterForReason(REASON_INSTALL));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 String msg = "Extracting package failed for " + pkgName;

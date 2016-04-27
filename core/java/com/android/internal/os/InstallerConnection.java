@@ -135,14 +135,15 @@ public class InstallerConnection {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags, String compilerFilter, String volumeUuid) throws InstallerException {
-        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
-                null /*outputPath*/, dexFlags, compilerFilter, volumeUuid);
+            int dexFlags, String compilerFilter, String volumeUuid, String sharedLibraries)
+            throws InstallerException {
+        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded, null /*outputPath*/, dexFlags,
+                compilerFilter, volumeUuid, sharedLibraries);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
             int dexoptNeeded, String outputPath, int dexFlags, String compilerFilter,
-            String volumeUuid) throws InstallerException {
+            String volumeUuid, String sharedLibraries) throws InstallerException {
         execute("dexopt",
                 apkPath,
                 uid,
@@ -152,7 +153,8 @@ public class InstallerConnection {
                 outputPath,
                 dexFlags,
                 compilerFilter,
-                volumeUuid);
+                volumeUuid,
+                sharedLibraries);
     }
 
     public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {

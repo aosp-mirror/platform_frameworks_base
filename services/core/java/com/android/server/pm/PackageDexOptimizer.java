@@ -88,8 +88,8 @@ class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, String[] instructionSets, boolean checkProfiles,
-            String targetCompilationFilter) {
+    int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
+            String[] instructionSets, boolean checkProfiles, String targetCompilationFilter) {
         synchronized (mInstallLock) {
             final boolean useLock = mSystemReady;
             if (useLock) {
@@ -97,7 +97,7 @@ class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, checkProfiles,
+                return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
                         targetCompilationFilter);
             } finally {
                 if (useLock) {
@@ -122,8 +122,8 @@ class PackageDexOptimizer {
         return dexoptFlags;
     }
 
-    private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            boolean checkProfiles, String targetCompilerFilter) {
+    private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
+            String[] targetInstructionSets, boolean checkProfiles, String targetCompilerFilter) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -200,10 +200,22 @@ class PackageDexOptimizer {
                         throw new IllegalStateException("Invalid dexopt:" + dexoptNeeded);
                 }
 
+                String sharedLibrariesPath = null;
+                if (sharedLibraries != null && sharedLibraries.length != 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (String lib : sharedLibraries) {
+                        if (sb.length() != 0) {
+                            sb.append(":");
+                        }
+                        sb.append(lib);
+                    }
+                    sharedLibrariesPath = sb.toString();
+                }
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                        + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir);
+                        + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir
+                        + " sharedLibraries=" + sharedLibrariesPath);
                 // Profile guide compiled oat files should not be public.
                 final boolean isPublic = !pkg.isForwardLocked() && !isProfileGuidedFilter;
                 final int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
@@ -216,7 +228,8 @@ class PackageDexOptimizer {
 
                 try {
                     mInstaller.dexopt(path, sharedGid, pkg.packageName, dexCodeInstructionSet,
-                            dexoptNeeded, oatDir, dexFlags, targetCompilerFilter, pkg.volumeUuid);
+                            dexoptNeeded, oatDir, dexFlags, targetCompilerFilter, pkg.volumeUuid,
+                            sharedLibrariesPath);
                     performedDexOpt = true;
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
