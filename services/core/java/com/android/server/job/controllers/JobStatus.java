@@ -151,19 +151,9 @@ public final class JobStatus {
             this.sourceTag = tag;
         }
 
-        if (this.sourceTag != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(job.getService().getPackageName());
-            sb.append('/');
-            sb.append(this.sourceTag);
-            if (sourcePackageName != null) {
-                sb.append('/');
-                sb.append(this.sourcePackageName);
-            }
-            this.batteryName = sb.toString();
-        } else {
-            this.batteryName = job.getService().flattenToShortString();
-        }
+        this.batteryName = this.sourceTag != null
+                ? this.sourceTag + ":" + job.getService().getPackageName()
+                : job.getService().flattenToShortString();
         this.tag = "*job*/" + this.batteryName;
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
