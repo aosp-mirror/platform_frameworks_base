@@ -29,13 +29,19 @@ page.title=Android Plugin for Gradle Release Notes
 
     <ol>
       <li>
+        <a class="external-link" href=
+        "http://google.github.io/android-gradle-dsl/current/">Android Plugin DSL
+        Reference</a>
+      </li>
+
+      <li>
         <a href="{@docRoot}sdk/installing/studio-build.html">Build System
         Overview</a>
       </li>
 
       <li>
-        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android
-        Plugin for Gradle</a>
+        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin
+        for Gradle</a>
       </li>
     </ol>
   </div>
@@ -166,15 +172,17 @@ distributionUrl = https\://services.gradle.org/distributions/gradle-2.10-all.zip
         connected device.
         </li>
 
-        <li>Added <code>maxProcessCount</code> to control how many slave dex processes can
-        be spawned concurrently. The following code, in the module-level
+        <li>Added <a class="external-link" href=
+        "http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DexOptions.html#com.android.build.gradle.internal.dsl.DexOptions:maxProcessCount">
+        <code>maxProcessCount</code></a> to control how many slave dex processes can be
+        spawned concurrently. The following code, in the module-level
         <code>build.gradle</code> file, sets the maximum number of concurrent processes
         to 4:
 <pre>
 android {
   ...
   dexOptions {
-  maxProcessCount = 4
+  maxProcessCount = 4 // this is the default value
   }
 }
 </pre>
@@ -192,11 +200,11 @@ android {
   ...
   buildTypes {
     debug {
-      minifyEnabed true
+      minifyEnabled true
       useProguard false
     }
     release {
-      minifyEnabed true
+      minifyEnabled true
       useProguard true // this is a default setting
     }
   }
