@@ -909,7 +909,8 @@ final class TaskRecord {
                 // expecting onNewIntent()), then we will finish the current
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
+                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0
+                        && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
                     if (!ret.finishing) {
                         if (stack != null) {
                             stack.finishActivityLocked(
