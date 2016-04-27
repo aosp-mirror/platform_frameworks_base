@@ -201,9 +201,12 @@ supported by Android TV.</p>
 <h3 id="banner">Provide a home screen banner</h3>
 
 <p>
-  An application must provide a home screen banner for each localization if it includes a Leanback
-  launcher intent filter. The banner is the app launch point that appears on the home screen in the
-  apps and games rows. Desribe the banner in the manifest as follows:
+  An application must provide a home screen banner image for each localization
+  if it includes a Leanback launcher intent filter. The banner is the app launch
+  point that appears on the home screen in the apps and games rows. When designing your banner,
+  follow the design requirements described in
+  <a href="{@docRoot}design/tv/patterns.html#banner">Banners</a>.
+  To add the banner to your app, describe the banner in the manifest as follows:
 </p>
 
 <pre>
@@ -221,11 +224,6 @@ supported by Android TV.</p>
   tag to supply a default banner for all application activities, or with the
   <a href="{@docRoot}guide/topics/manifest/activity-element.html"><code>&lt;activity&gt;</code></a>
   tag to supply a banner for a specific activity.
-</p>
-
-<p>
-  See <a href="{@docRoot}design/tv/patterns.html#banner">Banners</a> in the UI Patterns for TV
-  design guide.
 </p>
 
 <h3 id="transition-color">Change the launcher color</h3>
