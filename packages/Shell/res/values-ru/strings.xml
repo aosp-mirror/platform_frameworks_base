@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Нажмите, чтобы отправить отчет об ошибке."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Нажмите, чтобы отправить отчет об ошибке сразу, или подождите, пока будет сохранен скриншот."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Нажмите, чтобы отправить отчет об ошибке сразу, или подождите, пока будет сохранен скриншот."</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Отчеты об ошибках содержат данные различных системных журналов и могут включать конфиденциальную информацию (например, данные о местоположении). Открывайте к ним доступ только надежным пользователям и приложениям."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Больше не показывать"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчеты об ошибках"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Не удалось открыть отчет об ошибке"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Не удалось добавить данные отчета об ошибке в ZIP-файл"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"без названия"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Скриншоты"</string>

@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ប៉ះដើម្បីចែករំលែករបាយការណ៍កំហុសរបស់អ្នក"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ប៉ះដើម្បីចែករំលែករបាយការណ៍កំហុសរបស់អ្នកដោយមិនចាំបាច់មានរូបថតអេក្រង់ ឬរង់ចាំការបញ្ចប់ការថតអេក្រង់"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ប៉ះដើម្បីចែករំលែករបាយការណ៍កំហុសរបស់អ្នកដោយមិនចាំបាច់មានរូបថតអេក្រង់ ឬរង់ចាំការបញ្ចប់ការថតអេក្រង់"</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"របាយការណ៍ផ្ទុកទិន្នន័យពីឯកសារកំណត់ហេតុផ្សេងៗរបស់ប្រព័ន្ធ ដែលអាចមានផ្ទុកទិន្នន័យដែលអ្នកចាត់ទុកថាជាទិន្នន័យរសើប (ដូចជាការប្រើប្រាស់កម្មវិធី និងទិន្នន័យទីតាំង)។ ចែករំលែករបាយការណ៍កំហុសជាមួយមនុស្ស និងកម្មវិធីដែលអ្នកជឿជាក់ប៉ុណ្ណោះ។"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"កុំបង្ហាញម្ដងទៀត"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"រាយការណ៍ពីកំហុស"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"មិនអាចអានឯកសាររបាយកាណ៍កំហុសបានទេ"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"មិនអាចបន្ថែមព័ត៌មានលម្អិតនៃរបាយការណ៍កំហុសទៅឯកសារ zip បានទេ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"គ្មានឈ្មោះ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ព័ត៌មានលម្អិត"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"រូបថតអេក្រង់"</string>

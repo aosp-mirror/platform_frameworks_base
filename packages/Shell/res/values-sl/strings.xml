@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dotaknite se, če želite poročilo o napaki dati v skupno rabo"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dotaknite se za pošiljanje poročila o napakah brez posnetka zaslona ali počakajte, da se ta dokonča"</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Poročila o napakah vsebujejo podatke iz različnih dnevniških datotek sistema in morda vključujejo podatke, ki so za vas občutljivi (na primer podatki o uporabi aplikacij in podatki o lokaciji). Poročila o napakah delite samo z ljudmi in aplikacijami, ki jim zaupate."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Tega ne prikaži več"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Poročila o napakah"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Datoteke s poročilom o napakah ni bilo mogoče prebrati"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"V datoteko zip ni bilo mogoče dodati podrobnosti poročila o napakah."</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"neimenovano"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Podrobnosti"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Posnetek zaslona"</string>
