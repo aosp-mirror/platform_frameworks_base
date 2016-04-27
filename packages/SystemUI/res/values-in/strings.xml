@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Menyimpan tangkapan layar..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Tangkapan layar sedang disimpan."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Tangkapan layar diambil."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Sentuh untuk melihat tangkapan layar Anda."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Ketuk untuk melihat tangkapan layar."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat mengambil tangkapan layar."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Terjadi masalah saat menyimpan tangkapan layar."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan tangkapan layar karena ruang penyimpanan terbatas."</string>
@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"SEMUA suara dan getaran, termasuk dari alarm, musik, video, dan game akan diblokir."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Sentuh lagi untuk membuka"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Ketuk lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Gesek dari ikon untuk telepon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk mengaktifkan bantuan suara"</string>
@@ -418,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Luaskan"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ciutkan"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Kembali untuk melepas pin."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Kembali untuk melepas pin."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -428,7 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Izinkan"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tolak"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> adalah dialog volume"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan aslinya."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Ketuk untuk memulihkan aslinya."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Anda menggunakan profil kerja"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ketuk untuk menyuarakan."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>

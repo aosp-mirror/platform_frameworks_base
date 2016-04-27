@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት ይንኩ"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት መታ ያድርጉ።"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ቅጽበታዊ ገጽ ዕይታን በማስቀመጥ ጊዜ ችግር አጋጥሟል።"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ባለው የተገደበ የማከማቻ ቦታ ምክንያት ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አይችልም።"</string>
@@ -118,8 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"የውሂብ አመልካች ሙሉ ነው።"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"ከ<xliff:g id="WIFI">%s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"ከ<xliff:g id="BLUETOOTH">%s</xliff:g> ጋር ተገናኝቷል።"</string>
-    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
-    <skip />
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"ከ<xliff:g id="CAST">%s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ምንም WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX አንድ አሞሌ።"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ሁለት አሞሌዎች።"</string>
@@ -150,17 +149,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ምንም SIM የለም።"</string>
-    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"የተንቀሳቃሽ ስልክ ውሂብ በርቷል"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ምንም SIM ካርድ የለም።"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ።"</string>
-    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
-    <skip />
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"የባትሪ ዝርዝሮችን ክፈት"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ባትሪ ኃይል በመሙላት ላይ፣ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> በመቶ።"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንብሮች"</string>
@@ -200,13 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"አትረብሽ በርቷል፣ ቅድሚያ የሚሰጠው ብቻ።"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"አትረብሽ በርቷል፣ ሙሉ ለሙሉ ጸጥታ።"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"አትረብሽ በርቷል፣ ማንቂያዎች ብቻ።"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"አትረብሽ።"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"አትረብሽ ጠፍቷል።"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"አትረብሽ ጠፍቷል።"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"አትረብሽ በርቷል።"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ብሉቱዝ።"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ብሉቱዝ ጠፍቷል።"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ብሉቱዝ በርቷል።"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ብሉቱዝ በመገናኘት ላይ።"</string>
@@ -272,10 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ምንም የተጣመሩ መሣሪያዎች አይገኝም"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ብሩህነት"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"በራስ ሰር አሽከርክር"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ማያ ገጽን በራስ-አሽከርክር"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"ወደ <xliff:g id="ID_1">%s</xliff:g> ተቀናብሯል"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"አዙሪት ተቆልፏል"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"በቁመት"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"በወርድ"</string>
@@ -294,8 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"አልተገናኘም"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ምንም አውታረ መረብ የለም"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ጠፍቷል"</string>
-    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
-    <skip />
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi በርቷል"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ምንም የWi-Fi  አውታረ መረቦች የሉም"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ውሰድ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"በመውሰድ ላይ"</string>
@@ -349,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ይሄ ማንቂያዎችን፣ ሙዚቃን፣ ቪዲዮዎችን እና ጨዋታዎችንም ጨምሮ ሁሉንም ድምጾች እና ንዝረቶች ያጠፋል።"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"በጣም አስቸካይ ያልሆኑ ማሳወቂያዎች ከታች"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"ለመክፈት ዳግም ይንኩ"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ለመክፈት ዳግም መታ ያድርጉ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ለማስከፈት ወደ ላይ ያንሸራትቱ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ለስልክ ከአዶ ላይ ጠረግ ያድርጉ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ለድምጽ ረዳት ከአዶ ጠረግ ያድርጉ"</string>
@@ -427,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"አስፋ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ሰብስብ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ማያ ገጽ ተሰክቷል"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"ይህ እስከሚነቅሉት ድረስ በዕይታ ውስጥ ያቆየዋል። እንዲነቀል ለማድረግ ተመለስን ነካ አድርገው ይያዙት።"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል ተጭነው ይያዙ።"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ገባኝ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"አይ፣ አመሰግናለሁ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ይደበቅ?"</string>
@@ -437,15 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ፍቀድ"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ከልክል"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> የድምጽ መጠን መገናኛው ነው"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"የመጀመሪያውን ወደነበረበት ለመመለስ ይንኩ።"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"የመጀመሪያውን ወደነበረበት ለመመለስ መታ ያድርጉ።"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"የስራ መገለጫዎን እየተጠቀሙ ነው"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s። ድምጸ-ከል ለማድረግ መታ ያድርጉ"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s። ወደ ንዝረት ለማቀናበር መታ ያድርጉ። የተደራሽነት አገልግሎቶች ድምጸ-ከል ሊደረግባቸው ይችላል።"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s። ድምጸ-ከል ለማድረግ መታ ያድርጉ። የተደራሽነት አገልግሎቶች ድምጸ-ከል ሊደረግባቸው ይችላል።"</string>
-    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
-    <skip />
-    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
-    <skip />
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"የ%s ድምጽ መቆጣጠሪያዎች ይታያሉ። ለማሰናበት ወደ ላይ ያንሸራትቱ።"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"የድምጽ መቆጣጠሪያዎች ተደብቀዋል"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"የስርዓት በይነገጽ መቃኛ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"የተቀላቀለ የባትሪ አጠቃቀም መቶኛ አሳይ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ኃይል በማይሞላበት ጊዜ በሁነታ አሞሌ አዶ ውስጥ የባትሪ ደረጃ መቶኛን አሳይ"</string>
@@ -641,27 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ተወግዷል"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ወደ ቦታ <xliff:g id="POSITION">%2$d</xliff:g> ተወስዷል"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"የፈጣን ቅንብሮች አርታዒ።"</string>
-    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
-    <skip />
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"የ<xliff:g id="ID_1">%1$s</xliff:g> ማሳወቂያ፦ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"መተግበሪያ ከተከፈለ ማያ ገጽ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም።"</string>
-    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ቅንብሮችን ክፈት።"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ፈጣን ቅንብሮችን ክፈት።"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ፈጣን ቅንብሮችን ዝጋ።"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"ማንቂያ ተዘጋጅቷል።"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"እንደ <xliff:g id="ID_1">%s</xliff:g> ሆነው ገብተዋል"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ምንም በይነመረብ የለም።"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"ዝርዝሮችን ክፈት።"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"የ<xliff:g id="ID_1">%s</xliff:g> ቅንብሮችን ክፈት።"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"የቅንብሮድ ቅደም-ተከተል አርትዕ።"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ገጽ <xliff:g id="ID_1">%1$d</xliff:g> ከ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

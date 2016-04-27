@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Reproduzir"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Interromper"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Prima sem soltar o botão "<b>"HOME"</b>" para controlar o PIP"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Imagem na imagem"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Esta opção mantém o vídeo visível até reproduzir outro vídeo. Prima sem soltar "<b>"HOME"</b>" para o controlar."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Compreendi"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
 </resources>

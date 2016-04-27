@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Lejátszás"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Szüneteltetés"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP vezérlése a "<b>"HOME"</b>"-mal"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Kép a képben"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"A következő lejátszásáig ezt a videót tartja előtérben. A vezérléshez tartsa nyomva a "<b>"HOME"</b>" gombot."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Rendben"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Elvetés"</string>
 </resources>

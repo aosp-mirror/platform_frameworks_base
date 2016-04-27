@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Saving screenshot…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot is being saved."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot captured."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Touch to view your screenshot."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tap to view your screenshot."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Couldn\'t capture screenshot."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Problem encountered while saving screenshot."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Can\'t save screenshot due to limited storage space."</string>
@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"This blocks ALL sounds and vibrations, including from alarms, music, videos and games."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Less urgent notifications below"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Touch again to open"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Tap again to open"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Swipe up to unlock"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Swipe from icon for phone"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Swipe from icon for voice assist"</string>
@@ -418,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expand"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Collapse"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Screen is pinned"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"This keeps it in view until you unpin. Touch and hold Back to unpin."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"This keeps it in view until you unpin. Touch &amp; hold Back to unpin."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Got it"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, thanks"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Hide <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -428,7 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Allow"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Deny"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is the volume dialogue"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Touch to restore the original."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Tap to restore the original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"You\'re using your work profile"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap to unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap to set to vibrate. Accessibility services may be muted."</string>
