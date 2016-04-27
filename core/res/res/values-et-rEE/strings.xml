@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Veaaruande võtmine"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nii kogutakse teavet teie seadme praeguse oleku kohta, et saata see meilisõnumina. Enne kui saate veaaruande ära saata, võtab selle loomine natuke aega; varuge kannatust."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. aruanne"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Kasutage seda enamikul juhtudel. See võimaldab jälgida aruande edenemist, sisestada probleemi kohta täpsemat teavet ja jäädvustada ekraanipilte. Vahele võivad jääda mõned vähem kasutatud jaotised, millest teavitamine võtab rohkem aega."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Täielik aruanne"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Kasutage seda valikut süsteemihäirete minimeerimiseks, kui seade ei reageeri, on liiga aeglane või vajate aruande kõiki jaotisi. Teil ei lubata sisestada lisateavet ega jäädvustada lisaekraanipilte."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast.</item>
       <item quantity="one">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_0">%d</xliff:g> sekundi pärast.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> tundi</item>
       <item quantity="one">1 tund</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"praegu"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android viiakse üle uuemale versioonile ..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android käivitub ..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Salvestusruumi optimeerimine."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android viiakse üle uuemale versioonile"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Mõned rakendused ei pruugi enne uuemale versioonile ülemineku lõpetamist korralikult töötada"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>. rakenduse <xliff:g id="NUMBER_1">%2$d</xliff:g>-st optimeerimine."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> ettevalmistamine."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Rakenduste käivitamine."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kustutas teie administraator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmetele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minutiks (kuni <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Üheks minutiks (kuni <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

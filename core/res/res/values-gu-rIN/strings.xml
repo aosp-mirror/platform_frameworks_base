@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"બગ રિપોર્ટ લો"</string>
     <string name="bugreport_message" msgid="398447048750350456">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"પૂર્ણ રિપોર્ટ"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"જ્યારે તમારું ઉપકરણ પ્રતિભાવવિહીન અથવા ખૂબ ધીમું હોય અથવા જ્યારે તમને બધા રિપોર્ટ વિભાગોની જરૂર પડે ત્યારે ન્યૂનતમ સિસ્ટમ હસ્તક્ષેપ માટે આ વિકલ્પનો ઉપયોગ કરો. વધુ વિગતો દાખલ કરવાની અથવા વધારાના સ્ક્રીનશૉટ્સ લેવાની તમને મંજૂરી આપતું નથી."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">બગ રિપોર્ટ માટે <xliff:g id="NUMBER_1">%d</xliff:g> સેકન્ડમાં સ્ક્રીનશોટ લઈ રહ્યાં છે.</item>
       <item quantity="other">બગ રિપોર્ટ માટે <xliff:g id="NUMBER_1">%d</xliff:g> સેકન્ડમાં સ્ક્રીનશોટ લઈ રહ્યાં છે.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> કલાક</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> કલાક</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"હમણાં"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android અપગ્રેડ થઈ રહ્યું છે..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android પ્રારંભ થઈ રહ્યું છે…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"સંગ્રહ ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android અપગ્રેડ થઈ રહ્યું છે"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"અપગ્રેડ સમાપ્ત ન થાય ત્યાં સુધી કેટલીક ઍપ્લિકેશનો કદાચ યોગ્ય રીતે કામ ન કરે"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> માંથી <xliff:g id="NUMBER_0">%1$d</xliff:g> એપ્લિકેશન ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> તૈયાર કરી રહ્યું છે."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"એપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખેલ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય એપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, જે છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ચાલુ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
       <item quantity="other">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>

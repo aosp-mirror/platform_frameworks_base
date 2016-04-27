@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Գրել սխալի զեկույց"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և էկրանի պատկերներ կորզել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժինները, որոնց ստեղծումը երկար է տևում:"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Ամբողջական զեկույց"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Օգտագործեք այս տարբերակը համակարգի միջամտությունը նվազեցնելու համար՝ երբ սարքը չի արձագանքում կամ շատ դանդաղ է աշխատում, կամ երբ ձեզ հարկավոր են զեկույցի բոլոր բաժինները: Թույլ չի տալիս լրացուցիչ տվյալներ մուտքագրել կամ էկրանի լրացուցիչ պատկերներ ստանալ:"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Վրիպակի զեկույցի համար էկրանի պատկերի լուսանկարումը կատարվելու է <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
       <item quantity="other">Վրիպակի զեկույցի համար էկրանի պատկերի լուսանկարումը կատարվելու է <xliff:g id="NUMBER_1">%d</xliff:g> վայրկյանից:</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ժամ</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ժամ</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"հիմա"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android-ը նորացվում է..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android-ը մեկնարկում է…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Պահեստի օպտիմալացում:"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android-ը նորացվում է"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Հնարավոր է՝ որոշ հավելվածներ մինչև նորացման ավարտը ճիշտ չաշխատեն"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Օպտիմալացվում է հավելված <xliff:g id="NUMBER_0">%1$d</xliff:g>-ը <xliff:g id="NUMBER_1">%2$d</xliff:g>-ից:"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Հավելվածները մեկնարկում են:"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ադմինիստրատորը ջնջել է այն"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Մարտկոցի աշխատանքի ժամկետը երկարացնելու նպատակով, մարտկոցի էներգիայի խնայման գործառույթը սահմանափակում է սարքի աշխատանքը, թրթռոցը, տեղադրության ծառայությունները և հետնաշերտում աշխատող շատ գործընթացներ: Էլփոստը, հաղորդագրությունների փոխանակումը և տվյալների համաժամեցումից կախված այլ հավելվածները կարող են չթարմացվել, եթե դուք դրանք չգործարկեք:\n\nԵրբ ձեր սարքը լիցքավորվում է, մարտկոցի էներգիայի խնայման գործառույթն ինքնաշխատորեն անջատվում է:"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Տվյալների օգտագործումը նվազեցնելու նպատակով «Թրաֆիկի խնայումը» որոշ հավելվածներին թույլ չի տալիս ուղարկել կամ ստանալ տվյալներ ֆոնային ռեժիմում: Արդեն իսկ գործարկված հավելվածը կարող է օգտագործել տվյալները, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանք հպելուց հետո:"</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Միացնել"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

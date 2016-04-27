@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Қате туралы есеп құру"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Құрылғының қазіргі күйі туралы ақпаратты жинап, электрондық хабармен жібереді. Есеп әзір болғанша біраз уақыт кетеді, шыдай тұрыңыз."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивті есеп"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Бұл көптеген жағдайларда пайдаланылады. Ол есептің орындалу барысын бақылауға, мәселе туралы қосымша мәліметтер енгізуге және скриншоттар алуға мүмкіндік береді. Ол есеп беруіне ұзақ уақыт кететін кейбір азырақ пайдаланылатын бөлімдерді өткізіп жіберуі мүмкін."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Толық есеп"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Бұл параметрді құрылғы жауап бермей жатқанда немесе тым баяу істеген кезде, болмаса, барлық есеп бөлімдері керек болған кезде кедергілерді барынша азайту үшін пайдаланыңыз. Қосымша мәліметтер енгізуге немесе скриншот алуға рұқсат етілмейді."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> сағат</item>
       <item quantity="one">1 сағат</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"қазір"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android жаңартылуда…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android іске қосылуда…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Қойманы оңтайландыру."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ішінен <xliff:g id="NUMBER_0">%1$d</xliff:g> қолданба оңтайландырылуда."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> дайындалуда."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Қолданбалар іске қосылуда."</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Деректердің пайдаланылуын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге немесе қабылдауға жол бермейді. Қазір қолданылып жатқан қолданба деректерді пайдалануы мүмкін, бірақ жиі емес. Мысалы, кескіндер оларды түрткенге дейін көрсетілмейді."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
       <item quantity="one">Бір минут бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>

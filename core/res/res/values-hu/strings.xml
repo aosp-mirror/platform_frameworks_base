@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Hibajelentés készítése"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ezzel információt fog gyűjteni az eszköz jelenlegi állapotáról, amelyet a rendszer e-mailben fog elküldeni. Kérjük, legyen türelemmel, amíg a hibajelentés elkészül, és küldhető állapotba kerül."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktív jelentés"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Ezt használja a legtöbb esetben. Segítségével nyomon követheti a jelentés folyamatát, további részleteket adhat meg a problémáról, illetve képernyőképeket készíthet. A folyamat során kimaradhatnak az olyan kevésbé használt részek, amelyek jelentése túl sok időt igényel."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Teljes jelentés"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Ezt a beállítást minimális rendszerzavar esetén használja, amikor eszköze nem válaszol, túl lassú, illetve ha minden jelentésrészre szüksége van. A rendszer nem teszi lehetővé további részletek megadását, illetve további képernyőképek készítését."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_1">%d</xliff:g> másodpercen belül.</item>
       <item quantity="one">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_0">%d</xliff:g> másodpercen belül.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> óra</item>
       <item quantity="one">1 óra</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"most"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android frissítése folyamatban..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Az Android indítása…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tárhely-optimalizálás."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android frissítése folyamatban"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"A frissítés befejezéséig előfordulhat, hogy egyes alkalmazások nem megfelelően működnek."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Alkalmazás optimalizálása: <xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> előkészítése."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Kezdő alkalmazások."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de ezt sokkal ritkábban tesszük meg. Ez például azt jelentheti, hogy a képek csak azt követően jelennek meg, hogy rájuk koppintott."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Bekapcsolás"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d percen át (eddig: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Egy percen át (eddig: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

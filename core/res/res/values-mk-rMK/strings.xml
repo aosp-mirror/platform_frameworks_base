@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Целосен извештај"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Користете ја опцијава за да имате минимално системско попречување кога уредот не  реагира или е премногу бавен или пак кога ви се потребни сите делови од извештајот. Не ви дозволува да внесете повеќе детали или да сликате дополнителни слики од екранот."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунда.</item>
       <item quantity="other">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> час</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часа</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"сега"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се ажурира…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android стартува…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизирање на складирањето."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android се ажурира"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Некои апликации може да не работат правилно додека не се заврши надградбата"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Се оптимизира апликација <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Се подготвува <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Се стартуваат апликациите."</string>
@@ -1503,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до податоци, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

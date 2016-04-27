@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Kunin ang ulat sa bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula ng ulat sa bug hanggang sa handa na itong maipadala; mangyaring magpasensya."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactive na ulat"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gamitin ito sa karamihan ng sitwasyon. Nagbibigay-daan ito sa iyo na masubaybayan ang pag-usad ng ulat, makapaglagay ng higit pang mga detalye tungkol sa problema, at makakuha ng mga screenshot. Maaari itong mag-alis ng ilan sa mga hindi masyadong ginagamit na seksyon na nangangailangan ng mahabang panahon upang iulat."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Buong ulat"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gamitin ang opsyong ito para sa kaunting pagkaantala sa system kapag hindi tumutugon o masyadong mabagal ang iyong device, o kapag kailangan mo ang lahat ng seksyon ng ulat. Hindi ka pinapayagan na maglagay ng iba pang mga detalye o kumuha ng mga karagdagang screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> segundo.</item>
       <item quantity="other">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na segundo.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> oras</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> na oras</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ngayon"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Nag-a-upgrade ang Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Maaaring hindi gumana nang maayos ang ilang app hangga\'t hindi pa natatapos ang pag-upgrade"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ino-optimize ang app <xliff:g id="NUMBER_0">%1$d</xliff:g> ng <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Sinisimulan ang apps."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Na-delete ng iyong administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang pagganap ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Sa loob ng %1$d minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Sa loob ng %1$d na minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

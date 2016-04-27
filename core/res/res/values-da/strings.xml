@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Lav fejlrapport"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en e-mail. Der går lidt tid, fra fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv rapport"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Brug dette workflow under de fleste omstændigheder. Det giver dig mulighed for at se status på rapporten, angive flere oplysninger om problemet og tage skærmbilleder. Nogle mindre brugte sektioner, der tager lang tid at rapportere, udelades muligvis."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Fuld rapport"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Brug denne mulighed for at gribe mindst muligt ind, når enheden ikke reagerer eller er for langsom, eller når du har brug for alle rapportsektioner. Du har ikke mulighed for at angive flere oplysninger eller tage yderligere skærmbilleder."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Der tages et skærmbillede til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
       <item quantity="other">Der tages et skærmbillede til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> timer</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> timer</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"nu"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android opgraderes..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android starter..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Lageret optimeres."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android opgraderes"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Nogle apps fungerer muligvis ikke korrekt, før opgraderingen er gennemført"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimerer app <xliff:g id="NUMBER_0">%1$d</xliff:g> ud af <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Forbereder <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Åbner dine apps."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktion forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

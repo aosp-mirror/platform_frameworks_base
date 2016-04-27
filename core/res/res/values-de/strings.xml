@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Fehlerbericht abrufen"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bei diesem Fehlerbericht werden Daten zum aktuellen Status deines Geräts erfasst und als E-Mail versandt. Vom Start des Berichts bis zu seinem Versand kann es eine Weile dauern. Bitte habe etwas Geduld."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiver Bericht"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Diese Option kann in den meisten Fällen verwendet werden. Du kannst darüber den aktuellen Stand der Berichterstellung verfolgen, genauere Angaben zu dem Problem machen und Screenshots aufnehmen. Einige selten genutzte Bereiche, deren Berichterstellung längere Zeit in Anspruch nimmt, werden unter Umständen ausgelassen."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Vollständiger Bericht"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Du kannst diese Option für minimale Störungen des Systems nutzen, wenn dein Gerät beispielsweise nicht reagiert oder zu langsam ist oder wenn du alle Bereiche für Berichte benötigst. Du kannst keine weiteren Angaben machen oder zusätzliche Screenshots aufnehmen."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Screenshot für den Fehlerbericht wird in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden aufgenommen.</item>
       <item quantity="one">Screenshot für den Fehlerbericht wird in <xliff:g id="NUMBER_0">%d</xliff:g> Sekunde aufgenommen.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Stunden</item>
       <item quantity="one">1 Stunde</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"jetzt"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android wird aktualisiert..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android wird gestartet…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Speicher wird optimiert"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android wird aktualisiert"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Einige Apps funktionieren unter Umständen nicht richtig, bis das Upgrade abgeschlossen ist"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> von <xliff:g id="NUMBER_1">%2$d</xliff:g> wird optimiert..."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps werden gestartet..."</string>
@@ -1500,11 +1499,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Von deinem Administrator gelöscht"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Mit der Datenkomprimierung wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d Minuten (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">1 Minute (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

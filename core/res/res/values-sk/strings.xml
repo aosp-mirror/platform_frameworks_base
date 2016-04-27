@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie chyby"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktívne nahlásenie"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia, zadávať ďalšie podrobnosti o probléme a vytvárať snímky obrazovky. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Úplné nahlásenie"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Táto možnosť slúži na minimalizáciu zásahov do systému, keď zariadenie neodpovedá, je príliš pomalé alebo potrebujete zahrnúť všetky sekcie hlásenia. Neumožňuje zadať ďalšie podrobnosti ani vytvoriť dodatočné snímky obrazovky."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Snímka obrazovky pre hlásenie chyby sa vytvorí o <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Snímka obrazovky pre hlásenie chyby sa vytvorí o <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
@@ -874,8 +872,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hodín</item>
       <item quantity="one">1 hodina</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"teraz"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Prebieha inovácia systému Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektoré aplikácie môžu správne fungovať až po dokončení inovácie"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Prebieha spúšťanie aplikácií."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Odstránený správcom"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ak chcete znížiť spotrebu dát, dátový server zabráni niektorým aplikáciam odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú momentálne používate, môže pristupovať k dátam, ale môže to robiť menej často. Znamená to, že napríklad obrázky sa nezobrazia, kým na ne neklepnete."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Zapnúť Šetrič dát?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

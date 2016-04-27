@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan pepijat"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Harap bersabar, mungkin perlu sedikit masa untuk memulakan laporan sehingga siap untuk dihantar."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Laporan interaktif"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gunakan laporan ini dalam kebanyakan keadaan. Anda boleh menjejak kemajuan laporan, memasukkan butiran lanjut tentang masalah tersebut dan mengambil tangkapan skrin. Laporan ini mungkin meninggalkan beberapa bahagian yang kurang digunakan, yang mengambil masa lama untuk dilaporkan."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Laporan penuh"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gunakan pilihan ini untuk gangguan sistem yang minimum jika peranti tidak responsif, terlalu perlahan atau anda memerlukan semua bahagian laporan. Tidak membenarkan anda memasukkan butiran lanjut atau mengambil tangkapan skrin tambahan."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Mengambil tangkapan skrin untuk laporan pepijat dalam masa <xliff:g id="NUMBER_1">%d</xliff:g> saat.</item>
       <item quantity="one">Mengambil tangkapan skrin untuk laporan pepijat dalam masa <xliff:g id="NUMBER_0">%d</xliff:g> saat.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> jam</item>
       <item quantity="one">1 jam</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"sekarang"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang menaik taraf..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android sedang dimulakan…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimumkan storan."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android sedang ditingkatkan"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Sesetengah apl mungkin tidak berfungsi dengan betul sehingga peningkatan selesai"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimumkan apl <xliff:g id="NUMBER_0">%1$d</xliff:g> daripada <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Menyediakan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Memulakan apl."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dipadamkan oleh pentadbir anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan mengehadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Hidupkan Penjimat Data?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Hidupkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
