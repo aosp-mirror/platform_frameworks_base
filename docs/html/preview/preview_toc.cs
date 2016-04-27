@@ -17,7 +17,7 @@
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
       Support and Release Notes</a></div>
   </li>
-  
+
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html"
       es-lang="Configurar el SDK de la versión preliminar"
@@ -82,12 +82,15 @@
 
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
         >ICU4J Support</a></li>
-        
+
         <li><a href="<?cs var:toroot ?>preview/j8-jack.html"
         >Java 8 Language Features</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/afw.html"
         >Android for Work Updates</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/scoped-folder-access.html"
+        >Scoped Directory Access</a></li>
       </ul>
   </li>
 
