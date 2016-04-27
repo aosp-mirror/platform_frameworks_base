@@ -3357,7 +3357,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * color channel listed in the CFA.</p>
      * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is
      * available or the camera device advertises this key via
-     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys }.</p>
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 for each.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
