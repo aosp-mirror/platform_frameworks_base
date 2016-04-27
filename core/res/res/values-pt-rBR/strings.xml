@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Obter relatório de bugs"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Isto coletará informações sobre o estado atual do dispositivo para enviá-las em uma mensagem de e-mail. Após iniciar o relatório de bugs, será necessário aguardar algum tempo até que esteja pronto para ser enviado."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Relatório interativo"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Use este recurso na maioria das circunstâncias. Ele permite que você acompanhe o progresso do relatório, informe mais detalhes sobre o problema e faça capturas de tela. É possível que ele omita algumas seções menos utilizadas que levam muito tempo na emissão dos relatórios."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Relatório completo"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Use esta opção para ter o mínimo de interferência do sistema quando seu dispositivo não estiver respondendo ou estiver muito lento, ou quando você precisar de todas as seções de relatórios. Ela não permite que você informe mais detalhes ou faça capturas de tela adicionais."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Capturas de tela para o relatório do bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
       <item quantity="other">Capturas de tela para o relatório do bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> horas</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"agora"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"O Android está sendo atualizado..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"O Android está iniciando..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Otimizando o armazenamento."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"O Android está sendo atualizado"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Alguns apps podem não funcionar corretamente até que a atualização seja concluída"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Otimizando app <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando apps."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Excluído pelo seu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a duração da bateria, o economizador de bateria reduz o desempenho e os limites de vibração do dispositivo, os serviços de localização e a maioria dos dados de segundo plano. E-mail, mensagens e outros aplicativos que dependem de sincronização não podem ser atualizados, a não ser que você os abra.\n\nO economizador de bateria é desligado automaticamente quando o dispositivo está sendo carregado."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode significar que as imagens não serão exibidas até que você toque nelas."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

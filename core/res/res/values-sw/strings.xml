@@ -216,11 +216,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Chukua ripoti ya hitilafu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali ya kifaa chako kwa sasa, na itume kama barua pepe. Itachukua muda mfupi tangu ripoti ya hitilafu ianze kuzalishwa hadi iwe tayari kutumwa; vumilia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ripoti ya kushirikiana"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Tumia chaguo hili katika hali nyingi. Hukuruhusu kufuatilia jinsi ripoti yako inavyoendelea, kuandika maelezo zaidi kuhusu tatizo na kupiga picha za skrini. Huenda ikaacha baadhi ya sehemu ambazo hazitumiki sana na zinachukua muda mrefu kuripoti."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Ripoti kamili"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Tumia chaguo hili ili upunguze kukatizwa kwa mfumo wakati kifaa chako kinapokwama au kinapofanya kazi polepole au unapohitaji sehemu zote za ripoti. Haikuruhusu kuandika maelezo zaidi au kupiga picha zaidi za skrini."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
       <item quantity="one">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_0">%d</xliff:g>.</item>
@@ -858,8 +856,7 @@
       <item quantity="other">Saa <xliff:g id="COUNT">%d</xliff:g></item>
       <item quantity="one">Saa 1</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"sasa"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -966,6 +963,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Toleo jipya la Android linawekwa..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Inaanzisha Android..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Inaboresha hifadhi."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Tunasasisha Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Huenda baadhi ya programu zisifanye kazi vizuri hadi itakapomaliza kusasisha"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Inaboresha programu <xliff:g id="NUMBER_0">%1$d</xliff:g> kutoka <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Inaandaa <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Programu zinaanza"</string>
@@ -1499,10 +1498,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chini chini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozigonga."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

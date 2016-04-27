@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Útbúa villutilkynningu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Þetta safnar upplýsingum um núverandi stöðu tækisins til að senda með tölvupósti. Það tekur smástund frá því villutilkynningin er ræst og þar til hún er tilbúin til sendingar – sýndu biðlund."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Gagnvirk skýrsla"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Þú getur notað þetta í flestum tilvikum. Með þessu móti geturðu fylgst með framgangi tilkynningarinnar og slegið inn viðbótarupplýsingar um vandamálið. Hugsanlegt er að lítið notuðum hlutum verði sleppt til að spara tíma."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Heildarskýrsla"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Notaðu þennan valmöguleika til að lágmarka truflun frá kerfinu þegar tækið þitt svarar ekki eða er of hægt, eða þegar þú þarft alla hluta tilkynningarinnar. Leyfir þér ekki að slá inn viðbótarupplýsingar eða taka skjámyndir."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Tekur skjámynd fyrir villutilkynningu eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndu.</item>
       <item quantity="other">Tekur skjámynd fyrir villutilkynningu eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndur.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> klukkustund</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> klukkustundir</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"núna"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android er að uppfæra…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android er að ræsast…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Fínstillir geymslu."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android er að uppfæra"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Hugsanlega virka sum forrit ekki fyrr en uppfærslunni lýkur"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Fínstillir forrit <xliff:g id="NUMBER_0">%1$d</xliff:g> af <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Undirbýr <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ræsir forrit."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eytt af kerfisstjóra"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Til að auka endingu rafhlöðunnar mun orkusparnaður draga úr afköstum tækisins og takmarka titring, staðsetningarþjónustu og megnið af bakgrunnsgögnum. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu uppfærist nema þú opnir þau.\n\nSjálfkrafa er slökkt á orkusparnaði þegar tækið er í hleðslu."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan gæti verið, svo dæmi sé tekið, að myndir séu ekki birtar fyrr en þú ýtir á þær."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Kveikja á gagnasparnaði?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Kveikja"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Í %1$d mínútu (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Í %1$d mínútur (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

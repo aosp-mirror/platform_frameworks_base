@@ -148,7 +148,7 @@
     <string name="httpError" msgid="7956392511146698522">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏URL پیدا نشد."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی تأیید اعتبار سایت پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"تأیید اعتبار انجام نشد."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"تأیید اعتبار ناموفق بود."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"تأیید اعتبار از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"گرفتن گزارش اشکال"</string>
     <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. عکس صفحه‌نمایش دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
       <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"اکنون"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏Android در حال راه‌اندازی است..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"بهینه‌سازی فضای ذخیره‌سازی."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏Android درحال ارتقا است"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"تا پایان ارتقا، ممکن است برخی از برنامه‌ها به‌درستی کار نکنند."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"در حال بهینه‌سازی برنامهٔ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"در حال آغاز برنامه‌ها."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» مانع ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها می‌شود. برنامه‌ای که درحال حاضر استفاده می‌کنید می‌تواند به داده دسترسی داشته باشد اما دفعات دسترسی آن محدود است. به این معنی که، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Crea informe d\'errors"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu i se t\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactiu"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilitza aquesta opció en la majoria de circumstàncies. Et permet fer un seguiment del progrés de l\'informe, introduir més dades sobre el problema i fer captures de pantalla. És possible que ometi seccions poc utilitzades que requereixen molt de temps."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe complet"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilitza aquesta opció perquè la interferència en el sistema sigui mínima si el dispositiu no respon o va massa lent, o bé si necessites totes les seccions de l\'informe. No et permet introduir més dades ni fer més captures de pantalla."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons.</item>
       <item quantity="one">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_0">%d</xliff:g> segon.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hores</item>
       <item quantity="one">1 hora</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ara"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android s\'està actualitzant..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"S\'està iniciant Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"S\'està optimitzant l\'emmagatzematge."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android s\'està actualitzant"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Pot ser que algunes aplicacions no funcionin correctament fins que no es completi l\'actualització"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"S\'està optimitzant l\'aplicació <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"S\'està preparant <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"S\'estan iniciant les aplicacions."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"L\'administrador ho ha suprimit"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Durant 1 minut (fins a les <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

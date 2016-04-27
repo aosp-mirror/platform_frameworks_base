@@ -220,11 +220,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Napravi izveštaj o grešci"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupiti informacije o trenutnom stanju uređaja kako bi bile poslate u poruci e-pošte. Od započinjanja izveštaja o grešci do trenutka za njegovo slanje proći će neko vreme; budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv. izveštaj"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Koristite ovo u većini slučajeva. To vam omogućava da pratite napredak izveštaja, da unosite dodatne detalje o problemu i da snimate snimke ekrana. Verovatno će izostaviti neke manje korišćene odeljke za koje pravljenje izveštaja dugo traje."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Kompletan izveštaj"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Koristite ovu opciju radi minimalnih sistemskih smetnji kada uređaj ne reaguje, prespor je ili su vam potrebni svi odeljci izveštaja. Ne dozvoljava vam unos dodatnih detalja niti snimanje dodatnih snimaka ekrana."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekundu.</item>
       <item quantity="few">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekunde.</item>
@@ -867,8 +865,7 @@
       <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sata</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sati</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"sada"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -975,6 +972,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se nadograđuje…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android se pokreće…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memorija se optimizuje."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android se nadograđuje…"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Neke aplikacije možda neće ispravno funkcionisati dok se nadogradnja ne dovrši"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizovanje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Pokretanje aplikacija."</string>
@@ -1512,10 +1511,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao je vaš admiistrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi produžila vreme trajanja baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju možda neće da se ažuriraju ako ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d minuta (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

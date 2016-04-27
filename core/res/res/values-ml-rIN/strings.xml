@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"ബഗ് റിപ്പോർട്ട് എടുക്കുക"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"മിക്ക സാഹചര്യങ്ങളിലും ഇത് ഉപയോഗിക്കുക. റിപ്പോർട്ടിന്റെ പുരോഗതി കാണാനും പ്രശ്നത്തെ കുറിച്ചുള്ള കൂടുതൽ വിശദാംശങ്ങൾ നൽകാനും സ്ക്രീൻഷോട്ടുകൾ എടുക്കാനും ഇത് അനുവദിക്കുന്നു. റിപ്പോർട്ടുചെയ്യാൻ നീണ്ട സമയം എടുക്കുന്നതും നിങ്ങൾ കുറച്ച് ഉപയോഗിക്കുന്നതുമായ ചില വിഭാഗങ്ങളെ ഇത് വിട്ടുകളഞ്ഞേക്കാം."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"പൂർണ്ണ റിപ്പോർട്ട്"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"നിങ്ങളുടെ ഉപകരണം പ്രതികരിക്കുന്നില്ലെങ്കിലോ അതിന് വേഗത വളരെ കുറവാണെങ്കിലോ നിങ്ങൾക്ക് എല്ലാ റിപ്പോർട്ട് വിഭാഗങ്ങളും ആവശ്യമുള്ളപ്പോഴോ, സിസ്റ്റത്തിന്റെ തടസ്സം പരിമിതപ്പെടുത്തുന്നതിന്, ഈ ഓപ്ഷൻ ഉപയോഗിക്കുക. കൂടുതൽ വിശദാംശങ്ങൾ നൽകാനോ അനുബന്ധ സ്ക്രീൻഷോട്ടുകൾ എടുക്കാനോ നിങ്ങളെ അനുവദിക്കില്ല."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
       <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> മണിക്കൂർ</item>
       <item quantity="one">ഒരു മണിക്കൂർ</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ഇപ്പോൾ"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android അപ്ഗ്രേഡുചെയ്യുന്നു…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"സ്റ്റോറേജ്  ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android അപ്ഗ്രേഡുചെയ്യുന്നു"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"അപ്‌ഗ്രേഡ് പൂർത്തിയാകുന്നത് വരെ ചില ആപ്‌സ് ശരിയായി പ്രവർത്തിച്ചേക്കില്ല"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, നിങ്ങൾ ടാപ്പുചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ കാണിക്കുകയില്ല എന്നാണ്."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>

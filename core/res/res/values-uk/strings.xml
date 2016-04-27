@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Звіт про помилку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Інформація про поточний стан вашого пристрою буде зібрана й надіслана електронною поштою. Підготовка звіту триватиме певний час."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Інтерактивний звіт"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Підходить для більшості випадків. Можна відстежувати, як створюється звіт, вводити більше деталей про проблему та робити знімки екрана. Можуть опускатися деякі розділи, які рідко використовуються, але довго створюються."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Повний звіт"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Підходить для мінімального втручання в систему, коли пристрій не відповідає, працює повільно або вам потрібні всі розділи звіту. Не можна вводити більше деталей або робити додаткові знімки екрана."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунду.</item>
       <item quantity="few">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
@@ -874,8 +872,7 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> годин</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> години</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"зараз"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android оновлюється..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Запуск ОС Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимізація пам’яті."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android оновлюється"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Деякі додатки можуть не працювати належним чином, доки не завершиться оновлення"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимізація програми <xliff:g id="NUMBER_0">%1$d</xliff:g> з <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Підготовка додатка <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск програм."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Видалив адміністратор"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Щоб подовжити час роботи акумулятора, функція заощадження заряду акумулятора знижує продуктивність пристрою, а також обмежує вібрацію, функції служб локації та передавання більшості фонових даних. Електронна пошта, чати й інші додатки, які синхронізуються, можуть не оновлюватися, доки ви їх не відкриєте.\n\nФункція заощадження заряду акумулятора автоматично вимикається під час заряджання пристрою."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Увімкнути Заощадження трафіку?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Увімкнути"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d хвилину (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d хвилини (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

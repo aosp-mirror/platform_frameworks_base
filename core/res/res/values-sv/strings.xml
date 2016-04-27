@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Skapa felrapport"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv rapport"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Bör användas i de flesta fall. Då kan du spåra rapportförloppet, ange mer information om problemet och ta skärmdumpar. En del mindre använda avsnitt, som det tar lång tid att rapportera om, kan uteslutas."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Fullständig rapport"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Alternativet innebär minsta möjliga störning när enheten inte svarar eller är långsam, eller när alla avsnitt ska ingå i rapporten. Du kan inte ange mer information eller ta ytterligare skärmdumpar."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
       <item quantity="one">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> timmar</item>
       <item quantity="one">1 timme</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"nu"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android uppgraderas ..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android startar …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Lagringsutrymmet optimeras."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android uppgraderas"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"En del appar kanske inte fungerar som de ska innan uppgraderingen har slutförts"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimerar app <xliff:g id="NUMBER_0">%1$d</xliff:g> av <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> förbereds."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Appar startas."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktivera Databesparing?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I en minut (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

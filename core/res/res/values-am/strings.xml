@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"የሳንካ ሪፖርት ውሰድ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ይሄ እንደ የኢሜይል መልዕክት አድርጎ የሚልከውን ስለመሣሪያዎ የአሁኑ ሁኔታ መረጃ ይሰበስባል። የሳንካ ሪፖርቱን ከመጀመር ጀምሮ እስኪላክ ድረስ ትንሽ ጊዜ ይወስዳል፤ እባክዎ ይታገሱ።"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"መስተጋብራዊ ሪፖርት"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"በአብዛኛዎቹ ሁኔታዎች ላይ ይህን ይጠቀሙ። የሪፖርቱን ሂደት እንዲከታተሉ፣ ስለችግሩ ተጨማሪ ዝርዝሮችን እንዲያስገቡ እና ቅጽበታዊ ገጽ እይታዎችን እንዲያነሱ ያስችልዎታል። ሪፖርት ለማድረግ ረዥም ጊዜ የሚወስዱ አንዳንድ ብዙም ጥቅም ላይ የማይውሉ ክፍሎችን ሊያልፋቸው ይችላል።"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ሙሉ ሪፖርት"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"መሣሪያዎ ምላሽ የማይሰጥ ወይም በጣም ቀርፋፋ ከሆነ፣ ወይም ሁሉንም የሪፖርት ክፍሎች የሚያስፈልገዎት ከሆነ ለዝቅተኛ የስርዓት ጣልቃ-ገብነት ይህን አማራጭ ይጠቀሙ። ተጨማሪ ዝርዝሮችን እንዲያስገቡ ወይም ተጨማሪ ቅጽበታዊ ገጽ እይታዎችን እንዲያነሱ አያስችልዎትም።"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።</item>
       <item quantity="other">በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ሰዓቶች</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ሰዓቶች</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"አሁን"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android እያሻሻለ ነው..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android በመጀመር ላይ ነው…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ማከማቻን በማመቻቸት ላይ።"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android በማላቅ ላይ ነው"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"አንዳንድ መተግበሪያዎች ማላቁ እስኪጠናቀቅ ድረስ በአግባቡ ላይሰሩ ይችላሉ"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"መተግበሪያዎች በአግባቡ በመጠቀም ላይ <xliff:g id="NUMBER_0">%1$d</xliff:g> ከ <xliff:g id="NUMBER_1">%2$d</xliff:g> ፡፡"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ን ማዘጋጀት።"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"የባትሪ ዕድሜን ለማሻሻል ማገዝ እንዲቻል፣ ኢሜይል፣ መልዕክት አላላክ እና ሌሎች በማመሳሰል ላይ የሚመረኮዙ መተግበሪያዎች እርስዎ ካልከፈቱዋቸው በቀር አይዘምኑም።\n\nየባትሪ ኃይል ቆጣቢ የእርስዎ መሣሪያ ኃይል በሚሞላበት ጊዜ በራስ-ሰር ይጠፋል።"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ውሂብ ቆጣቢ ይጥፋ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"አብራ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
       <item quantity="other">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>

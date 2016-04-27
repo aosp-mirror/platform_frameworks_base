@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивный отчет"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Рекомендуем этот вариант в большинстве случаев, чтобы отслеживать статус отчета, указывать дополнительные данные о проблеме и делать скриншоты. Некоторые разделы могут быть исключены, чтобы сократить время подготовки отчета."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Подробный отчет"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Выберите этот вариант, если устройство не реагирует на ваши действия или работает слишком медленно, а также если вы хотите включить все разделы отчета. Вы не сможете сделать скриншот или указать дополнительные сведения."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунду</item>
       <item quantity="few">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунды</item>
@@ -874,8 +872,7 @@
       <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> часов</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> часов</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"сейчас"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Обновление Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Запуск Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизация хранилища…"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Обновление Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Во время обновления некоторые приложения могут работать со сбоями."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизация приложения <xliff:g id="NUMBER_0">%1$d</xliff:g> из <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Подготовка приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"..."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Удалено администратором"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Включить экономию трафика?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Включить"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d минуты (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

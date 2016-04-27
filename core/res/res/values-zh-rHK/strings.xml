@@ -218,9 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"取得錯誤報告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"這會收集您目前裝置狀態的相關資訊，並以電郵傳送給您。從開始建立錯誤報告到準備傳送需要一段時間，請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互動報告"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"在一般情況下，建議您使用這個選項，以便追蹤報告產生進度、輸入更多與問題相關的資訊，以及擷取螢幕畫面。系統可能會省略部分較少使用的區段，藉此縮短報告產生時間。"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"在大部分情況下，建議您使用此選項，以便追蹤報告進度、輸入更多與問題相關的詳細資料，以及擷取螢幕畫面。系統可能會省略一些不常用的部分，以縮短產生報告的時間。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整報告"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"如果您的裝置沒有回應或運行速度過慢，或是當您需要所有區段的報告時，建議您使用這個選項來減少系統干擾。這個選項不支援您輸入更多資訊，也不會擷取其他螢幕畫面。"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"如果裝置沒有反應或運作速度較慢，或您需要完整的報告時，建議使用此選項將系統的干擾程度降至最低。此選項不允許您輸入更多詳細資料，或擷取更多螢幕畫面。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">系統將在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
       <item quantity="one">系統將在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
@@ -965,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"正在升級 Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在啟動…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在優化儲存空間。"</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"正在升級 Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"部分應用程式需要完成升級方可正常運作"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在優化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"正在準備 <xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在啟動應用程式。"</string>
@@ -1498,7 +1500,7 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式仍可以存取資料，但存取頻率可能會降低。例如，除非您輕按圖片，否則系統可能不會顯示相關圖片。"</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

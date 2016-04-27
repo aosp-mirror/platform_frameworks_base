@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷ ವರದಿ ರಚಿಸಿ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ನಿಮ್ಮ ಸಾಧನದ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳುವುದರ ಜೊತೆ ಇ-ಮೇಲ್ ರೂಪದಲ್ಲಿ ನಿಮಗೆ ರವಾನಿಸುತ್ತದೆ. ಇದು ದೋಷ ವರದಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಸಮಯದಿಂದ ಅದನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಸ್ವಲ್ಪ ಸಮಯವನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ; ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ಪರಸ್ಪರ ಸಂವಹನ ವರದಿ"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ಹೆಚ್ಚಿನ ಸಂದರ್ಭಗಳಲ್ಲಿ ಇದನ್ನು ಬಳಸಿ. ಇದು ವರದಿಯ ಪ್ರಗತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮಸ್ಯೆ ಕುರಿತು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಮತ್ತು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ. ಇದು ವರದಿ ಮಾಡಲು ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುವಂತಹ ಕೆಲವು ಕಡಿಮೆ ಬಳಸಲಾದ ವಿಭಾಗಗಳನ್ನು ತ್ಯಜಿಸಬಹುದು."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ಪೂರ್ಣ ವರದಿ"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಟ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
       <item quantity="other">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ಗಂಟೆಗಳು</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ಗಂಟೆಗಳು</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"ಇದೀಗ"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ಅಪ್‌ಗ್ರೇಡ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ಸಂಗ್ರಹಣೆಯನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android ಅಪ್‌ಗ್ರೇಡ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ಅಪ್‌ಗ್ರೇಡ್ ಮುಗಿಯುವ ತನಕ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಸರಿಯಾಗಿ ಕೆಲಸ ಮಾಡದಿರಬಹುದು"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="NUMBER_0">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ನಿಮ್ಮ ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ನವೀಕರಣಗೊಳ್ಳುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ಡೇಟಾ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಲು ಸಹಾಯಕಾರಿಯಾಗಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಕಡಿಮೆ ಪುನರಾವರ್ತಿತವಾಗಿ ಮಾಡಬಹುದು. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಪ್ರದರ್ಶಿಸುವುದಿಲ್ಲ."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ಡೇಟಾ ಉಳಿಸುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡುವುದೇ?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ಆನ್ ಮಾಡು"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>
       <item quantity="other">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>

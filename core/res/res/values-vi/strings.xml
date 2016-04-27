@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Nhận báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Báo cáo tương tác"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Sử dụng tùy chọn này trong hầu hết các trường hợp. Tùy chọn này cho phép bạn theo dõi tiến trình của báo cáo, nhập thêm thông tin chi tiết về sự cố cũng như chụp ảnh màn hình. Tùy chọn này có thể bỏ qua một số phần ít được sử dụng mà mất nhiều thời gian để báo cáo."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Báo cáo đầy đủ"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Sử dụng tùy chọn này để giảm thiểu ảnh hưởng của hệ thống khi thiết bị của bạn không phản hồi hoặc quá chậm, hay khi bạn cần tất cả các phần báo cáo. Không cho phép bạn nhập thêm thông tin chi tiết hoặc chụp thêm ảnh chụp màn hình."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_1">%d</xliff:g> giây.</item>
       <item quantity="one">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_0">%d</xliff:g> giây.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> giờ</item>
       <item quantity="one">1 giờ</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"bây giờ"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android đang nâng cấp..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android đang khởi động..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tối ưu hóa lưu trữ."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android đang nâng cấp"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Một số ứng dụng có thể không hoạt động bình thường cho đến khi nâng cấp xong"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Đang tối ưu hóa ứng dụng <xliff:g id="NUMBER_0">%1$d</xliff:g> trong tổng số <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Đang chuẩn bị <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Khởi động ứng dụng."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu, nhưng có thể thực hiện việc đó ít thường xuyên hơn. Chẳng hạn, điều này có thể có nghĩa là hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Trong %1$d phút (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Trong một phút (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

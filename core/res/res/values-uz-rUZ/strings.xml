@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisoboti"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Qurilmangiz holati haqidagi ma’lumotlar to‘planib, e-pochta orqali yuboriladi. Hisobotni tayyorlash biroz vaqt olishi mumkin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv hisobot"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Bundan maxsus vaziyatlarda foydalaning. Bu hisobot jarayonini kuzatish imkonini beradi, muammo haqida batafsil ma’lumotlarni ko‘rishingiz va skrinshotlar olishingiz mumkin bo‘ladi. Hisobot uchun ko‘p vaqt oladigan kam ishlatiladigan bo‘limlar qoldirib ketilishi mumkin."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"To‘liq hisobot"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Qurilma javob bermaganda, juda sekinlashganda yoki barcha hisobot bo‘limlari zarur bo‘lganda kamroq tizim aralashuvlarisiz mazkur variantdan foydalaning. Qo‘shimcha skrinshotlar olinmaydi yoki batafsil ma’lumotlar ko‘rishingizga ruxsat berilmaydi."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng olinadi.</item>
       <item quantity="one">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_0">%d</xliff:g> soniyadan so‘ng olinadi.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soat</item>
       <item quantity="one">1 soat</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"hozir"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android yangilanmoqda…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ishga tushmoqda…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Xotira optimallashtirilmoqda."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ilovalar optimallashtirilmoqda (<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>)."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> tayyorlanmoqda."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ilovalar ishga tushirilmoqda."</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Trafik sarfini kamaytirish maqsadida Trafik tejash funksiyasi ba’zi ilovalarning orqa fonda internetdan foydalanishining oldini oladi. Siz hozirda foydalanayotgan ilova internetdan faqat talab etilgandagina foydalanishi mumkin. Bu degani, masalan, rasmlar ustiga bosilmaguncha, ular yuklanmaydi."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
       <item quantity="one">Bir daqiqa (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>

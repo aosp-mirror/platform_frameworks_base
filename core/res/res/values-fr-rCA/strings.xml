@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Créer un rapport de bogue"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme de courriel. Merci de patienter pendant la préparation du rapport de bogue. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapport interactif"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, d\'entrer plus d\'information sur le problème et d\'effectuer des saisies d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Rapport complet"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilisez cette option pour qu\'il y ait le moins d\'interférences système possible lorsque votre appareil ne répond pas ou qu\'il est trop lent, ou lorsque vous avez besoin de toutes les sections du rapport de bogue. Aucune saisie d\'écran supplémentaire ne peut être capturée, et vous ne pouvez entrer aucune autre information."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Saisie d\'écran pour le rapport de bogue dans <xliff:g id="NUMBER_1">%d</xliff:g> seconde.</item>
       <item quantity="other">Saisie d\'écran pour le rapport de bogue dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> heure</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> heures</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"mainten."</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Mise à jour d\'Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android en cours de démarrage..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimisation du stockage."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Installation de la m. à niveau d\'Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Il se peut que certaines applications ne fonctionnent pas correctement jusqu\'à ce que la mise à niveau soit terminée"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimisation de l\'application <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>…"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Préparation de <xliff:g id="APPNAME">%1$s</xliff:g> en cours…"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Lancement des applications…"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la pile, la fonction d\'économie d\'énergie réduit les performances de votre appareil et limite la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications Courriel, Messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez. \n\n L\'économiseur d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'Économiseur de données?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d minutes (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

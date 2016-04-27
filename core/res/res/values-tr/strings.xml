@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Hata raporu al"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bu rapor, e-posta iletisi olarak göndermek üzere cihazınızın şu anki durumuyla ilgili bilgi toplar. Hata raporu başlatıldıktan sonra hazır olması biraz zaman alabilir, lütfen sabırlı olun."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Etkileşimli rapor"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Çoğu durumda bunu kullanın. Bu seçenek, raporun ilerleme durumunu takip etmenize, sorunla ilgili daha fazla ayrıntı girmenize ve ekran görüntüleri almanıza olanak tanır. Rapor edilmesi uzun süren ve az kullanılan bazı bölümleri yok sayabilir."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Tam rapor"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Cihazınız yanıt vermediğinde veya çok yavaş çalıştığında ya da tüm rapor bölümlerine ihtiyacınız olduğunda, sisteme müdahaleyi en aza indirmek için bu seçeneği kullanın. Daha fazla ayrıntı girmenize veya başka ekran görüntüleri almanıza izin vermez."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde hata raporu ekran görüntüsü alınıyor.</item>
       <item quantity="one">Hata raporu ekran görüntüsü <xliff:g id="NUMBER_0">%d</xliff:g> saniye içinde alınacak.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
       <item quantity="one">1 saat</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"şimdi"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,10 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android yeni sürüme geçiriliyor..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android başlatılıyor…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Depolama optimize ediliyor."</string>
+    <!-- no translation found for android_upgrading_notification_title (1619393112444671028) -->
+    <skip />
+    <!-- no translation found for android_upgrading_notification_body (5761201379457064286) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> uygulama optimize ediliyor."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> hazırlanıyor."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uygulamalar başlatılıyor"</string>
@@ -1501,10 +1502,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Yöneticiniz tarafından silindi"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pil tasarrufu özelliği, pil ömrünü iyileştirmeye yardımcı olmak için cihazın performansını düşürür, titreşimi, konum hizmetlerini ve arka plan verilerinin çoğunu sınırlar. Senkronizasyona dayalı olarak çalışan e-posta, mesajlaşma uygulamaları ve diğer uygulamalar, bunları açmadığınız sürece güncellenmeyebilir.\n\nCihazınız şarj olurken pil tasarrufu otomatik olarak kapatılır."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Şu anda kullandığınız bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Veri Tasarrufu açılsın mı?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Aç"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

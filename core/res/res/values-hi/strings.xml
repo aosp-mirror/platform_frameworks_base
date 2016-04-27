@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट प्राप्त करें"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ईमेल संदेश के रूप में भेजने के लिए, इसके द्वारा आपके डिवाइस की वर्तमान स्थिति के बारे में जानकारी एकत्र की जाएगी. बग रिपोर्ट प्रारंभ करने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया धैर्य रखें."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"सहभागी रिपोर्ट"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"अधिकांश परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में अधिक विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में अधिक समय लगता है."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"जब आपका डिवाइस प्रतिसाद नहीं दे रहा हो या बहुत ही धीमा हो, या जब आपको सभी रिपोर्ट अनुभागों की आवश्यकता हो, तो न्यूनतम सिस्टम हस्तक्षेप के लिए इस विकल्प का उपयोग करें. यह आपको अधिक विवरण नहीं डालने देता या अतिरिक्त स्क्रीनशॉट नहीं लेने देता."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">बग रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
       <item quantity="other">बग रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
@@ -860,8 +858,7 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> घंटे</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> घंटे</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"अभी"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android अपग्रेड हो रहा है..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ हो रहा है…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"मेमोरी ऑप्‍टिमाइज़ हो रही है."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android अपग्रेड हो रहा है"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"जब तक अपग्रेड पूरा नहीं हो जाता, तब तक संभव है कि कुछ ऐप्लिकेशन ठीक से कार्य ना करें"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तैयार हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ऐप्स  प्रारंभ होने वाले हैं"</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपके नियंत्रक द्वारा हटाया गया"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बैटरी जीवन काल को बेहतर बनाने में सहायता के लिए, बैटरी सेवर आपके डिवाइस के प्रदर्शन को कम कर देता है और कंपन, स्‍थान सेवाओं और अधिकांश पृष्‍ठभूमि डेटा को सीमित कर देता है. हो सकता है कि ईमेल, संदेश सेवा तथा समन्‍वयन पर आधारित अन्‍य ऐप्‍स तब तक ना खुलें जब तक कि आप उन्‍हें नहीं खोलते.\n\nजब आपका डिवाइस चार्ज हो रहा होता है तो बैटरी सेवर अपने आप बंद हो जाता है."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा उपयोग कम करने में सहायता के लिए, डेटा बचतकर्ता कुछ ऐप्लिकेशन को पृष्ठभूमि में डेटा भेजने या प्राप्त करने से रोकता है. आपके द्वारा वर्तमान में उपयोग किया जा रहा एक ऐप्लिकेशन डेटा एक्सेस कर सकता है, लेकिन वह ऐसा कभी-कभी ही करेगा. उदाहरण के लिए, इसका अर्थ यह हो सकता है कि चित्र तब तक दिखाई नहीं देंगे जब तक कि आप उन्हें टैप नहीं करते."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करें?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
       <item quantity="other">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>

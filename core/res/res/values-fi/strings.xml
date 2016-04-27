@@ -218,11 +218,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Luo virheraportti"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Toiminto kerää tietoja laitteen tilasta ja lähettää ne sähköpostitse. Virheraportti on valmis lähetettäväksi hetken kuluttua - kiitos kärsivällisyydestäsi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiivinen"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Valitse tämä vaihtoehto useimmissa tapauksissa. Voit seurata raportin etenemistä, antaa lisätietoja ongelmasta ja tallentaa kuvakaappauksia. Tämä vaihtoehto saattaa ohittaa joitakin harvoin käytettyjä osioita, joiden käsittely raportissa kestää kauan."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Koko raportti"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Valitse tämä, jos laitteesi ei ota komentoja vastaan, jos se toimii hitaasti tai tarvitset kaikkia raportin osioita. Raporttiin ei voi tallentaa lisätietoja tai useampia kuvakaappauksia."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua.</item>
       <item quantity="one">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_0">%d</xliff:g> sekunnin kuluttua.</item>
@@ -860,8 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> tuntia</item>
       <item quantity="one">1 tunti</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"nyt"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -968,6 +965,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Androidia päivitetään…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android käynnistyy…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimoidaan tallennustilaa."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Androidia päivitetään"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Kaikki sovellukset eivät ehkä toimi oikein, ennen kuin päivitys on valmis."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimoidaan sovellusta <xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Valmistellaan: <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Käynnistetään sovelluksia."</string>
@@ -1501,10 +1500,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Järjestelmänvalvoja on poistanut paketin."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Jos haluat parantaa akun kestoa, virransäästö vähentää laitteesi suorituskykyä ja rajoittaa värinää, sijaintipalveluita ja useimpia taustatietoja. Sähköposti, viestit ja muut synkronointiin perustuvat sovellukset eivät välttämättä päivity, ellet avaa niitä.\n\nVirransäästö poistuu käytöstä automaattisesti, kun laitteesi latautuu."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Otetaanko Data Saver käyttöön?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Ota käyttöön"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Yhdeksi minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

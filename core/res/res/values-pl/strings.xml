@@ -222,11 +222,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Zgłoś błąd"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Informacje o bieżącym stanie urządzenia zostaną zebrane i wysłane e-mailem. Przygotowanie zgłoszenia błędu do wysłania chwilę potrwa, więc zachowaj cierpliwość."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktywny"</string>
-    <!-- no translation found for bugreport_option_interactive_summary (229299488536107968) -->
-    <skip />
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu, podanie dodatkowych szczegółów problemu i wykonanie zrzutów ekranu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Pełny raport"</string>
-    <!-- no translation found for bugreport_option_full_summary (7210859858969115745) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Użyj tej opcji, jeśli chcesz zminimalizować zakłócenia pracy systemu, gdy urządzenie nie reaguje, działa wolno lub gdy potrzebujesz wszystkich sekcji raportu. Nie można podać więcej szczegółów ani wykonać dodatkowych zrzutów ekranu."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Zrzut ekranu do raportu o błędzie zostanie zrobiony za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
       <item quantity="many">Zrzut ekranu do raportu o błędzie zostanie zrobiony za <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
@@ -874,8 +872,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> godziny</item>
       <item quantity="one">1 godzina</item>
     </plurals>
-    <!-- no translation found for now_string_shortest (8912796667087856402) -->
-    <skip />
+    <string name="now_string_shortest" msgid="8912796667087856402">"teraz"</string>
     <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
     <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
     <!-- no translation found for duration_days_shortest (1363973360381363510) -->
@@ -982,6 +979,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android jest uaktualniany..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android się uruchamia…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optymalizacja pamięci."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android jest uaktualniany"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektóre aplikacje mogą nie działać prawidłowo, dopóki nie zakończy się aktualizacja."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optymalizowanie aplikacji <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uruchamianie aplikacji."</string>
@@ -1523,10 +1522,8 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Usunięty przez administratora"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
-    <!-- no translation found for data_saver_enable_title (4674073932722787417) -->
-    <skip />
-    <!-- no translation found for data_saver_enable_button (7147735965247211818) -->
-    <skip />
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">Przez %1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">Przez %1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
