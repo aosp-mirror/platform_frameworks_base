@@ -502,6 +502,9 @@ public final class Pm {
                         sessionParams.volumeUuid = null;
                     }
                     break;
+                case "--force-sdk":
+                    sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }

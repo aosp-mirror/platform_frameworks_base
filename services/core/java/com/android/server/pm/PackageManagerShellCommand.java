@@ -1000,6 +1000,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "-g":
                     sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
                     break;
+                case "--dont-kill":
+                    sessionParams.installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+                    break;
                 case "--originating-uri":
                     sessionParams.originatingUri = Uri.parse(getNextArg());
                     break;
@@ -1034,6 +1037,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     if ("internal".equals(sessionParams.volumeUuid)) {
                         sessionParams.volumeUuid = null;
                     }
+                    break;
+                case "--force-sdk":
+                    sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
