@@ -156,7 +156,7 @@ public class HelpUtils {
         return intent;
     }
 
-    private static void addIntentParameters(Context context, Intent intent, String backupContext) {
+    public static void addIntentParameters(Context context, Intent intent, String backupContext) {
         if (!intent.hasExtra(EXTRA_CONTEXT)) {
             // Insert some context if none exists.
             intent.putExtra(EXTRA_CONTEXT, backupContext);
