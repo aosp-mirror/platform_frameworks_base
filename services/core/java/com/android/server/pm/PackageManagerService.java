@@ -2050,17 +2050,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 
-        synchronized (mPackages) {
-            for (String permission : pkg.requestedPermissions) {
-                BasePermission bp = mSettings.mPermissions.get(permission);
-                if (bp != null && (bp.isRuntime() || bp.isDevelopment())
-                        && (grantedPermissions == null
-                               || ArrayUtils.contains(grantedPermissions, permission))) {
-                    final int flags = permissionsState.getPermissionFlags(permission, userId);
-                    // Installer cannot change immutable permissions.
-                    if ((flags & immutableFlags) == 0) {
-                        grantRuntimePermission(pkg.packageName, permission, userId);
-                    }
+        for (String permission : pkg.requestedPermissions) {
+            final BasePermission bp;
+            synchronized (mPackages) {
+                bp = mSettings.mPermissions.get(permission);
+            }
+            if (bp != null && (bp.isRuntime() || bp.isDevelopment())
+                    && (grantedPermissions == null
+                           || ArrayUtils.contains(grantedPermissions, permission))) {
+                final int flags = permissionsState.getPermissionFlags(permission, userId);
+                // Installer cannot change immutable permissions.
+                if ((flags & immutableFlags) == 0) {
+                    grantRuntimePermission(pkg.packageName, permission, userId);
                 }
             }
         }
