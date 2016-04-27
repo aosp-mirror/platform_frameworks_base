@@ -3479,7 +3479,9 @@ public final class ActivityThread {
                     // the decor view we have to notify the view root that the
                     // callbacks may have changed.
                     ViewRootImpl impl = decor.getViewRootImpl();
-                    impl.notifyChildRebuilt();
+                    if (impl != null) {
+                        impl.notifyChildRebuilt();
+                    }
                 }
                 if (a.mVisibleFromClient && !a.mWindowAdded) {
                     a.mWindowAdded = true;
