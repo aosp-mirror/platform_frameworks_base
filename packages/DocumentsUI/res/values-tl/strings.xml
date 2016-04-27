@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Isara"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Hindi nakopya ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Hindi nailipat ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Hindi na-delete ang mga file na ito: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Na-convert ang mga file na ito sa ibang format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Nakopya ang <xliff:g id="COUNT_1">%1$d</xliff:g> file sa clipboard.</item>
@@ -137,4 +138,6 @@
       <item quantity="one">Gusto mo bang i-delete ang <xliff:g id="COUNT_1">%1$d</xliff:g> item?</item>
       <item quantity="other">Gusto mo bang i-delete ang <xliff:g id="COUNT_1">%1$d</xliff:g> na item?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Paumanhin, maaari ka lang pumili ng hanggang 1000 item sa isang pagkakataon"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Maaari lang pumili ng 1000 item"</string>
 </resources>

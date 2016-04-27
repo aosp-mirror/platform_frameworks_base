@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"關閉"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"以下檔案未能複製：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"以下檔案未能移動：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"無法刪除以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"這些檔案已轉換成其他格式：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案到剪貼簿。</item>
@@ -137,4 +138,6 @@
       <item quantity="other">要刪除 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目嗎？</item>
       <item quantity="one">要刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目嗎？</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"很抱歉，您每次只可選擇最多 1000 個項目"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"只可選擇 1000 個項目"</string>
 </resources>

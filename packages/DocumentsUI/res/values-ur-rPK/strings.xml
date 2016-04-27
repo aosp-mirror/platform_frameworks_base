@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"بند کریں"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"یہ فائلیں کاپی نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"یہ فائلیں منتقل نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"یہ فائلیں حذف نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ان فائلوں کو ایک دوسرے فارمیٹ میں تبدیل کیا گیا تھا: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز کلپ بورڈ پر کاپی کی گئیں۔</item>
@@ -137,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> آئٹمز حذف کریں؟</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> آئٹم حذف کریں؟</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"معذرت، آپ ایک وقت میں صرف 1000 آئٹمز تک منتخب کر سکتے ہیں"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"صرف 1000 آئٹمز منتخب ہو سکے"</string>
 </resources>

@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Chiudi"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"I seguenti file non sono stati copiati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"I seguenti file non sono stati spostati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"I seguenti file non sono stati eliminati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"I file sono stati convertiti in un altro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> file copiati negli appunti.</item>
@@ -137,4 +138,6 @@
       <item quantity="other">Eliminare <xliff:g id="COUNT_1">%1$d</xliff:g> elementi?</item>
       <item quantity="one">Eliminare <xliff:g id="COUNT_0">%1$d</xliff:g> elemento?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Spiacenti, puoi selezionare massimo 1000 elementi alla volta"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Sono stati selezionati solo 1000 elementi"</string>
 </resources>

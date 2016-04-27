@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"Mbyll"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Këta skedarë nuk u kopjuan: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Këta skedarë nuk u zhvendosën: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Këta skedarë nuk u fshinë: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Këta skedarë janë konvertuar në format tjetër: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">U kopjuan <xliff:g id="COUNT_1">%1$d</xliff:g> skedarë në kujtesën e fragmenteve.</item>
@@ -137,4 +138,6 @@
       <item quantity="other">Të fshihen <xliff:g id="COUNT_1">%1$d</xliff:g> artikuj?</item>
       <item quantity="one">Të fshihet <xliff:g id="COUNT_0">%1$d</xliff:g> artikull?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Na vjen keq, mund të zgjedhësh vetëm deri në 1000 artikuj në të njëjtën kohë."</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Vetëm 1000 artikuj mund të zgjidheshin"</string>
 </resources>

@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"మూసివేయి"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ఈ ఫైల్‌లు తరలించబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"ఈ ఫైల్‌లు తొలగించబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ఈ ఫైల్‌లు మరొక ఆకృతికి మార్చబడ్డాయి: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">క్లిప్‌బోర్డ్‌కి <xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేసారు.</item>
@@ -137,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> అంశాలను తొలగించాలా?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> అంశాన్ని తొలగించాలా?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"క్షమించండి, మీరు ఒకేసారి గరిష్టంగా 1000 అంశాలను మాత్రమే ఎంచుకోగలరు"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"కేవలం 1000 అంశాలను మాత్రమే ఎంచుకోగలరు"</string>
 </resources>

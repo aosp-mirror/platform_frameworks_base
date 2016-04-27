@@ -112,6 +112,7 @@
     <string name="close" msgid="3043722427445528732">"Закрити"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Ці файли не скопійовано: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Ці файли не переміщено: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Ці файли не видалено: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ці файли конвертовано в інший формат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файл.</item>
@@ -161,4 +162,6 @@
       <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елементів?</item>
       <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елемента?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"На жаль, за раз можна вибрати не більше 1000 елементів"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Можна вибрати лише 1000 елементів"</string>
 </resources>

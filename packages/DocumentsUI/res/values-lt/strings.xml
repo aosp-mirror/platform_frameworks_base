@@ -112,6 +112,7 @@
     <string name="close" msgid="3043722427445528732">"Uždaryti"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Šie failai nebuvo nukopijuoti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Šie failai nebuvo perkelti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Šie failai nebuvo ištrinti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Šie failai konvertuoti į kitą formatą: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Nukopijuotas <xliff:g id="COUNT_1">%1$d</xliff:g> failas į iškarpinę.</item>
@@ -161,4 +162,6 @@
       <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elemento?</item>
       <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elementų?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Deja, vienu metu galite pasirinkti daugiausia 1 000 elementų"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Galima pasirinkti tik 1 000 elementų"</string>
 </resources>
