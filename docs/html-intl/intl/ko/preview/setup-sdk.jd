@@ -1,0 +1,226 @@
+page.title=Preview 설정
+meta.keywords="프리뷰", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+<ol>
+  <li><a href="#get-as13">Android Studio 2.1 가져오기</a></li>
+  <li><a href="#get-sdk">Android N SDK 가져오기</a>
+    <ol>
+      <li><a href="#docs-dl">참조 문서</a>
+    </ol>
+  </li>
+  <li><a href="#java8">Java 8 JDK 및 JRE 가져오기</a></li>
+  <li><a href="#create-update">프로젝트 업데이트 또는 생성</a></li>
+  <li><a href="#next">다음 단계</a></li>
+</ol>
+  </div>
+</div>
+
+<p>Android N Preview용 앱을 개발하려면, 이 페이지의 설명에 따라
+개발자 환경을 약간 업데이트해야 합니다.</p>
+
+<p>Android N 시스템 이미지에서 앱의 호환성을 간단히
+테스트하려면, 가이드에 따라 <a href="{@docRoot}preview/download.html">Android N 기기에서 테스트</a>를 수행하세요.</p>
+
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
+
+
+<h2 id="get-as13">Android Studio 2.1 가져오기(프리뷰)</h2>
+
+<p>Android N 플랫폼에서는 <a href="{@docRoot}preview/j8-jack.html">Java 8 언어 기능</a>을 지원하며
+여기에는 Jack이라는 새로운 컴파일러가 필요합니다. 현재는
+Android Studio 2.1에서만 최신 버전의 Jack이 지원됩니다. 따라서 Java 8 언어 기능을
+사용하려면, Android Studio 2.1을 사용하여 앱을 빌드해야 합니다. 그렇지 않은 경우,
+Jack 컴파일러를 사용할 필요가 없지만 Android N 플랫폼에
+대해 컴파일하려면 아래의 설명에 따라 JDK 8로
+업데이트해야 합니다.
+</p>
+
+<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>현재 Android Studio 2.1은 Canary 릴리스 채널에서 프리뷰로
+제공됩니다.
+Android Studio가 이미 있고 Canary Channel로 업데이트하지 않으려면,
+Android Studio 2.1을 별도의 설치로 다운로드한 후, Android N을
+사용한 개발에 이것을 사용할 수 있습니다.
+이 경우 기본 Android Studio 환경은 영향을 받지 않습니다.</p>
+
+<p>Android Studio 2.1을 별도의 설치로 다운로드하려면 다음
+단계를 따르세요(또는 기존 설치의 업데이트로 Android Studio 2.1을
+받으려면 4단계로 건너뛰세요).</p>
+
+<ol>
+  <li>기존 Android Studio 설치의 이름을 수정하고 버전 번호를 붙입니다.
+이런 방식으로 새 버전을 설치하면
+기존 버전을 덮어쓰지 않습니다.</li>
+  <li><a href="http://tools.android.com/download/studio/canary/latest">Canary Channel
+다운로드 페이지</a>에서 자신의 운영 체제에 맞는 ZIP 파일을 다운로드합니다.
+  </li>
+  <li>패키지의 압축을 풀고 Android Studio 2.1의 콘텐츠를
+    시스템상의 적절한 애플리케이션 위치로 이동한 다음 실행합니다.</li>
+  <li>Settings 대화 상자를
+엽니다(Windows/Linux에서 <strong>File &gt; Settings</strong> 또는
+Mac에서 <strong>Android Studio &gt; Preferences</strong>). 왼쪽 패널에서 <strong>Appearance &amp; Behavior &gt; System Settings &gt;
+Updates</strong>를
+선택합니다.
+  </li>
+  <li>Updates 패널에서 <strong>Automatically
+check updates for</strong> 확인란을 선택하고
+드롭다운 목록에서 <strong>Canary Channel</strong>을 선택합니다.
+  </li>
+</ol>
+
+<p>다음 단계를 위해 이 설정 창을 열어둡니다.</p>
+
+
+<h2 id="get-sdk">N Preview SDK 가져오기</h2>
+
+<p>Android N API를 사용한 개발을 시작하려면,
+다음과 같이 Android N Preview SDK를 Android Studio에 설치해야 합니다.</p>
+
+<ol>
+  <li>Updates 패널이 여전히 표시된 상태에서(위의 4단계), <strong>Automatically
+check updates for Android SDK</strong> 확인란을 선택하고
+드롭다운 목록에서 <strong>Preview Channel</strong>을
+선택합니다.
+  </li>
+  <li><strong>Check Now</strong>를 클릭합니다.</li>
+
+  <li>왼쪽 패널에서 <strong>Appearance &amp; Behavior &gt;
+ System Settings &gt; Android SDK</strong>를 선택합니다.
+
+  <li><strong>SDK Platforms</strong> 탭을 클릭한 다음,
+<strong>Android N Preview</strong> 확인란을 선택합니다.</li>
+
+  <li><strong>SDK Tools</strong> 탭을 클릭한 다음,
+<strong>Android SDK Build Tools</strong>, <strong>Android SDK
+Platform-Tools</strong>, <strong>Android SDK Tools</strong> 확인란을
+선택합니다.
+  </li>
+
+  <li><strong>OK</strong>를 클릭한 다음, 설치해야 하는 패키지의
+사용권 계약에 동의합니다.
+  </li>
+</ol>
+
+<h3 id="docs-dl">N Preview 참조 문서 가져오기</h3>
+
+<p>
+  Android N API에 대한 자세한 내용은 N Preview
+참조 문서에서 볼 수 있으며, 이 문서는 다음 표에서 다운로드할 수 있습니다.
+이 패키지에는 요약된 오프라인 버전의 Android 개발자
+웹사이트가 있고 Android N API용의 업데이트된
+API 참조와 API 차이점 보고서가 포함되어 있습니다.
+</p>
+
+<table>
+  <tr>
+    <th scope="col">문서</th>
+    <th scope="col">체크섬</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap">
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip">n-preview-1-docs.zip</a></td>
+    <td width="100%">
+      MD5: 4ab33ccbe698f46f125cc5b807cf9c2f<br>
+      SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
+    </td>
+  </tr>
+<table>
+
+
+
+<h2 id="java8">Java 8 JDK 및 JRE 가져오기</h2>
+
+<p>Android N 플랫폼에 대해 앱을 컴파일하려면 
+Java 8 개발자 키트(JDK 8)를 사용해야 하며, Android
+Studio 2.1의 일부 도구를 사용하려면 Java 8 런타임 환경(JRE 8)을 설치해야
+합니다. 따라서 각각 최신 버전이 없는 경우, 지금 JDK 8 및 JRE 8를
+다운로드하세요.</p>
+
+<p>그런 다음 Android Studio에서 다음과 같이 JDK 버전을 설정합니다.</p>
+
+<ol>
+  <li>Android Studio에서 Android 프로젝트를 열고 <strong>File &gt;
+Project Structure</strong>를 선택하여
+Project Structure 대화 상자를 엽니다. (또는, <strong>File &gt; Other Settings &gt;
+Default Project Structure</strong>를 선택하여 모든 프로젝트에 대해
+기본값을 설정할 수 있습니다.)
+   </li>
+   <li>대화 상자의 왼쪽 패널에서 <strong>SDK Location</strong>을 클릭합니다.
+   </li>
+   <li><strong>JDK Location</strong> 필드에,
+Java 8 JDK의 위치를 입력한 다음(오른쪽의 버튼을 클릭하여
+파일 탐색), <strong>OK</strong>를 클릭합니다.
+   </li>
+</ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700" alt="" />
+
+
+<h2 id="create-update">프로젝트 업데이트 또는 생성</h2>
+
+<p>
+  Android N API를 사용하려면, 프로젝트를 적절하게 구성해야 합니다.
+</p>
+
+<p>Java 8 언어 기능을 사용할 계획인 경우에는,
+<a href="{@docRoot}preview/j8-jack.html">Java 8 언어 기능</a>에서 지원되는 Java 8 기능과
+Jack 컴파일러로 프로젝트를 구성하는 방법에 대해서도
+읽어봐야 합니다.</p>
+
+
+<h3 id="update">기존 프로젝트 업데이트</h3>
+
+<p>자신의 모듈에 대한
+<code>build.gradle</code>파일을 열고 다음과 같이 값을
+업데이트합니다.
+</p>
+
+<pre>
+android {
+  compileSdkVersion <strong>'android-N'</strong>
+  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'N'</strong>
+     targetSdkVersion <strong>'N'</strong>
+     ...
+  }
+  ...
+}</pre>
+
+
+<h3 id="create">새 프로젝트 생성</h3>
+
+
+<p>Android N Preview SDK를 사용한 개발에서 새 프로젝트를 만들려면:</p>
+
+<ol>
+  <li><strong>File &gt; New Project</strong>를 클릭하고
+Target Android Devices 페이지가 나올 때까지 단계를 따릅니다.
+  </li>
+  <li>이 페이지에서 <strong>Phone and Tablet</strong> 옵션을 선택합니다.</li>
+  <li><strong>Phone and Tablet</strong> 옵션 아래의 <strong>Minimum
+SDK</strong> 옵션 목록에서
+<strong>N: Android API 23, N Preview (Preview)</strong>를 선택합니다.</li>
+</ol>
+
+
+<h2 id="next">다음 단계</h2>
+
+<ul>
+  <li>가이드에 따라 <a href="{@docRoot}preview/download.html">Android N 기기에서 테스트</a>를 수행합니다.</li>
+  <li><a href="{@docRoot}preview/behavior-changes.html">동작 변경</a>
+및 <a href="{@docRoot}preview/api-overview.html">Android N API
+및 기능</a>에서 Android N 플랫폼에
+대해 자세히 알아봅니다.</li>
+</ul>
+
