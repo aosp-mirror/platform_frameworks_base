@@ -20,6 +20,8 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.database.MergeCursor;
@@ -48,7 +50,6 @@ import java.util.Map;
 @VisibleForTesting
 public class Model {
     private static final String TAG = "Model";
-    private static final String EMPTY = "";
 
     private boolean mIsLoading;
     private List<UpdateListener> mUpdateListeners = new ArrayList<>();
@@ -62,13 +63,6 @@ public class Model {
      */
     private String mIds[] = new String[0];
     private int mSortOrder = SORT_ORDER_DISPLAY_NAME;
-
-    private int mAuthorityIndex = -1;
-    private int mDocIdIndex = -1;
-    private int mMimeTypeIndex = -1;
-    private int mDisplayNameIndex = -1;
-    private int mSizeIndex = -1;
-    private int mLastModifiedIndex = -1;
 
     @Nullable String info;
     @Nullable String error;
@@ -111,14 +105,6 @@ public class Model {
         mCursor = result.cursor;
         mCursorCount = mCursor.getCount();
         mSortOrder = result.sortOrder;
-        mAuthorityIndex = mCursor.getColumnIndex(RootCursorWrapper.COLUMN_AUTHORITY);
-        assert(mAuthorityIndex != -1);
-        mDocIdIndex = mCursor.getColumnIndex(Document.COLUMN_DOCUMENT_ID);
-        mMimeTypeIndex = mCursor.getColumnIndex(Document.COLUMN_MIME_TYPE);
-        mDisplayNameIndex = mCursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME);
-        mLastModifiedIndex = mCursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED);
-        mSizeIndex = mCursor.getColumnIndex(Document.COLUMN_SIZE);
-
         doc = result.doc;
 
         updateModelData();
@@ -171,23 +157,26 @@ public class Model {
             // If the cursor is a merged cursor over multiple authorities, then prefix the ids
             // with the authority to avoid collisions.
             if (mCursor instanceof MergeCursor) {
-                mIds[pos] = getStringOrEmpty(mAuthorityIndex) + "|" + getStringOrEmpty(mDocIdIndex);
+                mIds[pos] = getCursorString(mCursor, RootCursorWrapper.COLUMN_AUTHORITY) + "|" +
+                        getCursorString(mCursor, Document.COLUMN_DOCUMENT_ID);
             } else {
-                mIds[pos] = getStringOrEmpty(mDocIdIndex);
+                mIds[pos] = getCursorString(mCursor, Document.COLUMN_DOCUMENT_ID);
             }
 
-            mimeType = getStringOrEmpty(mMimeTypeIndex);
+            mimeType = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
             isDirs[pos] = Document.MIME_TYPE_DIR.equals(mimeType);
 
-            switch (mSortOrder) {
+            switch(mSortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
-                    displayNames[pos] = getStringOrEmpty(mDisplayNameIndex);
+                    final String displayName = getCursorString(
+                            mCursor, Document.COLUMN_DISPLAY_NAME);
+                    displayNames[pos] = displayName;
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    longValues[pos] = getLastModified();
+                    longValues[pos] = getLastModified(mCursor);
                     break;
                 case SORT_ORDER_SIZE:
-                    longValues[pos] = getDocSize();
+                    longValues[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
                     break;
             }
         }
@@ -243,7 +232,7 @@ public class Model {
                 } else {
                     final String lhs = pivotValue;
                     final String rhs = sortKey[mid];
-                    compare = Shared.compareToIgnoreCase(lhs, rhs);
+                    compare = Shared.compareToIgnoreCaseNullable(lhs, rhs);
                 }
 
                 if (compare < 0) {
@@ -364,42 +353,13 @@ public class Model {
     }
 
     /**
-     * @return Value of the string column, or an empty string if no value, or empty value.
-     */
-    private String getStringOrEmpty(int columnIndex) {
-        if (columnIndex == -1)
-            return EMPTY;
-        final String result = mCursor.getString(columnIndex);
-        return result != null ? result : EMPTY;
-    }
-
-    /**
      * @return Timestamp for the given document. Some docs (e.g. active downloads) have a null
-     * or missing timestamp - these will be replaced with MAX_LONG so that such files get sorted to
-     * the top when sorting by date.
+     * timestamp - these will be replaced with MAX_LONG so that such files get sorted to the top
+     * when sorting by date.
      */
-    private long getLastModified() {
-        if (mLastModifiedIndex == -1)
-            return Long.MAX_VALUE;
-        try {
-            final long result = mCursor.getLong(mLastModifiedIndex);
-            return result > 0 ? result : Long.MAX_VALUE;
-        } catch (NumberFormatException e) {
-            return Long.MAX_VALUE;
-        }
-    }
-
-    /**
-     * @return Size for the given document. If the size is unknown or invalid, returns 0.
-     */
-    private long getDocSize() {
-        if (mSizeIndex == -1)
-            return 0;
-        try {
-            return mCursor.getLong(mSizeIndex);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+    long getLastModified(Cursor cursor) {
+        long l = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+        return (l == -1) ? Long.MAX_VALUE : l;
     }
 
     public @Nullable Cursor getItem(String modelId) {
