@@ -1,4 +1,4 @@
-page.title=Building Apps with Over 65K Methods
+page.title=Building Apps with Over 64K Methods
 page.tags="65536","references","max","65k","dex","64k","multidex","multi-dex","methods"</p>
 
 @jd:body
@@ -8,14 +8,14 @@ page.tags="65536","references","max","65k","dex","64k","multidex","multi-dex","m
     <h2>In this document</h2>
     <ol>
       <li><a href="#about">
-        About the 65K Reference Limit</a>
+        About the 64K Reference Limit</a>
         <ol>
           <li><a href="#mdex-pre-l">Multidex support prior to Android 5.0</a></li>
           <li><a href="#mdex-on-l">Multidex support for Android 5.0 and higher</a></li>
         </ol>
       </li>
       <li><a href="#avoid">
-        Avoiding the 65K Limit</a></li>
+        Avoiding the 64K Limit</a></li>
       <li><a href="#mdex-gradle">
         Configuring Your App for Multidex with Gradle</a>
         <ol>
@@ -82,45 +82,71 @@ You may try using --multi-dex option.
 </p>
 
 
-<h2 id="about">About the 65K Reference Limit</h2>
+<h2 id="about">About the 64K Reference Limit</h2>
 
 <p>
-  Android application (APK) files contain executable bytecode files in the form of <a href=
-  "https://source.android.com/devices/tech/dalvik/">Dalvik</a> Executable (DEX) files, which
-  contain the compiled code used to run your app. The Dalvik Executable specification limits the
-  total number of methods that can be referenced within a single DEX file to 65,536, including
-  Android framework methods, library methods, and methods in your own code. Getting past this limit
-  requires that you configure your app build process to generate more than one DEX file, known as a
-  <em>multidex</em> configuration.
+  Android application (APK) files contain executable bytecode files in the form
+  of <a href="https://source.android.com/devices/tech/dalvik/">Dalvik</a>
+  Executable (DEX) files, which contain the compiled code used to run your app.
+  The Dalvik Executable specification limits the total number of methods that
+  can be referenced within a single DEX file to 65,536—including Android
+  framework methods, library methods, and methods in your own code. In the
+  context of computer science, the term <a class="external-link" href=
+  "https://en.wikipedia.org/wiki/Kilo-"><em>Kilo, K</em></a>, denotes 1024 (or
+  2^10). Because 65,536 is equal to 64 X 1024, this limit is referred to as the
+  '64K reference limit'.
 </p>
 
+<p>
+  Getting past this limit requires that you configure your app build process to
+  generate more than one DEX file, known as a <em>multidex</em> configuration.
+</p>
 
 <h3 id="mdex-pre-l">Multidex support prior to Android 5.0</h3>
 
 <p>
-  Versions of the platform prior to Android 5.0 use the Dalvik runtime for executing app code. By
-  default, Dalvik limits apps to a single classes.dex bytecode file per APK. In order to get around
-  this limitation, you can use the <a href="{@docRoot}tools/support-library/features.html#multidex">
-  multidex support library</a>, which becomes part of the primary DEX file of your app and then
+  Versions of the platform prior to Android 5.0 (API level 21) use the Dalvik
+  runtime for executing app code. By default, Dalvik limits apps to a single
+  classes.dex bytecode file per APK. In order to get around this limitation,
+  you can use the <a href=
+  "{@docRoot}tools/support-library/features.html#multidex">multidex support
+  library</a>, which becomes part of the primary DEX file of your app and then
   manages access to the additional DEX files and the code they contain.
 </p>
 
+<p class="note">
+  <strong>Note:</strong> If your project is configured for multidex with
+  <code>minSdkVersion 20</code> or lower, and you deploy to target devices
+  running Android 4.4 (API level 20) or lower, Android Studio disables <a href=
+  "{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a>.
+</p>
 
 <h3 id="mdex-on-l">Multidex support for Android 5.0 and higher</h3>
 
 <p>
-  Android 5.0 and higher uses a runtime called ART which natively supports loading multiple dex
-  files from application APK files. ART performs pre-compilation at application install time which
-  scans for classes(..N).dex files and compiles them into a single .oat file for execution by the
-  Android device. For more information on the Android 5.0 runtime, see <a href=
-  "https://source.android.com/devices/tech/dalvik/art.html">Introducing ART</a>.
+  Android 5.0 (API level 21) and higher uses a runtime called ART which
+  natively supports loading multiple dex files from application APK files. ART
+  performs pre-compilation at application install time which scans for
+  classes(..N).dex files and compiles them into a single .oat file for
+  execution by the Android device. For more information on the Android 5.0
+  runtime, see <a href=
+  "https://source.android.com/devices/tech/dalvik/art.html">Introducing
+  ART</a>.
 </p>
 
+<p class="note">
+  <strong>Note:</strong> While using <a href=
+  "{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a>,
+  Android Studio automatically configures your app for multidex when your app's
+  <code>minSdkVersion</code> is set to 21 or higher. Because Instant Run only
+  works with the debug version of your app, you still need to configure your
+  release build for multidex to avoid the 64K limit.
+</p>
 
-<h2 id="avoid">Avoiding the 65K Limit</h2>
+<h2 id="avoid">Avoiding the 64K Limit</h2>
 
 <p>
-  Before configuring your app to enable use of 65K or more method references, you should take steps
+  Before configuring your app to enable use of 64K or more method references, you should take steps
   to reduce the total number of references called by your app code, including methods defined by
   your app code or included libraries. The following strategies can help you avoid hitting the dex
   reference limit:
@@ -173,8 +199,9 @@ You may try using --multi-dex option.
 </ul>
 
 <p>
-  Modify your app Gradle build file configuration to include the support library and enable
-  multidex output, as shown in the following Gradle build file snippet:
+  Modify the module-level <code>build.gradle</code> file configuration to
+  include the support library and enable multidex output, as shown in the
+  following code snippet:
 </p>
 
 <pre>
@@ -198,13 +225,6 @@ dependencies {
   compile 'com.android.support:multidex:1.0.0'
 }
 </pre>
-
-<p class="note">
-  <strong>Note:</strong> You can specify the <code>multiDexEnabled</code> setting in the
-  <code>defaultConfig,</code> <code>buildType</code>, or <code>productFlavor</code> sections of
-  your Gradle build file.
-</p>
-
 
 <p>
   In your manifest add the {@link android.support.multidex.MultiDexApplication} class from the
@@ -444,7 +464,7 @@ android {
 dependencies {
     androidTestCompile('com.android.support:multidex-instrumentation:1.0.1') {
          exclude group: 'com.android.support', module: 'multidex'
-    }       
+    }
 }
 </pre>
 </p>

@@ -22,6 +22,17 @@ page.article=true
   visualize the rendering, compute, memory, and battery performance of your
   app.</p>
 
+<p class="note">
+  <strong>Note:</strong> While profiling an app, you should <a href=
+  "{@docRoot}tools/building/building-studio.html#disable-ir">disable Instant
+  Run</a>. There is a small performance impact when <a href=
+  "{@docRoot}tools/building/building-studio.html#instant-run">using Instant
+  Run</a> and a slightly larger impact when updating methods. This
+  performance impact could interfere with information provided by performance
+  profiling tools. Additionally, the stub methods generated while using the
+  feature can complicate stack traces.
+</p>
+
 <h2 id="rendering-tools">Rendering Analysis Tools</h2>
 
 <p>Visualize the rendering behavior and performance of your app.</p>
