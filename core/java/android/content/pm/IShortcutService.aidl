@@ -49,6 +49,8 @@ interface IShortcutService {
 
     void resetThrottling(); // system only API for developer opsions
 
+    void onApplicationActive(String packageName, int userId); // system only API for sysUI
+
     byte[] getBackupPayload(int user);
 
     void applyRestore(in byte[] payload, int user);

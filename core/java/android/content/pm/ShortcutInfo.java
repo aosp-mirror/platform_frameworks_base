@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
@@ -35,8 +34,6 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 // TODO Enhance javadoc
@@ -307,14 +304,6 @@ public final class ShortcutInfo implements Parcelable {
             case Icon.TYPE_RESOURCE:
             case Icon.TYPE_BITMAP:
                 break; // OK
-            case Icon.TYPE_URI:
-                if (ContentResolver.SCHEME_CONTENT.equals(icon.getUri().getScheme())) {
-                    break;
-                }
-                // Note "file:" is not supported, because depending on the path, system server
-                // cannot access it. // TODO Revisit "file:" icon support
-
-                // fall through
             default:
                 throw getInvalidIconException();
         }
@@ -374,6 +363,12 @@ public final class ShortcutInfo implements Parcelable {
          * Optionally sets the target activity.  If it's not set, and if the caller application
          * has multiple launcher icons, this shortcut will be shown on all those icons.
          * If it's set, this shortcut will be only shown on this activity.
+         *
+         * <p>The package name of the target activity must match the package name of the shortcut
+         * publisher.
+         *
+         * <p>This has nothing to do with the activity that this shortcut will launch.  This is
+         * a hint to the launcher app about which launcher icon to associate this shortcut with.
          */
         @NonNull
         public Builder setActivityComponent(@NonNull ComponentName activityComponent) {
@@ -385,11 +380,8 @@ public final class ShortcutInfo implements Parcelable {
          * Optionally sets an icon.
          *
          * <ul>
-         *     <li>Tints are not supported.
-         *     <li>Bitmaps, resources and "content:" URIs are supported.
-         *     <li>"content:" URI will be fetched when a shortcut is registered to
-         *         {@link ShortcutManager}.  Changing the content from the same URI later will
-         *         not be reflected to launcher icons.
+         *     <li>Tints set by {@link Icon#setTint} or {@link Icon#setTintList} are not supported.
+         *     <li>Bitmaps and resources are supported, but "content:" URIs are not supported.
          * </ul>
          *
          * <p>For performance reasons, icons will <b>NOT</b> be available on instances
@@ -498,6 +490,11 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return the target activity, which may be null, in which case the shortcut is not associated
      * with a specific activity.
+     *
+     * <p>This has nothing to do with the activity that this shortcut will launch.  This is
+     * a hint to the launcher app that on which launcher icon this shortcut should be shown.
+     *
+     * @see Builder#setActivityComponent
      */
     @Nullable
     public ComponentName getActivityComponent() {
@@ -550,6 +547,10 @@ public final class ShortcutInfo implements Parcelable {
      *
      * <p>All shortcuts must have an intent, but this method will return null when
      * {@link #hasKeyFieldsOnly()} is true.
+     *
+     * <p>Launcher apps <b>cannot</b> see the intent.  If a {@link ShortcutInfo} is obtained via
+     * {@link LauncherApps}, then this method will always return null.  Launcher apps can only
+     * start a shortcut intent with {@link LauncherApps#startShortcut}.
      */
     @Nullable
     public Intent getIntent() {
