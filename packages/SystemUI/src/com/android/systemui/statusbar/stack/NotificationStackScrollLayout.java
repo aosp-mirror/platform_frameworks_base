@@ -23,6 +23,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -327,6 +328,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
+    private boolean mDrawBackgroundAsSrc;
+    private boolean mFadedOut;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -439,7 +442,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
-        mBackgroundPaint.setXfermode(asSrc ? mSrcMode : null);
+        mDrawBackgroundAsSrc = asSrc;
+        updateSrcDrawing();
+    }
+
+    private void updateSrcDrawing() {
+        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && !mFadedOut ? mSrcMode : null);
         invalidate();
     }
 
@@ -1743,7 +1751,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void applyCurrentBackgroundBounds() {
-        mScrimController.setExcludedBackgroundArea(mCurrentBounds);
+        if (!mFadedOut) {
+            mScrimController.setExcludedBackgroundArea(mCurrentBounds);
+        }
         invalidate();
     }
 
@@ -3419,6 +3429,24 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
         updateNotificationAnimationStates();
+    }
+
+    public void setFadedOut(boolean fadingOut) {
+        if (fadingOut != mFadedOut) {
+            mFadedOut = fadingOut;
+            if (fadingOut) {
+                mScrimController.setExcludedBackgroundArea(null);
+            } else {
+                applyCurrentBackgroundBounds();
+            }
+            updateSrcDrawing();
+        }
+    }
+
+    @Override
+    public void setAlpha(@FloatRange(from = 0.0, to = 1.0) float alpha) {
+        super.setAlpha(alpha);
+        setFadedOut(alpha != 1.0f);
     }
 
     /**
