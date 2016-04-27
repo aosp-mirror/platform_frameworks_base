@@ -9202,8 +9202,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence text = (arguments != null) ? arguments.getCharSequence(
                         AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE) : null;
                 setText(text);
-                if (text != null && text.length() > 0) {
-                    Selection.setSelection((Spannable) mText, text.length());
+                if (mText != null) {
+                    int updatedTextLength = mText.length();
+                    if (updatedTextLength > 0) {
+                        Selection.setSelection((Spannable) mText, updatedTextLength);
+                    }
                 }
             } return true;
             default: {
