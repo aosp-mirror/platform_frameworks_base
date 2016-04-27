@@ -3625,8 +3625,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // disregarding font scale, which should remain set to
             // the value of the previous configuration.
             mTempConfiguration.setToDefaults();
-            mTempConfiguration.fontScale = currentConfig.fontScale;
-            mTempConfiguration.uiMode = currentConfig.uiMode;
+            mTempConfiguration.updateFrom(currentConfig);
             computeScreenConfigurationLocked(mTempConfiguration);
             if (currentConfig.diff(mTempConfiguration) != 0) {
                 mWaitingForConfig = true;
@@ -3689,11 +3688,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            mCurConfiguration = new Configuration(config);
             if (mWaitingForConfig) {
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
+            boolean configChanged = mCurConfiguration.diff(config) != 0;
+            if (!configChanged) {
+                return null;
+            }
+            mCurConfiguration = new Configuration(config);
             return onConfigurationChanged();
         }
     }
@@ -8877,8 +8880,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
         mTempConfiguration.setToDefaults();
-        mTempConfiguration.fontScale = mCurConfiguration.fontScale;
-        mTempConfiguration.uiMode = mCurConfiguration.uiMode;
+        mTempConfiguration.updateFrom(mCurConfiguration);
         computeScreenConfigurationLocked(mTempConfiguration);
         configChanged |= mCurConfiguration.diff(mTempConfiguration) != 0;
 
