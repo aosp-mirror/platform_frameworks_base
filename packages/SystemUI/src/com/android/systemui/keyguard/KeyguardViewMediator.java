@@ -837,6 +837,7 @@ public class KeyguardViewMediator extends SystemUI {
         long when = SystemClock.elapsedRealtime() + timeout;
         Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
         intent.putExtra("seq", mDelayedShowingSequence);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
                 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
@@ -857,6 +858,7 @@ public class KeyguardViewMediator extends SystemUI {
                     Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
                     lockIntent.putExtra("seq", mDelayedProfileShowingSequence);
                     lockIntent.putExtra(Intent.EXTRA_USER_ID, profileId);
+                    lockIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     PendingIntent lockSender = PendingIntent.getBroadcast(
                             mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                     mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
