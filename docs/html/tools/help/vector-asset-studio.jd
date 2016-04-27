@@ -60,7 +60,8 @@ generate Portable Network Graphic (PNG) files (the default) or use the Support
 Library.</p>
 
 <p>For backward-compatibility, Vector Asset Studio generates
-raster images of the vector drawable. You can refer to vector assets as
+raster images of the vector drawable. The vector and raster drawables are
+packaged together in the APK. You can refer to vector assets as
 {@link android.graphics.drawable.Drawable} in Java code or
 <code>@drawable</code> in XML code; when your app runs, the corresponding vector
 or raster image displays automatically depending on the API level.</p>
@@ -109,7 +110,7 @@ icons black (<code>android:fillColor="#FF000000"</code>). Using this approach, y
 that you placed in a layout, and the icon color changes to the tint color. If the icon color
 isn't black, the icon color might instead blend with the tint color.</p>
 
-<h3 id="apilevel">Vector drawable support at different API levels</h3>
+<h3 id="apilevel">Vector drawable backward-compatibility solutions</h3>
 
 <p>The following table summarizes the two techniques you can use for
 backward-compatibility with Android 4.4 (API level 20) and lower:</p>
@@ -118,7 +119,7 @@ backward-compatibility with Android 4.4 (API level 20) and lower:</p>
 <table>
   <tr>
     <th scope="col">Technique</th>
-    <th scope="col">Graphics Type</th>
+    <th scope="col">Drawables in APK</th>
     <th scope="col">VectorDrawable XML Elements</th>
     <th scope="col">Android Plugin for Gradle</th>
     <th scope="col">Build Flags</th>
@@ -127,7 +128,7 @@ backward-compatibility with Android 4.4 (API level 20) and lower:</p>
 
   <tr>
     <td><strong>PNG generation</strong></td>
-    <td>Vector and PNG</td>
+    <td>Vector and raster</td>
     <td><a href="#apilevel">Subset supported</a></td>
     <td>1.5.0 or higher</td>
     <td>Default</td>
@@ -147,7 +148,7 @@ backward-compatibility with Android 4.4 (API level 20) and lower:</p>
 <p>Using vector graphics can produce a smaller APK, but the initial loading
 of vector graphics can take longer.</p>
 
-<h4 id="pngoption">PNG generation for backward-compatibility</h4>
+<h4 id="pngoption">PNG generation</h4>
 
 <p>Android 5.0 (API level 21) and higher provides vector drawable support. If your app has a
 minimum API level that is lower, Vector Asset Studio adds the vector drawable file to your
@@ -219,7 +220,7 @@ Changing the values in the code should not cause any issues, as long as they’r
 you want to add XML elements, you need to make sure that they’re supported based on your minimum API
 level.</p>
 
-<h4 id="sloption">Support Library for backward-compatibility</h4>
+<h4 id="sloption">Support Library</h4>
 
 <p>This technique requires Android Support Library 23.2 or higher and Android
 Plugin for Gradle 2.0 or higher, and uses vector drawables only. Before using
