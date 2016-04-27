@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.Pools.Pool;
@@ -553,8 +554,9 @@ public final class InputMethodManager {
         }
 
         @Override
-        protected void onReportFullscreenMode(boolean enabled) {
-            mParentInputMethodManager.setFullscreenMode(enabled);
+        protected void onReportFullscreenMode(boolean enabled, boolean calledInBackground) {
+            mParentInputMethodManager.onReportFullscreenMode(enabled, calledInBackground,
+                    getInputMethodId());
         }
 
         @Override
@@ -563,6 +565,7 @@ public final class InputMethodManager {
                     + "connection=" + getInputConnection()
                     + " finished=" + isFinished()
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
+                    + " mInputMethodId=" + getInputMethodId()
                     + "}";
         }
     }
@@ -718,8 +721,13 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void setFullscreenMode(boolean fullScreen) {
-        mFullscreenMode = fullScreen;
+    public void onReportFullscreenMode(boolean fullScreen, boolean calledInBackground,
+            String inputMethodId) {
+        synchronized (mH) {
+            if (!calledInBackground || TextUtils.equals(mCurId, inputMethodId)) {
+                mFullscreenMode = fullScreen;
+            }
+        }
     }
 
     /** @hide */
@@ -746,9 +754,11 @@ public final class InputMethodManager {
      * your UI, else returns false.
      */
     public boolean isFullscreenMode() {
-        return mFullscreenMode;
+        synchronized (mH) {
+            return mFullscreenMode;
+        }
     }
-    
+
     /**
      * Return true if the given view is the currently active view for the
      * input method.
@@ -1254,6 +1264,9 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mNextUserActionNotificationSequenceNumber =
                                 res.userActionNotificationSequenceNumber;
+                        if (mServedInputConnectionWrapper != null) {
+                            mServedInputConnectionWrapper.setInputMethodId(mCurId);
+                        }
                     } else {
                         if (res.channel != null && res.channel != mCurChannel) {
                             res.channel.dispose();
