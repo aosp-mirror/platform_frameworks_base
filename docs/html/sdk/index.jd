@@ -484,7 +484,7 @@ Android Auto.</p>
 <div class="col-2of6">
 <h4>Windows</h4>
 <ul>
-<li>Microsoft&reg;  Windows&reg;  7/8/10 (32 or 64-bit)</li>
+<li>Microsoft&reg;  Windows&reg;  7/8/10 (32- or 64-bit)</li>
 <li>2 GB RAM minimum, 8 GB RAM recommended</li>
 <li>2 GB of available disk space minimum,<br>4 GB Recommended
 (500 MB for IDE + 1.5 GB for
@@ -516,6 +516,7 @@ Android SDK and emulator system image)</li>
 <li>GNOME or KDE desktop
 <p><i>Tested on Ubuntu®  12.04, Precise Pangolin (64-bit distribution
 capable of running 32-bit applications)</i></li>
+<li>64-bit distribution capable of running 32-bit applications</li>
 <li>GNU C Library (glibc) 2.11 or later</li>
 <li>2 GB RAM minimum, 8 GB RAM recommended</li>
 <li>2 GB of available disk space minimum,<br>4 GB Recommended
@@ -523,8 +524,7 @@ capable of running 32-bit applications)</i></li>
 Android SDK and emulator system image)</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Java Development Kit (JDK) 8</li>
-<li>For accelerated emulator: 64-bit operating system and
-Intel® processor with support for Intel®
+<li>For accelerated emulator: Intel® processor with support for Intel®
 VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality,
 or AMD processor with support for AMD Virtualization™ (AMD-V™)</li>
 </ul>
