@@ -55,10 +55,7 @@ to "{@code http://schemas.android.com/apk/res/android}".</dd>
 <dd>A full Java-language-style package name for the Android application. The
   name should be unique.  The name may contain uppercase or lowercase letters
   ('A' through 'Z'), numbers, and underscores ('_').  However, individual
-  package name parts may only start with letters. Note that you can use
-  different names for the Android application package and for the Java package
-  identifiers used in the application's classes; these two types of names are
-  entirely independent.
+  package name parts may only start with letters.
 
 <p>To avoid conflicts with other developers, you should use Internet domain ownership as the
 basis for your package names (in reverse). For example, applications published by Google start with
