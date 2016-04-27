@@ -718,6 +718,21 @@ final class Settings {
                     // let's log a message about it.
                     Slog.i(PackageManagerService.TAG, "Package " + name + " codePath changed from "
                             + p.codePath + " to " + codePath + "; Retaining data and using new");
+
+                    // The owner user's installed flag is set false
+                    // when the application was installed by other user
+                    // and the installed flag is not updated
+                    // when the application is appended as system app later.
+                    if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 &&
+                            getDisabledSystemPkgLPr(name) == null) {
+                        List<UserInfo> allUserInfos = getAllUsers();
+                        if (allUserInfos != null) {
+                            for (UserInfo userInfo : allUserInfos) {
+                                p.setInstalled(true, userInfo.id);
+                            }
+                        }
+                    }
+
                     /*
                      * Since we've changed paths, we need to prefer the new
                      * native library path over the one stored in the
