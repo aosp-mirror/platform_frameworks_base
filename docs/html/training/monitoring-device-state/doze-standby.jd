@@ -205,13 +205,14 @@ Standby</a>
   you can set alarms that will fire even if the device is in Doze.
 </p>
 
-<p class="note"><strong>Note:</strong> Neither
-{@link
+<p class="note">
+  <strong>Note:</strong> Neither {@link
   android.app.AlarmManager#setAndAllowWhileIdle(int, long,
   android.app.PendingIntent) setAndAllowWhileIdle()} nor {@link
   android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
-  android.app.PendingIntent) setExactAndAllowWhileIdle()} can fire alarms more than once per 15
-minutes per app.</p>
+  android.app.PendingIntent) setExactAndAllowWhileIdle()} can fire alarms more
+  than once per 9 minutes, per app.
+</p>
 
 <p>
   The Doze restriction on network access is also likely to affect your app,
