@@ -41,21 +41,24 @@ parent.link=manifest-intro.html
 <p>
 <dt>description:</dt>
 <dd itemprop="description">The root element of the AndroidManifest.xml file.  It must
-contain an <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element 
+contain an <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element
 and specify {@code xmlns:android} and {@code package} attributes.</dd>
 
 <dt>attributes:</dt>
 <dd>
 <dl class="attr">
 <dt><a name="nspace"></a>{@code xmlns:android}</dt>
-<dd>Defines the Android namespace.  This attribute should always be set 
+<dd>Defines the Android namespace.  This attribute should always be set
 to "{@code http://schemas.android.com/apk/res/android}".</dd>
 
 <dt><a name="package"></a>{@code package}</dt>
-<dd>A full Java-language-style package name for the application.  The name should 
-be unique.  The name may contain uppercase or lowercase letters ('A'
-through 'Z'), numbers, and underscores ('_').  However, individual
-package name parts may only start with letters.
+<dd>A full Java-language-style package name for the Android application. The
+  name should be unique.  The name may contain uppercase or lowercase letters
+  ('A' through 'Z'), numbers, and underscores ('_').  However, individual
+  package name parts may only start with letters. Note that you can use
+  different names for the Android application package and for the Java package
+  identifiers used in the application's classes; these two types of names are
+  entirely independent.
 
 <p>To avoid conflicts with other developers, you should use Internet domain ownership as the
 basis for your package names (in reverse). For example, applications published by Google start with
@@ -83,11 +86,11 @@ the previous version cannot update to the new version.</p>
 </dd>
 
 <dt><a name="uid"></a>{@code android:sharedUserId}</dt>
-<dd>The name of a Linux user ID that will be shared with other applications.  
-By default, Android assigns each application its own unique user ID.  
-However, if this attribute is set to the same value for two or more applications, 
-they will all share the same ID &mdash; provided that they are also signed 
-by the same certificate.  Application with the same user ID can access each 
+<dd>The name of a Linux user ID that will be shared with other applications.
+By default, Android assigns each application its own unique user ID.
+However, if this attribute is set to the same value for two or more applications,
+they will all share the same ID &mdash; provided that they are also signed
+by the same certificate.  Application with the same user ID can access each
 other's data and, if desired, run in the same process.</dd>
 
 <dt><a name="uidlabel"></a>{@code android:sharedUserLabel}</dt>
@@ -103,8 +106,8 @@ a reference to a string resource; it cannot be a raw string.
 
 <dt><a name="vcode"></a>{@code android:versionCode}</dt>
 <dd>An internal version number.  This number is used only to determine whether
-one version is more recent than another, with higher numbers indicating more 
-recent versions.  This is not the version number shown to users; that number 
+one version is more recent than another, with higher numbers indicating more
+recent versions.  This is not the version number shown to users; that number
 is set by the {@code versionName} attribute.
 
   <p>
@@ -118,9 +121,9 @@ is set by the {@code versionName} attribute.
 </dd>
 
 <dt><a name="vname"></a>{@code android:versionName}</dt>
-<dd>The version number shown to users.  This attribute can be set as a raw 
-string or as a reference to a string resource.  The string has no other purpose 
-than to be displayed to users.  The {@code versionCode} attribute holds 
+<dd>The version number shown to users.  This attribute can be set as a raw
+string or as a reference to a string resource.  The string has no other purpose
+than to be displayed to users.  The {@code versionCode} attribute holds
 the significant version number used internally.
 </dd>
 
