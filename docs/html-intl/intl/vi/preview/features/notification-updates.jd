@@ -1,0 +1,328 @@
+page.title=Thông báo
+page.tags=notifications
+helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!-- table of contents -->
+<h2>Tài liệu này gồm có</h2>
+<ol>
+  <li><a href="#direct">Trả lời Trực tiếp</a></li>
+  <li><a href="#bundle">Thông báo Gộp</a></li>
+  <li><a href="#custom">Dạng xem Tùy chỉnh</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N giới thiệu một số API mới cho phép ứng dụng đăng
+các thông báo có khả năng hiển thị và tương tác cao.</p>
+
+<p>Android N mở rộng API thông báo {@link android.support.v4.app.RemoteInput}
+hiện có để hỗ trợ trả lời giữa dòng trên thiết bị cầm tay. Tính năng này cho phép người dùng
+ phản hồi nhanh chóng từ khu vực hiển thị thông báo mà không cần truy cập ứng dụng của bạn.</p>
+
+<p>
+  Android N cũng cho phép bạn gộp các thông báo tương tự nhau để
+  xuất hiện dưới dạng một thông báo đơn lẻ. Để điều này có thể xảy ra, Android N sử dụng phương thức {@link
+  android.support.v4.app.NotificationCompat.Builder#setGroup
+  NotificationCompat.Builder.setGroup()} hiện có. Người dùng có thể mở rộng mỗi
+  thông báo, và thực hiện các hành động như trả lời và bỏ qua trên mỗi
+  thông báo, từng thông báo một từ khu vực hiển thị thông báo.
+</p>
+
+<p>Cuối cùng, Android N cũng thêm các API mới cho phép bạn tận dụng các trang trí 
+của hệ thống trong các dạng xem thông báo tùy chỉnh của ứng dụng của bạn. Các API này giúp
+đảm bảo rằng dạng xem thông báo có chung một cách trình bày nhất quán
+với các mẫu tiêu chuẩn.</p>
+
+<p>Tài liệu này nêu bật một số các thay đổi chính mà bạn cần cân nhắc
+ khi sử dụng các tính năng thông báo mới trong ứng dụng của mình.</p>
+
+<h2 id="direct">Trả lời Trực tiếp</h2>
+
+<p>Với tính năng Trả lời Trực tiếp trong Android N, người dùng có thể
+phản hồi lại tin nhắn văn bản hoặc cập nhật danh sách tác vụ trực tiếp trong giao diện
+của thông báo. Trên thiết bị cầm tay, hành động trả lời giữa dòng xuất hiện dưới dạng một nút bổ sung
+ được gắn kèm với thông báo đó. Khi người dùng trả lời qua bàn phím, hệ thống sẽ đính kèm
+  phản hồi bằng văn bản với ý định
+    bạn đã quy định cho hành động thông báo và gửi ý định đến ứng dụng cầm tay
+     của bạn.
+
+
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
+<p class="img-caption">
+  <strong>Hình 1.</strong> Android N thêm nút hành động <strong>Reply</strong>
+.
+</p>
+
+<h3>Thêm các hành động trả lời giữa dòng</h3>
+
+<p>Để tạo một hành động thông báo hỗ trợ trả lời trực tiếp:
+</p>
+
+<ol>
+<li>Tạo thực thể{@link android.support.v4.app.RemoteInput.Builder} 
+  mà bạn có thể thêm vào hành động
+thông báo của bạn. Hàm dựng của lớp này sẽ chấp nhận xâu mà hệ thống sử dụng làm khóa 
+ cho nhập liệu văn bản. Sau đó, ứng dụng cầm tay của bạn sử dụng khóa đó để truy xuất văn bản
+  nhập liệu.
+
+<pre>
+// Key for the string that's delivered in the action's intent
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li>Đính kèm đối tượng {@link android.support.v4.app.RemoteInput}
+ với một hành động bằng cách sử dụng <code>addRemoteInput()</code>.
+
+<pre>
+// Create the reply action and add the remote input
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>Áp dụng hành động cho thông báo và phát hành thông báo.
+
+<pre>
+// Build the notification and add the action
+Notification notification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, notification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> Hệ thống sẽ nhắc người dùng nhập liệu một phản hồi khi chúng kích hoạt
+hành động thông báo. </p>
+
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png" srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Hình 2.</strong> Người dùng nhập liệu văn bản từ khu vực hiển thị thông báo.
+</p>
+
+<h3>Truy xuất mục nhập của người dùng từ trả lời giữa dòng</h3>
+
+<p>Để nhận mục nhập của người dùng từ giao diện thông báo đến hoạt động bạn
+đã khai báo trong ý định của hành động trả lời:</p>
+<ol>
+<li> Gọi {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()} bằng cách chuyển ý định của hành động thông báo dưới dạng
+ tham số đầu vào. Phương thức này trả về {@link android.os.Bundle}
+ có chứa phản hồi văn bản.
+</li>
+
+<pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+
+<li>Truy vấn gói bằng cách sử dụng khóa kết quả (đã cung cấp cho hàm dựng {@link
+  android.support.v4.app.RemoteInput.Builder}).
+</li>
+</ol>
+
+<p>Đoạn mã sau minh họa cách thức một phương thức truy xuất văn bản đầu vào
+từ một gói:</p>
+
+<pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+            }
+    return null;
+ }
+</pre>
+
+<p>Ứng dụng có thể áp dụng lô-gic để quyết định hành động nào nên lấy trên văn bản
+được truy xuất.
+Đối với các ứng dụng tương tác (chẳng hạn như trò chuyện), hãy cung cấp thêm ngữ cảnh trong chính thông báo
+ (ví dụ như nhiều dòng lịch sử trò chuyện, gồm có các tin nhắn của riêng người dùng)
+  để người dùng có thể phản hồi phù hợp.
+Khi người dùng phản hồi qua {@link android.support.v4.app.RemoteInput},
+ hãy bao gồm văn bản trong lịch sử trả lời bằng phương thức {@code setRemoteInputHistory()}
+.</p>
+
+<h2 id="bundle">Thông báo Gộp</h2>
+
+<p>Android N cung cấp cho các nhà phát triển một cách mới để hiển thị
+ hàng đợi thông báo: <i>thông báo gộp</i>. Cách hiển thị này tương tự với tính năng
+  <a href="{@docRoot}training/wearables/notifications/stacks.html">Ngăn xếp
+  Thông báo</a> có trong Android Wear. Ví dụ, nếu ứng dụng của bạn tạo thông báo
+  cho tin nhắn nhận được, khi có nhiều hơn một tin nhắn nhận được, hãy gói
+ các thông báo lại với nhau thành một nhóm đơn lẻ. Bạn có thể
+ sử dụng phương thức {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()} hiện có để gói các thông báo tương tự.</p>
+
+<p>
+  Nhóm thông báo sẽ quy định phân cấp trên các thông báo bao gồm nó.
+  Ở trên cùng của phân cấp là thông báo mẹ hiển thị tóm tắt
+  thông tin cho nhóm đó. Người dùng có thể mở rộng
+  nhóm thông báo tăng dần lên, và hệ thống sẽ hiển thị thêm thông tin khi
+  người dùng truy sâu hơn. Khi người dùng mở rộng gói này, hệ thống sẽ lộ ra thêm
+  thông tin cho tất cả các thông báo con của gói, khi người dùng
+  mở rộng một trong những thông báo đó, hệ thống sẽ lộ ra toàn bộ nội dung của nó.
+</p>
+
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png" srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Hình 3.</strong> Người dùng có thể mở rộng nhóm
+  thông báo tăng dần lên.
+</p>
+
+<p>Để tìm hiểu cách thêm thông báo vào một nhóm, xem
+<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Thêm
+Mỗi Thông báo vào một Nhóm</a>.</p>
+
+
+<h3 id="best-practices">Thực hành tốt nhất cho thông báo gộp</h3>
+<p>Mục này sẽ cung cấp hướng dẫn về việc khi nào sử dụng nhóm thông báo thay vì
+ các thông báo{@link android.app.Notification.InboxStyle InboxStyle}
+có sẵn trong các phiên bản cũ hơn của
+nền tảng Android.</p>
+
+<h3>Khi nào nên sử dụng thông báo gộp</h3>
+
+<p>Bạn nên sử dụng các nhóm thông báo chỉ khi tất cả các điều kiện sau là
+đúng đối với trường hợp sử dụng của bạn:</p>
+
+<ul>
+  <li>Thông báo con là loại thông báo đầy đủ và có thể được hiển thị
+   riêng rẽ mà không cần tóm tắt nhóm.</li>
+  <li>Sẽ có lợi khi làm nổi lên các thông báo con một cách riêng rẽ. Ví
+dụ:
+  </li>
+  <ul>
+    <li>Các thông báo này có thể hành động được, bằng các hành động cụ thể cho mỗi thông báo con.</li>
+    <li>Có nhiều thông tin hơn đối với thông báo con mà người dùng sẽ muốn đọc.</li>
+  </ul>
+</ul>
+
+<p>Các ví dụ về các trường hợp sử dụng tốt nhóm thông báo bao gồm: ứng dụng nhắn tin
+hiển thị danh sách các tin nhắn đến, hoặc ứng dụng email hiển thị danh sách
+các email đã nhận được.</p>
+
+<p>
+Ví dụ về các trường hợp trong đó một thông báo đơn lẻ được ưu tiên
+ bao gồm tin nhắn riêng từ một người đơn lẻ, hoặc biểu diễn danh sách
+ các mục văn bản một hàng. Bạn có thể sử dụng
+({@link android.app.Notification.InboxStyle InboxStyle} hoặc
+{@link android.app.Notification.BigTextStyle BigTextStyle}) để hoàn thành
+việc này.
+</p>
+
+<h3 id ="post">Hiển thị Thông báo gộp</h3>
+
+<p>
+  Ứng dụng sẽ luôn đăng tóm tắt nhóm, ngay cả khi nhóm chỉ chứa
+  một thông báo con duy nhất. Hệ thống này sẽ ngăn chặn tóm tắt và hiển thị trực tiếp
+  thông báo con nếu nó chỉ chứa một thông báo duy nhất. Điều này đảm bảo
+  rằng hệ thống có thể cung cấp một trải nghiệm nhất quán khi người dùng trượt nhanh khỏi
+  thông báo con của nhóm.
+</p>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Phiên bản Android N này không
+  ngăn chặn tóm tắt cho nhóm thông báo có chứa một thông báo con duy nhất. Chức năng
+  này sẽ được thêm vào trong phiên bản sau của Android N.
+</p>
+
+<h3>Thông báo lướt nhanh</h3>
+
+<p>Trong khi hệ thống thường hiển thị các thông báo con dưới dạng một nhóm, bạn có thể đặt
+ chúng tạm thời hiển thị dưới dạng
+ <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">
+ thông báo cảnh báo</a>. Tính năng này đặc biệt hữu ích bởi vì nó cho phép
+  truy cập ngay lập tức thông báo con gần đây nhất và các hành động liên kết với thông báo con đó.
+</p>
+
+
+<h3>Tính tương thích ngược</h3>
+
+<p>
+  Cả nhóm thông báo và đầu vào từ xa đều là một phần của API {@link
+  android.app.Notification} vì Android 5.0 (API mức 21) hỗ trợ
+  các thiết bị Android Wear. Nếu bạn đã dựng các thông báo bằng các API này,
+  hành động duy nhất bạn cần phải thực hiện là xác minh rằng ứng dụng có hành vi tương ứng
+  với các hướng dẫn đã mô tả ở trên, và cân nhắc việc triển khai {@code
+  setRemoteInputHistory()}.
+</p>
+
+<p>
+  Để hỗ trợ tính tương thích ngược, các API giống vậy sẽ được cung cấp cho
+  lớp {@link android.support.v4.app.NotificationCompat}
+  của thư viện hỗ trợ, cho phép bạn dựng các thông báo hoạt động trên các phiên bản
+  Android cũ hơn. Trên máy tính bảng và thiết bị cầm tay, người dùng chỉ nhìn thấy thông báo tóm tắt,
+  vì vậy ứng dụng vẫn có kiểu hòm thư hoặc thông báo tương tự
+  biểu diễn cho toàn bộ nội dung thông tin của nhóm. Vì các thiết bị Android
+  Wear cho phép người dùng xem các thông báo con thậm chí trên
+  các mức nền tảng thấp hơn, bạn nên dựng các thông báo con dù cho mức API
+  là mức nào.
+</p>
+
+<h2 id="custom"> Dạng xem Tùy chỉnh</h2>
+<p>Bắt đầu từ Android N, bạn có thể tùy chỉnh dạng xem và
+vẫn có các trang trí hệ thống như tiêu đề thông báo, hành động, và
+các bố trí mở rộng được.</p>
+
+<p>Để kích hoạt khả năng này, Android N thêm các API sau để tạo kiểu cho dạng xem tùy chỉnh
+  của bạn:</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> Thông báo kiểu khác với thông báo
+media.</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> Thông báo media tạo kiểu.</dd>
+</dl>
+
+<p>Để sử dụng API mới này, hãy gọi phương thức {@code setStyle()}, chuyển nó sang
+kiểu dạng xem tùy chỉnh mong muốn.</p>
+
+<p>Đoạn mã này cho biết cách dựng đối tượng thông báo tùy chỉnh bằng phương thức
+{@code DecoratedCustomViewStyle()}.</p>
+
+<pre>
+Notification noti = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>
