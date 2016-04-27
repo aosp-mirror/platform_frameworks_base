@@ -23,3 +23,11 @@ package; if you have already downloaded the NDK, you have them. They reside in
       <p><a href="https://github.com/googlesamples/android-ndk/tree/android-mk" class="button">
       Browse NDK samples</a></p>
  </div>
+
+<p>Vulkan samples are located separately from those for the rest of the NDK. To explore them,
+access the link below.</p>
+
+ <div id="Vulkan-terms-form">
+      <p><a href="https://github.com/LunarG/VulkanSamples" class="button">
+      Browse Vulkan samples</a></p>
+ </div>
