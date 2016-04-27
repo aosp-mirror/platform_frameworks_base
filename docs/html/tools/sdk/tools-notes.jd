@@ -18,28 +18,108 @@ update.</p>
 the SDK Tools, as denoted by revision number. To determine what revision of the SDK
 Tools you are using, refer to the "Installed Packages" listing in the Android SDK Manager. </p>
 
-<p>For a summary of all known issues in SDK Tools, see <a
-href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
+<p>
+  For a summary of all known issues in SDK Tools, visit <a class=
+  "external-link" href="http://tools.android.com/knownissues">the Android Tools
+  Project Site</a>.
+</p>
 
 <div class="toggle-content opened">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
-      alt=""/>SDK Platform-tools, Revision 23.1.0</a> <em>(December 2015)</em>
+  <p>
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">SDK Tools, Revision 25.0.0</a>
+    <em>(April 2016)</em>
   </p>
 
   <div class="toggle-content-toggleme">
-
     <dl>
-        <dt>General Notes:</dt>
-    <dd>
-      <ul>
-        <li>Changed Linux requirements for Android SDK Platform-tools revision 23.1.0 and later:
-          it now requires 64-bit Linux.</li>
-      </ul>
-    </dd>
+      <dt>
+        <strong>Android Emulator 2.0</strong>:
+      </dt>
 
+      <dd>
+        <ul>
+          <li>Performance improvements:
+          </li>
+            <ul>
+              <li>Emulator now uses CPU acceleration on x86 emulator system images by
+              default.
+              </li>
 
+              <li>Added <a href="{@docRoot}training/articles/smp.html">SMP</a> support
+              to take advantage of host multi-core architecture when emulating Android
+              6.0 (API level 23) or higher, resulting in much better performance and
+              speed than the physical counterpart. Also with SMP support, you can test
+              apps that specifically target multi-core Android devices.
+              </li>
 
+              <li>Improved data and APK push-pull protocol between the the <a href=
+              "{@docRoot}tools/help/adb.html">Android Debug Bridge</a> and devices
+              running Android 5.0 (API level 21) or higher. See speed improvements up
+              to five times faster than using a physical device.
+              </li>
+            </ul>
+
+          <li>Extended UI controls and a floating toolbar provide easy access to features
+          previously available only through the command line, such as taking screen
+          captures, adjusting the battery level, rotating the screen, and managing
+          virtual calls.
+          </li>
+
+          <li>Upload KML and GPX files to play back a set of custom location points.
+          </li>
+
+          <li>Dynamically resize the emulator by dragging a corner or zoom into the
+          emulator window.
+          </li>
+
+          <li>Install APKs or add media files to the emulator’s internal SD card by
+          dragging and dropping files into the emulator window.
+          </li>
+
+          <li>Simulate multi-touch input. While interacting with the emulator screen,
+          enter multi-touch mode by holding down the <strong>Ctrl</strong> key on
+          Windown/Linux, or <strong>Command</strong> key on Mac OSX.
+          </li>
+
+          <li>The Android Emulator works best with Android Studio 2.0. To find out more
+          about what's included in the newest version of the official Android IDE,
+          <a href="{@docRoot}tools/revisions/studio.html#Revisions">read the release
+          notes</a>.
+          </li>
+
+          <li>Read the documentation to find out more about <a href=
+          "{@docRoot}tools/devices/emulator.html">using the Android Emulator</a>.
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p>
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class=
+    "toggle-content-img" alt="">SDK Platform-tools, Revision 23.1.0</a>
+    <em>(December 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        General Notes:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Changed Linux requirements for Android SDK Platform-tools
+          revision 23.1.0 and later: it now requires 64-bit Linux.
+          </li>
+        </ul>
+      </dd>
+    </dl>
   </div>
 </div>
 
