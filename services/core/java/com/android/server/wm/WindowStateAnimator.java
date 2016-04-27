@@ -820,8 +820,8 @@ class WindowStateAnimator {
         // Adjust for surface insets.
         mTmpSize.left -= scale * attrs.surfaceInsets.left;
         mTmpSize.top -= scale * attrs.surfaceInsets.top;
-        mTmpSize.right += scale * (attrs.surfaceInsets.left + attrs.surfaceInsets.right);
-        mTmpSize.bottom += scale * (attrs.surfaceInsets.top + attrs.surfaceInsets.bottom);
+        mTmpSize.right += scale * attrs.surfaceInsets.right;
+        mTmpSize.bottom += scale * attrs.surfaceInsets.bottom;
     }
 
     boolean hasSurface() {
