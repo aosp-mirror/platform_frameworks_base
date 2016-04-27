@@ -3532,6 +3532,9 @@ public class PackageParser {
             a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_directBootAware,
                     false);
+
+            a.info.requestedVrComponent =
+                sa.getString(R.styleable.AndroidManifestActivity_enableVrMode);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
