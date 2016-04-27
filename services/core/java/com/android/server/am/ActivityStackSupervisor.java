@@ -2997,7 +2997,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean switchUserLocked(int userId, UserState uss) {
-        mUserStackInFront.put(mCurrentUser, mFocusedStack.getStackId());
+        final int focusStackId = mFocusedStack.getStackId();
+        // We dismiss the docked stack whenever we switch users.
+        moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, focusStackId == DOCKED_STACK_ID);
+
+        mUserStackInFront.put(mCurrentUser, focusStackId);
         final int restoreStackId = mUserStackInFront.get(userId, HOME_STACK_ID);
         mCurrentUser = userId;
 
@@ -3510,7 +3514,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
-            mService.moveTasksToFullscreenStack(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
+            moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
         } else if (task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
             String packageName = task.getTopActivity() != null
                     ? task.getTopActivity().appInfo.packageName : null;
