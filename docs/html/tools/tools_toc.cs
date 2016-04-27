@@ -96,6 +96,8 @@
               <span class="en">Improving Your Code with lint</span></a></li>
             <li><a href="<?cs var:toroot ?>tools/debugging/annotations.html">
               <span class="en">Improving Code Inspection with Annotations</span></a></li>
+            <li><a href="<?cs var:toroot ?>tools/help/proguard.html">
+              <span class="en">Shrink Your Code and Resources</span></a></li>
             <li><a href="<?cs var:toroot ?>tools/help/app-link-indexing.html">
               <span class="en">Supporting URLs and App Indexing in Android Studio</span></a></li>
           </ul>
@@ -226,7 +228,6 @@ class="en">Tools Help</span></a></div>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
-       <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
 
 
