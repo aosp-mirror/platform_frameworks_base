@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"ධාවනය කරන්න"</string>
     <string name="pip_pause" msgid="8412075640017218862">"විරාමය"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP පාලනයට "<b>"HOME"</b>" අල්ලාගන්න"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP පාලනය කිරීමට HOME බොත්තම ඔබා අල්ලාගෙන සිටින්න"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"පින්තූරය-තුළ-පින්තූරය"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"මෙය ඔබේ වීඩියෝව ඔබ වෙනත් එකක් ධාවනය කරන තෙක් දසුනෙහි තබා ගනියි. එය පාලනය කිරීමට "<b>"මුල් පිටුව"</b>" ඔබා අල්ලාගෙන සිටින්න."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"හරි, තේරුණා"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"අස් කරන්න"</string>
 </resources>

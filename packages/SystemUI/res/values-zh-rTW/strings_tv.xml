@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"播放"</string>
     <string name="pip_pause" msgid="8412075640017218862">"暫停"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"按住「主畫面」"<b></b>"按鈕即可控制子母畫面"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"按住「主畫面」按鈕即可控制子母畫面"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"子母畫面"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"您的影片會一直顯示在畫面中，直到您播放其他影片為止。按住 [HOME] (主畫面) 按鈕即可控制子母畫面。"<b></b></string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"我知道了"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"關閉"</string>
 </resources>

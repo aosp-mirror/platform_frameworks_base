@@ -75,7 +75,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"يتم حفظ لقطة."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"المس لعرض لقطة الشاشة."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"انقر لعرض لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
@@ -122,6 +122,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"إشارة البيانات كاملة."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"متصل بـ <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"متصل بـ <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"تم الاتصال بـ <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏ليس هناك WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏شريط WiMAX واحد."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏شريطا WiMAX."</string>
@@ -152,12 +153,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"بيانات شبكة الجوّال"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"تم تشغيل بيانات شبكة الجوّال"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"تم تعطيل بيانات شبكة الجوّال"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏ليس هناك شريحة SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"فتح تفاصيل البطارية"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> بالمائة."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"إعدادات النظام."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"محو الإشعار."</string>
@@ -195,9 +200,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"تم تشغيل الرجاء عدم الإزعاج، الأولوية فقط."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"تم تشغيل الرجاء عدم الإزعاج، كتم الصوت تمامًا."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"تم تشغيل الرجاء عدم الإزعاج، التنبيهات فقط."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"الرجاء عدم الإزعاج."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"تم تشغيل \"الرجاء عدم الإزعاج\"."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"إيقاف البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"تشغيل البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"جارٍ توصيل البلوتوث."</string>
@@ -251,7 +258,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"تم قفل الشاشة الآن في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"تم قفل الشاشة الآن في الاتجاه الرأسي."</string>
     <string name="dessert_case" msgid="1295161776223959221">"حالة الحلويات"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"حلم اليقظة"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"شاشة التوقف"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"الرجاء عدم الإزعاج"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"الأولوية فقط"</string>
@@ -263,6 +270,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"لا يتوفر أي أجهزة مقترنة"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"التدوير التلقائي للشاشة"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"ضبط على <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"تم قفل التدوير"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودي"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"أفقي"</string>
@@ -281,6 +290,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ليست متصلة"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"لا تتوفر شبكة"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏إيقاف Wi-Fi"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أية شبكة Wi-Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"إرسال"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
@@ -316,6 +326,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"تم تعطيل <xliff:g id="APP">%s</xliff:g> في الوضع الآمن."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"مسح الكل"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"لا تتوفر في التطبيق إمكانية تقسيم الشاشة"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"اسحب هنا لاستخدام وضع تقسيم الشاشة"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
@@ -333,7 +344,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"المس مرة أخرى للفتح"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"انقر مرة أخرى للفتح"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"مرر سريعًا لأعلى لإلغاء القفل"</string>
     <string name="phone_hint" msgid="4872890986869209950">"يمكنك التمرير سريعًا من الرمز لتشغيل الهاتف"</string>
     <string name="voice_hint" msgid="8939888732119726665">"يمكنك التمرير سريعًا من الرمز لتشغيل المساعد الصوتي"</string>
@@ -411,7 +422,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"توسيع"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"تصغير"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"تم تثبيت الشاشة"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"يساعد هذا على استمرار العرض حتى يتم إلغاء التثبيت. ويمكنك لمس \"رجوع\" مع الاستمرار لإلغاء التثبيت."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"يؤدي هذا إلى استمرار العرض إلى أن يتم إزالة التثبيت. ويمكنك لمس \"رجوع\" مع الاستمرار لإزالة التثبيت."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"حسنًا"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"لا، شكرًا"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"هل تريد إخفاء <xliff:g id="TILE_LABEL">%1$s</xliff:g>؟"</string>
@@ -421,11 +432,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"سماح"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"رفض"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> هو مربع حوار مستوى الصوت"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"المس لاستعادة الإعداد الأصلي."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"انقر لاستعادة النسخة الأصلية."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"أنت تستخدم ملفك الشخصي للعمل"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات إمكانية الوصول."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏تم عرض %s عنصر تحكم في مستوى الصوت. يمكنك التمرير سريعًا لأعلى للتجاهل."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"تم إخفاء عناصر التحكم في مستوى الصوت"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"أداة ضبط واجهة مستخدم النظام"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"عرض نسبة البطارية المدمجة"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"عرض نسبة مستوى البطارية داخل رمز شريط الحالة أثناء عدم الشحن"</string>
@@ -470,19 +483,24 @@
     <string name="block" msgid="2734508760962682611">"حظر كل الإشعارات"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"عدم كتم التنبيه الصوتي"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"عدم كتم التنبيه الصوتي أو حظر الإشعار"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"عرض الإعدادات الكاملة لمدى الأهمية"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"تم الحظر"</string>
-    <string name="min_importance" msgid="1901894910809414782">"الأقل أهمية"</string>
-    <string name="low_importance" msgid="4109929986107147930">"أهمية منخفضة"</string>
-    <string name="default_importance" msgid="8192107689995742653">"أهمية عادية"</string>
-    <string name="high_importance" msgid="1527066195614050263">"أهمية عالية"</string>
-    <string name="max_importance" msgid="5089005872719563894">"أهمية ملحَّة"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"عدم عرض هذه الإشعارات"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"عرض الإشعار بأسفل قائمة الإشعارات بدون تنبيه صوتي"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"عرض هذه الإشعارات بدون تنبيه صوتي"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"السماح لهذه الإشعارات بإصدار تنبيهات صوتية"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"يتم عرض الإشعار بسرعة على الشاشة مع السماح بإصدار تنبيه صوتي"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"عرض هذا الإشعار بأعلى قائمة الإشعارات وعرضه بسرعة على الشاشة مع السماح بإصدار تنبيه صوتي"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"عناصر التحكم في إشعارات التشغيل"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"تشغيل"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"إيقاف"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة التأمين وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"الأهمية: تلقائي"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"الأهمية: المستوى 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"الأهمية: المستوى 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"الأهمية: المستوى 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"الأهمية: المستوى 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"الأهمية: المستوى 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"الأهمية: المستوى 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"يحدد التطبيق مدى أهمية كل إشعار."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"عدم عرض إشعارات من هذا التطبيق أبدًا."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"عدم المقاطعة بظهور خاطف أو بملء الشاشة أو بصوت أو اهتزاز. الإخفاء من شاشة التأمين وشريط الحالة."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"عدم المقاطعة بظهور خاطف أو بملء الشاشة أو بصوت أو اهتزاز."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"عدم المقاطعة بظهور خاطف أو بملء الشاشة."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"الظهور الخاطف دائمًا. عدم المقاطعة بملء الشاشة."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"الظهور الخاطف دائمًا، والسماح بمقاطعة ملء الشاشة."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
     <string name="notification_done" msgid="5279426047273930175">"تم"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"عناصر التحكم في إشعارات <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -597,10 +615,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"غير ذلك"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"أداة تقسيم الشاشة"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"نقل لأسفل"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"نقل لأعلى"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"نقل لليسار"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"نقل لليمين"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"عرض النافذة اليسرى بملء الشاشة"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"ضبط حجم النافذة اليسرى ليكون ٧٠%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"ضبط حجم النافذة اليسرى ليكون ٥٠%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"ضبط حجم النافذة اليسرى ليكون ٣٠%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"عرض النافذة اليمنى بملء الشاشة"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"عرض النافذة العلوية بملء الشاشة"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"ضبط حجم النافذة العلوية ليكون ٧٠%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"ضبط حجم النافذة العلوية ليكون ٥٠%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ضبط حجم النافذة العلوية ليكون ٣٠%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"عرض النافذة السفلية بملء الشاشة"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. انقر نقرًا مزدوجًا للتعديل."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. انقر نقرًا مزدوجًا للإضافة."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>. انقر نقرًا مزدوجًا للتحديد."</string>
@@ -610,9 +634,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"تمت إزالة <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"تم نقل <xliff:g id="TILE_NAME">%1$s</xliff:g> إلى الموضع <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"برنامج تعديل الإعدادات السريعة."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"إشعار <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"التطبيق لا يتيح تقسيم الشاشة."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"توسيع الإعدادات السريعة."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"فتح الإعدادات."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"فتح الإعدادات السريعة."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"إغلاق الإعدادات السريعة."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"تم ضبط المنبه."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"تم تسجيل الدخول باعتبارك <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"لا يتوفر اتصال بالإنترنت."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"فتح التفاصيل."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"فتح إعدادات <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"تعديل ترتيب الإعدادات."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"الصفحة <xliff:g id="ID_1">%1$d</xliff:g> من <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

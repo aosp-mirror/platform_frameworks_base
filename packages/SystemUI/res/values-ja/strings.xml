@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"スクリーンショットを保存しています..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"スクリーンショットを保存しています。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"スクリーンショットを取得しました。"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"タップしてスクリーンショットを表示します。"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"タップするとスクリーンショットが表示されます。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"スクリーンショットをキャプチャできませんでした。"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"スクリーンショットの保存中に問題が発生しました。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"空き容量が足りないため、スクリーンショットを保存できません。"</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"データ信号:フル"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>に接続しました。"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>に接続しました。"</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g>に接続されています。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX電波状態:圏外"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX電波状態:レベル1"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX電波状態:レベル2"</string>
@@ -148,12 +149,18 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIMがありません。"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"モバイルデータ"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"モバイルデータは ON です"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"モバイルデータ OFF"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothテザリング。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"機内モード。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIMカードが挿入されていません。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"携帯通信会社のネットワークを変更します。"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"電池の詳細情報を開きます"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"電池残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="799583911231893380">"システム設定。"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"通知を消去。"</string>
@@ -191,9 +198,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"[通知を非表示]はONで、優先する通知のみです。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"[通知を非表示]はONで、サイレントです。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"[通知を非表示]はONで、アラームのみです。"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"通知を非表示"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"[通知を非表示]はOFFです。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"[通知を非表示]をOFFにしました。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"[通知を非表示]をONにしました。"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"BluetoothがOFFです。"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"BluetoothがONです。"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetoothに接続しています。"</string>
@@ -247,7 +256,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"画面を横向きにロックしました。"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"画面を縦向きにロックしました。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"デザートケース"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"スクリーンセーバー"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"イーサネット"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"通知を非表示"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"優先する通知のみ"</string>
@@ -259,6 +268,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ペア設定されたデバイスがありません"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"画面の明るさ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動回転"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"画面を自動回転します"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"[<xliff:g id="ID_1">%s</xliff:g>] に設定します"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"画面の向きをロック"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"縦向き"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"横向き"</string>
@@ -277,6 +288,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"接続されていません"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ネットワークなし"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi OFF"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi: ON"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fiネットワークを利用できません"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"キャスト"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"キャストしています"</string>
@@ -312,6 +324,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」はセーフモードでは無効になります。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"すべて消去"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"アプリで分割画面がサポートされていません"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"分割画面を使用するにはここにドラッグします"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"横に分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"縦に分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"分割（カスタム）"</string>
@@ -329,7 +342,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"緊急度の低い通知を下に表示"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"開くにはもう一度タップしてください"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"開くにはもう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ロック解除するには上にスワイプしてください"</string>
     <string name="phone_hint" msgid="4872890986869209950">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="8939888732119726665">"アイコンからスワイプして音声アシストを起動"</string>
@@ -407,7 +420,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"固定を解除するまで画面が常に表示されるようになります。[戻る]を押し続けると固定が解除されます。"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"固定を解除するまで画面が常に表示されるようになります。固定を解除するには [戻る] を押し続けます。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"はい"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"いいえ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
@@ -417,11 +430,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"許可"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"許可しない"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>を音量ダイアログとして使用"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"タップすると元の音量ダイアログが復元されます。"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"タップすると元に戻ります。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。タップしてミュートを解除します。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。タップしてバイブレーションに設定します。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。タップしてミュートします。ユーザー補助機能サービスがミュートされる場合があります。"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s の音量調節が表示されています。閉じるには、上にスワイプします。"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"音量調節を非表示にしました"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"システムUI調整ツール"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"内蔵電池の残量の割合を表示する"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
@@ -466,19 +481,24 @@
     <string name="block" msgid="2734508760962682611">"通知をすべてブロックする"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"音声で知らせる"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"音声で知らせる / ブロックしない"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"重要度の設定をすべて表示"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"ブロック中"</string>
-    <string name="min_importance" msgid="1901894910809414782">"重要度: 最低"</string>
-    <string name="low_importance" msgid="4109929986107147930">"重要度: 低"</string>
-    <string name="default_importance" msgid="8192107689995742653">"重要度: 中"</string>
-    <string name="high_importance" msgid="1527066195614050263">"重要度: 高"</string>
-    <string name="max_importance" msgid="5089005872719563894">"重要度: 緊急"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"今後はこの通知を表示しない"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"通知リストの末尾にマナーモードで表示する"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"この通知をマナーモードで表示する"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"通知を音声で知らせる"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"画面に数秒間表示し、音声でも知らせる"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"通知リストの先頭に表示し、画面に数秒間表示し、音声でも知らせる"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"電源通知管理"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ON"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"OFF"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"重要度: 自動"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"重要度: レベル 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"重要度: レベル 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"重要度: レベル 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"重要度: レベル 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"重要度: レベル 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"重要度: レベル 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"アプリが通知ごとに重要度を識別する"</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"このアプリからの通知を表示しない"</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"全画面表示、ポップアップ、音、バイブレーションを使用しない。ロック画面やステータスバーにも表示しない"</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"全画面表示、ポップアップ、音、バイブレーションを使用しない"</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"全画面表示やポップアップを使用しない"</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"常にポップアップし、全画面表示はしない"</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"常にポップアップし、全画面表示も許可する"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"詳細設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完了"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」の通知の管理"</string>
@@ -593,10 +613,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"その他"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"分割画面の分割線"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"下に移動"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"上に移動"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"左に移動"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"右に移動"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"左全画面"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"左 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"左 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"左 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"右全画面"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"上部全画面"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"上 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"上 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"上 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"下部全画面"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ポジション <xliff:g id="POSITION">%1$d</xliff:g> の <xliff:g id="TILE_NAME">%2$s</xliff:g> を編集するにはダブルタップします。"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> を追加するにはダブルタップします。"</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ポジション <xliff:g id="POSITION">%1$d</xliff:g> に配置します。選択するにはダブルタップします。"</string>
@@ -606,9 +632,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> を削除しました"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> をポジション <xliff:g id="POSITION">%2$d</xliff:g> に移動しました"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"クイック設定エディタ"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> の通知: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"アプリは分割画面では動作しないことがあります。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"アプリで分割画面がサポートされていません。"</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"クイック設定を展開"</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"設定を開きます。"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"クイック設定を開きます。"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"クイック設定を閉じます。"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"アラームを設定しました。"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> としてログインします"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"インターネットに接続されていません。"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"詳細情報を開きます。"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> の設定を開きます。"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"設定の順序を編集します。"</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

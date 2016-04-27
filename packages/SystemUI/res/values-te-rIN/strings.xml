@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"స్క్రీన్‌షాట్ సేవ్ చేయబడుతోంది."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"స్క్రీన్‌షాట్ క్యాప్చర్ చేయబడింది."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"మీ స్క్రీన్‌షాట్‌ను వీక్షించడానికి తాకండి."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"మీ స్క్రీన్‌షాట్‌ను వీక్షించడానికి నొక్కండి."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"స్క్రీన్‌షాట్‌ను క్యాప్చర్ చేయడం సాధ్యపడలేదు."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"స్క్రీన్‌షాట్‌ని సేవ్ చేస్తున్నప్పుడు సమస్య సంభవించింది."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"పరిమిత నిల్వ స్థలం కారణంగా స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడదు."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"డేటా సిగ్నల్ సంపూర్ణంగా ఉంది."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX లేదు."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX ఒక బార్ కలిగి ఉంది."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX రెండు బార్‌లు కలిగి ఉంది."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"ఎడ్జ్"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"సిమ్ లేదు."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"సెల్యులార్ డేటా"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"సెల్యులార్ డేటా ఆన్‌లో ఉంది"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"సెల్యులార్ డేటా ఆఫ్‌లో ఉంది"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"బ్లూటూత్ టెథెరింగ్."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ఎయిర్‌ప్లేన్ మోడ్."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM కార్డ్ లేదు."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"క్యారియర్ నెట్‌వర్క్ మారుస్తుంది."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"బ్యాటరీ వివరాలను తెరుస్తుంది"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> శాతం."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"సిస్టమ్ సెట్టింగ్‌లు."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"నోటిఫికేషన్‌లు."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"నోటిఫికేషన్‌ను క్లియర్ చేయండి."</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, ప్రాధాన్యత మాత్రమే."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, మొత్తం నిశ్శబ్దం."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, అలారాలు మాత్రమే."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"అంతరాయం కలిగించవద్దు."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"అంతరాయం కలిగించవద్దు ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"బ్లూటూత్."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"బ్లూటూత్ ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"బ్లూటూత్ ఆన్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"బ్లూటూత్ కనెక్ట్ అవుతోంది."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"స్క్రీన్ ఇప్పుడు ల్యాండ్‌స్కేప్ దృగ్విన్యాసంలో లాక్ చేయబడింది."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"స్క్రీన్ ఇప్పుడు పోర్ట్రెయిట్ దృగ్విన్యాసంలో లాక్ చేయబడింది."</string>
     <string name="dessert_case" msgid="1295161776223959221">"డెజర్ట్ కేస్"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"డేడ్రీమ్"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"స్క్రీన్ సేవర్"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ఈథర్‌నెట్"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"అంతరాయం కలిగించవద్దు"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ప్రాధాన్యత మాత్రమే"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"జత చేసిన పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ప్రకాశం"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"స్వయంచాలకంగా తిప్పడం"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పు"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g>కి సెట్ చేయి"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"తిప్పడం లాక్ చేయబడింది"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"పోర్ట్రెయిట్"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ల్యాండ్‌స్కేప్"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"కనెక్ట్ చేయబడలేదు"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"నెట్‌వర్క్ లేదు"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ఆన్‌లో ఉంది"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi నెట్‌వర్క్‌లు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ప్రసారం చేయండి"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ప్రసారం చేస్తోంది"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> సురక్షిత-మోడ్‌లో నిలిపివేయబడింది."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"అన్నీ తీసివేయి"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"అనువర్తనం విభజన స్క్రీన్‌కు మద్దతు ఇవ్వదు"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"విభజన స్క్రీన్‌ను ఉపయోగించడానికి ఇక్కడ లాగండి"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"సమతలంగా విభజించు"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"లంబంగా విభజించు"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"అనుకూలంగా విభజించు"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ఇది అలారాలు, సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా అన్ని ధ్వనులు మరియు వైబ్రేషన్‌లను బ్లాక్ చేస్తుంది."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"తెరవడానికి మళ్లీ తాకండి"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"అన్‌లాక్ చేయడానికి ఎగువకు స్వైప్ చేయండి"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="voice_hint" msgid="8939888732119726665">"వాయిస్ సహాయకం చిహ్నం నుండి స్వైప్"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"విస్తరింపజేయండి"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"కుదించండి"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"స్క్రీన్ పిన్ చేయబడింది"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"ఇది మీరు అన్‌పిన్ చేసే వరకు దీన్ని వీక్షణలో ఉంచుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు బటన్‌ను తాకి, ఉంచండి."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"ఇలా చేయడం వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు తాకి, అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"అర్థమైంది"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"వద్దు, ధన్యవాదాలు"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"అనుమతించు"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"తిరస్కరించు"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"అసలు దాన్ని పునరుద్ధరించడానికి నొక్కండి."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. అన్‌మ్యూట్ చేయడానికి నొక్కండి."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. వైబ్రేషన్‌కు సెట్ చేయడానికి నొక్కండి. ప్రాప్యత సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. ప్రాప్యత సేవలు మ్యూట్ చేయబడవచ్చు."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s వాల్యూమ్ నియంత్రణలు చూపబడ్డాయి. తీసివేయడానికి పైకి స్వైప్ చేయండి."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"వాల్యూమ్ నియంత్రణలు దాచబడ్డాయి"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"అన్ని నోటిఫికేషన్‌లను బ్లాక్ చేయి"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"నిశ్శబ్దం చేయవద్దు"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"నిశ్శబ్దం చేయవద్దు లేదా బ్లాక్ చేయవద్దు"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"పూర్తి ప్రాముఖ్యత సెట్టింగ్‌లను చూపండి"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"బ్లాక్ చేయబడింది"</string>
-    <string name="min_importance" msgid="1901894910809414782">"కని. ప్రాముఖ్యత"</string>
-    <string name="low_importance" msgid="4109929986107147930">"తక్కువ ప్రాముఖ్యత"</string>
-    <string name="default_importance" msgid="8192107689995742653">"సాధారణ ప్రాముఖ్యత"</string>
-    <string name="high_importance" msgid="1527066195614050263">"అధిక ప్రాముఖ్యత"</string>
-    <string name="max_importance" msgid="5089005872719563894">"అత్యవసర ప్రాముఖ్యత"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"ఈ నోటిఫికేషన్‌లను ఎప్పుడూ చూపదు"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"నోటిఫికేషన్‌ల జాబితా దిగువ భాగంలో శబ్దం లేకుండా చూపుతుంది"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"ఈ నోటిఫికేషన్‌లను శబ్దం లేకుండా చూపుతుంది"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"ఈ నోటిఫికేషన్‌లను శబ్దంతో చూపేలా అనుమతిస్తుంది"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"స్క్రీన్‌పై శీఘ్రంగా శబ్దంతో చూపుతుంది"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"నోటిఫికేషన్‌ల జాబితా అగ్ర భాగాన, స్క్రీన్‌పై శీఘ్రంగా శబ్దంతో చూపుతుంది"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ఆన్‌లో ఉన్నాయి"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ఆఫ్‌లో ఉన్నాయి"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు అనువర్తన నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ జాబితా పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ జాబితా దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- అనువర్తనం నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"ప్రాముఖ్యత: స్వయంచాలకం"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"ప్రాముఖ్యత: స్థాయి 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"ప్రాముఖ్యత: స్థాయి 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"ప్రాముఖ్యత: స్థాయి 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"ప్రాముఖ్యత: స్థాయి 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"ప్రాముఖ్యత: స్థాయి 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"ప్రాముఖ్యత: స్థాయి 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"అనువర్తనం ప్రతీ నోటిఫికేషన్‌ ప్రాముఖ్యతను నిశ్చయిస్తుంది."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"ఈ అనువర్తనం నుండి నోటిఫికేషన్‌లను ఎప్పుడూ చూపదు."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"పూర్తిస్క్రీన్ అంతరాయం,త్వరితవీక్షణ,శబ్దం,వైబ్రేషన్ఉండవు. లాక్ స్క్రీన్,స్థితిపట్టీ నుండి దాచబడతాయి."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"పూర్తి స్క్రీన్ అంతరాయం, త్వరిత వీక్షణ, శబ్దం లేదా వైబ్రేషన్ ఉండవు."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"పూర్తి స్క్రీన్ అంతరాయం లేదా త్వరిత వీక్షణ ఉండదు."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది. పూర్తి స్క్రీన్ అంతరాయం ఉండదు."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"ఎల్లప్పుడూ త్వరిత వీక్షణ మరియు పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడతాయి."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="notification_done" msgid="5279426047273930175">"పూర్తయింది"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్ నియంత్రణలు"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"ఇతరం"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"విభజన స్క్రీన్ విభాగిని"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"క్రిందికి తరలించు"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"పైకి తరలించు"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ఎడమవైపుకు తరలించు"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"కుడివైపుకు తరలించు"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ఎడమవైపు పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"ఎడమవైపు 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"ఎడమవైపు 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"ఎడమవైపు 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"కుడివైపు పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"ఎగువ పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"ఎగువ 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"ఎగువ 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ఎగువ 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"దిగువ పూర్తి స్క్రీన్"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"స్థానం <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. సవరించడానికి రెండుసార్లు నొక్కండి."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. జోడించడానికి రెండుసార్లు నొక్కండి."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"స్థానం <xliff:g id="POSITION">%1$d</xliff:g>. ఎంచుకోవడానికి రెండుసార్లు నొక్కండి."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> తీసివేయబడింది"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g>వ స్థానానికి తరలించబడింది"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"శీఘ్ర సెట్టింగ్‌ల ఎడిటర్."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> నోటిఫికేషన్: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"స్క్రీన్ విభజనతో అనువర్తనం పని చేయకపోవచ్చు."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"శీఘ్ర సెట్టింగ్‌లను విస్తరింపజేయండి."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"సెట్టింగ్‌లను తెరవండి."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"శీఘ్ర సెట్టింగ్‌లను తెరవండి."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"అలారం సెట్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేసారు"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ఇంటర్నెట్ వద్దు."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"వివరాలను తెరవండి."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
 </resources>

@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Redați"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Întrerupeți"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Apăsați lung "<b>"ACASĂ"</b>" pentru a controla PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Apăsați lung butonul ECRAN DE PORNIRE pentru a controla PIP"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Picture-in-Picture"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Astfel, videoclipul este afișat până când redați alt videoclip. Apăsați lung pe butonul "<b>"ACASĂ"</b>" pentru a controla funcția."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Am înțeles"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Închideți"</string>
 </resources>

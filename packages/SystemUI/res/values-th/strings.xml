@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"กำลังบันทึกภาพหน้าจอ"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"จับภาพหน้าจอแล้ว"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"แตะเพื่อดูภาพหน้าจอของคุณ"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"แตะเพื่อดูภาพหน้าจอของคุณ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ไม่สามารถจับภาพหน้าจอ"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"พบปัญหาขณะกำลังบันทึกภาพหน้าจอ"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ไม่สามารถบันทึกภาพหน้าจอเนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"สัญญาณข้อมูลเต็ม"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"เชื่อมต่อ <xliff:g id="WIFI">%s</xliff:g> แล้ว"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"เชื่อมต่อกับ <xliff:g id="BLUETOOTH">%s</xliff:g> แล้ว"</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"เชื่อมต่อกับ <xliff:g id="CAST">%s</xliff:g>"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ไม่มีสัญญาณ WiMAX"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"สัญญาณ WiMAX หนึ่งขีด"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"สัญญาณ WiMAX สองขีด"</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"ข้อมูลเครือข่ายมือถือ"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ข้อมูลเครือข่ายมือถือเปิดอยู่"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ปิดข้อมูลเครือข่ายมือถือแล้ว"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"เปิดรายละเอียดแบตเตอรี่"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"กำลังชาร์จแบตเตอรี่ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"การตั้งค่าระบบ"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"การแจ้งเตือน"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"ล้างการแจ้งเตือน"</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"การห้ามรบกวนเปิดอยู่ เฉพาะเรื่องสำคัญเท่านั้น"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"เปิดการห้ามรบกวนอยู่ ปิดเสียงทั้งหมด"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"เปิดการห้ามรบกวนอยู่ ปลุกได้เท่านั้น"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ห้ามรบกวน"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"การห้ามรบกวนปิดอยู่"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ปิดการห้ามรบกวนแล้ว"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"เปิดการห้ามรบกวนแล้ว"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"บลูทูธ"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"บลูทูธปิดอยู่"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"บลูทูธเปิดอยู่"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"กำลังเชื่อมต่อบลูทูธ"</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"เดย์ดรีม"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"โปรแกรมรักษาหน้าจอ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ห้ามรบกวน"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"เฉพาะเรื่องสำคัญ"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ไม่มีอุปกรณ์ที่จับคู่ที่สามารถใช้ได้"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ความสว่าง"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"หมุนอัตโนมัติ"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"หมุนหน้าจออัตโนมัติ"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"ตั้งค่าเป็น <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ล็อกการหมุน"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"แนวตั้ง"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"แนวนอน"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ไม่ได้เชื่อมต่อ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ไม่มีเครือข่าย"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ปิด WiFi"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi เปิดอยู่"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ไม่มีเครือข่าย Wi-Fi พร้อมใช้งาน"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"แคสต์"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"กำลังส่ง"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ปิดใช้ในโหมดปลอดภัย"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ล้างทั้งหมด"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"แอปไม่สนับสนุนการแยกหน้าจอ"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"ลากมาที่นี่เพื่อใช้การแยกหน้าจอ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"แยกในแนวนอน"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"แยกในแนวตั้ง"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"แยกแบบกำหนดเอง"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"แตะอีกครั้งเพื่อเปิด"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"เลื่อนเพื่อปลดล็อก"</string>
     <string name="phone_hint" msgid="4872890986869209950">"เลื่อนไอคอนโทรศัพท์"</string>
     <string name="voice_hint" msgid="8939888732119726665">"เลื่อนไอคอนตัวช่วยเสียง"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ขยาย"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ยุบ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ตรึงหน้าจอแล้ว"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" ค้างไว้เพื่อเลิกตรึง"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"รับทราบ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ไม่เป็นไร ขอบคุณ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ซ่อน <xliff:g id="TILE_LABEL">%1$s</xliff:g> ไหม"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"อนุญาต"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ปฏิเสธ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> เป็นช่องโต้ตอบระดับเสียง"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"แตะเพื่อคืนค่าดั้งเดิม"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"แตะเพื่อคืนค่าเป็นค่าเดิม"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"คุณกำลังใช้โปรไฟล์งานของคุณ"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ตัวควบคุมระดับเสียงแสดงอยู่ เลื่อนขึ้นเพื่อปิด"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ตัวควบคุมระดับเสียงซ่อนอยู่"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"ตัวรับสัญญาณ UI ระบบ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"แสดงเปอร์เซ็นต์ของแบตเตอรี่ในตัว"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"แสดงเปอร์เซ็นต์ของระดับแบตเตอรี่ภายในไอคอนแถบสถานะเมื่อไม่มีการชาร์จ"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"บล็อกการแจ้งเตือนทั้งหมด"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"ไม่ปิดเสียง"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"ไม่ปิดเสียงหรือบล็อก"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"แสดงการตั้งค่าความสำคัญแบบเต็ม"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"บล็อกแล้ว"</string>
-    <string name="min_importance" msgid="1901894910809414782">"ความสำคัญน้อย"</string>
-    <string name="low_importance" msgid="4109929986107147930">"ความสำคัญต่ำ"</string>
-    <string name="default_importance" msgid="8192107689995742653">"ความสำคัญปกติ"</string>
-    <string name="high_importance" msgid="1527066195614050263">"ความสำคัญสูง"</string>
-    <string name="max_importance" msgid="5089005872719563894">"ความสำคัญเร่งด่วน"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"ไม่ต้องแสดงการแจ้งเตือนเหล่านี้"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"แสดงที่ด้านล่างของรายการแจ้งเตือนโดยไม่ส่งเสียง"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"แสดงการแจ้งเตือนเหล่านี้โดยไม่ส่งเสียง"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"ให้การแจ้งเตือนเหล่านี้ส่งเสียงได้"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"แสดงบนหน้าจอและให้ส่งเสียงได้"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"แสดงที่ด้านบนของรายการการแจ้งเตือน แสดงบนหน้าจอและให้ส่งเสียงได้"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิด"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"เปิด"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ปิด"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิดช่วยให้คุณตั้งค่าระดับความสำคัญสำหรับการแจ้งเตือนของแอปได้ตั้งแต่ระดับ 0-5 \n\n"<b>"ระดับ 5"</b>" \n- แสดงที่ด้านบนของรายการแจ้งเตือน \n- อนุญาตให้รบกวนแบบเต็มหน้าจอ \n- อนุญาตให้แสดงชั่วครู่ \n\n"<b>"ระดับ 4"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- แสดงชั่วครู่เสมอ \n\n"<b>"ระดับ 3"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n\n"<b>"ระดับ 2"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n\n"<b>"ระดับ 1"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n- ซ่อนจากหน้าจอล็อกและแถบสถานะ \n- แสดงที่ด้านล่างของรายการแจ้งเตือน \n\n"<b>"ระดับ 0"</b>" \n- บล็อกการแจ้งเตือนทั้งหมดจากแอป"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"ความสำคัญ: อัตโนมัติ"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"ความสำคัญ: ระดับ 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"ความสำคัญ: ระดับ 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"ความสำคัญ: ระดับ 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"ความสำคัญ: ระดับ 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"ความสำคัญ: ระดับ 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"ความสำคัญ: ระดับ 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"แอปกำหนดความสำคัญของการแจ้งเตือนแต่ละรายการ"</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"ไม่ต้องแสดงการแจ้งเตือนจากแอปนี้"</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"ไม่มีการรบกวนแบบเต็มหน้าจอ แสดงชั่วครู่ มีเสียง หรือสั่น ซ่อนจากหน้าจอล็อกและแถบสถานะ"</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"ไม่มีการรบกวนแบบเต็มหน้าจอ แสดงชั่วครู่ มีเสียง หรือสั่น"</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"ไม่มีการรบกวนแบบเต็มหน้าจอหรือการแสดงชั่วครู่"</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"แสดงชั่วครู่เสมอ ไม่มีการรบกวนแบบเต็มหน้าจอ"</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"แสดงชั่วครู่เสมอ และรบกวนแบบเต็มหน้าจอได้"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"อื่นๆ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"เส้นแบ่งหน้าจอ"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"เลื่อนลง"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"เลื่อนขึ้น"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"เลื่อนไปทางซ้าย"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"เลื่อนไปทางขวา"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"เต็มหน้าจอทางซ้าย"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"ซ้าย 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"ซ้าย 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"ซ้าย 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"เต็มหน้าจอทางขวา"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"เต็มหน้าจอด้านบน"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"ด้านบน 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"ด้านบน 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ด้านบน 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"เต็มหน้าจอด้านล่าง"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> <xliff:g id="TILE_NAME">%2$s</xliff:g> แตะ 2 ครั้งเพื่อแก้ไข"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> แตะ 2 ครั้งเพื่อเพิ่ม"</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> แตะ 2 ครั้งเพื่อเลือก"</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"นำ <xliff:g id="TILE_NAME">%1$s</xliff:g> ออกแล้ว"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g> แล้ว"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ตัวแก้ไขการตั้งค่าด่วน"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> การแจ้งเตือน: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"แอปอาจใช้ไม่ได้กับโหมดแยกหน้าจอ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"แอปไม่สนับสนุนการแยกหน้าจอ"</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"ขยายการตั้งค่าด่วน"</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"เปิดการตั้งค่า"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"เปิดการตั้งค่าด่วน"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ปิดการตั้งค่าด่วน"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"ตั้งปลุกแล้ว"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"ลงชื่อเข้าใช้เป็น <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ไม่มีอินเทอร์เน็ต"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"เปิดรายละเอียด"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"เปิดการตั้งค่า <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"แก้ไขลำดับการตั้งค่า"</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

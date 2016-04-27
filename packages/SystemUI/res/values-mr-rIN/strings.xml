@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट जतन करत आहे…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रीनशॉट जतन केला जात आहे."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रीनशॉट कॅप्चर केला."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"आपला स्क्रीनशॉट पाहण्यासाठी स्पर्श करा."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"आपला स्क्रीनशॉट पाहण्यासाठी टॅप करा."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट कॅप्चर करू शकलो नाही."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रीनशॉट जतन करताना समस्या आली."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"मर्यादित संचय जागेमुळे स्क्रीनशॉट जतन करू शकत नाही."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"डेटा सिग्नल पूर्ण."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> शी कनेक्‍ट केले."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> शी कनेक्‍ट केले."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g> शी कनेक्ट केले."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX नाही."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX एक बार."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX दोन बार."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाय-फाय"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"सिम नाही."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"मोबाइल डेटा"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"मोबाइल डेटा चालू"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"मोबाइल डेटा बंद"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटुथ टिथरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"विमान मोड."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"सिम कार्ड नाही."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क बदलणे."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"बॅटरी तपशील उघडा"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"बॅटरी <xliff:g id="NUMBER">%d</xliff:g> टक्के."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"बॅटरी चार्ज होत आहे, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> टक्के."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्‍टम सेटिंग्‍ज."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचना."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ करा."</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"व्यत्यय आणू नका चालू, केवळ प्राधान्य."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"व्यत्यय आणू नका चालू, संपूर्ण शांतता."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"व्यत्यय आणू नका चालू, केवळ अलार्म."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"व्यत्यय आणू नका."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"व्यत्यय आणू नका बंद."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"व्यत्यय आणू नका बंद करा"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"व्यत्यय आणू नका चालू करा"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ब्लूटुथ."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ब्लूटुथ बंद."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ब्लूटुथ चालू."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ब्लूटुथ कनेक्ट करत आहे."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"स्‍क्रीन आता भूदृश्य अभिमुखतेत लॉक केली आहे."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"स्क्रीन आता पोर्ट्रेट अभिमुखतेत लॉक केली आहे."</string>
     <string name="dessert_case" msgid="1295161776223959221">"मिष्ठान्न प्रकरण"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"डेड्रीम"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"स्क्रीन सेव्हर"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"इथरनेट"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"व्यत्यय आणू नका"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"केवळ प्राधान्य"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोणतेही जोडलेले डिव्हाइसेस उपलब्ध नाहीत"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वयं-फिरवा"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"स्वयं-फिरणारी स्क्रीन"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> वर सेट करा"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"फिरविणे लॉक केले"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"पोर्ट्रेट"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"भूदृश्य"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"कनेक्ट केले नाही"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"नेटवर्क नाही"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाय-फाय बंद"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"वाय-फाय चालू"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi नेटवर्क उपलब्‍ध नाहीत"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"कास्‍ट करा"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्ट करत आहे"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> सुरक्षित-मोडमध्ये अक्षम केला आहे."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"सर्व साफ करा"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"अॅप विभाजित स्क्रीनला समर्थन देत नाही"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"विभाजित स्क्रीन वापर करण्यासाठी येथे ड्रॅग करा"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज विभाजित करा"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"अनुलंब विभाजित करा"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"सानुकूल विभाजित करा"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"हे अलार्म, संगीत, व्हिडिओ आणि गेम यासह, सर्व आवाज आणि कंपने अवरोधित करते."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"उघडण्यासाठी पुन्हा स्पर्श करा"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"उघडण्यासाठी पुन्हा टॅप करा"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करण्यासाठी स्वाइप करा"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
     <string name="voice_hint" msgid="8939888732119726665">"व्हॉइस सहाय्यासाठी चिन्हावरून स्वाइप करा"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तृत करा"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संकुचित करा"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्क्रीन पिन केलेली आहे"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"हे आपण अनपिन करेपर्यंत दृश्यामध्ये ते ठेवते. अनपिन करण्यासाठी परत ला स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"आपण अनपिन करेपर्यंत हे त्यास दृश्यामध्ये ठेवते. अनपिन करण्यासाठी स्पर्श करा आणि परत धरून ठेवा."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"समजले"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"नाही धन्यवाद"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"अनुमती द्या"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"नकार द्या"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"मूळ पुनर्संचयित करण्यासाठी टॅप करा."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आपण आपले कार्य प्रोफाईल वापरत आहात"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. कंपन सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s आवाज नियंत्रणे दर्शविली. डिसमिस करण्यासाठी वर स्वाइप करा."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"आवाज नियंत्रणे लपविली"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"सर्व सूचना अवरोधित करा"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"शांत करू नका"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"शांत किंवा अवरोधित करू नका"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"पूर्ण महत्त्व सेटिंग्ज दर्शवा"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"अवरोधित केले"</string>
-    <string name="min_importance" msgid="1901894910809414782">"किमान महत्त्व"</string>
-    <string name="low_importance" msgid="4109929986107147930">"कमी महत्त्व"</string>
-    <string name="default_importance" msgid="8192107689995742653">"सामान्य महत्त्व"</string>
-    <string name="high_importance" msgid="1527066195614050263">"सर्वाधिक महत्व"</string>
-    <string name="max_importance" msgid="5089005872719563894">"त्वरित महत्त्व"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"या सूचना कधीही दर्शवू नका"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"सूचना सूचीच्या तळाशी शांतपणे दर्शवा"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"या सूचना शांतपणे दर्शवा"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"या सूचनांना ध्वनी चालू करण्याची अनुमती द्या"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"स्क्रीनवर पहा आणि ध्वनीस अनुमती द्या ध्वनीस अनुमती द्या"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"सूचनांच्या शीर्षस्थानी दर्शवा, स्क्रीनवर पहा आणि ध्वनीस अनुमती द्या"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"उर्जा सूचना नियंत्रणे"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"उर्जा सूचना नियंत्रणांसह, आपण अॅपच्या सूचनांसाठी महत्त्व स्तर 0 ते 5 पर्यंत सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दर्शवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना अवरोधित करा"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"महत्त्व: स्वयंचलित"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"महत्त्व: स्तर 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"महत्त्व: स्तर 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"महत्त्व: स्तर 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"महत्त्व: स्तर 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"महत्त्व: स्तर 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"महत्त्व: स्तर 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"अॅप प्रत्येक सूचनेसाठी महत्त्व निर्धारित करतो."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"या अॅपमधील सूचना कधीही दर्शवू नका."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"पूर्ण स्क्रीन व्यत्यय, डोकावून पाहणे, ध्वनी किंवा कंपन नाही. लॉक स्क्रीन आणि स्टेटस बार मधून लपवा."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"पूर्ण स्क्रीन व्यत्यय, डोकावून पाहणे, ध्वनी किंवा कंपन नाही."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"पूर्ण स्क्रीन व्यत्यय किंवा डोकावणे नाही."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"नेहमी डोकावून पहा. पूर्ण स्क्रीन व्यत्यय नाही."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"नेहमी डोकावून पहा आणि पूर्ण स्क्रीन व्यत्ययास परवानगी द्या."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"अधिक सेटिंग्ज"</string>
     <string name="notification_done" msgid="5279426047273930175">"पूर्ण झाले"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> सूचना नियंत्रणे"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"अन्य"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"विभाजित-स्क्रीन विभाजक"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"खाली हलवा"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"वर हलवा"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"डावीकडे हलवा"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"उजवीकडे हलवा"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"डावी पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"डावी 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"डावी 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"डावी 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"उजवी पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"शीर्ष पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"शीर्ष 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"शीर्ष 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"शीर्ष 10"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"तळाशी पूर्ण स्क्रीन"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"स्थिती <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. संपादित करण्यासाठी दोनदा टॅप करा."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> . जोडण्यासाठी दोनदा टॅप करा."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"स्थिती <xliff:g id="POSITION">%1$d</xliff:g>. निवडण्यासाठी दोनदा टॅप करा."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ला काढले आहे"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ला <xliff:g id="POSITION">%2$d</xliff:g> स्थितीवर हलविले"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"द्रुत सेटिंग्ज संपादक."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"द्रुत सेटिंग्ज विस्तृत करा."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग्ज उघडा."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"जलद सेटिंग्ज उघडा."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"जलद सेटिंग्ज बंद करा."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"अलार्म सेट केला."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> म्हणून साइन इन केले"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"इंटरनेट नाही."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"तपशील उघडा."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग्ज उघडा."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिंग्जचा क्रम संपादित करा."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
 </resources>

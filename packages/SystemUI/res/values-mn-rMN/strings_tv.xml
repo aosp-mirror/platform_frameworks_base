@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Тоглуулах"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Түр зогсоох"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP-г удирдахын тулд "<b>"HOME"</b>" товчлуурыг дарна уу"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP-г удирдахын тулд НҮҮР ХУУДАС товчлуурыг дараад хүлээнэ үү"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Зураг доторх зураг"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Таныг өөр видео тоглуулах хүртэл таны видеог гаргасаар байх болно. Үүнийг удирдахын тулд "<b>"НҮҮР ХУУДАС"</b>" товчлуурыг дараад, хүлээнэ үү."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Ойлголоо"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Хаах"</string>
 </resources>

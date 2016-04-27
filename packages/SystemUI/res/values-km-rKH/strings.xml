@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"ប៉ះដើម្បីមើលរូបថតអេក្រង់របស់អ្នក"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"បានជួបប្រទះបញ្ហាខណៈពេលរក្សាទុកការថតអេក្រង់"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"មិនអាចរក្សាទុករូបថតអេក្រង់បានទេដោយសារទំហំផ្ទុកមានកម្រិត។"</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"សញ្ញា​ទិន្នន័យ​ពេញ។"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"បាន​ភ្ជាប់​ទៅ <xliff:g id="WIFI">%s</xliff:g> ។"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"បាន​ភ្ជាប់​ទៅ <xliff:g id="BLUETOOTH">%s</xliff:g> ។"</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"បានភ្ជាប់ទៅ <xliff:g id="CAST">%s</xliff:g>"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"គ្មាន WiMAX ។"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX មួយ​កាំ។"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ពីរ​កាំ។"</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"ទិន្នន័យចល័ត"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ទិន្នន័យចល័តបានបើក"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ទិន្នន័យចល័តបានបិទ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"គ្មានស៊ីមកាតទេ។"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ការប្តូរបណ្តាញក្រុមហ៊ុនផ្តល់សេវា។"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"បើកព័ត៌មានលម្អិតអំពីថ្ម"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ថ្ម <xliff:g id="NUMBER">%d</xliff:g> ភាគរយ។"</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"កំពុងសាកថ្ម <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ភាគរយ"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ការ​កំណត់​ប្រព័ន្ធ​។"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ការ​ជូន​ដំណឹង។"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"បានបើកមុខងារកុំរំខាន (អាទិភាពប៉ុណ្ណោះ)។"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"មុខងារកុំរំខានបានបើក ស្ងៀមស្ងាត់ទាំងស្រុង។"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"មុខងារកុំរំខានបានបើក សម្លេងរោទិ៍ប៉ុណ្ណោះ។"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"កុំរំខាន"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"បានបិទមុខងារកុំរំខាន។"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"បានបិទមុខងារកុំរំខាន។"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"បានបើកមុខងារកុំរំខាន។"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ប៊្លូធូស"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"បិទ​ប៊្លូធូស។"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"បើក​ប៊្លូធូស។"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ការ​​​ភ្ជាប់​ប៊្លូធូស។"</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ឥឡូវ​អេក្រង់​​ជាប់​សោ​ក្នុង​ទិស​ផ្ដេក។"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ឥឡូវ​អេក្រង់​​ជាប់​សោ​ក្នុង​ទិស​បញ្ឈរ។"</string>
     <string name="dessert_case" msgid="1295161776223959221">"ករណី Dessert"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"ធាតុ​រក្សា​អេក្រង់"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"ធាតុរក្សាអេក្រង់"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"អ៊ីសឺរណិត"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"កុំរំខាន"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"អាទិភាពប៉ុណ្ណោះ"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"មិន​មាន​ឧបករណ៍​ផ្គូផ្គង​ដែល​អាច​ប្រើ​បាន"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ពន្លឺ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"បង្វិល​ស្វ័យ​ប្រវត្តិ"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"បង្វិលអេក្រង់ស្វ័យប្រវត្តិ"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"កំណត់ទៅ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"បាន​ចាក់សោ​ការ​បង្វិល"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"បញ្ឈរ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ទេសភាព"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"មិន​បាន​តភ្ជាប់"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"គ្មាន​បណ្ដាញ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ខាស"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ត្រូវបានបិទដំណើរការក្នុងរបៀបសុវត្ថិភាព"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ជម្រះទាំងអស់"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"អូសនៅទីនេះដើម្បីប្រើអេក្រង់បំបែក"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"បំបែកផ្តេក"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"បំបែកបញ្ឈរ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"បំបែកផ្ទាល់ខ្លួន"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ដែលចេញពីម៉ោងរោទិ៍ តន្ត្រី វីដេអូ និងហ្គេម។"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"ប៉ះ​ម្ដង​ទៀត​ដើម្បី​បើក"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"អូស​ឡើង​លើ ដើម្បី​ដោះ​សោ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"អូសចេញពីរូបតំណាងដើម្បីប្រើទូរស័ព្ទ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"អូសចេញពីរូបតំណាងដើម្បីប្រើជំនួយសំឡេង"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"វានឹងនៅតែបង្ហាញ លុះត្រាតែអ្នកដកការដៅចេញ។ សូមប៉ះ និងសង្កត់ឲ្យជាប់ដើម្បីដកការដៅ។"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"វានឹងផ្អាករហូតដល់អ្នកផ្តាច់។ ប៉ះ និងសង្កត់គ្រាប់ចុចថយក្រោយដើម្បីផ្តាច់។"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ទេ អរគុណ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"លាក់ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"អនុញ្ញាត"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"បដិសេធ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"ប៉ះដើម្បីស្តារច្បាប់ដើម"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"អ្នកកំពុងប្រើប្រវត្តិរូបការងាររបស់អ្នក"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s។ ប៉ះដើម្បីបើកសំឡេង។"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s។ ប៉ះដើម្បីកំណត់ឲ្យញ័រ។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s។ ប៉ះដើម្បីបិទសំឡេង។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"អង្គគ្រប់គ្រងកម្រិតសំឡេង %s បានបង្ហាញ។ អូសឡើងលើដើម្បីបដិសេធ។"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"អង្គគ្រប់គ្រងកម្រិតសំឡេងបានលាក់"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"កម្មវិធីសម្រួល UI ប្រព័ន្ធ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"បង្ហាញភាគរយថាមពលថ្មដែលបានបង្កប់"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"បង្ហាញភាគរយនៃកម្រិតថាមពលថ្មនៅក្នុងរូបតំណាងរបារស្ថានភាពនៅពេលមិនសាកថ្ម"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"រារាំងការជូនដំណឹងទាំងអស់"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"កុំបិទសំឡេង"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"កុំបិទសំឡេង ឬរារាំង"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"បង្ហាញការកំណត់កម្រិតភាពសំខាន់ពេញលេញ"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"បានរារាំង"</string>
-    <string name="min_importance" msgid="1901894910809414782">"កម្រិតសំខាន់អប្បបរមា"</string>
-    <string name="low_importance" msgid="4109929986107147930">"មិនសូវសំខាន់"</string>
-    <string name="default_importance" msgid="8192107689995742653">"សំខាន់មធ្យម"</string>
-    <string name="high_importance" msgid="1527066195614050263">"សំខាន់ខ្លាំង"</string>
-    <string name="max_importance" msgid="5089005872719563894">"សំខាន់ជាបន្ទាន់"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"កុំបង្ហាញការជូនដំណឹងទាំងនេះ"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"បង្ហាញស្ងាត់ៗនៅផ្នែកខាងក្រោមបញ្ជីនៃការជូនដំណឹង"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"បង្ហាញការជូនដំណឹងទាំងនេះស្ងាត់ៗ"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"អនុញ្ញាតឲ្យការជូនដំណឹងទាំងនេះបន្លឺសំឡេង"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"លោតបង្ហាញនៅលើអេក្រង់ និងអនុញ្ញាតឲ្យបន្លឺសំឡេង"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"បង្ហាញនៅផ្នែកខាងលើបញ្ជីនៃការជូនដំណឹង លោតបង្ហាញនៅលើអេក្រង់ និងអនុញ្ញាតឲ្យបន្លឺសំឡេង"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"អង្គគ្រប់គ្រងការជូនដំណឹងថាមពល"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"បើក"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"បិទ"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"សារៈសំខាន់៖ ស្វ័យប្រវត្តិ"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"សារៈសំខាន់៖ កម្រិត 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"សារៈសំខាន់៖ កម្រិត 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"សារៈសំខាន់៖ កម្រិត 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"សារៈសំខាន់៖ កម្រិត 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"សារៈសំខាន់៖ កម្រិត 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"សារៈសំខាន់៖ កម្រិត 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"កម្មវិធីកំណត់កម្រិតសំខាន់សម្រាប់ការជូនដំណឹងនីមួយៗ។"</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"កុំបង្ហាញការជូនដំណឹងសម្រាប់កម្មវិធីនេះ"</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"គ្មានការរំខានលើអេក្រង់ពេញ ការលោតឡើង សំឡេង ឬញ័រទេ។ លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព។"</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"គ្មានការរំខានលើអេក្រង់ពេញ ការលោតឡើង សំឡេង ឬញ័រទេ។"</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"គ្មានការរំខាន ឬការលោតឡើងលើអេក្រង់ពេញទេ។"</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"លោតឡើងជានិច្ច។ គ្មានការរំខានលើអេក្រង់ពេញទេ។"</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"លោតឡើងជានិច្ច និងអនុញ្ញាតការរំខានលើអេក្រង់ពេញ។"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
     <string name="notification_done" msgid="5279426047273930175">"រួចរាល់"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"អង្គគ្រប់គ្រងការជូនដំណឹង <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"ផ្សេងៗ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"កម្មវិធីចែកអេក្រង់បំបែក"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"ផ្លាស់ទីចុះក្រោម"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ផ្លាស់ទីឡើងលើ"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ផ្លាស់ទីទៅឆ្វេង"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ផ្លាស់ទីទៅស្តាំ"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"អេក្រង់ពេញខាងឆ្វេង"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"ឆ្វេង 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"ឆ្វេង 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"ឆ្វេង 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"អេក្រង់ពេញខាងស្តាំ"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"អេក្រង់ពេញខាងលើ"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"ខាងលើ 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"ខាងលើ 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ខាងលើ 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"អេក្រង់ពេញខាងក្រោម"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ទីតាំង <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>, ប៉ះពីរដងដើម្បីកែ"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>, ប៉ះពីរដងដើម្បីបន្ថែម"</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ទីតាំង <xliff:g id="POSITION">%1$d</xliff:g>, ប៉ះពីរដងដើម្បីជ្រើស"</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ត្រូវបានយកចេញ"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> បានផ្លាស់ទីទៅទីតាំង <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"កម្មវិធីកែការកំណត់រហ័ស"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ការជូនដំណឹង៖ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"កម្មវិធីអាចនឹងមិនដំណើរការនៅលើអេក្រង់បំបែកទេ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"ពង្រីកការកំណត់រហ័ស"</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"បើកការកំណត់"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"បើកការកំណត់រហ័ស"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"បិទការកំណត់រហ័ស"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"បានកំណត់ម៉ោងរោទិ៍"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"បានចូលជា <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"គ្មានអ៊ីនធឺណិតទេ"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"បើកព័ត៌មានលម្អិត"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"បើការកំណត់ <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"កែលំដាប់ការកំណត់"</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

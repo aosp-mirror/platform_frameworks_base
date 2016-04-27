@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Reproducir"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausar"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Manter premido "<b>"INICIO"</b>" para controlar PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Mantén premido o botón de INICIO para controlar PIP"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Imaxe superposta"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"O vídeo manterase visible ata que reproduzas outro. Mantén premido "<b>"INICIO"</b>" para controlalo."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"De acordo"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
 </resources>

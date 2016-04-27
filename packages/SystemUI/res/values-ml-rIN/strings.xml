@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"സ്‌ക്രീൻഷോട്ട് എടുത്തു."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"നിങ്ങളുടെ സ്‌ക്രീൻഷോട്ട് കാണാനായി സ്‌പർശിക്കുക."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"നിങ്ങളുടെ സ്ക്രീൻഷോട്ട് കാണുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിഞ്ഞില്ല."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്ന സമയത്ത് പ്രശ്നം നേരിട്ടു."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"സ്റ്റോറേജ് ഇടം പരിമിതമായതിനാൽ സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കാൻ കഴിയില്ല."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ഡാറ്റ സിഗ്‌നൽ പൂർണ്ണമാണ്."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്‌തു."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്തു."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ഇല്ല."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX ഒരു ബാർ."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX രണ്ട് ബാറുകൾ."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"വൈഫൈ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"സിം ഇല്ല."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"സെല്ലുലാർ ഡാറ്റ"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"സെല്ലുലാർ ഡാറ്റ ഓണാണ്"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"സെല്ലുലാർ ഡാറ്റ ഓഫാണ്"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM കാർഡൊന്നുമില്ല."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ശതമാനം."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"അറിയിപ്പുകൾ."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"വിവരം മായ്‌ക്കുക."</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"ശല്യപ്പെടുത്തരുത് എന്നത് ഓണാണ്, മുൻഗണന മാത്രം."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\'ശല്യപ്പെടുത്തരുത്\' ഓണാണ്, പൂർണ്ണ നിശബ്‌ദത."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\'ശല്യപ്പെടുത്തരുത്\' ഓണാണ്, അലാറം മാത്രം."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ശല്യപ്പെടുത്തരുത്."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"ശല്ല്യപ്പെടുത്തരുത് എന്നത് ഓഫാണ്."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ശല്യപ്പെടുത്തരുത് എന്നത് ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ശല്യപ്പെടുത്തരുത് എന്നത് ഓണാക്കി."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ബ്ലൂടൂത്ത് ഓഫാണ്."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ബ്ലൂടൂത്ത് ഓണാണ്."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്യുന്നു."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ലാൻഡ്‌സ്‌കേപ്പ് ഓറിയന്റേഷനിൽ ഇപ്പോൾ സ്ക്രീൻ ലോക്കുചെയ്‌തു."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"പോർട്രെയ്‌റ്റ് ഓറിയന്റേഷനിൽ ഇപ്പോൾ സ്ക്രീൻ ലോക്കുചെയ്‌തു."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ഡെസേർട്ട് കെയ്സ്"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"ഡേഡ്രീം"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"സ്ക്രീൻ സേവർ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ഇതർനെറ്റ്"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ശല്ല്യപ്പെടുത്തരുത്"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"മുൻഗണന മാത്രം"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"തെളിച്ചം"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ആവശ്യാനുസരണം തിരിയുക"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> എന്നതിലേക്ക് സജ്ജമാക്കുക"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"റൊട്ടേഷൻ ലോക്കുചെയ്‌തു"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"പോർട്രെയ്‌റ്റ്"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ലാൻഡ്‌സ്‌കേപ്പ്"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റുചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"നെറ്റ്‌വർക്ക് ഒന്നുമില്ല"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"വൈഫൈ ഓഫുചെയ്യുക"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"വൈഫൈ ഓണാണ്"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"വൈഫൈ നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"കാസ്റ്റുചെയ്യുന്നു"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"സുരക്ഷിത മോഡിൽ <xliff:g id="APP">%s</xliff:g> പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"എല്ലാം മായ്‌ക്കുക"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"സ്പ്ലിറ്റ് സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"സ്പ്ലിറ്റ് സ്ക്രീൻ ഉപയോഗിക്കുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ഇത് അലാറങ്ങൾ, സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയിൽ നിന്നുൾപ്പെടെ എല്ലാ ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളും തടയുന്നു."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ആവശ്യം കുറഞ്ഞ അറിയിപ്പുകൾ ചുവടെ നൽകിയിരിക്കുന്നു"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"തുറക്കുന്നതിന് വീണ്ടും സ്‌പർശിക്കുക"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"തുറക്കുന്നതിന് വീണ്ടും ടാപ്പുചെയ്യുക"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"അൺലോക്കുചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ഫോൺ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="voice_hint" msgid="8939888732119726665">"വോയ്‌സ് അസിസ്റ്റിനായുള്ള ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"വികസിപ്പിക്കുക"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ചുരുക്കുക"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യുന്നതിന് \'മടങ്ങുക\' സ്‌പർശിച്ചുപിടിക്കുക."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യുന്നതിന് \'മടങ്ങുക\' സ്‌പർശിച്ചുപിടിക്കുക."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"മനസ്സിലായി"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"വേണ്ട, നന്ദി"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"അനുവദിക്കുക"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"നിരസിക്കുക"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"ആദ്യത്തേത് പുനഃസ്ഥാപിക്കാൻ സ്‌പർശിക്കുക."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"ഒറിജിനൽ പുനഃസ്ഥാപിക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"എംബഡ് ചെയ്‌ത ബാറ്ററി ശതമാനം കാണിക്കുക"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ചാർജ്ജുചെയ്യാതിരിക്കുമ്പോൾ സ്റ്റാറ്റസ് ബാർ ഐക്കണിൽ ബാറ്ററി ലെവൽ ശതമാനം കാണിക്കുക"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"എല്ലാ അറിയിപ്പുകളും ബ്ലോക്കുചെയ്യുക"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"നിശബ്ദമാക്കരുത്"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"നിശബ്ദമാക്കുകയോ ബ്ലോക്കുചെയ്യുകയോ അരുത്"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"പൂർണ്ണ പ്രാധാന്യ ക്രമീകരണം കാണിക്കുക"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"ബ്ലോക്കുചെയ്തു"</string>
-    <string name="min_importance" msgid="1901894910809414782">"കുറഞ്ഞ പ്രാധാന്യം"</string>
-    <string name="low_importance" msgid="4109929986107147930">"താഴ്ന്ന പ്രാധാന്യം"</string>
-    <string name="default_importance" msgid="8192107689995742653">"സാധാരണ പ്രാധാന്യം"</string>
-    <string name="high_importance" msgid="1527066195614050263">"ഉയർന്ന പ്രാധാന്യം"</string>
-    <string name="max_importance" msgid="5089005872719563894">"അടിയന്തര പ്രാധാന്യം"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"ഈ അറിയിപ്പുകൾ ഒരിക്കലും കാണിക്കരുത്"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"ശബ്ദമുണ്ടാക്കാൻ ഈ അറിയിപ്പുകളെ അനുവദിക്കുക"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"പവർ അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ഓൺ"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ഓഫ്"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"പവർ അറിയിപ്പ് നിയന്ത്രണം ഉപയോഗിച്ച്, ഒരു ആപ്പിനായുള്ള അറിയിപ്പുകൾക്ക് 0 മുതൽ 5 വരെയുള്ള പ്രാധാന്യ ലെവലുകളിലൊന്ന് നിങ്ങൾക്ക് സജ്ജമാക്കാവുന്നതാണ്. \n\n"<b>"ലെവൽ 5"</b>" \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ മുകളിൽ കാണിക്കുക \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം അനുവദിക്കുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 4"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 3"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും സൃശ്യമാക്കരുത് \n\n"<b>"ലെവൽ 2"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n\n"<b>"ലെവൽ 1"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n- ലോക്ക് സ്ക്രീനിൽ നിന്നും സ്റ്റാറ്റസ് ബാറിൽ നിന്നും മറയ്ക്കുക \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ അടിയിൽ കാണിക്കുക \n\n"<b>"ലെവൽ 0"</b>" \n- ആപ്പിൽ നിന്നുള്ള എല്ലാ അറിയിപ്പുകളും ബ്ലോക്കുചെയ്യുക"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"പ്രാധാന്യം: സ്വയമേവയുള്ളത്"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"പ്രാധാന്യം: ലെവൽ 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"പ്രാധാന്യം: ലെവൽ 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"പ്രാധാന്യം: ലെവൽ 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"പ്രാധാന്യം: ലെവൽ 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"പ്രാധാന്യം: ലെവൽ 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"പ്രാധാന്യം: ലെവൽ 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"ഓരോ അറിയിപ്പിനുമുള്ള പ്രാധാന്യം നിർണ്ണയിക്കുന്നത് ആപ്പാണ്."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പ് കാണിക്കരുത്."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക, മുഴുവൻ സ്ക്രീൻ തടസ്സം അനുവദിക്കുക. ലോക്ക് സ്ക്രീനിൽ നിന്നും സ്റ്റാറ്റസ് ബാറിൽ നിന്നും മറയ്ക്കുക."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"മുഴുവൻ സ്ക്രീൻ തടസ്സമോ ദൃശ്യമാക്കലോ ശബ്ദമോ വൈബ്രേഷനോ ഇല്ല."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"മുഴുവൻ സ്ക്രീൻ തടസ്സമോ ദൃശ്യമാകലോ ഇല്ല."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക. മുഴുവൻ സ്ക്രീൻ തടസ്സമില്ല."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക, മുഴുവൻ സ്ക്രീൻ തടസ്സം അനുവദിക്കുക."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"മറ്റുള്ളവ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"സ്പ്ലിറ്റ്-സ്ക്രീൻ ഡിവൈഡർ"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"താഴേക്ക് നീക്കുക"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"മുകളിലേക്ക് നീക്കുക"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ഇടത്തേക്ക് നീക്കുക"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"വലത്തേക്ക് നീക്കുക"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ഇടത് പൂർണ്ണ സ്ക്രീൻ"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"ഇടത് 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"ഇടത് 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"ഇടത് 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"വലത് പൂർണ്ണ സ്ക്രീൻ"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"മുകളിൽ പൂർണ്ണ സ്ക്രീൻ"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"മുകളിൽ 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"മുകളിൽ 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"മുകളിൽ 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"താഴെ പൂർണ്ണ സ്ക്രീൻ"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"സ്ഥാനം <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. എഡിറ്റുചെയ്യുന്നതിന് രണ്ടുതവണ ടാപ്പുചെയ്യുക."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ചേർക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"സ്ഥാനം <xliff:g id="POSITION">%1$d</xliff:g>. തിരഞ്ഞെടുക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> നീക്കംചെയ്യുന്നു"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"സ്ഥാനം <xliff:g id="POSITION">%2$d</xliff:g>-ലേക്ക് <xliff:g id="TILE_NAME">%1$s</xliff:g> നീക്കി"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ദ്രുത ക്രമീകരണ എഡിറ്റർ."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> അറിയിപ്പ്: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"സ്പ്ലിറ്റ്-സ്ക്രീനിനൊപ്പം ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"ദ്രുത ക്രമീകരണം വിപുലീകരിക്കുക."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ക്രമീകരണം തുറക്കുക."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ദ്രുത ക്രമീകരണം തുറക്കുക."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ദ്രുത ക്രമീകരണം അടയ്ക്കുക."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"അലാറം സജ്ജമാക്കി."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> ആയി സൈൻ ഇൻ ചെയ്‌തു"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ഇന്റർനെറ്റില്ല."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"വിശദാംശങ്ങൾ തുറക്കുക."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ക്രമീകരണം തുറക്കുക."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ക്രമീകരണ ക്രമം എഡിറ്റുചെയ്യുക."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

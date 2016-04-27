@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Estase gardando a captura de pantalla."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de pantalla gardada."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca para ver a captura de pantalla."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Toca para ver a captura de pantalla."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Non se puido facer a captura de pantalla."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Produciuse un problema ao gardar a captura de pantalla."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Non se pode gardar a captura de pantalla porque o espazo de almacenamento é limitado."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Sinal de datos: completo"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Conectado a <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Dispositivo conectado: <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Non hai WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Unha barra de WiMAX"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Dúas barras de WiMAX"</string>
@@ -148,12 +149,18 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sen SIM"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Datos móbiles"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Datos móbiles activados"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Os datos móbiles están desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoraxe de Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Non hai tarxeta SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambio de rede do operador."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir os detalles da batería"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Carga da batería: <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración do sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacións"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Eliminar notificación."</string>
@@ -191,9 +198,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Non molestar activado, só prioridade."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Non molestar activado, silencio total."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Non molestar activado, só alarmas."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Non molestar."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"A opción Non molestar está desactivada."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Desactivouse a opción Non molestar."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Activouse a opción Non molestar."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivado."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activado."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth conectando."</string>
@@ -247,7 +256,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Agora a pantalla está bloqueada en orientación horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Agora a pantalla está bloqueada en orientación vertical."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Caixa de sobremesa"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Protector pantalla"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Protector pantalla"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non molestar"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Só prioridade"</string>
@@ -259,6 +268,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Non hai dispositivos sincronizados dispoñibles"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotación automática"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Xirar a pantalla automaticamente"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Definido como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horizontal"</string>
@@ -277,6 +288,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Non conectada"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Non hai rede"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wifi desactivada"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wifi activada"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Non hai redes wifi dispoñibles"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emisión"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Emitindo"</string>
@@ -312,6 +324,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"A aplicación <xliff:g id="APP">%s</xliff:g> está desactivada no modo seguro"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Borrar todo"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"A aplicación non é compatible coa pantalla dividida"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastrar aquí para usar a pantalla dividida"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dividir en horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dividir en vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dividir de xeito personalizado"</string>
@@ -329,7 +342,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Esta acción bloquea TODOS os sons e vibracións, incluídos os das alarmas, música, vídeos e xogos."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacións menos urxentes abaixo"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Toca outra vez para abrir o elemento"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Toca de novo para abrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Pasa o dedo cara arriba para desbloquear"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Pasa o dedo desde a icona para acceder ao asistente de voz"</string>
@@ -407,7 +420,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Ampliar"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Contraer"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A pantalla está fixada"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"A pantalla manterase visible ata que anules a fixación. Para facelo, mantén premido Atrás."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Atrás."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Non, grazas"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Queres ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -417,11 +430,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Permitir"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denegar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é o cadro de diálogo de volume"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar o orixinal."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Toca para restaurar o orixinal."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando o perfil de traballo"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca para activar o son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca para establecer a vibración. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Pódense silenciar os servizos de accesibilidade."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Estanse mostrando os controis de volume de %s. Pasa o dedo cara a arriba para ignoralos."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ocultáronse os controis de volume"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Configurador da IU do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaxe de batería inserida"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
@@ -466,19 +481,24 @@
     <string name="block" msgid="2734508760962682611">"Bloquear todas as notificacións"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Non silenciar"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Non silenciar nin bloquear"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostrar a configuración completa da importancia"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Bloqueada"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Importancia mínima"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Importancia baixa"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Importancia normal"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Importancia alta"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Importancia urxente"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Non mostrar nunca estas notificacións"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Mostrar de forma silenciosa na parte inferior da lista de notificacións"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Mostrar estas notificacións de forma silenciosa"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Permitir que esta notificación emita son"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Mostrar na pantalla e permitir que emita son"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Mostrar na parte superior da lista de notificacións, amosar na pantalla e permitir que emita son"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Controis de notificacións mellorados"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Activar"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desactivar"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"Cos controis de notificacións mellorados, podes asignarlles un nivel de importancia comprendido entre 0 e 5 ás notificacións dunha aplicación determinada. \n\n"<b>"Nivel 5"</b>" \n- Mostrar na parte superior da lista de notificacións. \n- Permitir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 4"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 3"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n\n"<b>"Nivel 2"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n\n"<b>"Nivel 1"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n- Ocultar na pantalla de bloqueo e na barra de estado. \n- Mostrar na parte inferior da lista de notificacións. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas as notificacións da aplicación."</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Importancia: automática"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Importancia: nivel 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Importancia: nivel 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Importancia: nivel 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Importancia: nivel 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Importancia: nivel 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Importancia: nivel 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"A aplicación determina a importancia de cada notificación."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Non mostrar nunca as notificacións desta aplicación."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Sen notif. e sen son, vibrac. ou inter. en pant. completa. Ocultar na pant. bloqueo e barra estado."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Sen mostrar notificacións e sen son, vibración ou interrupcións no modo de pantalla completa."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Sen mostrar notificacións e sen interrupcións no modo de pantalla completa."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Mostrar notificacións sempre. Sen interrupcións no modo de pantalla completa."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Mostrar notificacións sempre e permitir interrupcións no modo de pantalla completa."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Máis opcións"</string>
     <string name="notification_done" msgid="5279426047273930175">"Feito"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controis de notificacións de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +613,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Outros"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Divisor de pantalla dividida"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Baixar"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Subir"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mover á esquerda"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mover á dereita"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Pantalla completa á esquerda"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"70 % á esquerda"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"50 % á esquerda"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"30 % á esquerda"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Pantalla completa á dereita"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Pantalla completa arriba"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"70 % arriba"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"50 % arriba"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"30 % arriba"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Pantalla completa abaixo"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posición <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Toca dúas veces o elemento para editalo."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Toca dúas veces o elemento para engadilo"</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posición <xliff:g id="POSITION">%1$d</xliff:g>. Toca dúas veces o elemento para seleccionalo."</string>
@@ -606,9 +632,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Eliminouse <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> moveuse á posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de configuración rápida."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Pode que a aplicación non funcione coa pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"A aplicación non é compatible coa función de pantalla dividida."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Ampliar configuración rápida"</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir configuración."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir a configuración rápida."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Pechar a configuración rápida."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarma definida."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Iniciaches sesión como <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Non hai conexión a Internet."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Abrir detalles."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir a configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar a orde das opcións de configuración."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

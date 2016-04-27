@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"चलाएं"</string>
     <string name="pip_pause" msgid="8412075640017218862">"रोकें"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP नियंत्रण हेतु "<b>"HOME"</b>" होल्ड करें"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP नियंत्रण के लिए HOME बटन को दबाए रखें"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"चित्र-में-चित्र"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"यह आपके वीडियो को तब तक दृश्यमान बनाए रखता है जब तक कि आप कोई दूसरा वीडियो नहीं चलाते. उसे नियंत्रित करने के लिए "<b>"HOME"</b>" को दबाए रखें."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"समझ लिया"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"ख़ारिज करें"</string>
 </resources>
