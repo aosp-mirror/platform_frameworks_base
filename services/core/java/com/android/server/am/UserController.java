@@ -220,6 +220,7 @@ final class UserController {
 
     private void finishUserBoot(UserState uss, IIntentReceiver resultTo) {
         final int userId = uss.mHandle.getIdentifier();
+        Slog.d(TAG, "Finishing user boot " + userId);
         synchronized (mService) {
             // Bail if we ended up with a stale user
             if (mStartedUsers.get(userId) != uss) return;
@@ -248,7 +249,8 @@ final class UserController {
                             + "): attempting unlock because parent is unlocked");
                     maybeUnlockUser(userId);
                 } else {
-                    Slog.d(TAG, "User " + userId + " (parent " + parent.id
+                    String parentId = (parent == null) ? "<null>" : String.valueOf(parent.id);
+                    Slog.d(TAG, "User " + userId + " (parent " + parentId
                             + "): delaying unlock because parent is locked");
                 }
             } else {
@@ -333,6 +335,10 @@ final class UserController {
         synchronized (mService) {
             // Bail if we ended up with a stale user
             if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
+            final UserInfo userInfo = getUserInfo(userId);
+            if (userInfo == null) {
+                return;
+            }
 
             // Only keep marching forward if user is actually unlocked
             if (!isUserKeyUnlocked(userId)) return;
@@ -341,6 +347,25 @@ final class UserController {
                 // Remember that we logged in
                 mUserManager.onUserLoggedIn(userId);
 
+                if (!userInfo.isInitialized()) {
+                    if (userId != UserHandle.USER_SYSTEM) {
+                        Slog.d(TAG, "Initializing user #" + userId);
+                        Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
+                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                        mService.broadcastIntentLocked(null, null, intent, null,
+                                new IIntentReceiver.Stub() {
+                                    @Override
+                                    public void performReceive(Intent intent, int resultCode,
+                                            String data, Bundle extras, boolean ordered,
+                                            boolean sticky, int sendingUser) {
+                                        // Note: performReceive is called with mService lock held
+                                        getUserManager().makeInitialized(userInfo.id);
+                                    }
+                                }, 0, null, null, null, AppOpsManager.OP_NONE,
+                                null, true, false, MY_PID, SYSTEM_UID, userId);
+                    }
+                }
+                Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
                 final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                 bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -669,6 +694,35 @@ final class UserController {
         }
     }
 
+    /**
+     * Start user, if its not already running.
+     * <p>The user will be brought to the foreground, if {@code foreground} parameter is set.
+     * When starting the user, multiple intents will be broadcast in the following order:</p>
+     * <ul>
+     *     <li>{@link Intent#ACTION_USER_STARTED} - sent to registered receivers of the new user
+     *     <li>{@link Intent#ACTION_USER_BACKGROUND} - sent to registered receivers of the outgoing
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     <li>{@link Intent#ACTION_USER_FOREGROUND} - sent to registered receivers of the new
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     <li>{@link Intent#ACTION_USER_SWITCHED} - sent to registered receivers of the new user.
+     *     Sent only if {@code foreground} parameter is true
+     *     <li>{@link Intent#ACTION_USER_STARTING} - ordered broadcast sent to registered receivers
+     *     of the new fg user
+     *     <li>{@link Intent#ACTION_LOCKED_BOOT_COMPLETED} - ordered broadcast sent to receivers of
+     *     the new user
+     *     <li>{@link Intent#ACTION_USER_UNLOCKED} - sent to registered receivers of the new user
+     *     <li>{@link Intent#ACTION_PRE_BOOT_COMPLETED} - ordered broadcast sent to receivers of the
+     *     new user. Sent only when the user is booting after a system update.
+     *     <li>{@link Intent#ACTION_USER_INITIALIZE} - ordered broadcast sent to receivers of the
+     *     new user. Sent only the first time a user is starting.
+     *     <li>{@link Intent#ACTION_BOOT_COMPLETED} - ordered broadcast sent to receivers of the new
+     *     user. Indicates that the user has finished booting.
+     * </ul>
+     *
+     * @param userId ID of the user to start
+     * @param foreground true if user should be brought to the foreground
+     * @return true if the user has been successfully started
+     */
     boolean startUser(final int userId, final boolean foreground) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -680,7 +734,7 @@ final class UserController {
             throw new SecurityException(msg);
         }
 
-        if (DEBUG_MU) Slog.i(TAG, "starting userid:" + userId + " fore:" + foreground);
+        Slog.i(TAG, "Starting userid:" + userId + " fg:" + foreground);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -790,36 +844,8 @@ final class UserController {
                             null, false, false, MY_PID, SYSTEM_UID, userId);
                 }
 
-                if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
-                    if (userId != UserHandle.USER_SYSTEM) {
-                        Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
-                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        mService.broadcastIntentLocked(null, null, intent, null,
-                                new IIntentReceiver.Stub() {
-                                    @Override
-                                    public void performReceive(Intent intent, int resultCode,
-                                            String data, Bundle extras, boolean ordered,
-                                            boolean sticky, int sendingUser) {
-                                        mHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                onUserInitialized(uss, foreground,
-                                                        oldUserId, userId);
-                                            }
-                                        });
-                                    }
-                                }, 0, null, null, null, AppOpsManager.OP_NONE,
-                                null, true, false, MY_PID, SYSTEM_UID, userId);
-                        uss.initializing = true;
-                    } else {
-                        getUserManager().makeInitialized(userInfo.id);
-                    }
-                }
-
                 if (foreground) {
-                    if (!uss.initializing) {
-                        moveUserToForegroundLocked(uss, oldUserId, userId);
-                    }
+                    moveUserToForegroundLocked(uss, oldUserId, userId);
                 } else {
                     mService.mUserController.finishUserBoot(uss);
                 }
@@ -996,8 +1022,8 @@ final class UserController {
         }
     }
 
-    void dispatchUserSwitch(final UserState uss, final int oldUserId,
-            final int newUserId) {
+    void dispatchUserSwitch(final UserState uss, final int oldUserId, final int newUserId) {
+        Slog.d(TAG, "Dispatch onUserSwitching oldUser #" + oldUserId + " newUser #" + newUserId);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         if (observerCount > 0) {
             final IRemoteCallback callback = new IRemoteCallback.Stub() {
@@ -1041,39 +1067,14 @@ final class UserController {
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        completeSwitchAndInitialize(uss, oldUserId, newUserId, false, true);
-    }
-
-    void onUserInitialized(UserState uss, boolean foreground, int oldUserId, int newUserId) {
+        Slog.d(TAG, "Continue user switch oldUser #" + oldUserId + ", newUser #" + newUserId);
         synchronized (mService) {
-            if (foreground) {
-                moveUserToForegroundLocked(uss, oldUserId, newUserId);
-            }
+            mService.mWindowManager.stopFreezingScreen();
         }
-        completeSwitchAndInitialize(uss, oldUserId, newUserId, true, false);
-    }
-
-    void completeSwitchAndInitialize(UserState uss, int oldUserId, int newUserId,
-            boolean clearInitializing, boolean clearSwitching) {
-        boolean unfrozen = false;
-        synchronized (mService) {
-            if (clearInitializing) {
-                uss.initializing = false;
-                getUserManager().makeInitialized(uss.mHandle.getIdentifier());
-            }
-            if (clearSwitching) {
-                uss.switching = false;
-            }
-            if (!uss.switching && !uss.initializing) {
-                mService.mWindowManager.stopFreezingScreen();
-                unfrozen = true;
-            }
-        }
-        if (unfrozen) {
-            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
-                    newUserId, 0));
-        }
+        uss.switching = false;
+        mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+        mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
+                newUserId, 0));
         stopGuestOrEphemeralUserIfBackground();
         stopBackgroundUsersIfEnforced(oldUserId);
     }
