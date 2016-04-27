@@ -218,8 +218,6 @@ under the <a href="{@docRoot}guide/topics/manifest/application-element.html">
 &lt;service
     android:name=".AnalogWatchFaceService"
     android:label="&#64;string/analog_name"
-    android:allowEmbedded="true"
-    android:taskAffinity=""
     android:permission="android.permission.BIND_WALLPAPER" >
     &lt;meta-data
         android:name="android.service.wallpaper"
