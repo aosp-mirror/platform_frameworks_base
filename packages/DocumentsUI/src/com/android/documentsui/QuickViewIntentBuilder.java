@@ -101,7 +101,10 @@ final class QuickViewIntentBuilder {
                     }
                 }
 
-                intent.putExtra(Intent.EXTRA_INDEX, documentLocation);
+                // The documentLocation variable contains an index in "uris". However,
+                // ClipData contains a slice of "uris", so we need to shift the location
+                // so it points to the same Uri.
+                intent.putExtra(Intent.EXTRA_INDEX, documentLocation - range.getLower());
                 intent.setClipData(clipData);
 
                 return intent;
@@ -147,12 +150,12 @@ final class QuickViewIntentBuilder {
             authority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
             uri = DocumentsContract.buildDocumentUri(authority, id);
 
-            if (id.equals(mDocument.documentId)) {
-                if (DEBUG) Log.d(TAG, "Found starting point for QV. " + i);
-                documentLocation = i;
-            }
-
             uris.add(uri);
+
+            if (id.equals(mDocument.documentId)) {
+                documentLocation = uris.size() - 1;  // Position in "uris", not in the model.
+                if (DEBUG) Log.d(TAG, "Found starting point for QV. " + documentLocation);
+            }
         }
 
         return documentLocation;
