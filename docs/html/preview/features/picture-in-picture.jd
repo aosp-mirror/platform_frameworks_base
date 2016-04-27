@@ -99,15 +99,15 @@ in the PIP window.</p>
 <h2 id="pip_button">Switching Your Activity to Picture-in-picture</h2>
 
 When you need to switch your activity into PIP mode, call
-<code>Activity.enterPictureInPicture()</code>. The following example switches
-to PIP mode when the user selects a dedicated PIP button on a media control
-bar:</p>
+<code>Activity.enterPictureInPictureMode()</code>. The following example
+switches to PIP mode when the user selects a dedicated PIP button on a media
+control bar:</p>
 
 <pre>
 &#64;Override
 public void onActionClicked(Action action) {
     if (action.getId() == R.id.lb_control_picture_in_picture) {
-        getActivity().enterPictureInPicture();
+        getActivity().enterPictureInPictureMode();
         return;
     }
     ...
@@ -129,14 +129,14 @@ control bar PIP actions and uses the PIP icon.</p>
 <p>When your activity enters PIP mode, your activity should only show video
 playback. Remove UI elements before your activity enters PIP,
 and restore these elements when your activity becomes full-screen again.
-Override <code>Activity.onPictureInPictureChanged()</code> or
-<code>Fragment.onPictureInPictureChanged()</code> and enable or
+Override <code>Activity.onPictureInPictureModeChanged()</code> or
+<code>Fragment.onPictureInPictureModeChanged()</code> and enable or
 disable your UI elements as needed, for example:</p>
 
 <pre>
 &#64;Override
-public void onPictureInPictureChanged(boolean inPictureInPicture) {
-    if (inPictureInPicture) {
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
         // Hide the controls in picture-in-picture mode.
         ...
     } else {
@@ -159,8 +159,8 @@ example:</p>
 <pre>
 &#64;Override
 public void onPause() {
-    // If called due to PIP, do not pause playback
-    if (inPictureInPicture()) {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
         // Continue playback
         ...
     }
