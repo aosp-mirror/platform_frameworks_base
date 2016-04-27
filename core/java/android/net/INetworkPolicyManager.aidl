@@ -52,6 +52,9 @@ interface INetworkPolicyManager {
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
 
+    /** Callback used to change internal state on tethering */
+    void onTetheringChanged(String iface, boolean tethering);
+
     /** Control which applications can be exempt from background data restrictions */
     void addRestrictBackgroundWhitelistedUid(int uid);
     void removeRestrictBackgroundWhitelistedUid(int uid);
