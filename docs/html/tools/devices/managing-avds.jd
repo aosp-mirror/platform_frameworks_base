@@ -1,297 +1,680 @@
-page.title=Managing AVDs with AVD Manager
-parent.title=Managing Virtual Devices
-parent.link=index.html
+page.title=Managing AVDs with the AVD Manager
 @jd:body
 
   <div id="qv-wrapper">
     <div id="qv">
       <h2>In this document</h2>
-
       <ol>
-        <li><a href="#createavd">Creating an AVD</a>
-          <ol>
-            <li><a href="#CreateDefinition">Creating a device definition</a></li>
-            <li><a href="#hardwareopts">Hardware options</a></li>
-          </ol>
+        <li><a href="#viewing">Viewing and Managing Your AVDs</a></li>
+        <li><a href="#createavd">Creating an AVD</a></li>
+        <li><a href="#createhp">Creating a Hardware Profile</a></li>
+        <li><a href="#workingavd">Working With Existing AVDs</a></li>
+        <li><a href="#workinghp">Working With Existing Hardware Profiles</a>
         </li>
+        <li><a href="#emulator">Running and Stopping an Emulator, and
+        Clearing Data</li>
+        <li><a href="#importexporthp">Importing and Exporting Hardware
+        Profiles</li>
+        <li><a href="#hpproperties">Hardware Profile Properties</a></li>
+        <li><a href="#avdproperties">AVD Properties</a></li>
         <li><a href="#skins">Creating Emulator Skins</a></li>
       </ol>
+      <h2>Dependencies and prerequisites</h2>
+      <ul>
+      <li>Android Studio 2.0 or higher</li>
+      <li>SDK Tools 25.0.10 or higher</li>
+      <li>Active network connection for certain operations, such as downloading
+      system images</li>
+      <li>adb integration enabled through <strong>Tools</strong> &gt;
+      <strong>Android</strong> &gt;
+      <strong>Enable ADB Integration</strong></li>
+    </ul>
     </div>
   </div>
 
-  <p>The AVD Manager is a tool you can use
-  to create and manage Android virtual devices (AVDs), which define device configurations
-  for the <a href="{@docRoot}tools/devices/emulator.html"
-  >Android Emulator</a>.</p>
+  <p>An Android Virtual Device (AVD) definition lets you define the
+  characteristics of an Android phone, tablet, Android Wear, or Android TV
+  device that you want to simulate in the
+ <a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a>.
+  The AVD Manager helps you easily create and manage AVDs. </p>
 
-<p>To launch the AVD Manager:</p>
+  <p>To effectively test your app, you should create an AVD that models each
+  device type that your app is designed to support. For example, we recommend
+  that you create an AVD for each API level that's equal to and higher than the
+  minimum version you've specified in your manifest
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"
+  style="white-space: nowrap;"
+  >{@code &lt;uses-sdk>}</a> tag.</p>
+
+  <p>An AVD contains a hardware profile, system image, skin, and other
+  properties.</p>
+
+  <p>The hardware profile defines the characteristics of a device as
+  shipped from the factory. The AVD Manager comes preloaded with certain
+  hardware profiles, such as Nexus phone devices, and you can define and import
+  hardware profiles as needed. You can override some of the settings in your
+  AVD, if needed.</p>
+
+  <p>The AVD Manager helps you choose a system image for your AVD by providing
+  recommendations. It also lets
+  you download system images, some with add-on libraries, like Google APIs,
+  which your app might require. x86 system images run the fastest in the
+  emulator. Android Wear and Android TV devices tend to run best (and have
+  the largest installed base) on recent releases, while users of Android phones
+  and tablets tend to use slightly older releases, as shown in the
+  <a href="{@docRoot}about/dashboards/index.html">API level
+  dashboards</a>.</p>
+
+  <p>An emulator skin specifies the appearance of a device. The AVD Manager
+  provides some predefined skins. You can also define your own, or use skins
+  provided by third parties.</p>
+
+  <p>Just as with a real device, for apps to use certains features defined in an
+  AVD, such as the camera, it must have the corresponding
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+  setting in the app manifest.</p>
+
+<h2 id="viewing">Viewing and Managing Your AVDs</h2>
+
+<p>The AVD Manager lets you manage your AVDs all in one place.</p>
+
+<p>To run the AVD Manager:</p>
+
 <ul>
-  <li>In Android Studio, select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
-  the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png"
-  style="vertical-align:bottom;margin:0;height:19px"> in the toolbar.</li>
-
-  <li>Or, use the command line to navigate to your SDK's <code>tools/</code> directory and execute:
-  <pre class="no-prettyprint classic">$ android avd</pre>
-  </li>
+  <li> In Android Studio, select <strong>Tools</strong> &gt;
+  <strong>Android</strong> &gt; <strong>AVD Manager</strong>.</li>
+  <li> Click AVD Manager <img src="{@docRoot}images/tools/avd-manager-studio.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="AVD Manager icon">
+  in the toolbar.</li>
 </ul>
 
-  <p>The AVD Manager main screen shows your current virtual devices, as shown in figure 1.</p>
+<p>The AVD Manager appears.</p>
 
+<img src="{@docRoot}images/tools/avd-main.png" alt="AVD Manager main window" />
 
-   <img src="{@docRoot}images/studio-avdmgr-firstscreen.png" alt="">
-   <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager main screen shows your current
-   virtual devices.</p>
+<p>It displays any AVDs you’ve already defined. When you first install
+Android Studio, it creates one AVD. If you defined AVDs for Android Emulator
+24.0.<em>x</em> or lower, you need to recreate them.</p>
 
+<p>From this page you can:</p>
 
-<p class="note"><strong>Note:</strong> If you launch the AVD Manager from the command line, the UI
-is different than how it appears in Android Studio, as documented here. Most of the same
-functionality is available, but the command-line version of the AVD Manager
-is currently not documented.</p>
+<ul>
+  <li> Define a new <a href="#createavd">AVD</a> or
+  <a href="#createhp">hardware profile</a>.</li>
+  <li> Edit an existing <a href="#workingavd">AVD</a> or
+  <a href="#workinghp">hardware profile</a>.</li>
+  <li> Delete an <a href="#workingavd">AVD</a> or
+  <a href="#workinghp">hardware profile</a>.</li>
+  <li> <a href="#importexporthp">Import or export</a> hardware profile
+  definitions.</li>
+  <li> <a href="#emulator">Run</a> an AVD to start the emulator.</li>
+  <li> <a href="#emulator">Stop</a> an emulator.</li>
+  <li> <a href="#emulator">Clear</a> data and start fresh, from the same state
+  as when you first ran the emulator.</li>
+  <li> <a href="#workingavd">Show</a> the associated AVD <code>.ini</code> and
+  <code>.img</code> files on disk.</li>
+  <li> <a href="#workingavd">View</a> AVD configuration details that you can
+  include in any bug
+  reports to the Android Studio team.</li>
+</ul>
 
 
   <h2 id="createavd">Creating an AVD</h2>
 
-  <p>You can create as many AVDs as you would like to use with the Android Emulator.
-  To effectively test your app, you should create an AVD that models each device type for which
-  you have designed your app to support. For instance, you should create an AVD for each
-  API level equal to and higher than the minimum version you've specified in your manifest
-  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html" style="white-space: nowrap;"
-  >{@code <uses-sdk>}</a> tag.</p>
+  <p>You can <a href="#newavd">create a new AVD</a> from the beginning, or
+  <a href="#copyavd">duplicate an AVD</a> and change some properties.</p>
 
-  <p>To create an AVD based on an existing device definition:</p>
+  <p id="newavd">To create a new AVD:</p>
 
   <ol>
-    <li>From the main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
+    <li id="selecthardwarepage">From the
+    <a href="#viewing"><em>Your Virtual Devices</em></a> page of
+    the AVD Manager, click <strong>Create Virtual Device</strong>.</li>
 
-    <li><p>In the Select Hardware window, select a device configuration, such as Nexus 6,
-    then click <strong>Next</strong>.</p>
+    <p>Alternatively,
+    <a href="{@docRoot}training/basics/firstapp/running-app.html">run your
+    app</a> from within Android Studio. In the <em>Select Deployment Target</em>
+    dialog, click <strong>Create New Emulator</strong>.</p>
 
-      <img src="{@docRoot}images/studio-avdmgr-selecthdwr.png" alt="">
-      <p class="img-caption"><strong>Figure 2.</strong> The Select Hardware window.</p>
+    <p>The <em>Select Hardware</em> page appears.</p>
+    <img src="{@docRoot}images/tools/avd-hardwareprofile.png"
+      alt="Hardware Profile page of the AVD Manager">
+
+    <li>Select a hardware profile,
+    and then click <strong>Next</strong>.</li>
+
+    <p>If you don't see the hardware profile you want, you can
+    <a href="#createhp">create</a>
+    or <a href="#importexporthp">import</a> a hardware profile.</p>
+
+      <p  id="systemimagepage">The <em>System Image</em> page appears.</p>
+      <img src="{@docRoot}images/tools/avd-systemimage.png"
+      alt="System Image page of the AVD Manager">
+
     </li>
-    <li>Select the desired system version for the AVD and click <strong>Next</strong>.
+    <li>Select the system image for a particular API level, and then click
+    <strong>Next</strong>.
     </li>
-    <li>Verify the configuration settings, then click <strong>Finish</strong>.
-    <p>If necessary, click <strong>Show Advanced Settings</strong> to select a custom skin
-      for the hardware profile and adjust other hardware settings.</p>
+    <p>The <strong>Recommended</strong> tab lists recommended system images. The
+    other tabs include a more complete list. The right pane describes the
+    selected system image. x86 images run the fastest in the emulator.</p>
+    <p>If you see <strong>Download</strong> next to the system image, you need
+    to click it to download the system image. You must be connected to the
+    internet to download it.</p>
+
+    <p id="verifyconfigpage">The <em>Verify Configuration</em> page appears.</p>
+      <img src="{@docRoot}images/tools/avd-verifyconfig.png"
+      alt="Verify Configuration page of the AVD Manager">
+
+    <li>Change <a href="#avdproperties">AVD properties</a> as needed,
+    and then click <strong>Finish</strong>.
+    <p>Click <strong>Show Advanced Settings</strong> to show more
+    settings, such as the skin.</p>
     </li>
-  </ol>
 
-  <p>To launch the AVD in the Android Emulator, click the launch button
-  <img src="{@docRoot}images/tools/as-avd-start.png"
-  style="vertical-align:bottom;margin:0;height:19px">
-   in the list of AVDs.</p>
+  <p>The new AVD appears in the <em>Your Virtual Devices</em> page or the
+  <em>Select Deployment Target</em> dialog.</p>
+</ol>
 
 
-<h3 id="CreateDefinition">Creating a device definition</h3>
+    <p id="copyavd">To create an AVD starting with a copy:</p>
 
-<p>In case the available device definitions do not match the device type you'd like to emulate,
-you can create a custom device definition for your AVD:</p>
+    <ol>
+    <li>From the
+    <a href="#viewing"><em>Your Virtual Devices</em></a> page of
+    the AVD Manager, right-click an AVD and select
+    <strong>Duplicate</strong>.</li>
+
+    <p>Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>Duplicate</strong>.</p>
+
+    <p>The <a href="#verifyconfigpage"><em>Verify Configuration</em></a>
+    page appears.</p>
+
+    <li>Click <strong>Change</strong> or <strong>Previous</strong> if you
+    need to make changes on the
+    <a href="#systemimagepage"><em>System Image</em></a> and
+    <a href="#hardwareprofilepage"><em>Hardware Profile</em></a> pages.</li>
+
+    <li>Make your changes, and then click <strong>Finish</strong>.</li>
+
+    <p>The AVD appears in the <em>Your Virtual Devices</em> page.
+
+</ol>
+
+
+<h2 id="createhp">Creating a Hardware Profile</h2>
+
+<p>The AVD Manager provides predefined hardware profiles for common devices so
+you can easily add them to your AVD definitions. If
+you need to define a different device, you can create a new hardware profile.
+You can <a href="#newhp">define a new hardware profile</a> from the beginning,
+or <a href="#copyavd">copy a hardware profile</a> as a start. The preloaded
+hardware profiles aren't editable.</p>
+
+<p id="newhp">To create a new hardware profile from the beginning:</p>
 <ol>
-  <li>From the main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
-  <li>To begin you custom device by using an existing device profile as a template, select
-  a device profile then click <strong>Clone Device</strong>.
-  <p>Or, to start from scratch, click <strong>New Hardware Profile</strong>.</p>
-  </li>
-  <li>
-<p>The following Configure Hardware Profile window (figure 3) allows you to specify various
-configurations such as the screen size, memory options, input type, and sensors.</p>
-
-    <p>When you're done configuring the device, click <strong>Finish</strong>.</p>
-
-      <img src="{@docRoot}images/studio-avdmgr-confighardwareprof.png" alt="">
-      <p class="img-caption"><strong>Figure 3.</strong> The Configure Hardware window when
-      creating a custom device configuration.</p>
-    </li>
-  <li>Your custom device configuration is now available in the list of device definitions
-  (shown after you click <strong>Create Virtual Device</strong>). To continue preparing an AVD
-  with your custom device configuration, select the new configuration and follow the instructions
-  above to create an AVD with an existing device definition (and select your new definition).</li>
-
-  </ol>
-
-
-
-<h3 id="hardwareopts">Hardware options</h3>
-
-<p>If you are creating a new AVD, you can specify the following hardware options for the AVD
-to emulate:</p>
-
-  <table>
-    <tr>
-      <th>Characteristic</th>
-
-      <th>Description</th>
-
-      <th>Property</th>
-    </tr>
-
-    <tr>
-      <td>Device ram size</td>
-
-      <td>The amount of physical RAM on the device, in megabytes. Default value is "96".</td>
-
-      <td>hw.ramSize</td>
-    </tr>
-
-    <tr>
-      <td>Touch-screen support</td>
-
-      <td>Whether there is a touch screen or not on the device. Default value is "yes".</td>
-
-      <td>hw.touchScreen</td>
-    </tr>
-
-    <tr>
-      <td>Trackball support</td>
-
-      <td>Whether there is a trackball on the device. Default value is "yes".</td>
-
-      <td>hw.trackBall</td>
-    </tr>
-
-    <tr>
-      <td>Keyboard support</td>
-
-      <td>Whether the device has a QWERTY keyboard. Default value is "yes".</td>
-
-      <td>hw.keyboard</td>
-    </tr>
-
-    <tr>
-      <td>DPad support</td>
-
-      <td>Whether the device has DPad keys. Default value is "yes".</td>
-
-      <td>hw.dPad</td>
-    </tr>
-
-    <tr>
-      <td>GSM modem support</td>
-
-      <td>Whether there is a GSM modem in the device. Default value is "yes".</td>
-
-      <td>hw.gsmModem</td>
-    </tr>
-
-    <tr>
-      <td>Camera support</td>
-
-      <td>Whether the device has a camera. Default value is "no".</td>
-
-      <td>hw.camera</td>
-    </tr>
-
-    <tr>
-      <td>Maximum horizontal camera pixels</td>
-
-      <td>Default value is "640".</td>
-
-      <td>hw.camera.maxHorizontalPixels</td>
-    </tr>
-
-    <tr>
-      <td>Maximum vertical camera pixels</td>
-
-      <td>Default value is "480".</td>
-
-      <td>hw.camera.maxVerticalPixels</td>
-    </tr>
-
-    <tr>
-      <td>GPS support</td>
-
-      <td>Whether there is a GPS in the device. Default value is "yes".</td>
-
-      <td>hw.gps</td>
-    </tr>
-
-    <tr>
-      <td>Battery support</td>
-
-      <td>Whether the device can run on a battery. Default value is "yes".</td>
-
-      <td>hw.battery</td>
-    </tr>
-
-    <tr>
-      <td>Accelerometer</td>
-
-      <td>Whether there is an accelerometer in the device. Default value is "yes".</td>
-
-      <td>hw.accelerometer</td>
-    </tr>
-
-    <tr>
-      <td>Audio recording support</td>
-
-      <td>Whether the device can record audio. Default value is "yes".</td>
-
-      <td>hw.audioInput</td>
-    </tr>
-
-    <tr>
-      <td>Audio playback support</td>
-
-      <td>Whether the device can play audio. Default value is "yes".</td>
-
-      <td>hw.audioOutput</td>
-    </tr>
-
-    <tr>
-      <td>SD Card support</td>
-
-      <td>Whether the device supports insertion/removal of virtual SD Cards. Default value is
-      "yes".</td>
-
-      <td>hw.sdCard</td>
-    </tr>
-
-    <tr>
-      <td>Cache partition support</td>
-
-      <td>Whether we use a /cache partition on the device. Default value is "yes".</td>
-
-      <td>disk.cachePartition</td>
-    </tr>
-
-    <tr>
-      <td>Cache partition size</td>
-
-      <td>Default value is "66MB".</td>
-
-      <td>disk.cachePartition.size</td>
-    </tr>
-
-    <tr>
-      <td>Abstracted LCD density</td>
-
-      <td>Sets the generalized density characteristic used by the AVD's screen. Default value is
-      "160".</td>
-
-      <td>hw.lcd.density</td>
-    </tr>
-  </table>
+  <li>In the <a href="#selecthardwarepage"><em>Select Hardware</em></a>
+  page, click <strong>New Hardware Profile</strong>.</li>
+
+  <li>In the <em>Configure Hardware Profile</em> page, change the
+  <a href="#hpproperties">hardware profile properties</a> as
+  needed.</li>
+
+  <li>Click <strong>Finish</strong>.</li>
+  <p>Your new hardware profile appears in the <em>Select Hardware</em> page.
+  You can optionally <a href="#selecthardwarepage">create an AVD</a>
+  that uses the hardware profile
+  by clicking <strong>Next</strong>. Or, click <strong>Cancel</strong> to return
+  to the <em>Your Virtual Devices</em> page or <em>Select Deployment Target</em>
+  dialog.</p>
+ </ol>
+
+<p id="copyhp">To create a hardware profile starting with a copy:</p>
+
+  <ol>
+  <li>In the <a href="#selecthardwarepage"><em>Select Hardware</em></a>
+  page, select a hardware profile and click <strong>Clone Device</strong>.</li>
+
+  <p>Or right-click a hardware profile and select <strong>Clone</strong>.</li>
+
+  <li>In the <em>Configure Hardware Profile</em> page, change the
+  <a href="#hpproperties">hardware profile properties</a> as
+  needed.</li>
+
+  <li>Click <strong>Finish</strong>.</li>
+
+  <p>Your new hardware profile appears in the <em>Select Hardware</em> page.
+  You can optionally <a href="#selecthardwarepage">create an AVD</a>
+  that uses the hardware profile
+  by clicking <strong>Next</strong>. Or, click <strong>Cancel</strong> to return
+  to the <em>Your Virtual Devices</em> page or <em>Select Deployment Target</em>
+  dialog.</p>
+ </ol>
+
+
+<h2 id="workingavd">Working With Existing AVDs</h2>
+
+ <p>From the <a href="#viewing"><em>Your Virtual Devices</em></a> page, you can
+ perform the following operations on an existing AVD:</p>
+ <ul>
+  <li>To edit an AVD, click Edit
+  <img src="{@docRoot}images/tools/studio-advmgr-actions-edit-icon.png"
+  style="vertical-align:sub;margin:0;height:17px"> and
+  <a href="#copyavd">make your changes</a>.</li>
+  <li>To delete an AVD, right-click an AVD and select
+    <strong>Delete</strong>. Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>Delete</strong>.</li>
+  <li>To show the associated AVD <code>.ini</code> and
+  <code>.img</code> files on disk, right-click an AVD and select
+    <strong>Show on Disk</strong>. Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>Show on Disk</strong>.</li>
+  <li> To view AVD configuration details that you can
+  include in any bug reports to the Android Studio team, right-click an AVD and
+  select <strong>View Details</strong>. Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>View Details</strong>.</li>
+  </ul>
+
+
+<h2 id="workinghp">Working With Existing Hardware Profiles</h2>
+
+<p>From the <a href="#selecthardwarepage"><em>Select Hardware</em></a> page,
+you can
+ perform the following operations on an existing hardware profile:</p>
+ <ul>
+  <li>To edit a hardware profile, select it and click
+  <strong>Edit Device</strong>. Or right-click a hardware profile and select
+    <strong>Edit</strong>. Next,
+  <a href="#copyhp">make your changes</a>.</li>
+
+  <li>To delete a hardware profile, right-click it and select
+    <strong>Delete</strong>. </li>
+  </ul>
+  <p>You can't edit or delete the predefined hardware profiles.</p>
+
+<h2 id="emulator">Running and Stopping an Emulator, and Clearing Data</h2>
+
+ <p>From the <a href="#viewing"><em>Your Virtual Devices</em></a> page, you can
+ perform the following operations on an emulator:</p>
+ <ul>
+  <li>To run an emulator that uses an AVD, double-click the AVD. Or click Run
+  <img src="{@docRoot}images/tools/as-avd-start.png"
+  style="vertical-align:sub;margin:0;height:17px">.</li>
+  <li>To stop a running emulator, right-click an AVD and select
+    <strong>Stop</strong>. Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>Stop</strong>.</li>
+  <li>To clear the data for an emulator, and return it to the same state as when
+  it was first defined, right-click an AVD and select
+    <strong>Wipe Data</strong>. Or click Menu
+    <img src="{@docRoot}images/tools/studio-advmgr-actions-dropdown-icon.png"
+    style="vertical-align:sub;margin:0;height:17px">
+    and select <strong>Wipe Data</strong>.</li>
+ </ul>
+
+<h2 id="importexporthp">Importing and Exporting Hardware Profiles</h2>
+
+<p>From the <a href="#selecthardwarepage"><em>Select Hardware</em></a> page,
+you can import and export hardware profiles:</p>
+ <ul>
+  <li>To import a hardware profile, click
+  <strong>Import Hardware Profiles</strong> and select the XML file containing
+  the definition on your computer.</li>
+
+  <li>To export a hardware profile, right-click it and select
+    <strong>Export</strong>. Specify the location where you want to store the
+    XML file containing the definition.</i>
+  </ul>
+
+<h2 id="hpproperties">Hardware Profile Properties</h2>
+
+<p>You can specify the following properties of hardware profiles in the
+<a href="#createhp"><em>Configure Hardware Profile</em></a> page. AVD
+configuration properties override hardware profile properties, and emulator
+properties that you set while the emulator is running override them both.</p>
+
+<p>The predefined hardware profiles included with the AVD Manager aren't
+editable. However, you can copy them and edit the copies.</p>
+
+
+<table>
+ <tr>
+    <th scope="col">Hardware Profile Property</th>
+    <th scope="col">Description</th>
+ </tr>
+ <tr>
+    <td>Device Name</td>
+    <td>Name of the hardware profile. The name can contain uppercase or
+    lowercase letters,
+    numbers from 0 to 9, periods (.), underscores (_), and parentheses ( () ).
+    The name of the file storing the hardware profile is derived from the
+    hardware profile name.
+    </td>
+ </tr>
+ <tr>
+    <td>Device Type</td>
+    <td>Select one of the following:
+<ul>
+  <li> Phone/Tablet
+  <li> Android Wear
+  <li> Android TV
+</ul>
+</td>
+ </tr>
+
+ <tr>
+    <td>Screen Size </td>
+    <td>The physical size of the screen, in inches, measured at the diagonal.
+    If the size is larger than your computer screen, it’s reduced in size at
+    launch.</td>
+ </tr>
+ <tr>
+    <td>Screen Resolution</td>
+    <td>Type a width and height in pixels to specify the total number of pixels
+    on the simulated screen.</td>
+
+ </tr>
+ <tr>
+    <td>Round</td>
+    <td>Select this option if the device has a round screen, such as an
+    Android Wear device. </td>
+ </tr>
+ <tr>
+    <td>Memory: RAM</td>
+    <td>Type a RAM size for the device and select the units, one of B (byte),
+    KB (kilobyte), MB (megabyte), GB (gigabyte), or TB (terabyte).</td>
+ </tr>
+
+ <tr>
+    <td>Input: Has Hardware Buttons (Back/Home/Menu)</td>
+    <td>Select this option if your device has hardware navigation buttons.
+    Deselect it if these buttons are implemented in software only. If you
+    select this option, the buttons won’t appear on the screen. You can use the
+    emulator side panel to “press” the buttons, in either case.</td>
+ </tr>
+ <tr>
+    <td>Input: Has Hardware Keyboard</td>
+    <td>Select this option if your device has a hardware keyboard. Deselect it
+    if it doesn’t. If you select this option, a keyboard won’t appear on the
+    screen. You can use your computer keyboard to send keystrokes to the
+    emulator, in either case.</td>
+ </tr>
+ <tr>
+    <td>Navigation Style</td>
+    <td><p>Select one of the following:</p>
+<ul>
+  <li> None - No hardware controls. Navigation is through the software.
+  <li> D-pad - Directional Pad support.
+  <li> Trackball
+  <li> Wheel
+</ul>
+  <p>These options are for actual hardware controls on the device itself.
+  However,
+  the events sent to the device by an external controller are the same.</p>
+</td>
+ </tr>
+ <tr>
+    <td>Supported Device States</td>
+    <td><p>Select one or both options:</p>
+<ul>
+  <li> Portrait - Oriented taller than wide.
+  <li> Landscape - Oriented wider than tall.
+</ul>
+<p>If you select both, you can switch between orientations in the emulator.
+You must select at least one option to continue.</p></td>
+ </tr>
+ <tr>
+    <td>Cameras</td>
+    <td><p>Select one or both options:</p>
+<ul>
+  <li> Back-Facing Camera - The lens faces away from the user.
+  <li> Front-Facing Camera - The lens faces toward the user.
+</ul>
+<p>Later, you can use a webcam or a photo provided by the emulator to simulate
+taking a photo with the camera.</td>
+ </tr>
+
+ <tr>
+    <td>Sensors: Accelerometer</td>
+    <td>Select if the device has hardware that helps the device determine
+    its orientation.</td>
+ </tr>
+ <tr>
+    <td>Sensors: Gyroscope</td>
+    <td>Select if the device has hardware that detects rotation or twist.
+    In combination with an
+    accelerometer, it can provide smoother orientation detection and support
+    a six-axis orientation system.</td>
+ </tr>
+ <tr>
+    <td>Sensors: GPS</td>
+    <td>Select if the device has hardware that supports the Global Positioning
+    System (GPS)
+    satellite-based navigation system.</td>
+ </tr>
+ <tr>
+    <td>Sensors: Proximity Sensor</td>
+    <td>Select if the device has hardware that detects if the device is close
+    to your face during a
+    phone call to disable input from the screen.</td>
+ </tr>
+ <tr>
+    <td>Default Skin</td>
+    <td>Select a skin that controls what the device looks like when displayed
+    in the
+    emulator. Remember that specifying a screen size that's too small for the
+    resolution can mean that the screen is cut off, so you can't see the whole
+    screen. See
+    <a href="{@docRoot}tools/devices/managing-avds.html#skins">Creating Emulator Skins</a>
+    for more information.</td>
+ </tr>
+</table>
+
+<h2 id="avdproperties">AVD Properties</h2>
+
+<p>You can specify the following properties for AVD configurations
+in the <a href="#verifyconfigpage"><em>Verify Configuration</em></a> page.
+The AVD configuration specifies the interaction between the development
+computer and the emulator, as well as properties you want to override in the
+hardware profile.</p>
+
+<p>AVD configuration properties override hardware profile properties,
+and emulator
+properties that you set while the emulator is running override them both.</p>
+
+<table>
+ <tr>
+    <th scope="col">AVD Property</th>
+    <th scope="col">Description</th>
+ </tr>
+ <tr>
+    <td>AVD Name</td>
+    <td>Name of the AVD. The name can contain uppercase or
+    lowercase letters,
+    numbers from 0 to 9, periods (.), underscores (_), and parentheses ( () ).
+    The name of the file storing the AVD configuration is derived from the AVD
+    name.
+    </td>
+ </tr>
+ <tr>
+    <td>AVD ID (Advanced)</td>
+    <td>The AVD filename is derived from the ID, and you can use the ID to
+    refer to the AVD from the command line.</td>
+ </tr>
+ <tr>
+    <td>Hardware Profile</td>
+    <td>Click <strong>Change</strong> to select a different hardware profile in
+    the <a href="#selecthardwarepage"><em>Select Hardware</em></a> page.</td>
+ </tr>
+ <tr>
+    <td>System Image</td>
+    <td>Click <strong>Change</strong> to select a different system image in the
+    <a href="#systemimagepage"><em>System Image</em></a> page.
+    An active internet connection is required to download a new image. </td>
+ </tr>
+
+ <tr>
+    <td>Startup: Scale </td>
+    <td>Select the initial size you want to use when the emulator launches.
+    This size might be adjusted to a smaller size if it’s larger than the
+    computer screen. The default is Auto (automatic).</td>
+ </tr>
+ <tr>
+    <td>Startup: Orientation</td>
+    <td><p>Select one option for the initial emulator orientation:</p>
+<ul>
+  <li> Portrait - Oriented taller than wide.
+  <li> Landscape - Oriented wider than tall.
+</ul>
+<p>An option is enabled only if it’s selected in the hardware profile. When
+running the AVD in the emulator, you can change the orientation if portrait and
+landscape are supported in the hardware profile.</p></td>
+ </tr>
+ <tr>
+    <td>Camera (Advanced)</td>
+    <td><p>Select one or both options:</p>
+<ul>
+  <li> Front - The lens faces away from the user.
+  <li> Back - The lens faces toward the user.
+</ul>
+<p>This option is available only if it's selected in the hardware profile; it's
+not available for Android Wear and Android TV.</p></td>
+ </tr>
+
+ <tr>
+    <td>Network: Speed (Advanced)</td>
+    <td><p>Select a network protocol to determine the speed of data transfer:
+    </p>
+    <ul>
+    <li>GSM - Global System for Mobile Communications</li>
+<li>HSCSD - High-Speed Circuit-Switched Data</li>
+<li>GPRS - Generic Packet Radio Service</li>
+<li>EDGE - Enhanced Data rates for GSM Evolution</li>
+<li>UMTS - Universal Mobile Telecommunications System</li>
+<li>HSPDA - High-Speed Downlink Packet Access</li>
+<li>Full (default) - Transfer data as quickly as your computer allows.</li>
+</ul>
+</td>
+ </tr>
+ <tr>
+    <td>Network: Latency (Advanced)</td>
+    <td>Select a network protocol to set how much time (delay) it takes for the
+    protocol to transfer a data packet from one point to another point.</td>
+ </tr>
+
+ <tr>
+    <td>Emulated Performance: Graphics</td>
+    <td><p>Select how graphics are rendered in the emulator:</p>
+    <ul>
+    <li>Hardware - Use your computer graphics card for faster rendering.</li>
+    <li>Software - Emulate the graphics in software, which is useful if you're
+    having a problem with rendering in your graphics card.</li>
+    <li>Auto - Let the emulator decide the best option based on your graphics
+    card.</li>
+    </td>
+ </tr>
+ <tr>
+    <td>Multi-Core CPU (Advanced)</td>
+    <td>Select the number of processor cores on your computer that you’d like
+    to use for the emulator. Using more processor cores speeds up the emulator.
+    </td>
+ </tr>
+
+ <tr>
+    <td>Memory and Storage: RAM</td>
+    <td>The amount of RAM on the device. This value is set by the hardware
+    manufacturer, but you can override it, if needed, such as for faster
+    emulator operation. Increasing the size uses more resources on your
+    computer. Type a RAM size and select the
+    units, one of B (byte), KB (kilobyte), MB (megabyte), GB (gigabyte), or
+    TB (terabyte).</td>
+ </tr>
+ <tr>
+    <td>Memory and Storage: VM Heap</td>
+    <td>The VM heap size. This value is set by the hardware
+    manufacturer, but you can override it, if needed. Type a heap size and
+    select the
+    units, one of B (byte), KB (kilobyte), MB (megabyte), GB (gigabyte), or
+    TB (terabyte). For more information on Android VMs, see
+    <a href="{@docRoot}tools/help/am-memory.html#vm">Memory Management for
+    Different Virtual Machines</a>.</td>
+ </tr>
+ <tr>
+    <td>Memory and Storage: Internal Storage</td>
+    <td>The amount of nonremovable memory space available on the device. This
+    value is set by the hardware
+    manufacturer, but you can override it, if needed. Type a size and select the
+    units, one of B (byte), KB (kilobyte), MB (megabyte), GB (gigabyte), or
+    TB (terabyte).</td>
+ </tr>
+ <tr>
+    <td>Memory and Storage: SD Card</td>
+    <td>The amount of removable memory space available to store data on the
+    device. To use a virtual SD card managed by Android Studio, select
+    <strong>Studio</strong>, type a size, and select the
+    units, one of B (byte), KB (kilobyte), MB (megabyte), GB (gigabyte), or
+    TB (terabyte). A minimum of 100 MB is recommended to use the camera. To
+    manage the space in a file, select <strong>External File</strong> and
+    click <strong>...</strong> to specify the file and location. For more
+    information, see <a href="{@docRoot}tools/help/mksdcard.html">mksdcard</a>.
+    </td>
+ </tr>
+
+ <tr>
+    <td>Device Frame: Enable Device Frame</td>
+    <td>Select to enable a frame around the emulator window that mimics the
+    look of a real device.</td>
+ </tr>
+ <tr>
+    <td>Custom Skin Definition (Advanced)</td>
+    <td>Select a skin that controls what the device looks like when displayed in
+    the emulator. Remember that specifying a screen size that's too small for
+    the resolution can mean that the screen is cut off, so you can't see the
+    whole screen. See
+    <a href="{@docRoot}tools/devices/managing-avds.html#skins">Creating Emulator Skins</a>
+    for more information.</td>
+ </tr>
+ <tr>
+    <td>Keyboard: Enable Keyboard Input (Advanced)</td>
+    <td>Select this option if you want to use your hardware keyboard to interact
+    with the emulator. It's disabled for Android Wear and Android TV.</td>
+ </tr>
+</table>
 
 
 <h2 id="skins">Creating Emulator Skins</h2>
 
-<p>An Android emulator skin is a collection of files that define the visual and control elements of
-an emulator display. If the skin definitions available in the AVD settings don't meet your needs,
-you can create your own custom skin definition, then apply it to your AVD from the
-advanced settings on the Verify Configuration screen.</p>
+<p>An Android emulator skin is a collection of files that define the visual
+and control elements of
+an emulator display. If the skin definitions available in the AVD settings
+don't meet your requirements,
+you can create your own custom skin definition, and then apply it to your AVD.
+</p>
 
 <p>Each emulator skin contains:</p>
    <ul>
       <li>A <code>hardware.ini</code> file</li>
-      <li>Layout files for supported orientations (landscape, portrait) and physical configuration</li>
-      <li>Image files for display elements, such as background, keys and buttons</li>
+      <li>Layout files for supported orientations (landscape, portrait) and
+      physical configuration</li>
+      <li>Image files for display elements, such as background, keys and
+      buttons</li>
     </ul>
 <p>To create and use a custom skin:</p>
  <ol>
-    <li>Create a new directory where you will save your skin configuration files. </li>
+    <li>Create a new directory where you will save your skin configuration
+    files. </li>
     <li>Define the visual appearance of the skin in a text file named
-    <code>layout</code>. This file defines many characteristics of the skin, such as the
+    <code>layout</code>. This file defines many characteristics of the skin,
+    such as the
     size and image assets for specific buttons. For example:
 <pre class="no-prettyprint">
 parts {
@@ -322,14 +705,16 @@ parts {
 </pre></li>
 
   <li>Add the bitmap files of the device images in the same directory.</li>
-  <li>Specify additional hardware-specific device configurations an <code>hardware.ini</code>
+  <li>Specify additional hardware-specific device configurations in a
+  <code>hardware.ini</code>
   file for the device settings, such as <code>hw.keyboard</code> and
   <code>hw.lcd.density</code>.</li>
-  <li>Archive the files in the skin folder and select the archive file as a custom skin. </li>
+  <li>Archive the files in the skin folder and select the archive file as a
+  custom skin.</li>
 </ol>
 
 <p>For more detailed information about creating emulator skins, see the
-<a href="https://android.googlesource.com/platform/external/qemu.git/+/master/docs/ANDROID-SKIN-FILES.TXT"
+<a href="https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/docs/ANDROID-SKIN-FILES.TXT"
 >Android Emulator Skin File Specification</a> in the tools source code.</p>
 
 
